@@ -1,0 +1,355 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Managing Topologies with Heron CLI · Apache Heron</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="&lt;!--"/><meta name="docsearch:version" content="0.20.0-incubating"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Managing Topologies with Heron CLI · Apache Heron"/><meta property="og:type" content="website"/><meta property="og:url" content="https://heronstreaming.io/"/><meta property="og:description" content="&lt;!--"/><meta property="og:image" content="https://heronstreaming.io/img/undraw_online.svg"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://heronstreaming.io/img/undraw_tweetstorm.svg"/><link rel="shortcut icon" href="/img/favicon-32x32.png"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script type="text/javascript" src="/js/custom.js"></script><script src="/js/scrollSpy.js"></script><link rel="stylesheet" href="/css/main.css"/><script src="/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/"><img class="logo" src="/img/HeronTextLogo-small.png" alt="Apache Heron"/><h2 class="headerTitleWithLogo">Apache Heron</h2></a><a href="/versions"><h3>0.20.0-incubating</h3></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class=""><a href="/api/java" target="_self">Javadocs</a></li><li class=""><a href="/api/python" target="_self">Pydocs</a></li><li class="siteNavGroupActive"><a href="/docs/0.20.0-incubating/getting-started-local-single-node" target="_self">Docs</a></li><li class=""><a href="#community" target="_self">Community</a></li><li class=""><a href="#apache" target="_self">Apache</a></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="container docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><div class="hamburger-menu"><div class="line1"></div><div class="line2"></div><div class="line3"></div></div></div><h2><i>›</i><span>User Manuals</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle">Getting Started</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/getting-started-local-single-node">Local (Single Node)</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/getting-started-migrate-storm-topologies">Migrate Storm Topologies</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/getting-started-troubleshooting-guide">Troubleshooting Guide</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Deployment</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/deployment-overview">Deployment Overiew</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/deployment-configuration">Configuration</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/deployment-api-server">The Heron API Server</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Topology Development APIs</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/topology-development-streamlet-api">The Heron Streamlet API for Java</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/topology-development-eco-api">The ECO API for Java</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/topology-development-topology-api-java">The Heron Topology API for Java</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/topology-development-topology-api-python">The Heron Topology API for Python</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/topology-development-streamlet-scala">The Heron Streamlet API for Scala</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Client API Docs</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/client-api-docs-overview">Client API Docs</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Guides</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/guides-effectively-once-java-topologies">Effectively Once Java Topologies</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/guides-python-topologies">Python Topologies</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/guides-data-model">Heron Data Model</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/guides-tuple-serialization">Tuple Serialization</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/guides-ui-guide">Heron UI Guide</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/guides-topology-tuning">Topology Tuning Guide</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/guides-packing-algorithms">Packing Algorithms</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/guides-simulator-mode">Simulator Mode</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/guides-troubeshooting-guide">Topology Troubleshooting Guide</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Heron Concepts</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/heron-design-goals">Heron Design Goals</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/heron-topology-concepts">Heron Topologies</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/heron-streamlet-concepts">Heron Streamlets</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/heron-architecture">Heron Architecture</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/heron-delivery-semantics">Heron Delivery Semantics</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">State Managers</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/state-managers-zookeeper">Zookeeper</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/state-managers-local-fs">Local File System</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Uploaders</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/uploaders-local-fs">Local File System</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/uploaders-hdfs">HDFS</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/uploaders-http">HTTP</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/uploaders-amazon-s3">Amazon S3</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/uploaders-scp">Secure Copy (SCP)</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Schedulers</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/schedulers-k8s-by-hand">Kubernetes by hand</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/schedulers-k8s-with-helm">Kubernetes with Helm</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/schedulers-aurora-cluster">Aurora Cluster</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/schedulers-aurora-local">Aurora Locally</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/schedulers-local">Local Cluster</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/schedulers-standalone">Heron Multi-node Standalone Cluster</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/schedulers-nomad">Nomad</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/schedulers-mesos-local-mac">Mesos Cluster Locally</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/schedulers-slurm">Slurm Cluster</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/schedulers-yarn">YARN Cluster</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Cluster Configuration</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/cluster-config-overview">Cluster Config Overview</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/cluster-config-system-level">System Level Configuration</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/cluster-config-instance">Heron Instance</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/cluster-config-metrics">Metrics Manager</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/cluster-config-stream">Stream Manager</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/cluster-config-tmaster">Topology Master</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Observability</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/observability-prometheus">Prometheus</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/observability-graphite">Graphite</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/observability-scribe">Scribe</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">User Manuals</h3><ul class=""><li class="navListItem navListItemActive"><a class="navItem" href="/docs/0.20.0-incubating/user-manuals-heron-cli">Heron Client</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/user-manuals-heron-explorer">Heron Explorer</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/user-manuals-tracker-rest">Heron Tracker REST API</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/user-manuals-heron-tracker-runbook">Heron Tracker Runbook</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/user-manuals-heron-ui-runbook">Heron UI Runbook</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/user-manuals-heron-shell">Heron Shell</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Compiling</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/compiling-overview">Compiling Overview</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/compiling-linux">Compiling on Linux</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/compiling-osx">Compiling on OS X</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/compiling-docker">Compiling With Docker</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/compiling-running-tests">Running Tests</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/compiling-code-organization">Code Organization</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Extending Heron</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/extending-heron-scheduler">Custom Scheduler</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/extending-heron-metric-sink">Custom Metrics Sink</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Heron Resources</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/heron-resources-resources">Heron Resources</a></li></ul></div></div></section></div><script>
+            var coll = document.getElementsByClassName('collapsible');
+            var checkActiveCategory = true;
+            for (var i = 0; i < coll.length; i++) {
+              var links = coll[i].nextElementSibling.getElementsByTagName('*');
+              if (checkActiveCategory){
+                for (var j = 0; j < links.length; j++) {
+                  if (links[j].classList.contains('navListItemActive')){
+                    coll[i].nextElementSibling.classList.toggle('hide');
+                    coll[i].childNodes[1].classList.toggle('rotate');
+                    checkActiveCategory = false;
+                    break;
+                  }
+                }
+              }
+
+              coll[i].addEventListener('click', function() {
+                var arrow = this.childNodes[1];
+                arrow.classList.toggle('rotate');
+                var content = this.nextElementSibling;
+                content.classList.toggle('hide');
+              });
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+              createToggler('#navToggler', '#docsNav', 'docsSliderActive');
+              createToggler('#tocToggler', 'body', 'tocActive');
+
+              var headings = document.querySelector('.toc-headings');
+              headings && headings.addEventListener('click', function(event) {
+                var el = event.target;
+                while(el !== headings){
+                  if (el.tagName === 'A') {
+                    document.body.classList.remove('tocActive');
+                    break;
+                  } else{
+                    el = el.parentNode;
+                  }
+                }
+              }, false);
+
+              function createToggler(togglerSelector, targetSelector, className) {
+                var toggler = document.querySelector(togglerSelector);
+                var target = document.querySelector(targetSelector);
+
+                if (!toggler) {
+                  return;
+                }
+
+                toggler.onclick = function(event) {
+                  event.preventDefault();
+
+                  target.classList.toggle(className);
+                };
+              }
+            });
+        </script></nav></div><div class="container mainContainer"><div class="wrapper"><div class="post"><header class="postHeader"><h1 class="postHeaderTitle">Managing Topologies with Heron CLI</h1></header><article><div><span><!--
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements.  See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership.  The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License.  You may obtain a copy of the License at
+      http://www.apache.org/licenses/LICENSE-2.0
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied.  See the License for the
+    specific language governing permissions and limitations
+    under the License.
+-->
+<p>The <strong>Heron CLI</strong> us used to to manage every aspect of the
+<a href="heron-topology-concepts#topology-lifecycle">topology lifecycle</a>.</p>
+<h2><a class="anchor" aria-hidden="true" id="deploying-the-heron-cli-executable"></a><a href="#deploying-the-heron-cli-executable" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Deploying the <code>heron</code> CLI Executable</h2>
+<p>To use <code>heron</code> CLI, download the <code>heron-install</code> for your platfrom from
+<a href="https://github.com/apache/incubator-heron/releases">release binaries</a> and  run the
+installation script. For example, if you have downloaded the version <code>0.17.6</code>,
+you invoke the installation script as follows</p>
+<pre><code class="hljs css language-bash">$ chmod +x heron-install-0.17.6-darwin.sh
+$ ./heron-install-0.17.6-darwin.sh --user
+Heron client installer
+----------------------
+
+Uncompressing......
+
+Heron is now installed!
+
+Make sure you have <span class="hljs-string">"/Users/<span class="hljs-variable">$USER</span>/bin"</span> <span class="hljs-keyword">in</span> your path.
+
+See http://heronstreaming.io/docs/getting-started.html on how to use Heron!
+
+....
+</code></pre>
+<p>Alternatively, generate a full <a href="compiling-overview">Heron release</a> and
+distribute the resulting <code>heron</code> CLI to all machines used to manage topologies.</p>
+<h3><a class="anchor" aria-hidden="true" id="common-cli-args"></a><a href="#common-cli-args" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Common CLI Args</h3>
+<p>All topology management commands (<code>submit</code>, <code>activate</code>, <code>deactivate</code>,
+<code>restart</code>, <code>update</code> and <code>kill</code>) take the following required arguments:</p>
+<ul>
+<li><p><code>cluster</code> --- The name of the cluster where the command needs to be executed.</p></li>
+<li><p><code>role</code> --- This represents the user or the group depending on deployment.
+If not provided, it defaults to the unix user.</p></li>
+<li><p><code>env</code> --- This is a tag for including additional information (e.g) a
+topology can be tagged as PROD or DEVEL to indicate whether it is in production
+or development. If <code>env</code> is not provided, it is given a value <code>default</code></p></li>
+</ul>
+<p><code>cluster</code>, <code>role</code> and <code>env</code> are specified as a single argument in the form of
+<code>cluster/role/env</code> (e.g) <code>local/ads/PROD</code> to refer the cluster <code>local</code> with
+role <code>ads</code> and the environment <code>PROD</code>. If you just want to specify <code>cluster</code>, the
+argument will be simply <code>local</code>.</p>
+<h3><a class="anchor" aria-hidden="true" id="optional-cli-flags"></a><a href="#optional-cli-flags" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Optional CLI Flags</h3>
+<p>CLI supports a common set of optional flags for all topology management commands
+(<code>submit</code>, <code>activate</code>, <code>deactivate</code>, <code>restart</code>, <code>update</code> and <code>kill</code>):</p>
+<ul>
+<li><p><code>--config-path</code> --- Every heron cluster must provide a few configuration
+files that are kept under a directory named after the cluster. By default,
+when a cluster is provided in the command, it searches the <code>conf</code> directory
+for a directory with the cluster name. This flag enables you to specify a
+non standard directory to search for the cluster directory.</p></li>
+<li><p><code>--config-property</code> --- Heron supports several configuration parameters
+that be overridden. These parameters are specified in the form of <code>key=value</code>.</p></li>
+<li><p><code>--verbose</code> --- When this flag is provided, <code>heron</code> CLI prints logs
+that provide detailed information about the execution.</p></li>
+</ul>
+<p>Below is an example topology management command that uses one of these flags:</p>
+<pre><code class="hljs css language-bash">$ heron activate --config-path ~/heronclusters devcluster/ads/PROD AckingTopology
+</code></pre>
+<h2><a class="anchor" aria-hidden="true" id="submitting-a-topology"></a><a href="#submitting-a-topology" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Submitting a Topology</h2>
+<p>To run a topology in a Heron cluster, submit it using the <code>submit</code> command.
+Topologies can be submitted in either an activated (default) or deactivated state
+(more on <a href="#activating-a-topology">activation</a> and <a href="#deactivating-a-topology">deactivation</a>
+below).</p>
+<p>Below is the basic syntax:</p>
+<pre><code class="hljs css language-bash">$ heron <span class="hljs-built_in">help</span> submit
+usage: heron submit [options] cluster/[role]/[env] topology-file-name topology-class-name [topology-args]
+
+Required arguments:
+  cluster/[role]/[env]  Cluster, role, and env to run topology
+  topology-file-name    Topology jar/tar/zip file
+  topology-class-name   Topology class name
+
+Optional arguments:
+  --config-path (a string; path to cluster config; default: <span class="hljs-string">"/Users/<span class="hljs-variable">$USER</span>/.heron/conf"</span>)
+  --config-property (key=value; a config key and its value; default: [])
+  --deploy-deactivated (a boolean; default: <span class="hljs-string">"false"</span>)
+  --topology-main-jvm-property Define a system property to pass to java -D when running main.
+  --verbose (a boolean; default: <span class="hljs-string">"false"</span>)
+</code></pre>
+<p>Arguments of the <code>submit</code> command:</p>
+<ul>
+<li><p><strong>cluster/[role]/[env]</strong> --- The cluster where topology needs to be submitted,
+optionally taking the role and environment. For example,<code>local/ads/PROD</code> or just <code>local</code></p></li>
+<li><p><strong>topology-file-name</strong> --- The path of the file in which you've packaged the
+topology's code. For Java topologies this will be a <code>.jar</code> file; for
+topologies in other languages (not yet supported), this could be a
+<code>.tar</code> file. For example, <code>/path/to/topology/my-topology.jar</code></p></li>
+<li><p><strong>topology-class-name</strong> --- The name of the class containing the <code>main</code> function
+for the topology. For example, <code>com.example.topologies.MyTopology</code></p></li>
+<li><p><strong>topology-args</strong> (optional) --- Arguments specific to the topology.
+You will need to supply additional args only if the <code>main</code> function for your
+topology requires them.</p></li>
+</ul>
+<h3><a class="anchor" aria-hidden="true" id="example-topology-submission-command"></a><a href="#example-topology-submission-command" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Example Topology Submission Command</h3>
+<p>Below is an example command that submits a topology to a cluster named <code>devcluster</code>
+with a main class named <code>com.example.topologies.MyTopology</code> packaged in <code>my-topology.jar</code>,
+along with the optional <code>--config-path</code> where the config for <code>devcluster</code> can be found:</p>
+<pre><code class="hljs css language-bash">$ heron submit --config-path ~/heronclusters devcluster /path/to/topology/my-topology.jar \
+    com.example.topologies.MyTopology my-topology
+</code></pre>
+<h3><a class="anchor" aria-hidden="true" id="other-topology-submission-options"></a><a href="#other-topology-submission-options" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Other Topology Submission Options</h3>
+<table>
+<thead>
+<tr><th style="text-align:left">Flag</th><th style="text-align:left">Meaning</th></tr>
+</thead>
+<tbody>
+<tr><td style="text-align:left"><code>--deploy-deactivated</code></td><td style="text-align:left">If set, the topology is deployed in a deactivated state.</td></tr>
+<tr><td style="text-align:left"><code>--topology-main-jvm-property</code></td><td style="text-align:left">Defines a system property to pass to java -D when running topology main</td></tr>
+</tbody>
+</table>
+<h2><a class="anchor" aria-hidden="true" id="activating-a-topology"></a><a href="#activating-a-topology" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Activating a Topology</h2>
+<p>Topologies are submitted to the cluster in the activated state by default. To
+activate a deactivated topology use the <code>activate</code> command. Below is the basic
+syntax:</p>
+<pre><code class="hljs css language-bash">$ heron <span class="hljs-built_in">help</span> activate
+usage: heron activate [options] cluster/[role]/[env] topology-name
+
+Required arguments:
+  cluster/[role]/[env]  Cluster, role, and env to run topology
+  topology-name         Name of the topology
+
+Optional arguments:
+  --config-path (a string; path to cluster config; default: <span class="hljs-string">"/Users/<span class="hljs-variable">$USER</span>/.heron/conf"</span>)
+  --config-property (key=value; a config key and its value; default: [])
+</code></pre>
+<p>Arguments of the <code>activate</code> command:</p>
+<ul>
+<li><p><strong>cluster/[role]/[env]</strong> --- The cluster where topology needs to be submitted,
+optionally taking the role and environment. For exampple, <code>local/ads/PROD</code> or just <code>local</code></p></li>
+<li><p><strong>topology-name</strong>  --- The name of the already-submitted topology that you'd
+like to activate.</p></li>
+</ul>
+<h3><a class="anchor" aria-hidden="true" id="example-topology-activation-command"></a><a href="#example-topology-activation-command" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Example Topology Activation Command</h3>
+<pre><code class="hljs css language-bash">$ heron activate <span class="hljs-built_in">local</span>/ads/PROD my-topology
+</code></pre>
+<h2><a class="anchor" aria-hidden="true" id="deactivating-a-topology"></a><a href="#deactivating-a-topology" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Deactivating a Topology</h2>
+<p>You can deactivate a running topology at any time using the <code>deactivate</code>
+command. Here's the basic syntax:</p>
+<pre><code class="hljs css language-bash">$ heron <span class="hljs-built_in">help</span> deactivate
+usage: heron deactivate [options] cluster/[role]/[env] topology-name
+
+Required arguments:
+  cluster/[role]/[env]  Cluster, role, and env to run topology
+  topology-name         Name of the topology
+
+Optional arguments:
+  --config-path (a string; path to cluster config; default: <span class="hljs-string">"/Users/kramasamy/.heron/conf"</span>)
+  --config-property (key=value; a config key and its value; default: [])
+  --verbose (a boolean; default: <span class="hljs-string">"false"</span>)
+
+</code></pre>
+<p>Arguments of the <code>deactivate</code> command:</p>
+<ul>
+<li><p><strong>cluster/[role]/[env]</strong> --- The cluster where topology needs to be submitted,
+optionally taking the role and environment. For example, <code>local/ads/PROD</code> or just <code>local</code></p></li>
+<li><p><strong>topology-name</strong> --- The name of the topology that you'd like to deactivate.</p></li>
+</ul>
+<h2><a class="anchor" aria-hidden="true" id="restarting-a-topology"></a><a href="#restarting-a-topology" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Restarting a Topology</h2>
+<p>You can restart a deactivated topology using the <code>restart</code> command (assuming
+that the topology has not yet been killed, i.e. removed from the cluster).</p>
+<pre><code class="hljs css language-bash">$ heron <span class="hljs-built_in">help</span> restart
+usage: heron restart [options] cluster/[role]/[env] topology-name [container-id]
+
+Required arguments:
+  cluster/[role]/[env]  Cluster, role, and env to run topology
+  topology-name         Name of the topology
+  container-id          Identifier of the container to be restarted
+
+Optional arguments:
+  --config-path (a string; path to cluster config; default: <span class="hljs-string">"/Users/kramasamy/.heron/conf"</span>)
+  --config-property (key=value; a config key and its value; default: [])
+  --verbose (a boolean; default: <span class="hljs-string">"false"</span>)
+</code></pre>
+<p>Arguments of the <code>restart</code> command:</p>
+<ul>
+<li><p><strong>cluster/[role]/[env]</strong> --- The cluster where topology needs to be submitted,
+optionally taking the role and environment. For example, <code>local/ads/PROD</code> or just <code>local</code></p></li>
+<li><p><strong>topology-name</strong> --- The name of the topology that you'd like to restart.</p></li>
+<li><p><strong>container-id</strong> (optional) --- This enables you to specify the container ID to be
+restarted if you want to restart only a specific container of the topology.</p></li>
+</ul>
+<h3><a class="anchor" aria-hidden="true" id="example-topology-restart-command"></a><a href="#example-topology-restart-command" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Example Topology Restart Command</h3>
+<pre><code class="hljs css language-bash">$ heron restart <span class="hljs-built_in">local</span>/ads/PROD my-topology
+</code></pre>
+<h2><a class="anchor" aria-hidden="true" id="updating-a-topology"></a><a href="#updating-a-topology" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Updating a Topology</h2>
+<p>You can update the parallelism of any of the components of a deployed
+topology using the <code>update</code> command.</p>
+<pre><code class="hljs css language-bash">$ heron <span class="hljs-built_in">help</span> update
+usage: heron update [options] cluster/[role]/[env] &lt;topology-name&gt; --component-parallelism &lt;name:value&gt;
+
+Required arguments:
+  cluster/[role]/[env]  Cluster, role, and environment to run topology
+  topology-name         Name of the topology
+
+Optional arguments:
+  --component-parallelism COMPONENT_PARALLELISM
+                        Component name and the new parallelism value colon-
+                        delimited: [component_name]:[parallelism]
+  --config-path (a string; path to cluster config; default: <span class="hljs-string">"/Users/billg/.heron/conf"</span>)
+  --config-property (key=value; a config key and its value; default: [])
+  --verbose (a boolean; default: <span class="hljs-string">"false"</span>)
+</code></pre>
+<p>Arguments of the <code>update</code> command include <strong>cluster/[role]/[env]</strong> and
+<strong>topology-name</strong> as well as:</p>
+<ul>
+<li><strong>--component-parallelism</strong> --- This argument can be included multiple
+times to change the parallelism of components in the deployed topology.</li>
+</ul>
+<h3><a class="anchor" aria-hidden="true" id="example-topology-update-command"></a><a href="#example-topology-update-command" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Example Topology Update Command</h3>
+<pre><code class="hljs css language-bash">$ heron update <span class="hljs-built_in">local</span>/ads/PROD my-topology \
+  --component-parallelism=my-spout:2 \
+  --component-parallelism=my-bolt:4
+</code></pre>
+<h2><a class="anchor" aria-hidden="true" id="killing-a-topology"></a><a href="#killing-a-topology" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Killing a Topology</h2>
+<p>If you've submitted a topology to your Heron cluster and would like to remove
+knowledge of the topology entirely, you can remove it using the <code>kill</code> command.
+Here's the basic syntax:</p>
+<pre><code class="hljs css language-bash">$ heron <span class="hljs-built_in">kill</span> &lt;killer-overrides&gt; &lt;topology&gt;
+</code></pre>
+<p>Arguments of the <code>kill</code> command:</p>
+<ul>
+<li><p><strong>cluster/[role]/[env]</strong> --- The cluster where topology needs to be submitted,
+optionally taking the role and environment.  For example, <code>local/ads/PROD</code> or just
+<code>local</code></p></li>
+<li><p><strong>topology-name</strong> --- The name of the topology that you'd like to kill.</p></li>
+</ul>
+<h3><a class="anchor" aria-hidden="true" id="example-topology-kill-command"></a><a href="#example-topology-kill-command" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Example Topology Kill Command</h3>
+<pre><code class="hljs css language-bash">$ heron <span class="hljs-built_in">kill</span> <span class="hljs-built_in">local</span> my-topology
+</code></pre>
+<h2><a class="anchor" aria-hidden="true" id="heron-cli-configuration"></a><a href="#heron-cli-configuration" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Heron CLI configuration</h2>
+<p>When using the Heron CLI tool to interact with Heron clusters, there are two ways to provide configuration for the tool:</p>
+<ul>
+<li>Via command-line flags, such as <code>--service-url</code></li>
+<li>Using the <code>heron config</code> interface, which enables you to set, unset, and list configs in the local filesystem</li>
+</ul>
+<h3><a class="anchor" aria-hidden="true" id="available-parameters"></a><a href="#available-parameters" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Available parameters</h3>
+<p>The following parameters can currently be set using the <code>heron config</code> interface:</p>
+<table>
+<thead>
+<tr><th style="text-align:left">Parameter</th><th style="text-align:left">Description</th><th style="text-align:left">Corresponding CLI flag</th></tr>
+</thead>
+<tbody>
+<tr><td style="text-align:left"><code>service_url</code></td><td style="text-align:left">The service URL for the Heron cluster</td><td style="text-align:left"><code>--service-url</code></td></tr>
+</tbody>
+</table>
+<h3><a class="anchor" aria-hidden="true" id="set-configuration"></a><a href="#set-configuration" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Set configuration</h3>
+<p>You can set a config using the <code>set</code> command. Here's an example:</p>
+<pre><code class="hljs css language-bash">$ heron config us-west-staging <span class="hljs-built_in">set</span> service_url http://us-west.staging.example.com:9000
+</code></pre>
+<h3><a class="anchor" aria-hidden="true" id="unset-configuration"></a><a href="#unset-configuration" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Unset configuration</h3>
+<p>You can remove a parameter using the <code>unset</code> command. Here's an example:</p>
+<pre><code class="hljs css language-bash">$ heron config apac-australia <span class="hljs-built_in">unset</span> service_url
+</code></pre>
+<h3><a class="anchor" aria-hidden="true" id="list-configuration"></a><a href="#list-configuration" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>List configuration</h3>
+<p>You can list all of the CLI configs for a Heron cluster using the <code>list</code> command. This will return the configs as a list of <code>parameter = value</code> pairs. Here's an example:</p>
+<pre><code class="hljs css language-bash">$ heron config <span class="hljs-built_in">local</span> list
+service_url = http://localhost:9000
+</code></pre>
+<h3><a class="anchor" aria-hidden="true" id="configuration-example"></a><a href="#configuration-example" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Configuration example</h3>
+<p>Let's say that you need to interact with a Heron cluster called <code>apac-japan-staging</code> which has a service
+URL of <a href="http://apac-japan.staging.example.com:9000">http://apac-japan.staging.example.com:9000</a>. If you specified the service URL via CLI flags, you'd need
+to set the flag every time you perform an operation involving that cluster:</p>
+<pre><code class="hljs css language-bash">$ heron deactivate apac-japan-staging MyTopology \
+  --service-url http://apac-japan.staging.example.com:9000
+</code></pre>
+<p>Using <code>heron config</code>, however, you could set the service URL for that cluster once and for all:</p>
+<pre><code class="hljs css language-bash">$ heron config apac-japan-staging <span class="hljs-built_in">set</span> service_url http://apac-japan.staging.example.com:9000
+$ heron deactivate apac-japan-staging MyTopology
+</code></pre>
+<h2><a class="anchor" aria-hidden="true" id="other-commands"></a><a href="#other-commands" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Other Commands</h2>
+<h3><a class="anchor" aria-hidden="true" id="version"></a><a href="#version" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Version</h3>
+<p>Run the <code>version</code> command at any time to see which version of <code>heron</code> you're
+using:</p>
+<pre><code class="hljs css language-bash">$ heron version
+heron.build.version : <span class="hljs-string">'0.17.6'</span>
+heron.build.time : Wed Feb 28 12:08:52 PST 2018
+heron.build.timestamp : 1519848532000
+heron.build.host : ci-server-01
+heron.build.user : release-agent1
+heron.build.git.revision : ada6052f6f841e27416b9f9bb4be73183d5a8cd8
+heron.build.git.status : Clean
+</code></pre>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/0.20.0-incubating/observability-scribe"><span class="arrow-prev">← </span><span>Scribe</span></a><a class="docs-next button" href="/docs/0.20.0-incubating/user-manuals-heron-explorer"><span>Heron Explorer</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#deploying-the-heron-cli-executable">Deploying the <code>heron</code> CLI Executable</a><ul class="toc-headings"><li><a href="#common-cli-args">Common CLI Args</a></li><li><a href="#optional-cli-flags">Optional CLI Flags</a></li></ul></li><li><a href="#submitting-a-topology">Submitting a Topology</a><ul class="toc-headings"><li><a href="#example-topology-submission-command">Example Topology Submission Command</a></li><li><a href="#other-topology-submission-options">Other Topology Submission Options</a></li></ul></li><li><a href="#activating-a-topology">Activating a Topology</a><ul class="toc-headings"><li><a href="#example-topology-activation-command">Example Topology Activation Command</a></li></ul></li><li><a href="#deactivating-a-topology">Deactivating a Topology</a></li><li><a href="#restarting-a-topology">Restarting a Topology</a><ul class="toc-headings"><li><a href="#example-topology-restart-command">Example Topology Restart Command</a></li></ul></li><li><a href="#updating-a-topology">Updating a Topology</a><ul class="toc-headings"><li><a href="#example-topology-update-command">Example Topology Update Command</a></li></ul></li><li><a href="#killing-a-topology">Killing a Topology</a><ul class="toc-headings"><li><a href="#example-topology-kill-command">Example Topology Kill Command</a></li></ul></li><li><a href="#heron-cli-configuration">Heron CLI configuration</a><ul class="toc-headings"><li><a href="#available-parameters">Available parameters</a></li><li><a href="#set-configuration">Set configuration</a></li><li><a href="#unset-configuration">Unset configuration</a></li><li><a href="#list-configuration">List configuration</a></li><li><a href="#configuration-example">Configuration example</a></li></ul></li><li><a href="#other-commands">Other Commands</a><ul class="toc-headings"><li><a href="#version">Version</a></li></ul></li></ul></nav></div><footer class="nav-footer" id="footer"><div class="apache-disclaimer">Disclaimer Apache Heron (incubating) is an effort undergoing incubation at The Apache Software Foundation (ASF), sponsored by Incubator. Incubation is required of all newly accepted projects until a further review indicates that the infrastructure, communications, and decision making process have stabilized in a manner consistent with other successful ASF projects. While incubation status is not necessarily a reflection of the completeness or stability of the code, it does indicate that the project has yet to be fully endorsed by the ASF.</div><section class="copyright">Copyright © 2019 the Apache Software Foundation, Apache Heron, Heron, 
+  Apache, the Apache feather Logo, and the Apache Heron project logo are either registered 
+  trademarks or trademarks of the Apache Software Foundation.</section></footer></div><script>window.twttr=(function(d,s, id){var js,fjs=d.getElementsByTagName(s)[0],t=window.twttr||{};if(d.getElementById(id))return t;js=d.createElement(s);js.id=id;js.src='https://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js, fjs);t._e = [];t.ready = function(f) {t._e.push(f);};return t;}(document, 'script', 'twitter-wjs'));</script></body></html>

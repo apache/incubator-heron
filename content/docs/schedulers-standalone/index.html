@@ -1,0 +1,222 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Heron Multi-node Standalone Cluster · Apache Heron</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="&lt;!--"/><meta name="docsearch:version" content="0.20.1-incubating"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Heron Multi-node Standalone Cluster · Apache Heron"/><meta property="og:type" content="website"/><meta property="og:url" content="https://heronstreaming.io/"/><meta property="og:description" content="&lt;!--"/><meta property="og:image" content="https://heronstreaming.io/img/undraw_online.svg"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://heronstreaming.io/img/undraw_tweetstorm.svg"/><link rel="shortcut icon" href="/img/favicon-32x32.png"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script type="text/javascript" src="/js/custom.js"></script><script src="/js/scrollSpy.js"></script><link rel="stylesheet" href="/css/main.css"/><script src="/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/"><img class="logo" src="/img/HeronTextLogo-small.png" alt="Apache Heron"/><h2 class="headerTitleWithLogo">Apache Heron</h2></a><a href="/versions"><h3>0.20.1-incubating</h3></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class=""><a href="/api/java" target="_self">Javadocs</a></li><li class=""><a href="/api/python" target="_self">Pydocs</a></li><li class="siteNavGroupActive"><a href="/docs/getting-started-local-single-node" target="_self">Docs</a></li><li class=""><a href="#community" target="_self">Community</a></li><li class=""><a href="#apache" target="_self">Apache</a></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="container docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><div class="hamburger-menu"><div class="line1"></div><div class="line2"></div><div class="line3"></div></div></div><h2><i>›</i><span>Schedulers</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle">Getting Started</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/getting-started-local-single-node">Local (Single Node)</a></li><li class="navListItem"><a class="navItem" href="/docs/getting-started-migrate-storm-topologies">Migrate Storm Topologies</a></li><li class="navListItem"><a class="navItem" href="/docs/getting-started-troubleshooting-guide">Troubleshooting Guide</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Deployment</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/deployment-overview">Deployment Overiew</a></li><li class="navListItem"><a class="navItem" href="/docs/deployment-configuration">Configuration</a></li><li class="navListItem"><a class="navItem" href="/docs/deployment-api-server">The Heron API Server</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Topology Development APIs</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/topology-development-streamlet-api">The Heron Streamlet API for Java</a></li><li class="navListItem"><a class="navItem" href="/docs/topology-development-eco-api">The ECO API for Java</a></li><li class="navListItem"><a class="navItem" href="/docs/topology-development-topology-api-java">The Heron Topology API for Java</a></li><li class="navListItem"><a class="navItem" href="/docs/topology-development-topology-api-python">The Heron Topology API for Python</a></li><li class="navListItem"><a class="navItem" href="/docs/topology-development-streamlet-scala">The Heron Streamlet API for Scala</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Client API Docs</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/client-api-docs-overview">Client API Docs</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Guides</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/guides-effectively-once-java-topologies">Effectively Once Java Topologies</a></li><li class="navListItem"><a class="navItem" href="/docs/guides-python-topologies">Python Topologies</a></li><li class="navListItem"><a class="navItem" href="/docs/guides-data-model">Heron Data Model</a></li><li class="navListItem"><a class="navItem" href="/docs/guides-tuple-serialization">Tuple Serialization</a></li><li class="navListItem"><a class="navItem" href="/docs/guides-ui-guide">Heron UI Guide</a></li><li class="navListItem"><a class="navItem" href="/docs/guides-topology-tuning">Topology Tuning Guide</a></li><li class="navListItem"><a class="navItem" href="/docs/guides-packing-algorithms">Packing Algorithms</a></li><li class="navListItem"><a class="navItem" href="/docs/guides-simulator-mode">Simulator Mode</a></li><li class="navListItem"><a class="navItem" href="/docs/guides-troubeshooting-guide">Topology Troubleshooting Guide</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Heron Concepts</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/heron-design-goals">Heron Design Goals</a></li><li class="navListItem"><a class="navItem" href="/docs/heron-topology-concepts">Heron Topologies</a></li><li class="navListItem"><a class="navItem" href="/docs/heron-streamlet-concepts">Heron Streamlets</a></li><li class="navListItem"><a class="navItem" href="/docs/heron-architecture">Heron Architecture</a></li><li class="navListItem"><a class="navItem" href="/docs/heron-delivery-semantics">Heron Delivery Semantics</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">State Managers</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/state-managers-zookeeper">Zookeeper</a></li><li class="navListItem"><a class="navItem" href="/docs/state-managers-local-fs">Local File System</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Uploaders</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/uploaders-local-fs">Local File System</a></li><li class="navListItem"><a class="navItem" href="/docs/uploaders-hdfs">HDFS</a></li><li class="navListItem"><a class="navItem" href="/docs/uploaders-http">HTTP</a></li><li class="navListItem"><a class="navItem" href="/docs/uploaders-amazon-s3">Amazon S3</a></li><li class="navListItem"><a class="navItem" href="/docs/uploaders-scp">Secure Copy (SCP)</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Schedulers</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/schedulers-k8s-by-hand">Kubernetes by hand</a></li><li class="navListItem"><a class="navItem" href="/docs/schedulers-k8s-with-helm">Kubernetes with Helm</a></li><li class="navListItem"><a class="navItem" href="/docs/schedulers-aurora-cluster">Aurora Cluster</a></li><li class="navListItem"><a class="navItem" href="/docs/schedulers-aurora-local">Aurora Locally</a></li><li class="navListItem"><a class="navItem" href="/docs/schedulers-local">Local Cluster</a></li><li class="navListItem navListItemActive"><a class="navItem" href="/docs/schedulers-standalone">Heron Multi-node Standalone Cluster</a></li><li class="navListItem"><a class="navItem" href="/docs/schedulers-nomad">Nomad</a></li><li class="navListItem"><a class="navItem" href="/docs/schedulers-mesos-local-mac">Mesos Cluster Locally</a></li><li class="navListItem"><a class="navItem" href="/docs/schedulers-slurm">Slurm Cluster</a></li><li class="navListItem"><a class="navItem" href="/docs/schedulers-yarn">YARN Cluster</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Cluster Configuration</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/cluster-config-overview">Cluster Config Overview</a></li><li class="navListItem"><a class="navItem" href="/docs/cluster-config-system-level">System Level Configuration</a></li><li class="navListItem"><a class="navItem" href="/docs/cluster-config-instance">Heron Instance</a></li><li class="navListItem"><a class="navItem" href="/docs/cluster-config-metrics">Metrics Manager</a></li><li class="navListItem"><a class="navItem" href="/docs/cluster-config-stream">Stream Manager</a></li><li class="navListItem"><a class="navItem" href="/docs/cluster-config-tmaster">Topology Master</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Observability</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/observability-prometheus">Prometheus</a></li><li class="navListItem"><a class="navItem" href="/docs/observability-graphite">Graphite</a></li><li class="navListItem"><a class="navItem" href="/docs/observability-scribe">Scribe</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">User Manuals</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/user-manuals-heron-cli">Heron Client</a></li><li class="navListItem"><a class="navItem" href="/docs/user-manuals-heron-explorer">Heron Explorer</a></li><li class="navListItem"><a class="navItem" href="/docs/user-manuals-tracker-rest">Heron Tracker REST API</a></li><li class="navListItem"><a class="navItem" href="/docs/user-manuals-heron-tracker-runbook">Heron Tracker Runbook</a></li><li class="navListItem"><a class="navItem" href="/docs/user-manuals-heron-ui-runbook">Heron UI Runbook</a></li><li class="navListItem"><a class="navItem" href="/docs/user-manuals-heron-shell">Heron Shell</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Compiling</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/compiling-overview">Compiling Overview</a></li><li class="navListItem"><a class="navItem" href="/docs/compiling-linux">Compiling on Linux</a></li><li class="navListItem"><a class="navItem" href="/docs/compiling-osx">Compiling on OS X</a></li><li class="navListItem"><a class="navItem" href="/docs/compiling-docker">Compiling With Docker</a></li><li class="navListItem"><a class="navItem" href="/docs/compiling-running-tests">Running Tests</a></li><li class="navListItem"><a class="navItem" href="/docs/compiling-code-organization">Code Organization</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Extending Heron</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/extending-heron-scheduler">Custom Scheduler</a></li><li class="navListItem"><a class="navItem" href="/docs/extending-heron-metric-sink">Custom Metrics Sink</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Heron Resources</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/heron-resources-resources">Heron Resources</a></li></ul></div></div></section></div><script>
+            var coll = document.getElementsByClassName('collapsible');
+            var checkActiveCategory = true;
+            for (var i = 0; i < coll.length; i++) {
+              var links = coll[i].nextElementSibling.getElementsByTagName('*');
+              if (checkActiveCategory){
+                for (var j = 0; j < links.length; j++) {
+                  if (links[j].classList.contains('navListItemActive')){
+                    coll[i].nextElementSibling.classList.toggle('hide');
+                    coll[i].childNodes[1].classList.toggle('rotate');
+                    checkActiveCategory = false;
+                    break;
+                  }
+                }
+              }
+
+              coll[i].addEventListener('click', function() {
+                var arrow = this.childNodes[1];
+                arrow.classList.toggle('rotate');
+                var content = this.nextElementSibling;
+                content.classList.toggle('hide');
+              });
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+              createToggler('#navToggler', '#docsNav', 'docsSliderActive');
+              createToggler('#tocToggler', 'body', 'tocActive');
+
+              var headings = document.querySelector('.toc-headings');
+              headings && headings.addEventListener('click', function(event) {
+                var el = event.target;
+                while(el !== headings){
+                  if (el.tagName === 'A') {
+                    document.body.classList.remove('tocActive');
+                    break;
+                  } else{
+                    el = el.parentNode;
+                  }
+                }
+              }, false);
+
+              function createToggler(togglerSelector, targetSelector, className) {
+                var toggler = document.querySelector(togglerSelector);
+                var target = document.querySelector(targetSelector);
+
+                if (!toggler) {
+                  return;
+                }
+
+                toggler.onclick = function(event) {
+                  event.preventDefault();
+
+                  target.classList.toggle(className);
+                };
+              }
+            });
+        </script></nav></div><div class="container mainContainer"><div class="wrapper"><div class="post"><header class="postHeader"><h1 class="postHeaderTitle">Heron Multi-node Standalone Cluster</h1></header><article><div><span><!--
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements.  See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership.  The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License.  You may obtain a copy of the License at
+      http://www.apache.org/licenses/LICENSE-2.0
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied.  See the License for the
+    specific language governing permissions and limitations
+    under the License.
+-->
+<p>Heron enables you to easily run a multi-node cluster in <strong>standalone mode</strong>. The difference between standalone mode and <a href="schedulers-local">local mode</a> for Heron is that standalone mode involves running multiple compute nodes---using <a href="https://www.hashicorp.com/">Hashicorp</a>'s <a href="https://www.nomadproject.io/">Nomad</a> as a scheduler---rather than just one.</p>
+<h2><a class="anchor" aria-hidden="true" id="installation"></a><a href="#installation" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Installation</h2>
+<p>You can use Heron in standalone mode using the <code>heron-admin</code> CLI tool, which can be installed using the instructions <a href="getting-started-local-single-node">here</a>.</p>
+<h2><a class="anchor" aria-hidden="true" id="requirements"></a><a href="#requirements" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Requirements</h2>
+<p>In order to run Heron in standalone mode, you'll need to run a <a href="https://zookeeper.apache.org">ZooKeeper</a> cluster. You will also need to be able to ssh into all the nodes that you want to have in your standalone cluster from the node that your are setting up the cluster.</p>
+<h2><a class="anchor" aria-hidden="true" id="configuration"></a><a href="#configuration" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Configuration</h2>
+<p>Once you have the <code>heron-admin</code> CLI tool installed, you need to provide a list of hosts for both the Heron cluster itself and for <a href="https://zookeeper.apache.org">ZooKeeper</a>.</p>
+<p>You can easily do this by running the following command:</p>
+<pre><code class="hljs css language-bash">$ heron-admin standalone <span class="hljs-built_in">set</span>
+</code></pre>
+<p>That will open up an <code>inventory.yaml</code> file in whichever editor is specified in your <code>EDITOR</code> environment variable. The default is <a href="http://www.vim.org/">Vim</a>. That YAML file looks like this:</p>
+<pre><code class="hljs css language-yaml"><span class="hljs-attr">cluster:</span>
+<span class="hljs-bullet">-</span> <span class="hljs-number">127.0</span><span class="hljs-number">.0</span><span class="hljs-number">.1</span>
+<span class="hljs-attr">zookeepers:</span>
+<span class="hljs-bullet">-</span> <span class="hljs-number">127.0</span><span class="hljs-number">.0</span><span class="hljs-number">.1</span>
+</code></pre>
+<p>You can modify the file to include all hosts for your standalone cluster and for ZooKeeper. Remember you need to be able to ssh into all the nodes listed in the cluster section. Once you've added the lists of hosts for the Heron standalone cluster and ZooKeeper and saved the file, you can move on to <a href="#starting-and-stopping-the-cluster">starting the cluster</a>.</p>
+<blockquote>
+<p>To run Heron in standalone mode locally on your laptop, use the defaults that are already provided in the <code>inventory.yaml</code> file.</p>
+</blockquote>
+<h2><a class="anchor" aria-hidden="true" id="starting-and-stopping-the-cluster"></a><a href="#starting-and-stopping-the-cluster" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Starting and stopping the cluster</h2>
+<p>To start Heron in standalone mode once the host configuration has been applied:</p>
+<pre><code class="hljs css language-bash">$ heron-admin standalone cluster start
+</code></pre>
+<p>You should see output like this:</p>
+<pre><code class="hljs css language-bash">[2018-01-22 10:37:06 -0800] [INFO]: Roles:
+[2018-01-22 10:37:06 -0800] [INFO]:  - Master Servers: [<span class="hljs-string">'127.0.0.1'</span>]
+[2018-01-22 10:37:06 -0800] [INFO]:  - Slave Servers: [<span class="hljs-string">'127.0.0.1'</span>]
+[2018-01-22 10:37:06 -0800] [INFO]:  - Zookeeper Servers: [<span class="hljs-string">'127.0.0.1'</span>]
+[2018-01-22 10:37:06 -0800] [INFO]: Updating config files...
+[2018-01-22 10:37:06 -0800] [INFO]: Starting master on 127.0.0.1
+[2018-01-22 10:37:06 -0800] [INFO]: Done starting masters
+[2018-01-22 10:37:06 -0800] [INFO]: Starting slave on 127.0.0.1
+[2018-01-22 10:37:06 -0800] [INFO]: Done starting slaves
+[2018-01-22 10:37:06 -0800] [INFO]: Waiting <span class="hljs-keyword">for</span> cluster to come up... 0
+[2018-01-22 10:37:08 -0800] [INFO]: Starting Heron API Server on 127.0.0.1
+[2018-01-22 10:37:08 -0800] [INFO]: Waiting <span class="hljs-keyword">for</span> API server to come up... 0
+[2018-01-22 10:37:09 -0800] [INFO]: Waiting <span class="hljs-keyword">for</span> API server to come up... 1
+[2018-01-22 10:37:16 -0800] [INFO]: Done starting Heron API Server
+[2018-01-22 10:37:16 -0800] [INFO]: Starting Heron Tools on 127.0.0.1
+[2018-01-22 10:37:16 -0800] [INFO]: Waiting <span class="hljs-keyword">for</span> API server to come up... 0
+[2018-01-22 10:37:17 -0800] [INFO]: Done starting Heron Tools
+[2018-01-22 10:37:17 -0800] [INFO]: Heron standalone cluster complete!
+</code></pre>
+<p>If you see the <code>Heron standalone cluster complete!</code> message, that means that the cluster is ready for you to <a href="#submitting-a-topology">submit</a> and manage topologies.</p>
+<p>You can stop the cluster at any time using the <code>stop</code> command:</p>
+<pre><code class="hljs css language-bash">$ heron-admin standalone cluster stop
+</code></pre>
+<p>You will be prompted to confirm that you want to stop the cluster by typing <strong>yes</strong> or <strong>y</strong> (or <strong>no</strong> or <strong>n</strong> if you don't want to). If you enter <strong>yes</strong> or <strong>y</strong> and press <strong>Enter</strong>, all Heron-related jobs will be de-scheduled on Nomad.</p>
+<h2><a class="anchor" aria-hidden="true" id="fetching-info-about-your-standalone-cluster"></a><a href="#fetching-info-about-your-standalone-cluster" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Fetching info about your standalone cluster</h2>
+<p>At any time, you can retrieve information about your standalone cluster by running:</p>
+<pre><code class="hljs css language-bash">$ heron-admin standalone info
+</code></pre>
+<p>This will return a JSON string containing a list of hosts for Heron and ZooKeeper as well as URLs for the <a href="deployment-api-server">Heron API server</a>, <a href="user-manuals-heron-ui">Heron UI</a>, and <a href="user-manuals-heron-tracker-runbook">Heron Tracker</a>. Here is a cluster info JSON string if all defaults are retained:</p>
+<pre><code class="hljs css language-json">{
+  <span class="hljs-attr">"numNodes"</span>: <span class="hljs-number">1</span>,
+  <span class="hljs-attr">"nodes"</span>: [
+    <span class="hljs-string">"127.0.0.1"</span>
+  ],
+  <span class="hljs-attr">"roles"</span>: {
+    <span class="hljs-attr">"masters"</span>: [
+      <span class="hljs-string">"127.0.0.1"</span>
+    ],
+    <span class="hljs-attr">"slaves"</span>: [
+      <span class="hljs-string">"127.0.0.1"</span>
+    ],
+    <span class="hljs-attr">"zookeepers"</span>: [
+      <span class="hljs-string">"127.0.0.1"</span>
+    ]
+  },
+  <span class="hljs-attr">"urls"</span>: {
+    <span class="hljs-attr">"serviceUrl"</span>: <span class="hljs-string">"http://127.0.0.1:9000"</span>,
+    <span class="hljs-attr">"heronUi"</span>: <span class="hljs-string">"http://127.0.0.1:8889"</span>,
+    <span class="hljs-attr">"heronTracker"</span>: <span class="hljs-string">"http://127.0.0.1:8888"</span>
+  }
+}
+</code></pre>
+<p>You can also get more specific bits of info using the <code>get</code> command:</p>
+<pre><code class="hljs css language-bash"><span class="hljs-comment"># Heron Tracker URL</span>
+$ heron-admin standalone get heron-tracker-url
+
+<span class="hljs-comment"># Heron UI URL</span>
+$ heron-admin standalone get heron-ui-url
+
+<span class="hljs-comment"># Heron cluster service URL</span>
+$ heron-admin standalone get service-url
+</code></pre>
+<h2><a class="anchor" aria-hidden="true" id="setting-the-service-url"></a><a href="#setting-the-service-url" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Setting the service URL</h2>
+<p>Once your standalone cluster is running, there's one final step before you can interact with the cluster: you need to specify the service URL for the <a href="deployment-api-server">Heron API server</a> for the standalone cluster. You can fetch that URL in two different ways:</p>
+<pre><code class="hljs css language-bash"><span class="hljs-comment"># Using the "get" command</span>
+$ heron-admin standalone get service-url
+
+<span class="hljs-comment"># Using the "info" command</span>
+$ heron-admin standalone info | jq .urls.serviceUrl | tr -d <span class="hljs-string">'"'</span>
+</code></pre>
+<p>Once you have the URL, you can use the <code>heron config</code> command to set the service URL:</p>
+<pre><code class="hljs css language-bash">$ heron config standalone <span class="hljs-built_in">set</span> service_url SERVICE_URL
+</code></pre>
+<p>Here are some more convenient ways to set the service URL:</p>
+<pre><code class="hljs css language-bash"><span class="hljs-comment"># Using the "get" command</span>
+$ heron config standalone <span class="hljs-built_in">set</span> service_url \
+  $(heron-admin standalone get service-url)
+
+<span class="hljs-comment"># Using the "info" command</span>
+$ heron config standalone <span class="hljs-built_in">set</span> service_url \
+  $(heron-admin standalone info | jq .urls.serviceUrl | tr -d <span class="hljs-string">'"'</span>)
+</code></pre>
+<p>If you're running a standalone cluster locally on your laptop, the service URL will always be <code>http://localhost:9000</code>:</p>
+<pre><code class="hljs css language-bash">$ heron config standalone <span class="hljs-built_in">set</span> service_url http://localhost:9000
+</code></pre>
+<h2><a class="anchor" aria-hidden="true" id="submitting-a-topology"></a><a href="#submitting-a-topology" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Submitting a topology</h2>
+<p>Once your standalone cluster is up and running and you've set the service URL for the <a href="user-manuals-heron-cli"><code>heron</code> CLI tool</a>, you can submit and manage topologies by specifying the <code>standalone</code> cluster. Here's an example topology submission command:</p>
+<pre><code class="hljs css language-bash">$ heron submit standalone \
+  ~/.heron/examples/heron-streamlet-examples.jar \
+  org.apache.heron.examples.streamlet.WindowedWordCountTopology \
+  WindowedWordCount
+</code></pre>
+<p>You can also specify the service url as part of the submission command:</p>
+<pre><code class="hljs css language-bash">$ heron submit standalone \
+  --service-url http://localhost:9000 \
+  ~/.heron/examples/heron-streamlet-examples.jar \
+  org.apache.heron.examples.streamlet.WindowedWordCountTopology \
+  WindowedWordCount
+</code></pre>
+<p>Once the topology has been submitted, it can be deactivated, killed, updated, and so on, just like topologies on any other scheduler.</p>
+<h2><a class="anchor" aria-hidden="true" id="managing-nomad"></a><a href="#managing-nomad" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Managing Nomad</h2>
+<p>Heron standalone uses <a href="https://www.nomadproject.io/">Nomad</a> as a scheduler. For the most part, you shouldn't need to interact with Nomad when managing your Heron standalone cluster. If you do need to manage Nomad directly, however, you can do so using the <code>heron-nomad</code> executable, which is installed at <code>~/.heron/bin/heron-nomad</code>. That executable is essentially an alias for the <code>nomad</code> CLI tool. You can find documentation in the <a href="https://www.nomadproject.io/docs/commands/index.html">official Nomad docs</a>.</p>
+<p>You can also access the <a href="https://www.nomadproject.io/guides/ui.html">Nomad Web UI</a> on port 4646 of any master node in the Heron cluster. You can see a list of master nodes by running <code>heron-admin standalone info</code>. If you're running a standalone cluster locally on your machine, you can access the Nomad UI at <code>localhost:4646</code>.</p>
+<h2><a class="anchor" aria-hidden="true" id="debugging-help"></a><a href="#debugging-help" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Debugging Help</h2>
+<p>The locations of the logs for the Nomad Server (master node) and Nomad Clients (slave nodes) are located at '/tmp/nomad_server_log' and '/tmp/nomad_client.log' respectively. Please look through these logs to see if there was a error setting up the Nomad cluster</p>
+<h3><a class="anchor" aria-hidden="true" id="common-problems"></a><a href="#common-problems" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Common Problems</h3>
+<p>If you see the following in '/tmp/nomad_server_log'</p>
+<pre><code class="hljs css language-bash">Error starting agent: Failed to start Consul server: Failed to start lan serf: Failed to parse advertise address!
+</code></pre>
+<p>The Nomad server cannot determine the network address to advertise itself on.  You will need to manually set that address. You can do that by modifying the configuration file:</p>
+<p>~/.heron/conf/standalone/resources/master.hcl</p>
+<p>You will need to add a stanza like:</p>
+<p>advertise {</p>
+<h1><a class="anchor" aria-hidden="true" id="defaults-to-the-node-s-hostname-if-the-hostname-resolves-to-a-loopback"></a><a href="#defaults-to-the-node-s-hostname-if-the-hostname-resolves-to-a-loopback" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Defaults to the node's hostname. If the hostname resolves to a loopback</h1>
+<h1><a class="anchor" aria-hidden="true" id="address-you-must-manually-configure-advertise-addresses"></a><a href="#address-you-must-manually-configure-advertise-addresses" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>address you must manually configure advertise addresses.</h1>
+<p>http = &quot;1.2.3.4&quot;
+rpc  = &quot;1.2.3.4&quot;
+serf = &quot;1.2.3.4:5648&quot; # non-default ports may be specified
+}</p>
+<p>Please reference:</p>
+<p><a href="https://www.nomadproject.io/docs/agent/configuration/index.html">https://www.nomadproject.io/docs/agent/configuration/index.html</a></p>
+<p>You can then stop the cluster and restart.</p>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/schedulers-local"><span class="arrow-prev">← </span><span>Local Cluster</span></a><a class="docs-next button" href="/docs/schedulers-nomad"><span>Nomad</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#installation">Installation</a></li><li><a href="#requirements">Requirements</a></li><li><a href="#configuration">Configuration</a></li><li><a href="#starting-and-stopping-the-cluster">Starting and stopping the cluster</a></li><li><a href="#fetching-info-about-your-standalone-cluster">Fetching info about your standalone cluster</a></li><li><a href="#setting-the-service-url">Setting the service URL</a></li><li><a href="#submitting-a-topology">Submitting a topology</a></li><li><a href="#managing-nomad">Managing Nomad</a></li><li><a href="#debugging-help">Debugging Help</a><ul class="toc-headings"><li><a href="#common-problems">Common Problems</a></li></ul></li></ul></nav></div><footer class="nav-footer" id="footer"><div class="apache-disclaimer">Disclaimer Apache Heron (incubating) is an effort undergoing incubation at The Apache Software Foundation (ASF), sponsored by Incubator. Incubation is required of all newly accepted projects until a further review indicates that the infrastructure, communications, and decision making process have stabilized in a manner consistent with other successful ASF projects. While incubation status is not necessarily a reflection of the completeness or stability of the code, it does indicate that the project has yet to be fully endorsed by the ASF.</div><section class="copyright">Copyright © 2019 the Apache Software Foundation, Apache Heron, Heron, 
+  Apache, the Apache feather Logo, and the Apache Heron project logo are either registered 
+  trademarks or trademarks of the Apache Software Foundation.</section></footer></div><script>window.twttr=(function(d,s, id){var js,fjs=d.getElementsByTagName(s)[0],t=window.twttr||{};if(d.getElementById(id))return t;js=d.createElement(s);js.id=id;js.src='https://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js, fjs);t._e = [];t.ready = function(f) {t._e.push(f);};return t;}(document, 'script', 'twitter-wjs'));</script></body></html>

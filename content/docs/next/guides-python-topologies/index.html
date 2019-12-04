@@ -1,0 +1,357 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Python Topologies · Apache Heron</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="&lt;!--"/><meta name="docsearch:version" content="next"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Python Topologies · Apache Heron"/><meta property="og:type" content="website"/><meta property="og:url" content="https://heronstreaming.io/"/><meta property="og:description" content="&lt;!--"/><meta property="og:image" content="https://heronstreaming.io/img/undraw_online.svg"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://heronstreaming.io/img/undraw_tweetstorm.svg"/><link rel="shortcut icon" href="/img/favicon-32x32.png"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script type="text/javascript" src="/js/custom.js"></script><script src="/js/scrollSpy.js"></script><link rel="stylesheet" href="/css/main.css"/><script src="/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/"><img class="logo" src="/img/HeronTextLogo-small.png" alt="Apache Heron"/><h2 class="headerTitleWithLogo">Apache Heron</h2></a><a href="/versions"><h3>next</h3></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class=""><a href="/api/java" target="_self">Javadocs</a></li><li class=""><a href="/api/python" target="_self">Pydocs</a></li><li class="siteNavGroupActive"><a href="/docs/next/getting-started-local-single-node" target="_self">Docs</a></li><li class=""><a href="#community" target="_self">Community</a></li><li class=""><a href="#apache" target="_self">Apache</a></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="container docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><div class="hamburger-menu"><div class="line1"></div><div class="line2"></div><div class="line3"></div></div></div><h2><i>›</i><span>Guides</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle">Getting Started</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/next/getting-started-local-single-node">Local (Single Node)</a></li><li class="navListItem"><a class="navItem" href="/docs/next/getting-started-migrate-storm-topologies">Migrate Storm Topologies</a></li><li class="navListItem"><a class="navItem" href="/docs/next/getting-started-troubleshooting-guide">Troubleshooting Guide</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Deployment</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/next/deployment-overview">Deployment Overiew</a></li><li class="navListItem"><a class="navItem" href="/docs/next/deployment-configuration">Configuration</a></li><li class="navListItem"><a class="navItem" href="/docs/next/deployment-api-server">The Heron API Server</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Topology Development APIs</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/next/topology-development-streamlet-api">The Heron Streamlet API for Java</a></li><li class="navListItem"><a class="navItem" href="/docs/next/topology-development-eco-api">The ECO API for Java</a></li><li class="navListItem"><a class="navItem" href="/docs/next/topology-development-topology-api-java">The Heron Topology API for Java</a></li><li class="navListItem"><a class="navItem" href="/docs/next/topology-development-topology-api-python">The Heron Topology API for Python</a></li><li class="navListItem"><a class="navItem" href="/docs/next/topology-development-streamlet-scala">The Heron Streamlet API for Scala</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Client API Docs</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/next/client-api-docs-overview">Client API Docs</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Guides</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/next/guides-effectively-once-java-topologies">Effectively Once Java Topologies</a></li><li class="navListItem navListItemActive"><a class="navItem" href="/docs/next/guides-python-topologies">Python Topologies</a></li><li class="navListItem"><a class="navItem" href="/docs/next/guides-data-model">Heron Data Model</a></li><li class="navListItem"><a class="navItem" href="/docs/next/guides-tuple-serialization">Tuple Serialization</a></li><li class="navListItem"><a class="navItem" href="/docs/next/guides-ui-guide">Heron UI Guide</a></li><li class="navListItem"><a class="navItem" href="/docs/next/guides-topology-tuning">Topology Tuning Guide</a></li><li class="navListItem"><a class="navItem" href="/docs/next/guides-packing-algorithms">Packing Algorithms</a></li><li class="navListItem"><a class="navItem" href="/docs/next/guides-simulator-mode">Simulator Mode</a></li><li class="navListItem"><a class="navItem" href="/docs/next/guides-troubeshooting-guide">Topology Troubleshooting Guide</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Heron Concepts</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/next/heron-design-goals">Heron Design Goals</a></li><li class="navListItem"><a class="navItem" href="/docs/next/heron-topology-concepts">Heron Topologies</a></li><li class="navListItem"><a class="navItem" href="/docs/next/heron-streamlet-concepts">Heron Streamlets</a></li><li class="navListItem"><a class="navItem" href="/docs/next/heron-architecture">Heron Architecture</a></li><li class="navListItem"><a class="navItem" href="/docs/next/heron-delivery-semantics">Heron Delivery Semantics</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">State Managers</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/next/state-managers-zookeeper">Zookeeper</a></li><li class="navListItem"><a class="navItem" href="/docs/next/state-managers-local-fs">Local File System</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Uploaders</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/next/uploaders-local-fs">Local File System</a></li><li class="navListItem"><a class="navItem" href="/docs/next/uploaders-hdfs">HDFS</a></li><li class="navListItem"><a class="navItem" href="/docs/next/uploaders-http">HTTP</a></li><li class="navListItem"><a class="navItem" href="/docs/next/uploaders-amazon-s3">Amazon S3</a></li><li class="navListItem"><a class="navItem" href="/docs/next/uploaders-scp">Secure Copy (SCP)</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Schedulers</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/next/schedulers-k8s-by-hand">Kubernetes by hand</a></li><li class="navListItem"><a class="navItem" href="/docs/next/schedulers-k8s-with-helm">Kubernetes with Helm</a></li><li class="navListItem"><a class="navItem" href="/docs/next/schedulers-aurora-cluster">Aurora Cluster</a></li><li class="navListItem"><a class="navItem" href="/docs/next/schedulers-aurora-local">Aurora Locally</a></li><li class="navListItem"><a class="navItem" href="/docs/next/schedulers-local">Local Cluster</a></li><li class="navListItem"><a class="navItem" href="/docs/next/schedulers-standalone">Heron Multi-node Standalone Cluster</a></li><li class="navListItem"><a class="navItem" href="/docs/next/schedulers-nomad">Nomad</a></li><li class="navListItem"><a class="navItem" href="/docs/next/schedulers-mesos-local-mac">Mesos Cluster Locally</a></li><li class="navListItem"><a class="navItem" href="/docs/next/schedulers-slurm">Slurm Cluster</a></li><li class="navListItem"><a class="navItem" href="/docs/next/schedulers-yarn">YARN Cluster</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Cluster Configuration</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/next/cluster-config-overview">Cluster Config Overview</a></li><li class="navListItem"><a class="navItem" href="/docs/next/cluster-config-system-level">System Level Configuration</a></li><li class="navListItem"><a class="navItem" href="/docs/next/cluster-config-instance">Heron Instance</a></li><li class="navListItem"><a class="navItem" href="/docs/next/cluster-config-metrics">Metrics Manager</a></li><li class="navListItem"><a class="navItem" href="/docs/next/cluster-config-stream">Stream Manager</a></li><li class="navListItem"><a class="navItem" href="/docs/next/cluster-config-tmaster">Topology Master</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Observability</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/next/observability-prometheus">Prometheus</a></li><li class="navListItem"><a class="navItem" href="/docs/next/observability-graphite">Graphite</a></li><li class="navListItem"><a class="navItem" href="/docs/next/observability-scribe">Scribe</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">User Manuals</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/next/user-manuals-heron-cli">Heron Client</a></li><li class="navListItem"><a class="navItem" href="/docs/next/user-manuals-heron-explorer">Heron Explorer</a></li><li class="navListItem"><a class="navItem" href="/docs/next/user-manuals-tracker-rest">Heron Tracker REST API</a></li><li class="navListItem"><a class="navItem" href="/docs/next/user-manuals-heron-tracker-runbook">Heron Tracker Runbook</a></li><li class="navListItem"><a class="navItem" href="/docs/next/user-manuals-heron-ui-runbook">Heron UI Runbook</a></li><li class="navListItem"><a class="navItem" href="/docs/next/user-manuals-heron-shell">Heron Shell</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Compiling</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/next/compiling-overview">Compiling Overview</a></li><li class="navListItem"><a class="navItem" href="/docs/next/compiling-linux">Compiling on Linux</a></li><li class="navListItem"><a class="navItem" href="/docs/next/compiling-osx">Compiling on OS X</a></li><li class="navListItem"><a class="navItem" href="/docs/next/compiling-docker">Compiling With Docker</a></li><li class="navListItem"><a class="navItem" href="/docs/next/compiling-running-tests">Running Tests</a></li><li class="navListItem"><a class="navItem" href="/docs/next/compiling-code-organization">Code Organization</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Extending Heron</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/next/extending-heron-scheduler">Custom Scheduler</a></li><li class="navListItem"><a class="navItem" href="/docs/next/extending-heron-metric-sink">Custom Metrics Sink</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Heron Resources</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/next/heron-resources-resources">Heron Resources</a></li></ul></div></div></section></div><script>
+            var coll = document.getElementsByClassName('collapsible');
+            var checkActiveCategory = true;
+            for (var i = 0; i < coll.length; i++) {
+              var links = coll[i].nextElementSibling.getElementsByTagName('*');
+              if (checkActiveCategory){
+                for (var j = 0; j < links.length; j++) {
+                  if (links[j].classList.contains('navListItemActive')){
+                    coll[i].nextElementSibling.classList.toggle('hide');
+                    coll[i].childNodes[1].classList.toggle('rotate');
+                    checkActiveCategory = false;
+                    break;
+                  }
+                }
+              }
+
+              coll[i].addEventListener('click', function() {
+                var arrow = this.childNodes[1];
+                arrow.classList.toggle('rotate');
+                var content = this.nextElementSibling;
+                content.classList.toggle('hide');
+              });
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+              createToggler('#navToggler', '#docsNav', 'docsSliderActive');
+              createToggler('#tocToggler', 'body', 'tocActive');
+
+              var headings = document.querySelector('.toc-headings');
+              headings && headings.addEventListener('click', function(event) {
+                var el = event.target;
+                while(el !== headings){
+                  if (el.tagName === 'A') {
+                    document.body.classList.remove('tocActive');
+                    break;
+                  } else{
+                    el = el.parentNode;
+                  }
+                }
+              }, false);
+
+              function createToggler(togglerSelector, targetSelector, className) {
+                var toggler = document.querySelector(togglerSelector);
+                var target = document.querySelector(targetSelector);
+
+                if (!toggler) {
+                  return;
+                }
+
+                toggler.onclick = function(event) {
+                  event.preventDefault();
+
+                  target.classList.toggle(className);
+                };
+              }
+            });
+        </script></nav></div><div class="container mainContainer"><div class="wrapper"><div class="post"><header class="postHeader"><h1 class="postHeaderTitle">Python Topologies</h1></header><article><div><span><!--
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements.  See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership.  The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License.  You may obtain a copy of the License at
+      http://www.apache.org/licenses/LICENSE-2.0
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied.  See the License for the
+    specific language governing permissions and limitations
+    under the License.
+-->
+<blockquote>
+<p>The current version of <code>heronpy</code> is [{{% heronpyVersion %}}](<a href="https://pypi.python.org/pypi/heronpy/">https://pypi.python.org/pypi/heronpy/</a>{{% heronpyVersion %}}).</p>
+</blockquote>
+<p>Support for developing Heron topologies in Python is provided by a Python library called <a href="https://pypi.python.org/pypi/heronpy"><code>heronpy</code></a>.</p>
+<blockquote>
+<h4><a class="anchor" aria-hidden="true" id="python-api-docs"></a><a href="#python-api-docs" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Python API docs</h4>
+<p>You can find API docs for the <code>heronpy</code> library <a href="/api/python">here</a>.</p>
+</blockquote>
+<h2><a class="anchor" aria-hidden="true" id="setup"></a><a href="#setup" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Setup</h2>
+<p>First, you need to install the <code>heronpy</code> library using <a href="https://pip.pypa.io/en/stable/">pip</a>, <a href="https://wiki.python.org/moin/EasyInstall">EasyInstall</a>, or an analogous tool:</p>
+<pre><code class="hljs css language-shell"><span class="hljs-meta">$</span><span class="bash"> pip install heronpy</span>
+<span class="hljs-meta">$</span><span class="bash"> easy_install heronpy</span>
+</code></pre>
+<p>Then you can include <code>heronpy</code> in your project files. Here's an example:</p>
+<pre><code class="hljs css language-python"><span class="hljs-keyword">from</span> heronpy.api.bolt.bolt <span class="hljs-keyword">import</span> Bolt
+<span class="hljs-keyword">from</span> heronpy.api.spout.spout <span class="hljs-keyword">import</span> Spout
+<span class="hljs-keyword">from</span> heronpy.api.topology <span class="hljs-keyword">import</span> Topology
+</code></pre>
+<h2><a class="anchor" aria-hidden="true" id="writing-topologies-in-python"></a><a href="#writing-topologies-in-python" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Writing topologies in Python</h2>
+<p>Heron <a href="heron-topology-concepts">topologies</a> are networks of <a href="topology-development-topology-api-python#spouts">spouts</a> that pull data into a topology and <a href="topology-development-topology-api-python#bolts">bolts</a> that process that ingested data.</p>
+<blockquote>
+<p>You can see how to create Python spouts in the <a href="topology-development-topology-api-python#spouts">Implementing Python Spouts</a> guide and how to create Python bolts in the <a href="topology-development-topology-api-python#bolts">Implementing Python Bolts</a> guide.</p>
+</blockquote>
+<p>Once you've defined spouts and bolts for a topology, you can then compose the topology in one of two ways:</p>
+<ul>
+<li><p>You can use the <code>TopologyBuilder</code> class inside of a main function.</p>
+<p>Here's an example:</p>
+<pre><code class="hljs css language-python"><span class="hljs-comment">#!/usr/bin/env python</span>
+<span class="hljs-keyword">from</span> heronpy.api.topology <span class="hljs-keyword">import</span> TopologyBuilder
+
+
+<span class="hljs-keyword">if</span> __name__ == <span class="hljs-string">"__main__"</span>:
+    builder = TopologyBuilder(<span class="hljs-string">"MyTopology"</span>)
+    <span class="hljs-comment"># Add spouts and bolts</span>
+    builder.build_and_submit()
+</code></pre></li>
+<li><p>You can subclass the <code>Topology</code> class.</p>
+<p>Here's an example:</p>
+<pre><code class="hljs css language-python"><span class="hljs-keyword">from</span> heronpy.api.stream <span class="hljs-keyword">import</span> Grouping
+<span class="hljs-keyword">from</span> heronpy.api.topology <span class="hljs-keyword">import</span> Topology
+
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyTopology</span><span class="hljs-params">(Topology)</span>:</span>
+    my_spout = WordSpout.spec(par=<span class="hljs-number">2</span>)
+    my_bolt = CountBolt.spec(par=<span class="hljs-number">3</span>, inputs={spout: Grouping.fields(<span class="hljs-string">"word"</span>)})
+</code></pre></li>
+</ul>
+<h2><a class="anchor" aria-hidden="true" id="defining-topologies-using-the-topologybuilder-class"></a><a href="#defining-topologies-using-the-topologybuilder-class" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Defining topologies using the <code>TopologyBuilder</code> class</h2>
+<p>If you create a Python topology using a <code>TopologyBuilder</code>, you need to instantiate a <code>TopologyBuilder</code> inside of a standard Python main function, like this:</p>
+<pre><code class="hljs css language-python"><span class="hljs-keyword">from</span> heronpy.api.topology <span class="hljs-keyword">import</span> TopologyBuilder
+
+
+<span class="hljs-keyword">if</span> __name__ == <span class="hljs-string">"__main__"</span>:
+    builder = TopologyBuilder(<span class="hljs-string">"MyTopology"</span>)
+</code></pre>
+<p>Once you've created a <code>TopologyBuilder</code> object, you can add bolts using the <code>add_bolt</code> method and spouts using the <code>add_spout</code> method. Here's an example:</p>
+<pre><code class="hljs css language-python">builder = TopologyBuilder(<span class="hljs-string">"MyTopology"</span>)
+builder.add_bolt(<span class="hljs-string">"my_bolt"</span>, CountBolt, par=<span class="hljs-number">3</span>)
+builder.add_spout(<span class="hljs-string">"my_spout"</span>, WordSpout, par=<span class="hljs-number">2</span>)
+</code></pre>
+<p>Both the <code>add_bolt</code> and <code>add_spout</code> methods return the corresponding `HeronComponentSpec1 object.</p>
+<p>The <code>add_bolt</code> method takes four arguments and an optional <code>config</code> parameter:</p>
+<table>
+<thead>
+<tr><th style="text-align:left">Argument</th><th style="text-align:left">Data type</th><th style="text-align:left">Description</th><th style="text-align:left">Default</th></tr>
+</thead>
+<tbody>
+<tr><td style="text-align:left"><code>name</code></td><td style="text-align:left"><code>str</code></td><td style="text-align:left">The unique identifier assigned to this bolt</td><td style="text-align:left"></td></tr>
+<tr><td style="text-align:left"><code>bolt_cls</code></td><td style="text-align:left">class</td><td style="text-align:left">The subclass of <code>Bolt</code> that defines this bolt</td><td style="text-align:left"></td></tr>
+<tr><td style="text-align:left"><code>par</code></td><td style="text-align:left"><code>int</code></td><td style="text-align:left">The number of instances of this bolt in the topology</td><td style="text-align:left"></td></tr>
+<tr><td style="text-align:left"><code>config</code></td><td style="text-align:left"><code>dict</code></td><td style="text-align:left">Specifies the configuration for this spout</td><td style="text-align:left"><code>None</code></td></tr>
+</tbody>
+</table>
+<p>The <code>add_spout</code> method takes three arguments and an optional <code>config</code> parameter:</p>
+<table>
+<thead>
+<tr><th style="text-align:left">Argument</th><th style="text-align:left">Data type</th><th style="text-align:left">Description</th><th style="text-align:left">Default</th></tr>
+</thead>
+<tbody>
+<tr><td style="text-align:left"><code>name</code></td><td style="text-align:left"><code>str</code></td><td style="text-align:left">The unique identifier assigned to this spout</td><td style="text-align:left"></td></tr>
+<tr><td style="text-align:left"><code>spout_cls</code></td><td style="text-align:left">class</td><td style="text-align:left">The subclass of <code>Spout</code> that defines this spout</td><td style="text-align:left"></td></tr>
+<tr><td style="text-align:left"><code>par</code></td><td style="text-align:left"><code>int</code></td><td style="text-align:left">The number of instances of this spout in the topology</td><td style="text-align:left"></td></tr>
+<tr><td style="text-align:left"><code>inputs</code></td><td style="text-align:left"><code>dict</code> or <code>list</code></td><td style="text-align:left">Either a <code>dict</code> mapping from <code>HeronComponentSpec</code> to <code>Grouping</code> <em>or</em> a list of <code>HeronComponentSpec</code>, in which case the <code>shuffle</code> grouping is used</td></tr>
+<tr><td style="text-align:left"><code>config</code></td><td style="text-align:left"><code>dict</code></td><td style="text-align:left">Specifies the configuration for this spout</td><td style="text-align:left"><code>None</code></td></tr>
+</tbody>
+</table>
+<h3><a class="anchor" aria-hidden="true" id="example"></a><a href="#example" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Example</h3>
+<p>The following is an example implementation of a word count topology in Python that subclasses <code>TopologyBuilder</code>.</p>
+<pre><code class="hljs css language-python"><span class="hljs-keyword">from</span> your_spout <span class="hljs-keyword">import</span> WordSpout
+<span class="hljs-keyword">from</span> your_bolt <span class="hljs-keyword">import</span> CountBolt
+
+<span class="hljs-keyword">from</span> heronpy.api.stream <span class="hljs-keyword">import</span> Grouping
+<span class="hljs-keyword">from</span> heronpy.api.topology <span class="hljs-keyword">import</span> TopologyBuilder
+
+
+<span class="hljs-keyword">if</span> __name__ == <span class="hljs-string">"__main__"</span>:
+    builder = TopologyBuilder(<span class="hljs-string">"WordCountTopology"</span>)
+    <span class="hljs-comment"># piece together the topology</span>
+    word_spout = builder.add_spout(<span class="hljs-string">"word_spout"</span>, WordSpout, par=<span class="hljs-number">2</span>)
+    count_bolt = builder.add_bolt(<span class="hljs-string">"count_bolt"</span>, CountBolt, par=<span class="hljs-number">2</span>, inputs={word_spout: Grouping.fields(<span class="hljs-string">"word"</span>)})
+    <span class="hljs-comment"># submit the toplogy</span>
+    builder.build_and_submit()
+</code></pre>
+<p>Note that arguments to the main method can be passed by providing them in the
+<code>heron submit</code> command.</p>
+<h3><a class="anchor" aria-hidden="true" id="topology-wide-configuration"></a><a href="#topology-wide-configuration" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Topology-wide configuration</h3>
+<p>If you're building a Python topology using a <code>TopologyBuilder</code>, you can specify configuration for the topology using the <code>set_config</code> method. A topology's config is a <code>dict</code> in which the keys are a series constants from the <code>api_constants</code> module and values are configuration values for those parameters.</p>
+<p>Here's an example:</p>
+<pre><code class="hljs css language-python"><span class="hljs-keyword">from</span> heronpy.api <span class="hljs-keyword">import</span> api_constants
+<span class="hljs-keyword">from</span> heronpy.api.topology <span class="hljs-keyword">import</span> TopologyBuilder
+
+
+<span class="hljs-keyword">if</span> __name__ == <span class="hljs-string">"__main__"</span>:
+    topology_config = {
+        api_constants.TOPOLOGY_ENABLE_MESSAGE_TIMEOUTS: <span class="hljs-literal">True</span>
+    }
+    builder = TopologyBuilder(<span class="hljs-string">"MyTopology"</span>)
+    builder.set_config(topology_config)
+    <span class="hljs-comment"># Add bolts and spouts, etc.</span>
+</code></pre>
+<h3><a class="anchor" aria-hidden="true" id="launching-the-topology"></a><a href="#launching-the-topology" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Launching the topology</h3>
+<p>If you want to <a href="../../../operators/heron-cli#submitting-a-topology">submit</a> Python topologies to a Heron cluster, they need to be packaged as a <a href="https://pex.readthedocs.io/en/stable/whatispex.html">PEX</a> file. In order to produce PEX files, we recommend using a build tool like <a href="http://www.pantsbuild.org/python_readme.html">Pants</a> or <a href="https://github.com/benley/bazel_rules_pex">Bazel</a>.</p>
+<p>If you defined your topology by subclassing the <code>TopologyBuilder</code> class and built a <code>word_count.pex</code> file for that topology in the <code>~/topology</code> folder. You can submit the topology to a cluster called <code>local</code> like this:</p>
+<pre><code class="hljs css language-bash">$ heron submit <span class="hljs-built_in">local</span> \
+  ~/topology/word_count.pex \
+  - <span class="hljs-comment"># No class specified</span>
+</code></pre>
+<p>Note the <code>-</code> in this submission command. If you define a topology by subclassing <code>TopologyBuilder</code> you do not need to instruct Heron where your main method is located.</p>
+<blockquote>
+<h4><a class="anchor" aria-hidden="true" id="example-topologies-buildable-as-pexs"></a><a href="#example-topologies-buildable-as-pexs" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Example topologies buildable as PEXs</h4>
+<ul>
+<li>See <a href="https://github.com/streamlio/pants-dev-environment">this repo</a> for an example of a Heron topology written in Python and deployable as a Pants-packaged PEX.</li>
+<li>See <a href="https://github.com/streamlio/bazel-dev-environment">this repo</a> for an example of a Heron topology written in Python and deployable as a Bazel-packaged PEX.</li>
+</ul>
+</blockquote>
+<h2><a class="anchor" aria-hidden="true" id="defining-a-topology-by-subclassing-the-topology-class"></a><a href="#defining-a-topology-by-subclassing-the-topology-class" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Defining a topology by subclassing the <code>Topology</code> class</h2>
+<p>If you create a Python topology by subclassing the <code>Topology</code> class, you need to create a new topology class, like this:</p>
+<pre><code class="hljs css language-python"><span class="hljs-keyword">from</span> my_spout <span class="hljs-keyword">import</span> WordSpout
+<span class="hljs-keyword">from</span> my_bolt <span class="hljs-keyword">import</span> CountBolt
+
+<span class="hljs-keyword">from</span> heronpy.api.stream <span class="hljs-keyword">import</span> Grouping
+<span class="hljs-keyword">from</span> heronpy.api.topology <span class="hljs-keyword">import</span> Topology
+
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyTopology</span><span class="hljs-params">(Topology)</span>:</span>
+    my_spout = WordSpout.spec(par=<span class="hljs-number">2</span>)
+    my_bolt_inputs = {my_spout: Grouping.fields(<span class="hljs-string">"word"</span>)}
+    my_bolt = CountBolt.spec(par=<span class="hljs-number">3</span>, inputs=my_bolt_inputs)
+</code></pre>
+<p>All you need to do is place <code>HeronComponentSpec</code>s as the class attributes
+of your topology class, which are returned by the <code>spec()</code> method of
+your spout or bolt class. You do <em>not</em> need to run a <code>build</code> method or anything like that; the <code>Topology</code> class will automatically detect which spouts and bolts are included in the topology.</p>
+<blockquote>
+<p>If you use this method to define a new Python topology, you do <em>not</em> need to have a main function.</p>
+</blockquote>
+<p>For bolts, the <code>spec</code> method for spouts takes three optional arguments::</p>
+<table>
+<thead>
+<tr><th style="text-align:left">Argument</th><th style="text-align:left">Data type</th><th style="text-align:left">Description</th><th style="text-align:left">Default</th></tr>
+</thead>
+<tbody>
+<tr><td style="text-align:left"><code>name</code></td><td style="text-align:left"><code>str</code></td><td style="text-align:left">The unique identifier assigned to this bolt or <code>None</code> if you want to use the variable name of the return <code>HeronComponentSpec</code> as the unique identifier for this bolt</td><td style="text-align:left"></td></tr>
+<tr><td style="text-align:left"><code>par</code></td><td style="text-align:left"><code>int</code></td><td style="text-align:left">The number of instances of this bolt in the topology</td><td style="text-align:left"></td></tr>
+<tr><td style="text-align:left"><code>config</code></td><td style="text-align:left"><code>dict</code></td><td style="text-align:left">Specifies the configuration for this bolt</td><td style="text-align:left"><code>None</code></td></tr>
+</tbody>
+</table>
+<p>For spouts, the <code>spec</code> method takes four optional arguments:</p>
+<table>
+<thead>
+<tr><th style="text-align:left">Argument</th><th style="text-align:left">Data type</th><th style="text-align:left">Description</th><th style="text-align:left">Default</th></tr>
+</thead>
+<tbody>
+<tr><td style="text-align:left"><code>name</code></td><td style="text-align:left"><code>str</code></td><td style="text-align:left">The unique identifier assigned to this spout or <code>None</code> if you want to use the variable name of the return <code>HeronComponentSpec</code> as the unique identifier for this spout</td><td style="text-align:left"><code>None</code></td></tr>
+<tr><td style="text-align:left"><code>inputs</code></td><td style="text-align:left"><code>dict</code> or <code>list</code></td><td style="text-align:left">Either a <code>dict</code> mapping from <code>HeronComponentSpec</code>to <code>Grouping</code> <em>or</em> a list of <code>HeronComponentSpec</code>s, in which case the <code>shuffle</code> grouping is used</td></tr>
+<tr><td style="text-align:left"><code>par</code></td><td style="text-align:left"><code>int</code></td><td style="text-align:left">The number of instances of this spout in the topology</td><td style="text-align:left"><code>1</code></td></tr>
+<tr><td style="text-align:left"><code>config</code></td><td style="text-align:left"><code>dict</code></td><td style="text-align:left">Specifies the configuration for this spout</td><td style="text-align:left"><code>None</code></td></tr>
+</tbody>
+</table>
+<h3><a class="anchor" aria-hidden="true" id="example-1"></a><a href="#example-1" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Example</h3>
+<p>Here's an example topology definition with one spout and one bolt:</p>
+<pre><code class="hljs css language-python"><span class="hljs-keyword">from</span> my_spout <span class="hljs-keyword">import</span> WordSpout
+<span class="hljs-keyword">from</span> my_bolt <span class="hljs-keyword">import</span> CountBolt
+
+<span class="hljs-keyword">from</span> heronpy.api.stream <span class="hljs-keyword">import</span> Grouping
+<span class="hljs-keyword">from</span> heronpy.api.topology <span class="hljs-keyword">import</span> Topology
+
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">WordCount</span><span class="hljs-params">(Topology)</span>:</span>
+    word_spout = WordSpout.spec(par=<span class="hljs-number">2</span>)
+    count_bolt = CountBolt.spec(par=<span class="hljs-number">2</span>, inputs={word_spout: Grouping.fields(<span class="hljs-string">"word"</span>)})
+</code></pre>
+<h3><a class="anchor" aria-hidden="true" id="launching"></a><a href="#launching" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Launching</h3>
+<p>If you defined your topology by subclassing the <code>Topology</code> class,
+your main Python file should <em>not</em> contain a main method. You will, however, need to instruct Heron which class contains your topology definition.</p>
+<p>Let's say that you've defined a topology by subclassing <code>Topology</code> and built a PEX stored in <code>~/topology/dist/word_count.pex</code>. The class containing your topology definition is <code>topology.word_count.WordCount</code>. You can submit the topology to a cluster called <code>local</code> like this:</p>
+<pre><code class="hljs css language-bash">$ heron submit <span class="hljs-built_in">local</span> \
+  ~/topology/dist/word_count.pex \
+  topology.word_count.WordCount \ <span class="hljs-comment"># Specifies the topology class definition</span>
+  WordCountTopology
+</code></pre>
+<h3><a class="anchor" aria-hidden="true" id="topology-wide-configuration-1"></a><a href="#topology-wide-configuration-1" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Topology-wide configuration</h3>
+<p>If you're building a Python topology by subclassing <code>Topology</code>, you can specify configuration for the topology using the <code>set_config</code> method. A topology's config is a <code>dict</code> in which the keys are a series constants from the <code>api_constants</code> module and values are configuration values for those parameters.</p>
+<p>Here's an example:</p>
+<pre><code class="hljs css language-python"><span class="hljs-keyword">from</span> heronpy.api.topology <span class="hljs-keyword">import</span> Topology
+<span class="hljs-keyword">from</span> heronpy.api <span class="hljs-keyword">import</span> api_constants
+
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyTopology</span><span class="hljs-params">(Topology)</span>:</span>
+    config = {
+        api_constants.TOPOLOGY_ENABLE_MESSAGE_TIMEOUTS: <span class="hljs-literal">True</span>
+    }
+    <span class="hljs-comment"># Add bolts and spouts, etc.</span>
+</code></pre>
+<h2><a class="anchor" aria-hidden="true" id="multiple-streams"></a><a href="#multiple-streams" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Multiple streams</h2>
+<p>To specify that a component has multiple output streams, instead of using a list of
+strings for <code>outputs</code>, you can specify a list of <code>Stream</code> objects, in the following manner.</p>
+<pre><code class="hljs css language-python"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MultiStreamSpout</span><span class="hljs-params">(Spout)</span>:</span>
+    outputs = [
+        Stream(fields=[<span class="hljs-string">"normal"</span>, <span class="hljs-string">"fields"</span>], name=<span class="hljs-string">"default"</span>),
+        Stream(fields=[<span class="hljs-string">"error_message"</span>], name=<span class="hljs-string">"error_stream"</span>),
+    ]
+</code></pre>
+<p>To select one of these streams as the input for your bolt, you can simply
+use <code>[]</code> to specify the stream you want. Without any stream specified, the <code>default</code>
+stream will be used.</p>
+<pre><code class="hljs css language-python"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MultiStreamTopology</span><span class="hljs-params">(Topology)</span>:</span>
+    spout = MultiStreamSpout.spec()
+    error_bolt = ErrorBolt.spec(inputs={spout[<span class="hljs-string">"error_stream"</span>]: Grouping.LOWEST})
+    consume_bolt = ConsumeBolt.spec(inputs={spout: Grouping.SHUFFLE})
+</code></pre>
+<h2><a class="anchor" aria-hidden="true" id="declaring-output-fields-using-the-spec-method"></a><a href="#declaring-output-fields-using-the-spec-method" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Declaring output fields using the <code>spec()</code> method</h2>
+<p>In Python topologies, the output fields of your spouts and bolts
+need to be declared by placing <code>outputs</code> class attributes, as there is
+no <code>declareOutputFields()</code> method. <code>heronpy</code> enables you to dynamically declare output fields as a list using the
+<code>optional_outputs</code> argument in the <code>spec()</code> method.</p>
+<p>This is useful in a situation like below.</p>
+<pre><code class="hljs css language-python"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">IdentityBolt</span><span class="hljs-params">(Bolt)</span>:</span>
+    <span class="hljs-comment"># Statically declaring output fields is not allowed</span>
+    <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">process</span><span class="hljs-params">(self, tup)</span>:</span>
+        emit([tup.values])
+
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">DynamicOutputField</span><span class="hljs-params">(Topology)</span>:</span>
+    spout = WordSpout.spec()
+    bolt = IdentityBolt.spec(inputs={spout: Grouping.ALL}, optional_outputs=[<span class="hljs-string">"word"</span>])
+</code></pre>
+<p>You can also declare outputs in the <code>add_spout()</code> and the <code>add_bolt()</code>
+method for the <code>TopologyBuilder</code> in the same way.</p>
+<h2><a class="anchor" aria-hidden="true" id="example-topologies"></a><a href="#example-topologies" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Example topologies</h2>
+<p>There are a number of example topologies that you can peruse in the [<code>examples/src/python</code>]({{% githubMaster %}}/examples/src/python) directory of the [Heron repo]({{% githubMaster %}}):</p>
+<table>
+<thead>
+<tr><th style="text-align:left">Topology</th><th style="text-align:left">File</th><th style="text-align:left">Description</th></tr>
+</thead>
+<tbody>
+<tr><td style="text-align:left">Word count</td><td style="text-align:left">[<code>word_count_topology.py</code>]({{% githubMaster %}}/examples/src/python/word_count_topology.py)</td><td style="text-align:left">The [<code>WordSpout</code>]({{% githubMaster %}}/examples/src/python/spout/word_spout.py) spout emits random words from a list, while the [<code>CountBolt</code>]({{% githubMaster %}}/examples/src/python/bolt/count_bolt.py) bolt counts the number of words that have been emitted.</td></tr>
+<tr><td style="text-align:left">Multiple streams</td><td style="text-align:left">[<code>multi_stream_topology.py</code>]({{% githubMaster %}}/examples/src/python/multi_stream_topology.py)</td><td style="text-align:left">The [<code>MultiStreamSpout</code>]({{% githubMaster %}}/examples/src/python/spout/multi_stream_spout.py) emits multiple streams to downstream bolts.</td></tr>
+<tr><td style="text-align:left">Half acking</td><td style="text-align:left">[<code>half_acking_topology.py</code>]({{% githubMaster %}}/examples/src/python/half_acking_topology.py)</td><td style="text-align:left">The [<code>HalfAckBolt</code>]({{% githubMaster %}}/examples/src/python/bolt/half_ack_bolt.py) acks only half of all received tuples.</td></tr>
+<tr><td style="text-align:left">Custom grouping</td><td style="text-align:left">[<code>custom_grouping_topology.py</code>]({{% githubMaster %}}/examples/src/python/custom_grouping_topology.py)</td><td style="text-align:left">The [<code>SampleCustomGrouping</code>]({{% githubMaster %}}/examples/src/python/custom_grouping_topology.py#L26) class provides a custom field grouping.</td></tr>
+</tbody>
+</table>
+<p>You can build the respective PEXs for these topologies using the following commands:</p>
+<pre><code class="hljs css language-shell"><span class="hljs-meta">$</span><span class="bash"> bazel build examples/src/python:word_count</span>
+<span class="hljs-meta">$</span><span class="bash"> bazel build examples/src/python:multi_stream</span>
+<span class="hljs-meta">$</span><span class="bash"> bazel build examples/src/python:half_acking</span>
+<span class="hljs-meta">$</span><span class="bash"> bazel build examples/src/python:custom_grouping</span>
+</code></pre>
+<p>All built PEXs will be stored in <code>bazel-bin/examples/src/python</code>. You can submit them to Heron like so:</p>
+<pre><code class="hljs css language-shell"><span class="hljs-meta">$</span><span class="bash"> heron submit <span class="hljs-built_in">local</span> \</span>
+  bazel-bin/examples/src/python/word_count.pex - \
+  WordCount
+<span class="hljs-meta">$</span><span class="bash"> heron submit <span class="hljs-built_in">local</span> \</span>
+  bazel-bin/examples/src/python/multi_stream.pex \
+  heron.examples.src.python.multi_stream_topology.MultiStream
+<span class="hljs-meta">$</span><span class="bash"> heron submit <span class="hljs-built_in">local</span> \</span>
+  bazel-bin/examples/src/python/half_acking.pex - \
+  HalfAcking
+<span class="hljs-meta">$</span><span class="bash"> heron submit <span class="hljs-built_in">local</span> \</span>
+  bazel-bin/examples/src/python/custom_grouping.pex \
+  heron.examples.src.python.custom_grouping_topology.CustomGrouping
+</code></pre>
+<p>By default, the <code>submit</code> command also activates topologies. To disable this behavior, set the <code>--deploy-deactivated</code> flag.</p>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/next/guides-effectively-once-java-topologies"><span class="arrow-prev">← </span><span>Effectively Once Java Topologies</span></a><a class="docs-next button" href="/docs/next/guides-data-model"><span>Heron Data Model</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#setup">Setup</a></li><li><a href="#writing-topologies-in-python">Writing topologies in Python</a></li><li><a href="#defining-topologies-using-the-topologybuilder-class">Defining topologies using the <code>TopologyBuilder</code> class</a><ul class="toc-headings"><li><a href="#example">Example</a></li><li><a href="#topology-wide-configuration">Topology-wide configuration</a></li><li><a href="#launching-the-topology">Launching the topology</a></li></ul></li><li><a href="#defining-a-topology-by-subclassing-the-topology-class">Defining a topology by subclassing the <code>Topology</code> class</a><ul class="toc-headings"><li><a href="#example-1">Example</a></li><li><a href="#launching">Launching</a></li><li><a href="#topology-wide-configuration-1">Topology-wide configuration</a></li></ul></li><li><a href="#multiple-streams">Multiple streams</a></li><li><a href="#declaring-output-fields-using-the-spec-method">Declaring output fields using the <code>spec()</code> method</a></li><li><a href="#example-topologies">Example topologies</a></li></ul></nav></div><footer class="nav-footer" id="footer"><div class="apache-disclaimer">Disclaimer Apache Heron (incubating) is an effort undergoing incubation at The Apache Software Foundation (ASF), sponsored by Incubator. Incubation is required of all newly accepted projects until a further review indicates that the infrastructure, communications, and decision making process have stabilized in a manner consistent with other successful ASF projects. While incubation status is not necessarily a reflection of the completeness or stability of the code, it does indicate that the project has yet to be fully endorsed by the ASF.</div><section class="copyright">Copyright © 2019 the Apache Software Foundation, Apache Heron, Heron, 
+  Apache, the Apache feather Logo, and the Apache Heron project logo are either registered 
+  trademarks or trademarks of the Apache Software Foundation.</section></footer></div><script>window.twttr=(function(d,s, id){var js,fjs=d.getElementsByTagName(s)[0],t=window.twttr||{};if(d.getElementById(id))return t;js=d.createElement(s);js.id=id;js.src='https://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js, fjs);t._e = [];t.ready = function(f) {t._e.push(f);};return t;}(document, 'script', 'twitter-wjs'));</script></body></html>
