@@ -19,7 +19,7 @@
 #  under the License.
 
 '''result.py'''
-
+from __future__ import print_function
 import abc
 import sys
 from enum import Enum

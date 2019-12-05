@@ -24,7 +24,7 @@ POST_EXECUTE = [
     'VENV="$${TMPF}/venv"', 
 
     '$(location @virtualenv//:virtualenv) --no-download --quiet --clear "$$VENV"',
-    'PYTHON="$$VENV/bin/python3"',
+    'PYTHON="$$VENV/bin/python"',
 
     '$$VENV/bin/pip install pex \
             --quiet --no-cache-dir --no-index --build $(@D)/pexbuild \
