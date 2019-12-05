@@ -62,11 +62,13 @@ import io.kubernetes.client.models.V1ObjectMeta;
 import io.kubernetes.client.models.V1PodSpec;
 import io.kubernetes.client.models.V1PodTemplateSpec;
 import io.kubernetes.client.models.V1ResourceRequirements;
+import io.kubernetes.client.models.V1Toleration;
 import io.kubernetes.client.models.V1StatefulSet;
 import io.kubernetes.client.models.V1StatefulSetSpec;
-import io.kubernetes.client.models.V1Toleration;
+import io.kubernetes.client.models.V1Status;
 import io.kubernetes.client.models.V1Volume;
 import io.kubernetes.client.models.V1VolumeMount;
+import io.kubernetes.client.V1STATUS_FAILURE;
 
 public class AppsV1Controller extends KubernetesController {
 
@@ -101,9 +103,10 @@ public class AppsV1Controller extends KubernetesController {
     final V1StatefulSet statefulSet = createStatefulSet(containerResource, numberOfInstances);
 
     try {
+      //createNamespacedStatefulSet(namespace, body, pretty, dryRun, fieldManager);
       final Response response =
-          client.createNamespacedStatefulSetCall(getNamespace(), statefulSet, null,
-              null, null).execute();
+          client.createNamespacedStatefulSet(getNamespace(), statefulSet, null,
+              null, null);
       if (!response.isSuccessful()) {
         LOG.log(Level.SEVERE, "Error creating topology message: " + response.message());
         KubernetesUtils.logResponseBodyIfPresent(LOG, response);
@@ -203,6 +206,7 @@ public class AppsV1Controller extends KubernetesController {
   }
 
   V1StatefulSet getStatefulSet() throws ApiException {
+    //readNamespacedStatefulSet(name, namespace, pretty, exact, export);
     return client.readNamespacedStatefulSet(getTopologyName(), getNamespace(), null, null, null);
   }
 
@@ -211,12 +215,12 @@ public class AppsV1Controller extends KubernetesController {
       final V1DeleteOptions options = new V1DeleteOptions();
       options.setGracePeriodSeconds(0L);
       options.setPropagationPolicy(KubernetesConstants.DELETE_OPTIONS_PROPAGATION_POLICY);
-      final Response response = client.deleteNamespacedStatefulSetCall(getTopologyName(),
-          getNamespace(), options, null, null, null, null, null, null)
-          .execute();
+      //deleteNamespacedStatefulSet(name, namespace, pretty, body, dryRun, gracePeriodSeconds, orphanDependents, propagationPolicy);
+      final V1Status response = client.deleteNamespacedStatefulSet(getTopologyName(),
+          getNamespace(), null, options, null, null, null, null);
 
-      if (!response.isSuccessful()) {
-        LOG.log(Level.SEVERE, "Error killing topology message: " + response.message());
+      if (V1STATUS_FAILURE.equals(response.getStatus())) {
+        LOG.log(Level.SEVERE, "Error killing topology message: " + response.getMessage());
         KubernetesUtils.logResponseBodyIfPresent(LOG, response);
 
         throw new TopologyRuntimeManagementException(
@@ -232,10 +236,10 @@ public class AppsV1Controller extends KubernetesController {
 
   boolean isStatefulSet() {
     try {
+      //readNamespacedStatefulSet(name, namespace, pretty, exact, export);
       final Response response =
-          client.readNamespacedStatefulSetCall(getTopologyName(), getNamespace(),
-              null, null, null, null, null)
-              .execute();
+          client.readNamespacedStatefulSet(getTopologyName(), getNamespace(),
+              null, null, null);
       return response.isSuccessful();
     } catch (IOException | ApiException e) {
       LOG.warning("isStatefulSet check " +  e.getMessage());
@@ -418,7 +422,7 @@ public class AppsV1Controller extends KubernetesController {
     final Map<String, Quantity> requests = new HashMap<>();
     requests.put(KubernetesConstants.MEMORY,
         Quantity.fromString(KubernetesUtils.Megabytes(resource.getRam())));
-    requests.put(KubernetesConstants.CPU,
+    requests.put(KubernetesConstants.CPU, 
          Quantity.fromString(Double.toString(roundDecimal(resource.getCpu(), 3))));
     resourceRequirements.setRequests(requests);
     container.setResources(resourceRequirements);
