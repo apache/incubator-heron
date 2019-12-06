@@ -18,7 +18,7 @@
 
 set -e
 
-HERONPY_VERSION=$1
+TEMP_HERONPY_VERSION=$1
 HERON_ROOT_DIR=$(git rev-parse --show-toplevel)
 cd ${HERON_ROOT_DIR}
 
@@ -41,7 +41,10 @@ source "$VENV/bin/activate"
 pip install pdoc==0.3.2
 pip install --ignore-installed six
 # Install the heronpy
-pip install $PIP_LOCATION/heronpy-${HERONPY_VERSION}-py2.py3-none-any.whl
+echo "list heronpy location"
+ls $PIP_LOCATION
+pip install $PIP_LOCATION/heronpy-*-py2.py3-none-any.whl
+
 
 mkdir -p static/api && rm -rf static/api/python
 
