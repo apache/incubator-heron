@@ -640,7 +640,7 @@ _quiet = False
 _line_length = 80
 
 try:
-  range(1, 0)
+  xrange(1, 0)
 except NameError:
   #  -- pylint: disable=redefined-builtin
   xrange = range
@@ -652,7 +652,7 @@ except NameError:
   basestring = unicode = str
 
 try:
-  long
+  long(2)
 except NameError:
   #  -- pylint: disable=redefined-builtin
   long = int
@@ -1555,7 +1555,7 @@ def RemoveMultiLineCommentsFromRange(lines, begin, end):
   """Clears a range of lines for multi-line comments."""
   # Having // dummy comments makes the lines non-empty, so we will not get
   # unnecessary blank line warnings later in the code.
-  for i in xrange(begin, end):
+  for i in range(begin, end):
     lines[i] = '/**/'
 
 
@@ -1608,7 +1608,7 @@ class CleansedLines(object):
     self.raw_lines = lines
     self.num_lines = len(lines)
     self.lines_without_raw_strings = CleanseRawStrings(lines)
-    for linenum in xrange(len(self.lines_without_raw_strings)):
+    for linenum in range(len(self.lines_without_raw_strings)):
       self.lines.append(CleanseComments(
           self.lines_without_raw_strings[linenum]))
       elided = self._CollapseStrings(self.lines_without_raw_strings[linenum])
@@ -1928,7 +1928,7 @@ def CheckForCopyright(filename, lines, error):
 
   # We'll say it should occur by line 10. Don't forget there's a
   # dummy line at the front.
-  for line in xrange(1, min(len(lines), 11)):
+  for line in range(1, min(len(lines), 11)):
     if re.search(r'Copyright', lines[line], re.I): break
   else:                       # means no copyright line was found
     error(filename, 0, 'legal/copyright', 5,
@@ -2393,7 +2393,7 @@ class _ClassInfo(_BlockInfo):
     # But it's still good enough for CheckSectionSpacing.
     self.last_line = 0
     depth = 0
-    for i in xrange(linenum, clean_lines.NumLines()):
+    for i in range(linenum, clean_lines.NumLines()):
       line = clean_lines.elided[i]
       depth += line.count('{') - line.count('}')
       if not depth:
@@ -2857,7 +2857,7 @@ class NestingState(object):
     Returns:
       A _ClassInfo object if we are inside a class, or None otherwise.
     """
-    for i in xrange(len(self.stack), 0, -1):
+    for i in range(len(self.stack), 0, -1):
       classinfo = self.stack[i - 1]
       if isinstance(classinfo, _ClassInfo):
         return classinfo
@@ -3194,7 +3194,7 @@ def CheckForFunctionLengths(filename, clean_lines, linenum,
 
   if starting_func:
     body_found = False
-    for start_linenum in xrange(linenum, clean_lines.NumLines()):
+    for start_linenum in range(linenum, clean_lines.NumLines()):
       start_line = lines[start_linenum]
       joined_line += ' ' + start_line.lstrip()
       if Search(r'(;|})', start_line):  # Declarations and trivial functions
@@ -3841,7 +3841,7 @@ def CheckSectionSpacing(filename, clean_lines, class_info, linenum, error):
       #   class Derived
       #       : public Base {
       end_class_head = class_info.starting_linenum
-      for i in xrange(class_info.starting_linenum, linenum):
+      for i in range(class_info.starting_linenum, linenum):
         if Search(r'\{\s*$', clean_lines.lines[i]):
           end_class_head = i
           break
@@ -5671,7 +5671,7 @@ def CheckForIncludeWhatYouUse(filename, clean_lines, include_state, error,
   required = {}  # A map of header name to linenumber and the template entity.
                  # Example of required: { '<functional>': (1219, 'less<>') }
 
-  for linenum in xrange(clean_lines.NumLines()):
+  for linenum in range(clean_lines.NumLines()):
     line = clean_lines.elided[linenum]
     if not line or line[0] == '#':
       continue
@@ -5804,7 +5804,7 @@ def CheckRedundantVirtual(filename, clean_lines, linenum, error):
   end_col = -1
   end_line = -1
   start_col = len(virtual.group(2))
-  for start_line in xrange(linenum, min(linenum + 3, clean_lines.NumLines())):
+  for start_line in range(linenum, min(linenum + 3, clean_lines.NumLines())):
     line = clean_lines.elided[start_line][start_col:]
     parameter_list = Match(r'^([^(]*)\(', line)
     if parameter_list:
@@ -5819,7 +5819,7 @@ def CheckRedundantVirtual(filename, clean_lines, linenum, error):
 
   # Look for "override" or "final" after the parameter list
   # (possibly on the next few lines).
-  for i in xrange(end_line, min(end_line + 3, clean_lines.NumLines())):
+  for i in range(end_line, min(end_line + 3, clean_lines.NumLines())):
     line = clean_lines.elided[i][end_col:]
     match = Search(r'\b(override|final)\b', line)
     if match:
@@ -6070,7 +6070,7 @@ def ProcessFileData(filename, file_extension, lines, error,
   if file_extension in GetHeaderExtensions():
     CheckForHeaderGuard(filename, clean_lines, error)
 
-  for line in xrange(clean_lines.NumLines()):
+  for line in range(clean_lines.NumLines()):
     ProcessLine(filename, file_extension, clean_lines, line,
                 include_state, function_state, nesting_state, error,
                 extra_check_functions)
@@ -6226,7 +6226,7 @@ def ProcessFile(filename, vlevel, extra_check_functions=None):
 
     # Remove trailing '\r'.
     # The -1 accounts for the extra trailing blank line we get from split()
-    for linenum in xrange(len(lines) - 1):
+    for linenum in range(len(lines) - 1):
       if lines[linenum].endswith('\r'):
         lines[linenum] = lines[linenum].rstrip('\r')
         crlf_lines.append(linenum + 1)
