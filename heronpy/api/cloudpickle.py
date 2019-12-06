@@ -34,7 +34,7 @@ LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
 NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
-
+from __future__ import print_function
 
 import operator
 import opcode
@@ -55,12 +55,12 @@ import weakref
 if sys.version < '3':
   from pickle import Pickler # pylint: disable=ungrouped-imports
   try:
-    from io import StringIO
+    from cStringIO import StringIO
   except ImportError:
-    from io import StringIO
+    from StringIO import StringIO
   PY3 = False
 else:
-  type = type
+  types.ClassType = type
   from pickle import _Pickler as Pickler # pylint: disable=ungrouped-imports
   from io import BytesIO as StringIO # pylint: disable=ungrouped-imports
   PY3 = True
@@ -386,7 +386,7 @@ class CloudPickler(Pickler): # pylint: disable=too-many-public-methods
       return Pickler.save_global(self, obj, name)
 
     typ = type(obj)
-    if typ is not obj and isinstance(obj, type):
+    if typ is not obj and isinstance(obj, (type, types.ClassType)):
       d = dict(obj.__dict__)  # copy dict proxy to a dict
       if not isinstance(d.get('__dict__', None), property):
         # don't extract dict that are properties
@@ -427,7 +427,7 @@ class CloudPickler(Pickler): # pylint: disable=too-many-public-methods
       raise pickle.PicklingError("Can't pickle %r" % obj)
 
   dispatch[type] = save_global
-  dispatch[type] = save_global
+  dispatch[types.ClassType] = save_global
 
   def save_instancemethod(self, obj):
     # Memoization rarely is ever useful due to python bounding
@@ -604,7 +604,7 @@ class CloudPickler(Pickler): # pylint: disable=too-many-public-methods
   def save_file(self, obj): # pylint: disable=too-many-branches
     """Save a file"""
     try:
-      import io as pystringIO #we can't use cStringIO as it lacks the name attribute
+      import StringIO as pystringIO #we can't use cStringIO as it lacks the name attribute
     except ImportError:
       import io as pystringIO # pylint: disable=reimported
 

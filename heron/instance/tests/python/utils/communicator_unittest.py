@@ -20,7 +20,7 @@
 
 
 # pylint: disable=missing-docstring
-import queue
+from queue import Empty
 import unittest
 
 from heron.instance.src.python.utils.misc import HeronCommunicator
@@ -41,7 +41,7 @@ class CommunicatorTest(unittest.TestCase):
 
   def test_empty(self):
     communicator = HeronCommunicator(producer_cb=None, consumer_cb=None)
-    with self.assertRaises(queue.Empty):
+    with self.assertRaises(Empty):
       communicator.poll()
 
   def test_producer_callback(self):
