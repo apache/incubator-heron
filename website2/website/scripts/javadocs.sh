@@ -59,6 +59,7 @@ CLOSURE_CLASSES="$HERON_ROOT_DIR/bazel-bin/storm-compatibility/src/java/_javac/s
 export CLASSPATH=$BIN_JARS:$GEN_JARS:$SCRIBE_JARS:$PROTO_JARS:$CLOSURE_CLASSES
 
 $JAVADOC $FLAGS \
+  -encoding "UTF-8" \
   -windowtitle "Heron Java API" \
   -doctitle "The Heron Java API" \
   -overview $OVERVIEW_HTML_FILE \

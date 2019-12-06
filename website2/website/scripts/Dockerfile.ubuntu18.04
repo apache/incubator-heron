@@ -21,6 +21,7 @@ FROM ubuntu:18.04
 ENV TARGET_PLATFORM ubuntu
 ENV bazelVersion 0.26.0
 
+
 RUN apt-get update && apt-get -y install \
       g++ \
       cmake \
@@ -51,9 +52,17 @@ RUN apt-get update && apt-get install -y nodejs
 
 ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64
 
+ARG UNAME
+ARG UID
+ARG GID
+RUN groupadd -g $GID -o $UNAME
+RUN useradd -m -u $UID -g $GID -o -s /bin/bash $UNAME
+USER $UNAME
+
 RUN wget -O /tmp/bazel.sh https://github.com/bazelbuild/bazel/releases/download/$bazelVersion/bazel-$bazelVersion-installer-linux-x86_64.sh \
       && chmod +x /tmp/bazel.sh \
-      && /tmp/bazel.sh
+      && /tmp/bazel.sh --user
 
-ADD bazelrc /root/.bazelrc
+ADD bazelrc /home/$UNAME/.bazelrc
+ENV PATH="/home/$UNAME/bin:${PATH}"
 
