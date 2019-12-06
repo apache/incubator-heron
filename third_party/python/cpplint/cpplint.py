@@ -5804,7 +5804,7 @@ def CheckRedundantVirtual(filename, clean_lines, linenum, error):
   end_col = -1
   end_line = -1
   start_col = len(virtual.group(2))
-  for start_line in range(linenum, min(linenum + 3, clean_lines.NumLines())):
+  for start_line in xrange(linenum, min(linenum + 3, clean_lines.NumLines())):
     line = clean_lines.elided[start_line][start_col:]
     parameter_list = Match(r'^([^(]*)\(', line)
     if parameter_list:
@@ -5819,7 +5819,7 @@ def CheckRedundantVirtual(filename, clean_lines, linenum, error):
 
   # Look for "override" or "final" after the parameter list
   # (possibly on the next few lines).
-  for i in range(end_line, min(end_line + 3, clean_lines.NumLines())):
+  for i in xrange(end_line, min(end_line + 3, clean_lines.NumLines())):
     line = clean_lines.elided[i][end_col:]
     match = Search(r'\b(override|final)\b', line)
     if match:
