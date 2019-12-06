@@ -19,6 +19,9 @@
 #  under the License.
 
 '''aggregator_bolt.py'''
+from future.standard_library import install_aliases
+install_aliases()
+
 import http.client
 import json
 from urllib.parse import urlparse

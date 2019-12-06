@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2.7
 # -*- encoding: utf-8 -*-
 
 #  Licensed to the Apache Software Foundation (ASF) under one
@@ -272,7 +272,7 @@ def main():
   # 2. stop the Tornado IO loop
   def signal_handler(signum, frame):
     # start a new line after ^C character because this looks nice
-    print('\n')
+    print('\n', end='')
     application.stop()
     tornado.ioloop.IOLoop.instance().stop()
 
