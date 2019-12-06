@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 # -*- encoding: utf-8 -*-
 
 #  Licensed to the Apache Software Foundation (ASF) under one
@@ -19,6 +19,7 @@
 #  under the License.
 
 ''' main.py '''
+from __future__ import print_function
 
 import argparse
 import os

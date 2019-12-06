@@ -16,7 +16,7 @@
 #  under the License.
 
 
-# !/usr/bin/env python3
+# !/usr/bin/env python
 ''' main.py '''
 import argparse
 import os

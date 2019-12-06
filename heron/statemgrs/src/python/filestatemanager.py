@@ -117,7 +117,8 @@ class FileStateManager(StateManager):
 
       topologies = []
       if os.path.isdir(topologies_path):
-        topologies = list([f for f in os.listdir(topologies_path) if os.path.isfile(os.path.join(topologies_path, f))])
+        topologies = list([f for f in os.listdir(topologies_path)
+                           if os.path.isfile(os.path.join(topologies_path, f))])
       if set(topologies) != set(self.topologies_directory):
         for callback in self.topologies_watchers:
           callback(topologies)
@@ -164,7 +165,8 @@ class FileStateManager(StateManager):
       self.topologies_watchers.append(callback)
     else:
       topologies_path = self.get_topologies_path()
-      return [f for f in os.listdir(topologies_path) if os.path.isfile(os.path.join(topologies_path, f))]
+      return [f for f in os.listdir(topologies_path)
+              if os.path.isfile(os.path.join(topologies_path, f))]
 
   def get_topology(self, topologyName, callback=None):
     """get topology"""

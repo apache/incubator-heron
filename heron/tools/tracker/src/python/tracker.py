@@ -165,9 +165,9 @@ class Tracker(object):
     Raises exception if topology is not found, or more than one are found.
     """
     topologies = list([t for t in self.topologies if t.name == topologyName
-                             and t.cluster == cluster
-                             and (not role or t.execution_state.role == role)
-                             and t.environ == environ])
+                       and t.cluster == cluster
+                       and (not role or t.execution_state.role == role)
+                       and t.environ == environ])
     if not topologies or len(topologies) > 1:
       if role is not None:
         raise Exception("Topology not found for {0}, {1}, {2}, {3}".format(

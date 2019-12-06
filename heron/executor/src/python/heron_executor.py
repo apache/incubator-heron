@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 # -*- encoding: utf-8 -*-
 
 #  Licensed to the Apache Software Foundation (ASF) under one
@@ -236,11 +236,10 @@ class HeronExecutor(object):
     self.tmaster_stats_port = parsed_args.tmaster_stats_port
     self.heron_internals_config_file = parsed_args.heron_internals_config_file
     self.override_config_file = parsed_args.override_config_file
-    self.component_ram_map =\
-        [{x.split(':')[0]:
-                           int(x.split(':')[1])} for x in parsed_args.component_ram_map.split(',')]
-    self.component_ram_map =\
-        functools.reduce(lambda x, y: dict(list(x.items()) + list(y.items())), self.component_ram_map)
+    self.component_ram_map = [{x.split(':')[0]:int(x.split(':')[1])}
+                              for x in parsed_args.component_ram_map.split(',')]
+    self.component_ram_map = functools.reduce(lambda x, y: dict(list(x.items()) + list(y.items())),
+                                              self.component_ram_map)
 
     # component_jvm_opts_in_base64 itself is a base64-encoding-json-map, which is appended with
     # " at the start and end. It also escapes "=" to "&equals" due to aurora limitation
@@ -1084,7 +1083,7 @@ class HeronExecutor(object):
     '''
     with self.process_lock:
       current_commands = dict(list(map((lambda process: (process.name, process.command)),
-                                  list(self.processes_to_monitor.values()))))
+                                       list(self.processes_to_monitor.values()))))
       updated_commands = self.get_commands_to_run()
 
       # get the commands to kill, keep and start

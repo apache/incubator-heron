@@ -20,9 +20,10 @@
 
 ''' statemanager.py '''
 import abc
-import six
+
 import socket
 import subprocess
+import six
 
 from heron.statemgrs.src.python.log import Log as LOG
 
