@@ -1,0 +1,7 @@
+staging:
+  profile: ~
+  whoami: asf-site
+
+publish:
+  whoami: asf-site
+  hostname: http://heronstreaming.io
