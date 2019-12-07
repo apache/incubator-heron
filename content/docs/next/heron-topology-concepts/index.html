@@ -1,0 +1,231 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Heron Topologies · Apache Heron</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="&lt;!--"/><meta name="docsearch:version" content="next"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Heron Topologies · Apache Heron"/><meta property="og:type" content="website"/><meta property="og:url" content="https://heronstreaming.io/"/><meta property="og:description" content="&lt;!--"/><meta property="og:image" content="https://heronstreaming.io/img/undraw_online.svg"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://heronstreaming.io/img/undraw_tweetstorm.svg"/><link rel="shortcut icon" href="/img/favicon-32x32.png"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script type="text/javascript" src="/js/custom.js"></script><script src="/js/scrollSpy.js"></script><link rel="stylesheet" href="/css/main.css"/><script src="/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/"><img class="logo" src="/img/HeronTextLogo-small.png" alt="Apache Heron"/><h2 class="headerTitleWithLogo">Apache Heron</h2></a><a href="/versions"><h3>next</h3></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class=""><a href="/api/java" target="_self">Javadocs</a></li><li class=""><a href="/api/python" target="_self">Pydocs</a></li><li class="siteNavGroupActive"><a href="/docs/next/getting-started-local-single-node" target="_self">Docs</a></li><li class=""><a href="#community" target="_self">Community</a></li><li class=""><a href="#apache" target="_self">Apache</a></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="container docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><div class="hamburger-menu"><div class="line1"></div><div class="line2"></div><div class="line3"></div></div></div><h2><i>›</i><span>Heron Concepts</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle">Getting Started</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/next/getting-started-local-single-node">Local (Single Node)</a></li><li class="navListItem"><a class="navItem" href="/docs/next/getting-started-migrate-storm-topologies">Migrate Storm Topologies</a></li><li class="navListItem"><a class="navItem" href="/docs/next/getting-started-troubleshooting-guide">Troubleshooting Guide</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Deployment</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/next/deployment-overview">Deployment Overiew</a></li><li class="navListItem"><a class="navItem" href="/docs/next/deployment-configuration">Configuration</a></li><li class="navListItem"><a class="navItem" href="/docs/next/deployment-api-server">The Heron API Server</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Topology Development APIs</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/next/topology-development-streamlet-api">The Heron Streamlet API for Java</a></li><li class="navListItem"><a class="navItem" href="/docs/next/topology-development-eco-api">The ECO API for Java</a></li><li class="navListItem"><a class="navItem" href="/docs/next/topology-development-topology-api-java">The Heron Topology API for Java</a></li><li class="navListItem"><a class="navItem" href="/docs/next/topology-development-topology-api-python">The Heron Topology API for Python</a></li><li class="navListItem"><a class="navItem" href="/docs/next/topology-development-streamlet-scala">The Heron Streamlet API for Scala</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Client API Docs</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/next/client-api-docs-overview">Client API Docs</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Guides</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/next/guides-effectively-once-java-topologies">Effectively Once Java Topologies</a></li><li class="navListItem"><a class="navItem" href="/docs/next/guides-python-topologies">Python Topologies</a></li><li class="navListItem"><a class="navItem" href="/docs/next/guides-data-model">Heron Data Model</a></li><li class="navListItem"><a class="navItem" href="/docs/next/guides-tuple-serialization">Tuple Serialization</a></li><li class="navListItem"><a class="navItem" href="/docs/next/guides-ui-guide">Heron UI Guide</a></li><li class="navListItem"><a class="navItem" href="/docs/next/guides-topology-tuning">Topology Tuning Guide</a></li><li class="navListItem"><a class="navItem" href="/docs/next/guides-packing-algorithms">Packing Algorithms</a></li><li class="navListItem"><a class="navItem" href="/docs/next/guides-simulator-mode">Simulator Mode</a></li><li class="navListItem"><a class="navItem" href="/docs/next/guides-troubeshooting-guide">Topology Troubleshooting Guide</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Heron Concepts</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/next/heron-design-goals">Heron Design Goals</a></li><li class="navListItem navListItemActive"><a class="navItem" href="/docs/next/heron-topology-concepts">Heron Topologies</a></li><li class="navListItem"><a class="navItem" href="/docs/next/heron-streamlet-concepts">Heron Streamlets</a></li><li class="navListItem"><a class="navItem" href="/docs/next/heron-architecture">Heron Architecture</a></li><li class="navListItem"><a class="navItem" href="/docs/next/heron-delivery-semantics">Heron Delivery Semantics</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">State Managers</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/next/state-managers-zookeeper">Zookeeper</a></li><li class="navListItem"><a class="navItem" href="/docs/next/state-managers-local-fs">Local File System</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Uploaders</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/next/uploaders-local-fs">Local File System</a></li><li class="navListItem"><a class="navItem" href="/docs/next/uploaders-hdfs">HDFS</a></li><li class="navListItem"><a class="navItem" href="/docs/next/uploaders-http">HTTP</a></li><li class="navListItem"><a class="navItem" href="/docs/next/uploaders-amazon-s3">Amazon S3</a></li><li class="navListItem"><a class="navItem" href="/docs/next/uploaders-scp">Secure Copy (SCP)</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Schedulers</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/next/schedulers-k8s-by-hand">Kubernetes by hand</a></li><li class="navListItem"><a class="navItem" href="/docs/next/schedulers-k8s-with-helm">Kubernetes with Helm</a></li><li class="navListItem"><a class="navItem" href="/docs/next/schedulers-aurora-cluster">Aurora Cluster</a></li><li class="navListItem"><a class="navItem" href="/docs/next/schedulers-aurora-local">Aurora Locally</a></li><li class="navListItem"><a class="navItem" href="/docs/next/schedulers-local">Local Cluster</a></li><li class="navListItem"><a class="navItem" href="/docs/next/schedulers-standalone">Heron Multi-node Standalone Cluster</a></li><li class="navListItem"><a class="navItem" href="/docs/next/schedulers-nomad">Nomad</a></li><li class="navListItem"><a class="navItem" href="/docs/next/schedulers-mesos-local-mac">Mesos Cluster Locally</a></li><li class="navListItem"><a class="navItem" href="/docs/next/schedulers-slurm">Slurm Cluster</a></li><li class="navListItem"><a class="navItem" href="/docs/next/schedulers-yarn">YARN Cluster</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Cluster Configuration</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/next/cluster-config-overview">Cluster Config Overview</a></li><li class="navListItem"><a class="navItem" href="/docs/next/cluster-config-system-level">System Level Configuration</a></li><li class="navListItem"><a class="navItem" href="/docs/next/cluster-config-instance">Heron Instance</a></li><li class="navListItem"><a class="navItem" href="/docs/next/cluster-config-metrics">Metrics Manager</a></li><li class="navListItem"><a class="navItem" href="/docs/next/cluster-config-stream">Stream Manager</a></li><li class="navListItem"><a class="navItem" href="/docs/next/cluster-config-tmaster">Topology Master</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Observability</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/next/observability-prometheus">Prometheus</a></li><li class="navListItem"><a class="navItem" href="/docs/next/observability-graphite">Graphite</a></li><li class="navListItem"><a class="navItem" href="/docs/next/observability-scribe">Scribe</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">User Manuals</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/next/user-manuals-heron-cli">Heron Client</a></li><li class="navListItem"><a class="navItem" href="/docs/next/user-manuals-heron-explorer">Heron Explorer</a></li><li class="navListItem"><a class="navItem" href="/docs/next/user-manuals-tracker-rest">Heron Tracker REST API</a></li><li class="navListItem"><a class="navItem" href="/docs/next/user-manuals-heron-tracker-runbook">Heron Tracker Runbook</a></li><li class="navListItem"><a class="navItem" href="/docs/next/user-manuals-heron-ui-runbook">Heron UI Runbook</a></li><li class="navListItem"><a class="navItem" href="/docs/next/user-manuals-heron-shell">Heron Shell</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Compiling</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/next/compiling-overview">Compiling Overview</a></li><li class="navListItem"><a class="navItem" href="/docs/next/compiling-linux">Compiling on Linux</a></li><li class="navListItem"><a class="navItem" href="/docs/next/compiling-osx">Compiling on OS X</a></li><li class="navListItem"><a class="navItem" href="/docs/next/compiling-docker">Compiling With Docker</a></li><li class="navListItem"><a class="navItem" href="/docs/next/compiling-running-tests">Running Tests</a></li><li class="navListItem"><a class="navItem" href="/docs/next/compiling-code-organization">Code Organization</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Extending Heron</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/next/extending-heron-scheduler">Custom Scheduler</a></li><li class="navListItem"><a class="navItem" href="/docs/next/extending-heron-metric-sink">Custom Metrics Sink</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Heron Resources</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/next/heron-resources-resources">Heron Resources</a></li></ul></div></div></section></div><script>
+            var coll = document.getElementsByClassName('collapsible');
+            var checkActiveCategory = true;
+            for (var i = 0; i < coll.length; i++) {
+              var links = coll[i].nextElementSibling.getElementsByTagName('*');
+              if (checkActiveCategory){
+                for (var j = 0; j < links.length; j++) {
+                  if (links[j].classList.contains('navListItemActive')){
+                    coll[i].nextElementSibling.classList.toggle('hide');
+                    coll[i].childNodes[1].classList.toggle('rotate');
+                    checkActiveCategory = false;
+                    break;
+                  }
+                }
+              }
+
+              coll[i].addEventListener('click', function() {
+                var arrow = this.childNodes[1];
+                arrow.classList.toggle('rotate');
+                var content = this.nextElementSibling;
+                content.classList.toggle('hide');
+              });
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+              createToggler('#navToggler', '#docsNav', 'docsSliderActive');
+              createToggler('#tocToggler', 'body', 'tocActive');
+
+              var headings = document.querySelector('.toc-headings');
+              headings && headings.addEventListener('click', function(event) {
+                var el = event.target;
+                while(el !== headings){
+                  if (el.tagName === 'A') {
+                    document.body.classList.remove('tocActive');
+                    break;
+                  } else{
+                    el = el.parentNode;
+                  }
+                }
+              }, false);
+
+              function createToggler(togglerSelector, targetSelector, className) {
+                var toggler = document.querySelector(togglerSelector);
+                var target = document.querySelector(targetSelector);
+
+                if (!toggler) {
+                  return;
+                }
+
+                toggler.onclick = function(event) {
+                  event.preventDefault();
+
+                  target.classList.toggle(className);
+                };
+              }
+            });
+        </script></nav></div><div class="container mainContainer"><div class="wrapper"><div class="post"><header class="postHeader"><h1 class="postHeaderTitle">Heron Topologies</h1></header><article><div><span><!--
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements.  See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership.  The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License.  You may obtain a copy of the License at
+      http://www.apache.org/licenses/LICENSE-2.0
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied.  See the License for the
+    specific language governing permissions and limitations
+    under the License.
+-->
+<blockquote>
+<p><strong>Don't want to manually create spouts and bolts? Try the Heron Streamlet API.</strong>.  If you find manually creating and connecting spouts and bolts to be overly cumbersome, we recommend trying out the <a href="topology-development-streamlet-api">Heron Streamlet API</a> for Java, which enables you to create your topology logic using a highly streamlined logic inspired by functional programming concepts.</p>
+</blockquote>
+<p>A Heron <strong>topology</strong> is a <a href="https://en.wikipedia.org/wiki/Directed_acyclic_graph">directed acyclic
+graph</a> (DAG) used to process
+streams of data. Topologies can be stateless or
+<a href="heron-delivery-semantics#stateful-topologies">stateful</a> depending on your use case.</p>
+<p>Heron topologies consist of two basic components:</p>
+<ul>
+<li><a href="topology-development-topology-api-java#spouts">Spouts</a> inject data into Heron topologies, potentially from external sources like pub-sub messaging systems (Apache Kafka, Apache Pulsar, etc.)</li>
+<li><a href="topology-development-topology-api-java#bolts">Bolts</a> apply user-defined processing logic to data supplied by spouts</li>
+</ul>
+<p>Spouts and bolts are connected to one another via <strong>streams</strong> of data. Below is a
+visual illustration of a simple Heron topology:</p>
+<p><img src="/docs/assets/topology.png" alt="Heron topology"></p>
+<p>In the diagram above, spout <strong>S1</strong> feeds data to bolts <strong>B1</strong> and <strong>B2</strong> for
+processing; in turn, bolt <strong>B1</strong> feeds processed data to bolts <strong>B3</strong> and
+<strong>B4</strong>, while bolt <strong>B2</strong> feeds processed data to bolt <strong>B4</strong>. This is just a
+simple example; you can create arbitrarily complex topologies in Heron.</p>
+<h2><a class="anchor" aria-hidden="true" id="creating-topologies"></a><a href="#creating-topologies" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Creating topologies</h2>
+<p>There are currently two APIs available that you can use to build Heron topologies:</p>
+<ol>
+<li>The higher-level <a href="topology-development-streamlet-api">Heron Streamlet API</a>, which enables you to create topologies in a declarative, developer-friendly style inspired by functional programming concepts (such as map, flatMap, and filter operations)</li>
+<li>The lower-level <a href="topology-development-topology-api-java">topology API</a> , based on the original <a href="http://storm.apache.org/about/simple-api.html">Apache Storm</a> API, which requires you to specify spout and bolt logic directly</li>
+</ol>
+<h2><a class="anchor" aria-hidden="true" id="topology-lifecycle"></a><a href="#topology-lifecycle" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Topology Lifecycle</h2>
+<p>Once you've set up a Heron cluster, you
+can use Heron's <a href="user-manuals-heron-cli">CLI tool</a> to manage the entire
+lifecycle of a topology, which typically goes through the following stages:</p>
+<ol>
+<li><a href="user-manuals-heron-cli#submitting-a-topology">Submit</a> the topology
+to the cluster. The topology is not yet processing streams but is ready to be
+activated.</li>
+<li><a href="user-manuals-heron-cli#activating-a-topology">Activate</a> the
+topology. The topology will begin processing streams in accordance with
+the topology architecture that you've created.</li>
+<li><a href="user-manuals-heron-cli#restarting-a-topology">Restart</a> an
+active topology if, for example, you need to update the topology configuration.</li>
+<li><a href="user-manuals-heron-cli#deactivating-a-topology">Deactivate</a> the
+topology. Once deactivated, the topology will stop processing but
+remain running in the cluster.</li>
+<li><a href="user-manuals-heron-cli#killing-a-topology">Kill</a> a topology to completely
+remove it from the cluster.  It is no longer known to the Heron cluster and
+can no longer be activated. Once killed, the only way to run that topology is
+to re-submit and re-activate it.</li>
+</ol>
+<h2><a class="anchor" aria-hidden="true" id="logical-plan"></a><a href="#logical-plan" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Logical Plan</h2>
+<p>A topology's <strong>logical plan</strong> is analagous to a database <a href="https://en.wikipedia.org/wiki/Query_plan">query
+plan</a> in that it maps out the basic
+operations associated with a topology. Here's an example logical plan for the
+example Streamlet API topology <a href="#streamlet-api-example">below</a>:</p>
+<p><img src="https://www.lucidchart.com/publicSegments/view/4e6e1ede-45f1-471f-b131-b3ecb7b7c3b5/image.png" alt="Topology logical Plan"></p>
+<p>Whether you use the <a href="#the-heron-streamlet-api">Heron Streamlet API</a> or the <a href="#the-topology-api">topology
+API</a>, Heron automatically transforms the processing logic that
+you create into both a logical plan and a <a href="#physical-plan">physical plan</a>.</p>
+<h2><a class="anchor" aria-hidden="true" id="physical-plan"></a><a href="#physical-plan" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Physical Plan</h2>
+<p>A topology's <strong>physical plan</strong> is related to its logical plan but with the
+crucial difference that a physical plan determines the &quot;physical&quot; execution
+logic of a topology, i.e. how topology processes are divided between containers. Here's a
+basic visual representation of a
+physical plan:</p>
+<p><img src="https://www.lucidchart.com/publicSegments/view/5c2fe0cb-e4cf-4192-9416-b1b64b5ce958/image.png" alt="Topology Physical Plan"></p>
+<p>In this example, a Heron topology consists of two <a href="topology-development-topology-api-java#spouts">spout</a> and five
+different <a href="topology-development-topology-api-java#bolts">bolts</a> (each of which has multiple instances) that have automatically
+been distributed between five different containers.</p>
+<h2><a class="anchor" aria-hidden="true" id="window-operations"></a><a href="#window-operations" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Window operations</h2>
+<p><strong>Windowed computations</strong> gather results from a topology or topology component within a specified finite time frame rather than, say, on a per-tuple basis.</p>
+<p>Here are some examples of window operations:</p>
+<ul>
+<li>Counting how many customers have purchased a product during each one-hour period in the last 24 hours.</li>
+<li>Determining which player in an online game has the highest score within the last 1000 computations.</li>
+</ul>
+<h3><a class="anchor" aria-hidden="true" id="sliding-windows"></a><a href="#sliding-windows" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Sliding windows</h3>
+<p><strong>Sliding windows</strong> are windows that overlap, as in this figure:</p>
+<p><img src="https://www.lucidchart.com/publicSegments/view/57d2fcbb-591b-4403-9258-e5b8e1e25de2/image.png" alt="Sliding time window"></p>
+<p>For sliding windows, you need to specify two things:</p>
+<ol>
+<li>The length or duration of the window (length if the window is a <a href="#count-windows">count window</a>, duration if the window is a <a href="#time-windows">time window</a>).</li>
+<li>The sliding interval, which determines when the window slides, i.e. at what point during the current window the new window begins.</li>
+</ol>
+<p>In the figure above, the duration of the window is 20 seconds, while the sliding interval is 10 seconds. Each new window begins five seconds into the current window.</p>
+<blockquote>
+<p>With sliding time windows, data can be processed in more than one window. Tuples 3, 4, and 5 above are processed in both window 1 and window 2 while tuples 6, 7, and 8 are processed in both window 2 and window 3.</p>
+</blockquote>
+<p>Setting the duration of a window to 16 seconds and the sliding interval to 12 seconds would produce this window arrangement:</p>
+<p><img src="https://www.lucidchart.com/publicSegments/view/44bd4835-a692-44e6-a5d8-8e47151e3167/image.png" alt="Sliding time window with altered time interval"></p>
+<p>Here, the sliding interval determines that a new window is always created 12 seconds into the current window.</p>
+<h3><a class="anchor" aria-hidden="true" id="tumbling-windows"></a><a href="#tumbling-windows" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Tumbling windows</h3>
+<p><strong>Tumbling windows</strong> are windows that don't overlap, as in this figure:</p>
+<p><img src="https://www.lucidchart.com/publicSegments/view/881f99ee-8f93-448f-a178-b9f72dce6491/image.png" alt="Tumbling time window"></p>
+<p>Tumbling windows don't overlap because a new window doesn't begin until the current window has elapsed. For tumbling windows, you only need to specify the length or duration of the window but <em>no sliding interval</em>.</p>
+<blockquote>
+<p>With tumbling windows, data are <em>never</em> processed in more than one window because the windows never overlap. Also, in the figure above, the duration of the window is 20 seconds.</p>
+</blockquote>
+<h3><a class="anchor" aria-hidden="true" id="count-windows"></a><a href="#count-windows" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Count windows</h3>
+<p><strong>Count windows</strong> are specified on the basis of the number of operations rather than a time interval. A count window of 100 would mean that a window would elapse after 100 tuples have been processed, <em>with no relation to clock time</em>.</p>
+<p>With count windows, this scenario (for a count window of 50) would be completely normal:</p>
+<table>
+<thead>
+<tr><th style="text-align:left">Window</th><th style="text-align:left">Tuples processed</th><th style="text-align:left">Clock time</th></tr>
+</thead>
+<tbody>
+<tr><td style="text-align:left">1</td><td style="text-align:left">50</td><td style="text-align:left">10 seconds</td></tr>
+<tr><td style="text-align:left">2</td><td style="text-align:left">50</td><td style="text-align:left">12 seconds</td></tr>
+<tr><td style="text-align:left">3</td><td style="text-align:left">50</td><td style="text-align:left">1 hour, 12 minutes</td></tr>
+<tr><td style="text-align:left">4</td><td style="text-align:left">50</td><td style="text-align:left">5 seconds</td></tr>
+</tbody>
+</table>
+<h3><a class="anchor" aria-hidden="true" id="time-windows"></a><a href="#time-windows" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Time windows</h3>
+<p><strong>Time windows</strong> differ from <a href="#count-windows">count windows</a> because you need to specify a time duration (in seconds) rather than a number of tuples processed.</p>
+<p>With time windows, this scenario (for a time window of 30 seconds) would be completely normal:</p>
+<table>
+<thead>
+<tr><th style="text-align:left">Window</th><th style="text-align:left">Tuples processed</th><th style="text-align:left">Clock time</th></tr>
+</thead>
+<tbody>
+<tr><td style="text-align:left">1</td><td style="text-align:left">150</td><td style="text-align:left">30 seconds</td></tr>
+<tr><td style="text-align:left">2</td><td style="text-align:left">50</td><td style="text-align:left">30 seconds</td></tr>
+<tr><td style="text-align:left">3</td><td style="text-align:left">0</td><td style="text-align:left">30 seconds</td></tr>
+<tr><td style="text-align:left">4</td><td style="text-align:left">375</td><td style="text-align:left">30 seconds</td></tr>
+</tbody>
+</table>
+<h3><a class="anchor" aria-hidden="true" id="all-window-types"></a><a href="#all-window-types" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>All window types</h3>
+<p>As explained above, windows differ along two axes: sliding (overlapping) vs. tumbling (non overlapping) and count vs. time. This produces four total types:</p>
+<ol>
+<li><a href="#sliding-windows">Sliding</a> <a href="#time-windows">time</a> windows</li>
+<li><a href="#sliding-windows">Sliding</a> <a href="#count-windows">count</a> windows</li>
+<li><a href="#tumbling-windows">Tumbling</a> <a href="#time-windows">time</a> windows</li>
+<li><a href="#tumbling-windows">Tumbling</a> <a href="#count-windows">count</a> windows</li>
+</ol>
+<h2><a class="anchor" aria-hidden="true" id="resource-allocation-with-the-heron-streamlet-api"></a><a href="#resource-allocation-with-the-heron-streamlet-api" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Resource allocation with the Heron Streamlet API</h2>
+<p>When creating topologies using the Streamlet API, there are three types of resources that you can specify:</p>
+<ol>
+<li>The number of containers into which the topology's <a href="#physical-plan">physical plan</a> will be split</li>
+<li>The total number of CPUs allocated to be used by the topology</li>
+<li>The total amount of RAM allocated to be used by the topology</li>
+</ol>
+<p>For each topology, there are defaults for each resource type:</p>
+<table>
+<thead>
+<tr><th style="text-align:left">Resource</th><th style="text-align:left">Default</th><th style="text-align:left">Minimum</th></tr>
+</thead>
+<tbody>
+<tr><td style="text-align:left">Number of containers</td><td style="text-align:left">1</td><td style="text-align:left">1</td></tr>
+<tr><td style="text-align:left">CPU</td><td style="text-align:left">1.0</td><td style="text-align:left">1.0</td></tr>
+<tr><td style="text-align:left">RAM</td><td style="text-align:left">512 MB</td><td style="text-align:left">192MB</td></tr>
+</tbody>
+</table>
+<h3><a class="anchor" aria-hidden="true" id="allocating-resources-to-topologies"></a><a href="#allocating-resources-to-topologies" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Allocating resources to topologies</h3>
+<p>For instructions on allocating resources to topologies, see the language-specific documentation for:</p>
+<ul>
+<li><a href="topology-development-streamlet-api#containers-and-resources">Java</a></li>
+</ul>
+<h2><a class="anchor" aria-hidden="true" id="data-model"></a><a href="#data-model" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Data Model</h2>
+<p>Heron's original topology API required using a fundamentally tuple-driven data model.
+You can find more information in <a href="guides-data-model">Heron's Data Model</a>.</p>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/next/heron-design-goals"><span class="arrow-prev">← </span><span>Heron Design Goals</span></a><a class="docs-next button" href="/docs/next/heron-streamlet-concepts"><span>Heron Streamlets</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#creating-topologies">Creating topologies</a></li><li><a href="#topology-lifecycle">Topology Lifecycle</a></li><li><a href="#logical-plan">Logical Plan</a></li><li><a href="#physical-plan">Physical Plan</a></li><li><a href="#window-operations">Window operations</a><ul class="toc-headings"><li><a href="#sliding-windows">Sliding windows</a></li><li><a href="#tumbling-windows">Tumbling windows</a></li><li><a href="#count-windows">Count windows</a></li><li><a href="#time-windows">Time windows</a></li><li><a href="#all-window-types">All window types</a></li></ul></li><li><a href="#resource-allocation-with-the-heron-streamlet-api">Resource allocation with the Heron Streamlet API</a><ul class="toc-headings"><li><a href="#allocating-resources-to-topologies">Allocating resources to topologies</a></li></ul></li><li><a href="#data-model">Data Model</a></li></ul></nav></div><footer class="nav-footer" id="footer"><div class="apache-disclaimer">Disclaimer Apache Heron (incubating) is an effort undergoing incubation at The Apache Software Foundation (ASF), sponsored by Incubator. Incubation is required of all newly accepted projects until a further review indicates that the infrastructure, communications, and decision making process have stabilized in a manner consistent with other successful ASF projects. While incubation status is not necessarily a reflection of the completeness or stability of the code, it does indicate that the project has yet to be fully endorsed by the ASF.</div><section class="copyright">Copyright © 2019 the Apache Software Foundation, Apache Heron, Heron, 
+  Apache, the Apache feather Logo, and the Apache Heron project logo are either registered 
+  trademarks or trademarks of the Apache Software Foundation.</section></footer></div><script>window.twttr=(function(d,s, id){var js,fjs=d.getElementsByTagName(s)[0],t=window.twttr||{};if(d.getElementById(id))return t;js=d.createElement(s);js.id=id;js.src='https://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js, fjs);t._e = [];t.ready = function(f) {t._e.push(f);};return t;}(document, 'script', 'twitter-wjs'));</script></body></html>

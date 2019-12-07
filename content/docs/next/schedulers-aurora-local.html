@@ -1,0 +1,296 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Setting up Heron with Aurora Cluster Locally on Linux · Apache Heron</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="&lt;!--"/><meta name="docsearch:version" content="next"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Setting up Heron with Aurora Cluster Locally on Linux · Apache Heron"/><meta property="og:type" content="website"/><meta property="og:url" content="https://heronstreaming.io/"/><meta property="og:description" content="&lt;!--"/><meta property="og:image" content="https://heronstreaming.io/img/undraw_online.svg"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://heronstreaming.io/img/undraw_tweetstorm.svg"/><link rel="shortcut icon" href="/img/favicon-32x32.png"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script type="text/javascript" src="/js/custom.js"></script><script src="/js/scrollSpy.js"></script><link rel="stylesheet" href="/css/main.css"/><script src="/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/"><img class="logo" src="/img/HeronTextLogo-small.png" alt="Apache Heron"/><h2 class="headerTitleWithLogo">Apache Heron</h2></a><a href="/versions"><h3>next</h3></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class=""><a href="/api/java" target="_self">Javadocs</a></li><li class=""><a href="/api/python" target="_self">Pydocs</a></li><li class="siteNavGroupActive"><a href="/docs/next/getting-started-local-single-node" target="_self">Docs</a></li><li class=""><a href="#community" target="_self">Community</a></li><li class=""><a href="#apache" target="_self">Apache</a></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="container docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><div class="hamburger-menu"><div class="line1"></div><div class="line2"></div><div class="line3"></div></div></div><h2><i>›</i><span>Schedulers</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle">Getting Started</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/next/getting-started-local-single-node">Local (Single Node)</a></li><li class="navListItem"><a class="navItem" href="/docs/next/getting-started-migrate-storm-topologies">Migrate Storm Topologies</a></li><li class="navListItem"><a class="navItem" href="/docs/next/getting-started-troubleshooting-guide">Troubleshooting Guide</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Deployment</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/next/deployment-overview">Deployment Overiew</a></li><li class="navListItem"><a class="navItem" href="/docs/next/deployment-configuration">Configuration</a></li><li class="navListItem"><a class="navItem" href="/docs/next/deployment-api-server">The Heron API Server</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Topology Development APIs</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/next/topology-development-streamlet-api">The Heron Streamlet API for Java</a></li><li class="navListItem"><a class="navItem" href="/docs/next/topology-development-eco-api">The ECO API for Java</a></li><li class="navListItem"><a class="navItem" href="/docs/next/topology-development-topology-api-java">The Heron Topology API for Java</a></li><li class="navListItem"><a class="navItem" href="/docs/next/topology-development-topology-api-python">The Heron Topology API for Python</a></li><li class="navListItem"><a class="navItem" href="/docs/next/topology-development-streamlet-scala">The Heron Streamlet API for Scala</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Client API Docs</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/next/client-api-docs-overview">Client API Docs</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Guides</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/next/guides-effectively-once-java-topologies">Effectively Once Java Topologies</a></li><li class="navListItem"><a class="navItem" href="/docs/next/guides-python-topologies">Python Topologies</a></li><li class="navListItem"><a class="navItem" href="/docs/next/guides-data-model">Heron Data Model</a></li><li class="navListItem"><a class="navItem" href="/docs/next/guides-tuple-serialization">Tuple Serialization</a></li><li class="navListItem"><a class="navItem" href="/docs/next/guides-ui-guide">Heron UI Guide</a></li><li class="navListItem"><a class="navItem" href="/docs/next/guides-topology-tuning">Topology Tuning Guide</a></li><li class="navListItem"><a class="navItem" href="/docs/next/guides-packing-algorithms">Packing Algorithms</a></li><li class="navListItem"><a class="navItem" href="/docs/next/guides-simulator-mode">Simulator Mode</a></li><li class="navListItem"><a class="navItem" href="/docs/next/guides-troubeshooting-guide">Topology Troubleshooting Guide</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Heron Concepts</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/next/heron-design-goals">Heron Design Goals</a></li><li class="navListItem"><a class="navItem" href="/docs/next/heron-topology-concepts">Heron Topologies</a></li><li class="navListItem"><a class="navItem" href="/docs/next/heron-streamlet-concepts">Heron Streamlets</a></li><li class="navListItem"><a class="navItem" href="/docs/next/heron-architecture">Heron Architecture</a></li><li class="navListItem"><a class="navItem" href="/docs/next/heron-delivery-semantics">Heron Delivery Semantics</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">State Managers</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/next/state-managers-zookeeper">Zookeeper</a></li><li class="navListItem"><a class="navItem" href="/docs/next/state-managers-local-fs">Local File System</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Uploaders</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/next/uploaders-local-fs">Local File System</a></li><li class="navListItem"><a class="navItem" href="/docs/next/uploaders-hdfs">HDFS</a></li><li class="navListItem"><a class="navItem" href="/docs/next/uploaders-http">HTTP</a></li><li class="navListItem"><a class="navItem" href="/docs/next/uploaders-amazon-s3">Amazon S3</a></li><li class="navListItem"><a class="navItem" href="/docs/next/uploaders-scp">Secure Copy (SCP)</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Schedulers</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/next/schedulers-k8s-by-hand">Kubernetes by hand</a></li><li class="navListItem"><a class="navItem" href="/docs/next/schedulers-k8s-with-helm">Kubernetes with Helm</a></li><li class="navListItem"><a class="navItem" href="/docs/next/schedulers-aurora-cluster">Aurora Cluster</a></li><li class="navListItem navListItemActive"><a class="navItem" href="/docs/next/schedulers-aurora-local">Aurora Locally</a></li><li class="navListItem"><a class="navItem" href="/docs/next/schedulers-local">Local Cluster</a></li><li class="navListItem"><a class="navItem" href="/docs/next/schedulers-standalone">Heron Multi-node Standalone Cluster</a></li><li class="navListItem"><a class="navItem" href="/docs/next/schedulers-nomad">Nomad</a></li><li class="navListItem"><a class="navItem" href="/docs/next/schedulers-mesos-local-mac">Mesos Cluster Locally</a></li><li class="navListItem"><a class="navItem" href="/docs/next/schedulers-slurm">Slurm Cluster</a></li><li class="navListItem"><a class="navItem" href="/docs/next/schedulers-yarn">YARN Cluster</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Cluster Configuration</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/next/cluster-config-overview">Cluster Config Overview</a></li><li class="navListItem"><a class="navItem" href="/docs/next/cluster-config-system-level">System Level Configuration</a></li><li class="navListItem"><a class="navItem" href="/docs/next/cluster-config-instance">Heron Instance</a></li><li class="navListItem"><a class="navItem" href="/docs/next/cluster-config-metrics">Metrics Manager</a></li><li class="navListItem"><a class="navItem" href="/docs/next/cluster-config-stream">Stream Manager</a></li><li class="navListItem"><a class="navItem" href="/docs/next/cluster-config-tmaster">Topology Master</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Observability</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/next/observability-prometheus">Prometheus</a></li><li class="navListItem"><a class="navItem" href="/docs/next/observability-graphite">Graphite</a></li><li class="navListItem"><a class="navItem" href="/docs/next/observability-scribe">Scribe</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">User Manuals</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/next/user-manuals-heron-cli">Heron Client</a></li><li class="navListItem"><a class="navItem" href="/docs/next/user-manuals-heron-explorer">Heron Explorer</a></li><li class="navListItem"><a class="navItem" href="/docs/next/user-manuals-tracker-rest">Heron Tracker REST API</a></li><li class="navListItem"><a class="navItem" href="/docs/next/user-manuals-heron-tracker-runbook">Heron Tracker Runbook</a></li><li class="navListItem"><a class="navItem" href="/docs/next/user-manuals-heron-ui-runbook">Heron UI Runbook</a></li><li class="navListItem"><a class="navItem" href="/docs/next/user-manuals-heron-shell">Heron Shell</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Compiling</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/next/compiling-overview">Compiling Overview</a></li><li class="navListItem"><a class="navItem" href="/docs/next/compiling-linux">Compiling on Linux</a></li><li class="navListItem"><a class="navItem" href="/docs/next/compiling-osx">Compiling on OS X</a></li><li class="navListItem"><a class="navItem" href="/docs/next/compiling-docker">Compiling With Docker</a></li><li class="navListItem"><a class="navItem" href="/docs/next/compiling-running-tests">Running Tests</a></li><li class="navListItem"><a class="navItem" href="/docs/next/compiling-code-organization">Code Organization</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Extending Heron</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/next/extending-heron-scheduler">Custom Scheduler</a></li><li class="navListItem"><a class="navItem" href="/docs/next/extending-heron-metric-sink">Custom Metrics Sink</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Heron Resources</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/next/heron-resources-resources">Heron Resources</a></li></ul></div></div></section></div><script>
+            var coll = document.getElementsByClassName('collapsible');
+            var checkActiveCategory = true;
+            for (var i = 0; i < coll.length; i++) {
+              var links = coll[i].nextElementSibling.getElementsByTagName('*');
+              if (checkActiveCategory){
+                for (var j = 0; j < links.length; j++) {
+                  if (links[j].classList.contains('navListItemActive')){
+                    coll[i].nextElementSibling.classList.toggle('hide');
+                    coll[i].childNodes[1].classList.toggle('rotate');
+                    checkActiveCategory = false;
+                    break;
+                  }
+                }
+              }
+
+              coll[i].addEventListener('click', function() {
+                var arrow = this.childNodes[1];
+                arrow.classList.toggle('rotate');
+                var content = this.nextElementSibling;
+                content.classList.toggle('hide');
+              });
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+              createToggler('#navToggler', '#docsNav', 'docsSliderActive');
+              createToggler('#tocToggler', 'body', 'tocActive');
+
+              var headings = document.querySelector('.toc-headings');
+              headings && headings.addEventListener('click', function(event) {
+                var el = event.target;
+                while(el !== headings){
+                  if (el.tagName === 'A') {
+                    document.body.classList.remove('tocActive');
+                    break;
+                  } else{
+                    el = el.parentNode;
+                  }
+                }
+              }, false);
+
+              function createToggler(togglerSelector, targetSelector, className) {
+                var toggler = document.querySelector(togglerSelector);
+                var target = document.querySelector(targetSelector);
+
+                if (!toggler) {
+                  return;
+                }
+
+                toggler.onclick = function(event) {
+                  event.preventDefault();
+
+                  target.classList.toggle(className);
+                };
+              }
+            });
+        </script></nav></div><div class="container mainContainer"><div class="wrapper"><div class="post"><header class="postHeader"><h1 class="postHeaderTitle">Setting up Heron with Aurora Cluster Locally on Linux</h1></header><article><div><span><!--
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements.  See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership.  The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License.  You may obtain a copy of the License at
+      http://www.apache.org/licenses/LICENSE-2.0
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied.  See the License for the
+    specific language governing permissions and limitations
+    under the License.
+-->
+<p>It is possible to setup Heron with a locally running Apache Aurora cluster.
+This is a step by step guide on how to configure and setup all the necessary
+components.</p>
+<h2><a class="anchor" aria-hidden="true" id="setting-up-apache-aurora-cluster-locally"></a><a href="#setting-up-apache-aurora-cluster-locally" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Setting Up Apache Aurora Cluster locally</h2>
+<p>You first need to setup Apache Aurora locally. More detailed description of the
+following steps can be found in <a href="http://aurora.apache.org/documentation/latest/getting-started/vagrant/">A local Cluster with Vagrant</a></p>
+<h3><a class="anchor" aria-hidden="true" id="step-1-install-virtualbox-and-vagrant"></a><a href="#step-1-install-virtualbox-and-vagrant" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Step 1: Install VirtualBox and Vagrant</h3>
+<p>Download and install VirtualBox and Vagrant on your machine. If vagrant is successfully
+installed in your machine the following command should list several common commands
+for this tool</p>
+<pre><code class="hljs css language-bash">$ vagrant
+</code></pre>
+<h3><a class="anchor" aria-hidden="true" id="step-2-clone-the-aurora-repository"></a><a href="#step-2-clone-the-aurora-repository" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Step 2: Clone the Aurora repository</h3>
+<p>You can get the source repository for Aurora with the following command</p>
+<pre><code class="hljs css language-bash">$ dgit <span class="hljs-built_in">clone</span> git://git.apache.org/aurora.git
+</code></pre>
+<p>Once the clone is complete cd into the aurora folder</p>
+<pre><code class="hljs css language-bash">$ <span class="hljs-built_in">cd</span> aurora
+</code></pre>
+<h3><a class="anchor" aria-hidden="true" id="step-3-starting-local-aurora-cluster"></a><a href="#step-3-starting-local-aurora-cluster" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Step 3: Starting Local Aurora Cluster</h3>
+<p>To start the local cluster all you have to do is execute the following command. It will install all the needed dependencies like Apache Mesos and Zookeeper in the VM.</p>
+<pre><code class="hljs css language-bash">$ vagrant up
+</code></pre>
+<p>Additionally to get rid of some of the warning messages that you get during up command execute the following command</p>
+<pre><code class="hljs css language-bash">$ vagrant plugin install vagrant-vbguest
+</code></pre>
+<p>You can verify that the Aurora cluster is properly running by opening the following links in your web-browser</p>
+<ul>
+<li>Scheduler - http://192.168.33.7:8081</li>
+<li>Observer - http://192.168.33.7:1338</li>
+<li>Mesos Master - http://192.168.33.7:5050</li>
+<li>Mesos Agent - http://192.168.33.7:5051</li>
+</ul>
+<p>If you go into <a href="http://192.168.33.7:8081/scheduler">http://192.168.33.7:8081/scheduler</a> you can notice that the name of the default cluster that is setup in aurora is
+named <code>devcluster</code> this will be important to note when submitting typologies from heron.</p>
+<p><img src="/docs/assets/aurora-local-cluster-start.png" alt="Heron topology"></p>
+<h2><a class="anchor" aria-hidden="true" id="installing-heron-within-the-cluster-vm"></a><a href="#installing-heron-within-the-cluster-vm" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Installing Heron within the Cluster VM</h2>
+<p>Now that the Aurora cluster is setup you need to install heron within the cluster VM in order to be able to get the Heron
+deployment working. Since this is a fresh VM instance you will have to install the basic software such as &quot;unzip&quot; and set
+the JAVA_HOME path as an environmental variable ( Just need to add this to .bashrc file). After you have the basic stuff
+working follow the following steps to install Heron in the VM. You can ssh into the VM with the following command</p>
+<pre><code class="hljs css language-bash">$ vagrant ssh
+</code></pre>
+<h3><a class="anchor" aria-hidden="true" id="step-1a-download-installation-script-files"></a><a href="#step-1a-download-installation-script-files" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Step 1.a : Download installation script files</h3>
+<p>You can download the script files that match your Linux distribution from
+<a href="https://github.com/apache/incubator-heron/releases/tag/">https://github.com/apache/incubator-heron/releases/tag/</a>0.20.1-incubating</p>
+<p>For example for the 0.20.1-incubating release the files you need to download For Ubuntu will be the following.</p>
+<ul>
+<li><code>heron-install-0.20.1-incubating-ubuntu.sh</code></li>
+</ul>
+<p>Optionally - You want need the following for the steps in the blog post</p>
+<ul>
+<li><code>heron-api-install-0.20.1-incubating-ubuntu.sh</code></li>
+<li><code>heron-core-0.20.1-incubating-ubuntu.tar.gz</code></li>
+</ul>
+<h3><a class="anchor" aria-hidden="true" id="step-1b-execute-the-client-and-tools-shell-scripts"></a><a href="#step-1b-execute-the-client-and-tools-shell-scripts" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Step 1.b: Execute the client and tools shell scripts</h3>
+<pre><code class="hljs css language-bash">$ chmod +x heron-install-VERSION-PLATFORM.sh
+$ ./heron-install-VERSION-PLATFORM.sh --user
+Heron client installer
+----------------------
+
+Uncompressing......
+Heron is now installed!
+
+Make sure you have <span class="hljs-string">"/home/vagrant/bin"</span> <span class="hljs-keyword">in</span> your path.
+</code></pre>
+<p>After this you need to add the path &quot;/home/vagrant/bin&quot;. You can just execute the following command
+or add it to the end of  .bashrc file ( which is more convenient ).</p>
+<pre><code class="hljs css language-bash">$ <span class="hljs-built_in">export</span> PATH=<span class="hljs-variable">$PATH</span>:/home/vagrant/bin
+</code></pre>
+<p>Install the following packages to make sure that you have all the needed dependencies in the VM.
+You might have to do sudo apt-get update before you execute the following.</p>
+<pre><code class="hljs css language-bash">$ sudo apt-get install git build-essential automake cmake libtool zip libunwind-setjmp0-dev zlib1g-dev unzip pkg-config -y
+</code></pre>
+<h2><a class="anchor" aria-hidden="true" id="configuring-state-manager-apache-zookeeper"></a><a href="#configuring-state-manager-apache-zookeeper" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Configuring State Manager ( Apache Zookeeper )</h2>
+<p>Since Heron only uses Apache Zookeeper for coordination the load on the Zookeeper
+node is minimum. Because of this it is sufficient to use a single Zookeeper node or
+if you have an Zookeeper instance running for some other task you can simply use that.
+Since Apache Aurora already uses an Zookeeper instance you can directly use that instance
+to execute State Manager tasks of Heron. First you need to configure Heron to work with
+the Zookeeper instance. You can find meanings of each attribute in <a href="state-managers-zookeeper">Setting Up ZooKeeper
+State Manager</a>. Configurations for State manager are
+located in the directory <code>/home/vagrant/.heron/conf/aurora</code>.</p>
+<p>Open the file <code>statemgr.yaml</code> using vim ( or some other text editor you prefer )
+and add/edit the file to include the following.</p>
+<pre><code class="hljs css language-yaml"><span class="hljs-comment"># local state manager class for managing state in a persistent fashion</span>
+<span class="hljs-string">heron.class.state.manager:</span> <span class="hljs-string">org.apache.heron.statemgr.zookeeper.curator.CuratorStateManager</span>
+
+<span class="hljs-comment"># local state manager connection string</span>
+<span class="hljs-string">heron.statemgr.connection.string:</span>  <span class="hljs-string">"127.0.0.1:2181"</span>
+
+<span class="hljs-comment"># path of the root address to store the state in a local file system</span>
+<span class="hljs-string">heron.statemgr.root.path:</span> <span class="hljs-string">"/heronroot"</span>
+
+<span class="hljs-comment"># create the zookeeper nodes, if they do not exist</span>
+<span class="hljs-string">heron.statemgr.zookeeper.is.initialize.tree:</span> <span class="hljs-literal">True</span>
+
+<span class="hljs-comment"># timeout in ms to wait before considering zookeeper session is dead</span>
+<span class="hljs-string">heron.statemgr.zookeeper.session.timeout.ms:</span> <span class="hljs-number">30000</span>
+
+<span class="hljs-comment"># timeout in ms to wait before considering zookeeper connection is dead</span>
+<span class="hljs-string">heron.statemgr.zookeeper.connection.timeout.ms:</span> <span class="hljs-number">30000</span>
+
+<span class="hljs-comment"># timeout in ms to wait before considering zookeeper connection is dead</span>
+<span class="hljs-string">heron.statemgr.zookeeper.retry.count:</span> <span class="hljs-number">10</span>
+
+<span class="hljs-comment"># duration of time to wait until the next retry</span>
+<span class="hljs-string">heron.statemgr.zookeeper.retry.interval.ms:</span> <span class="hljs-number">10000</span>
+</code></pre>
+<h2><a class="anchor" aria-hidden="true" id="creating-paths-in-zookeeper"></a><a href="#creating-paths-in-zookeeper" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Creating Paths in Zookeeper</h2>
+<p>Next you need to create some paths within Zookeeper since some of the paths
+are not created by Heron automatically. So you need to create them manually.
+Since Aurora installation already installed Zookeeper, you can use the Zookeeper
+cli to create the manual paths.</p>
+<pre><code class="hljs css language-bash">$ sudo ./usr/share/zookeeper/bin/zkCli.sh
+</code></pre>
+<p>This will connect to the Zookeeper instance running locally. Then execute the
+following commands from within the client to create paths <code>/heronroot/topologies</code>
+and <code>/heron/topologies</code>. Later in &quot;Associating new Aurora cluster into Heron UI&quot;
+you will see that you only need to create <code>/heronroot/topologies</code> but for now lets
+create both to make sure you don't get any errors when you run things.</p>
+<pre><code class="hljs css language-bash">create /heronroot null
+create /heronroot/topologies null
+</code></pre>
+<pre><code class="hljs css language-bash">create /heron null
+create /heron/topologies null
+</code></pre>
+<h2><a class="anchor" aria-hidden="true" id="configuring-scheduler-apache-aurora"></a><a href="#configuring-scheduler-apache-aurora" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Configuring Scheduler ( Apache Aurora )</h2>
+<p>Next you need to configure Apache Aurora to be used as the Scheduler for our Heron
+local cluster. In order to do this you need to edit the <code>scheduler.yaml</code> file that is
+also located in <code>/home/vagrant/.heron/conf/aurora</code>. Add/Edit the file to include the
+following. More information regarding parameters can be found in <a href="schedulers-aurora-cluster">Aurora Cluster</a></p>
+<pre><code class="hljs css language-yaml"><span class="hljs-comment"># scheduler class for distributing the topology for execution</span>
+<span class="hljs-string">heron.class.scheduler:</span> <span class="hljs-string">org.apache.heron.scheduler.aurora.AuroraScheduler</span>
+
+<span class="hljs-comment"># launcher class for submitting and launching the topology</span>
+<span class="hljs-string">heron.class.launcher:</span> <span class="hljs-string">org.apache.heron.scheduler.aurora.AuroraLauncher</span>
+
+<span class="hljs-comment"># location of the core package</span>
+<span class="hljs-string">heron.package.core.uri:</span> <span class="hljs-attr">file:///home/vagrant/.heron/dist/heron-core.tar.gz</span>
+
+<span class="hljs-comment"># location of java - pick it up from shell environment</span>
+<span class="hljs-string">heron.directory.sandbox.java.home:</span> <span class="hljs-string">/usr/lib/jvm/java-1.8.0-openjdk-amd64/</span>
+
+<span class="hljs-comment"># Invoke the IScheduler as a library directly</span>
+<span class="hljs-string">heron.scheduler.is.service:</span> <span class="hljs-literal">False</span>
+</code></pre>
+<p>Additionally edit the <code>client.yaml</code> file and change the core uri to make it consistant.</p>
+<pre><code class="hljs css language-yaml"><span class="hljs-comment"># location of the core package</span>
+<span class="hljs-string">heron.package.core.uri:</span> <span class="hljs-attr">file:///home/vagrant/.heron/dist/heron-core.tar.gz</span>
+</code></pre>
+<h3><a class="anchor" aria-hidden="true" id="important-step-change-folder-name-aurora-to-devcluster"></a><a href="#important-step-change-folder-name-aurora-to-devcluster" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Important Step: Change folder name <code>aurora</code> to <code>devcluster</code></h3>
+<p>Next you need to change the folder name of <code>/home/vagrant/.heron/conf/aurora</code> to
+<code>/home/vagrant/.heron/conf/devcluster</code>. This is because the name of your aurora
+cluster is <code>devcluster</code> as you noted in a previous step. You can do this with the
+following commands</p>
+<pre><code class="hljs css language-bash">$ <span class="hljs-built_in">cd</span> /home/vagrant/.heron/conf/
+$ mv aurora devcluster
+</code></pre>
+<h2><a class="anchor" aria-hidden="true" id="submitting-example-topology-to-aurora-cluster"></a><a href="#submitting-example-topology-to-aurora-cluster" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Submitting Example Topology to Aurora cluster</h2>
+<p>Now you can submit a topology to the aurora cluster. this can be done with the following command.</p>
+<pre><code class="hljs css language-bash">$ heron submit devcluster/heronuser/devel --config-path ~/.heron/conf/ ~/.heron/examples/heron-api-examples.jar org.apache.heron.examples.api.ExclamationTopology ExclamationTopology
+</code></pre>
+<p>Now you should be able to see the topology in the Aurora UI ( <a href="http://192.168.33.7:8081/scheduler/heronuser">http://192.168.33.7:8081/scheduler/heronuser</a> ) .</p>
+<p><img src="/docs/assets/aurora-local-topology-submitted.png" alt="Heron topology"></p>
+<h3><a class="anchor" aria-hidden="true" id="understanding-the-parameters"></a><a href="#understanding-the-parameters" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Understanding the parameters</h3>
+<p>below is a brief explanation on some of the important parameters that are used in this command. the first
+parameter <code>devcluster/heronuser/devel</code> defines cluster, role and env ( env can have values <code>prod | devel | test | staging</code> ).
+The cluster is the name of the aurora cluster which is <code>devcluster</code> in our case. You can give something like your
+name for the role name and for env you need to choose from one of the env values.</p>
+<p><code>--config-path</code> points to the config folder. the program will automatically look for a folder with the cluster name.
+This is why you had to change the name of the aurora conf folder to devcluster.</p>
+<p>Now that everything is working you need to perform one last step to be able to see the typologies that you can see in Aurora UI in Heron UI.</p>
+<h2><a class="anchor" aria-hidden="true" id="associating-new-aurora-cluster-into-heron-ui"></a><a href="#associating-new-aurora-cluster-into-heron-ui" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Associating new Aurora cluster into Heron UI</h2>
+<p>Heron UI uses information that is gets from the heron tracker when displaying the information in the heron UI interface.
+So in-order to allow the Heron UI to show Aurora cluster information you need to modify configuration of the Heron tracker
+so that it can identify the Aurora Cluster.</p>
+<p>Heron Tracker configurations are located at <code>/home/vagrant/.herontools/conf</code> the configuration file is named <code>heron_tracker.yaml</code>.
+By default you should see the following in the file</p>
+<pre><code class="hljs css language-yaml"><span class="hljs-attr">statemgrs:</span>
+<span class="hljs-bullet">  -</span>
+<span class="hljs-attr">    type:</span> <span class="hljs-string">"file"</span>
+<span class="hljs-attr">    name:</span> <span class="hljs-string">"local"</span>
+<span class="hljs-attr">    rootpath:</span> <span class="hljs-string">"~/.herondata/repository/state/local"</span>
+<span class="hljs-attr">    tunnelhost:</span> <span class="hljs-string">"localhost"</span>
+<span class="hljs-bullet">  -</span>
+<span class="hljs-attr">    type:</span> <span class="hljs-string">"zookeeper"</span>
+<span class="hljs-attr">    name:</span> <span class="hljs-string">"localzk"</span>
+<span class="hljs-attr">    hostport:</span> <span class="hljs-string">"localhost:2181"</span>
+<span class="hljs-attr">    rootpath:</span> <span class="hljs-string">"/heron"</span>
+<span class="hljs-attr">    tunnelhost:</span> <span class="hljs-string">"localhost"</span>
+</code></pre>
+<p>You can see that there already two entries. Before, you had to create paths in Zookeeper for <code>/heron/topologies</code> this is
+because the entry named <code>localzk</code> in this file. If you remove this you will not need to create that path in Zookeeper.
+Now all you have to is to add a new entry for the aurora cluster into this file ( lets comment out <code>localzk</code> ).
+Then the file would look like below.</p>
+<pre><code class="hljs css language-yaml"><span class="hljs-attr">statemgrs:</span>
+<span class="hljs-bullet">  -</span>
+<span class="hljs-attr">    type:</span> <span class="hljs-string">"file"</span>
+<span class="hljs-attr">    name:</span> <span class="hljs-string">"local"</span>
+<span class="hljs-attr">    rootpath:</span> <span class="hljs-string">"~/.herondata/repository/state/local"</span>
+<span class="hljs-attr">    tunnelhost:</span> <span class="hljs-string">"localhost"</span>
+  <span class="hljs-comment">#-</span>
+   <span class="hljs-comment">#type: "zookeeper"</span>
+   <span class="hljs-comment"># name: "localzk"</span>
+   <span class="hljs-comment"># hostport: "localhost:2181"</span>
+   <span class="hljs-comment"># rootpath: "/heron"</span>
+   <span class="hljs-comment"># tunnelhost: "localhost"</span>
+<span class="hljs-bullet">  -</span>
+<span class="hljs-attr">    type:</span> <span class="hljs-string">"zookeeper"</span>
+<span class="hljs-attr">    name:</span> <span class="hljs-string">"devcluster"</span>
+<span class="hljs-attr">    hostport:</span> <span class="hljs-string">"localhost:2181"</span>
+<span class="hljs-attr">    rootpath:</span> <span class="hljs-string">"/heronroot"</span>
+<span class="hljs-attr">    tunnelhost:</span> <span class="hljs-string">"localhost"</span>
+</code></pre>
+<p>Now you can start Heron tracker and then Heron UI, Now you will be able to see the aurora cluster from the
+Heron UI ( <a href="http://192.168.33.7:8889/topologies">http://192.168.33.7:8889/topologies</a> ) as below</p>
+<pre><code class="hljs css language-bash">$ heron-tracker
+$ heron-ui
+</code></pre>
+<p><img src="/docs/assets/heron-ui-topology-submitted.png" alt="Heron topology"></p>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/next/schedulers-aurora-cluster"><span class="arrow-prev">← </span><span>Aurora Cluster</span></a><a class="docs-next button" href="/docs/next/schedulers-local"><span>Local Cluster</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#setting-up-apache-aurora-cluster-locally">Setting Up Apache Aurora Cluster locally</a><ul class="toc-headings"><li><a href="#step-1-install-virtualbox-and-vagrant">Step 1: Install VirtualBox and Vagrant</a></li><li><a href="#step-2-clone-the-aurora-repository">Step 2: Clone the Aurora repository</a></li><li><a href="#step-3-starting-local-aurora-cluster">Step 3: Starting Local Aurora Cluster</a></li></ul></li><li><a href="#installing-heron-within-the-cluster-vm">Installing Heron within the Cluster VM</a><ul class="toc-headings"><li><a href="#step-1a-download-installation-script-files">Step 1.a : Download installation script files</a></li><li><a href="#step-1b-execute-the-client-and-tools-shell-scripts">Step 1.b: Execute the client and tools shell scripts</a></li></ul></li><li><a href="#configuring-state-manager-apache-zookeeper">Configuring State Manager ( Apache Zookeeper )</a></li><li><a href="#creating-paths-in-zookeeper">Creating Paths in Zookeeper</a></li><li><a href="#configuring-scheduler-apache-aurora">Configuring Scheduler ( Apache Aurora )</a><ul class="toc-headings"><li><a href="#important-step-change-folder-name-aurora-to-devcluster">Important Step: Change folder name <code>aurora</code> to <code>devcluster</code></a></li></ul></li><li><a href="#submitting-example-topology-to-aurora-cluster">Submitting Example Topology to Aurora cluster</a><ul class="toc-headings"><li><a href="#understanding-the-parameters">Understanding the parameters</a></li></ul></li><li><a href="#associating-new-aurora-cluster-into-heron-ui">Associating new Aurora cluster into Heron UI</a></li></ul></nav></div><footer class="nav-footer" id="footer"><div class="apache-disclaimer">Disclaimer Apache Heron (incubating) is an effort undergoing incubation at The Apache Software Foundation (ASF), sponsored by Incubator. Incubation is required of all newly accepted projects until a further review indicates that the infrastructure, communications, and decision making process have stabilized in a manner consistent with other successful ASF projects. While incubation status is not necessarily a reflection of the completeness or stability of the code, it does indicate that the project has yet to be fully endorsed by the ASF.</div><section class="copyright">Copyright © 2019 the Apache Software Foundation, Apache Heron, Heron, 
+  Apache, the Apache feather Logo, and the Apache Heron project logo are either registered 
+  trademarks or trademarks of the Apache Software Foundation.</section></footer></div><script>window.twttr=(function(d,s, id){var js,fjs=d.getElementsByTagName(s)[0],t=window.twttr||{};if(d.getElementById(id))return t;js=d.createElement(s);js.id=id;js.src='https://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js, fjs);t._e = [];t.ready = function(f) {t._e.push(f);};return t;}(document, 'script', 'twitter-wjs'));</script></body></html>

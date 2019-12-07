@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+    <id>https://heronstreaming.io/blog</id>
+    <title>Apache Heron Blog</title>
+    <updated>2017-10-24T06:00:00Z</updated>
+    <generator>Feed for Node.js</generator>
+    <link rel="alternate" href="https://heronstreaming.io/blog"/>
+    <subtitle>The best place to stay up-to-date with the latest Apache Heron news and events.</subtitle>
+    <logo>https://heronstreaming.io/img/HeronTextLogo-small.png</logo>
+    <rights>Copyright © 2019 the Apache Software Foundation, Apache Heron, Heron, 
+  Apache, the Apache feather Logo, and the Apache Heron project logo are either registered 
+  trademarks or trademarks of the Apache Software Foundation.</rights>
+    <entry>
+        <title type="html"/>
+        <id>https://heronstreaming.io/blog/2017/10/24/new-version-1.0.0.html</id>
+        <link href="https://heronstreaming.io/blog/2017/10/24/new-version-1.0.0.html">
+        </link>
+        <updated>2017-10-24T06:00:00Z</updated>
+        <author>
+        </author>
+    </entry>
+    <entry>
+        <title type="html"/>
+        <id>https://heronstreaming.io/blog/2017/09/26/adding-rss.html</id>
+        <link href="https://heronstreaming.io/blog/2017/09/26/adding-rss.html">
+        </link>
+        <updated>2017-09-26T06:00:00Z</updated>
+        <author>
+        </author>
+    </entry>
+    <entry>
+        <title type="html"/>
+        <id>https://heronstreaming.io/blog/2017/09/25/testing-rss.html</id>
+        <link href="https://heronstreaming.io/blog/2017/09/25/testing-rss.html">
+        </link>
+        <updated>2017-09-25T06:00:00Z</updated>
+        <summary type="html"><![CDATA[<!--
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements.  See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership.  The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License.  You may obtain a copy of the License at
+<pre><code class="hljs">  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+&quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+</code></pre>
+<h2><a class="anchor" aria-hidden="true" id=""></a><a href="#" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>--&gt;</h2>
+<p>title: Adding RSS Support - RSS Truncation Test
+author: Eric Nakagawa
+authorURL: <a href="http://twitter.com/ericnakagawa">http://twitter.com/ericnakagawa</a>
+authorFBID: 661277173</p>
+<hr>
+<p>1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890</p>
+<p>This should be truncated.</p>
+]]></summary>
+        <author>
+        </author>
+    </entry>
+    <entry>
+        <title type="html"/>
+        <id>https://heronstreaming.io/blog/2017/04/10/blog-post-two.html</id>
+        <link href="https://heronstreaming.io/blog/2017/04/10/blog-post-two.html">
+        </link>
+        <updated>2017-04-10T06:00:00Z</updated>
+        <summary type="html"><![CDATA[<!--
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements.  See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership.  The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License.  You may obtain a copy of the License at
+<pre><code class="hljs">  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+&quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+</code></pre>
+<h2><a class="anchor" aria-hidden="true" id=""></a><a href="#" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>--&gt;</h2>
+<p>title: New Blog Post
+author: Blog Author
+authorURL: <a href="http://twitter.com/">http://twitter.com/</a>
+authorFBID: 100002976521003</p>
+<hr>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque elementum dignissim ultricies. Fusce rhoncus ipsum tempor eros aliquam consequat. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus elementum massa eget nulla aliquet sagittis. Proin odio tortor, vulputate ut odio in, ultrices ultricies augue. Cras ornare ultrices lorem malesuada iaculis. Etiam sit amet libero tempor, pulvinar mauris sed, sollicitudin sapien.</p>
+]]></summary>
+        <author>
+        </author>
+    </entry>
+    <entry>
+        <title type="html"/>
+        <id>https://heronstreaming.io/blog/2016/03/11/blog-post.html</id>
+        <link href="https://heronstreaming.io/blog/2016/03/11/blog-post.html">
+        </link>
+        <updated>2016-03-11T06:00:00Z</updated>
+        <summary type="html"><![CDATA[<!--
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements.  See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership.  The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License.  You may obtain a copy of the License at
+<pre><code class="hljs">  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+&quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+</code></pre>
+<h2><a class="anchor" aria-hidden="true" id=""></a><a href="#" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>--&gt;</h2>
+<p>title: Blog Title
+author: Blog Author
+authorURL: <a href="http://twitter.com/">http://twitter.com/</a>
+authorFBID: 100002976521003</p>
+<hr>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque elementum dignissim ultricies. Fusce rhoncus ipsum tempor eros aliquam consequat. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus elementum massa eget nulla aliquet sagittis. Proin odio tortor, vulputate ut odio in, ultrices ultricies augue. Cras ornare ultrices lorem malesuada iaculis. Etiam sit amet libero tempor, pulvinar mauris sed, sollicitudin sapien.</p>
+]]></summary>
+        <author>
+        </author>
+    </entry>
+</feed>

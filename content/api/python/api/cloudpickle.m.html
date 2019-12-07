@@ -1,0 +1,4206 @@
+<!doctype html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+
+    <title>heronpy.api.cloudpickle API documentation</title>
+    <meta name="description" content="This class is defined to override standard pickle functionality
+The goals of it follow:
+-Serialize l..." />
+
+  <link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:400,300' rel='stylesheet' type='text/css'>
+  
+  <style type="text/css">
+  
+* {
+  box-sizing: border-box;
+}
+/*! normalize.css v1.1.1 | MIT License | git.io/normalize */
+
+/* ==========================================================================
+   HTML5 display definitions
+   ========================================================================== */
+
+/**
+ * Correct `block` display not defined in IE 6/7/8/9 and Firefox 3.
+ */
+
+article,
+aside,
+details,
+figcaption,
+figure,
+footer,
+header,
+hgroup,
+main,
+nav,
+section,
+summary {
+    display: block;
+}
+
+/**
+ * Correct `inline-block` display not defined in IE 6/7/8/9 and Firefox 3.
+ */
+
+audio,
+canvas,
+video {
+    display: inline-block;
+    *display: inline;
+    *zoom: 1;
+}
+
+/**
+ * Prevent modern browsers from displaying `audio` without controls.
+ * Remove excess height in iOS 5 devices.
+ */
+
+audio:not([controls]) {
+    display: none;
+    height: 0;
+}
+
+/**
+ * Address styling not present in IE 7/8/9, Firefox 3, and Safari 4.
+ * Known issue: no IE 6 support.
+ */
+
+[hidden] {
+    display: none;
+}
+
+/* ==========================================================================
+   Base
+   ========================================================================== */
+
+/**
+ * 1. Prevent system color scheme's background color being used in Firefox, IE,
+ *    and Opera.
+ * 2. Prevent system color scheme's text color being used in Firefox, IE, and
+ *    Opera.
+ * 3. Correct text resizing oddly in IE 6/7 when body `font-size` is set using
+ *    `em` units.
+ * 4. Prevent iOS text size adjust after orientation change, without disabling
+ *    user zoom.
+ */
+
+html {
+    background: #fff; /* 1 */
+    color: #000; /* 2 */
+    font-size: 100%; /* 3 */
+    -webkit-text-size-adjust: 100%; /* 4 */
+    -ms-text-size-adjust: 100%; /* 4 */
+}
+
+/**
+ * Address `font-family` inconsistency between `textarea` and other form
+ * elements.
+ */
+
+html,
+button,
+input,
+select,
+textarea {
+    font-family: sans-serif;
+}
+
+/**
+ * Address margins handled incorrectly in IE 6/7.
+ */
+
+body {
+    margin: 0;
+}
+
+/* ==========================================================================
+   Links
+   ========================================================================== */
+
+/**
+ * Address `outline` inconsistency between Chrome and other browsers.
+ */
+
+a:focus {
+    outline: thin dotted;
+}
+
+/**
+ * Improve readability when focused and also mouse hovered in all browsers.
+ */
+
+a:active,
+a:hover {
+    outline: 0;
+}
+
+/* ==========================================================================
+   Typography
+   ========================================================================== */
+
+/**
+ * Address font sizes and margins set differently in IE 6/7.
+ * Address font sizes within `section` and `article` in Firefox 4+, Safari 5,
+ * and Chrome.
+ */
+
+h1 {
+    font-size: 2em;
+    margin: 0.67em 0;
+}
+
+h2 {
+    font-size: 1.5em;
+    margin: 0.83em 0;
+}
+
+h3 {
+    font-size: 1.17em;
+    margin: 1em 0;
+}
+
+h4 {
+    font-size: 1em;
+    margin: 1.33em 0;
+}
+
+h5 {
+    font-size: 0.83em;
+    margin: 1.67em 0;
+}
+
+h6 {
+    font-size: 0.67em;
+    margin: 2.33em 0;
+}
+
+/**
+ * Address styling not present in IE 7/8/9, Safari 5, and Chrome.
+ */
+
+abbr[title] {
+    border-bottom: 1px dotted;
+}
+
+/**
+ * Address style set to `bolder` in Firefox 3+, Safari 4/5, and Chrome.
+ */
+
+b,
+strong {
+    font-weight: bold;
+}
+
+blockquote {
+    margin: 1em 40px;
+}
+
+/**
+ * Address styling not present in Safari 5 and Chrome.
+ */
+
+dfn {
+    font-style: italic;
+}
+
+/**
+ * Address differences between Firefox and other browsers.
+ * Known issue: no IE 6/7 normalization.
+ */
+
+hr {
+    -moz-box-sizing: content-box;
+    box-sizing: content-box;
+    height: 0;
+}
+
+/**
+ * Address styling not present in IE 6/7/8/9.
+ */
+
+mark {
+    background: #ff0;
+    color: #000;
+}
+
+/**
+ * Address margins set differently in IE 6/7.
+ */
+
+p,
+pre {
+    margin: 1em 0;
+}
+
+/**
+ * Correct font family set oddly in IE 6, Safari 4/5, and Chrome.
+ */
+
+code,
+kbd,
+pre,
+samp {
+    font-family: monospace, serif;
+    _font-family: 'courier new', monospace;
+    font-size: 1em;
+}
+
+/**
+ * Improve readability of pre-formatted text in all browsers.
+ */
+
+pre {
+    white-space: pre;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+/**
+ * Address CSS quotes not supported in IE 6/7.
+ */
+
+q {
+    quotes: none;
+}
+
+/**
+ * Address `quotes` property not supported in Safari 4.
+ */
+
+q:before,
+q:after {
+    content: '';
+    content: none;
+}
+
+/**
+ * Address inconsistent and variable font size in all browsers.
+ */
+
+small {
+    font-size: 80%;
+}
+
+/**
+ * Prevent `sub` and `sup` affecting `line-height` in all browsers.
+ */
+
+sub,
+sup {
+    font-size: 75%;
+    line-height: 0;
+    position: relative;
+    vertical-align: baseline;
+}
+
+sup {
+    top: -0.5em;
+}
+
+sub {
+    bottom: -0.25em;
+}
+
+/* ==========================================================================
+   Lists
+   ========================================================================== */
+
+/**
+ * Address margins set differently in IE 6/7.
+ */
+
+dl,
+menu,
+ol,
+ul {
+    margin: 1em 0;
+}
+
+dd {
+    margin: 0 0 0 40px;
+}
+
+/**
+ * Address paddings set differently in IE 6/7.
+ */
+
+menu,
+ol,
+ul {
+    padding: 0 0 0 40px;
+}
+
+/**
+ * Correct list images handled incorrectly in IE 7.
+ */
+
+nav ul,
+nav ol {
+    list-style: none;
+    list-style-image: none;
+}
+
+/* ==========================================================================
+   Embedded content
+   ========================================================================== */
+
+/**
+ * 1. Remove border when inside `a` element in IE 6/7/8/9 and Firefox 3.
+ * 2. Improve image quality when scaled in IE 7.
+ */
+
+img {
+    border: 0; /* 1 */
+    -ms-interpolation-mode: bicubic; /* 2 */
+}
+
+/**
+ * Correct overflow displayed oddly in IE 9.
+ */
+
+svg:not(:root) {
+    overflow: hidden;
+}
+
+/* ==========================================================================
+   Figures
+   ========================================================================== */
+
+/**
+ * Address margin not present in IE 6/7/8/9, Safari 5, and Opera 11.
+ */
+
+figure {
+    margin: 0;
+}
+
+/* ==========================================================================
+   Forms
+   ========================================================================== */
+
+/**
+ * Correct margin displayed oddly in IE 6/7.
+ */
+
+form {
+    margin: 0;
+}
+
+/**
+ * Define consistent border, margin, and padding.
+ */
+
+fieldset {
+    border: 1px solid #c0c0c0;
+    margin: 0 2px;
+    padding: 0.35em 0.625em 0.75em;
+}
+
+/**
+ * 1. Correct color not being inherited in IE 6/7/8/9.
+ * 2. Correct text not wrapping in Firefox 3.
+ * 3. Correct alignment displayed oddly in IE 6/7.
+ */
+
+legend {
+    border: 0; /* 1 */
+    padding: 0;
+    white-space: normal; /* 2 */
+    *margin-left: -7px; /* 3 */
+}
+
+/**
+ * 1. Correct font size not being inherited in all browsers.
+ * 2. Address margins set differently in IE 6/7, Firefox 3+, Safari 5,
+ *    and Chrome.
+ * 3. Improve appearance and consistency in all browsers.
+ */
+
+button,
+input,
+select,
+textarea {
+    font-size: 100%; /* 1 */
+    margin: 0; /* 2 */
+    vertical-align: baseline; /* 3 */
+    *vertical-align: middle; /* 3 */
+}
+
+/**
+ * Address Firefox 3+ setting `line-height` on `input` using `!important` in
+ * the UA stylesheet.
+ */
+
+button,
+input {
+    line-height: normal;
+}
+
+/**
+ * Address inconsistent `text-transform` inheritance for `button` and `select`.
+ * All other form control elements do not inherit `text-transform` values.
+ * Correct `button` style inheritance in Chrome, Safari 5+, and IE 6+.
+ * Correct `select` style inheritance in Firefox 4+ and Opera.
+ */
+
+button,
+select {
+    text-transform: none;
+}
+
+/**
+ * 1. Avoid the WebKit bug in Android 4.0.* where (2) destroys native `audio`
+ *    and `video` controls.
+ * 2. Correct inability to style clickable `input` types in iOS.
+ * 3. Improve usability and consistency of cursor style between image-type
+ *    `input` and others.
+ * 4. Remove inner spacing in IE 7 without affecting normal text inputs.
+ *    Known issue: inner spacing remains in IE 6.
+ */
+
+button,
+html input[type="button"], /* 1 */
+input[type="reset"],
+input[type="submit"] {
+    -webkit-appearance: button; /* 2 */
+    cursor: pointer; /* 3 */
+    *overflow: visible;  /* 4 */
+}
+
+/**
+ * Re-set default cursor for disabled elements.
+ */
+
+button[disabled],
+html input[disabled] {
+    cursor: default;
+}
+
+/**
+ * 1. Address box sizing set to content-box in IE 8/9.
+ * 2. Remove excess padding in IE 8/9.
+ * 3. Remove excess padding in IE 7.
+ *    Known issue: excess padding remains in IE 6.
+ */
+
+input[type="checkbox"],
+input[type="radio"] {
+    box-sizing: border-box; /* 1 */
+    padding: 0; /* 2 */
+    *height: 13px; /* 3 */
+    *width: 13px; /* 3 */
+}
+
+/**
+ * 1. Address `appearance` set to `searchfield` in Safari 5 and Chrome.
+ * 2. Address `box-sizing` set to `border-box` in Safari 5 and Chrome
+ *    (include `-moz` to future-proof).
+ */
+
+input[type="search"] {
+    -webkit-appearance: textfield; /* 1 */
+    -moz-box-sizing: content-box;
+    -webkit-box-sizing: content-box; /* 2 */
+    box-sizing: content-box;
+}
+
+/**
+ * Remove inner padding and search cancel button in Safari 5 and Chrome
+ * on OS X.
+ */
+
+input[type="search"]::-webkit-search-cancel-button,
+input[type="search"]::-webkit-search-decoration {
+    -webkit-appearance: none;
+}
+
+/**
+ * Remove inner padding and border in Firefox 3+.
+ */
+
+button::-moz-focus-inner,
+input::-moz-focus-inner {
+    border: 0;
+    padding: 0;
+}
+
+/**
+ * 1. Remove default vertical scrollbar in IE 6/7/8/9.
+ * 2. Improve readability and alignment in all browsers.
+ */
+
+textarea {
+    overflow: auto; /* 1 */
+    vertical-align: top; /* 2 */
+}
+
+/* ==========================================================================
+   Tables
+   ========================================================================== */
+
+/**
+ * Remove most spacing between table cells.
+ */
+
+table {
+    border-collapse: collapse;
+    border-spacing: 0;
+}
+
+  </style>
+
+  <style type="text/css">
+  
+  html, body {
+    margin: 0;
+    padding: 0;
+    min-height: 100%;
+  }
+  body {
+    background: #fff;
+    font-family: "Source Sans Pro", "Helvetica Neueue", Helvetica, sans;
+    font-weight: 300;
+    font-size: 16px;
+    line-height: 1.6em;
+  }
+  #content {
+    width: 70%;
+    max-width: 850px;
+    float: left;
+    padding: 30px 60px;
+    border-left: 1px solid #ddd;
+  }
+  #sidebar {
+    width: 25%;
+    float: left;
+    padding: 30px;
+    overflow: hidden;
+  }
+  #nav {
+    font-size: 130%;
+    margin: 0 0 15px 0;
+  }
+
+  #top {
+    display: block;
+    position: fixed;
+    bottom: 5px;
+    left: 5px;
+    font-size: .85em;
+    text-transform: uppercase;
+  }
+
+  #footer {
+    font-size: .75em;
+    padding: 5px 30px;
+    border-top: 1px solid #ddd;
+    text-align: right;
+  }
+    #footer p {
+      margin: 0 0 0 30px;
+      display: inline-block;
+    }
+
+  h1, h2, h3, h4, h5 {
+    font-weight: 300;
+  }
+  h1 {
+    font-size: 2.5em;
+    line-height: 1.1em;
+    margin: 0 0 .50em 0;
+  }
+
+  h2 {
+    font-size: 1.75em;
+    margin: 1em 0 .50em 0;
+  }
+
+  h3 {
+    margin: 25px 0 10px 0;
+  }
+
+  h4 {
+    margin: 0;
+    font-size: 105%;
+  }
+
+  a {
+    color: #058;
+    text-decoration: none;
+    transition: color .3s ease-in-out;
+  }
+
+  a:hover {
+    color: #e08524;
+    transition: color .3s ease-in-out;
+  }
+
+  pre, code, .mono, .name {
+    font-family: "Ubuntu Mono", "Cousine", "DejaVu Sans Mono", monospace;
+  }
+
+  .title .name {
+    font-weight: bold;
+  }
+  .section-title {
+    margin-top: 2em;
+  }
+  .ident {
+    color: #900;
+  }
+
+  code {
+    background: #f9f9f9;
+  } 
+
+  pre {
+    background: #fefefe;
+    border: 1px solid #ddd;
+    box-shadow: 2px 2px 0 #f3f3f3;
+    margin: 0 30px;
+    padding: 15px 30px;
+  }
+
+  .codehilite {
+    margin: 0 30px 10px 30px;
+  }
+
+    .codehilite pre {
+      margin: 0;
+    }
+    .codehilite .err { background: #ff3300; color: #fff !important; } 
+
+  table#module-list {
+    font-size: 110%;
+  }
+
+    table#module-list tr td:first-child {
+      padding-right: 10px;
+      white-space: nowrap;
+    }
+
+    table#module-list td {
+      vertical-align: top;
+      padding-bottom: 8px;
+    }
+
+      table#module-list td p {
+        margin: 0 0 7px 0;
+      }
+
+  .def {
+    display: table;
+  }
+
+    .def p {
+      display: table-cell;
+      vertical-align: top;
+      text-align: left;
+    }
+
+    .def p:first-child {
+      white-space: nowrap;
+    }
+
+    .def p:last-child {
+      width: 100%;
+    }
+
+
+  #index {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+  }
+    ul#index .class_name {
+      /* font-size: 110%; */
+      font-weight: bold;
+    }
+    #index ul {
+      margin: 0;
+    }
+
+  .item {
+    margin: 0 0 15px 0;
+  }
+
+    .item .class {
+      margin: 0 0 25px 30px;
+    }
+
+      .item .class ul.class_list {
+        margin: 0 0 20px 0;
+      }
+
+    .item .name {
+      background: #fafafa;
+      margin: 0;
+      font-weight: bold;
+      padding: 5px 10px;
+      border-radius: 3px;
+      display: inline-block;
+      min-width: 40%;
+    }
+      .item .name:hover {
+        background: #f6f6f6;
+      }
+
+    .item .empty_desc {
+      margin: 0 0 5px 0;
+      padding: 0;
+    }
+
+    .item .inheritance {
+      margin: 3px 0 0 30px;
+    }
+
+    .item .inherited {
+      color: #666;
+    }
+
+    .item .desc {
+      padding: 0 8px;
+      margin: 0;
+    }
+
+      .item .desc p {
+        margin: 0 0 10px 0;
+      }
+
+    .source_cont {
+      margin: 0;
+      padding: 0;
+    }
+
+    .source_link a {
+      background: #ffc300;
+      font-weight: 400;
+      font-size: .75em;
+      text-transform: uppercase;
+      color: #fff;
+      text-shadow: 1px 1px 0 #f4b700;
+      
+      padding: 3px 8px;
+      border-radius: 2px;
+      transition: background .3s ease-in-out;
+    }
+      .source_link a:hover {
+        background: #FF7200;
+        text-shadow: none;
+        transition: background .3s ease-in-out;
+      }
+
+    .source {
+      display: none;
+      max-height: 600px;
+      overflow-y: scroll;
+      margin-bottom: 15px;
+    }
+
+      .source .codehilite {
+        margin: 0;
+      }
+
+  .desc h1, .desc h2, .desc h3 {
+    font-size: 100% !important;
+  }
+  .clear {
+    clear: both;
+  }
+
+  @media all and (max-width: 950px) {
+    #sidebar {
+      width: 35%;
+    }
+    #content {
+      width: 65%;
+    }
+  }
+  @media all and (max-width: 650px) {
+    #top {
+      display: none;
+    }
+    #sidebar {
+      float: none;
+      width: auto;
+    }
+    #content {
+      float: none;
+      width: auto;
+      padding: 30px;
+    }
+
+    #index ul {
+      padding: 0;
+      margin-bottom: 15px;
+    }
+    #index ul li {
+      display: inline-block;
+      margin-right: 30px;
+    }
+    #footer {
+      text-align: left;
+    }
+    #footer p {
+      display: block;
+      margin: inherit;
+    }
+  }
+
+  /*****************************/
+
+  </style>
+
+
+  <style type="text/css">
+  
+/* ==========================================================================
+   EXAMPLE Media Queries for Responsive Design.
+   These examples override the primary ('mobile first') styles.
+   Modify as content requires.
+   ========================================================================== */
+
+@media only screen and (min-width: 35em) {
+    /* Style adjustments for viewports that meet the condition */
+}
+
+@media print,
+       (-o-min-device-pixel-ratio: 5/4),
+       (-webkit-min-device-pixel-ratio: 1.25),
+       (min-resolution: 120dpi) {
+    /* Style adjustments for high resolution devices */
+}
+
+/* ==========================================================================
+   Print styles.
+   Inlined to avoid required HTTP connection: h5bp.com/r
+   ========================================================================== */
+
+@media print {
+    * {
+        background: transparent !important;
+        color: #000 !important; /* Black prints faster: h5bp.com/s */
+        box-shadow: none !important;
+        text-shadow: none !important;
+    }
+
+    a,
+    a:visited {
+        text-decoration: underline;
+    }
+
+    a[href]:after {
+        content: " (" attr(href) ")";
+    }
+
+    abbr[title]:after {
+        content: " (" attr(title) ")";
+    }
+
+    /*
+     * Don't show links for images, or javascript/internal links
+     */
+
+    .ir a:after,
+    a[href^="javascript:"]:after,
+    a[href^="#"]:after {
+        content: "";
+    }
+
+    pre,
+    blockquote {
+        border: 1px solid #999;
+        page-break-inside: avoid;
+    }
+
+    thead {
+        display: table-header-group; /* h5bp.com/t */
+    }
+
+    tr,
+    img {
+        page-break-inside: avoid;
+    }
+
+    img {
+        max-width: 100% !important;
+    }
+
+    @page {
+        margin: 0.5cm;
+    }
+
+    p,
+    h2,
+    h3 {
+        orphans: 3;
+        widows: 3;
+    }
+
+    h2,
+    h3 {
+        page-break-after: avoid;
+    }
+}
+
+  </style>
+
+  <script type="text/javascript">
+  function toggle(id, $link) {
+    $node = document.getElementById(id);
+    if (!$node)
+    return;
+    if (!$node.style.display || $node.style.display == 'none') {
+    $node.style.display = 'block';
+    $link.innerHTML = 'Hide source &nequiv;';
+    } else {
+    $node.style.display = 'none';
+    $link.innerHTML = 'Show source &equiv;';
+    }
+  }
+  </script>
+</head>
+<body>
+<a href="#" id="top">Top</a>
+
+<div id="container">
+    
+  
+  <div id="sidebar">
+    <h1>Index</h1>
+    <ul id="index">
+    <li class="set"><h3><a href="#header-variables">Module variables</a></h3>
+      
+  <ul>
+    <li class="mono"><a href="#heronpy.api.cloudpickle.DELETE_GLOBAL">DELETE_GLOBAL</a></li>
+    <li class="mono"><a href="#heronpy.api.cloudpickle.EXTENDED_ARG">EXTENDED_ARG</a></li>
+    <li class="mono"><a href="#heronpy.api.cloudpickle.GLOBAL_OPS">GLOBAL_OPS</a></li>
+    <li class="mono"><a href="#heronpy.api.cloudpickle.HAVE_ARGUMENT">HAVE_ARGUMENT</a></li>
+    <li class="mono"><a href="#heronpy.api.cloudpickle.LOAD_GLOBAL">LOAD_GLOBAL</a></li>
+    <li class="mono"><a href="#heronpy.api.cloudpickle.PY3">PY3</a></li>
+    <li class="mono"><a href="#heronpy.api.cloudpickle.STORE_GLOBAL">STORE_GLOBAL</a></li>
+    <li class="mono"><a href="#heronpy.api.cloudpickle.k1">k1</a></li>
+  </ul>
+
+    </li>
+
+    <li class="set"><h3><a href="#header-functions">Functions</a></h3>
+      
+  <ul>
+    <li class="mono"><a href="#heronpy.api.cloudpickle.dump">dump</a></li>
+    <li class="mono"><a href="#heronpy.api.cloudpickle.dumps">dumps</a></li>
+    <li class="mono"><a href="#heronpy.api.cloudpickle.islambda">islambda</a></li>
+    <li class="mono"><a href="#heronpy.api.cloudpickle.print_exec">print_exec</a></li>
+    <li class="mono"><a href="#heronpy.api.cloudpickle.subimport">subimport</a></li>
+  </ul>
+
+    </li>
+
+    <li class="set"><h3><a href="#header-classes">Classes</a></h3>
+      <ul>
+        <li class="mono">
+        <span class="class_name"><a href="#heronpy.api.cloudpickle.CloudPickler">CloudPickler</a></span>
+        
+          
+  <ul>
+    <li class="mono"><a href="#heronpy.api.cloudpickle.CloudPickler.__init__">__init__</a></li>
+    <li class="mono"><a href="#heronpy.api.cloudpickle.CloudPickler.clear_memo">clear_memo</a></li>
+    <li class="mono"><a href="#heronpy.api.cloudpickle.CloudPickler.dump">dump</a></li>
+    <li class="mono"><a href="#heronpy.api.cloudpickle.CloudPickler.extract_code_globals">extract_code_globals</a></li>
+    <li class="mono"><a href="#heronpy.api.cloudpickle.CloudPickler.extract_func_data">extract_func_data</a></li>
+    <li class="mono"><a href="#heronpy.api.cloudpickle.CloudPickler.get">get</a></li>
+    <li class="mono"><a href="#heronpy.api.cloudpickle.CloudPickler.inject_addons">inject_addons</a></li>
+    <li class="mono"><a href="#heronpy.api.cloudpickle.CloudPickler.inject_numpy">inject_numpy</a></li>
+    <li class="mono"><a href="#heronpy.api.cloudpickle.CloudPickler.memoize">memoize</a></li>
+    <li class="mono"><a href="#heronpy.api.cloudpickle.CloudPickler.persistent_id">persistent_id</a></li>
+    <li class="mono"><a href="#heronpy.api.cloudpickle.CloudPickler.put">put</a></li>
+    <li class="mono"><a href="#heronpy.api.cloudpickle.CloudPickler.save">save</a></li>
+    <li class="mono"><a href="#heronpy.api.cloudpickle.CloudPickler.save_attrgetter">save_attrgetter</a></li>
+    <li class="mono"><a href="#heronpy.api.cloudpickle.CloudPickler.save_bool">save_bool</a></li>
+    <li class="mono"><a href="#heronpy.api.cloudpickle.CloudPickler.save_buffer">save_buffer</a></li>
+    <li class="mono"><a href="#heronpy.api.cloudpickle.CloudPickler.save_builtin_function">save_builtin_function</a></li>
+    <li class="mono"><a href="#heronpy.api.cloudpickle.CloudPickler.save_codeobject">save_codeobject</a></li>
+    <li class="mono"><a href="#heronpy.api.cloudpickle.CloudPickler.save_dict">save_dict</a></li>
+    <li class="mono"><a href="#heronpy.api.cloudpickle.CloudPickler.save_empty_tuple">save_empty_tuple</a></li>
+    <li class="mono"><a href="#heronpy.api.cloudpickle.CloudPickler.save_file">save_file</a></li>
+    <li class="mono"><a href="#heronpy.api.cloudpickle.CloudPickler.save_float">save_float</a></li>
+    <li class="mono"><a href="#heronpy.api.cloudpickle.CloudPickler.save_function">save_function</a></li>
+    <li class="mono"><a href="#heronpy.api.cloudpickle.CloudPickler.save_function_tuple">save_function_tuple</a></li>
+    <li class="mono"><a href="#heronpy.api.cloudpickle.CloudPickler.save_global">save_global</a></li>
+    <li class="mono"><a href="#heronpy.api.cloudpickle.CloudPickler.save_inst">save_inst</a></li>
+    <li class="mono"><a href="#heronpy.api.cloudpickle.CloudPickler.save_instancemethod">save_instancemethod</a></li>
+    <li class="mono"><a href="#heronpy.api.cloudpickle.CloudPickler.save_int">save_int</a></li>
+    <li class="mono"><a href="#heronpy.api.cloudpickle.CloudPickler.save_itemgetter">save_itemgetter</a></li>
+    <li class="mono"><a href="#heronpy.api.cloudpickle.CloudPickler.save_list">save_list</a></li>
+    <li class="mono"><a href="#heronpy.api.cloudpickle.CloudPickler.save_long">save_long</a></li>
+    <li class="mono"><a href="#heronpy.api.cloudpickle.CloudPickler.save_memoryview">save_memoryview</a></li>
+    <li class="mono"><a href="#heronpy.api.cloudpickle.CloudPickler.save_module">save_module</a></li>
+    <li class="mono"><a href="#heronpy.api.cloudpickle.CloudPickler.save_none">save_none</a></li>
+    <li class="mono"><a href="#heronpy.api.cloudpickle.CloudPickler.save_partial">save_partial</a></li>
+    <li class="mono"><a href="#heronpy.api.cloudpickle.CloudPickler.save_pers">save_pers</a></li>
+    <li class="mono"><a href="#heronpy.api.cloudpickle.CloudPickler.save_property">save_property</a></li>
+    <li class="mono"><a href="#heronpy.api.cloudpickle.CloudPickler.save_reduce">save_reduce</a></li>
+    <li class="mono"><a href="#heronpy.api.cloudpickle.CloudPickler.save_string">save_string</a></li>
+    <li class="mono"><a href="#heronpy.api.cloudpickle.CloudPickler.save_tuple">save_tuple</a></li>
+    <li class="mono"><a href="#heronpy.api.cloudpickle.CloudPickler.save_ufunc">save_ufunc</a></li>
+    <li class="mono"><a href="#heronpy.api.cloudpickle.CloudPickler.save_unicode">save_unicode</a></li>
+    <li class="mono"><a href="#heronpy.api.cloudpickle.CloudPickler.save_unsupported">save_unsupported</a></li>
+  </ul>
+
+        </li>
+      </ul>
+    </li>
+
+    </ul>
+  </div>
+
+    <article id="content">
+      
+  
+
+  
+
+
+  <header id="section-intro">
+  <h1 class="title"><span class="name">heronpy.api.cloudpickle</span> module</h1>
+  <p>This class is defined to override standard pickle functionality
+The goals of it follow:
+-Serialize lambdas and nested functions to compiled byte code
+-Deal with main module correctly
+-Deal with other non-serializable objects
+It does not include an unpickler, as standard python unpickling suffices.
+This module was extracted from the <code>cloud</code> package, developed by <code>PiCloud, Inc.
+&lt;http://www.picloud.com&gt;</code><em>.
+Copyright (c) 2012, Regents of the University of California.
+Copyright (c) 2009 <code>PiCloud, Inc. &lt;http://www.picloud.com&gt;</code></em>.
+All rights reserved.
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions
+are met:
+  * Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+  * Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in the
+    documentation and/or other materials provided with the distribution.
+  * Neither the name of the University of California, Berkeley nor the
+    names of its contributors may be used to endorse or promote
+    products derived from this software without specific prior written
+    permission.
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
+TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</p>
+  
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-heronpy.api.cloudpickle', this);">Show source &equiv;</a></p>
+  <div id="source-heronpy.api.cloudpickle" class="source">
+    <pre><code>"""
+This class is defined to override standard pickle functionality
+The goals of it follow:
+-Serialize lambdas and nested functions to compiled byte code
+-Deal with main module correctly
+-Deal with other non-serializable objects
+It does not include an unpickler, as standard python unpickling suffices.
+This module was extracted from the `cloud` package, developed by `PiCloud, Inc.
+<http://www.picloud.com>`_.
+Copyright (c) 2012, Regents of the University of California.
+Copyright (c) 2009 `PiCloud, Inc. <http://www.picloud.com>`_.
+All rights reserved.
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions
+are met:
+  * Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+  * Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in the
+    documentation and/or other materials provided with the distribution.
+  * Neither the name of the University of California, Berkeley nor the
+    names of its contributors may be used to endorse or promote
+    products derived from this software without specific prior written
+    permission.
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
+TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+"""
+from __future__ import print_function
+
+import operator
+import opcode
+import os
+import io
+import pickle
+import struct
+import sys
+import types
+from functools import partial
+import itertools
+import dis
+import traceback
+import weakref
+
+# pylint: disable-all
+
+if sys.version < '3':
+  from pickle import Pickler # pylint: disable=ungrouped-imports
+  try:
+    from cStringIO import StringIO
+  except ImportError:
+    from StringIO import StringIO
+  PY3 = False
+else:
+  types.ClassType = type
+  from pickle import _Pickler as Pickler # pylint: disable=ungrouped-imports
+  from io import BytesIO as StringIO # pylint: disable=ungrouped-imports
+  PY3 = True
+
+#relevant opcodes
+STORE_GLOBAL = opcode.opmap['STORE_GLOBAL']
+DELETE_GLOBAL = opcode.opmap['DELETE_GLOBAL']
+LOAD_GLOBAL = opcode.opmap['LOAD_GLOBAL']
+GLOBAL_OPS = (STORE_GLOBAL, DELETE_GLOBAL, LOAD_GLOBAL)
+HAVE_ARGUMENT = dis.HAVE_ARGUMENT
+EXTENDED_ARG = dis.EXTENDED_ARG
+
+
+def islambda(func):
+  return getattr(func, '__name__') == '<lambda>'
+
+
+_BUILTIN_TYPE_NAMES = {}
+for k1, v1 in types.__dict__.items():
+  if type(v1) is type: # pylint: disable=unidiomatic-typecheck
+    _BUILTIN_TYPE_NAMES[v1] = k1
+
+
+def _builtin_type(name):
+  return getattr(types, name)
+
+
+if sys.version_info < (3, 4):
+  def _walk_global_ops(code):
+    """
+    Yield (opcode, argument number) tuples for all
+    global-referencing instructions in *code*.
+    """
+    code = getattr(code, 'co_code', b'')
+    if not PY3:
+      code = map(ord, code)
+
+    n = len(code)
+    i = 0
+    extended_arg = 0
+    while i < n:
+      op = code[i]
+      i += 1
+      if op >= HAVE_ARGUMENT:
+        oparg = code[i] + code[i + 1] * 256 + extended_arg
+        extended_arg = 0
+        i += 2
+        if op == EXTENDED_ARG:
+          extended_arg = oparg * 65536
+        if op in GLOBAL_OPS:
+          yield op, oparg
+
+else:
+  def _walk_global_ops(code):
+    """
+    Yield (opcode, argument number) tuples for all
+    global-referencing instructions in *code*.
+    """
+    for instr in dis.get_instructions(code): # pylint: disable=no-member
+      op = instr.opcode
+      if op in GLOBAL_OPS:
+        yield op, instr.arg
+
+
+class CloudPickler(Pickler): # pylint: disable=too-many-public-methods
+  """
+  CloudPickler class
+  """
+  dispatch = Pickler.dispatch.copy()
+
+  def __init__(self, filen, protocol=None):
+    Pickler.__init__(self, filen, protocol)
+    # set of modules to unpickle
+    self.modules = set()
+    # map ids to dictionary. used to ensure that functions can share global env
+    self.globals_ref = {}
+
+  def dump(self, obj):
+    self.inject_addons()
+    try:
+      return Pickler.dump(self, obj)
+    except RuntimeError as e:
+      if 'recursion' in e.args[0]:
+        msg = """Could not pickle object as excessively deep recursion required."""
+        raise pickle.PicklingError(msg)
+    except pickle.PickleError:
+      raise
+    except Exception as e:
+      print_exec(sys.stderr)
+      raise pickle.PicklingError(str(e))
+
+  def save_memoryview(self, obj):
+    """Fallback to save_string"""
+    Pickler.save_string(self, str(obj))
+
+  def save_buffer(self, obj):
+    """Fallback to save_string"""
+    Pickler.save_string(self, str(obj))
+  if PY3:
+    dispatch[memoryview] = save_memoryview
+  else:
+    dispatch[buffer] = save_buffer
+
+  def save_unsupported(self, obj): # pylint: disable=no-self-use
+    raise pickle.PicklingError("Cannot pickle objects of type %s" % type(obj))
+  dispatch[types.GeneratorType] = save_unsupported
+
+  # itertools objects do not pickle!
+  for v in itertools.__dict__.values():
+    if type(v) is type: # pylint: disable=unidiomatic-typecheck
+      dispatch[v] = save_unsupported
+
+  def save_module(self, obj):
+    """
+    Save a module as an import
+    """
+    self.modules.add(obj)
+    self.save_reduce(subimport, (obj.__name__,), obj=obj)
+  dispatch[types.ModuleType] = save_module
+
+  def save_codeobject(self, obj):
+    """
+    Save a code object
+    """
+    if PY3:
+      args = (
+          obj.co_argcount, obj.co_kwonlyargcount, obj.co_nlocals, obj.co_stacksize,
+          obj.co_flags, obj.co_code, obj.co_consts, obj.co_names, obj.co_varnames,
+          obj.co_filename, obj.co_name, obj.co_firstlineno, obj.co_lnotab, obj.co_freevars,
+          obj.co_cellvars
+      )
+    else:
+      args = (
+          obj.co_argcount, obj.co_nlocals, obj.co_stacksize, obj.co_flags, obj.co_code,
+          obj.co_consts, obj.co_names, obj.co_varnames, obj.co_filename, obj.co_name,
+          obj.co_firstlineno, obj.co_lnotab, obj.co_freevars, obj.co_cellvars
+      )
+    self.save_reduce(types.CodeType, args, obj=obj)
+  dispatch[types.CodeType] = save_codeobject
+
+  def save_function(self, obj, name=None):
+    """ Registered with the dispatch to handle all function types.
+    Determines what kind of function obj is (e.g. lambda, defined at
+    interactive prompt, etc) and handles the pickling appropriately.
+    """
+    write = self.write
+
+    if name is None:
+      name = obj.__name__
+    try:
+      # whichmodule() could fail, see
+      # https://bitbucket.org/gutworth/six/issues/63/importing-six-breaks-pickling
+      modname = pickle.whichmodule(obj, name)
+    except Exception:
+      modname = None
+    # print('which gives %s %s %s' % (modname, obj, name))
+    try:
+      themodule = sys.modules[modname]
+    except KeyError:
+      # eval'd items such as namedtuple give invalid items for their function __module__
+      modname = '__main__'
+
+    if modname == '__main__':
+      themodule = None
+
+    if themodule:
+      self.modules.add(themodule)
+      if getattr(themodule, name, None) is obj:
+        return self.save_global(obj, name)
+
+    # if func is lambda, def'ed at prompt, is in main, or is nested, then
+    # we'll pickle the actual function object rather than simply saving a
+    # reference (as is done in default pickler), via save_function_tuple.
+    if islambda(obj) or obj.__code__.co_filename == '<stdin>' or themodule is None:
+      #print("save global", islambda(obj), obj.__code__.co_filename, modname, themodule)
+      self.save_function_tuple(obj)
+      return
+    else:
+      # func is nested
+      klass = getattr(themodule, name, None)
+      if klass is None or klass is not obj:
+        self.save_function_tuple(obj)
+        return
+
+    if obj.__dict__:
+      # essentially save_reduce, but workaround needed to avoid recursion
+      self.save(_restore_attr)
+      write(pickle.MARK + pickle.GLOBAL + modname + '\n' + name + '\n')
+      self.memoize(obj)
+      self.save(obj.__dict__)
+      write(pickle.TUPLE + pickle.REDUCE)
+    else:
+      write(pickle.GLOBAL + modname + '\n' + name + '\n')
+      self.memoize(obj)
+  dispatch[types.FunctionType] = save_function
+
+  def save_function_tuple(self, func):
+    """  Pickles an actual func object.
+    A func comprises: code, globals, defaults, closure, and dict.  We
+    extract and save these, injecting reducing functions at certain points
+    to recreate the func object.  Keep in mind that some of these pieces
+    can contain a ref to the func itself.  Thus, a naive save on these
+    pieces could trigger an infinite loop of save's.  To get around that,
+    we first create a skeleton func object using just the code (this is
+    safe, since this won't contain a ref to the func), and memoize it as
+    soon as it's created.  The other stuff can then be filled in later.
+    """
+    save = self.save
+    write = self.write
+
+    code, f_globals, defaults, closure, dct, base_globals = self.extract_func_data(func)
+
+    save(_fill_function)  # skeleton function updater
+    write(pickle.MARK)    # beginning of tuple that _fill_function expects
+
+    # create a skeleton function object and memoize it
+    save(_make_skel_func)
+    save((code, closure, base_globals))
+    write(pickle.REDUCE)
+    self.memoize(func)
+
+    # save the rest of the func data needed by _fill_function
+    save(f_globals)
+    save(defaults)
+    save(dct)
+    save(func.__module__)
+    write(pickle.TUPLE)
+    write(pickle.REDUCE)  # applies _fill_function on the tuple
+
+  _extract_code_globals_cache = (
+      weakref.WeakKeyDictionary()
+      if sys.version_info >= (2, 7) and not hasattr(sys, "pypy_version_info")
+      else {}
+  )
+
+  @classmethod
+  def extract_code_globals(cls, co):
+    """
+    Find all globals names read or written to by codeblock co
+    """
+    out_names = cls._extract_code_globals_cache.get(co)
+    if out_names is None:
+      try:
+        names = co.co_names
+      except AttributeError:
+        # PyPy "builtin-code" object
+        out_names = set()
+      else:
+        out_names = set(names[oparg]
+                        for op, oparg in _walk_global_ops(co))
+
+        # see if nested function have any global refs
+        if co.co_consts:
+          for const in co.co_consts:
+            if type(const) is types.CodeType: # pylint: disable=unidiomatic-typecheck
+              out_names |= cls.extract_code_globals(const)
+
+      cls._extract_code_globals_cache[co] = out_names
+
+    return out_names
+
+  def extract_func_data(self, func):
+    """
+    Turn the function into a tuple of data necessary to recreate it:
+      code, globals, defaults, closure, dict
+    """
+    code = func.__code__
+
+    # extract all global ref's
+    func_global_refs = self.extract_code_globals(code)
+
+    # process all variables referenced by global environment
+    f_globals = {}
+    for var in func_global_refs:
+      if var in func.__globals__:
+        f_globals[var] = func.__globals__[var]
+
+    # defaults requires no processing
+    defaults = func.__defaults__
+
+    # process closure
+    closure = [c.cell_contents for c in func.__closure__] if func.__closure__ else []
+
+    # save the dict
+    dct = func.__dict__
+
+    base_globals = self.globals_ref.get(id(func.__globals__), {})
+    self.globals_ref[id(func.__globals__)] = base_globals
+
+    return (code, f_globals, defaults, closure, dct, base_globals)
+
+  def save_builtin_function(self, obj):
+    if obj.__module__ is "__builtin__":
+      return self.save_global(obj)
+    return self.save_function(obj)
+  dispatch[types.BuiltinFunctionType] = save_builtin_function
+
+  def save_global(self, obj, name=None, pack=struct.pack): # pylint: disable=too-many-branches
+    if obj.__module__ == "__builtin__" or obj.__module__ == "builtins":
+      if obj in _BUILTIN_TYPE_NAMES:
+        return self.save_reduce(_builtin_type, (_BUILTIN_TYPE_NAMES[obj],), obj=obj)
+
+    if name is None:
+      name = obj.__name__
+
+    modname = getattr(obj, "__module__", None)
+    if modname is None:
+      try:
+        # whichmodule() could fail, see
+        # https://bitbucket.org/gutworth/six/issues/63/importing-six-breaks-pickling
+        modname = pickle.whichmodule(obj, name)
+      except Exception:
+        modname = '__main__'
+
+    if modname == '__main__':
+      themodule = None
+    else:
+      __import__(modname)
+      themodule = sys.modules[modname]
+      self.modules.add(themodule)
+
+    if hasattr(themodule, name) and getattr(themodule, name) is obj:
+      return Pickler.save_global(self, obj, name)
+
+    typ = type(obj)
+    if typ is not obj and isinstance(obj, (type, types.ClassType)):
+      d = dict(obj.__dict__)  # copy dict proxy to a dict
+      if not isinstance(d.get('__dict__', None), property):
+        # don't extract dict that are properties
+        d.pop('__dict__', None)
+      d.pop('__weakref__', None)
+
+      # hack as __new__ is stored differently in the __dict__
+      new_override = d.get('__new__', None)
+      if new_override:
+        d['__new__'] = obj.__new__
+
+      # workaround for namedtuple (hijacked by PySpark)
+      if getattr(obj, '_is_namedtuple_', False):
+        self.save_reduce(_load_namedtuple, (obj.__name__, obj._fields))
+        return
+
+      self.save(_load_class)
+      self.save_reduce(typ, (obj.__name__, obj.__bases__, {"__doc__": obj.__doc__}), obj=obj)
+      d.pop('__doc__', None)
+      # handle property and staticmethod
+      dd = {}
+      for k, v in d.items():
+        if isinstance(v, property):
+          k = ('property', k)
+          v = (v.fget, v.fset, v.fdel, v.__doc__)
+        elif isinstance(v, staticmethod) and hasattr(v, '__func__'):
+          k = ('staticmethod', k)
+          v = v.__func__
+        elif isinstance(v, classmethod) and hasattr(v, '__func__'):
+          k = ('classmethod', k)
+          v = v.__func__
+        dd[k] = v
+      self.save(dd)
+      self.write(pickle.TUPLE2)
+      self.write(pickle.REDUCE)
+
+    else:
+      raise pickle.PicklingError("Can't pickle %r" % obj)
+
+  dispatch[type] = save_global
+  dispatch[types.ClassType] = save_global
+
+  def save_instancemethod(self, obj):
+    # Memoization rarely is ever useful due to python bounding
+    if PY3:
+      self.save_reduce(types.MethodType, (obj.__func__, obj.__self__), obj=obj)
+    else:
+      self.save_reduce(
+          types.MethodType, (obj.__func__, obj.__self__, obj.__self__.__class__),
+          obj=obj)
+  dispatch[types.MethodType] = save_instancemethod
+
+  def save_inst(self, obj):
+    """Inner logic to save instance. Based off pickle.save_inst
+    Supports __transient__"""
+    cls = obj.__class__
+
+    memo = self.memo
+    write = self.write
+    save = self.save
+
+    if hasattr(obj, '__getinitargs__'):
+      args = obj.__getinitargs__()
+      len(args)  # assert it's a sequence
+      pickle._keep_alive(args, memo) # pylint: disable=protected-access
+    else:
+      args = ()
+
+    write(pickle.MARK)
+
+    if self.bin:
+      save(cls)
+      for arg in args:
+        save(arg)
+      write(pickle.OBJ)
+    else:
+      for arg in args:
+        save(arg)
+      write(pickle.INST + cls.__module__ + '\n' + cls.__name__ + '\n')
+
+    self.memoize(obj)
+
+    try:
+      getstate = obj.__getstate__
+    except AttributeError:
+      stuff = obj.__dict__
+      #remove items if transient
+      if hasattr(obj, '__transient__'):
+        transient = obj.__transient__
+        stuff = stuff.copy()
+        for k in list(stuff.keys()):
+          if k in transient:
+            del stuff[k]
+    else:
+      stuff = getstate()
+      pickle._keep_alive(stuff, memo) # pylint: disable=protected-access
+    save(stuff)
+    write(pickle.BUILD)
+
+  if not PY3:
+    dispatch[types.InstanceType] = save_inst
+
+  def save_property(self, obj):
+    # properties not correctly saved in python
+    self.save_reduce(property, (obj.fget, obj.fset, obj.fdel, obj.__doc__), obj=obj)
+  dispatch[property] = save_property
+
+  def save_itemgetter(self, obj):
+    """itemgetter serializer (needed for namedtuple support)"""
+    class Dummy: # pylint: disable=old-style-class
+      def __init__(self):
+        pass
+      def __getitem__(self, item):
+        return item
+    items = obj(Dummy())
+    if not isinstance(items, tuple):
+      items = (items, )
+    return self.save_reduce(operator.itemgetter, items)
+
+  if type(operator.itemgetter) is type: # pylint: disable=unidiomatic-typecheck
+    dispatch[operator.itemgetter] = save_itemgetter
+
+  def save_attrgetter(self, obj):
+    """attrgetter serializer"""
+    class Dummy(object):
+      def __init__(self, attrs, index=None):
+        self.attrs = attrs
+        self.index = index
+      def __getattribute__(self, item):
+        attrs = object.__getattribute__(self, "attrs")
+        index = object.__getattribute__(self, "index")
+        if index is None:
+          index = len(attrs)
+          attrs.append(item)
+        else:
+          attrs[index] = ".".join([attrs[index], item])
+        return type(self)(attrs, index)
+    attrs = []
+    obj(Dummy(attrs))
+    return self.save_reduce(operator.attrgetter, tuple(attrs))
+
+  if type(operator.attrgetter) is type: # pylint: disable=unidiomatic-typecheck
+    dispatch[operator.attrgetter] = save_attrgetter
+
+  def save_reduce(self, func, args, state=None, # pylint: disable=too-many-branches
+                  listitems=None, dictitems=None, obj=None):
+    """Modified to support __transient__ on new objects
+    Change only affects protocol level 2 (which is always used by PiCloud"""
+    # Assert that args is a tuple or None
+    if not isinstance(args, tuple):
+      raise pickle.PicklingError("args from reduce() should be a tuple")
+
+    # Assert that func is callable
+    if not hasattr(func, '__call__'):
+      raise pickle.PicklingError("func from reduce should be callable")
+
+    save = self.save
+    write = self.write
+
+    # Protocol 2 special case: if func's name is __newobj__, use NEWOBJ
+    if self.proto >= 2 and getattr(func, "__name__", "") == "__newobj__":
+      #Added fix to allow transient
+      cls = args[0]
+      if not hasattr(cls, "__new__"):
+        raise pickle.PicklingError(
+            "args[0] from __newobj__ args has no __new__")
+      if obj is not None and cls is not obj.__class__:
+        raise pickle.PicklingError(
+            "args[0] from __newobj__ args has the wrong class")
+      args = args[1:]
+      save(cls)
+
+      #Don't pickle transient entries
+      if hasattr(obj, '__transient__'):
+        transient = obj.__transient__
+        state = state.copy()
+
+        for k in list(state.keys()):
+          if k in transient:
+            del state[k]
+
+      save(args)
+      write(pickle.NEWOBJ)
+    else:
+      save(func)
+      save(args)
+      write(pickle.REDUCE)
+
+    if obj is not None:
+      self.memoize(obj)
+
+    # More new special cases (that work with older protocols as
+    # well): when __reduce__ returns a tuple with 4 or 5 items,
+    # the 4th and 5th item should be iterators that provide list
+    # items and dict items (as (key, value) tuples), or None.
+
+    if listitems is not None:
+      self._batch_appends(listitems)
+
+    if dictitems is not None:
+      self._batch_setitems(dictitems)
+
+    if state is not None:
+      save(state)
+      write(pickle.BUILD)
+
+  def save_partial(self, obj):
+    """Partial objects do not serialize correctly in python2.x -- this fixes the bugs"""
+    self.save_reduce(_genpartial, (obj.func, obj.args, obj.keywords))
+
+  if sys.version_info < (2, 7):  # 2.7 supports partial pickling
+    dispatch[partial] = save_partial
+
+
+  def save_file(self, obj): # pylint: disable=too-many-branches
+    """Save a file"""
+    try:
+      import StringIO as pystringIO #we can't use cStringIO as it lacks the name attribute
+    except ImportError:
+      import io as pystringIO # pylint: disable=reimported
+
+    if not hasattr(obj, 'name') or  not hasattr(obj, 'mode'):
+      raise pickle.PicklingError("Cannot pickle files that do not map to an actual file")
+    if obj is sys.stdout:
+      return self.save_reduce(getattr, (sys, 'stdout'), obj=obj)
+    if obj is sys.stderr:
+      return self.save_reduce(getattr, (sys, 'stderr'), obj=obj)
+    if obj is sys.stdin:
+      raise pickle.PicklingError("Cannot pickle standard input")
+    if  hasattr(obj, 'isatty') and obj.isatty():
+      raise pickle.PicklingError("Cannot pickle files that map to tty objects")
+    if 'r' not in obj.mode:
+      raise pickle.PicklingError("Cannot pickle files that are not opened for reading")
+    name = obj.name
+    try:
+      fsize = os.stat(name).st_size
+    except OSError:
+      raise pickle.PicklingError("Cannot pickle file %s as it cannot be stat" % name)
+
+    if obj.closed:
+      #create an empty closed string io
+      retval = pystringIO.StringIO("")
+      retval.close()
+    elif not fsize: #empty file
+      retval = pystringIO.StringIO("")
+      try:
+        tmpfile = file(name)
+        tst = tmpfile.read(1)
+      except IOError:
+        raise pickle.PicklingError("Cannot pickle file %s as it cannot be read" % name)
+      tmpfile.close()
+      if tst != '':
+        raise pickle.PicklingError(
+            "Cannot pickle file %s as it does not appear to map to a physical, real file" % name)
+    else:
+      try:
+        tmpfile = file(name)
+        contents = tmpfile.read()
+        tmpfile.close()
+      except IOError:
+        raise pickle.PicklingError("Cannot pickle file %s as it cannot be read" % name)
+      retval = pystringIO.StringIO(contents)
+      curloc = obj.tell()
+      retval.seek(curloc)
+
+    retval.name = name
+    self.save(retval)
+    self.memoize(obj)
+
+  if PY3:
+    dispatch[io.TextIOWrapper] = save_file
+  else:
+    dispatch[file] = save_file
+
+  # Special functions for Add-on libraries
+
+  def inject_numpy(self):
+    numpy = sys.modules.get('numpy')
+    if not numpy or not hasattr(numpy, 'ufunc'):
+      return
+    self.dispatch[numpy.ufunc] = self.__class__.save_ufunc
+
+  def save_ufunc(self, obj):
+    """Hack function for saving numpy ufunc objects"""
+    name = obj.__name__
+    numpy_tst_mods = ['numpy', 'scipy.special']
+    for tst_mod_name in numpy_tst_mods:
+      tst_mod = sys.modules.get(tst_mod_name, None)
+      if tst_mod and name in tst_mod.__dict__:
+        return self.save_reduce(_getobject, (tst_mod_name, name))
+    raise pickle.PicklingError(
+        'cannot save %s. Cannot resolve what module it is defined in' % str(obj))
+
+  def inject_addons(self):
+    """Plug in system. Register additional pickling functions if modules already loaded"""
+    self.inject_numpy()
+
+
+# Shorthands for legacy support
+
+def dump(obj, filen, protocol=2):
+  CloudPickler(filen, protocol).dump(obj)
+
+
+def dumps(obj, protocol=2):
+  filen = StringIO()
+
+  cp = CloudPickler(filen, protocol)
+  cp.dump(obj)
+
+  return filen.getvalue()
+
+
+#hack for __import__ not working as desired
+def subimport(name):
+  __import__(name)
+  return sys.modules[name]
+
+
+# restores function attributes
+def _restore_attr(obj, attr):
+  for key, val in attr.items():
+    setattr(obj, key, val)
+  return obj
+
+
+def _get_module_builtins():
+  return pickle.__builtins__ # pylint: disable=no-member
+
+
+def print_exec(stream):
+  ei = sys.exc_info()
+  traceback.print_exception(ei[0], ei[1], ei[2], None, stream)
+
+
+def _modules_to_main(modList):
+  """Force every module in modList to be placed into main"""
+  if not modList:
+    return
+
+  main = sys.modules['__main__']
+  for modname in modList:
+    if isinstance(modname, str):
+      try:
+        mod = __import__(modname)
+      except Exception:
+        sys.stderr.write(
+            'warning: could not import %s\n.  '
+            'Your function may unexpectedly error due to this import failing;'
+            'A version mismatch is likely.  Specific error was:\n' % modname)
+        print_exec(sys.stderr)
+      else:
+        setattr(main, mod.__name__, mod)
+
+
+#object generators:
+def _genpartial(func, args, kwds):
+  if not args:
+    args = ()
+  if not kwds:
+    kwds = {}
+  return partial(func, *args, **kwds)
+
+
+def _fill_function(func, globalsn, defaults, dictn, module):
+  """ Fills in the rest of function data into the skeleton function object
+    that were created via _make_skel_func().
+     """
+  func.__globals__.update(globalsn)
+  func.__defaults__ = defaults
+  func.__dict__ = dictn
+  func.__module__ = module
+
+  return func
+
+
+def _make_cell(value):
+  return (lambda: value).__closure__[0]
+
+
+def _reconstruct_closure(values):
+  return tuple([_make_cell(v) for v in values])
+
+
+def _make_skel_func(code, closures, base_globals=None):
+  """ Creates a skeleton function object that contains just the provided
+    code and the correct number of cells in func_closure.  All other
+    func attributes (e.g. func_globals) are empty.
+  """
+  closure = _reconstruct_closure(closures) if closures else None
+
+  if base_globals is None:
+    base_globals = {}
+  base_globals['__builtins__'] = __builtins__
+
+  return types.FunctionType(code, base_globals, None, None, closure)
+
+
+def _load_class(cls, d):
+  """
+  Loads additional properties into class `cls`.
+  """
+  for k, v in d.items():
+    if isinstance(k, tuple):
+      typ, k = k
+      if typ == 'property':
+        v = property(*v)
+      elif typ == 'staticmethod':
+        v = staticmethod(v) # pylint: disable=redefined-variable-type
+      elif typ == 'classmethod':
+        v = classmethod(v)
+    setattr(cls, k, v)
+  return cls
+
+
+def _load_namedtuple(name, fields):
+  """
+  Loads a class generated by namedtuple
+  """
+  from collections import namedtuple
+  return namedtuple(name, fields)
+
+
+# Constructors for 3rd party libraries
+# Note: These can never be renamed due to client compatibility issues
+
+def _getobject(modname, attribute):
+  mod = __import__(modname, fromlist=[attribute])
+  return mod.__dict__[attribute]
+</code></pre>
+  </div>
+
+  </header>
+
+  <section id="section-items">
+    <h2 class="section-title" id="header-variables">Module variables</h2>
+      <div class="item">
+      <p id="heronpy.api.cloudpickle.DELETE_GLOBAL" class="name">var <span class="ident">DELETE_GLOBAL</span></p>
+      
+  
+  <div class="source_cont">
+</div>
+
+      </div>
+      <div class="item">
+      <p id="heronpy.api.cloudpickle.EXTENDED_ARG" class="name">var <span class="ident">EXTENDED_ARG</span></p>
+      
+  
+  <div class="source_cont">
+</div>
+
+      </div>
+      <div class="item">
+      <p id="heronpy.api.cloudpickle.GLOBAL_OPS" class="name">var <span class="ident">GLOBAL_OPS</span></p>
+      
+  
+  <div class="source_cont">
+</div>
+
+      </div>
+      <div class="item">
+      <p id="heronpy.api.cloudpickle.HAVE_ARGUMENT" class="name">var <span class="ident">HAVE_ARGUMENT</span></p>
+      
+  
+  <div class="source_cont">
+</div>
+
+      </div>
+      <div class="item">
+      <p id="heronpy.api.cloudpickle.LOAD_GLOBAL" class="name">var <span class="ident">LOAD_GLOBAL</span></p>
+      
+  
+  <div class="source_cont">
+</div>
+
+      </div>
+      <div class="item">
+      <p id="heronpy.api.cloudpickle.PY3" class="name">var <span class="ident">PY3</span></p>
+      
+  
+  <div class="source_cont">
+</div>
+
+      </div>
+      <div class="item">
+      <p id="heronpy.api.cloudpickle.STORE_GLOBAL" class="name">var <span class="ident">STORE_GLOBAL</span></p>
+      
+  
+  <div class="source_cont">
+</div>
+
+      </div>
+      <div class="item">
+      <p id="heronpy.api.cloudpickle.k1" class="name">var <span class="ident">k1</span></p>
+      
+  
+  <div class="source_cont">
+</div>
+
+      </div>
+
+    <h2 class="section-title" id="header-functions">Functions</h2>
+      
+  <div class="item">
+    <div class="name def" id="heronpy.api.cloudpickle.dump">
+    <p>def <span class="ident">dump</span>(</p><p>obj, filen, protocol=2)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-heronpy.api.cloudpickle.dump', this);">Show source &equiv;</a></p>
+  <div id="source-heronpy.api.cloudpickle.dump" class="source">
+    <pre><code>def dump(obj, filen, protocol=2):
+  CloudPickler(filen, protocol).dump(obj)
+</code></pre>
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
+    <div class="name def" id="heronpy.api.cloudpickle.dumps">
+    <p>def <span class="ident">dumps</span>(</p><p>obj, protocol=2)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-heronpy.api.cloudpickle.dumps', this);">Show source &equiv;</a></p>
+  <div id="source-heronpy.api.cloudpickle.dumps" class="source">
+    <pre><code>def dumps(obj, protocol=2):
+  filen = StringIO()
+
+  cp = CloudPickler(filen, protocol)
+  cp.dump(obj)
+
+  return filen.getvalue()
+</code></pre>
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
+    <div class="name def" id="heronpy.api.cloudpickle.islambda">
+    <p>def <span class="ident">islambda</span>(</p><p>func)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-heronpy.api.cloudpickle.islambda', this);">Show source &equiv;</a></p>
+  <div id="source-heronpy.api.cloudpickle.islambda" class="source">
+    <pre><code>def islambda(func):
+  return getattr(func, '__name__') == '<lambda>'
+</code></pre>
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
+    <div class="name def" id="heronpy.api.cloudpickle.print_exec">
+    <p>def <span class="ident">print_exec</span>(</p><p>stream)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-heronpy.api.cloudpickle.print_exec', this);">Show source &equiv;</a></p>
+  <div id="source-heronpy.api.cloudpickle.print_exec" class="source">
+    <pre><code>def print_exec(stream):
+  ei = sys.exc_info()
+  traceback.print_exception(ei[0], ei[1], ei[2], None, stream)
+</code></pre>
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
+    <div class="name def" id="heronpy.api.cloudpickle.subimport">
+    <p>def <span class="ident">subimport</span>(</p><p>name)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-heronpy.api.cloudpickle.subimport', this);">Show source &equiv;</a></p>
+  <div id="source-heronpy.api.cloudpickle.subimport" class="source">
+    <pre><code>def subimport(name):
+  __import__(name)
+  return sys.modules[name]
+</code></pre>
+  </div>
+</div>
+
+  </div>
+  
+
+    <h2 class="section-title" id="header-classes">Classes</h2>
+      
+      <div class="item">
+      <p id="heronpy.api.cloudpickle.CloudPickler" class="name">class <span class="ident">CloudPickler</span></p>
+      
+  
+    <div class="desc"><p>CloudPickler class</p></div>
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-heronpy.api.cloudpickle.CloudPickler', this);">Show source &equiv;</a></p>
+  <div id="source-heronpy.api.cloudpickle.CloudPickler" class="source">
+    <pre><code>class CloudPickler(Pickler): # pylint: disable=too-many-public-methods
+  """
+  CloudPickler class
+  """
+  dispatch = Pickler.dispatch.copy()
+
+  def __init__(self, filen, protocol=None):
+    Pickler.__init__(self, filen, protocol)
+    # set of modules to unpickle
+    self.modules = set()
+    # map ids to dictionary. used to ensure that functions can share global env
+    self.globals_ref = {}
+
+  def dump(self, obj):
+    self.inject_addons()
+    try:
+      return Pickler.dump(self, obj)
+    except RuntimeError as e:
+      if 'recursion' in e.args[0]:
+        msg = """Could not pickle object as excessively deep recursion required."""
+        raise pickle.PicklingError(msg)
+    except pickle.PickleError:
+      raise
+    except Exception as e:
+      print_exec(sys.stderr)
+      raise pickle.PicklingError(str(e))
+
+  def save_memoryview(self, obj):
+    """Fallback to save_string"""
+    Pickler.save_string(self, str(obj))
+
+  def save_buffer(self, obj):
+    """Fallback to save_string"""
+    Pickler.save_string(self, str(obj))
+  if PY3:
+    dispatch[memoryview] = save_memoryview
+  else:
+    dispatch[buffer] = save_buffer
+
+  def save_unsupported(self, obj): # pylint: disable=no-self-use
+    raise pickle.PicklingError("Cannot pickle objects of type %s" % type(obj))
+  dispatch[types.GeneratorType] = save_unsupported
+
+  # itertools objects do not pickle!
+  for v in itertools.__dict__.values():
+    if type(v) is type: # pylint: disable=unidiomatic-typecheck
+      dispatch[v] = save_unsupported
+
+  def save_module(self, obj):
+    """
+    Save a module as an import
+    """
+    self.modules.add(obj)
+    self.save_reduce(subimport, (obj.__name__,), obj=obj)
+  dispatch[types.ModuleType] = save_module
+
+  def save_codeobject(self, obj):
+    """
+    Save a code object
+    """
+    if PY3:
+      args = (
+          obj.co_argcount, obj.co_kwonlyargcount, obj.co_nlocals, obj.co_stacksize,
+          obj.co_flags, obj.co_code, obj.co_consts, obj.co_names, obj.co_varnames,
+          obj.co_filename, obj.co_name, obj.co_firstlineno, obj.co_lnotab, obj.co_freevars,
+          obj.co_cellvars
+      )
+    else:
+      args = (
+          obj.co_argcount, obj.co_nlocals, obj.co_stacksize, obj.co_flags, obj.co_code,
+          obj.co_consts, obj.co_names, obj.co_varnames, obj.co_filename, obj.co_name,
+          obj.co_firstlineno, obj.co_lnotab, obj.co_freevars, obj.co_cellvars
+      )
+    self.save_reduce(types.CodeType, args, obj=obj)
+  dispatch[types.CodeType] = save_codeobject
+
+  def save_function(self, obj, name=None):
+    """ Registered with the dispatch to handle all function types.
+    Determines what kind of function obj is (e.g. lambda, defined at
+    interactive prompt, etc) and handles the pickling appropriately.
+    """
+    write = self.write
+
+    if name is None:
+      name = obj.__name__
+    try:
+      # whichmodule() could fail, see
+      # https://bitbucket.org/gutworth/six/issues/63/importing-six-breaks-pickling
+      modname = pickle.whichmodule(obj, name)
+    except Exception:
+      modname = None
+    # print('which gives %s %s %s' % (modname, obj, name))
+    try:
+      themodule = sys.modules[modname]
+    except KeyError:
+      # eval'd items such as namedtuple give invalid items for their function __module__
+      modname = '__main__'
+
+    if modname == '__main__':
+      themodule = None
+
+    if themodule:
+      self.modules.add(themodule)
+      if getattr(themodule, name, None) is obj:
+        return self.save_global(obj, name)
+
+    # if func is lambda, def'ed at prompt, is in main, or is nested, then
+    # we'll pickle the actual function object rather than simply saving a
+    # reference (as is done in default pickler), via save_function_tuple.
+    if islambda(obj) or obj.__code__.co_filename == '<stdin>' or themodule is None:
+      #print("save global", islambda(obj), obj.__code__.co_filename, modname, themodule)
+      self.save_function_tuple(obj)
+      return
+    else:
+      # func is nested
+      klass = getattr(themodule, name, None)
+      if klass is None or klass is not obj:
+        self.save_function_tuple(obj)
+        return
+
+    if obj.__dict__:
+      # essentially save_reduce, but workaround needed to avoid recursion
+      self.save(_restore_attr)
+      write(pickle.MARK + pickle.GLOBAL + modname + '\n' + name + '\n')
+      self.memoize(obj)
+      self.save(obj.__dict__)
+      write(pickle.TUPLE + pickle.REDUCE)
+    else:
+      write(pickle.GLOBAL + modname + '\n' + name + '\n')
+      self.memoize(obj)
+  dispatch[types.FunctionType] = save_function
+
+  def save_function_tuple(self, func):
+    """  Pickles an actual func object.
+    A func comprises: code, globals, defaults, closure, and dict.  We
+    extract and save these, injecting reducing functions at certain points
+    to recreate the func object.  Keep in mind that some of these pieces
+    can contain a ref to the func itself.  Thus, a naive save on these
+    pieces could trigger an infinite loop of save's.  To get around that,
+    we first create a skeleton func object using just the code (this is
+    safe, since this won't contain a ref to the func), and memoize it as
+    soon as it's created.  The other stuff can then be filled in later.
+    """
+    save = self.save
+    write = self.write
+
+    code, f_globals, defaults, closure, dct, base_globals = self.extract_func_data(func)
+
+    save(_fill_function)  # skeleton function updater
+    write(pickle.MARK)    # beginning of tuple that _fill_function expects
+
+    # create a skeleton function object and memoize it
+    save(_make_skel_func)
+    save((code, closure, base_globals))
+    write(pickle.REDUCE)
+    self.memoize(func)
+
+    # save the rest of the func data needed by _fill_function
+    save(f_globals)
+    save(defaults)
+    save(dct)
+    save(func.__module__)
+    write(pickle.TUPLE)
+    write(pickle.REDUCE)  # applies _fill_function on the tuple
+
+  _extract_code_globals_cache = (
+      weakref.WeakKeyDictionary()
+      if sys.version_info >= (2, 7) and not hasattr(sys, "pypy_version_info")
+      else {}
+  )
+
+  @classmethod
+  def extract_code_globals(cls, co):
+    """
+    Find all globals names read or written to by codeblock co
+    """
+    out_names = cls._extract_code_globals_cache.get(co)
+    if out_names is None:
+      try:
+        names = co.co_names
+      except AttributeError:
+        # PyPy "builtin-code" object
+        out_names = set()
+      else:
+        out_names = set(names[oparg]
+                        for op, oparg in _walk_global_ops(co))
+
+        # see if nested function have any global refs
+        if co.co_consts:
+          for const in co.co_consts:
+            if type(const) is types.CodeType: # pylint: disable=unidiomatic-typecheck
+              out_names |= cls.extract_code_globals(const)
+
+      cls._extract_code_globals_cache[co] = out_names
+
+    return out_names
+
+  def extract_func_data(self, func):
+    """
+    Turn the function into a tuple of data necessary to recreate it:
+      code, globals, defaults, closure, dict
+    """
+    code = func.__code__
+
+    # extract all global ref's
+    func_global_refs = self.extract_code_globals(code)
+
+    # process all variables referenced by global environment
+    f_globals = {}
+    for var in func_global_refs:
+      if var in func.__globals__:
+        f_globals[var] = func.__globals__[var]
+
+    # defaults requires no processing
+    defaults = func.__defaults__
+
+    # process closure
+    closure = [c.cell_contents for c in func.__closure__] if func.__closure__ else []
+
+    # save the dict
+    dct = func.__dict__
+
+    base_globals = self.globals_ref.get(id(func.__globals__), {})
+    self.globals_ref[id(func.__globals__)] = base_globals
+
+    return (code, f_globals, defaults, closure, dct, base_globals)
+
+  def save_builtin_function(self, obj):
+    if obj.__module__ is "__builtin__":
+      return self.save_global(obj)
+    return self.save_function(obj)
+  dispatch[types.BuiltinFunctionType] = save_builtin_function
+
+  def save_global(self, obj, name=None, pack=struct.pack): # pylint: disable=too-many-branches
+    if obj.__module__ == "__builtin__" or obj.__module__ == "builtins":
+      if obj in _BUILTIN_TYPE_NAMES:
+        return self.save_reduce(_builtin_type, (_BUILTIN_TYPE_NAMES[obj],), obj=obj)
+
+    if name is None:
+      name = obj.__name__
+
+    modname = getattr(obj, "__module__", None)
+    if modname is None:
+      try:
+        # whichmodule() could fail, see
+        # https://bitbucket.org/gutworth/six/issues/63/importing-six-breaks-pickling
+        modname = pickle.whichmodule(obj, name)
+      except Exception:
+        modname = '__main__'
+
+    if modname == '__main__':
+      themodule = None
+    else:
+      __import__(modname)
+      themodule = sys.modules[modname]
+      self.modules.add(themodule)
+
+    if hasattr(themodule, name) and getattr(themodule, name) is obj:
+      return Pickler.save_global(self, obj, name)
+
+    typ = type(obj)
+    if typ is not obj and isinstance(obj, (type, types.ClassType)):
+      d = dict(obj.__dict__)  # copy dict proxy to a dict
+      if not isinstance(d.get('__dict__', None), property):
+        # don't extract dict that are properties
+        d.pop('__dict__', None)
+      d.pop('__weakref__', None)
+
+      # hack as __new__ is stored differently in the __dict__
+      new_override = d.get('__new__', None)
+      if new_override:
+        d['__new__'] = obj.__new__
+
+      # workaround for namedtuple (hijacked by PySpark)
+      if getattr(obj, '_is_namedtuple_', False):
+        self.save_reduce(_load_namedtuple, (obj.__name__, obj._fields))
+        return
+
+      self.save(_load_class)
+      self.save_reduce(typ, (obj.__name__, obj.__bases__, {"__doc__": obj.__doc__}), obj=obj)
+      d.pop('__doc__', None)
+      # handle property and staticmethod
+      dd = {}
+      for k, v in d.items():
+        if isinstance(v, property):
+          k = ('property', k)
+          v = (v.fget, v.fset, v.fdel, v.__doc__)
+        elif isinstance(v, staticmethod) and hasattr(v, '__func__'):
+          k = ('staticmethod', k)
+          v = v.__func__
+        elif isinstance(v, classmethod) and hasattr(v, '__func__'):
+          k = ('classmethod', k)
+          v = v.__func__
+        dd[k] = v
+      self.save(dd)
+      self.write(pickle.TUPLE2)
+      self.write(pickle.REDUCE)
+
+    else:
+      raise pickle.PicklingError("Can't pickle %r" % obj)
+
+  dispatch[type] = save_global
+  dispatch[types.ClassType] = save_global
+
+  def save_instancemethod(self, obj):
+    # Memoization rarely is ever useful due to python bounding
+    if PY3:
+      self.save_reduce(types.MethodType, (obj.__func__, obj.__self__), obj=obj)
+    else:
+      self.save_reduce(
+          types.MethodType, (obj.__func__, obj.__self__, obj.__self__.__class__),
+          obj=obj)
+  dispatch[types.MethodType] = save_instancemethod
+
+  def save_inst(self, obj):
+    """Inner logic to save instance. Based off pickle.save_inst
+    Supports __transient__"""
+    cls = obj.__class__
+
+    memo = self.memo
+    write = self.write
+    save = self.save
+
+    if hasattr(obj, '__getinitargs__'):
+      args = obj.__getinitargs__()
+      len(args)  # assert it's a sequence
+      pickle._keep_alive(args, memo) # pylint: disable=protected-access
+    else:
+      args = ()
+
+    write(pickle.MARK)
+
+    if self.bin:
+      save(cls)
+      for arg in args:
+        save(arg)
+      write(pickle.OBJ)
+    else:
+      for arg in args:
+        save(arg)
+      write(pickle.INST + cls.__module__ + '\n' + cls.__name__ + '\n')
+
+    self.memoize(obj)
+
+    try:
+      getstate = obj.__getstate__
+    except AttributeError:
+      stuff = obj.__dict__
+      #remove items if transient
+      if hasattr(obj, '__transient__'):
+        transient = obj.__transient__
+        stuff = stuff.copy()
+        for k in list(stuff.keys()):
+          if k in transient:
+            del stuff[k]
+    else:
+      stuff = getstate()
+      pickle._keep_alive(stuff, memo) # pylint: disable=protected-access
+    save(stuff)
+    write(pickle.BUILD)
+
+  if not PY3:
+    dispatch[types.InstanceType] = save_inst
+
+  def save_property(self, obj):
+    # properties not correctly saved in python
+    self.save_reduce(property, (obj.fget, obj.fset, obj.fdel, obj.__doc__), obj=obj)
+  dispatch[property] = save_property
+
+  def save_itemgetter(self, obj):
+    """itemgetter serializer (needed for namedtuple support)"""
+    class Dummy: # pylint: disable=old-style-class
+      def __init__(self):
+        pass
+      def __getitem__(self, item):
+        return item
+    items = obj(Dummy())
+    if not isinstance(items, tuple):
+      items = (items, )
+    return self.save_reduce(operator.itemgetter, items)
+
+  if type(operator.itemgetter) is type: # pylint: disable=unidiomatic-typecheck
+    dispatch[operator.itemgetter] = save_itemgetter
+
+  def save_attrgetter(self, obj):
+    """attrgetter serializer"""
+    class Dummy(object):
+      def __init__(self, attrs, index=None):
+        self.attrs = attrs
+        self.index = index
+      def __getattribute__(self, item):
+        attrs = object.__getattribute__(self, "attrs")
+        index = object.__getattribute__(self, "index")
+        if index is None:
+          index = len(attrs)
+          attrs.append(item)
+        else:
+          attrs[index] = ".".join([attrs[index], item])
+        return type(self)(attrs, index)
+    attrs = []
+    obj(Dummy(attrs))
+    return self.save_reduce(operator.attrgetter, tuple(attrs))
+
+  if type(operator.attrgetter) is type: # pylint: disable=unidiomatic-typecheck
+    dispatch[operator.attrgetter] = save_attrgetter
+
+  def save_reduce(self, func, args, state=None, # pylint: disable=too-many-branches
+                  listitems=None, dictitems=None, obj=None):
+    """Modified to support __transient__ on new objects
+    Change only affects protocol level 2 (which is always used by PiCloud"""
+    # Assert that args is a tuple or None
+    if not isinstance(args, tuple):
+      raise pickle.PicklingError("args from reduce() should be a tuple")
+
+    # Assert that func is callable
+    if not hasattr(func, '__call__'):
+      raise pickle.PicklingError("func from reduce should be callable")
+
+    save = self.save
+    write = self.write
+
+    # Protocol 2 special case: if func's name is __newobj__, use NEWOBJ
+    if self.proto >= 2 and getattr(func, "__name__", "") == "__newobj__":
+      #Added fix to allow transient
+      cls = args[0]
+      if not hasattr(cls, "__new__"):
+        raise pickle.PicklingError(
+            "args[0] from __newobj__ args has no __new__")
+      if obj is not None and cls is not obj.__class__:
+        raise pickle.PicklingError(
+            "args[0] from __newobj__ args has the wrong class")
+      args = args[1:]
+      save(cls)
+
+      #Don't pickle transient entries
+      if hasattr(obj, '__transient__'):
+        transient = obj.__transient__
+        state = state.copy()
+
+        for k in list(state.keys()):
+          if k in transient:
+            del state[k]
+
+      save(args)
+      write(pickle.NEWOBJ)
+    else:
+      save(func)
+      save(args)
+      write(pickle.REDUCE)
+
+    if obj is not None:
+      self.memoize(obj)
+
+    # More new special cases (that work with older protocols as
+    # well): when __reduce__ returns a tuple with 4 or 5 items,
+    # the 4th and 5th item should be iterators that provide list
+    # items and dict items (as (key, value) tuples), or None.
+
+    if listitems is not None:
+      self._batch_appends(listitems)
+
+    if dictitems is not None:
+      self._batch_setitems(dictitems)
+
+    if state is not None:
+      save(state)
+      write(pickle.BUILD)
+
+  def save_partial(self, obj):
+    """Partial objects do not serialize correctly in python2.x -- this fixes the bugs"""
+    self.save_reduce(_genpartial, (obj.func, obj.args, obj.keywords))
+
+  if sys.version_info < (2, 7):  # 2.7 supports partial pickling
+    dispatch[partial] = save_partial
+
+
+  def save_file(self, obj): # pylint: disable=too-many-branches
+    """Save a file"""
+    try:
+      import StringIO as pystringIO #we can't use cStringIO as it lacks the name attribute
+    except ImportError:
+      import io as pystringIO # pylint: disable=reimported
+
+    if not hasattr(obj, 'name') or  not hasattr(obj, 'mode'):
+      raise pickle.PicklingError("Cannot pickle files that do not map to an actual file")
+    if obj is sys.stdout:
+      return self.save_reduce(getattr, (sys, 'stdout'), obj=obj)
+    if obj is sys.stderr:
+      return self.save_reduce(getattr, (sys, 'stderr'), obj=obj)
+    if obj is sys.stdin:
+      raise pickle.PicklingError("Cannot pickle standard input")
+    if  hasattr(obj, 'isatty') and obj.isatty():
+      raise pickle.PicklingError("Cannot pickle files that map to tty objects")
+    if 'r' not in obj.mode:
+      raise pickle.PicklingError("Cannot pickle files that are not opened for reading")
+    name = obj.name
+    try:
+      fsize = os.stat(name).st_size
+    except OSError:
+      raise pickle.PicklingError("Cannot pickle file %s as it cannot be stat" % name)
+
+    if obj.closed:
+      #create an empty closed string io
+      retval = pystringIO.StringIO("")
+      retval.close()
+    elif not fsize: #empty file
+      retval = pystringIO.StringIO("")
+      try:
+        tmpfile = file(name)
+        tst = tmpfile.read(1)
+      except IOError:
+        raise pickle.PicklingError("Cannot pickle file %s as it cannot be read" % name)
+      tmpfile.close()
+      if tst != '':
+        raise pickle.PicklingError(
+            "Cannot pickle file %s as it does not appear to map to a physical, real file" % name)
+    else:
+      try:
+        tmpfile = file(name)
+        contents = tmpfile.read()
+        tmpfile.close()
+      except IOError:
+        raise pickle.PicklingError("Cannot pickle file %s as it cannot be read" % name)
+      retval = pystringIO.StringIO(contents)
+      curloc = obj.tell()
+      retval.seek(curloc)
+
+    retval.name = name
+    self.save(retval)
+    self.memoize(obj)
+
+  if PY3:
+    dispatch[io.TextIOWrapper] = save_file
+  else:
+    dispatch[file] = save_file
+
+  # Special functions for Add-on libraries
+
+  def inject_numpy(self):
+    numpy = sys.modules.get('numpy')
+    if not numpy or not hasattr(numpy, 'ufunc'):
+      return
+    self.dispatch[numpy.ufunc] = self.__class__.save_ufunc
+
+  def save_ufunc(self, obj):
+    """Hack function for saving numpy ufunc objects"""
+    name = obj.__name__
+    numpy_tst_mods = ['numpy', 'scipy.special']
+    for tst_mod_name in numpy_tst_mods:
+      tst_mod = sys.modules.get(tst_mod_name, None)
+      if tst_mod and name in tst_mod.__dict__:
+        return self.save_reduce(_getobject, (tst_mod_name, name))
+    raise pickle.PicklingError(
+        'cannot save %s. Cannot resolve what module it is defined in' % str(obj))
+
+  def inject_addons(self):
+    """Plug in system. Register additional pickling functions if modules already loaded"""
+    self.inject_numpy()
+</code></pre>
+  </div>
+</div>
+
+
+      <div class="class">
+          <h3>Ancestors (in MRO)</h3>
+          <ul class="class_list">
+          <li><a href="#heronpy.api.cloudpickle.CloudPickler">CloudPickler</a></li>
+          <li>pickle.Pickler</li>
+          </ul>
+          <h3>Class variables</h3>
+            <div class="item">
+            <p id="heronpy.api.cloudpickle.CloudPickler.dispatch" class="name">var <span class="ident">dispatch</span></p>
+            
+
+            
+  
+  <div class="source_cont">
+</div>
+
+            </div>
+            <div class="item">
+            <p id="heronpy.api.cloudpickle.CloudPickler.v" class="name">var <span class="ident">v</span></p>
+            
+
+            
+  
+  <div class="source_cont">
+</div>
+
+            </div>
+          <h3>Instance variables</h3>
+            <div class="item">
+            <p id="heronpy.api.cloudpickle.CloudPickler.globals_ref" class="name">var <span class="ident">globals_ref</span></p>
+            
+
+            
+  
+  <div class="source_cont">
+</div>
+
+            </div>
+            <div class="item">
+            <p id="heronpy.api.cloudpickle.CloudPickler.modules" class="name">var <span class="ident">modules</span></p>
+            
+
+            
+  
+  <div class="source_cont">
+</div>
+
+            </div>
+          <h3>Methods</h3>
+            
+  <div class="item">
+    <div class="name def" id="heronpy.api.cloudpickle.CloudPickler.__init__">
+    <p>def <span class="ident">__init__</span>(</p><p>self, filen, protocol=None)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-heronpy.api.cloudpickle.CloudPickler.__init__', this);">Show source &equiv;</a></p>
+  <div id="source-heronpy.api.cloudpickle.CloudPickler.__init__" class="source">
+    <pre><code>def __init__(self, filen, protocol=None):
+  Pickler.__init__(self, filen, protocol)
+  # set of modules to unpickle
+  self.modules = set()
+  # map ids to dictionary. used to ensure that functions can share global env
+  self.globals_ref = {}
+</code></pre>
+  </div>
+</div>
+
+  </div>
+  
+            
+  <div class="item">
+    <div class="name def" id="heronpy.api.cloudpickle.CloudPickler.clear_memo">
+    <p>def <span class="ident">clear_memo</span>(</p><p>self)</p>
+    </div>
+    
+
+    
+  
+    <div class="desc"><p>Clears the pickler's "memo".</p>
+<p>The memo is the data structure that remembers which objects the
+pickler has already seen, so that shared or recursive objects are
+pickled by reference and not by value.  This method is useful when
+re-using picklers.</p></div>
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-heronpy.api.cloudpickle.CloudPickler.clear_memo', this);">Show source &equiv;</a></p>
+  <div id="source-heronpy.api.cloudpickle.CloudPickler.clear_memo" class="source">
+    <pre><code>def clear_memo(self):
+    """Clears the pickler's "memo".
+    The memo is the data structure that remembers which objects the
+    pickler has already seen, so that shared or recursive objects are
+    pickled by reference and not by value.  This method is useful when
+    re-using picklers.
+    """
+    self.memo.clear()
+</code></pre>
+  </div>
+</div>
+
+  </div>
+  
+            
+  <div class="item">
+    <div class="name def" id="heronpy.api.cloudpickle.CloudPickler.dump">
+    <p>def <span class="ident">dump</span>(</p><p>self, obj)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-heronpy.api.cloudpickle.CloudPickler.dump', this);">Show source &equiv;</a></p>
+  <div id="source-heronpy.api.cloudpickle.CloudPickler.dump" class="source">
+    <pre><code>def dump(self, obj):
+  self.inject_addons()
+  try:
+    return Pickler.dump(self, obj)
+  except RuntimeError as e:
+    if 'recursion' in e.args[0]:
+      msg = """Could not pickle object as excessively deep recursion required."""
+      raise pickle.PicklingError(msg)
+  except pickle.PickleError:
+    raise
+  except Exception as e:
+    print_exec(sys.stderr)
+    raise pickle.PicklingError(str(e))
+</code></pre>
+  </div>
+</div>
+
+  </div>
+  
+            
+  <div class="item">
+    <div class="name def" id="heronpy.api.cloudpickle.CloudPickler.extract_code_globals">
+    <p>def <span class="ident">extract_code_globals</span>(</p><p>cls, co)</p>
+    </div>
+    
+
+    
+  
+    <div class="desc"><p>Find all globals names read or written to by codeblock co</p></div>
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-heronpy.api.cloudpickle.CloudPickler.extract_code_globals', this);">Show source &equiv;</a></p>
+  <div id="source-heronpy.api.cloudpickle.CloudPickler.extract_code_globals" class="source">
+    <pre><code>@classmethod
+def extract_code_globals(cls, co):
+  """
+  Find all globals names read or written to by codeblock co
+  """
+  out_names = cls._extract_code_globals_cache.get(co)
+  if out_names is None:
+    try:
+      names = co.co_names
+    except AttributeError:
+      # PyPy "builtin-code" object
+      out_names = set()
+    else:
+      out_names = set(names[oparg]
+                      for op, oparg in _walk_global_ops(co))
+      # see if nested function have any global refs
+      if co.co_consts:
+        for const in co.co_consts:
+          if type(const) is types.CodeType: # pylint: disable=unidiomatic-typecheck
+            out_names |= cls.extract_code_globals(const)
+    cls._extract_code_globals_cache[co] = out_names
+  return out_names
+</code></pre>
+  </div>
+</div>
+
+  </div>
+  
+            
+  <div class="item">
+    <div class="name def" id="heronpy.api.cloudpickle.CloudPickler.extract_func_data">
+    <p>def <span class="ident">extract_func_data</span>(</p><p>self, func)</p>
+    </div>
+    
+
+    
+  
+    <div class="desc"><p>Turn the function into a tuple of data necessary to recreate it:
+code, globals, defaults, closure, dict</p></div>
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-heronpy.api.cloudpickle.CloudPickler.extract_func_data', this);">Show source &equiv;</a></p>
+  <div id="source-heronpy.api.cloudpickle.CloudPickler.extract_func_data" class="source">
+    <pre><code>def extract_func_data(self, func):
+  """
+  Turn the function into a tuple of data necessary to recreate it:
+    code, globals, defaults, closure, dict
+  """
+  code = func.__code__
+  # extract all global ref's
+  func_global_refs = self.extract_code_globals(code)
+  # process all variables referenced by global environment
+  f_globals = {}
+  for var in func_global_refs:
+    if var in func.__globals__:
+      f_globals[var] = func.__globals__[var]
+  # defaults requires no processing
+  defaults = func.__defaults__
+  # process closure
+  closure = [c.cell_contents for c in func.__closure__] if func.__closure__ else []
+  # save the dict
+  dct = func.__dict__
+  base_globals = self.globals_ref.get(id(func.__globals__), {})
+  self.globals_ref[id(func.__globals__)] = base_globals
+  return (code, f_globals, defaults, closure, dct, base_globals)
+</code></pre>
+  </div>
+</div>
+
+  </div>
+  
+            
+  <div class="item">
+    <div class="name def" id="heronpy.api.cloudpickle.CloudPickler.get">
+    <p>def <span class="ident">get</span>(</p><p>self, i, pack=&lt;built-in function pack&gt;)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-heronpy.api.cloudpickle.CloudPickler.get', this);">Show source &equiv;</a></p>
+  <div id="source-heronpy.api.cloudpickle.CloudPickler.get" class="source">
+    <pre><code>def get(self, i, pack=struct.pack):
+    if self.bin:
+        if i < 256:
+            return BINGET + chr(i)
+        else:
+            return LONG_BINGET + pack("<i", i)
+    return GET + repr(i) + '\n'
+</code></pre>
+  </div>
+</div>
+
+  </div>
+  
+            
+  <div class="item">
+    <div class="name def" id="heronpy.api.cloudpickle.CloudPickler.inject_addons">
+    <p>def <span class="ident">inject_addons</span>(</p><p>self)</p>
+    </div>
+    
+
+    
+  
+    <div class="desc"><p>Plug in system. Register additional pickling functions if modules already loaded</p></div>
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-heronpy.api.cloudpickle.CloudPickler.inject_addons', this);">Show source &equiv;</a></p>
+  <div id="source-heronpy.api.cloudpickle.CloudPickler.inject_addons" class="source">
+    <pre><code>def inject_addons(self):
+  """Plug in system. Register additional pickling functions if modules already loaded"""
+  self.inject_numpy()
+</code></pre>
+  </div>
+</div>
+
+  </div>
+  
+            
+  <div class="item">
+    <div class="name def" id="heronpy.api.cloudpickle.CloudPickler.inject_numpy">
+    <p>def <span class="ident">inject_numpy</span>(</p><p>self)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-heronpy.api.cloudpickle.CloudPickler.inject_numpy', this);">Show source &equiv;</a></p>
+  <div id="source-heronpy.api.cloudpickle.CloudPickler.inject_numpy" class="source">
+    <pre><code>def inject_numpy(self):
+  numpy = sys.modules.get('numpy')
+  if not numpy or not hasattr(numpy, 'ufunc'):
+    return
+  self.dispatch[numpy.ufunc] = self.__class__.save_ufunc
+</code></pre>
+  </div>
+</div>
+
+  </div>
+  
+            
+  <div class="item">
+    <div class="name def" id="heronpy.api.cloudpickle.CloudPickler.memoize">
+    <p>def <span class="ident">memoize</span>(</p><p>self, obj)</p>
+    </div>
+    
+
+    
+  
+    <div class="desc"><p>Store an object in the memo.</p></div>
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-heronpy.api.cloudpickle.CloudPickler.memoize', this);">Show source &equiv;</a></p>
+  <div id="source-heronpy.api.cloudpickle.CloudPickler.memoize" class="source">
+    <pre><code>def memoize(self, obj):
+    """Store an object in the memo."""
+    # The Pickler memo is a dictionary mapping object ids to 2-tuples
+    # that contain the Unpickler memo key and the object being memoized.
+    # The memo key is written to the pickle and will become
+    # the key in the Unpickler's memo.  The object is stored in the
+    # Pickler memo so that transient objects are kept alive during
+    # pickling.
+    # The use of the Unpickler memo length as the memo key is just a
+    # convention.  The only requirement is that the memo values be unique.
+    # But there appears no advantage to any other scheme, and this
+    # scheme allows the Unpickler memo to be implemented as a plain (but
+    # growable) array, indexed by memo key.
+    if self.fast:
+        return
+    assert id(obj) not in self.memo
+    memo_len = len(self.memo)
+    self.write(self.put(memo_len))
+    self.memo[id(obj)] = memo_len, obj
+</code></pre>
+  </div>
+</div>
+
+  </div>
+  
+            
+  <div class="item">
+    <div class="name def" id="heronpy.api.cloudpickle.CloudPickler.persistent_id">
+    <p>def <span class="ident">persistent_id</span>(</p><p>self, obj)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-heronpy.api.cloudpickle.CloudPickler.persistent_id', this);">Show source &equiv;</a></p>
+  <div id="source-heronpy.api.cloudpickle.CloudPickler.persistent_id" class="source">
+    <pre><code>def persistent_id(self, obj):
+    # This exists so a subclass can override it
+    return None
+</code></pre>
+  </div>
+</div>
+
+  </div>
+  
+            
+  <div class="item">
+    <div class="name def" id="heronpy.api.cloudpickle.CloudPickler.put">
+    <p>def <span class="ident">put</span>(</p><p>self, i, pack=&lt;built-in function pack&gt;)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-heronpy.api.cloudpickle.CloudPickler.put', this);">Show source &equiv;</a></p>
+  <div id="source-heronpy.api.cloudpickle.CloudPickler.put" class="source">
+    <pre><code>def put(self, i, pack=struct.pack):
+    if self.bin:
+        if i < 256:
+            return BINPUT + chr(i)
+        else:
+            return LONG_BINPUT + pack("<i", i)
+    return PUT + repr(i) + '\n'
+</code></pre>
+  </div>
+</div>
+
+  </div>
+  
+            
+  <div class="item">
+    <div class="name def" id="heronpy.api.cloudpickle.CloudPickler.save">
+    <p>def <span class="ident">save</span>(</p><p>self, obj)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-heronpy.api.cloudpickle.CloudPickler.save', this);">Show source &equiv;</a></p>
+  <div id="source-heronpy.api.cloudpickle.CloudPickler.save" class="source">
+    <pre><code>def save(self, obj):
+    # Check for persistent id (defined by a subclass)
+    pid = self.persistent_id(obj)
+    if pid is not None:
+        self.save_pers(pid)
+        return
+    # Check the memo
+    x = self.memo.get(id(obj))
+    if x:
+        self.write(self.get(x[0]))
+        return
+    # Check the type dispatch table
+    t = type(obj)
+    f = self.dispatch.get(t)
+    if f:
+        f(self, obj) # Call unbound method with explicit self
+        return
+    # Check copy_reg.dispatch_table
+    reduce = dispatch_table.get(t)
+    if reduce:
+        rv = reduce(obj)
+    else:
+        # Check for a class with a custom metaclass; treat as regular class
+        try:
+            issc = issubclass(t, TypeType)
+        except TypeError: # t is not a class (old Boost; see SF #502085)
+            issc = 0
+        if issc:
+            self.save_global(obj)
+            return
+        # Check for a __reduce_ex__ method, fall back to __reduce__
+        reduce = getattr(obj, "__reduce_ex__", None)
+        if reduce:
+            rv = reduce(self.proto)
+        else:
+            reduce = getattr(obj, "__reduce__", None)
+            if reduce:
+                rv = reduce()
+            else:
+                raise PicklingError("Can't pickle %r object: %r" %
+                                    (t.__name__, obj))
+    # Check for string returned by reduce(), meaning "save as global"
+    if type(rv) is StringType:
+        self.save_global(obj, rv)
+        return
+    # Assert that reduce() returned a tuple
+    if type(rv) is not TupleType:
+        raise PicklingError("%s must return string or tuple" % reduce)
+    # Assert that it returned an appropriately sized tuple
+    l = len(rv)
+    if not (2 <= l <= 5):
+        raise PicklingError("Tuple returned by %s must have "
+                            "two to five elements" % reduce)
+    # Save the reduce() output and finally memoize the object
+    self.save_reduce(obj=obj, *rv)
+</code></pre>
+  </div>
+</div>
+
+  </div>
+  
+            
+  <div class="item">
+    <div class="name def" id="heronpy.api.cloudpickle.CloudPickler.save_attrgetter">
+    <p>def <span class="ident">save_attrgetter</span>(</p><p>self, obj)</p>
+    </div>
+    
+
+    
+  
+    <div class="desc"><p>attrgetter serializer</p></div>
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-heronpy.api.cloudpickle.CloudPickler.save_attrgetter', this);">Show source &equiv;</a></p>
+  <div id="source-heronpy.api.cloudpickle.CloudPickler.save_attrgetter" class="source">
+    <pre><code>def save_attrgetter(self, obj):
+  """attrgetter serializer"""
+  class Dummy(object):
+    def __init__(self, attrs, index=None):
+      self.attrs = attrs
+      self.index = index
+    def __getattribute__(self, item):
+      attrs = object.__getattribute__(self, "attrs")
+      index = object.__getattribute__(self, "index")
+      if index is None:
+        index = len(attrs)
+        attrs.append(item)
+      else:
+        attrs[index] = ".".join([attrs[index], item])
+      return type(self)(attrs, index)
+  attrs = []
+  obj(Dummy(attrs))
+  return self.save_reduce(operator.attrgetter, tuple(attrs))
+</code></pre>
+  </div>
+</div>
+
+  </div>
+  
+            
+  <div class="item">
+    <div class="name def" id="heronpy.api.cloudpickle.CloudPickler.save_bool">
+    <p>def <span class="ident">save_bool</span>(</p><p>self, obj)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-heronpy.api.cloudpickle.CloudPickler.save_bool', this);">Show source &equiv;</a></p>
+  <div id="source-heronpy.api.cloudpickle.CloudPickler.save_bool" class="source">
+    <pre><code>def save_bool(self, obj):
+    if self.proto >= 2:
+        self.write(obj and NEWTRUE or NEWFALSE)
+    else:
+        self.write(obj and TRUE or FALSE)
+</code></pre>
+  </div>
+</div>
+
+  </div>
+  
+            
+  <div class="item">
+    <div class="name def" id="heronpy.api.cloudpickle.CloudPickler.save_buffer">
+    <p>def <span class="ident">save_buffer</span>(</p><p>self, obj)</p>
+    </div>
+    
+
+    
+  
+    <div class="desc"><p>Fallback to save_string</p></div>
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-heronpy.api.cloudpickle.CloudPickler.save_buffer', this);">Show source &equiv;</a></p>
+  <div id="source-heronpy.api.cloudpickle.CloudPickler.save_buffer" class="source">
+    <pre><code>def save_buffer(self, obj):
+  """Fallback to save_string"""
+  Pickler.save_string(self, str(obj))
+</code></pre>
+  </div>
+</div>
+
+  </div>
+  
+            
+  <div class="item">
+    <div class="name def" id="heronpy.api.cloudpickle.CloudPickler.save_builtin_function">
+    <p>def <span class="ident">save_builtin_function</span>(</p><p>self, obj)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-heronpy.api.cloudpickle.CloudPickler.save_builtin_function', this);">Show source &equiv;</a></p>
+  <div id="source-heronpy.api.cloudpickle.CloudPickler.save_builtin_function" class="source">
+    <pre><code>def save_builtin_function(self, obj):
+  if obj.__module__ is "__builtin__":
+    return self.save_global(obj)
+  return self.save_function(obj)
+</code></pre>
+  </div>
+</div>
+
+  </div>
+  
+            
+  <div class="item">
+    <div class="name def" id="heronpy.api.cloudpickle.CloudPickler.save_codeobject">
+    <p>def <span class="ident">save_codeobject</span>(</p><p>self, obj)</p>
+    </div>
+    
+
+    
+  
+    <div class="desc"><p>Save a code object</p></div>
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-heronpy.api.cloudpickle.CloudPickler.save_codeobject', this);">Show source &equiv;</a></p>
+  <div id="source-heronpy.api.cloudpickle.CloudPickler.save_codeobject" class="source">
+    <pre><code>def save_codeobject(self, obj):
+  """
+  Save a code object
+  """
+  if PY3:
+    args = (
+        obj.co_argcount, obj.co_kwonlyargcount, obj.co_nlocals, obj.co_stacksize,
+        obj.co_flags, obj.co_code, obj.co_consts, obj.co_names, obj.co_varnames,
+        obj.co_filename, obj.co_name, obj.co_firstlineno, obj.co_lnotab, obj.co_freevars,
+        obj.co_cellvars
+    )
+  else:
+    args = (
+        obj.co_argcount, obj.co_nlocals, obj.co_stacksize, obj.co_flags, obj.co_code,
+        obj.co_consts, obj.co_names, obj.co_varnames, obj.co_filename, obj.co_name,
+        obj.co_firstlineno, obj.co_lnotab, obj.co_freevars, obj.co_cellvars
+    )
+  self.save_reduce(types.CodeType, args, obj=obj)
+</code></pre>
+  </div>
+</div>
+
+  </div>
+  
+            
+  <div class="item">
+    <div class="name def" id="heronpy.api.cloudpickle.CloudPickler.save_dict">
+    <p>def <span class="ident">save_dict</span>(</p><p>self, obj)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-heronpy.api.cloudpickle.CloudPickler.save_dict', this);">Show source &equiv;</a></p>
+  <div id="source-heronpy.api.cloudpickle.CloudPickler.save_dict" class="source">
+    <pre><code>def save_dict(self, obj):
+    write = self.write
+    if self.bin:
+        write(EMPTY_DICT)
+    else:   # proto 0 -- can't use EMPTY_DICT
+        write(MARK + DICT)
+    self.memoize(obj)
+    self._batch_setitems(obj.iteritems())
+</code></pre>
+  </div>
+</div>
+
+  </div>
+  
+            
+  <div class="item">
+    <div class="name def" id="heronpy.api.cloudpickle.CloudPickler.save_empty_tuple">
+    <p>def <span class="ident">save_empty_tuple</span>(</p><p>self, obj)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-heronpy.api.cloudpickle.CloudPickler.save_empty_tuple', this);">Show source &equiv;</a></p>
+  <div id="source-heronpy.api.cloudpickle.CloudPickler.save_empty_tuple" class="source">
+    <pre><code>def save_empty_tuple(self, obj):
+    self.write(EMPTY_TUPLE)
+</code></pre>
+  </div>
+</div>
+
+  </div>
+  
+            
+  <div class="item">
+    <div class="name def" id="heronpy.api.cloudpickle.CloudPickler.save_file">
+    <p>def <span class="ident">save_file</span>(</p><p>self, obj)</p>
+    </div>
+    
+
+    
+  
+    <div class="desc"><p>Save a file</p></div>
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-heronpy.api.cloudpickle.CloudPickler.save_file', this);">Show source &equiv;</a></p>
+  <div id="source-heronpy.api.cloudpickle.CloudPickler.save_file" class="source">
+    <pre><code>def save_file(self, obj): # pylint: disable=too-many-branches
+  """Save a file"""
+  try:
+    import StringIO as pystringIO #we can't use cStringIO as it lacks the name attribute
+  except ImportError:
+    import io as pystringIO # pylint: disable=reimported
+  if not hasattr(obj, 'name') or  not hasattr(obj, 'mode'):
+    raise pickle.PicklingError("Cannot pickle files that do not map to an actual file")
+  if obj is sys.stdout:
+    return self.save_reduce(getattr, (sys, 'stdout'), obj=obj)
+  if obj is sys.stderr:
+    return self.save_reduce(getattr, (sys, 'stderr'), obj=obj)
+  if obj is sys.stdin:
+    raise pickle.PicklingError("Cannot pickle standard input")
+  if  hasattr(obj, 'isatty') and obj.isatty():
+    raise pickle.PicklingError("Cannot pickle files that map to tty objects")
+  if 'r' not in obj.mode:
+    raise pickle.PicklingError("Cannot pickle files that are not opened for reading")
+  name = obj.name
+  try:
+    fsize = os.stat(name).st_size
+  except OSError:
+    raise pickle.PicklingError("Cannot pickle file %s as it cannot be stat" % name)
+  if obj.closed:
+    #create an empty closed string io
+    retval = pystringIO.StringIO("")
+    retval.close()
+  elif not fsize: #empty file
+    retval = pystringIO.StringIO("")
+    try:
+      tmpfile = file(name)
+      tst = tmpfile.read(1)
+    except IOError:
+      raise pickle.PicklingError("Cannot pickle file %s as it cannot be read" % name)
+    tmpfile.close()
+    if tst != '':
+      raise pickle.PicklingError(
+          "Cannot pickle file %s as it does not appear to map to a physical, real file" % name)
+  else:
+    try:
+      tmpfile = file(name)
+      contents = tmpfile.read()
+      tmpfile.close()
+    except IOError:
+      raise pickle.PicklingError("Cannot pickle file %s as it cannot be read" % name)
+    retval = pystringIO.StringIO(contents)
+    curloc = obj.tell()
+    retval.seek(curloc)
+  retval.name = name
+  self.save(retval)
+  self.memoize(obj)
+</code></pre>
+  </div>
+</div>
+
+  </div>
+  
+            
+  <div class="item">
+    <div class="name def" id="heronpy.api.cloudpickle.CloudPickler.save_float">
+    <p>def <span class="ident">save_float</span>(</p><p>self, obj, pack=&lt;built-in function pack&gt;)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-heronpy.api.cloudpickle.CloudPickler.save_float', this);">Show source &equiv;</a></p>
+  <div id="source-heronpy.api.cloudpickle.CloudPickler.save_float" class="source">
+    <pre><code>def save_float(self, obj, pack=struct.pack):
+    if self.bin:
+        self.write(BINFLOAT + pack('>d', obj))
+    else:
+        self.write(FLOAT + repr(obj) + '\n')
+</code></pre>
+  </div>
+</div>
+
+  </div>
+  
+            
+  <div class="item">
+    <div class="name def" id="heronpy.api.cloudpickle.CloudPickler.save_function">
+    <p>def <span class="ident">save_function</span>(</p><p>self, obj, name=None)</p>
+    </div>
+    
+
+    
+  
+    <div class="desc"><p>Registered with the dispatch to handle all function types.
+Determines what kind of function obj is (e.g. lambda, defined at
+interactive prompt, etc) and handles the pickling appropriately.</p></div>
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-heronpy.api.cloudpickle.CloudPickler.save_function', this);">Show source &equiv;</a></p>
+  <div id="source-heronpy.api.cloudpickle.CloudPickler.save_function" class="source">
+    <pre><code>def save_function(self, obj, name=None):
+  """ Registered with the dispatch to handle all function types.
+  Determines what kind of function obj is (e.g. lambda, defined at
+  interactive prompt, etc) and handles the pickling appropriately.
+  """
+  write = self.write
+  if name is None:
+    name = obj.__name__
+  try:
+    # whichmodule() could fail, see
+    # https://bitbucket.org/gutworth/six/issues/63/importing-six-breaks-pickling
+    modname = pickle.whichmodule(obj, name)
+  except Exception:
+    modname = None
+  # print('which gives %s %s %s' % (modname, obj, name))
+  try:
+    themodule = sys.modules[modname]
+  except KeyError:
+    # eval'd items such as namedtuple give invalid items for their function __module__
+    modname = '__main__'
+  if modname == '__main__':
+    themodule = None
+  if themodule:
+    self.modules.add(themodule)
+    if getattr(themodule, name, None) is obj:
+      return self.save_global(obj, name)
+  # if func is lambda, def'ed at prompt, is in main, or is nested, then
+  # we'll pickle the actual function object rather than simply saving a
+  # reference (as is done in default pickler), via save_function_tuple.
+  if islambda(obj) or obj.__code__.co_filename == '<stdin>' or themodule is None:
+    #print("save global", islambda(obj), obj.__code__.co_filename, modname, themodule)
+    self.save_function_tuple(obj)
+    return
+  else:
+    # func is nested
+    klass = getattr(themodule, name, None)
+    if klass is None or klass is not obj:
+      self.save_function_tuple(obj)
+      return
+  if obj.__dict__:
+    # essentially save_reduce, but workaround needed to avoid recursion
+    self.save(_restore_attr)
+    write(pickle.MARK + pickle.GLOBAL + modname + '\n' + name + '\n')
+    self.memoize(obj)
+    self.save(obj.__dict__)
+    write(pickle.TUPLE + pickle.REDUCE)
+  else:
+    write(pickle.GLOBAL + modname + '\n' + name + '\n')
+    self.memoize(obj)
+</code></pre>
+  </div>
+</div>
+
+  </div>
+  
+            
+  <div class="item">
+    <div class="name def" id="heronpy.api.cloudpickle.CloudPickler.save_function_tuple">
+    <p>def <span class="ident">save_function_tuple</span>(</p><p>self, func)</p>
+    </div>
+    
+
+    
+  
+    <div class="desc"><p>Pickles an actual func object.
+A func comprises: code, globals, defaults, closure, and dict.  We
+extract and save these, injecting reducing functions at certain points
+to recreate the func object.  Keep in mind that some of these pieces
+can contain a ref to the func itself.  Thus, a naive save on these
+pieces could trigger an infinite loop of save's.  To get around that,
+we first create a skeleton func object using just the code (this is
+safe, since this won't contain a ref to the func), and memoize it as
+soon as it's created.  The other stuff can then be filled in later.</p></div>
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-heronpy.api.cloudpickle.CloudPickler.save_function_tuple', this);">Show source &equiv;</a></p>
+  <div id="source-heronpy.api.cloudpickle.CloudPickler.save_function_tuple" class="source">
+    <pre><code>def save_function_tuple(self, func):
+  """  Pickles an actual func object.
+  A func comprises: code, globals, defaults, closure, and dict.  We
+  extract and save these, injecting reducing functions at certain points
+  to recreate the func object.  Keep in mind that some of these pieces
+  can contain a ref to the func itself.  Thus, a naive save on these
+  pieces could trigger an infinite loop of save's.  To get around that,
+  we first create a skeleton func object using just the code (this is
+  safe, since this won't contain a ref to the func), and memoize it as
+  soon as it's created.  The other stuff can then be filled in later.
+  """
+  save = self.save
+  write = self.write
+  code, f_globals, defaults, closure, dct, base_globals = self.extract_func_data(func)
+  save(_fill_function)  # skeleton function updater
+  write(pickle.MARK)    # beginning of tuple that _fill_function expects
+  # create a skeleton function object and memoize it
+  save(_make_skel_func)
+  save((code, closure, base_globals))
+  write(pickle.REDUCE)
+  self.memoize(func)
+  # save the rest of the func data needed by _fill_function
+  save(f_globals)
+  save(defaults)
+  save(dct)
+  save(func.__module__)
+  write(pickle.TUPLE)
+  write(pickle.REDUCE)  # applies _fill_function on the tuple
+</code></pre>
+  </div>
+</div>
+
+  </div>
+  
+            
+  <div class="item">
+    <div class="name def" id="heronpy.api.cloudpickle.CloudPickler.save_global">
+    <p>def <span class="ident">save_global</span>(</p><p>self, obj, name=None, pack=&lt;built-in function pack&gt;)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-heronpy.api.cloudpickle.CloudPickler.save_global', this);">Show source &equiv;</a></p>
+  <div id="source-heronpy.api.cloudpickle.CloudPickler.save_global" class="source">
+    <pre><code>def save_global(self, obj, name=None, pack=struct.pack): # pylint: disable=too-many-branches
+  if obj.__module__ == "__builtin__" or obj.__module__ == "builtins":
+    if obj in _BUILTIN_TYPE_NAMES:
+      return self.save_reduce(_builtin_type, (_BUILTIN_TYPE_NAMES[obj],), obj=obj)
+  if name is None:
+    name = obj.__name__
+  modname = getattr(obj, "__module__", None)
+  if modname is None:
+    try:
+      # whichmodule() could fail, see
+      # https://bitbucket.org/gutworth/six/issues/63/importing-six-breaks-pickling
+      modname = pickle.whichmodule(obj, name)
+    except Exception:
+      modname = '__main__'
+  if modname == '__main__':
+    themodule = None
+  else:
+    __import__(modname)
+    themodule = sys.modules[modname]
+    self.modules.add(themodule)
+  if hasattr(themodule, name) and getattr(themodule, name) is obj:
+    return Pickler.save_global(self, obj, name)
+  typ = type(obj)
+  if typ is not obj and isinstance(obj, (type, types.ClassType)):
+    d = dict(obj.__dict__)  # copy dict proxy to a dict
+    if not isinstance(d.get('__dict__', None), property):
+      # don't extract dict that are properties
+      d.pop('__dict__', None)
+    d.pop('__weakref__', None)
+    # hack as __new__ is stored differently in the __dict__
+    new_override = d.get('__new__', None)
+    if new_override:
+      d['__new__'] = obj.__new__
+    # workaround for namedtuple (hijacked by PySpark)
+    if getattr(obj, '_is_namedtuple_', False):
+      self.save_reduce(_load_namedtuple, (obj.__name__, obj._fields))
+      return
+    self.save(_load_class)
+    self.save_reduce(typ, (obj.__name__, obj.__bases__, {"__doc__": obj.__doc__}), obj=obj)
+    d.pop('__doc__', None)
+    # handle property and staticmethod
+    dd = {}
+    for k, v in d.items():
+      if isinstance(v, property):
+        k = ('property', k)
+        v = (v.fget, v.fset, v.fdel, v.__doc__)
+      elif isinstance(v, staticmethod) and hasattr(v, '__func__'):
+        k = ('staticmethod', k)
+        v = v.__func__
+      elif isinstance(v, classmethod) and hasattr(v, '__func__'):
+        k = ('classmethod', k)
+        v = v.__func__
+      dd[k] = v
+    self.save(dd)
+    self.write(pickle.TUPLE2)
+    self.write(pickle.REDUCE)
+  else:
+    raise pickle.PicklingError("Can't pickle %r" % obj)
+</code></pre>
+  </div>
+</div>
+
+  </div>
+  
+            
+  <div class="item">
+    <div class="name def" id="heronpy.api.cloudpickle.CloudPickler.save_inst">
+    <p>def <span class="ident">save_inst</span>(</p><p>self, obj)</p>
+    </div>
+    
+
+    
+  
+    <div class="desc"><p>Inner logic to save instance. Based off pickle.save_inst
+Supports <strong>transient</strong></p></div>
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-heronpy.api.cloudpickle.CloudPickler.save_inst', this);">Show source &equiv;</a></p>
+  <div id="source-heronpy.api.cloudpickle.CloudPickler.save_inst" class="source">
+    <pre><code>def save_inst(self, obj):
+  """Inner logic to save instance. Based off pickle.save_inst
+  Supports __transient__"""
+  cls = obj.__class__
+  memo = self.memo
+  write = self.write
+  save = self.save
+  if hasattr(obj, '__getinitargs__'):
+    args = obj.__getinitargs__()
+    len(args)  # assert it's a sequence
+    pickle._keep_alive(args, memo) # pylint: disable=protected-access
+  else:
+    args = ()
+  write(pickle.MARK)
+  if self.bin:
+    save(cls)
+    for arg in args:
+      save(arg)
+    write(pickle.OBJ)
+  else:
+    for arg in args:
+      save(arg)
+    write(pickle.INST + cls.__module__ + '\n' + cls.__name__ + '\n')
+  self.memoize(obj)
+  try:
+    getstate = obj.__getstate__
+  except AttributeError:
+    stuff = obj.__dict__
+    #remove items if transient
+    if hasattr(obj, '__transient__'):
+      transient = obj.__transient__
+      stuff = stuff.copy()
+      for k in list(stuff.keys()):
+        if k in transient:
+          del stuff[k]
+  else:
+    stuff = getstate()
+    pickle._keep_alive(stuff, memo) # pylint: disable=protected-access
+  save(stuff)
+  write(pickle.BUILD)
+</code></pre>
+  </div>
+</div>
+
+  </div>
+  
+            
+  <div class="item">
+    <div class="name def" id="heronpy.api.cloudpickle.CloudPickler.save_instancemethod">
+    <p>def <span class="ident">save_instancemethod</span>(</p><p>self, obj)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-heronpy.api.cloudpickle.CloudPickler.save_instancemethod', this);">Show source &equiv;</a></p>
+  <div id="source-heronpy.api.cloudpickle.CloudPickler.save_instancemethod" class="source">
+    <pre><code>def save_instancemethod(self, obj):
+  # Memoization rarely is ever useful due to python bounding
+  if PY3:
+    self.save_reduce(types.MethodType, (obj.__func__, obj.__self__), obj=obj)
+  else:
+    self.save_reduce(
+        types.MethodType, (obj.__func__, obj.__self__, obj.__self__.__class__),
+        obj=obj)
+</code></pre>
+  </div>
+</div>
+
+  </div>
+  
+            
+  <div class="item">
+    <div class="name def" id="heronpy.api.cloudpickle.CloudPickler.save_int">
+    <p>def <span class="ident">save_int</span>(</p><p>self, obj, pack=&lt;built-in function pack&gt;)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-heronpy.api.cloudpickle.CloudPickler.save_int', this);">Show source &equiv;</a></p>
+  <div id="source-heronpy.api.cloudpickle.CloudPickler.save_int" class="source">
+    <pre><code>def save_int(self, obj, pack=struct.pack):
+    if self.bin:
+        # If the int is small enough to fit in a signed 4-byte 2's-comp
+        # format, we can store it more efficiently than the general
+        # case.
+        # First one- and two-byte unsigned ints:
+        if obj >= 0:
+            if obj <= 0xff:
+                self.write(BININT1 + chr(obj))
+                return
+            if obj <= 0xffff:
+                self.write("%c%c%c" % (BININT2, obj&0xff, obj>>8))
+                return
+        # Next check for 4-byte signed ints:
+        high_bits = obj >> 31  # note that Python shift sign-extends
+        if high_bits == 0 or high_bits == -1:
+            # All high bits are copies of bit 2**31, so the value
+            # fits in a 4-byte signed int.
+            self.write(BININT + pack("<i", obj))
+            return
+    # Text pickle, or int too big to fit in signed 4-byte format.
+    self.write(INT + repr(obj) + '\n')
+</code></pre>
+  </div>
+</div>
+
+  </div>
+  
+            
+  <div class="item">
+    <div class="name def" id="heronpy.api.cloudpickle.CloudPickler.save_itemgetter">
+    <p>def <span class="ident">save_itemgetter</span>(</p><p>self, obj)</p>
+    </div>
+    
+
+    
+  
+    <div class="desc"><p>itemgetter serializer (needed for namedtuple support)</p></div>
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-heronpy.api.cloudpickle.CloudPickler.save_itemgetter', this);">Show source &equiv;</a></p>
+  <div id="source-heronpy.api.cloudpickle.CloudPickler.save_itemgetter" class="source">
+    <pre><code>def save_itemgetter(self, obj):
+  """itemgetter serializer (needed for namedtuple support)"""
+  class Dummy: # pylint: disable=old-style-class
+    def __init__(self):
+      pass
+    def __getitem__(self, item):
+      return item
+  items = obj(Dummy())
+  if not isinstance(items, tuple):
+    items = (items, )
+  return self.save_reduce(operator.itemgetter, items)
+</code></pre>
+  </div>
+</div>
+
+  </div>
+  
+            
+  <div class="item">
+    <div class="name def" id="heronpy.api.cloudpickle.CloudPickler.save_list">
+    <p>def <span class="ident">save_list</span>(</p><p>self, obj)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-heronpy.api.cloudpickle.CloudPickler.save_list', this);">Show source &equiv;</a></p>
+  <div id="source-heronpy.api.cloudpickle.CloudPickler.save_list" class="source">
+    <pre><code>def save_list(self, obj):
+    write = self.write
+    if self.bin:
+        write(EMPTY_LIST)
+    else:   # proto 0 -- can't use EMPTY_LIST
+        write(MARK + LIST)
+    self.memoize(obj)
+    self._batch_appends(iter(obj))
+</code></pre>
+  </div>
+</div>
+
+  </div>
+  
+            
+  <div class="item">
+    <div class="name def" id="heronpy.api.cloudpickle.CloudPickler.save_long">
+    <p>def <span class="ident">save_long</span>(</p><p>self, obj, pack=&lt;built-in function pack&gt;)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-heronpy.api.cloudpickle.CloudPickler.save_long', this);">Show source &equiv;</a></p>
+  <div id="source-heronpy.api.cloudpickle.CloudPickler.save_long" class="source">
+    <pre><code>def save_long(self, obj, pack=struct.pack):
+    if self.proto >= 2:
+        bytes = encode_long(obj)
+        n = len(bytes)
+        if n < 256:
+            self.write(LONG1 + chr(n) + bytes)
+        else:
+            self.write(LONG4 + pack("<i", n) + bytes)
+        return
+    self.write(LONG + repr(obj) + '\n')
+</code></pre>
+  </div>
+</div>
+
+  </div>
+  
+            
+  <div class="item">
+    <div class="name def" id="heronpy.api.cloudpickle.CloudPickler.save_memoryview">
+    <p>def <span class="ident">save_memoryview</span>(</p><p>self, obj)</p>
+    </div>
+    
+
+    
+  
+    <div class="desc"><p>Fallback to save_string</p></div>
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-heronpy.api.cloudpickle.CloudPickler.save_memoryview', this);">Show source &equiv;</a></p>
+  <div id="source-heronpy.api.cloudpickle.CloudPickler.save_memoryview" class="source">
+    <pre><code>def save_memoryview(self, obj):
+  """Fallback to save_string"""
+  Pickler.save_string(self, str(obj))
+</code></pre>
+  </div>
+</div>
+
+  </div>
+  
+            
+  <div class="item">
+    <div class="name def" id="heronpy.api.cloudpickle.CloudPickler.save_module">
+    <p>def <span class="ident">save_module</span>(</p><p>self, obj)</p>
+    </div>
+    
+
+    
+  
+    <div class="desc"><p>Save a module as an import</p></div>
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-heronpy.api.cloudpickle.CloudPickler.save_module', this);">Show source &equiv;</a></p>
+  <div id="source-heronpy.api.cloudpickle.CloudPickler.save_module" class="source">
+    <pre><code>def save_module(self, obj):
+  """
+  Save a module as an import
+  """
+  self.modules.add(obj)
+  self.save_reduce(subimport, (obj.__name__,), obj=obj)
+</code></pre>
+  </div>
+</div>
+
+  </div>
+  
+            
+  <div class="item">
+    <div class="name def" id="heronpy.api.cloudpickle.CloudPickler.save_none">
+    <p>def <span class="ident">save_none</span>(</p><p>self, obj)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-heronpy.api.cloudpickle.CloudPickler.save_none', this);">Show source &equiv;</a></p>
+  <div id="source-heronpy.api.cloudpickle.CloudPickler.save_none" class="source">
+    <pre><code>def save_none(self, obj):
+    self.write(NONE)
+</code></pre>
+  </div>
+</div>
+
+  </div>
+  
+            
+  <div class="item">
+    <div class="name def" id="heronpy.api.cloudpickle.CloudPickler.save_partial">
+    <p>def <span class="ident">save_partial</span>(</p><p>self, obj)</p>
+    </div>
+    
+
+    
+  
+    <div class="desc"><p>Partial objects do not serialize correctly in python2.x -- this fixes the bugs</p></div>
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-heronpy.api.cloudpickle.CloudPickler.save_partial', this);">Show source &equiv;</a></p>
+  <div id="source-heronpy.api.cloudpickle.CloudPickler.save_partial" class="source">
+    <pre><code>def save_partial(self, obj):
+  """Partial objects do not serialize correctly in python2.x -- this fixes the bugs"""
+  self.save_reduce(_genpartial, (obj.func, obj.args, obj.keywords))
+</code></pre>
+  </div>
+</div>
+
+  </div>
+  
+            
+  <div class="item">
+    <div class="name def" id="heronpy.api.cloudpickle.CloudPickler.save_pers">
+    <p>def <span class="ident">save_pers</span>(</p><p>self, pid)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-heronpy.api.cloudpickle.CloudPickler.save_pers', this);">Show source &equiv;</a></p>
+  <div id="source-heronpy.api.cloudpickle.CloudPickler.save_pers" class="source">
+    <pre><code>def save_pers(self, pid):
+    # Save a persistent id reference
+    if self.bin:
+        self.save(pid)
+        self.write(BINPERSID)
+    else:
+        self.write(PERSID + str(pid) + '\n')
+</code></pre>
+  </div>
+</div>
+
+  </div>
+  
+            
+  <div class="item">
+    <div class="name def" id="heronpy.api.cloudpickle.CloudPickler.save_property">
+    <p>def <span class="ident">save_property</span>(</p><p>self, obj)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-heronpy.api.cloudpickle.CloudPickler.save_property', this);">Show source &equiv;</a></p>
+  <div id="source-heronpy.api.cloudpickle.CloudPickler.save_property" class="source">
+    <pre><code>def save_property(self, obj):
+  # properties not correctly saved in python
+  self.save_reduce(property, (obj.fget, obj.fset, obj.fdel, obj.__doc__), obj=obj)
+</code></pre>
+  </div>
+</div>
+
+  </div>
+  
+            
+  <div class="item">
+    <div class="name def" id="heronpy.api.cloudpickle.CloudPickler.save_reduce">
+    <p>def <span class="ident">save_reduce</span>(</p><p>self, func, args, state=None, listitems=None, dictitems=None, obj=None)</p>
+    </div>
+    
+
+    
+  
+    <div class="desc"><p>Modified to support <strong>transient</strong> on new objects
+Change only affects protocol level 2 (which is always used by PiCloud</p></div>
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-heronpy.api.cloudpickle.CloudPickler.save_reduce', this);">Show source &equiv;</a></p>
+  <div id="source-heronpy.api.cloudpickle.CloudPickler.save_reduce" class="source">
+    <pre><code>def save_reduce(self, func, args, state=None, # pylint: disable=too-many-branches
+                listitems=None, dictitems=None, obj=None):
+  """Modified to support __transient__ on new objects
+  Change only affects protocol level 2 (which is always used by PiCloud"""
+  # Assert that args is a tuple or None
+  if not isinstance(args, tuple):
+    raise pickle.PicklingError("args from reduce() should be a tuple")
+  # Assert that func is callable
+  if not hasattr(func, '__call__'):
+    raise pickle.PicklingError("func from reduce should be callable")
+  save = self.save
+  write = self.write
+  # Protocol 2 special case: if func's name is __newobj__, use NEWOBJ
+  if self.proto >= 2 and getattr(func, "__name__", "") == "__newobj__":
+    #Added fix to allow transient
+    cls = args[0]
+    if not hasattr(cls, "__new__"):
+      raise pickle.PicklingError(
+          "args[0] from __newobj__ args has no __new__")
+    if obj is not None and cls is not obj.__class__:
+      raise pickle.PicklingError(
+          "args[0] from __newobj__ args has the wrong class")
+    args = args[1:]
+    save(cls)
+    #Don't pickle transient entries
+    if hasattr(obj, '__transient__'):
+      transient = obj.__transient__
+      state = state.copy()
+      for k in list(state.keys()):
+        if k in transient:
+          del state[k]
+    save(args)
+    write(pickle.NEWOBJ)
+  else:
+    save(func)
+    save(args)
+    write(pickle.REDUCE)
+  if obj is not None:
+    self.memoize(obj)
+  # More new special cases (that work with older protocols as
+  # well): when __reduce__ returns a tuple with 4 or 5 items,
+  # the 4th and 5th item should be iterators that provide list
+  # items and dict items (as (key, value) tuples), or None.
+  if listitems is not None:
+    self._batch_appends(listitems)
+  if dictitems is not None:
+    self._batch_setitems(dictitems)
+  if state is not None:
+    save(state)
+    write(pickle.BUILD)
+</code></pre>
+  </div>
+</div>
+
+  </div>
+  
+            
+  <div class="item">
+    <div class="name def" id="heronpy.api.cloudpickle.CloudPickler.save_string">
+    <p>def <span class="ident">save_string</span>(</p><p>self, obj, pack=&lt;built-in function pack&gt;)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-heronpy.api.cloudpickle.CloudPickler.save_string', this);">Show source &equiv;</a></p>
+  <div id="source-heronpy.api.cloudpickle.CloudPickler.save_string" class="source">
+    <pre><code>def save_string(self, obj, pack=struct.pack):
+    if self.bin:
+        n = len(obj)
+        if n < 256:
+            self.write(SHORT_BINSTRING + chr(n) + obj)
+        else:
+            self.write(BINSTRING + pack("<i", n) + obj)
+    else:
+        self.write(STRING + repr(obj) + '\n')
+    self.memoize(obj)
+</code></pre>
+  </div>
+</div>
+
+  </div>
+  
+            
+  <div class="item">
+    <div class="name def" id="heronpy.api.cloudpickle.CloudPickler.save_tuple">
+    <p>def <span class="ident">save_tuple</span>(</p><p>self, obj)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-heronpy.api.cloudpickle.CloudPickler.save_tuple', this);">Show source &equiv;</a></p>
+  <div id="source-heronpy.api.cloudpickle.CloudPickler.save_tuple" class="source">
+    <pre><code>def save_tuple(self, obj):
+    write = self.write
+    proto = self.proto
+    n = len(obj)
+    if n == 0:
+        if proto:
+            write(EMPTY_TUPLE)
+        else:
+            write(MARK + TUPLE)
+        return
+    save = self.save
+    memo = self.memo
+    if n <= 3 and proto >= 2:
+        for element in obj:
+            save(element)
+        # Subtle.  Same as in the big comment below.
+        if id(obj) in memo:
+            get = self.get(memo[id(obj)][0])
+            write(POP * n + get)
+        else:
+            write(_tuplesize2code[n])
+            self.memoize(obj)
+        return
+    # proto 0 or proto 1 and tuple isn't empty, or proto > 1 and tuple
+    # has more than 3 elements.
+    write(MARK)
+    for element in obj:
+        save(element)
+    if id(obj) in memo:
+        # Subtle.  d was not in memo when we entered save_tuple(), so
+        # the process of saving the tuple's elements must have saved
+        # the tuple itself:  the tuple is recursive.  The proper action
+        # now is to throw away everything we put on the stack, and
+        # simply GET the tuple (it's already constructed).  This check
+        # could have been done in the "for element" loop instead, but
+        # recursive tuples are a rare thing.
+        get = self.get(memo[id(obj)][0])
+        if proto:
+            write(POP_MARK + get)
+        else:   # proto 0 -- POP_MARK not available
+            write(POP * (n+1) + get)
+        return
+    # No recursion.
+    self.write(TUPLE)
+    self.memoize(obj)
+</code></pre>
+  </div>
+</div>
+
+  </div>
+  
+            
+  <div class="item">
+    <div class="name def" id="heronpy.api.cloudpickle.CloudPickler.save_ufunc">
+    <p>def <span class="ident">save_ufunc</span>(</p><p>self, obj)</p>
+    </div>
+    
+
+    
+  
+    <div class="desc"><p>Hack function for saving numpy ufunc objects</p></div>
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-heronpy.api.cloudpickle.CloudPickler.save_ufunc', this);">Show source &equiv;</a></p>
+  <div id="source-heronpy.api.cloudpickle.CloudPickler.save_ufunc" class="source">
+    <pre><code>def save_ufunc(self, obj):
+  """Hack function for saving numpy ufunc objects"""
+  name = obj.__name__
+  numpy_tst_mods = ['numpy', 'scipy.special']
+  for tst_mod_name in numpy_tst_mods:
+    tst_mod = sys.modules.get(tst_mod_name, None)
+    if tst_mod and name in tst_mod.__dict__:
+      return self.save_reduce(_getobject, (tst_mod_name, name))
+  raise pickle.PicklingError(
+      'cannot save %s. Cannot resolve what module it is defined in' % str(obj))
+</code></pre>
+  </div>
+</div>
+
+  </div>
+  
+            
+  <div class="item">
+    <div class="name def" id="heronpy.api.cloudpickle.CloudPickler.save_unicode">
+    <p>def <span class="ident">save_unicode</span>(</p><p>self, obj, pack=&lt;built-in function pack&gt;)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-heronpy.api.cloudpickle.CloudPickler.save_unicode', this);">Show source &equiv;</a></p>
+  <div id="source-heronpy.api.cloudpickle.CloudPickler.save_unicode" class="source">
+    <pre><code>def save_unicode(self, obj, pack=struct.pack):
+    if self.bin:
+        encoding = obj.encode('utf-8')
+        n = len(encoding)
+        self.write(BINUNICODE + pack("<i", n) + encoding)
+    else:
+        obj = obj.replace("\\", "\\u005c")
+        obj = obj.replace("\n", "\\u000a")
+        self.write(UNICODE + obj.encode('raw-unicode-escape') + '\n')
+    self.memoize(obj)
+</code></pre>
+  </div>
+</div>
+
+  </div>
+  
+            
+  <div class="item">
+    <div class="name def" id="heronpy.api.cloudpickle.CloudPickler.save_unsupported">
+    <p>def <span class="ident">save_unsupported</span>(</p><p>self, obj)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-heronpy.api.cloudpickle.CloudPickler.save_unsupported', this);">Show source &equiv;</a></p>
+  <div id="source-heronpy.api.cloudpickle.CloudPickler.save_unsupported" class="source">
+    <pre><code>def save_unsupported(self, obj): # pylint: disable=no-self-use
+  raise pickle.PicklingError("Cannot pickle objects of type %s" % type(obj))
+</code></pre>
+  </div>
+</div>
+
+  </div>
+  
+      </div>
+      </div>
+
+  </section>
+
+    </article>
+  <div class="clear"> </div>
+  <footer id="footer">
+    <p>
+      Documentation generated by
+      <a href="https://github.com/BurntSushi/pdoc">pdoc 0.3.2</a>
+    </p>
+
+    <p>pdoc is in the public domain with the
+      <a href="http://unlicense.org">UNLICENSE</a></p>
+
+    <p>Design by <a href="http://nadh.in">Kailash Nadh</a></p>
+  </footer>
+</div>
+</body>
+</html>

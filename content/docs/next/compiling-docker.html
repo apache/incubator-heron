@@ -1,0 +1,208 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Compiling With Docker · Apache Heron</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="&lt;!--"/><meta name="docsearch:version" content="next"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Compiling With Docker · Apache Heron"/><meta property="og:type" content="website"/><meta property="og:url" content="https://heronstreaming.io/"/><meta property="og:description" content="&lt;!--"/><meta property="og:image" content="https://heronstreaming.io/img/undraw_online.svg"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://heronstreaming.io/img/undraw_tweetstorm.svg"/><link rel="shortcut icon" href="/img/favicon-32x32.png"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script type="text/javascript" src="/js/custom.js"></script><script src="/js/scrollSpy.js"></script><link rel="stylesheet" href="/css/main.css"/><script src="/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/"><img class="logo" src="/img/HeronTextLogo-small.png" alt="Apache Heron"/><h2 class="headerTitleWithLogo">Apache Heron</h2></a><a href="/versions"><h3>next</h3></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class=""><a href="/api/java" target="_self">Javadocs</a></li><li class=""><a href="/api/python" target="_self">Pydocs</a></li><li class="siteNavGroupActive"><a href="/docs/next/getting-started-local-single-node" target="_self">Docs</a></li><li class=""><a href="#community" target="_self">Community</a></li><li class=""><a href="#apache" target="_self">Apache</a></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="container docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><div class="hamburger-menu"><div class="line1"></div><div class="line2"></div><div class="line3"></div></div></div><h2><i>›</i><span>Compiling</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle">Getting Started</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/next/getting-started-local-single-node">Local (Single Node)</a></li><li class="navListItem"><a class="navItem" href="/docs/next/getting-started-migrate-storm-topologies">Migrate Storm Topologies</a></li><li class="navListItem"><a class="navItem" href="/docs/next/getting-started-troubleshooting-guide">Troubleshooting Guide</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Deployment</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/next/deployment-overview">Deployment Overiew</a></li><li class="navListItem"><a class="navItem" href="/docs/next/deployment-configuration">Configuration</a></li><li class="navListItem"><a class="navItem" href="/docs/next/deployment-api-server">The Heron API Server</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Topology Development APIs</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/next/topology-development-streamlet-api">The Heron Streamlet API for Java</a></li><li class="navListItem"><a class="navItem" href="/docs/next/topology-development-eco-api">The ECO API for Java</a></li><li class="navListItem"><a class="navItem" href="/docs/next/topology-development-topology-api-java">The Heron Topology API for Java</a></li><li class="navListItem"><a class="navItem" href="/docs/next/topology-development-topology-api-python">The Heron Topology API for Python</a></li><li class="navListItem"><a class="navItem" href="/docs/next/topology-development-streamlet-scala">The Heron Streamlet API for Scala</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Client API Docs</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/next/client-api-docs-overview">Client API Docs</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Guides</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/next/guides-effectively-once-java-topologies">Effectively Once Java Topologies</a></li><li class="navListItem"><a class="navItem" href="/docs/next/guides-python-topologies">Python Topologies</a></li><li class="navListItem"><a class="navItem" href="/docs/next/guides-data-model">Heron Data Model</a></li><li class="navListItem"><a class="navItem" href="/docs/next/guides-tuple-serialization">Tuple Serialization</a></li><li class="navListItem"><a class="navItem" href="/docs/next/guides-ui-guide">Heron UI Guide</a></li><li class="navListItem"><a class="navItem" href="/docs/next/guides-topology-tuning">Topology Tuning Guide</a></li><li class="navListItem"><a class="navItem" href="/docs/next/guides-packing-algorithms">Packing Algorithms</a></li><li class="navListItem"><a class="navItem" href="/docs/next/guides-simulator-mode">Simulator Mode</a></li><li class="navListItem"><a class="navItem" href="/docs/next/guides-troubeshooting-guide">Topology Troubleshooting Guide</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Heron Concepts</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/next/heron-design-goals">Heron Design Goals</a></li><li class="navListItem"><a class="navItem" href="/docs/next/heron-topology-concepts">Heron Topologies</a></li><li class="navListItem"><a class="navItem" href="/docs/next/heron-streamlet-concepts">Heron Streamlets</a></li><li class="navListItem"><a class="navItem" href="/docs/next/heron-architecture">Heron Architecture</a></li><li class="navListItem"><a class="navItem" href="/docs/next/heron-delivery-semantics">Heron Delivery Semantics</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">State Managers</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/next/state-managers-zookeeper">Zookeeper</a></li><li class="navListItem"><a class="navItem" href="/docs/next/state-managers-local-fs">Local File System</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Uploaders</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/next/uploaders-local-fs">Local File System</a></li><li class="navListItem"><a class="navItem" href="/docs/next/uploaders-hdfs">HDFS</a></li><li class="navListItem"><a class="navItem" href="/docs/next/uploaders-http">HTTP</a></li><li class="navListItem"><a class="navItem" href="/docs/next/uploaders-amazon-s3">Amazon S3</a></li><li class="navListItem"><a class="navItem" href="/docs/next/uploaders-scp">Secure Copy (SCP)</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Schedulers</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/next/schedulers-k8s-by-hand">Kubernetes by hand</a></li><li class="navListItem"><a class="navItem" href="/docs/next/schedulers-k8s-with-helm">Kubernetes with Helm</a></li><li class="navListItem"><a class="navItem" href="/docs/next/schedulers-aurora-cluster">Aurora Cluster</a></li><li class="navListItem"><a class="navItem" href="/docs/next/schedulers-aurora-local">Aurora Locally</a></li><li class="navListItem"><a class="navItem" href="/docs/next/schedulers-local">Local Cluster</a></li><li class="navListItem"><a class="navItem" href="/docs/next/schedulers-standalone">Heron Multi-node Standalone Cluster</a></li><li class="navListItem"><a class="navItem" href="/docs/next/schedulers-nomad">Nomad</a></li><li class="navListItem"><a class="navItem" href="/docs/next/schedulers-mesos-local-mac">Mesos Cluster Locally</a></li><li class="navListItem"><a class="navItem" href="/docs/next/schedulers-slurm">Slurm Cluster</a></li><li class="navListItem"><a class="navItem" href="/docs/next/schedulers-yarn">YARN Cluster</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Cluster Configuration</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/next/cluster-config-overview">Cluster Config Overview</a></li><li class="navListItem"><a class="navItem" href="/docs/next/cluster-config-system-level">System Level Configuration</a></li><li class="navListItem"><a class="navItem" href="/docs/next/cluster-config-instance">Heron Instance</a></li><li class="navListItem"><a class="navItem" href="/docs/next/cluster-config-metrics">Metrics Manager</a></li><li class="navListItem"><a class="navItem" href="/docs/next/cluster-config-stream">Stream Manager</a></li><li class="navListItem"><a class="navItem" href="/docs/next/cluster-config-tmaster">Topology Master</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Observability</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/next/observability-prometheus">Prometheus</a></li><li class="navListItem"><a class="navItem" href="/docs/next/observability-graphite">Graphite</a></li><li class="navListItem"><a class="navItem" href="/docs/next/observability-scribe">Scribe</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">User Manuals</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/next/user-manuals-heron-cli">Heron Client</a></li><li class="navListItem"><a class="navItem" href="/docs/next/user-manuals-heron-explorer">Heron Explorer</a></li><li class="navListItem"><a class="navItem" href="/docs/next/user-manuals-tracker-rest">Heron Tracker REST API</a></li><li class="navListItem"><a class="navItem" href="/docs/next/user-manuals-heron-tracker-runbook">Heron Tracker Runbook</a></li><li class="navListItem"><a class="navItem" href="/docs/next/user-manuals-heron-ui-runbook">Heron UI Runbook</a></li><li class="navListItem"><a class="navItem" href="/docs/next/user-manuals-heron-shell">Heron Shell</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Compiling</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/next/compiling-overview">Compiling Overview</a></li><li class="navListItem"><a class="navItem" href="/docs/next/compiling-linux">Compiling on Linux</a></li><li class="navListItem"><a class="navItem" href="/docs/next/compiling-osx">Compiling on OS X</a></li><li class="navListItem navListItemActive"><a class="navItem" href="/docs/next/compiling-docker">Compiling With Docker</a></li><li class="navListItem"><a class="navItem" href="/docs/next/compiling-running-tests">Running Tests</a></li><li class="navListItem"><a class="navItem" href="/docs/next/compiling-code-organization">Code Organization</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Extending Heron</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/next/extending-heron-scheduler">Custom Scheduler</a></li><li class="navListItem"><a class="navItem" href="/docs/next/extending-heron-metric-sink">Custom Metrics Sink</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Heron Resources</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/next/heron-resources-resources">Heron Resources</a></li></ul></div></div></section></div><script>
+            var coll = document.getElementsByClassName('collapsible');
+            var checkActiveCategory = true;
+            for (var i = 0; i < coll.length; i++) {
+              var links = coll[i].nextElementSibling.getElementsByTagName('*');
+              if (checkActiveCategory){
+                for (var j = 0; j < links.length; j++) {
+                  if (links[j].classList.contains('navListItemActive')){
+                    coll[i].nextElementSibling.classList.toggle('hide');
+                    coll[i].childNodes[1].classList.toggle('rotate');
+                    checkActiveCategory = false;
+                    break;
+                  }
+                }
+              }
+
+              coll[i].addEventListener('click', function() {
+                var arrow = this.childNodes[1];
+                arrow.classList.toggle('rotate');
+                var content = this.nextElementSibling;
+                content.classList.toggle('hide');
+              });
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+              createToggler('#navToggler', '#docsNav', 'docsSliderActive');
+              createToggler('#tocToggler', 'body', 'tocActive');
+
+              var headings = document.querySelector('.toc-headings');
+              headings && headings.addEventListener('click', function(event) {
+                var el = event.target;
+                while(el !== headings){
+                  if (el.tagName === 'A') {
+                    document.body.classList.remove('tocActive');
+                    break;
+                  } else{
+                    el = el.parentNode;
+                  }
+                }
+              }, false);
+
+              function createToggler(togglerSelector, targetSelector, className) {
+                var toggler = document.querySelector(togglerSelector);
+                var target = document.querySelector(targetSelector);
+
+                if (!toggler) {
+                  return;
+                }
+
+                toggler.onclick = function(event) {
+                  event.preventDefault();
+
+                  target.classList.toggle(className);
+                };
+              }
+            });
+        </script></nav></div><div class="container mainContainer"><div class="wrapper"><div class="post"><header class="postHeader"><h1 class="postHeaderTitle">Compiling With Docker</h1></header><article><div><span><!--
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements.  See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership.  The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License.  You may obtain a copy of the License at
+      http://www.apache.org/licenses/LICENSE-2.0
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied.  See the License for the
+    specific language governing permissions and limitations
+    under the License.
+-->
+<p>For developing Heron, you will need to compile it for the environment that you
+want to use it in. If you'd like to use Docker to create that build environment,
+Heron provides a convenient script to make that process easier.</p>
+<p>Currently, only Ubuntu 14.04, Ubuntu 15.10, and CentOS 7 are supported, but if you
+need another platform there are instructions for adding new ones
+<a href="#contributing-new-environments">below</a>.</p>
+<h3><a class="anchor" aria-hidden="true" id="requirements"></a><a href="#requirements" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Requirements</h3>
+<ul>
+<li><a href="https://docs.docker.com">Docker</a></li>
+</ul>
+<h3><a class="anchor" aria-hidden="true" id="running-docker-in-a-virtual-machine"></a><a href="#running-docker-in-a-virtual-machine" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Running Docker in a Virtual Machine</h3>
+<p>If you are running Docker in a virtual machine (VM), it is recommended that you
+adjust your settings to help speed up the build. To do this, open
+<a href="https://www.virtualbox.org/wiki/Downloads">VirtualBox</a> and go to the container
+in which Docker is running (usually &quot;default&quot; or whatever name you used to
+create the VM), click on the VM, and then click on <strong>Settings</strong>.</p>
+<p><strong>Note</strong>: You will need to stop the VM before modifying these settings.</p>
+<p><img src="/docs/assets/virtual-box-processors.png" alt="VirtualBox Processors">
+<img src="/docs/assets/virtual-box-memory.png" alt="VirtualBox Memory"></p>
+<h2><a class="anchor" aria-hidden="true" id="building-heron"></a><a href="#building-heron" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Building Heron</h2>
+<p>Heron provides a <code>build-arfifacts.sh</code> script for Docker located in the
+<code>docker</code> folder. To run that script:</p>
+<pre><code class="hljs css language-bash">$ <span class="hljs-built_in">cd</span> /path/to/heron/repo
+$ docker/build-artifacts.sh
+</code></pre>
+<p>Running the script by itself will display usage information:</p>
+<pre><code class="hljs"><span class="hljs-attribute">Usage</span>: docker/build-artifacts.sh &lt;platform&gt; &lt;version_string&gt; [source-tarball] &lt;output-directory&gt;
+
+<span class="routeros">Platforms Supported: darwin, ubuntu14.04, ubuntu15.10, centos7
+
+Example:
+  ./build-artifacts.sh ubuntu14.04 0.12.0 .
+
+NOTE: <span class="hljs-keyword">If</span> running on OSX, the output directory will need <span class="hljs-keyword">to</span>
+      be under <span class="hljs-built_in">/Users </span>so virtualbox has access <span class="hljs-keyword">to</span>.
+</span></code></pre>
+<p>The following arguments are required:</p>
+<ul>
+<li><code>platform</code> --- Currently, this can be one of: <code>ubuntu14.04</code>, <code>centos7</code>. You
+can add other platforms using the <a href="#contributing-new-environments">instructions
+below</a>.</li>
+<li><code>version-string</code> --- The Heron release for which you'd like to build
+artifacts.</li>
+<li><code>output-directory</code> --- The directory in which you'd like the release to be
+built.</li>
+</ul>
+<p>Here's an example usage:</p>
+<pre><code class="hljs css language-bash">$ docker/scripts/build-artifacts.sh ubuntu14.04 0.12.0 ~/heron-release
+</code></pre>
+<p>This will build a Docker container specific to Ubuntu 14.04, create a source
+tarball of the Heron repository, run a full release build of Heron, and then
+copy the artifacts into the <code>~/heron-release</code> directory.</p>
+<p>Optionally, you can also include a tarball of the Heron source if you have one.
+By default, the script will create a tarball of the current source in the Heron
+repo and use that to build the artifacts.</p>
+<p><strong>Note</strong>: If you are running on Mac OS X, Docker must be run inside a VM.
+Therefore, you must make sure that both the source tarball and destination
+directory are somewhere under your home directory. For example, you cannot
+output the Heron artifacts to <code>/tmp</code> because <code>/tmp</code> refers to the directory
+inside the VM, not on the host machine. Your home directory, however, is
+automatically linked in to the VM and can be accessed normally.</p>
+<p>After the build has completed, you can go to your output directory and see all
+of the generated artifacts:</p>
+<pre><code class="hljs css language-bash">$ ls ~/heron-release
+heron-0.12.0-ubuntu14.04.tar
+heron-0.12.0-ubuntu14.04.tar.gz
+heron-core-0.12.0-ubuntu14.04.tar.gz
+heron-install-0.12.0-ubuntu14.04.sh
+heron-layer-0.12.0-ubuntu14.04.tar
+heron-tools-0.12.0-ubuntu14.04.tar.gz
+</code></pre>
+<h2><a class="anchor" aria-hidden="true" id="contributing-new-environments"></a><a href="#contributing-new-environments" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Contributing New Environments</h2>
+<p>You'll notice that there are multiple
+<a href="https://docs.docker.com/engine/reference/builder/">Dockerfiles</a> in the <code>docker</code>
+directory of Heron's source code, one for each of the currently supported
+platforms.</p>
+<p>To add support for a new platform, add a new <code>Dockerfile</code> to that directory and
+append the name of the platform to the name of the file. If you'd like to add
+support for Debian 8, for example, add a file named <code>Dockerfile.debian8</code>. Once
+you've done that, follow the instructions in the <a href="https://docs.docker.com/engine/articles/dockerfile_best-practices/">Docker
+documentation</a>.</p>
+<p>You should make sure that your <code>Dockerfile</code> specifies <em>at least</em> all of the
+following:</p>
+<h3><a class="anchor" aria-hidden="true" id="step-1-the-os-being-used-in-a-from-https-docsdockercom-engine-reference-builder-from-statement"></a><a href="#step-1-the-os-being-used-in-a-from-https-docsdockercom-engine-reference-builder-from-statement" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Step 1 --- The OS being used in a <a href="https://docs.docker.com/engine/reference/builder/#from"><code>FROM</code></a> statement.</h3>
+<p>Here's an example:</p>
+<pre><code class="hljs css language-dockerfile"><span class="hljs-keyword">FROM</span> centos:centos7
+</code></pre>
+<h3><a class="anchor" aria-hidden="true" id="step-2-a-target_platform-environment-variable-using-the-env-https-docsdockercom-engine-reference-builder-env-instruction"></a><a href="#step-2-a-target_platform-environment-variable-using-the-env-https-docsdockercom-engine-reference-builder-env-instruction" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Step 2 --- A <code>TARGET_PLATFORM</code> environment variable using the <a href="https://docs.docker.com/engine/reference/builder/#env"><code>ENV</code></a> instruction.</h3>
+<p>Here's an example:</p>
+<pre><code class="hljs css language-dockerfile"><span class="hljs-keyword">ENV</span> TARGET_PLATFORM centos
+</code></pre>
+<h3><a class="anchor" aria-hidden="true" id="step-3-a-general-dependency-installation-script-using-a-run-https-docsdockercom-engine-reference-builder-run-instruction"></a><a href="#step-3-a-general-dependency-installation-script-using-a-run-https-docsdockercom-engine-reference-builder-run-instruction" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Step 3 --- A general dependency installation script using a <a href="https://docs.docker.com/engine/reference/builder/#run"><code>RUN</code></a> instruction.</h3>
+<p>Here's an example:</p>
+<pre><code class="hljs css language-dockerfile"><span class="hljs-keyword">RUN</span><span class="bash"> apt-get update &amp;&amp; apt-get -y install \
+         automake \
+         build-essential \
+         cmake \
+         curl \
+         libssl-dev \
+         git \
+         libtool \
+         libunwind8 \
+         libunwind-setjmp0-dev \
+         python \
+         python2.7-dev \
+         python-software-properties \
+         software-properties-common \
+         python-setuptools \
+         unzip \
+         wget</span>
+</code></pre>
+<h3><a class="anchor" aria-hidden="true" id="step-4-an-installation-script-for-java-8-and-a-java_home-environment-variable"></a><a href="#step-4-an-installation-script-for-java-8-and-a-java_home-environment-variable" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Step 4 --- An installation script for Java 8 and a <code>JAVA_HOME</code> environment variable</h3>
+<p>Here's an example:</p>
+<pre><code class="hljs css language-dockerfile"><span class="hljs-keyword">RUN</span><span class="bash"> \
+     <span class="hljs-built_in">echo</span> oracle-java8-installer shared/accepted-oracle-license-v1-1 select <span class="hljs-literal">true</span> | debconf-set-selections &amp;&amp; \
+     add-apt-repository -y ppa:webupd8team/java &amp;&amp; \
+     apt-get update &amp;&amp; \
+     apt-get install -y oracle-java8-installer &amp;&amp; \
+     rm -rf /var/lib/apt/lists/* &amp;&amp; \
+     rm -rf /var/cache/oracle-jdk8-installer</span>
+
+<span class="hljs-keyword">ENV</span> JAVA_HOME /usr/lib/jvm/java-<span class="hljs-number">8</span>-oracle
+</code></pre>
+<h4><a class="anchor" aria-hidden="true" id="step-5-an-installation-script-for-bazel-http-bazelio-version-bazelversion-or-above"></a><a href="#step-5-an-installation-script-for-bazel-http-bazelio-version-bazelversion-or-above" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Step 5 - An installation script for <a href="http://bazel.io/">Bazel</a> version 0.26.0 or above.</h4>
+<p>Here's an example:</p>
+<pre><code class="hljs css language-dockerfile"><span class="hljs-keyword">RUN</span><span class="bash"> wget -O /tmp/bazel.sh https://github.com/bazelbuild/bazel/releases/download/0.23.2/bazel-0.23.2-installer-linux-x86_64.sh \
+         &amp;&amp; chmod +x /tmp/bazel.sh \
+         &amp;&amp; /tmp/bazel.sh</span>
+</code></pre>
+<h3><a class="anchor" aria-hidden="true" id="step-6-add-the-bazelrc-configuration-file-for-bazel-and-the-compilesh-script-from-the-docker-folder-that-compiles-heron"></a><a href="#step-6-add-the-bazelrc-configuration-file-for-bazel-and-the-compilesh-script-from-the-docker-folder-that-compiles-heron" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Step 6 --- Add the <code>bazelrc</code> configuration file for Bazel and the <code>compile.sh</code> script (from the <code>docker</code> folder) that compiles Heron</h3>
+<pre><code class="hljs css language-dockerfile"><span class="hljs-keyword">ADD</span><span class="bash"> bazelrc /root/.bazelrc</span>
+<span class="hljs-keyword">ADD</span><span class="bash"> compile.sh /compile.sh</span>
+</code></pre>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/next/compiling-osx"><span class="arrow-prev">← </span><span>Compiling on OS X</span></a><a class="docs-next button" href="/docs/next/compiling-running-tests"><span>Running Tests</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#building-heron">Building Heron</a></li><li><a href="#contributing-new-environments">Contributing New Environments</a><ul class="toc-headings"><li><a href="#step-1-the-os-being-used-in-a-from-https-docsdockercom-engine-reference-builder-from-statement">Step 1 --- The OS being used in a <a href="https://docs.docker.com/engine/reference/builder/#from"><code>FROM</code></a> statement.</a></li><li><a href="#step-2-a-target_platform-environment-variable-using-the-env-https-docsdockercom-engine-reference-builder-env-instruction">Step 2 --- A <code>TARGET_PLATFORM</code> environment variable using the <a href="https://docs.docker.com/engine/reference/builder/#env"><code>ENV</code></a> instruction.</a></li><li><a href="#step-3-a-general-dependency-installation-script-using-a-run-https-docsdockercom-engine-reference-builder-run-instruction">Step 3 --- A general dependency installation script using a <a href="https://docs.docker.com/engine/reference/builder/#run"><code>RUN</code></a> instruction.</a></li><li><a href="#step-4-an-installation-script-for-java-8-and-a-java_home-environment-variable">Step 4 --- An installation script for Java 8 and a <code>JAVA_HOME</code> environment variable</a></li><li><a href="#step-6-add-the-bazelrc-configuration-file-for-bazel-and-the-compilesh-script-from-the-docker-folder-that-compiles-heron">Step 6 --- Add the <code>bazelrc</code> configuration file for Bazel and the <code>compile.sh</code> script (from the <code>docker</code> folder) that compiles Heron</a></li></ul></li></ul></nav></div><footer class="nav-footer" id="footer"><div class="apache-disclaimer">Disclaimer Apache Heron (incubating) is an effort undergoing incubation at The Apache Software Foundation (ASF), sponsored by Incubator. Incubation is required of all newly accepted projects until a further review indicates that the infrastructure, communications, and decision making process have stabilized in a manner consistent with other successful ASF projects. While incubation status is not necessarily a reflection of the completeness or stability of the code, it does indicate that the project has yet to be fully endorsed by the ASF.</div><section class="copyright">Copyright © 2019 the Apache Software Foundation, Apache Heron, Heron, 
+  Apache, the Apache feather Logo, and the Apache Heron project logo are either registered 
+  trademarks or trademarks of the Apache Software Foundation.</section></footer></div><script>window.twttr=(function(d,s, id){var js,fjs=d.getElementsByTagName(s)[0],t=window.twttr||{};if(d.getElementById(id))return t;js=d.createElement(s);js.id=id;js.src='https://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js, fjs);t._e = [];t.ready = function(f) {t._e.push(f);};return t;}(document, 'script', 'twitter-wjs'));</script></body></html>
