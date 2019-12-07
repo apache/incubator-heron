@@ -27,9 +27,10 @@ RUN apt-get -y update && apt-get -y install \
     rm -rf /var/lib/apt/lists/*
 
 # install zookeeper
+ARG ZK_DIST=zookeeper-3.4.14
 ADD base/scripts /opt/heron-docker/scripts
 
-RUN sh /opt/heron-docker/scripts/install-zookeeper.sh
+RUN sh /opt/heron-docker/scripts/install-zookeeper.sh $ZK_DIST
 
 ADD base/conf/zookeeper.conf /opt/zookeeper/conf/zookeeper.conf
 ADD base/conf/sandbox.conf /etc/supervisor/conf.d/

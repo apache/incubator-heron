@@ -16,7 +16,14 @@
 # specific language governing permissions and limitations
 # under the License.
 
-ZK_DIST=zookeeper-3.4.14
+if [ "$#" -ne 1 ]; then
+  echo "Usage: $0 zookeeper-<version-number>"
+  echo "Example:"
+  echo "$ $0 zookeeper-3.4.14"
+  exit 1
+fi
+
+ZK_DIST=$1
 
 curl -O "https://archive.apache.org/dist/zookeeper/$ZK_DIST/$ZK_DIST.tar.gz"
 tar -xzf ./$ZK_DIST.tar.gz -C /opt
