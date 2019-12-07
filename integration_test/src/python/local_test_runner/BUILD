@@ -7,7 +7,10 @@ pex_binary(
     resources = [
         "resources/test.conf",
     ],
-    reqs = ["argparse==1.4.0"],
+    reqs = [
+      "argparse==1.4.0",
+      "future==0.18.2",
+    ],
     deps = [
         "//heron/common/src/python:common-py",
         "//integration_test/src/python/common",
