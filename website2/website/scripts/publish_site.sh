@@ -38,10 +38,14 @@ HERON_SITE_TMP=/tmp/heron-site
   git config user.email "dev@heron.incubator.apache.org"
   git checkout asf-site
 
-  # copy the generated dir
-  rm -rf $HERON_SITE_TMP/content/*
+
+   # clean content directory
+  rm -rf $HERON_SITE_TMP/content/
+  mkdir $HERON_SITE_TMP/content
+
+ # copy the generated dir
   cp -r $WORK_DIR/* $HERON_SITE_TMP/content
-  cp -a ${ROOT_DIR}/.htaccess ${ROOT_DIR}/content
+  cp -a $ROOT_DIR/.htaccess $HERON_SITE_TMP/content
   # push all of the results to asf-site branch
   git add -A .
   git diff-index --quiet HEAD || (git commit -m "git-site-role commit from $ME" && git push -q origin HEAD:asf-site)
