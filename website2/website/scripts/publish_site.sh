@@ -45,7 +45,7 @@ HERON_SITE_TMP=/tmp/heron-site
 
  # copy the generated dir
   cp -r $WORK_DIR/* $HERON_SITE_TMP/content
-  cp -a $ROOT_DIR/.htaccess $HERON_SITE_TMP/content
+  #cp -a $ROOT_DIR/.htaccess $HERON_SITE_TMP/content
   # push all of the results to asf-site branch
   git add -A .
   git diff-index --quiet HEAD || (git commit -m "git-site-role commit from $ME" && git push -q origin HEAD:asf-site)
