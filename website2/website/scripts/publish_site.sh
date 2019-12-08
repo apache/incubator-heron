@@ -39,7 +39,6 @@ HERON_SITE_TMP=/tmp/heron-site
   git checkout asf-site
 
   # copy the generated dir
-  rm $HERON_SITE_TMP/.htaccess
   cp -r $WORK_DIR/* $HERON_SITE_TMP/content
   cp -a ${ROOT_DIR}/.htaccess ${ROOT_DIR}/content
   # push all of the results to asf-site branch
