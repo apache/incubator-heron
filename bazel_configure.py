@@ -191,7 +191,8 @@ def discover_version(path):
 
   # on mac, /usr/bin/cpp --version returns this:
   #   Apple LLVM version 6.0 (clang-600.0.56) (based on LLVM 3.5svn)
-  mac_line = re.search('^(Apple LLVM version\s+[\d\.]+)\s+\(clang.*', first_line)
+  #   Apple clang version 11.0.0 (clang-1100.0.33.12)
+  mac_line = re.search('^(Apple (LLVM|clang) version\s+[\d\.]+)\s+\(clang.*', first_line)
   if mac_line:
     version = get_trailing_version(mac_line.group(1))
     if version:
@@ -413,12 +414,7 @@ def main():
   env_map['AUTOCONF'] = discover_tool('autoconf', 'Autoconf', 'AUTOCONF', '2.6.3')
   env_map['MAKE'] = discover_tool('make', 'Make', 'MAKE', '3.81')
   env_map['PYTHON'] = discover_tool('python', 'Python', 'PYTHON', '2.7')
-
-  if platform == 'Darwin':
-    env_map['LIBTOOL'] = discover_tool('glibtool', 'Libtool', 'LIBTOOL', '2.4.2')
-  else:
-    env_map['LIBTOOL'] = discover_tool('libtool', 'Libtool', 'LIBTOOL', '2.4.2')
-
+  env_map['LIBTOOL'] = discover_tool('libtool', 'Libtool', 'LIBTOOL', '2.4.2')
   env_map['AR'] = discover_tool('ar', 'archiver', 'AR')
   env_map['GCOV']= discover_tool('gcov','coverage tool', 'GCOV')
   env_map['DWP'] = discover_tool_default('dwp', 'dwp', 'DWP', '/usr/bin/dwp')
