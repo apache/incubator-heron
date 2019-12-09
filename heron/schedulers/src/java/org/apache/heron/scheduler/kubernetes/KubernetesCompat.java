@@ -19,17 +19,16 @@
 
 package org.apache.heron.scheduler.kubernetes;
 
-import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import com.squareup.okhttp.Response;
 
 import org.apache.heron.scheduler.TopologyRuntimeManagementException;
 
 import io.kubernetes.client.ApiClient;
 import io.kubernetes.client.ApiException;
 import io.kubernetes.client.apis.CoreV1Api;
+import io.kubernetes.client.models.V1Status;
+import static io.kubernetes.client.KubernetesConstants.V1STATUS_FAILURE;
 
 public class KubernetesCompat {
 
@@ -41,18 +40,16 @@ public class KubernetesCompat {
     // old version deployed topologies as naked pods
     try {
       final String labelSelector = KubernetesConstants.LABEL_TOPOLOGY + "=" + topology;
-      final Response response =
-      // deleteCollectionNamespacedPod(namespace, pretty, _continue, fieldSelector, labelSelector, limit, resourceVersion, timeoutSeconds, watch);
+      final V1Status response =
           client.deleteCollectionNamespacedPod(namespace, null, null, null,
           labelSelector, null, null, null, null);
-      if (!response.isSuccessful()) {
-        LOG.log(Level.SEVERE, "Error killing topology message: " + response.message());
-        KubernetesUtils.logResponseBodyIfPresent(LOG, response);
+      if (V1STATUS_FAILURE.equals(response.getStatus())) {
+        LOG.log(Level.SEVERE, "Error killing topology message: " + response.toString());
 
         throw new TopologyRuntimeManagementException(
             KubernetesUtils.errorMessageFromResponse(response));
       }
-    } catch (IOException | ApiException e) {
+    } catch (ApiException e) {
       LOG.log(Level.SEVERE, "Error killing topology " + e.getMessage());
       if (e instanceof ApiException) {
         LOG.log(Level.SEVERE, "Error details:\n" +  ((ApiException) e).getResponseBody());

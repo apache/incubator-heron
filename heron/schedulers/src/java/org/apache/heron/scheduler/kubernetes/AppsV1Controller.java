@@ -19,7 +19,6 @@
 
 package org.apache.heron.scheduler.kubernetes;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -31,11 +30,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.squareup.okhttp.Response;
 
 import org.apache.heron.api.utils.TopologyUtils;
 import org.apache.heron.scheduler.TopologyRuntimeManagementException;
@@ -51,6 +45,7 @@ import io.kubernetes.client.ApiClient;
 import io.kubernetes.client.ApiException;
 import io.kubernetes.client.apis.AppsV1Api;
 import io.kubernetes.client.custom.Quantity;
+import io.kubernetes.client.custom.V1Patch;
 import io.kubernetes.client.models.V1Container;
 import io.kubernetes.client.models.V1ContainerPort;
 import io.kubernetes.client.models.V1DeleteOptions;
@@ -62,13 +57,13 @@ import io.kubernetes.client.models.V1ObjectMeta;
 import io.kubernetes.client.models.V1PodSpec;
 import io.kubernetes.client.models.V1PodTemplateSpec;
 import io.kubernetes.client.models.V1ResourceRequirements;
-import io.kubernetes.client.models.V1Toleration;
 import io.kubernetes.client.models.V1StatefulSet;
 import io.kubernetes.client.models.V1StatefulSetSpec;
 import io.kubernetes.client.models.V1Status;
+import io.kubernetes.client.models.V1Toleration;
 import io.kubernetes.client.models.V1Volume;
 import io.kubernetes.client.models.V1VolumeMount;
-import io.kubernetes.client.V1STATUS_FAILURE;
+import static io.kubernetes.client.KubernetesConstants.V1STATUS_FAILURE;
 
 public class AppsV1Controller extends KubernetesController {
 
@@ -103,18 +98,10 @@ public class AppsV1Controller extends KubernetesController {
     final V1StatefulSet statefulSet = createStatefulSet(containerResource, numberOfInstances);
 
     try {
-      //createNamespacedStatefulSet(namespace, body, pretty, dryRun, fieldManager);
-      final Response response =
+      final V1StatefulSet response =
           client.createNamespacedStatefulSet(getNamespace(), statefulSet, null,
               null, null);
-      if (!response.isSuccessful()) {
-        LOG.log(Level.SEVERE, "Error creating topology message: " + response.message());
-        KubernetesUtils.logResponseBodyIfPresent(LOG, response);
-        // construct a message based on the k8s API server response
-        throw new TopologySubmissionException(
-            KubernetesUtils.errorMessageFromResponse(response));
-      }
-    } catch (IOException | ApiException e) {
+    } catch (ApiException e) {
       KubernetesUtils.logExceptionWithDetails(LOG, "Error creating topology", e);
       throw new TopologySubmissionException(e.getMessage());
     }
@@ -190,23 +177,17 @@ public class AppsV1Controller extends KubernetesController {
 
   private void doPatch(V1StatefulSetSpec patchedSpec) throws ApiException {
     final String body =
-        String.format(JSON_PATCH_STATEFUL_SET_REPLICAS_FORMAT,
-            patchedSpec.getReplicas().toString());
-    final ArrayList<JsonObject> arr = new ArrayList<>();
-    arr.add(((JsonElement) deserialize(body, JsonElement.class)).getAsJsonObject());
-    LOG.fine("Update body: " + arr);
-    client.patchNamespacedStatefulSet(getTopologyName(), getNamespace(), arr, null);
+            String.format(JSON_PATCH_STATEFUL_SET_REPLICAS_FORMAT,
+                    patchedSpec.getReplicas().toString());
+    final V1Patch patch = new V1Patch(body);
+    client.patchNamespacedStatefulSet(getTopologyName(),
+            getNamespace(), patch, null, null, null, null);
   }
 
   private static final String JSON_PATCH_STATEFUL_SET_REPLICAS_FORMAT =
       "{\"op\":\"replace\",\"path\":\"/spec/replicas\",\"value\":%s}";
 
-  private Object deserialize(String jsonStr, Class<?> targetClass) {
-    return (new Gson()).fromJson(jsonStr, targetClass);
-  }
-
   V1StatefulSet getStatefulSet() throws ApiException {
-    //readNamespacedStatefulSet(name, namespace, pretty, exact, export);
     return client.readNamespacedStatefulSet(getTopologyName(), getNamespace(), null, null, null);
   }
 
@@ -215,18 +196,16 @@ public class AppsV1Controller extends KubernetesController {
       final V1DeleteOptions options = new V1DeleteOptions();
       options.setGracePeriodSeconds(0L);
       options.setPropagationPolicy(KubernetesConstants.DELETE_OPTIONS_PROPAGATION_POLICY);
-      //deleteNamespacedStatefulSet(name, namespace, pretty, body, dryRun, gracePeriodSeconds, orphanDependents, propagationPolicy);
       final V1Status response = client.deleteNamespacedStatefulSet(getTopologyName(),
           getNamespace(), null, options, null, null, null, null);
 
       if (V1STATUS_FAILURE.equals(response.getStatus())) {
-        LOG.log(Level.SEVERE, "Error killing topology message: " + response.getMessage());
-        KubernetesUtils.logResponseBodyIfPresent(LOG, response);
+        LOG.log(Level.SEVERE, "Error killing topology message: " + response.toString());
 
         throw new TopologyRuntimeManagementException(
             KubernetesUtils.errorMessageFromResponse(response));
       }
-    } catch (IOException | ApiException e) {
+    } catch (ApiException e) {
       KubernetesUtils.logExceptionWithDetails(LOG, "Error deleting topology", e);
       return false;
     }
@@ -236,12 +215,11 @@ public class AppsV1Controller extends KubernetesController {
 
   boolean isStatefulSet() {
     try {
-      //readNamespacedStatefulSet(name, namespace, pretty, exact, export);
-      final Response response =
+      final V1StatefulSet response =
           client.readNamespacedStatefulSet(getTopologyName(), getNamespace(),
               null, null, null);
-      return response.isSuccessful();
-    } catch (IOException | ApiException e) {
+      return response.getKind().equals("StatefulSet");
+    } catch (ApiException e) {
       LOG.warning("isStatefulSet check " +  e.getMessage());
     }
     return false;
@@ -422,7 +400,7 @@ public class AppsV1Controller extends KubernetesController {
     final Map<String, Quantity> requests = new HashMap<>();
     requests.put(KubernetesConstants.MEMORY,
         Quantity.fromString(KubernetesUtils.Megabytes(resource.getRam())));
-    requests.put(KubernetesConstants.CPU, 
+    requests.put(KubernetesConstants.CPU,
          Quantity.fromString(Double.toString(roundDecimal(resource.getCpu(), 3))));
     resourceRequirements.setRequests(requests);
     container.setResources(resourceRequirements);
