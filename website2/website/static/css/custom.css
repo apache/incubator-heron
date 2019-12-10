@@ -50,7 +50,22 @@ a {
   border-radius: 0.25rem;
 }
 
+
 .apache-disclaimer {
   color: #ffffff;
   padding: 25px 25px 25px 25px;
+  width: 80%;
+  float: left;
 }
+
+.apache-links {
+  color: #ffffff;
+  padding: 25px 25px 25px 25px;
+  float: right;
+  width: 20%;
+}
+
+.copywrite-box {
+  float: left;
+}
+
