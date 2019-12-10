@@ -28,8 +28,9 @@ library marshal, pickle and json modules.
 See: http://download.oracle.com/javase/6/docs/platform/serialization/spec/protocol.html
 """
 
-import io
 import struct
+import six
+
 from heron.common.src.python.utils.log import Log
 
 def log_debug(message, ident=0):
@@ -53,12 +54,12 @@ def load(file_object):
 
 
 # pylint: disable=undefined-variable
-def loads(string):
+def loads(value):
   """
   Deserializes Java objects and primitive data serialized by ObjectOutputStream
   from a string.
   """
-  f = io.StringIO(string)
+  f = six.StringIO(value)
   marshaller = JavaObjectUnmarshaller(f)
   marshaller.add_transformer(DefaultObjectTransformer())
   return marshaller.readObject()
@@ -558,7 +559,7 @@ class JavaObjectMarshaller(JavaObjectConstants):
   # pylint: disable=attribute-defined-outside-init
   def dump(self, obj):
     self.object_obj = obj
-    self.object_stream = io.StringIO()
+    self.object_stream = six.StringIO()
     self._writeStreamHeader()
     self.writeObject(obj)
     return self.object_stream.getvalue()
