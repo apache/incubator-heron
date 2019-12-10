@@ -8,6 +8,7 @@ pex_binary(
     main = "main.py",
     resources = [
         "resources/test.json",
+        "future==0.18.2"
     ],
     reqs = ["argparse==1.4.0"],
     deps = [
