@@ -17,7 +17,7 @@
 
 staging:
   profile: ~
-  whoami: asf-site
+  whoami: joshfischer/apache-content
 
 publish:
   whoami: asf-site
