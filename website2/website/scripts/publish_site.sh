@@ -47,7 +47,7 @@ HERON_SITE_TMP=/tmp/heron-site
   cp -r $WORK_DIR/* $HERON_SITE_TMP/content
 
   #  copy the asf.yaml
-  cp $WORK_ROOT_DIR/.asf.yaml $HERON_SITE_TMP/
+  cp $ROOT_DIR/.asf.yaml $HERON_SITE_TMP/
 
   # push all of the results to asf-site branch
   git add -A .
