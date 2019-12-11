@@ -46,6 +46,9 @@ HERON_SITE_TMP=/tmp/heron-site
   # copy the generated dir
   cp -r $WORK_DIR/* $HERON_SITE_TMP/content
 
+  #  copy the asf.yaml
+  cp $WORK_ROOT_DIR/.asf.yaml $HERON_SITE_TMP/
+
   # push all of the results to asf-site branch
   git add -A .
   git diff-index --quiet HEAD || (git commit -m "git-site-role commit from $ME" && git push -q origin HEAD:asf-site)
