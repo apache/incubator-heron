@@ -35,6 +35,7 @@ RUN apt-get update && apt-get -y install \
       unzip \
       git \
       curl \
+      tree \
       openjdk-8-jdk-headless
 
 ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64
