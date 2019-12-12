@@ -22,3 +22,9 @@ staging:
 publish:
   whoami: asf-site
   hostname: http://heronstreaming.io
+
+github:
+  description: "Apache Heron (Incubating) is a realtime, distributed, fault-tolerant stream processing engine from Twitter"
+  homepage: https://heron.incubator.apache.org/
+  labels:
+    - heron
