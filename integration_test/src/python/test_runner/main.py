@@ -24,7 +24,7 @@ import re
 import sys
 import time
 import uuid
-from httplib import HTTPConnection
+from http.client import HTTPConnection
 from threading import Lock, Thread
 
 from ..common import status
@@ -82,7 +82,7 @@ class HttpBasedExpectedResultsHandler(object):
 
       # need to convert from a list of json objects to a string of a python list,
       # without the unicode using double quotes, not single quotes.
-      return str(map(lambda x: str(x), result)).replace("'", '"')
+      return str([str(x) for x in result]).replace("'", '"')
     except Exception as e:
       raise status.TestFailure(
           "Fetching expected result failed for %s topology" % self.topology_name, e)
@@ -133,8 +133,8 @@ class ExactlyOnceResultsChecker(object):
     else:
       failure = status.TestFailure("Actual result did not match expected result")
       # lambda required below to remove the unicode 'u' from the output
-      logging.info("Actual result ---------- \n" + str(map(lambda x: str(x), actual_results)))
-      logging.info("Expected result ---------- \n" + str(map(lambda x: str(x), expected_results)))
+      logging.info("Actual result ---------- \n" + str([str(x) for x in actual_results]))
+      logging.info("Expected result ---------- \n" + str([str(x) for x in expected_results]))
       raise failure
 
 class AtLeastOnceResultsChecker(ExactlyOnceResultsChecker):
@@ -161,9 +161,9 @@ class AtLeastOnceResultsChecker(ExactlyOnceResultsChecker):
       failure = status.TestFailure("Actual result did not match expected result")
       # lambda required below to remove the unicode 'u' from the output
       logging.info("Actual value frequencies ---------- \n" + ', '.join(
-          map(lambda (k, v): "%s(%s)" % (str(k), v), actual_counts.iteritems())))
+          ["%s(%s)" % (str(k_v[0]), k_v[1]) for k_v in iter(actual_counts.items())]))
       logging.info("Expected value frequencies ---------- \n" + ', '.join(
-          map(lambda (k, v): "%s(%s)" % (str(k), v), expected_counts.iteritems())))
+          ["%s(%s)" % (str(k_v1[0]), k_v1[1]) for k_v1 in iter(expected_counts.items())]))
       raise failure
 
 def _frequency_dict(values):
@@ -301,11 +301,11 @@ def filter_test_topologies(test_topologies, test_pattern):
   initial_topologies = test_topologies
   if test_pattern:
     pattern = re.compile(test_pattern)
-    test_topologies = filter(lambda x: pattern.match(x['topologyName']), test_topologies)
+    test_topologies = [x for x in test_topologies if pattern.match(x['topologyName'])]
 
   if len(test_topologies) == 0:
     logging.error("Test filter '%s' did not match any configured test names:\n%s",
-                  test_pattern, '\n'.join(map(lambda x: x['topologyName'], initial_topologies)))
+                  test_pattern, '\n'.join([x['topologyName'] for x in initial_topologies]))
     sys.exit(1)
   return test_topologies
 

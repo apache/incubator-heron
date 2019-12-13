@@ -92,7 +92,7 @@ class HeronExecutorTest(unittest.TestCase):
 
   def build_packing_plan(self, instance_distribution):
     packing_plan = PackingPlan()
-    for container_id in instance_distribution.keys():
+    for container_id in list(instance_distribution.keys()):
       container_plan = packing_plan.container_plans.add()
       container_plan.id = int(container_id)
       for (component_name, global_task_id, component_index) in instance_distribution[container_id]:
@@ -293,11 +293,11 @@ class HeronExecutorTest(unittest.TestCase):
   def test_update_packing_plan(self):
     self.executor_0.update_packing_plan(self.packing_plan_expected)
 
-    self.assertEquals(self.packing_plan_expected, self.executor_0.packing_plan)
-    self.assertEquals({1: "stmgr-1", 7: "stmgr-7"}, self.executor_0.stmgr_ids)
-    self.assertEquals(
+    self.assertEqual(self.packing_plan_expected, self.executor_0.packing_plan)
+    self.assertEqual({1: "stmgr-1", 7: "stmgr-7"}, self.executor_0.stmgr_ids)
+    self.assertEqual(
       {0: "metricsmgr-0", 1: "metricsmgr-1", 7: "metricsmgr-7"}, self.executor_0.metricsmgr_ids)
-    self.assertEquals(
+    self.assertEqual(
       {0: "heron-shell-0", 1: "heron-shell-1", 7: "heron-shell-7"}, self.executor_0.heron_shell_ids)
 
   def test_launch_container_0(self):
@@ -315,17 +315,13 @@ class HeronExecutorTest(unittest.TestCase):
     monitored_processes = executor.processes_to_monitor
 
     # convert to (pid, name, command)
-    found_processes = list(map(lambda process_info:
-                          (process_info.pid, process_info.name, process_info.command_str),
-                          executor.processes))
-    found_monitored = list(map(lambda pinfo:
-                          (pinfo[0], pinfo[1].name, pinfo[1].command_str),
-                          monitored_processes.items()))
+    found_processes = list([(process_info.pid, process_info.name, process_info.command_str) for process_info in executor.processes])
+    found_monitored = list([(pinfo[0], pinfo[1].name, pinfo[1].command_str) for pinfo in list(monitored_processes.items())])
     found_processes.sort(key=lambda tuple: tuple[0])
     found_monitored.sort(key=lambda tuple: tuple[0])
     print("do_test_commands - found_processes: %s found_monitored: %s" \
           % (found_processes, found_monitored))
-    self.assertEquals(found_processes, found_monitored)
+    self.assertEqual(found_processes, found_monitored)
 
     print("do_test_commands - expected_processes: %s monitored_processes: %s" \
           % (expected_processes, monitored_processes))
@@ -337,18 +333,18 @@ class HeronExecutorTest(unittest.TestCase):
     current_commands = self.executor_1.get_commands_to_run()
 
     temp_dict = dict(
-        map((lambda process_info: (process_info.name, process_info.command.split(' '))),
-            self.expected_processes_container_1))
+        list(map((lambda process_info: (process_info.name, process_info.command.split(' '))),
+            self.expected_processes_container_1)))
 
     current_json = json.dumps(current_commands, sort_keys=True, cls=CommandEncoder).split(' ')
     temp_json = json.dumps(temp_dict, sort_keys=True).split(' ')
 
-    print ("current_json: %s" % current_json)
-    print ("temp_json: %s" % temp_json)
+    print("current_json: %s" % current_json)
+    print("temp_json: %s" % temp_json)
 
     # better test error report
     for (s1, s2) in zip(current_json, temp_json):
-      self.assertEquals(s1, s2)
+      self.assertEqual(s1, s2)
 
     # update instance distribution
     new_packing_plan = self.build_packing_plan(
@@ -360,20 +356,20 @@ class HeronExecutorTest(unittest.TestCase):
     commands_to_kill, commands_to_keep, commands_to_start = \
       self.executor_1.get_command_changes(current_commands, updated_commands)
 
-    self.assertEquals(['container_1_exclaim1_2', 'stmgr-1'], sorted(commands_to_kill.keys()))
-    self.assertEquals(
+    self.assertEqual(['container_1_exclaim1_2', 'stmgr-1'], sorted(commands_to_kill.keys()))
+    self.assertEqual(
         ['container_1_exclaim1_1', 'container_1_word_3', 'heron-shell-1', 'metricsmgr-1'],
         sorted(commands_to_keep.keys()))
-    self.assertEquals(['container_1_word_2', 'stmgr-1'], sorted(commands_to_start.keys()))
+    self.assertEqual(['container_1_word_2', 'stmgr-1'], sorted(commands_to_start.keys()))
 
   def assert_processes(self, expected_processes, found_processes):
-    self.assertEquals(len(expected_processes), len(found_processes))
+    self.assertEqual(len(expected_processes), len(found_processes))
     for expected_process in expected_processes:
       self.assert_process(expected_process, found_processes)
 
   def assert_process(self, expected_process, found_processes):
     pid = expected_process.pid
     self.assertTrue(found_processes[pid])
-    self.assertEquals(expected_process.name, found_processes[pid].name)
-    self.assertEquals(expected_process.command, found_processes[pid].command_str)
-    self.assertEquals(1, found_processes[pid].attempts)
+    self.assertEqual(expected_process.name, found_processes[pid].name)
+    self.assertEqual(expected_process.command, found_processes[pid].command_str)
+    self.assertEqual(1, found_processes[pid].attempts)

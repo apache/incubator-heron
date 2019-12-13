@@ -91,7 +91,7 @@ def _list(cl_args):
   cluster = cl_args['cluster']
   config = cliconfig.cluster_config(cluster)
   if config:
-    for k, v in config.items():
+    for k, v in list(config.items()):
       print("%s = %s" % (str(k), str(v)))
   else:
     print("No config for cluster %s" % cluster)

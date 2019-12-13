@@ -20,7 +20,7 @@
 
 '''spout_instance.py: module for base spout for python topology'''
 
-import Queue
+import queue
 import time
 import collections
 
@@ -185,7 +185,7 @@ class SpoutInstance(BaseInstance):
     while not self.in_stream.is_empty():
       try:
         tuples = self.in_stream.poll()
-      except Queue.Empty:
+      except queue.Empty:
         break
 
       if isinstance(tuples, tuple_pb2.HeronTupleSet):

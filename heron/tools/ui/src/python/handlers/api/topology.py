@@ -53,8 +53,8 @@ class TopologyExceptionSummaryHandler(base.BaseHandler):
       if not 'spouts' in lplan or not 'bolts' in lplan:
         self.write(dict())
         return
-      comp_names = lplan['spouts'].keys()
-      comp_names.extend(lplan['bolts'].keys())
+      comp_names = list(lplan['spouts'].keys())
+      comp_names.extend(list(lplan['bolts'].keys()))
     else:
       comp_names = [comp_name]
     exception_infos = dict()
@@ -64,7 +64,7 @@ class TopologyExceptionSummaryHandler(base.BaseHandler):
 
     # Combine exceptions from multiple component
     aggregate_exceptions = dict()
-    for comp_name, exception_logs in exception_infos.items():
+    for comp_name, exception_logs in list(exception_infos.items()):
       for exception_log in exception_logs:
         class_name = exception_log['class_name']
         if class_name != '':
@@ -96,11 +96,11 @@ class ListTopologiesJsonHandler(base.BaseHandler):
     result = dict()
 
     # now convert some of the fields to be displayable
-    for cluster, cluster_value in topologies.items():
+    for cluster, cluster_value in list(topologies.items()):
       result[cluster] = dict()
-      for environ, environ_value in cluster_value.items():
+      for environ, environ_value in list(cluster_value.items()):
         result[cluster][environ] = dict()
-        for topology, topology_value in environ_value.items():
+        for topology, topology_value in list(environ_value.items()):
           if "jobname" not in topology_value or topology_value["jobname"] is None:
             continue
 

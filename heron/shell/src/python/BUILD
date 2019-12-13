@@ -11,6 +11,7 @@ pex_library(
     reqs = [
         "requests==2.12.3",
         "tornado==4.0.2",
+        "future==0.18.2",
     ],
 )
 

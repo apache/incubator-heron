@@ -99,7 +99,7 @@ class FileStateManager(StateManager):
       For all the topologies in the watchers, check if the data
       in directory has changed. Trigger the callback if it has.
       """
-      for topology, callbacks in watchers.items():
+      for topology, callbacks in list(watchers.items()):
         file_path = os.path.join(path, topology)
         data = ""
         if os.path.exists(file_path):
@@ -117,9 +117,8 @@ class FileStateManager(StateManager):
 
       topologies = []
       if os.path.isdir(topologies_path):
-        topologies = list(filter(
-            lambda f: os.path.isfile(os.path.join(topologies_path, f)),
-            os.listdir(topologies_path)))
+        topologies = list([f for f in os.listdir(topologies_path)
+                           if os.path.isfile(os.path.join(topologies_path, f))])
       if set(topologies) != set(self.topologies_directory):
         for callback in self.topologies_watchers:
           callback(topologies)
@@ -166,8 +165,8 @@ class FileStateManager(StateManager):
       self.topologies_watchers.append(callback)
     else:
       topologies_path = self.get_topologies_path()
-      return filter(lambda f: os.path.isfile(os.path.join(topologies_path, f)),
-                    os.listdir(topologies_path))
+      return [f for f in os.listdir(topologies_path)
+              if os.path.isfile(os.path.join(topologies_path, f))]
 
   def get_topology(self, topologyName, callback=None):
     """get topology"""

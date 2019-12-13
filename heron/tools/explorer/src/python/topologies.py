@@ -44,8 +44,8 @@ def to_table(result):
   ''' normalize raw result to table '''
   max_count = 20
   table, count = [], 0
-  for role, envs_topos in result.items():
-    for env, topos in envs_topos.items():
+  for role, envs_topos in list(result.items()):
+    for env, topos in list(envs_topos.items()):
       for topo in topos:
         count += 1
         if count > max_count:

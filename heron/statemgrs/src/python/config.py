@@ -46,7 +46,7 @@ class Config(object):
     """
     Names of all state locations must be unique.
     """
-    names = map(lambda loc: loc["name"], self.locations)
+    names = [loc["name"] for loc in self.locations]
     assert len(names) == len(set(names)), "Names of state locations must be unique"
 
   def get_all_state_locations(self):
@@ -59,4 +59,4 @@ class Config(object):
     """
     Return a list of state locations of a particular type.
     """
-    return filter(lambda location: location['type'] == location_type, self.locations)
+    return [location for location in self.locations if location['type'] == location_type]

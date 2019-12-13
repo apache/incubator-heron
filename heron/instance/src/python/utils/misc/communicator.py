@@ -20,7 +20,7 @@
 
 '''communicator.py: module responsible for communication between Python heron modules'''
 import sys
-import Queue
+from queue import Queue, Full, Empty
 
 from heron.common.src.python.utils.log import Log
 
@@ -40,7 +40,7 @@ class HeronCommunicator(object):
     """
     self._producer_callback = producer_cb
     self._consumer_callback = consumer_cb
-    self._buffer = Queue.Queue()
+    self._buffer = Queue()
     self.capacity = sys.maxsize
 
   def register_capacity(self, capacity):
@@ -72,9 +72,9 @@ class HeronCommunicator(object):
       if self._producer_callback is not None:
         self._producer_callback()
       return ret
-    except Queue.Empty:
+    except Empty:
       Log.debug("%s: Empty in poll()" % str(self))
-      raise Queue.Empty
+      raise Empty
 
   def offer(self, item):
     """Offer to the buffer
@@ -87,9 +87,9 @@ class HeronCommunicator(object):
       if self._consumer_callback is not None:
         self._consumer_callback()
       return True
-    except Queue.Full:
+    except Full:
       Log.debug("%s: Full in offer()" % str(self))
-      raise Queue.Full
+      raise Full
 
   def clear(self):
     """Clear the buffer"""

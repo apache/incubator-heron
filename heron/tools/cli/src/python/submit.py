@@ -19,13 +19,16 @@
 #  under the License.
 
 ''' submit.py '''
+from future.standard_library import install_aliases
+install_aliases()
+
 import glob
 import logging
 import os
 import tempfile
 import requests
 import subprocess
-import urlparse
+from urllib.parse import urlparse
 
 from heron.common.src.python.utils.log import Log
 from heron.proto import topology_pb2
@@ -418,7 +421,7 @@ def run(command, parser, cl_args, unknown_args):
   # get the topology file name
   topology_file = cl_args['topology-file-name']
 
-  if urlparse.urlparse(topology_file).scheme:
+  if urlparse(topology_file).scheme:
     cl_args['topology-file-name'] = download(topology_file, cl_args['cluster'])
     topology_file = cl_args['topology-file-name']
     Log.debug("download uri to local file: %s", topology_file)
