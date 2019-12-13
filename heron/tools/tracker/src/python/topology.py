@@ -108,7 +108,7 @@ class Topology(object):
     unregister the corresponding watch.
     """
     to_remove = []
-    for uid, callback in self.watches.items():
+    for uid, callback in list(self.watches.items()):
       try:
         callback(self)
       except Exception as e:
@@ -202,7 +202,7 @@ class Topology(object):
     """
     Returns a list of names of all the spouts
     """
-    return map(lambda component: component.comp.name, self.spouts())
+    return [component.comp.name for component in self.spouts()]
 
   def bolts(self):
     """
@@ -216,7 +216,7 @@ class Topology(object):
     """
     Returns a list of names of all the bolts
     """
-    return map(lambda component: component.comp.name, self.bolts())
+    return [component.comp.name for component in self.bolts()]
 
   def get_machines(self):
     """
@@ -225,7 +225,7 @@ class Topology(object):
     """
     if self.physical_plan:
       stmgrs = list(self.physical_plan.stmgrs)
-      return map(lambda s: s.host_name, stmgrs)
+      return [s.host_name for s in stmgrs]
     return []
 
   def get_status(self):

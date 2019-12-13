@@ -44,8 +44,8 @@ class MetricsTest(unittest.TestCase):
     for _ in range(10):
       for key in key_list:
         metric.incr(key=key)
-    self.assertEqual(metric.get_value_and_reset(), dict(zip(key_list, [10] * 3)))
-    self.assertEqual(metric.get_value_and_reset(), dict(zip(key_list, [0] * 3)))
+    self.assertEqual(metric.get_value_and_reset(), dict(list(zip(key_list, [10] * 3))))
+    self.assertEqual(metric.get_value_and_reset(), dict(list(zip(key_list, [0] * 3))))
 
     metric.add_key("key4")
     ret = metric.get_value_and_reset()
@@ -71,8 +71,8 @@ class MetricsTest(unittest.TestCase):
       metric.update(key=key_list[0], value=i)
       metric.update(key=key_list[1], value=i * 2)
       metric.update(key=key_list[2], value=i * 3)
-    self.assertEqual(metric.get_value_and_reset(), dict(zip(key_list, [5.5, 11, 16.5])))
-    self.assertEqual(metric.get_value_and_reset(), dict(zip(key_list, [None] * 3)))
+    self.assertEqual(metric.get_value_and_reset(), dict(list(zip(key_list, [5.5, 11, 16.5]))))
+    self.assertEqual(metric.get_value_and_reset(), dict(list(zip(key_list, [None] * 3))))
 
     metric.add_key("key4")
     ret = metric.get_value_and_reset()

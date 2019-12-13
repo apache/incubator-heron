@@ -115,7 +115,7 @@ class HeronComponentSpec(object):
     # iterate through self.custom_config
     if self.custom_config is not None:
       sanitized = self._sanitize_config(self.custom_config)
-      for key, value in sanitized.items():
+      for key, value in list(sanitized.items()):
         if isinstance(value, str):
           kvs = proto_config.kvs.add()
           kvs.key = key
@@ -149,7 +149,7 @@ class HeronComponentSpec(object):
       raise TypeError("Component-specific configuration must be given as a dict type, given: %s"
                       % str(type(custom_config)))
     sanitized = {}
-    for key, value in custom_config.items():
+    for key, value in list(custom_config.items()):
       if not isinstance(key, str):
         raise TypeError("Key for component-specific configuration must be string, given: %s:%s"
                         % (str(type(key)), str(key)))
@@ -170,7 +170,7 @@ class HeronComponentSpec(object):
     # sanitize inputs and get a map <GlobalStreamId -> Grouping>
     input_dict = self._sanitize_inputs()
 
-    for global_streamid, gtype in input_dict.items():
+    for global_streamid, gtype in list(input_dict.items()):
       in_stream = bolt.inputs.add()
       in_stream.stream.CopyFrom(self._get_stream_id(global_streamid.component_id,
                                                     global_streamid.stream_id))
@@ -196,7 +196,7 @@ class HeronComponentSpec(object):
     if isinstance(self.inputs, dict):
       # inputs are dictionary, must be either <HeronComponentSpec -> Grouping> or
       # <GlobalStreamId -> Grouping>
-      for key, grouping in self.inputs.items():
+      for key, grouping in list(self.inputs.items()):
         if not Grouping.is_grouping_sane(grouping):
           raise ValueError('A given grouping is not supported')
         if isinstance(key, HeronComponentSpec):
@@ -239,7 +239,7 @@ class HeronComponentSpec(object):
     # sanitize outputs and get a map <stream_id -> out fields>
     output_map = self._sanitize_outputs()
 
-    for stream_id, out_fields in output_map.items():
+    for stream_id, out_fields in list(output_map.items()):
       out_stream = spbl.outputs.add()
       out_stream.stream.CopyFrom(self._get_stream_id(self.name, stream_id))
       out_stream.schema.CopyFrom(self._get_stream_schema(out_fields))

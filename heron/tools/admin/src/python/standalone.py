@@ -16,6 +16,7 @@
 #  under the License.
 
 ''' standalone.py '''
+from __future__ import print_function
 from collections import OrderedDict
 from subprocess import call
 import subprocess
@@ -185,11 +186,11 @@ def run(command, parser, cl_args, unknown_args):
   elif action == Action.GET:
     action_type = cl_args["type"]
     if action_type == Get.SERVICE_URL:
-      print get_service_url(cl_args)
+      print(get_service_url(cl_args))
     elif action_type == Get.HERON_UI_URL:
-      print get_heron_ui_url(cl_args)
+      print(get_heron_ui_url(cl_args))
     elif action_type == Get.HERON_TRACKER_URL:
-      print get_heron_tracker_url(cl_args)
+      print(get_heron_tracker_url(cl_args))
     else:
       raise ValueError("Invalid get action %s" % action_type)
   elif action == Action.INFO:
@@ -312,7 +313,7 @@ def template_file(src, dest, replacements_dict):
   file_contents = ""
   with open(src, 'r') as tf:
     file_contents = tf.read()
-    for key, value in replacements_dict.iteritems():
+    for key, value in replacements_dict.items():
       file_contents = file_contents.replace(key, value)
 
   if not file_contents:
@@ -372,7 +373,7 @@ def print_cluster_info(cl_args):
   info['roles'] = roles
   info['urls'] = urls
 
-  print json.dumps(info, indent=2)
+  print(json.dumps(info, indent=2))
 
 def add_additional_args(parsers):
   '''
@@ -858,13 +859,13 @@ def get_hostname(ip_addr, cl_args):
   return output[0].strip("\n")
 
 def check_sure(cl_args, prompt):
-  yes = raw_input("%s" % prompt + ' (yes/no): ')
+  yes = input("%s" % prompt + ' (yes/no): ')
   if yes == "y" or yes == "yes":
     return True
   elif yes == "n" or yes == "no":
     return False
   else:
-    print 'Invalid input.  Please input "yes" or "no"'
+    print('Invalid input.  Please input "yes" or "no"')
 
 def get_jobs(cl_args, nomad_addr):
   r = requests.get("http://%s:4646/v1/jobs" % nomad_addr)

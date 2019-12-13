@@ -236,11 +236,10 @@ class HeronExecutor(object):
     self.tmaster_stats_port = parsed_args.tmaster_stats_port
     self.heron_internals_config_file = parsed_args.heron_internals_config_file
     self.override_config_file = parsed_args.override_config_file
-    self.component_ram_map =\
-        map(lambda x: {x.split(':')[0]:
-                           int(x.split(':')[1])}, parsed_args.component_ram_map.split(','))
-    self.component_ram_map =\
-        functools.reduce(lambda x, y: dict(x.items() + y.items()), self.component_ram_map)
+    self.component_ram_map = [{x.split(':')[0]:int(x.split(':')[1])}
+                              for x in parsed_args.component_ram_map.split(',')]
+    self.component_ram_map = functools.reduce(lambda x, y: dict(list(x.items()) + list(y.items())),
+                                              self.component_ram_map)
 
     # component_jvm_opts_in_base64 itself is a base64-encoding-json-map, which is appended with
     # " at the start and end. It also escapes "=" to "&equals" due to aurora limitation
@@ -256,7 +255,7 @@ class HeronExecutor(object):
         base64.b64decode(parsed_args.component_jvm_opts.
                          lstrip('"').rstrip('"').replace('(61)', '=').replace('&equals;', '='))
     if component_jvm_opts_in_json != "":
-      for (k, v) in json.loads(component_jvm_opts_in_json).items():
+      for (k, v) in list(json.loads(component_jvm_opts_in_json).items()):
         # In json, the component name and JVM options are still in base64 encoding
         self.component_jvm_opts[base64.b64decode(k)] = base64.b64decode(v)
 
@@ -366,7 +365,7 @@ class HeronExecutor(object):
     parser.add_argument("--is-stateful", required=True)
     parser.add_argument("--checkpoint-manager-classpath", required=True)
     parser.add_argument("--checkpoint-manager-port", required=True)
-    parser.add_argument("--checkpoint-manager-ram", type=long, required=True)
+    parser.add_argument("--checkpoint-manager-ram", type=int, required=True)
     parser.add_argument("--stateful-config-file", required=True)
     parser.add_argument("--health-manager-mode", required=True)
     parser.add_argument("--health-manager-classpath", required=True)
@@ -793,7 +792,7 @@ class HeronExecutor(object):
         '--zkhostportlist=%s' % self.state_manager_connection,
         '--zkroot=%s' % self.state_manager_root,
         '--stmgr_id=%s' % self.stmgr_ids[self.shard],
-        '--instance_ids=%s' % ','.join(map(lambda x: x[0], instance_info)),
+        '--instance_ids=%s' % ','.join([x[0] for x in instance_info]),
         '--myhost=%s' % self.master_host,
         '--data_port=%s' % str(self.master_port),
         '--local_data_port=%s' % str(self.tmaster_controller_port),
@@ -958,8 +957,8 @@ class HeronExecutor(object):
   def _kill_processes(self, commands):
     # remove the command from processes_to_monitor and kill the process
     with self.process_lock:
-      for command_name, command in commands.items():
-        for process_info in self.processes_to_monitor.values():
+      for command_name, command in list(commands.items()):
+        for process_info in list(self.processes_to_monitor.values()):
           if process_info.name == command_name:
             del self.processes_to_monitor[process_info.pid]
             Log.info("Killing %s process with pid %d: %s" %
@@ -978,7 +977,7 @@ class HeronExecutor(object):
     Log.info("Start processes")
     processes_to_monitor = {}
     # First start all the processes
-    for (name, command) in commands.items():
+    for (name, command) in list(commands.items()):
       p = self._run_process(name, command)
       processes_to_monitor[p.pid] = ProcessInfo(p, name, command)
 
@@ -999,7 +998,7 @@ class HeronExecutor(object):
         (pid, status) = os.wait()
 
         with self.process_lock:
-          if pid in self.processes_to_monitor.keys():
+          if pid in list(self.processes_to_monitor.keys()):
             old_process_info = self.processes_to_monitor[pid]
             name = old_process_info.name
             command = old_process_info.command
@@ -1061,10 +1060,10 @@ class HeronExecutor(object):
 
     # if the current command has a matching command in the updated commands we keep it
     # otherwise we kill it
-    for current_name, current_command in current_commands.items():
+    for current_name, current_command in list(current_commands.items()):
       # We don't restart tmaster since it watches the packing plan and updates itself. The stream
       # manager is restarted just to reset state, but we could update it to do so without a restart
-      if current_name in updated_commands.keys() and \
+      if current_name in list(updated_commands.keys()) and \
         current_command == updated_commands[current_name] and \
         not current_name.startswith('stmgr-'):
         commands_to_keep[current_name] = current_command
@@ -1072,8 +1071,8 @@ class HeronExecutor(object):
         commands_to_kill[current_name] = current_command
 
     # updated commands not in the keep list need to be started
-    for updated_name, updated_command in updated_commands.items():
-      if updated_name not in commands_to_keep.keys():
+    for updated_name, updated_command in list(updated_commands.items()):
+      if updated_name not in list(commands_to_keep.keys()):
         commands_to_start[updated_name] = updated_command
 
     return commands_to_kill, commands_to_keep, commands_to_start
@@ -1083,8 +1082,8 @@ class HeronExecutor(object):
     Then starts new ones required and kills old ones no longer required.
     '''
     with self.process_lock:
-      current_commands = dict(map((lambda process: (process.name, process.command)),
-                                  self.processes_to_monitor.values()))
+      current_commands = dict(list(map((lambda process: (process.name, process.command)),
+                                       list(self.processes_to_monitor.values()))))
       updated_commands = self.get_commands_to_run()
 
       # get the commands to kill, keep and start
@@ -1176,7 +1175,7 @@ def setup(executor):
     Log.info('Executor terminated; exiting all process in executor.')
 
     # Kill child processes first and wait for log collection to finish
-    for pid in executor.processes_to_monitor.keys():
+    for pid in list(executor.processes_to_monitor.keys()):
       os.kill(pid, signal.SIGTERM)
     time.sleep(5)
 
@@ -1192,7 +1191,7 @@ def setup(executor):
   sid = os.getsid(pid)
 
   # POSIX prohibits the change of the process group ID of a session leader
-  if pid <> sid:
+  if pid != sid:
     Log.info('Set up process group; executor becomes leader')
     os.setpgrp() # create new process group, become its leader
 

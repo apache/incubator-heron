@@ -116,7 +116,7 @@ class RuntimeStateHandler(BaseHandler):
       topology = self.tracker.getTopologyByClusterRoleEnvironAndName(
           cluster, role, environ, topology_name)
       reg_summary = yield tornado.gen.Task(self.getStmgrsRegSummary, topology.tmaster)
-      for stmgr, reg in reg_summary.items():
+      for stmgr, reg in list(reg_summary.items()):
         runtime_state["stmgrs"].setdefault(stmgr, {})["is_registered"] = reg
       self.write_success_response(runtime_state)
     except Exception as e:

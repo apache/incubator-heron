@@ -167,7 +167,7 @@ class ComponentSpecTest(unittest.TestCase):
     inputs_list = [GlobalStreamId("spout1", "default"), GlobalStreamId("spout2", "some_stream")]
     spec = HeronComponentSpec("bolt", "bl_cls", False, 1, inputs=inputs_list)
     ret = spec._sanitize_inputs()
-    self.assertEqual(ret, dict(zip(inputs_list, [Grouping.SHUFFLE] * 2)))
+    self.assertEqual(ret, dict(list(zip(inputs_list, [Grouping.SHUFFLE] * 2))))
 
     # list of neither GlobalStreamId nor HeronComponentSpec
     inputs_list = [None, 123, "string", [GlobalStreamId("sp", "default")]]

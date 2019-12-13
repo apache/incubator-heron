@@ -40,7 +40,7 @@ from kazoo.exceptions import NotEmptyError
 from kazoo.exceptions import ZookeeperError
 
 def _makehostportlist(hostportlist):
-  return ','.join(map(lambda hp: "%s:%i" % hp, hostportlist))
+  return ','.join(["%s:%i" % hp for hp in hostportlist])
 
 # pylint: disable=attribute-defined-outside-init
 class ZkStateManager(StateManager):

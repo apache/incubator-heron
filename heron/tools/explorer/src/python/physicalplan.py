@@ -76,7 +76,7 @@ def to_table(metrics):
   """ normalize raw metrics API result to table """
   all_queries = tracker_access.metric_queries()
   m = tracker_access.queries_map()
-  names = metrics.values()[0].keys()
+  names = list(metrics.values())[0].keys()
   stats = []
   for n in names:
     info = [n]
@@ -86,7 +86,7 @@ def to_table(metrics):
       except KeyError:
         pass
     stats.append(info)
-  header = ['container id'] + [m[k] for k in all_queries if k in metrics.keys()]
+  header = ['container id'] + [m[k] for k in all_queries if k in list(metrics.keys())]
   return stats, header
 
 
@@ -97,8 +97,8 @@ def run_metrics(command, parser, cl_args, unknown_args):
   topology = cl_args['topology-name']
   try:
     result = tracker_access.get_topology_info(cluster, env, topology, role)
-    spouts = result['physical_plan']['spouts'].keys()
-    bolts = result['physical_plan']['bolts'].keys()
+    spouts = list(result['physical_plan']['spouts'].keys())
+    bolts = list(result['physical_plan']['bolts'].keys())
     components = spouts + bolts
     cname = cl_args['component']
     if cname:
@@ -134,7 +134,7 @@ def run_bolts(command, parser, cl_args, unknown_args):
   topology = cl_args['topology-name']
   try:
     result = tracker_access.get_topology_info(cluster, env, topology, role)
-    bolts = result['physical_plan']['bolts'].keys()
+    bolts = list(result['physical_plan']['bolts'].keys())
     bolt_name = cl_args['bolt']
     if bolt_name:
       if bolt_name in bolts:
@@ -174,11 +174,11 @@ def run_containers(command, parser, cl_args, unknown_args):
     return False
   containers = result['physical_plan']['stmgrs']
   all_bolts, all_spouts = set(), set()
-  for _, bolts in result['physical_plan']['bolts'].items():
+  for _, bolts in list(result['physical_plan']['bolts'].items()):
     all_bolts = all_bolts | set(bolts)
-  for _, spouts in result['physical_plan']['spouts'].items():
+  for _, spouts in list(result['physical_plan']['spouts'].items()):
     all_spouts = all_spouts | set(spouts)
-  stmgrs = containers.keys()
+  stmgrs = list(containers.keys())
   stmgrs.sort()
   if container_id is not None:
     try:

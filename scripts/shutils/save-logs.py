@@ -30,7 +30,7 @@ def tail(filename, n):
   with open(filename, "rb") as f:
    fm = mmap.mmap(f.fileno(), 0, mmap.MAP_SHARED, mmap.PROT_READ)
    try:
-      for i in xrange(size - 1, -1, -1):
+      for i in range(size - 1, -1, -1):
           if fm[i] == '\n':
              n -= 1
              if n == -1:
@@ -40,7 +40,7 @@ def tail(filename, n):
         fm.close()
 
 def main(file, cmd):
-  print "%s writing to: %s" % (cmd, file)
+  print("%s writing to: %s" % (cmd, file))
   with open(file, "w") as out:
    count = 0
    process = subprocess.Popen(cmd,
@@ -64,16 +64,16 @@ def main(file, cmd):
    errcode = process.wait()
    diff = datetime.now() - start
    sys.stdout.write("\r%d seconds %d log lines"%(diff.seconds, count))
-  print "\n %s finished with errcode: %d" % (cmd, errcode)
+  print("\n %s finished with errcode: %d" % (cmd, errcode))
   if errcode != 0:
      lines = tail(file, 1000)
-     print '\n'.join(lines)
+     print('\n'.join(lines))
      sys.exit(errcode)
   return errcode
 
 if __name__ == "__main__":
   if sys.argv < 1:
-      print "Usage: %s [file info]" % sys.argv[0]
+      print("Usage: %s [file info]" % sys.argv[0])
       sys.exit(1)
   file = sys.argv[1]
   cmd = sys.argv[2:]

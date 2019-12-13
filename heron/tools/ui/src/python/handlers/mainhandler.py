@@ -29,4 +29,4 @@ class MainHandler(base.BaseHandler):
     '''
     :return:
     '''
-    self.redirect(u"/topologies")
+    self.redirect("/topologies")

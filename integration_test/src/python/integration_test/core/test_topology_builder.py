@@ -122,7 +122,7 @@ class TestTopologyBuilder(TopologyBuilder):
 
     # building a graph directed from children to parents, by looking only on bolts
     # since spouts don't have parents
-    for name, bolt_spec in self.bolts.iteritems():
+    for name, bolt_spec in self.bolts.items():
       if name == self.TERMINAL_BOLT_NAME:
         continue
 
@@ -144,20 +144,20 @@ class TestTopologyBuilder(TopologyBuilder):
     non_terminals = set()
     # 1. terminal bolts need upstream components, because we don't want isolated bolts
     # 2. terminal bolts should not exist in the prev.values(), meaning that no downstream
-    for parent_set in self.prev.values():
+    for parent_set in list(self.prev.values()):
       non_terminals.update(parent_set)
 
-    for bolt_name in self.prev.keys():
+    for bolt_name in list(self.prev.keys()):
       if bolt_name not in non_terminals:
         terminals.add(bolt_name)
 
     # will also consider the cases with spouts without children
-    for spout_name in self.spouts.keys():
+    for spout_name in list(self.spouts.keys()):
       if spout_name not in non_terminals:
         terminals.add(spout_name)
 
     # add all grouping to components
-    for child in self.prev.keys():
+    for child in list(self.prev.keys()):
       for parent in self.prev[child]:
         self._add_all_grouping(child, parent, integ_const.INTEGRATION_TEST_CONTROL_STREAM_ID)
 

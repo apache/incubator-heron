@@ -101,7 +101,7 @@ def get_subparser(parser, command):
   # but better save than sorry
   for subparsers_action in subparsers_actions:
     # get all subparsers
-    for choice, subparser in subparsers_action.choices.items():
+    for choice, subparser in list(subparsers_action.choices.items()):
       if choice == command:
         return subparser
   return None
@@ -467,7 +467,7 @@ def print_build_info(zipped_pex=False):
 
   with open(release_file) as release_info:
     release_map = yaml.load(release_info)
-    release_items = sorted(release_map.items(), key=lambda tup: tup[0])
+    release_items = sorted(list(release_map.items()), key=lambda tup: tup[0])
     for key, value in release_items:
       print("%s : %s" % (key, value))
 

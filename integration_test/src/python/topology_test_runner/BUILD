@@ -9,7 +9,10 @@ pex_binary(
     resources = [
         "resources/test.json",
     ],
-    reqs = ["argparse==1.4.0"],
+    reqs = [
+        "argparse==1.4.0",
+        "future==0.18.2"
+    ],
     deps = [
         "//heron/common/src/python:common-py",
         "//heronpy/proto:proto-py",

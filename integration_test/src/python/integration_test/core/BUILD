@@ -7,4 +7,5 @@ pex_library(
         "//heronpy/api:heron-python-py",
         "//heron/common/src/python:common-py"
     ],
+    reqs = ["future==0.18.2"]
 )

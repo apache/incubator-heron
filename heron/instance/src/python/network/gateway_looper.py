@@ -26,7 +26,7 @@ import os
 import time
 import select
 
-from event_looper import EventLooper
+from .event_looper import EventLooper
 from heron.common.src.python.utils.log import Log
 
 class GatewayLooper(EventLooper):
@@ -83,7 +83,7 @@ class GatewayLooper(EventLooper):
     error_lst = []
 
     if self.sock_map is not None:
-      for fd, obj in self.sock_map.items():
+      for fd, obj in list(self.sock_map.items()):
         is_r = obj.readable()
         is_w = obj.writable()
         if is_r:
