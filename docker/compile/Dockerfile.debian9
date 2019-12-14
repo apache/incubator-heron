@@ -34,6 +34,7 @@ RUN apt-get update && apt-get -y install \
       python2.7-dev \
       software-properties-common \
       python-setuptools \
+      tree \
       zip \
       unzip \
       wget
