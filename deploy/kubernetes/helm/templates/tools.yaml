@@ -84,8 +84,8 @@ spec:
               cpu: "100m"
               memory: "200M"
             limits:
-              cpu: "200m"
-              memory: "300M"
+              cpu: "400m"
+              memory: "512M"
           ports:
             - containerPort: 8888
               name: api-port
@@ -105,8 +105,8 @@ spec:
               cpu: "100m"
               memory: "200M"
             limits:
-              cpu: "200m"
-              memory: "300M"
+              cpu: "400m"
+              memory: "512M"
           ports:
             - containerPort: 8889
               name: app-port

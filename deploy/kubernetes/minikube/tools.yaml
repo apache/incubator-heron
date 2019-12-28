@@ -51,8 +51,8 @@ spec:
               cpu: "100m"
               memory: "200M"
             limits:
-              cpu: "200m"
-              memory: "300M"
+              cpu: "400m"
+              memory: "512M"
         - name: heron-ui
           image: heron/heron:latest
           ports:
@@ -69,8 +69,8 @@ spec:
               cpu: "100m"
               memory: "200M"
             limits:
-              cpu: "200m"
-              memory: "300M"
+              cpu: "400m"
+              memory: "512M"
 ---
 
 ##
