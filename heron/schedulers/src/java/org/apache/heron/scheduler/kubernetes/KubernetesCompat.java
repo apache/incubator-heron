@@ -24,10 +24,10 @@ import java.util.logging.Logger;
 
 import org.apache.heron.scheduler.TopologyRuntimeManagementException;
 
-import io.kubernetes.client.ApiClient;
-import io.kubernetes.client.ApiException;
-import io.kubernetes.client.apis.CoreV1Api;
-import io.kubernetes.client.models.V1Status;
+import io.kubernetes.client.openapi.ApiClient;
+import io.kubernetes.client.openapi.ApiException;
+import io.kubernetes.client.openapi.apis.CoreV1Api;
+import io.kubernetes.client.openapi.models.V1Status;
 import static io.kubernetes.client.KubernetesConstants.V1STATUS_FAILURE;
 
 public class KubernetesCompat {
@@ -41,8 +41,9 @@ public class KubernetesCompat {
     try {
       final String labelSelector = KubernetesConstants.LABEL_TOPOLOGY + "=" + topology;
       final V1Status response =
-          client.deleteCollectionNamespacedPod(namespace, null, null, null,
-          labelSelector, null, null, null, null);
+          client.deleteCollectionNamespacedPod(namespace, null, null, null, null, null,
+            null, labelSelector, null, null, 
+            KubernetesConstants.DELETE_OPTIONS_PROPAGATION_POLICY, null, null, null, null);
       if (V1STATUS_FAILURE.equals(response.getStatus())) {
         LOG.log(Level.SEVERE, "Error killing topology message: " + response.toString());
 

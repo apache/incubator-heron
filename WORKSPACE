@@ -537,8 +537,8 @@ maven_jar(
 # end Pulsar Client
 
 # Kubernetes java client
-kubernetes_client_version = "6.0.1"
-squareup_okhttp_version = "2.7.5"
+kubernetes_client_version = "7.0.0"
+squareup_okhttp_version = "3.14.3"
 
 maven_jar(
   name = "kubernetes_java_client",
@@ -557,7 +557,7 @@ maven_jar(
 
 maven_jar(
   name = "squareup_okhttp",
-  artifact = "com.squareup.okhttp:okhttp:" + squareup_okhttp_version
+  artifact = "com.squareup.okhttp3:okhttp:" + squareup_okhttp_version
 )
 maven_jar(
   name = "squareup_okio",
@@ -565,12 +565,7 @@ maven_jar(
 )
 maven_jar(
   name = "squareup_okhttp_logging_interceptor",
-  artifact = "com.squareup.okhttp:logging-interceptor:" + squareup_okhttp_version
-)
-
-maven_jar(
-  name = "squareup_okhttp_ws",
-  artifact = "com.squareup.okhttp:okhttp-ws:" + squareup_okhttp_version
+  artifact = "com.squareup.okhttp3:logging-interceptor:" + squareup_okhttp_version
 )
 
 maven_jar(

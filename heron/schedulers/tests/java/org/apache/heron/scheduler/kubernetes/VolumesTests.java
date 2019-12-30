@@ -24,7 +24,7 @@ import org.junit.Test;
 
 import org.apache.heron.spi.common.Config;
 
-import io.kubernetes.client.models.V1Volume;
+import io.kubernetes.client.openapi.models.V1Volume;
 
 public class VolumesTests {
 

@@ -27,8 +27,8 @@ import org.apache.heron.scheduler.utils.Runtime;
 import org.apache.heron.spi.common.Config;
 import org.apache.heron.spi.common.Context;
 
-import io.kubernetes.client.ApiException;
-import io.kubernetes.client.models.V1Status;
+import io.kubernetes.client.openapi.ApiException;
+import io.kubernetes.client.openapi.models.V1Status;
 
 final class KubernetesUtils {
 
