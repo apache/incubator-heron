@@ -561,7 +561,7 @@ maven_jar(
 )
 maven_jar(
   name = "squareup_okio",
-  artifact = "com.squareup.okio:okio:1.6.0"
+  artifact = "com.squareup.okio:okio:1.17.2"
 )
 maven_jar(
   name = "squareup_okhttp_logging_interceptor",
@@ -570,7 +570,12 @@ maven_jar(
 
 maven_jar(
   name = "google_gson",
-  artifact = "com.google.code.gson:gson:2.6.2"
+  artifact = "com.google.code.gson:gson:2.8.0"
+)
+
+maven_jar(
+  name = "io_gsonfire",
+  artifact = "io.gsonfire:gson-fire:1.8.3"
 )
 
 maven_jar(
