@@ -48,7 +48,6 @@ import io.kubernetes.client.openapi.ApiException;
 import io.kubernetes.client.openapi.apis.AppsV1Api;
 import io.kubernetes.client.openapi.models.V1Container;
 import io.kubernetes.client.openapi.models.V1ContainerPort;
-import io.kubernetes.client.openapi.models.V1DeleteOptions;
 import io.kubernetes.client.openapi.models.V1EnvVar;
 import io.kubernetes.client.openapi.models.V1EnvVarSource;
 import io.kubernetes.client.openapi.models.V1LabelSelector;
@@ -194,7 +193,8 @@ public class AppsV1Controller extends KubernetesController {
   boolean deleteStatefulSet() {
     try {
       final V1Status response = client.deleteNamespacedStatefulSet(getTopologyName(),
-          getNamespace(), null, null, 0, null, KubernetesConstants.DELETE_OPTIONS_PROPAGATION_POLICY, null);
+          getNamespace(), null, null, 0, null,
+          KubernetesConstants.DELETE_OPTIONS_PROPAGATION_POLICY, null);
 
       if (V1STATUS_FAILURE.equals(response.getStatus())) {
         LOG.log(Level.SEVERE, "Error killing topology message: " + response.toString());

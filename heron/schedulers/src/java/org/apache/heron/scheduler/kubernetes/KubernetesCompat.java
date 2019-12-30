@@ -42,8 +42,9 @@ public class KubernetesCompat {
       final String labelSelector = KubernetesConstants.LABEL_TOPOLOGY + "=" + topology;
       final V1Status response =
           client.deleteCollectionNamespacedPod(namespace, null, null, null, null, null,
-            null, labelSelector, null, null, 
-            KubernetesConstants.DELETE_OPTIONS_PROPAGATION_POLICY, null, null, null, null);
+            null, labelSelector, null, null,
+            KubernetesConstants.DELETE_OPTIONS_PROPAGATION_POLICY,
+            null, null, null, null);
       if (V1STATUS_FAILURE.equals(response.getStatus())) {
         LOG.log(Level.SEVERE, "Error killing topology message: " + response.toString());
 
