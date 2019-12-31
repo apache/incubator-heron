@@ -61,7 +61,7 @@ dlog_deps_files = \
         "//third_party/java:dlog-java",
         "//heron/common/src/java:basics-java",
         "//heron/io/dlog/src/java:dlog-lib",
-        "@com_google_guava_guava//jar",
+        "@maven//:com_google_guava_guava",
     ]
 
 java_library(

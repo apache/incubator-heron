@@ -44,7 +44,7 @@ apiserver_deps_files = \
   packing_deps_files + \
   uploader_deps_files + [
     "//third_party/java:cli",
-    "@org_yaml_snakeyaml//jar",
+    "@maven//:org_yaml_snakeyaml",
     "//third_party/java:jetty-jersey-java",
     "//third_party/java:commons-compress",
     "//third_party/java:jackson",
