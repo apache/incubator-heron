@@ -35,7 +35,7 @@ java_library(
     javacopts = DOCLINT_HTML_AND_SYNTAX,
     deps = api_deps_files + [
         ":api-java-low-level",
-        "@org_apache_commons_commons_lang3//jar"
+        "@maven//:org_apache_commons_commons_lang3"
     ]
 )
 
@@ -46,7 +46,7 @@ java_library(
     srcs = glob(["org/apache/heron/api/**/*.java", "org/apache/heron/streamlet/**/*.java"]),
     deps = api_deps_files + [
         "//third_party/java:kryo-neverlink",
-        "@org_apache_commons_commons_lang3//jar"
+        "@maven//:org_apache_commons_commons_lang3"
     ]
 )
 
@@ -55,7 +55,7 @@ java_binary(
     srcs = glob(["org/apache/heron/api/**/*.java", "org/apache/heron/streamlet/**/*.java"]),
     deps = api_deps_files + [
         "//third_party/java:kryo-neverlink",
-        "@org_apache_commons_commons_lang3//jar"
+        "@maven//:org_apache_commons_commons_lang3"
     ]
 )
 
@@ -63,7 +63,7 @@ jarjar_binary(
     name = "api-shaded",
     src = ":api-unshaded_deploy.jar",
     shade = "shade.conf",
-    deps = ["@org_sonatype_plugins_jarjar_maven_plugin//jar"]
+    deps = ["@maven//:org_sonatype_plugins_jarjar_maven_plugin"]
 )
 
 genrule(

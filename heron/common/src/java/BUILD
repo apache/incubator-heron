@@ -20,7 +20,8 @@ java_library(
     srcs = glob(["**/config/*.java"]),
     deps = [
         ":basics-java",
-        "@org_yaml_snakeyaml//jar",
+        # "@org_yaml_snakeyaml//jar",
+        "@maven//:org_yaml_snakeyaml",
     ],
 )
 

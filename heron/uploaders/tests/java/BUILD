@@ -103,9 +103,9 @@ java_test(
     deps = common_deps_files + spi_deps_files + [
          "//heron/uploaders/src/java:http-uploader-java",
          "@commons_logging_commons_logging//jar",
-         "@org_apache_httpcomponents_http_core//jar",
-         "@org_apache_httpcomponents_http_client//jar",
-         "@org_apache_httpcomponents_http_client_test//jar",
+         "@org_apache_httpcomponents_httpcore//jar",
+         "@org_apache_httpcomponents_httpclient//jar",
+         "@org_apache_httpcomponents_httpclient_test//jar",
          "//heron/common/src/java:basics-java"
     ],
     size = "small",

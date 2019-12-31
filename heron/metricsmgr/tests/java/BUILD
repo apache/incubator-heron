@@ -12,7 +12,7 @@ java_library(
         "//heron/proto:proto_common_java",
         "//heron/proto:proto_metrics_java",
         "//heron/proto:proto_tmaster_java",
-        "@com_google_guava_guava//jar",
+        "@maven//:com_google_guava_guava",
         "@com_google_protobuf//:protobuf_java",
         "//third_party/java:mockito",
         "//third_party/java:junit4",

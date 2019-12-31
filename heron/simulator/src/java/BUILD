@@ -19,7 +19,7 @@ simulator_deps_files = \
         "//heron/common/src/java:config-java",
         "//heron/common/src/java:utils-java",
         "//heron/instance/src/java:instance-java",
-        "@org_yaml_snakeyaml//jar",
+        "@maven//:org_yaml_snakeyaml",
     ]
 
 java_library(
@@ -34,7 +34,7 @@ java_binary(
     srcs = glob(["org/apache/heron/simulator/**/*.java"]),
     deps = simulator_deps_files + [
         "//third_party/java:kryo-neverlink",
-        "@org_apache_commons_commons_lang3//jar"
+        "@maven//:org_apache_commons_commons_lang3"
     ]
 )
 
@@ -43,7 +43,7 @@ jarjar_binary(
     src = ":simulator-unshaded_deploy.jar",
     shade = "shade.conf",
     deps = [
-        "@org_sonatype_plugins_jarjar_maven_plugin//jar"
+        "@maven//:org_sonatype_plugins_jarjar_maven_plugin"
     ]
 )
 

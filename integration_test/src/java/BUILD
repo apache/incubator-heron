@@ -25,8 +25,8 @@ java_library(
         "//third_party/java:jackson",
         "@commons_logging_commons_logging//jar",
         "@com_google_protobuf//:protobuf_java",
-        "@org_apache_httpcomponents_http_client//jar",
-        "@org_apache_httpcomponents_http_core//jar",
+        "@org_apache_httpcomponents_httpclient//jar",
+        "@org_apache_httpcomponents_httpcore//jar",
     ],
 )
 
@@ -133,8 +133,8 @@ java_library(
         "//third_party/java:jackson",
         "@commons_logging_commons_logging//jar",
         "@com_google_protobuf//:protobuf_java",
-        "@org_apache_httpcomponents_http_client//jar",
-        "@org_apache_httpcomponents_http_core//jar",
+        "@org_apache_httpcomponents_httpclient//jar",
+        "@org_apache_httpcomponents_httpcore//jar",
     ],
 )
 
