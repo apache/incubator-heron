@@ -48,6 +48,7 @@ http_archive(
 )
 
 load("@rules_jvm_external//:defs.bzl", "maven_install")
+load("@rules_jvm_external//:specs.bzl", "maven")
 
 maven_install(
     artifacts = [
@@ -58,7 +59,6 @@ maven_install(
     "com.hashicorp.nomad:nomad-sdk:0.7.0",
     "org.apache.hadoop:hadoop-core:0.20.2",
     "com.google.apis:google-api-services-storage:v1-rev108-" + google_client_version,
-    # "com.google.api-client:google-api-client:" + google_client_version,
     "org.apache.reef:reef-runtime-yarn:" + reef_version,
     "org.apache.reef:reef-runtime-local:" + reef_version,
     "org.apache.httpcomponents:httpclient:" + http_client_version,
@@ -70,18 +70,18 @@ maven_install(
     "com.microsoft.dhalion:dhalion:0.2.3",
     "org.objenesis:objenesis:2.1",
     "org.ow2.asm:asm-all:5.1",
-    # "org.ow2.asm:asm:5.0.4",
     "com.amazonaws:aws-java-sdk-s3:" + aws_version,
     "org.eclipse.jetty:jetty-server:" + jetty_version,
-    # "org.eclipse.jetty:jetty-http:" + jetty_version,
+    "org.eclipse.jetty:jetty-http:" + jetty_version,
     "org.eclipse.jetty:jetty-security:" + jetty_version,
     "org.eclipse.jetty:jetty-continuation:" + jetty_version,
-    # "org.eclipse.jetty:jetty-servlets:" + jetty_version,
+    "org.eclipse.jetty:jetty-servlets:" + jetty_version,
+    "org.eclipse.jetty:jetty-servlet:" + jetty_version,
+    "org.jvnet.mimepull:mimepull:1.9.7",
     "javax.servlet:javax.servlet-api:3.1.0",
-    # "org.glassfish.jersey.core:jersey-server:" + jersey_verion,
     "org.glassfish.jersey.media:jersey-media-json-jackson:" + jersey_version,
-    # "org.glassfish.jersey.media:jersey-media-json-jackson:2.24",
-    "org.glassfish.jersey.containers:jersey-container-servlet:2.25.1",
+    "org.glassfish.jersey.media:jersey-media-multipart:" + jersey_version,
+    "org.glassfish.jersey.containers:jersey-container-servlet:" + jersey_verion,
     "org.apache.distributedlog:distributedlog-core-shaded:" + distributedlog_version,
     "io.netty:netty-all:4.1.22.Final",
     "aopalliance:aopalliance:1.0",
@@ -91,7 +91,6 @@ maven_install(
     "org.apache.curator:curator-framework:" + curator_version,
     "org.apache.curator:curator-recipes:" + curator_version,
     "org.apache.curator:curator-client:" + curator_version,
-    # "org.apache.curator:apache-curator:" + curator_version,
     "org.slf4j:slf4j-api:" + slf4j_version,
     "org.slf4j:slf4j-jdk14:" + slf4j_version,
     "log4j:log4j:1.2.17",
@@ -108,12 +107,17 @@ maven_install(
     "com.fasterxml.jackson.core:jackson-databind:" + jackson_version,
     "com.fasterxml.jackson.jaxrs:jackson-jaxrs-base:2.8.8",
     "com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider:2.8.8",
-    # "com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider:2.5.4",
-    # "com.fasterxml.jackson.jaxrs:jackson-jaxrs-base:2.5.4",
     "org.mockito:mockito-all:1.10.19",
     "org.sonatype.plugins:jarjar-maven-plugin:1.9",
     "org.powermock:powermock-api-mockito:" + powermock_version,
     "org.powermock:powermock-module-junit4:" + powermock_version,
+    maven.artifact(
+      group = "org.apache.httpcomponents",
+      artifact = "httpclient",
+      version = http_client_version,
+      classifier = "tests",
+      packaging = "test-jar",
+    )
     ],
     repositories = [
         "https://jcenter.bintray.com/",

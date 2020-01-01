@@ -105,7 +105,7 @@ java_test(
          "@maven//:commons_logging_commons_logging",
          "@maven//:org_apache_httpcomponents_httpcore",
          "@maven//:org_apache_httpcomponents_httpclient",
-         "@maven//:org_apache_httpcomponents_httpclient_test",
+         "@maven//:org_apache_httpcomponents_httpclient_tests",
          "//heron/common/src/java:basics-java"
     ],
     size = "small",
