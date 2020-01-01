@@ -11,7 +11,6 @@ java_library(
         "//heron/common/src/java:test-helpers-java",
         "//heron/proto:proto_networktests_java",
         "//third_party/java:powermock",
-        # "@commons_io_commons_io//jar",
         "@maven//:commons_io_commons_io",
         "@com_google_protobuf//:protobuf_java",
         "//third_party/java:mockito",

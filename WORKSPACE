@@ -52,12 +52,15 @@ load("@rules_jvm_external//:specs.bzl", "maven")
 
 maven_install(
     artifacts = [
+    "antlr:antlr:2.7.7",
+    "org.apache.zookeeper:zookeeper:3.4.14",
     "io.kubernetes:client-java:" + kubernetes_client_version,
     "com.esotericsoftware:kryo:3.0.3",
     "org.apache.avro:avro:1.7.4",
     "org.apache.mesos:mesos:0.22.0",
     "com.hashicorp.nomad:nomad-sdk:0.7.0",
     "org.apache.hadoop:hadoop-core:0.20.2",
+    "org.apache.pulsar:pulsar-client:shaded:1.19.0-incubating",
     "com.google.apis:google-api-services-storage:v1-rev108-" + google_client_version,
     "org.apache.reef:reef-runtime-yarn:" + reef_version,
     "org.apache.reef:reef-runtime-local:" + reef_version,
@@ -81,7 +84,7 @@ maven_install(
     "javax.servlet:javax.servlet-api:3.1.0",
     "org.glassfish.jersey.media:jersey-media-json-jackson:" + jersey_version,
     "org.glassfish.jersey.media:jersey-media-multipart:" + jersey_version,
-    "org.glassfish.jersey.containers:jersey-container-servlet:" + jersey_verion,
+    "org.glassfish.jersey.containers:jersey-container-servlet:" + jersey_version,
     "org.apache.distributedlog:distributedlog-core-shaded:" + distributedlog_version,
     "io.netty:netty-all:4.1.22.Final",
     "aopalliance:aopalliance:1.0",
@@ -111,6 +114,8 @@ maven_install(
     "org.sonatype.plugins:jarjar-maven-plugin:1.9",
     "org.powermock:powermock-api-mockito:" + powermock_version,
     "org.powermock:powermock-module-junit4:" + powermock_version,
+    "com.puppycrawl.tools:checkstyle:6.17",
+    "com.googlecode.json-simple:json-simple:1.1",
     maven.artifact(
       group = "org.apache.httpcomponents",
       artifact = "httpclient",
