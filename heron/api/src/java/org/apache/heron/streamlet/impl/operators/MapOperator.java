@@ -41,7 +41,7 @@ public class MapOperator<R, T> extends StreamletOperator<R, T> {
   public void execute(Tuple tuple) {
     R obj = (R) tuple.getValue(0);
     T result = mapFn.apply(obj);
-    collector.emit(new Values(result));
+    collector.emit(tuple, new Values(result));
     collector.ack(tuple);
   }
 }

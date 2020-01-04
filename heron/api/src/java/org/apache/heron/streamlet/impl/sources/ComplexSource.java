@@ -20,7 +20,12 @@ package org.apache.heron.streamlet.impl.sources;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import com.google.common.cache.Cache;
 
 import org.apache.heron.api.spout.SpoutOutputCollector;
 import org.apache.heron.api.state.State;
@@ -38,8 +43,16 @@ import org.apache.heron.streamlet.impl.ContextImpl;
 public class ComplexSource<R> extends StreamletSource {
 
   private static final long serialVersionUID = -5086763670301450007L;
+  private static final Logger LOG = Logger.getLogger(ComplexSource.class.getName());
   private Source<R> generator;
   private State<Serializable, Serializable> state;
+
+  // protected used to allow unit test access
+  protected Cache<String, Object> msgIdCache;
+  protected String msgId;
+  // taskIds are collected to facilitate units tests
+  protected List<Integer> taskIds;
+  private Level logLevel = Level.INFO;
 
   public ComplexSource(Source<R> generator) {
     this.generator = generator;
@@ -57,13 +70,40 @@ public class ComplexSource<R> extends StreamletSource {
     super.open(map, topologyContext, outputCollector);
     Context context = new ContextImpl(topologyContext, map, state);
     generator.setup(context);
+    ackingEnabled = isAckingEnabled(map, topologyContext);
+    msgIdCache = createCache();
   }
 
   @Override
   public void nextTuple() {
     Collection<R> tuples = generator.get();
+    msgId = null;
     if (tuples != null) {
-      tuples.forEach(tuple -> collector.emit(new Values(tuple)));
+      for (R tuple : tuples) {
+        if (ackingEnabled) {
+          msgId = getUniqueMessageId();
+          msgIdCache.put(msgId, tuple);
+          taskIds = collector.emit(new Values(tuple), msgId);
+        } else {
+          taskIds = collector.emit(new Values(tuple));
+        }
+        LOG.log(logLevel, "emitting: [" + msgId + "]");
+      }
+    }
+  }
+
+  @Override public void ack(Object mid) {
+    if (ackingEnabled) {
+      msgIdCache.invalidate(mid);
+      LOG.log(logLevel, "acked:    [" + mid + "]");
+    }
+  }
+
+  @Override public void fail(Object mid) {
+    if (ackingEnabled) {
+      Values values = new Values(msgIdCache.getIfPresent(mid));
+      taskIds = collector.emit(values, mid);
+      LOG.log(logLevel, "re-emit:  [" + mid + "]");
     }
   }
 }

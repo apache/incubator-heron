@@ -16,27 +16,29 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.heron.streamlet.impl.sources;
 
-package org.apache.heron.streamlet.impl.operators;
+import java.util.ArrayList;
+import java.util.List;
 
-import org.apache.heron.api.tuple.Tuple;
-import org.apache.heron.api.tuple.Values;
+import org.apache.heron.api.spout.ISpoutOutputCollector;
 
-/**
- * UnionOperator is the class that implements the union functionality.
- * Its a very simple bolt that re-emits every tuple that it sees.
- */
-public class UnionOperator<I> extends StreamletOperator<I, I> {
-  private static final long serialVersionUID = -7326832064961413315L;
 
-  public UnionOperator() {
+public class TestCollector implements ISpoutOutputCollector {
+
+  @Override public List<Integer> emit(String streamId, List<Object> tuple, Object messageId) {
+    int taskId = 1234;
+    List<Integer> tskIds = new ArrayList<>();
+    if (tuple  != null) {
+      tskIds.add(taskId++);
+    }
+    return tskIds;
   }
 
-  @SuppressWarnings("unchecked")
   @Override
-  public void execute(Tuple tuple) {
-    I obj = (I) tuple.getValue(0);
-    collector.emit(tuple, new Values(obj));
-    collector.ack(tuple);
+  public void emitDirect(int taskId, String streamId, List<Object> tuple, Object messageId) {
+  }
+
+  @Override public void reportError(Throwable error) {
   }
 }

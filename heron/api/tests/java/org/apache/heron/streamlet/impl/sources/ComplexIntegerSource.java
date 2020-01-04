@@ -16,27 +16,40 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.heron.streamlet.impl.sources;
 
-package org.apache.heron.streamlet.impl.operators;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 
-import org.apache.heron.api.tuple.Tuple;
-import org.apache.heron.api.tuple.Values;
+import org.apache.heron.streamlet.Context;
+import org.apache.heron.streamlet.Source;
 
-/**
- * UnionOperator is the class that implements the union functionality.
- * Its a very simple bolt that re-emits every tuple that it sees.
- */
-public class UnionOperator<I> extends StreamletOperator<I, I> {
-  private static final long serialVersionUID = -7326832064961413315L;
+public class ComplexIntegerSource implements Source<Integer> {
 
-  public UnionOperator() {
+  private List<Integer> intList;
+
+  ComplexIntegerSource() {
+    intList = new ArrayList<>();
   }
 
-  @SuppressWarnings("unchecked")
   @Override
-  public void execute(Tuple tuple) {
-    I obj = (I) tuple.getValue(0);
-    collector.emit(tuple, new Values(obj));
-    collector.ack(tuple);
+  public void setup(Context context) {
   }
+
+  @Override public Collection<Integer> get() {
+    intList.clear();
+    int i = ThreadLocalRandom.current().nextInt(25);
+    intList.add(i + 1);
+    intList.add(i + 2);
+    intList.add(i + 3);
+    return intList;
+
+  }
+
+  @Override
+  public void cleanup() {
+  }
+
 }

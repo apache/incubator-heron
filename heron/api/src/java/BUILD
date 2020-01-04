@@ -1,5 +1,4 @@
 licenses(["notice"])
-
 package(default_visibility = ["//visibility:public"])
 
 load("//tools/rules:build_defs.bzl", "DOCLINT_HTML_AND_SYNTAX")
@@ -16,6 +15,7 @@ api_deps_files =  \
     heron_java_api_proto_files() + [
         ":classification",
         "//heron/common/src/java:basics-java",
+        "//third_party/java:guava"
     ]
 
 # Low Level Api

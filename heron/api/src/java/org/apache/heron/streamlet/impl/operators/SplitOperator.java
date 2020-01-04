@@ -46,7 +46,7 @@ public class SplitOperator<R> extends StreamletOperator<R, R> {
     R obj = (R) tuple.getValue(0);
     for (Map.Entry<String, SerializablePredicate<R>> entry: splitFns.entrySet()) {
       if (entry.getValue().test(obj)) {
-        collector.emit(entry.getKey(), new Values(obj));
+        collector.emit(entry.getKey(), tuple, new Values(obj));
       }
     }
     collector.ack(tuple);

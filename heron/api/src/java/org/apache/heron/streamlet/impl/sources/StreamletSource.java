@@ -20,6 +20,10 @@ package org.apache.heron.streamlet.impl.sources;
 
 import java.io.Serializable;
 import java.util.Map;
+import java.util.UUID;
+
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 
 import org.apache.heron.api.spout.BaseRichSpout;
 import org.apache.heron.api.spout.SpoutOutputCollector;
@@ -28,6 +32,10 @@ import org.apache.heron.api.topology.IStatefulComponent;
 import org.apache.heron.api.topology.OutputFieldsDeclarer;
 import org.apache.heron.api.topology.TopologyContext;
 import org.apache.heron.api.tuple.Fields;
+import org.apache.heron.streamlet.impl.ContextImpl;
+
+import static org.apache.heron.api.Config.TOPOLOGY_RELIABILITY_MODE;
+import static org.apache.heron.api.Config.TopologyReliabilityMode.ATLEAST_ONCE;
 
 /**
  * StreamletSource is the base class for all streamlet sources.
@@ -39,6 +47,7 @@ public abstract class StreamletSource extends BaseRichSpout
   private static final long serialVersionUID = 8583965332619565343L;
   private static final String OUTPUT_FIELD_NAME = "output";
 
+  protected boolean ackingEnabled = false;
   protected SpoutOutputCollector collector;
 
   @Override
@@ -54,6 +63,12 @@ public abstract class StreamletSource extends BaseRichSpout
     collector = outputCollector;
   }
 
+  // a convenience method for creating cache
+  // TODO set appropriate properties in builder
+  <K, V> Cache<K, V> createCache() {
+    return CacheBuilder.newBuilder().build();
+  }
+
   /**
    * The sources implementing streamlet functionality have some properties.
    * 1. They all output only one stream
@@ -63,5 +78,24 @@ public abstract class StreamletSource extends BaseRichSpout
   @Override
   public void declareOutputFields(OutputFieldsDeclarer outputFieldsDeclarer) {
     outputFieldsDeclarer.declare(new Fields(OUTPUT_FIELD_NAME));
+  }
+
+  /**
+   * Return a unique message ID for use with ATLEAST_ONCE topologies.
+   *
+   * @return a unique message id string.
+   */
+  public String getUniqueMessageId() {
+    return UUID.randomUUID().toString();
+  }
+
+  /**
+   * Determine if streamlet acknowledgments (i.e., ATLEAST_ONCE) are set.
+   *
+   * @return true if acking is enabled; false otherwise.
+   */
+  public boolean isAckingEnabled(Map map, TopologyContext topologyContext) {
+    ContextImpl context = new ContextImpl(topologyContext, map, null);
+    return context.getConfig().get(TOPOLOGY_RELIABILITY_MODE).equals(ATLEAST_ONCE.toString());
   }
 }
