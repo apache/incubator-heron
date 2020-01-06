@@ -19,16 +19,19 @@
 
 package org.apache.heron.scheduler.kubernetes;
 
+import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.heron.common.basics.ByteAmount;
+import org.apache.heron.common.basics.SysUtils;
 import org.apache.heron.scheduler.utils.Runtime;
 import org.apache.heron.spi.common.Config;
 import org.apache.heron.spi.common.Context;
 
 import io.kubernetes.client.openapi.ApiException;
-import io.kubernetes.client.openapi.models.V1Status;
+
+import okhttp3.Response;
 
 final class KubernetesUtils {
 
@@ -46,6 +49,15 @@ final class KubernetesUtils {
         Runtime.topologyPackageUri(runtime).toString());
   }
 
+  static void logResponseBodyIfPresent(Logger log, Response response) {
+    try {
+      log.log(Level.SEVERE, "Error details:\n" +  response.body().string());
+    } catch (IOException ioe) {
+      // ignore
+      SysUtils.closeIgnoringExceptions(response.body());
+    }
+  }
+
   static void logExceptionWithDetails(Logger log, String message, Exception e) {
     log.log(Level.SEVERE, message + " " + e.getMessage());
     if (e instanceof ApiException) {
@@ -53,8 +65,18 @@ final class KubernetesUtils {
     }
   }
 
-  static String errorMessageFromResponse(V1Status response) {
-    return response.toString();
+  static String errorMessageFromResponse(Response response) {
+    final String message = response.message();
+    String details;
+    try {
+      details = response.body().string();
+    } catch (IOException ioe) {
+      // ignore
+      details = ioe.getMessage();
+    } finally {
+      SysUtils.closeIgnoringExceptions(response.body());
+    }
+    return message + "\ndetails:\n" + details;
   }
 
   // https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/

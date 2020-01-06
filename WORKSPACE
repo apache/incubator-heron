@@ -538,7 +538,7 @@ maven_jar(
 
 # Kubernetes java client
 kubernetes_client_version = "7.0.0"
-squareup_okhttp_version = "3.14.3"
+squareup_okhttp_version = "3.14.5"
 
 maven_jar(
   name = "kubernetes_java_client",

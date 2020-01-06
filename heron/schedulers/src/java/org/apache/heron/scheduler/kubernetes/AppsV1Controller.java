@@ -19,6 +19,7 @@
 
 package org.apache.heron.scheduler.kubernetes;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -58,11 +59,11 @@ import io.kubernetes.client.openapi.models.V1PodTemplateSpec;
 import io.kubernetes.client.openapi.models.V1ResourceRequirements;
 import io.kubernetes.client.openapi.models.V1StatefulSet;
 import io.kubernetes.client.openapi.models.V1StatefulSetSpec;
-import io.kubernetes.client.openapi.models.V1Status;
 import io.kubernetes.client.openapi.models.V1Toleration;
 import io.kubernetes.client.openapi.models.V1Volume;
 import io.kubernetes.client.openapi.models.V1VolumeMount;
-import static io.kubernetes.client.KubernetesConstants.V1STATUS_FAILURE;
+
+import okhttp3.Response;
 
 public class AppsV1Controller extends KubernetesController {
 
@@ -192,22 +193,27 @@ public class AppsV1Controller extends KubernetesController {
 
   boolean deleteStatefulSet() {
     try {
-      final V1Status response = client.deleteNamespacedStatefulSet(getTopologyName(),
+      final Response response = client.deleteNamespacedStatefulSetCall(getTopologyName(),
           getNamespace(), null, null, 0, null,
-          KubernetesConstants.DELETE_OPTIONS_PROPAGATION_POLICY, null);
+          KubernetesConstants.DELETE_OPTIONS_PROPAGATION_POLICY, null, null).execute();
 
-      if (V1STATUS_FAILURE.equals(response.getStatus())) {
-        LOG.log(Level.SEVERE, "Error killing topology message: " + response.toString());
+      if (response.isSuccessful()) {
+        LOG.log(Level.INFO, "StatefulSet for the Job [" + getTopologyName()
+            + "] in namespace [" + getNamespace() + "] is deleted.");
+        return true;
+      } else {
+        LOG.log(Level.SEVERE, "Error when deleting the StatefulSet of the job ["
+            + getTopologyName() + "]: in namespace [" + getNamespace() + "]");
+        LOG.log(Level.SEVERE, "Error killing topology message: " + response.message());
+        KubernetesUtils.logResponseBodyIfPresent(LOG, response);
 
         throw new TopologyRuntimeManagementException(
             KubernetesUtils.errorMessageFromResponse(response));
       }
-    } catch (ApiException e) {
+    } catch (IOException | ApiException e) {
       KubernetesUtils.logExceptionWithDetails(LOG, "Error deleting topology", e);
       return false;
     }
-
-    return true;
   }
 
   boolean isStatefulSet() {
