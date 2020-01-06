@@ -19,7 +19,7 @@ addons:
       - g++-4.8
       - gcc-4.8-multilib
       - g++-4.8-multilib
-      - python2.7
+      - python3
       - wget
       - pkg-config
       - zip
@@ -48,6 +48,6 @@ script:
   - g++ --version
   - which python
   - python -V
-  - which python2.7
+  - which python3
   - python2.7 -V
   - scripts/travis/ci.sh
