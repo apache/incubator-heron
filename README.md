@@ -24,16 +24,14 @@ Heron is realtime analytics platform developed by Twitter.  It has a wide array 
 
 [Heron in Apache Incubation](http://incubator.apache.org/projects/heron.html)
 
-[Heron Website](https://apache.github.io/incubator-heron)
-
 ### Documentation
 
-[https://apache.github.io/incubator-heron](https://apache.github.io/incubator-heron)
+[https://heron.incubator.apache.org/](https://heron.incubator.apache.org/)
 
 #### Heron Requirements:
  * Java JDK 1.8
  * Python 2.7
- * Bazel latest
+ * Bazel 0.26.0
 
 ## Contact
 
@@ -52,26 +50,13 @@ Heron is realtime analytics platform developed by Twitter.  It has a wide array 
 
 [Bay Area Heron Meetup](https://www.meetup.com/Apache-Heron-Bay-Area), *We meet on Third Monday of Every Month in Palo Alto.*
 
-#### Twitter
-Heron on Twitter: [@heronstreaming](https://twitter.com/heronstreaming)
-
 ## For more information:
 
-* Official Heron documentation located at [https://apache.github.io/incubator-heron](https://apache.github.io/incubator-heron)
+* Official Heron documentation located at [https://heron.incubator.apache.org/](https://heron.incubator.apache.org/)
 * Official Heron resources, including Conference & Journal Papers, Videos, Blog Posts and selected Press located at [Heron Resources](https://apache.github.io/incubator-heron/docs/resources/)
 * [Twitter Heron: Stream Processing at Scale](http://dl.acm.org/citation.cfm?id=2742788) (academic paper)
 * [Twitter Heron: Stream Processing at Scale](https://www.youtube.com/watch?v=pUaFOuGgmco) (YouTube video)
 * [Flying Faster with Twitter Heron](https://blog.twitter.com/2015/flying-faster-with-twitter-heron) (blog post)
-
-
-## Update
-
-We recently merged updates to run Heron natively using [Mesos](http://mesos.apache.org/) in [AWS](https://aws.amazon.com/), Mesos/[Aurora](http://aurora.apache.org/) in AWS, and locally on a laptop.  
-
-We also added beta testing for [Apache YARN](https://hadoop.apache.org/docs/r2.7.1/hadoop-yarn/hadoop-yarn-site/YARN.html) support using [Apache REEF](http://reef.apache.org/), in addition to the Simple Linux Utility for Resource Management [(SLURM)](http://slurm.schedmd.com/). 
-
-We are working to add support for [Mesosphere DC/OS](https://dcos.io/) and [Kubernetes](http://kubernetes.io/).  We will continue to post updates as we progress.
-
 
 ## License
 
