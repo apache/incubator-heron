@@ -937,18 +937,18 @@ http_archive(
 # for helm
 http_archive(
     name = "helm_mac",
-    urls = ["https://storage.googleapis.com/kubernetes-helm/helm-v2.7.2-darwin-amd64.tar.gz"],
+    urls = ["https://get.helm.sh/helm-v3.0.2-darwin-amd64.tar.gz"],
     strip_prefix = "darwin-amd64",
     build_file = "@//:third_party/helm/helm.BUILD",
-    sha256 = "5058142bcd6e16b7e01695a8f258d27ae0b6469caf227ddf6aa2181405e6aa8e",
+    sha256 = "05c7748da0ea8d5f85576491cd3c615f94063f20986fd82a0f5658ddc286cdb1",
 )
 
 http_archive(
     name = "helm_linux",
-    urls = ["https://storage.googleapis.com/kubernetes-helm/helm-v2.7.2-linux-amd64.tar.gz"],
+    urls = ["https://get.helm.sh/helm-v3.0.2-linux-amd64.tar.gz"],
     strip_prefix = "linux-amd64",
     build_file = "@//:third_party/helm/helm.BUILD",
-    sha256 = "9f04c4824fc751d6c932ae5b93f7336eae06e78315352aa80241066aa1d66c49",
+    sha256 = "c6b7aa7e4ffc66e8abb4be328f71d48c643cb8f398d95c74d075cfb348710e1d",
 )
 # end helm
 

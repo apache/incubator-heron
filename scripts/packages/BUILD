@@ -693,7 +693,6 @@ genrule(
         'mv $$HELM_DIR/*.txt $$HELM_DIR/*.tpl $$HELM_DIR/templates',
         'rm $$HELM_DIR/Chart.yaml.template $$HELM_DIR/values.yaml.template $$HELM_DIR/release.yaml',
         'tree $$HELM_DIR',
-        '$(location //third_party/helm:helm) init --client-only',
         '$(location //third_party/helm:helm) package $$HELM_DIR',
         'mv *.tgz heron-charts',
         '$(location //third_party/helm:helm) repo index heron-charts --url https://storage.googleapis.com/heron-charts',
