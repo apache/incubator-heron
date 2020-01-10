@@ -37,6 +37,7 @@ import time
 import yaml
 import socket
 import traceback
+import itertools
 
 from heron.common.src.python.utils import log
 from heron.common.src.python.utils import proc
@@ -431,7 +432,6 @@ class HeronExecutor(object):
                       # for instance, the default -Xmx in Twitter mesos machine is around 18GB
                       '-Xmx1024M',
                       '-XX:+PrintCommandLineFlags',
-                      self._get_java_gc_instance_cmd(metricsManagerId),
                       '-Djava.net.preferIPv4Stack=true',
                       '-cp',
                       self.metrics_manager_classpath,
@@ -447,6 +447,8 @@ class HeronExecutor(object):
                       '--override-config-file=' + self.override_config_file,
                       '--sink-config-file=' + sink_config_file]
 
+    # Insert GC Options
+    metricsmgr_cmd = self._get_java_gc_instance_cmd(metricsmgr_cmd, metricsManagerId)
     return Command(metricsmgr_cmd, self.shell_env)
 
   def _get_metrics_cache_cmd(self):
@@ -458,7 +460,6 @@ class HeronExecutor(object):
                            # for instance, the default -Xmx in Twitter mesos machine is around 18GB
                            '-Xmx1024M',
                            '-XX:+PrintCommandLineFlags',
-                           self._get_java_gc_instance_cmd('metricscache'),
                            '-Djava.net.preferIPv4Stack=true',
                            '-cp',
                            self.metricscache_manager_classpath,
@@ -475,6 +476,8 @@ class HeronExecutor(object):
                            "--role", self.role,
                            "--environment", self.environment]
 
+    # Insert GC Options
+    metricscachemgr_cmd = self._get_java_gc_instance_cmd(metricscachemgr_cmd, 'metricscache')
     return Command(metricscachemgr_cmd, self.shell_env)
 
   def _get_healthmgr_cmd(self):
@@ -486,7 +489,6 @@ class HeronExecutor(object):
                      # for instance, the default -Xmx in Twitter mesos machine is around 18GB
                      '-Xmx1024M',
                      '-XX:+PrintCommandLineFlags',
-                     self._get_java_gc_instance_cmd('healthmgr'),
                      '-Djava.net.preferIPv4Stack=true',
                      '-cp', self.health_manager_classpath,
                      healthmgr_main_class,
@@ -496,6 +498,8 @@ class HeronExecutor(object):
                      "--topology_name", self.topology_name,
                      "--metricsmgr_port", self.metrics_manager_port]
 
+    # Insert GC Options
+    healthmgr_cmd = self._get_java_gc_instance_cmd(healthmgr_cmd, 'healthmgr')
     return Command(healthmgr_cmd, self.shell_env)
 
   def _get_tmaster_processes(self):
@@ -579,23 +583,25 @@ class HeronExecutor(object):
   def _get_java_major_version(self):
     return int(self._get_jvm_version().split(".")[0])
 
-  def _get_java_gc_instance_cmd(self, instance_id):
+  def _get_java_gc_instance_cmd(self, cmd, gc_name):
+    gc_cmd = []
     if self._get_java_major_version() >= 9:
-      return ' '.join([
+      gc_cmd = [
           '-verbosegc',
-          '-XX:MaxGCPauseMillis=100',
-          '-XX:InitiatingHeapOccupancyPercent=30',
-          '-XX:+HeapDumpOnOutOfMemoryError',
           '-XX:+UseG1GC',
           '-XX:+ParallelRefProcEnabled',
           '-XX:+UseStringDeduplication',
-          '-Xlog:gc=info:file=log-files/gc.%s.log:time,uptime,pid:filecount=5,filesize=100M'
-          % instance_id])
+          '-XX:MaxGCPauseMillis=100',
+          '-XX:InitiatingHeapOccupancyPercent=30',
+          '-XX:+HeapDumpOnOutOfMemoryError',
+          '-Xlog:gc+heap=info:file=' + self.log_dir + '/gc.' + gc_name +
+          '.log:time,uptime,pid:filecount=5,filesize=100M']
     else:
-      return ' '.join([
+      gc_cmd = [
+          '-verbosegc',
+          '-XX:+UseConcMarkSweepGC',
           '-XX:+CMSScavengeBeforeRemark',
           '-XX:TargetSurvivorRatio=90',
-          '-verbosegc',
           '-XX:+PrintGCDetails',
           '-XX:+PrintGCTimeStamps',
           '-XX:+PrintGCDateStamps',
@@ -607,9 +613,13 @@ class HeronExecutor(object):
           '-XX:+PrintTenuringDistribution',
           '-XX:+PrintHeapAtGC',
           '-XX:+HeapDumpOnOutOfMemoryError',
-          '-XX:+UseConcMarkSweepGC',
           '-XX:ParallelGCThreads=4',
-          '-Xloggc:log-files/gc.%s.log' % instance_id])
+          '-Xloggc:' + self.log_dir + '/gc.' + gc_name + '.log']
+    try:
+      cp_index = cmd.index('-cp')
+      return list(itertools.chain(*[cmd[0:cp_index], gc_cmd, cmd[cp_index:]]))
+    except ValueError:
+      return gc_cmd
 
   def _get_jvm_instance_options(self, instance_id, component_name, remote_debugger_port):
     code_cache_size_mb = 64
@@ -638,11 +648,12 @@ class HeronExecutor(object):
         '-XX:%s=%dM' % (java_metasize_param, java_metasize_mb),
         '-XX:ReservedCodeCacheSize=%dM' % code_cache_size_mb,
         '-XX:+PrintCommandLineFlags',
-        self._get_java_gc_instance_cmd(instance_id),
         '-Djava.net.preferIPv4Stack=true',
         '-cp',
         '%s:%s'% (self.instance_classpath, self.classpath)]
 
+    # Insert GC Options
+    instance_options = self._get_java_gc_instance_cmd(instance_options, instance_id)
     # Append debugger ports when it is available
     if remote_debugger_port:
       instance_options.append('-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=%s'
@@ -826,7 +837,6 @@ class HeronExecutor(object):
                    '-Xms%dM' % ckptmgr_ram_mb,
                    '-Xmx%dM' % ckptmgr_ram_mb,
                    '-XX:+PrintCommandLineFlags',
-                   self._get_java_gc_instance_cmd(ckptmgr_id),
                    '-Djava.net.preferIPv4Stack=true',
                    '-cp',
                    self.checkpoint_manager_classpath,
@@ -838,6 +848,9 @@ class HeronExecutor(object):
                    '-f' + self.stateful_config_file,
                    '-o' + self.override_config_file,
                    '-g' + self.heron_internals_config_file]
+
+    # Insert GC Options
+    ckptmgr_cmd = self._get_java_gc_instance_cmd(ckptmgr_cmd, ckptmgr_id)
     retval = {}
     retval[self.ckptmgr_ids[self.shard]] = Command(ckptmgr_cmd, self.shell_env)
 
