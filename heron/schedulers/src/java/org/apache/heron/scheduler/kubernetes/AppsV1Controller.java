@@ -32,11 +32,6 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.squareup.okhttp.Response;
-
 import org.apache.heron.api.utils.TopologyUtils;
 import org.apache.heron.scheduler.TopologyRuntimeManagementException;
 import org.apache.heron.scheduler.TopologySubmissionException;
@@ -47,39 +42,42 @@ import org.apache.heron.spi.common.Config;
 import org.apache.heron.spi.packing.PackingPlan;
 import org.apache.heron.spi.packing.Resource;
 
-import io.kubernetes.client.ApiClient;
-import io.kubernetes.client.ApiException;
-import io.kubernetes.client.apis.AppsV1beta1Api;
-import io.kubernetes.client.models.V1Container;
-import io.kubernetes.client.models.V1ContainerPort;
-import io.kubernetes.client.models.V1DeleteOptions;
-import io.kubernetes.client.models.V1EnvVar;
-import io.kubernetes.client.models.V1EnvVarSource;
-import io.kubernetes.client.models.V1LabelSelector;
-import io.kubernetes.client.models.V1ObjectFieldSelector;
-import io.kubernetes.client.models.V1ObjectMeta;
-import io.kubernetes.client.models.V1PodSpec;
-import io.kubernetes.client.models.V1PodTemplateSpec;
-import io.kubernetes.client.models.V1ResourceRequirements;
-import io.kubernetes.client.models.V1Toleration;
-import io.kubernetes.client.models.V1Volume;
-import io.kubernetes.client.models.V1VolumeMount;
-import io.kubernetes.client.models.V1beta1StatefulSet;
-import io.kubernetes.client.models.V1beta1StatefulSetSpec;
+import io.kubernetes.client.custom.Quantity;
+import io.kubernetes.client.custom.V1Patch;
+import io.kubernetes.client.openapi.ApiClient;
+import io.kubernetes.client.openapi.ApiException;
+import io.kubernetes.client.openapi.apis.AppsV1Api;
+import io.kubernetes.client.openapi.models.V1Container;
+import io.kubernetes.client.openapi.models.V1ContainerPort;
+import io.kubernetes.client.openapi.models.V1EnvVar;
+import io.kubernetes.client.openapi.models.V1EnvVarSource;
+import io.kubernetes.client.openapi.models.V1LabelSelector;
+import io.kubernetes.client.openapi.models.V1ObjectFieldSelector;
+import io.kubernetes.client.openapi.models.V1ObjectMeta;
+import io.kubernetes.client.openapi.models.V1PodSpec;
+import io.kubernetes.client.openapi.models.V1PodTemplateSpec;
+import io.kubernetes.client.openapi.models.V1ResourceRequirements;
+import io.kubernetes.client.openapi.models.V1StatefulSet;
+import io.kubernetes.client.openapi.models.V1StatefulSetSpec;
+import io.kubernetes.client.openapi.models.V1Toleration;
+import io.kubernetes.client.openapi.models.V1Volume;
+import io.kubernetes.client.openapi.models.V1VolumeMount;
 
-public class AppsV1beta1Controller extends KubernetesController {
+import okhttp3.Response;
+
+public class AppsV1Controller extends KubernetesController {
 
   private static final Logger LOG =
-      Logger.getLogger(AppsV1beta1Controller.class.getName());
+      Logger.getLogger(AppsV1Controller.class.getName());
 
   private static final String ENV_SHARD_ID = "SHARD_ID";
 
-  private final AppsV1beta1Api client;
+  private final AppsV1Api client;
 
-  AppsV1beta1Controller(Config configuration, Config runtimeConfiguration) {
+  AppsV1Controller(Config configuration, Config runtimeConfiguration) {
     super(configuration, runtimeConfiguration);
     final ApiClient apiClient = new ApiClient().setBasePath(getKubernetesUri());
-    client = new AppsV1beta1Api(apiClient);
+    client = new AppsV1Api(apiClient);
   }
 
   @Override
@@ -97,20 +95,13 @@ public class AppsV1beta1Controller extends KubernetesController {
     for (PackingPlan.ContainerPlan containerPlan : packingPlan.getContainers()) {
       numberOfInstances = Math.max(numberOfInstances, containerPlan.getInstances().size());
     }
-    final V1beta1StatefulSet statefulSet = createStatefulSet(containerResource, numberOfInstances);
+    final V1StatefulSet statefulSet = createStatefulSet(containerResource, numberOfInstances);
 
     try {
-      final Response response =
-          client.createNamespacedStatefulSetCall(getNamespace(), statefulSet, null,
-              null, null).execute();
-      if (!response.isSuccessful()) {
-        LOG.log(Level.SEVERE, "Error creating topology message: " + response.message());
-        KubernetesUtils.logResponseBodyIfPresent(LOG, response);
-        // construct a message based on the k8s API server response
-        throw new TopologySubmissionException(
-            KubernetesUtils.errorMessageFromResponse(response));
-      }
-    } catch (IOException | ApiException e) {
+      final V1StatefulSet response =
+          client.createNamespacedStatefulSet(getNamespace(), statefulSet, null,
+              null, null);
+    } catch (ApiException e) {
       KubernetesUtils.logExceptionWithDetails(LOG, "Error creating topology", e);
       throw new TopologySubmissionException(e.getMessage());
     }
@@ -138,7 +129,7 @@ public class AppsV1beta1Controller extends KubernetesController {
   @Override
   public Set<PackingPlan.ContainerPlan>
       addContainers(Set<PackingPlan.ContainerPlan> containersToAdd) {
-    final V1beta1StatefulSet statefulSet;
+    final V1StatefulSet statefulSet;
     try {
       statefulSet = getStatefulSet();
     } catch (ApiException ae) {
@@ -148,7 +139,7 @@ public class AppsV1beta1Controller extends KubernetesController {
     final int currentContainerCount = statefulSet.getSpec().getReplicas();
     final int newContainerCount = currentContainerCount + containersToAdd.size();
 
-    final V1beta1StatefulSetSpec newSpec = new V1beta1StatefulSetSpec();
+    final V1StatefulSetSpec newSpec = new V1StatefulSetSpec();
     newSpec.setReplicas(newContainerCount);
 
     try {
@@ -163,7 +154,7 @@ public class AppsV1beta1Controller extends KubernetesController {
 
   @Override
   public void removeContainers(Set<PackingPlan.ContainerPlan> containersToRemove) {
-    final V1beta1StatefulSet statefulSet;
+    final V1StatefulSet statefulSet;
     try {
       statefulSet = getStatefulSet();
     } catch (ApiException ae) {
@@ -173,7 +164,7 @@ public class AppsV1beta1Controller extends KubernetesController {
     final int currentContainerCount = statefulSet.getSpec().getReplicas();
     final int newContainerCount = currentContainerCount - containersToRemove.size();
 
-    final V1beta1StatefulSetSpec newSpec = new V1beta1StatefulSetSpec();
+    final V1StatefulSetSpec newSpec = new V1StatefulSetSpec();
     newSpec.setReplicas(newContainerCount);
 
     try {
@@ -184,37 +175,35 @@ public class AppsV1beta1Controller extends KubernetesController {
     }
   }
 
-  private void doPatch(V1beta1StatefulSetSpec patchedSpec) throws ApiException {
+  private void doPatch(V1StatefulSetSpec patchedSpec) throws ApiException {
     final String body =
-        String.format(JSON_PATCH_STATEFUL_SET_REPLICAS_FORMAT,
-            patchedSpec.getReplicas().toString());
-    final ArrayList<JsonObject> arr = new ArrayList<>();
-    arr.add(((JsonElement) deserialize(body, JsonElement.class)).getAsJsonObject());
-    LOG.fine("Update body: " + arr);
-    client.patchNamespacedStatefulSet(getTopologyName(), getNamespace(), arr, null);
+            String.format(JSON_PATCH_STATEFUL_SET_REPLICAS_FORMAT,
+                    patchedSpec.getReplicas().toString());
+    final V1Patch patch = new V1Patch(body);
+    client.patchNamespacedStatefulSet(getTopologyName(),
+            getNamespace(), patch, null, null, null, null);
   }
 
   private static final String JSON_PATCH_STATEFUL_SET_REPLICAS_FORMAT =
       "{\"op\":\"replace\",\"path\":\"/spec/replicas\",\"value\":%s}";
 
-  private Object deserialize(String jsonStr, Class<?> targetClass) {
-    return (new Gson()).fromJson(jsonStr, targetClass);
-  }
-
-  V1beta1StatefulSet getStatefulSet() throws ApiException {
+  V1StatefulSet getStatefulSet() throws ApiException {
     return client.readNamespacedStatefulSet(getTopologyName(), getNamespace(), null, null, null);
   }
 
   boolean deleteStatefulSet() {
     try {
-      final V1DeleteOptions options = new V1DeleteOptions();
-      options.setGracePeriodSeconds(0L);
-      options.setPropagationPolicy(KubernetesConstants.DELETE_OPTIONS_PROPAGATION_POLICY);
       final Response response = client.deleteNamespacedStatefulSetCall(getTopologyName(),
-          getNamespace(), options, null, null, null, null, null, null)
-          .execute();
+          getNamespace(), null, null, 0, null,
+          KubernetesConstants.DELETE_OPTIONS_PROPAGATION_POLICY, null, null).execute();
 
-      if (!response.isSuccessful()) {
+      if (response.isSuccessful()) {
+        LOG.log(Level.INFO, "StatefulSet for the Job [" + getTopologyName()
+            + "] in namespace [" + getNamespace() + "] is deleted.");
+        return true;
+      } else {
+        LOG.log(Level.SEVERE, "Error when deleting the StatefulSet of the job ["
+            + getTopologyName() + "]: in namespace [" + getNamespace() + "]");
         LOG.log(Level.SEVERE, "Error killing topology message: " + response.message());
         KubernetesUtils.logResponseBodyIfPresent(LOG, response);
 
@@ -225,18 +214,15 @@ public class AppsV1beta1Controller extends KubernetesController {
       KubernetesUtils.logExceptionWithDetails(LOG, "Error deleting topology", e);
       return false;
     }
-
-    return true;
   }
 
   boolean isStatefulSet() {
     try {
-      final Response response =
-          client.readNamespacedStatefulSetCall(getTopologyName(), getNamespace(),
-              null, null, null, null, null)
-              .execute();
-      return response.isSuccessful();
-    } catch (IOException | ApiException e) {
+      final V1StatefulSet response =
+          client.readNamespacedStatefulSet(getTopologyName(), getNamespace(),
+              null, null, null);
+      return response.getKind().equals("StatefulSet");
+    } catch (ApiException e) {
       LOG.warning("isStatefulSet check " +  e.getMessage());
     }
     return false;
@@ -269,11 +255,11 @@ public class AppsV1beta1Controller extends KubernetesController {
   }
 
 
-  private V1beta1StatefulSet createStatefulSet(Resource containerResource, int numberOfInstances) {
+  private V1StatefulSet createStatefulSet(Resource containerResource, int numberOfInstances) {
     final String topologyName = getTopologyName();
     final Config runtimeConfiguration = getRuntimeConfiguration();
 
-    final V1beta1StatefulSet statefulSet = new V1beta1StatefulSet();
+    final V1StatefulSet statefulSet = new V1StatefulSet();
 
     // setup stateful set metadata
     final V1ObjectMeta objectMeta = new V1ObjectMeta();
@@ -281,7 +267,7 @@ public class AppsV1beta1Controller extends KubernetesController {
     statefulSet.metadata(objectMeta);
 
     // create the stateful set spec
-    final V1beta1StatefulSetSpec statefulSetSpec = new V1beta1StatefulSetSpec();
+    final V1StatefulSetSpec statefulSetSpec = new V1StatefulSetSpec();
     statefulSetSpec.serviceName(topologyName);
     statefulSetSpec.setReplicas(Runtime.numContainers(runtimeConfiguration).intValue());
 
@@ -414,10 +400,11 @@ public class AppsV1beta1Controller extends KubernetesController {
 
     // set container resources
     final V1ResourceRequirements resourceRequirements = new V1ResourceRequirements();
-    final Map<String, String> requests = new HashMap<>();
+    final Map<String, Quantity> requests = new HashMap<>();
     requests.put(KubernetesConstants.MEMORY,
-        KubernetesUtils.Megabytes(resource.getRam()));
-    requests.put(KubernetesConstants.CPU, Double.toString(resource.getCpu()));
+        Quantity.fromString(KubernetesUtils.Megabytes(resource.getRam())));
+    requests.put(KubernetesConstants.CPU,
+         Quantity.fromString(Double.toString(roundDecimal(resource.getCpu(), 3))));
     resourceRequirements.setRequests(requests);
     container.setResources(resourceRequirements);
 
@@ -467,5 +454,10 @@ public class AppsV1beta1Controller extends KubernetesController {
               .mountPath(KubernetesContext.getContainerVolumeMountPath(config));
       container.volumeMounts(Collections.singletonList(mount));
     }
+  }
+
+  public static double roundDecimal(double value, int places) {
+    double scale = Math.pow(10, places);
+    return Math.round(value * scale) / scale;
   }
 }

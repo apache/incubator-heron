@@ -39,16 +39,18 @@ spec:
   {{- end }}
 
 ---
-apiVersion: apps/v1beta1
+apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: {{ .Release.Name }}-zookeeper
   labels:
     app: {{ .Release.Name }}-zookeeper
-    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
     release: {{ .Release.Name | quote }}
-    heritage: {{ .Release.Service | quote }}
 spec:
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-zookeeper
+      release: {{ .Release.Name | quote }}    
   serviceName: {{ .Release.Name }}-zookeeper-headless
   replicas: {{ $zkReplicas }}
   template:

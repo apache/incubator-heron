@@ -24,10 +24,10 @@ import java.util.Map;
 
 import org.apache.heron.spi.common.Config;
 
-import io.kubernetes.client.models.V1AWSElasticBlockStoreVolumeSource;
-import io.kubernetes.client.models.V1HostPathVolumeSource;
-import io.kubernetes.client.models.V1NFSVolumeSource;
-import io.kubernetes.client.models.V1Volume;
+import io.kubernetes.client.openapi.models.V1AWSElasticBlockStoreVolumeSource;
+import io.kubernetes.client.openapi.models.V1HostPathVolumeSource;
+import io.kubernetes.client.openapi.models.V1NFSVolumeSource;
+import io.kubernetes.client.openapi.models.V1Volume;
 
 final class Volumes {
 
