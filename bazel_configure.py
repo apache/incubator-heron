@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements.  See the NOTICE file
 # distributed with this work for additional information
@@ -413,7 +413,7 @@ def main():
   env_map['AUTOMAKE'] = discover_tool('automake', 'Automake', 'AUTOMAKE', '1.9.6')
   env_map['AUTOCONF'] = discover_tool('autoconf', 'Autoconf', 'AUTOCONF', '2.6.3')
   env_map['MAKE'] = discover_tool('make', 'Make', 'MAKE', '3.81')
-  env_map['PYTHON'] = discover_tool('python', 'Python', 'PYTHON', '2.7')
+  env_map['PYTHON3'] = discover_tool('python3', 'Python3', 'PYTHON3', '3.4')
 
   if platform == 'Darwin':
     env_map['LIBTOOL'] = discover_tool('glibtool', 'Libtool', 'LIBTOOL', '2.4.2')
