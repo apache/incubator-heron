@@ -30,7 +30,6 @@ slf4j_version = "1.7.7"
 distributedlog_version = "4.7.3"
 http_client_version = "4.5.2"
 kubernetes_client_version = "7.0.0"
-# squareup_okhttp_version = "3.14.3"
 
 # heron API server
 jetty_version = "9.4.6.v20170531"
