@@ -34,8 +34,8 @@ data:
     #BK_statsProviderClass: org.apache.bookkeeper.stats.prometheus.PrometheusMetricsProvider
     # use hostname as bookie id for StatefulSets deployment
     BK_useHostNameAsBookieID: "true"
----
 
+---
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
