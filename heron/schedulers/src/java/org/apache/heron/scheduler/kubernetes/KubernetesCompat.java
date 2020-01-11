@@ -28,6 +28,7 @@ import org.apache.heron.scheduler.TopologyRuntimeManagementException;
 import io.kubernetes.client.openapi.ApiClient;
 import io.kubernetes.client.openapi.ApiException;
 import io.kubernetes.client.openapi.apis.CoreV1Api;
+import io.kubernetes.client.openapi.Configuration;
 import okhttp3.Response;
 
 public class KubernetesCompat {
@@ -35,13 +36,21 @@ public class KubernetesCompat {
   private static final Logger LOG = Logger.getLogger(KubernetesCompat.class.getName());
 
   boolean killTopology(String kubernetesUri, String topology, String namespace) {
-    final CoreV1Api client = new CoreV1Api(new ApiClient().setBasePath(kubernetesUri));
+    CoreV1Api coreClient;
+    try {
+      final ApiClient apiClient = io.kubernetes.client.util.Config.defaultClient();
+      Configuration.setDefaultApiClient(apiClient);
+      coreClient = new CoreV1Api(apiClient);
+    } catch (Exception e) {
+      LOG.log(Level.SEVERE, "Failed to setup Kubernetes client" + e);
+      throw new RuntimeException(e);
+    }
 
     // old version deployed topologies as naked pods
     try {
       final String labelSelector = KubernetesConstants.LABEL_TOPOLOGY + "=" + topology;
       final Response response =
-          client.deleteCollectionNamespacedPodCall(namespace, null, null, null, null, null,
+          coreClient.deleteCollectionNamespacedPodCall(namespace, null, null, null, null, null,
           null, labelSelector, null, null,
           KubernetesConstants.DELETE_OPTIONS_PROPAGATION_POLICY,
           null, null, null, null, null).execute();

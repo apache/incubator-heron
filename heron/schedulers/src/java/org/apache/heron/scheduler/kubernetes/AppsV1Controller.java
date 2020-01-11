@@ -47,6 +47,7 @@ import io.kubernetes.client.custom.V1Patch;
 import io.kubernetes.client.openapi.ApiClient;
 import io.kubernetes.client.openapi.ApiException;
 import io.kubernetes.client.openapi.apis.AppsV1Api;
+import io.kubernetes.client.openapi.Configuration;
 import io.kubernetes.client.openapi.models.V1Container;
 import io.kubernetes.client.openapi.models.V1ContainerPort;
 import io.kubernetes.client.openapi.models.V1EnvVar;
@@ -72,12 +73,18 @@ public class AppsV1Controller extends KubernetesController {
 
   private static final String ENV_SHARD_ID = "SHARD_ID";
 
-  private final AppsV1Api client;
+  private final AppsV1Api appsClient;
 
   AppsV1Controller(Config configuration, Config runtimeConfiguration) {
     super(configuration, runtimeConfiguration);
-    final ApiClient apiClient = new ApiClient().setBasePath(getKubernetesUri());
-    client = new AppsV1Api(apiClient);
+    try {
+      final ApiClient apiClient = io.kubernetes.client.util.Config.defaultClient();
+      Configuration.setDefaultApiClient(apiClient);
+      appsClient = new AppsV1Api(apiClient);
+    } catch (Exception e) {
+      LOG.log(Level.SEVERE, "Failed to setup Kubernetes client" + e);
+      throw new RuntimeException(e);
+    }
   }
 
   @Override
@@ -99,7 +106,7 @@ public class AppsV1Controller extends KubernetesController {
 
     try {
       final V1StatefulSet response =
-          client.createNamespacedStatefulSet(getNamespace(), statefulSet, null,
+          appsClient.createNamespacedStatefulSet(getNamespace(), statefulSet, null,
               null, null);
     } catch (ApiException e) {
       KubernetesUtils.logExceptionWithDetails(LOG, "Error creating topology", e);
@@ -180,7 +187,7 @@ public class AppsV1Controller extends KubernetesController {
             String.format(JSON_PATCH_STATEFUL_SET_REPLICAS_FORMAT,
                     patchedSpec.getReplicas().toString());
     final V1Patch patch = new V1Patch(body);
-    client.patchNamespacedStatefulSet(getTopologyName(),
+    appsClient.patchNamespacedStatefulSet(getTopologyName(),
             getNamespace(), patch, null, null, null, null);
   }
 
@@ -188,12 +195,12 @@ public class AppsV1Controller extends KubernetesController {
       "{\"op\":\"replace\",\"path\":\"/spec/replicas\",\"value\":%s}";
 
   V1StatefulSet getStatefulSet() throws ApiException {
-    return client.readNamespacedStatefulSet(getTopologyName(), getNamespace(), null, null, null);
+    return appsClient.readNamespacedStatefulSet(getTopologyName(), getNamespace(), null, null, null);
   }
 
   boolean deleteStatefulSet() {
     try {
-      final Response response = client.deleteNamespacedStatefulSetCall(getTopologyName(),
+      final Response response = appsClient.deleteNamespacedStatefulSetCall(getTopologyName(),
           getNamespace(), null, null, 0, null,
           KubernetesConstants.DELETE_OPTIONS_PROPAGATION_POLICY, null, null).execute();
 
@@ -219,7 +226,7 @@ public class AppsV1Controller extends KubernetesController {
   boolean isStatefulSet() {
     try {
       final V1StatefulSet response =
-          client.readNamespacedStatefulSet(getTopologyName(), getNamespace(),
+          appsClient.readNamespacedStatefulSet(getTopologyName(), getNamespace(),
               null, null, null);
       return response.getKind().equals("StatefulSet");
     } catch (ApiException e) {
