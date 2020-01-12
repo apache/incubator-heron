@@ -595,7 +595,7 @@ class HeronExecutor(object):
           '-XX:+HeapDumpOnOutOfMemoryError',
           '-XX:ParallelGCThreads=4',
           '-Xlog:gc*=info:file=' + self.log_dir + '/gc.' + gc_name +
-          '.log:time,label,tags,uptime,pid:filecount=5,filesize=100M']
+          '.log:time,tags,uptime,pid:filecount=5,filesize=100M']
     else:
       gc_cmd += [
           '-XX:+UseConcMarkSweepGC',
