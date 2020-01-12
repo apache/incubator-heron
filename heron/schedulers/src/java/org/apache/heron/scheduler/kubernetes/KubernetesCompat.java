@@ -27,8 +27,9 @@ import org.apache.heron.scheduler.TopologyRuntimeManagementException;
 
 import io.kubernetes.client.openapi.ApiClient;
 import io.kubernetes.client.openapi.ApiException;
-import io.kubernetes.client.openapi.apis.CoreV1Api;
 import io.kubernetes.client.openapi.Configuration;
+import io.kubernetes.client.openapi.apis.CoreV1Api;
+
 import okhttp3.Response;
 
 public class KubernetesCompat {
@@ -41,7 +42,7 @@ public class KubernetesCompat {
       final ApiClient apiClient = io.kubernetes.client.util.Config.defaultClient();
       Configuration.setDefaultApiClient(apiClient);
       coreClient = new CoreV1Api(apiClient);
-    } catch (Exception e) {
+    } catch (IOException e) {
       LOG.log(Level.SEVERE, "Failed to setup Kubernetes client" + e);
       throw new RuntimeException(e);
     }

@@ -46,8 +46,8 @@ import io.kubernetes.client.custom.Quantity;
 import io.kubernetes.client.custom.V1Patch;
 import io.kubernetes.client.openapi.ApiClient;
 import io.kubernetes.client.openapi.ApiException;
-import io.kubernetes.client.openapi.apis.AppsV1Api;
 import io.kubernetes.client.openapi.Configuration;
+import io.kubernetes.client.openapi.apis.AppsV1Api;
 import io.kubernetes.client.openapi.models.V1Container;
 import io.kubernetes.client.openapi.models.V1ContainerPort;
 import io.kubernetes.client.openapi.models.V1EnvVar;
@@ -81,7 +81,7 @@ public class AppsV1Controller extends KubernetesController {
       final ApiClient apiClient = io.kubernetes.client.util.Config.defaultClient();
       Configuration.setDefaultApiClient(apiClient);
       appsClient = new AppsV1Api(apiClient);
-    } catch (Exception e) {
+    } catch (IOException e) {
       LOG.log(Level.SEVERE, "Failed to setup Kubernetes client" + e);
       throw new RuntimeException(e);
     }
@@ -195,7 +195,8 @@ public class AppsV1Controller extends KubernetesController {
       "{\"op\":\"replace\",\"path\":\"/spec/replicas\",\"value\":%s}";
 
   V1StatefulSet getStatefulSet() throws ApiException {
-    return appsClient.readNamespacedStatefulSet(getTopologyName(), getNamespace(), null, null, null);
+    return appsClient.readNamespacedStatefulSet(getTopologyName(), getNamespace(),
+        null, null, null);
   }
 
   boolean deleteStatefulSet() {
