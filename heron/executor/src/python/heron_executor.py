@@ -585,21 +585,20 @@ class HeronExecutor(object):
     return int(self._get_jvm_version().split(".")[0])
 
   def _get_java_gc_instance_cmd(self, cmd, gc_name):
-    gc_cmd = []
+    gc_cmd = ['-verbosegc']
     if self._get_java_major_version() >= 9:
-      gc_cmd = [
-          '-verbosegc',
+      gc_cmd += [
           '-XX:+UseG1GC',
           '-XX:+ParallelRefProcEnabled',
           '-XX:+UseStringDeduplication',
           '-XX:MaxGCPauseMillis=100',
           '-XX:InitiatingHeapOccupancyPercent=30',
           '-XX:+HeapDumpOnOutOfMemoryError',
-          '-Xlog:gc+heap=info:file=' + self.log_dir + '/gc.' + gc_name +
-          '.log:time,uptime,pid:filecount=5,filesize=100M']
+          '-XX:ParallelGCThreads=4',
+          '-Xlog:gc*=info:file=' + self.log_dir + '/gc.' + gc_name +
+          '.log:time,label,tags,uptime,pid:filecount=5,filesize=100M']
     else:
-      gc_cmd = [
-          '-verbosegc',
+      gc_cmd += [
           '-XX:+UseConcMarkSweepGC',
           '-XX:+CMSScavengeBeforeRemark',
           '-XX:TargetSurvivorRatio=90',
@@ -620,7 +619,7 @@ class HeronExecutor(object):
       cp_index = cmd.index('-cp')
       return list(itertools.chain(*[cmd[0:cp_index], gc_cmd, cmd[cp_index:]]))
     except ValueError:
-      return gc_cmd
+      return cmd
 
   def _get_jvm_instance_options(self, instance_id, component_name, remote_debugger_port):
     code_cache_size_mb = 64
