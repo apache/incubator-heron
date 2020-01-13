@@ -72,6 +72,7 @@ maven_install(
     "com.microsoft.dhalion:dhalion:0.2.3",
     "org.objenesis:objenesis:2.1",
     "org.ow2.asm:asm-all:5.1",
+    "org.ow2.asm:asm:5.0.4",
     "com.amazonaws:aws-java-sdk-s3:" + aws_version,
     "org.eclipse.jetty:jetty-server:" + jetty_version,
     "org.eclipse.jetty:jetty-http:" + jetty_version,
@@ -128,7 +129,11 @@ maven_install(
         "https://maven.google.com",
         "https://repo1.maven.org/maven2",
     ],
+    maven_install_json = "//:maven_install.json",
 )
+
+load("@maven//:defs.bzl", "pinned_maven_install")
+pinned_maven_install()
 
 # for pex repos
 PEX_SRC = "https://pypi.python.org/packages/3a/1d/cd41cd3765b78a4353bbf27d18b099f7afbcd13e7f2dc9520f304ec8981c/pex-1.2.15.tar.gz"
@@ -195,9 +200,9 @@ http_archive(
 # protobuf dependencies for C++ and Java
 http_archive(
     name = "com_google_protobuf",
-    urls = ["https://github.com/protocolbuffers/protobuf/archive/v3.6.1.3.tar.gz"],
-    strip_prefix = "protobuf-3.6.1.3",
-    sha256 = "73fdad358857e120fd0fa19e071a96e15c0f23bb25f85d3f7009abfd4f264a2a",
+    urls = ["https://github.com/protocolbuffers/protobuf/archive/v3.8.0.tar.gz"],
+    strip_prefix = "protobuf-3.8.0",
+    sha256 = "03d2e5ef101aee4c2f6ddcf145d2a04926b9c19e7086944df3842b1b8502b783",
 )
 # end protobuf dependencies for C++ and Java
 
@@ -211,10 +216,10 @@ http_archive(
 
 http_archive(
     name = "org_libevent_libevent",
-    urls = ["https://github.com/libevent/libevent/releases/download/release-2.1.10-stable/libevent-2.1.10-stable.tar.gz"],
-    strip_prefix = "libevent-2.1.10-stable",
+    urls = ["https://github.com/libevent/libevent/releases/download/release-2.1.11-stable/libevent-2.1.11-stable.tar.gz"],
+    strip_prefix = "libevent-2.1.11-stable",
     build_file = "@//:third_party/libevent/libevent.BUILD",
-    sha256 = "e864af41a336bb11dab1a23f32993afe963c1f69618bd9292b89ecf6904845b0",
+    sha256 = "a65bac6202ea8c5609fd5c7e480e6d25de467ea1917c08290c521752f147283d",
 )
 
 http_archive(
@@ -275,10 +280,10 @@ http_archive(
 
 http_archive(
     name = "com_github_danmar_cppcheck",
-    urls = ["https://github.com/danmar/cppcheck/archive/1.87.zip"],
-    strip_prefix = "cppcheck-1.87",
+    urls = ["https://github.com/danmar/cppcheck/archive/1.89.zip"],
+    strip_prefix = "cppcheck-1.89",
     build_file = "@//:third_party/cppcheck/cppcheck.BUILD",
-    sha256 = "b3de7fbdc1a23d7341b55f7f88877e106a76847bd5a07fa721c07310b625318b",
+    sha256 = "3c57799e91653bcaab7492eaf54da3368499e713917ccae5cf1c698f1a07419e",
 )
 
 http_archive(

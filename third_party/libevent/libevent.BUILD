@@ -52,6 +52,7 @@ genrule(
         'mkdir -p $$TMP_DIR',
         'cp -R $$(pwd)/external/org_libevent_libevent/* $$TMP_DIR',
         'cd $$TMP_DIR',
+        'autoreconf -f -i',
         './configure --prefix=$$INSTALL_DIR --enable-shared=no --disable-openssl',
         'make install',
         'rm -rf $$TMP_DIR',

@@ -102,7 +102,7 @@ java_library(
         # "@com_esotericsoftware_reflectasm",
         # "@com_esotericsoftware_minlog",
         # "@org_objenesis_objenesis",
-        # "@org_objectweb_asm",
+        "@maven//:org_ow2_asm_asm",
     ],
 )
 
