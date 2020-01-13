@@ -64,6 +64,7 @@ kubernetes_deps_files = [
     "//heron/schedulers/src/java:kubernetes-scheduler-java",
     "//heron/schedulers/src/java:scheduler-utils-java",
     "//third_party/java:kubernetes-java-client",
+    "@org_slf4j_slf4j_api//jar",
 ]
 
 nomad_sdk_deps = [
