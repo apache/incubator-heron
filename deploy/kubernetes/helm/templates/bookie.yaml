@@ -50,8 +50,8 @@ data:
   BK_enableTaskExecutionStats: "true"
   BK_statsProviderClass: org.apache.bookkeeper.stats.prometheus.PrometheusMetricsProvider
   {{- end }}
----
 
+---
 ## BookKeeper servers need to access the local disks and the pods
 ## cannot be moved across different nodes.
 ## For this reason, we run BK as a daemon set, one for each node in the
@@ -195,8 +195,8 @@ spec:
           requests:
             storage: {{ $bookieStorageCapacity }}
 {{- end }}
----
 
+---
 ##
 ## Define the Bookie headless service
 ## In practice, in this case, it is only useful to have a view of
