@@ -32,8 +32,8 @@ data:
   BK_zkServers: zookeeper
   # TODO: Issue 458: https://github.com/apache/bookkeeper/issues/458
   #BK_statsProviderClass: org.apache.bookkeeper.stats.PrometheusMetricsProvider
----
 
+---
 ## BookKeeper servers need to access the local disks and the pods
 ## cannot be moved across different nodes.
 ## For this reason, we run BK as a daemon set, one for each node in the
@@ -107,7 +107,6 @@ spec:
             path: /mnt/disks/ssd1
 
 ---
-
 ##
 ## Define the Bookie headless service
 ## In practice, in this case, it is only useful to have a view of

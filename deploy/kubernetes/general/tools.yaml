@@ -85,8 +85,8 @@ spec:
             limits:
               cpu: "400m"
               memory: "512M"
----
 
+---
 ##
 ## Service to expose the heron-ui
 ##

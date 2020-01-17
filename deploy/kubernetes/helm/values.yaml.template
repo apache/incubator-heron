@@ -29,7 +29,6 @@ platform: minikube
 
 # Heron image to use
 image: heron/heron:VERSION
-kubectlImage: heron/kubectl:latest
 
 # Heron image pull policy
 imagePullPolicy: IfNotPresent

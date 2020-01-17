@@ -30,8 +30,8 @@ spec:
     matchLabels:
       app: zk
   minAvailable: 1
----
 
+---
 ## Define a StatefulSet for ZK servers
 apiVersion: apps/v1
 kind: StatefulSet
@@ -107,7 +107,6 @@ spec:
           emptyDir: {}
 
 ---
-
 ##
 ## Define the ZooKeeper headless service
 ##
