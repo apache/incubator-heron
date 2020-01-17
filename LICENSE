@@ -258,7 +258,7 @@ The following components are provided under the MIT License. See project link fo
       -> heron/tools/ui/resources/static/js/bootstrap.min.js
       -> heron/tools/ui/resources/static/css/bootstrap.min.css
       -> heron/tools/ui/resources/static/fonts/glyphicons-halflings-regular.{eot, svg, ttf, woff}
-    JSXTransformer(v0.10.0, https://github.com/cronn-de/jsxtransformer/blob/master/LICENSE)
+    JSXTransformer(v0.10.0)
       -> heron/tools/ui/resources/static/js/JSXTransformer.0.10.0.js
     Underscore.js(v1.6.0, https://github.com/jashkenas/underscore/blob/master/LICENSE)
       -> heron/tools/ui/resources/static/js/underscore-min.1.6.0.js
@@ -290,6 +290,15 @@ The following components are provided under the MIT License. See project link fo
       -> heron/shell/assets/jquery.js
     Modernizr(http://www.modernizr.com)
       -> heron/tools/ui/resources/static/js/bootstrap.js
+
+========================================================================
+Third party BSD 2-Clause licenses
+========================================================================
+The following components are provided under the BSD 2-Clause license.
+See project link for details.
+
+    JSXTransformer(v0.10.0)
+      -> heron/tools/ui/resources/static/js/JSXTransformer.0.10.0.js
 
 ========================================================================
 Third party BSD 3-Clause licenses
