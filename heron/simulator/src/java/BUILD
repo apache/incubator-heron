@@ -25,8 +25,8 @@ simulator_deps_files = \
 
 java_library(
     name = "simulator-java",
-    javacopts = DOCLINT_HTML_AND_SYNTAX,
     srcs = glob(["**/*.java"]),
+    javacopts = DOCLINT_HTML_AND_SYNTAX,
     deps = simulator_deps_files,
 )
 
@@ -35,8 +35,8 @@ java_binary(
     srcs = glob(["org/apache/heron/simulator/**/*.java"]),
     deps = simulator_deps_files + [
         "//third_party/java:kryo-neverlink",
-        "@org_apache_commons_commons_lang3//jar"
-    ]
+        "@org_apache_commons_commons_lang3//jar",
+    ],
 )
 
 jarjar_binary(
@@ -44,8 +44,8 @@ jarjar_binary(
     src = ":simulator-unshaded_deploy.jar",
     shade = "shade.conf",
     deps = [
-        "@org_sonatype_plugins_jarjar_maven_plugin//jar"
-    ]
+        "@maven//:org_sonatype_plugins_jarjar_maven_plugin",
+    ],
 )
 
 genrule(

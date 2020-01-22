@@ -7,9 +7,9 @@ common_deps_files = [
 ]
 
 downloader_test_deps_files = \
-  common_deps_files + [
-    "//heron/downloaders/src/java:heron-downloader"
-  ]
+    common_deps_files + [
+        "//heron/downloaders/src/java:heron-downloader",
+    ]
 
 java_library(
     name = "tests",
@@ -18,23 +18,23 @@ java_library(
 )
 
 java_tests(
-  test_classes = [
-    "org.apache.heron.downloader.ExtractorTests",
-  ],
-  runtime_deps = [ ":tests" ],
-  size = "small",
+    size = "small",
+    test_classes = [
+        "org.apache.heron.downloader.ExtractorTests",
+    ],
+    runtime_deps = [":tests"],
 )
 
 java_test(
     name = "RegistryTest",
+    size = "small",
     srcs = glob(["**/downloader/RegistryTest.java"]),
     deps = downloader_test_deps_files,
-    size = "small",
 )
 
 java_test(
     name = "DLDownloaderTest",
+    size = "small",
     srcs = glob(["**/downloader/DLDownloaderTest.java"]),
     deps = downloader_test_deps_files,
-    size = "small",
 )

@@ -14,8 +14,8 @@ java_library(
         "//heron/common/src/java:config-java",
         "//heron/common/src/java:network-java",
         "//heron/common/src/java:utils-java",
-        "//heron/proto:proto_common_java",
         "//heron/proto:proto_ckptmgr_java",
+        "//heron/proto:proto_common_java",
         "//heron/proto:proto_physical_plan_java",
         "//heron/proto:proto_stmgr_java",
         "//heron/proto:proto_topology_java",
@@ -44,5 +44,5 @@ jarjar_binary(
     name = "heron-ckptmgr",
     src = ":ckptmgr-unshaded_deploy.jar",
     shade = "shade.conf",
-    deps = ["@org_sonatype_plugins_jarjar_maven_plugin//jar"]
+    deps = ["@maven//:org_sonatype_plugins_jarjar_maven_plugin"],
 )

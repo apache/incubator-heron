@@ -15,19 +15,19 @@ pex_library(
         "//heron/common/src/python:common-py",
         "//heron/tools/common/src/python:common-py",
         "//heron/tools/common/src/python:tracker-py",
-    ]
+    ],
 )
 
 pex_binary(
     name = "heron-ui",
     srcs = ["main.py"],
-    deps = [
-        ":heron-ui-lib",
-    ],
     resources = [
-        "//heron/tools/ui/resources:templates",
         "//heron/tools/ui/resources:static",
+        "//heron/tools/ui/resources:templates",
         "//scripts/packages:release_files",
     ],
     zip_safe = False,
+    deps = [
+        ":heron-ui-lib",
+    ],
 )

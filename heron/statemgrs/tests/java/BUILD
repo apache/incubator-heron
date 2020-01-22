@@ -6,8 +6,8 @@ test_deps_files = [
 ]
 
 spi_deps_files = [
-    "//heron/common/src/java:basics-java", 
-    "//heron/spi/src/java:common-spi-java", 
+    "//heron/common/src/java:basics-java",
+    "//heron/spi/src/java:common-spi-java",
     "//heron/spi/src/java:statemgr-spi-java",
     "//heron/spi/src/java:network-utils-java",
 ]
@@ -36,21 +36,21 @@ zookeeper_deps_files = \
 
 java_test(
     name = "LocalFileSystemStateManagerTest",
+    size = "small",
     srcs = glob(["**/localfs/LocalFileSystemStateManagerTest.java"]),
     deps = localfs_deps_files,
-    size = "small",
 )
 
 java_test(
     name = "ZkUtilsTest",
+    size = "small",
     srcs = glob(["**/zookeeper/ZkUtilsTest.java"]),
     deps = zookeeper_deps_files,
-    size = "small",
 )
 
 java_test(
     name = "CuratorStateManagerTest",
+    size = "small",
     srcs = glob(["**/zookeeper/curator/CuratorStateManagerTest.java"]),
     deps = zookeeper_deps_files,
-    size = "small",
 )

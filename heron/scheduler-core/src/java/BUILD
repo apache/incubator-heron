@@ -28,7 +28,7 @@ scheduler_deps_files = \
     spi_deps_files
 
 java_library(
-    name = 'scheduler-java',
+    name = "scheduler-java",
     srcs = glob(
         ["**/*.java"],
     ),
@@ -36,7 +36,7 @@ java_library(
 )
 
 java_binary(
-    name = 'scheduler-unshaded',
+    name = "scheduler-unshaded",
     srcs = glob(["**/*.java"]),
     deps = scheduler_deps_files,
 )
@@ -45,5 +45,5 @@ genrule(
     name = "heron-scheduler",
     srcs = [":scheduler-unshaded_deploy.jar"],
     outs = ["heron-scheduler.jar"],
-    cmd  = "cp $< $@",
+    cmd = "cp $< $@",
 )

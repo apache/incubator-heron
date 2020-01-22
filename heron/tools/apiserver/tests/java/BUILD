@@ -6,9 +6,9 @@ common_deps_files = [
 ]
 
 apiserver_test_deps_files = \
-  common_deps_files + [
-    "//heron/tools/apiserver/src/java:heron-apiserver"
-  ]
+    common_deps_files + [
+        "//heron/tools/apiserver/src/java:heron-apiserver",
+    ]
 
 java_library(
     name = "tests",
@@ -17,10 +17,10 @@ java_library(
 )
 
 java_tests(
-  test_classes = [
-    "org.apache.heron.apiserver.utils.ConfigUtilsTests",
-    "org.apache.heron.apiserver.resources.TopologyResourceTests",
-  ],
-  runtime_deps = [ ":tests" ],
-  size = "small",
+    size = "small",
+    test_classes = [
+        "org.apache.heron.apiserver.utils.ConfigUtilsTests",
+        "org.apache.heron.apiserver.resources.TopologyResourceTests",
+    ],
+    runtime_deps = [":tests"],
 )

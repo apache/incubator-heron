@@ -4,22 +4,24 @@ java_library(
     deps = [
         "//heron/api/src/java:api-java-low-level",
         "//heron/common/src/java:basics-java",
-        "//heron/common/src/java:network-java",
         "//heron/common/src/java:config-java",
+        "//heron/common/src/java:network-java",
         "//heron/common/src/java:test-helpers-java",
         "//heron/metricsmgr/src/java:metricsmgr-java",
-        "//heron/spi/src/java:metricsmgr-spi-java",
         "//heron/proto:proto_common_java",
         "//heron/proto:proto_metrics_java",
         "//heron/proto:proto_tmaster_java",
+        "//heron/spi/src/java:metricsmgr-spi-java",
+        "//third_party/java:junit4",
+        "//third_party/java:mockito",
         "@com_google_guava_guava//jar",
         "@com_google_protobuf//:protobuf_java",
-        "//third_party/java:mockito",
-        "//third_party/java:junit4",
     ],
 )
 
 java_tests(
+    size = "small",
+    data = ["//heron/config/src/yaml:test-config-internals-yaml"],
     test_classes = [
         "org.apache.heron.metricsmgr.MetricsUtilTests",
         "org.apache.heron.metricsmgr.HandleTMasterLocationTest",
@@ -34,6 +36,4 @@ java_tests(
     runtime_deps = [
         ":metricsmgr-tests",
     ],
-    data = ["//heron/config/src/yaml:test-config-internals-yaml"],
-    size = "small",
 )

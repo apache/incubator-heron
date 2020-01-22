@@ -2,7 +2,7 @@ licenses(["notice"])
 
 package(default_visibility = ["//visibility:public"])
 
-instance_deps_files =  \
+instance_deps_files = \
     heron_java_proto_files() + [
         "//heron/api/src/java:api-java-low-level",
         "//heron/api/src/java:classification",
@@ -10,7 +10,7 @@ instance_deps_files =  \
         "//heron/common/src/java:config-java",
         "//heron/common/src/java:network-java",
         "//heron/common/src/java:utils-java",
-        "@commons_cli_commons_cli//jar"
+        "@commons_cli_commons_cli//jar",
     ]
 
 java_library(
@@ -33,5 +33,5 @@ jarjar_binary(
     name = "heron-instance",
     src = ":instance-unshaded_deploy.jar",
     shade = "shade.conf",
-    deps = ["@org_sonatype_plugins_jarjar_maven_plugin//jar"]
+    deps = ["@maven//:org_sonatype_plugins_jarjar_maven_plugin"],
 )

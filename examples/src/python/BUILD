@@ -2,9 +2,13 @@ package(default_visibility = ["//visibility:public"])
 
 pex_library(
     name = "example-py",
-    srcs = glob(['bolt/*.py', 'spout/*.py', 'misc/*.py']),
+    srcs = glob([
+        "bolt/*.py",
+        "spout/*.py",
+        "misc/*.py",
+    ]),
     deps = [
-      '//heronpy/api:heron-python-py',
+        "//heronpy/api:heron-python-py",
     ],
 )
 
@@ -51,9 +55,9 @@ pex_binary(
     name = "word_count_streamlet",
     srcs = ["word_count_streamlet.py"],
     deps = [
-      '//heronpy/api:heron-python-py',
-      '//heronpy/streamlet:heron-python-streamlet-py',
-      '//heronpy/connectors:heron-pythonconnectors-py',
+        "//heronpy/api:heron-python-py",
+        "//heronpy/connectors:heron-pythonconnectors-py",
+        "//heronpy/streamlet:heron-python-streamlet-py",
     ],
 )
 
@@ -61,20 +65,18 @@ pex_binary(
     name = "pulsar_word_count_streamlet",
     srcs = ["pulsar_word_count_streamlet.py"],
     deps = [
-      '//heronpy/api:heron-python-py',
-      '//heronpy/streamlet:heron-python-streamlet-py',
-      '//heronpy/connectors:heron-pythonconnectors-py',
-    ]
+        "//heronpy/api:heron-python-py",
+        "//heronpy/connectors:heron-pythonconnectors-py",
+        "//heronpy/streamlet:heron-python-streamlet-py",
+    ],
 )
 
 pex_binary(
     name = "join_streamlet_topology",
     srcs = ["join_streamlet_topology.py"],
     deps = [
-      '//heronpy/api:heron-python-py',
-      '//heronpy/streamlet:heron-python-streamlet-py',
-      '//heronpy/connectors:heron-pythonconnectors-py',
-    ]
+        "//heronpy/api:heron-python-py",
+        "//heronpy/connectors:heron-pythonconnectors-py",
+        "//heronpy/streamlet:heron-python-streamlet-py",
+    ],
 )
-
-

@@ -71,5 +71,5 @@ genrule(
     name = "heron-healthmgr",
     srcs = [":healthmgr-unshaded_deploy.jar"],
     outs = ["heron-healthmgr.jar"],
-    cmd  = "cp $< $@",
+    cmd = "cp $< $@",
 )
