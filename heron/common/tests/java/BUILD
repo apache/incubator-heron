@@ -14,7 +14,7 @@ java_library(
         "//third_party/java:mockito",
         "//third_party/java:powermock",
         "@com_google_protobuf//:protobuf_java",
-        "@commons_io_commons_io//jar",
+        "@maven//:commons_io_commons_io",
     ],
 )
 

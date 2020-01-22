@@ -11,9 +11,9 @@ downloader_deps = [
     "//heron/io/dlog/src/java:dlog-lib",
     "//heron/spi/src/java:common-spi-java",
     "//third_party/java:commons-compress",
-    "@commons_cli_commons_cli//jar",
-    "@org_apache_distributedlog_core//jar",
-    "@io_netty_netty_all//jar",
+    "@maven//:commons_cli_commons_cli",
+    "@maven//:org_apache_distributedlog_distributedlog_core_shaded",
+    "@maven//:io_netty_netty_all",
 ]
 
 java_library(

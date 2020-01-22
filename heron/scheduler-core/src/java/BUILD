@@ -5,10 +5,10 @@ common_deps_files = [
     "//heron/common/src/java:config-java",
     "//heron/common/src/java:utils-java",
     "//heron/api/src/java:classification",
-    "@commons_cli_commons_cli//jar",
-    "@com_google_guava_guava//jar",
-    "@javax_xml_bind_jaxb//jar",
-    "@org_apache_commons_commons_lang3//jar",
+    "@maven//:commons_cli_commons_cli",
+    "@maven//:com_google_guava_guava",
+    "@maven//:org_apache_commons_commons_lang3",
+    "@maven//:javax_xml_bind_jaxb",
     "//third_party/java:jackson",
 ]
 

@@ -14,7 +14,7 @@ java_library(
         "//heron/spi/src/java:metricsmgr-spi-java",
         "//third_party/java:junit4",
         "//third_party/java:mockito",
-        "@com_google_guava_guava//jar",
+        "@maven//:com_google_guava_guava",
         "@com_google_protobuf//:protobuf_java",
     ],
 )

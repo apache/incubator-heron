@@ -11,7 +11,7 @@ scala_binary(
         "//heron/api/src/java:api-java-low-level",
         "//heron/api/src/scala:api-scala",
         "//third_party/java:kryo",
-        "@org_apache_commons_commons_lang3//jar",
+        "@maven//:org_apache_commons_commons_lang3",
     ],
 )
 

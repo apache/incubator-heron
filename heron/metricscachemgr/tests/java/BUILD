@@ -23,7 +23,7 @@ metricscachemgr_deps_files = [
 test_deps_files = [
     "//third_party/java:junit4",
     "//heron/spi/src/java:utils-spi-java",
-    "@com_google_guava_guava//jar",
+    "@maven//:com_google_guava_guava",
     "//third_party/java:powermock",
     "//third_party/java:mockito",
 ]

@@ -22,17 +22,17 @@ gcs_deps_files = \
 
 dlog_deps_files = \
     uploader_spi_files + [
-        "@org_apache_distributedlog_core//jar",
-        "@io_netty_netty_all//jar",
+        "@maven//:org_apache_distributedlog_distributedlog_core_shaded",
+        "@maven//:io_netty_netty_all",
         "//heron/io/dlog/src/java:dlog-lib",
     ]
 
 http_uploader_deps_files = \
     uploader_spi_files + [
-        "@org_apache_httpcomponents_httpmime//jar",
-        "@org_apache_httpcomponents_http_client//jar",
-        "@org_apache_httpcomponents_http_core//jar",
-        "@org_apache_commons_commons_lang3//jar",
+        "@maven//:org_apache_httpcomponents_httpmime",
+        "@maven//:org_apache_httpcomponents_httpclient",
+        "@maven//:org_apache_httpcomponents_httpcore",
+        "@maven//:org_apache_commons_commons_lang3",
         "//third_party/java:guava",
     ]
 

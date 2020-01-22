@@ -24,7 +24,7 @@ java_library(
         "//storm-compatibility/src/java:storm-compatibility-java",
         "//third_party/java:jackson",
         "@com_google_protobuf//:protobuf_java",
-        "@commons_logging_commons_logging//jar",
+        "@maven//:commons_logging_commons_logging",
         "@maven//:org_apache_httpcomponents_httpclient",
         "@maven//:org_apache_httpcomponents_httpcore",
     ],
@@ -42,7 +42,7 @@ java_library(
         "//storm-compatibility/src/java:storm-compatibility-java",
         "//third_party/java:hadoop-core",
         "//third_party/java:jackson",
-        "@commons_cli_commons_cli//jar",
+        "@maven//:commons_cli_commons_cli",
     ],
 )
 
@@ -57,8 +57,8 @@ java_library(
         "//heron/api/src/java:api-java",
         "//heron/api/src/java:api-java-low-level",
         "//storm-compatibility/src/java:storm-compatibility-java",
-        "@com_googlecode_json_simple_json_simple//jar",
-        "@commons_cli_commons_cli//jar",
+        "@maven//:com_googlecode_json_simple_json_simple",
+        "@maven//:commons_cli_commons_cli",
     ],
 )
 
@@ -87,8 +87,8 @@ java_binary(
         "//heron/api/src/java:api-java",
         "//heron/api/src/java:api-java-low-level",
         "//storm-compatibility/src/java:storm-compatibility-java",
-        "@com_googlecode_json_simple_json_simple//jar",
-        "@commons_cli_commons_cli//jar",
+        "@maven//:com_googlecode_json_simple_json_simple",
+        "@maven//:commons_cli_commons_cli",
     ],
 )
 
@@ -132,7 +132,7 @@ java_library(
         "//storm-compatibility/src/java:storm-compatibility-java",
         "//third_party/java:jackson",
         "@com_google_protobuf//:protobuf_java",
-        "@commons_logging_commons_logging//jar",
+        "@maven//:commons_logging_commons_logging",
         "@maven//:org_apache_httpcomponents_httpclient",
         "@maven//:org_apache_httpcomponents_httpcore",
     ],
@@ -151,7 +151,7 @@ java_library(
         "//storm-compatibility/src/java:storm-compatibility-java",
         "//third_party/java:hadoop-core",
         "//third_party/java:jackson",
-        "@commons_cli_commons_cli//jar",
+        "@maven//:commons_cli_commons_cli",
     ],
 )
 
@@ -168,8 +168,8 @@ java_library(
         "//heron/api/src/java:api-java",
         "//heron/api/src/java:api-java-low-level",
         "//storm-compatibility/src/java:storm-compatibility-java",
-        "@com_googlecode_json_simple_json_simple//jar",
-        "@commons_cli_commons_cli//jar",
+        "@maven//:com_googlecode_json_simple_json_simple",
+        "@maven//:commons_cli_commons_cli",
     ],
 )
 
@@ -186,8 +186,8 @@ java_binary(
         "//heron/api/src/java:api-java",
         "//heron/api/src/java:api-java-low-level",
         "//storm-compatibility/src/java:storm-compatibility-java",
-        "@com_googlecode_json_simple_json_simple//jar",
-        "@commons_cli_commons_cli//jar",
+        "@maven//:com_googlecode_json_simple_json_simple",
+        "@maven//:commons_cli_commons_cli",
     ],
 )
 

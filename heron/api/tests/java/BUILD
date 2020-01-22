@@ -6,7 +6,7 @@ api_deps_files = [
     "//third_party/java:junit4",
     "//third_party/java:powermock",
     "//third_party/java:kryo",
-    "@org_mockito_mockito_all//jar",
+    "@maven//:org_mockito_mockito_all",
 ]
 
 api_deps_files = \

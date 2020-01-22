@@ -48,10 +48,10 @@ apiserver_deps_files = \
     "//third_party/java:commons-compress",
     "//third_party/java:jackson",
     "//third_party/java:logging",
-    "@javax_activation_activation//jar",
-    "@javax_annotation_javax_annotation_api//jar",
-    "@javax_xml_bind_jaxb//jar",
-    "@org_yaml_snakeyaml//jar",
+    "@maven//:javax_activation_activation",
+    "@maven//:javax_annotation_javax_annotation_api",
+    "@maven//:javax_xml_bind_jaxb",
+    "@maven//:org_yaml_snakeyaml",
   ]
 
 java_binary(

@@ -19,8 +19,8 @@ simulator_deps_files = \
         "//heron/common/src/java:config-java",
         "//heron/common/src/java:utils-java",
         "//heron/instance/src/java:instance-java",
-        "@javax_xml_bind_jaxb//jar",
-        "@org_yaml_snakeyaml//jar",
+        "@maven//:org_yaml_snakeyaml",
+        "@maven//:javax_xml_bind_jaxb",
     ]
 
 java_library(
@@ -35,7 +35,7 @@ java_binary(
     srcs = glob(["org/apache/heron/simulator/**/*.java"]),
     deps = simulator_deps_files + [
         "//third_party/java:kryo-neverlink",
-        "@org_apache_commons_commons_lang3//jar",
+        "@maven//:org_apache_commons_commons_lang3",
     ],
 )
 

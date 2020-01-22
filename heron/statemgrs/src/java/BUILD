@@ -5,7 +5,7 @@ common_deps_files = \
         "//heron/spi/src/java:common-spi-java",
         "//heron/spi/src/java:statemgr-spi-java",
         "//heron/spi/src/java:network-utils-java",
-        "@com_google_guava_guava//jar",
+        "@maven//:com_google_guava_guava",
     ]
 
 localfs_deps_files = \
@@ -17,10 +17,10 @@ localfs_deps_files = \
 
 zookeeper_deps_files = \
     localfs_deps_files + [
-        "@org_apache_curator_curator_client//jar",
-        "@org_apache_curator_curator_framework//jar",
-        "@org_apache_curator_curator_recipes//jar",
-        "@org_apache_zookeeper_zookeeper//jar",
+        "@maven//:org_apache_curator_curator_client",
+        "@maven//:org_apache_curator_curator_framework",
+        "@maven//:org_apache_curator_curator_recipes",
+        "@maven//:org_apache_zookeeper_zookeeper",
         "//third_party/java:logging",
     ]
 
