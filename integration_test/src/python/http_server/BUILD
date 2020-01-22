@@ -3,7 +3,7 @@ package(default_visibility = ["//visibility:public"])
 pex_binary(
     name = "http-server",
     srcs = [
-        "main.py"
+        "main.py",
     ],
     main = "main.py",
     reqs = [

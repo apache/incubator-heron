@@ -12,7 +12,7 @@ java_doc(
     title = "Heron Api Documentation",
 )
 
-api_deps_files =  \
+api_deps_files = \
     heron_java_api_proto_files() + [
         ":classification",
         "//heron/common/src/java:basics-java",
@@ -24,8 +24,8 @@ java_library(
     srcs = glob(["org/apache/heron/api/**/*.java"]),
     javacopts = DOCLINT_HTML_AND_SYNTAX,
     deps = api_deps_files + [
-        "//third_party/java:kryo-neverlink"
-    ]
+        "//third_party/java:kryo-neverlink",
+    ],
 )
 
 # Functional Api
@@ -35,35 +35,41 @@ java_library(
     javacopts = DOCLINT_HTML_AND_SYNTAX,
     deps = api_deps_files + [
         ":api-java-low-level",
-        "@org_apache_commons_commons_lang3//jar"
-    ]
+        "@org_apache_commons_commons_lang3//jar",
+    ],
 )
 
 # Low level and functional Api
 java_library(
     name = "api-java-low-level-functional",
+    srcs = glob([
+        "org/apache/heron/api/**/*.java",
+        "org/apache/heron/streamlet/**/*.java",
+    ]),
     javacopts = DOCLINT_HTML_AND_SYNTAX,
-    srcs = glob(["org/apache/heron/api/**/*.java", "org/apache/heron/streamlet/**/*.java"]),
     deps = api_deps_files + [
         "//third_party/java:kryo-neverlink",
-        "@org_apache_commons_commons_lang3//jar"
-    ]
+        "@org_apache_commons_commons_lang3//jar",
+    ],
 )
 
 java_binary(
     name = "api-unshaded",
-    srcs = glob(["org/apache/heron/api/**/*.java", "org/apache/heron/streamlet/**/*.java"]),
+    srcs = glob([
+        "org/apache/heron/api/**/*.java",
+        "org/apache/heron/streamlet/**/*.java",
+    ]),
     deps = api_deps_files + [
         "//third_party/java:kryo-neverlink",
-        "@org_apache_commons_commons_lang3//jar"
-    ]
+        "@org_apache_commons_commons_lang3//jar",
+    ],
 )
 
 jarjar_binary(
     name = "api-shaded",
     src = ":api-unshaded_deploy.jar",
     shade = "shade.conf",
-    deps = ["@org_sonatype_plugins_jarjar_maven_plugin//jar"]
+    deps = ["@maven//:org_sonatype_plugins_jarjar_maven_plugin"],
 )
 
 genrule(

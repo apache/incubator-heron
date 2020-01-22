@@ -56,9 +56,9 @@ cc_library(
         "-I$(GENDIR)/heron",
         "-Iheron/api/src/cpp",
     ],
+    linkstatic = 1,
     deps = [
         "//heron/proto:proto-cxx",
         "@com_github_cereal//:cereal-cxx",
     ],
-    linkstatic = 1,
 )

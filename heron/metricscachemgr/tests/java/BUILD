@@ -26,27 +26,25 @@ test_deps_files = [
     "@com_google_guava_guava//jar",
     "//third_party/java:powermock",
     "//third_party/java:mockito",
-  ]
-
+]
 
 java_library(
     name = "metricscachemgr-tests",
     srcs = glob(["**/*.java"]),
-    deps = metricscachemgr_deps_files +\
-           test_deps_files
-           + [
-               "//heron/statemgrs/src/java:null-statemgr-java",
-               "//heron/schedulers/src/java:null-scheduler-java",
-               "//heron/packing/src/java:roundrobin-packing",
-             ]
+    deps = metricscachemgr_deps_files +
+           test_deps_files + [
+        "//heron/statemgrs/src/java:null-statemgr-java",
+        "//heron/schedulers/src/java:null-scheduler-java",
+        "//heron/packing/src/java:roundrobin-packing",
+    ],
 )
 
 java_tests(
-   test_classes = [
-       "org.apache.heron.metricscachemgr.metricscache.CacheCoreTest",
-       "org.apache.heron.metricscachemgr.metricscache.MetricsCacheQueryUtilsTest",
-       "org.apache.heron.metricscachemgr.metricscache.MetricsCacheTest",
-     ],
-     runtime_deps = [ ":metricscachemgr-tests" ],
-     size = "small",
+    size = "small",
+    test_classes = [
+        "org.apache.heron.metricscachemgr.metricscache.CacheCoreTest",
+        "org.apache.heron.metricscachemgr.metricscache.MetricsCacheQueryUtilsTest",
+        "org.apache.heron.metricscachemgr.metricscache.MetricsCacheTest",
+    ],
+    runtime_deps = [":metricscachemgr-tests"],
 )

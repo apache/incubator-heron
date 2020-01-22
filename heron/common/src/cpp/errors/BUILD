@@ -33,23 +33,21 @@ cc_library(
     name = "errors-cxx",
     srcs = [
         "gexception.cpp",
+        "gexception.h",
         "modinit.cpp",
         "sperrimpl.cpp",
+        "sperrimpl.h",
+        "sperrmod.h",
         "sperror.cpp",
+        "sperror.h",
         "spexcept.cpp",
-
+        "spexcept.h",
         "sys-einfo-bakw-gen.h",
         "sys-einfo-gen.h",
         "sys-error-enum-gen.h",
-        "sperrimpl.h",
-
-        "gexception.h",
-        "sperrmod.h",
-        "sperror.h",
-        "spexcept.h",
         "syserr.h",
     ],
-    hdrs = [ 
+    hdrs = [
         "errors.h",
         "modinit.h",
     ],
@@ -57,8 +55,8 @@ cc_library(
         "-Iheron/common/src/cpp",
         "-I$(GENDIR)/heron/common/src/cpp",
     ],
+    linkstatic = 1,
     deps = [
         "//heron/common/src/cpp/basics:basics-cxx",
     ],
-    linkstatic = 1,
 )

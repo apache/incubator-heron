@@ -50,7 +50,7 @@ java_library(
 java_library(
     name = "eco-submit-java",
     srcs = glob(["org/apache/heron/eco/submit/*.java"]),
-    deps = eco_deps, 
+    deps = eco_deps,
 )
 
 java_library(

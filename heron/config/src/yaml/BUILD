@@ -15,10 +15,14 @@ filegroup(
 filegroup(
     name = "conf-yaml",
     srcs = glob(
-        ["conf/**/*.aurora"]
-        + ["conf/**/*.hcl"]
-        + ["conf/**/*.sh"]
-        + ["conf/**/*.yaml"]),
+        ["conf/**/*.aurora"] + [
+            "conf/**/*.hcl",
+        ] + [
+            "conf/**/*.sh",
+        ] + [
+            "conf/**/*.yaml",
+        ],
+    ),
 )
 
 filegroup(

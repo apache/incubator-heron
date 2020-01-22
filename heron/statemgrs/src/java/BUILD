@@ -21,7 +21,7 @@ zookeeper_deps_files = \
         "@org_apache_curator_curator_framework//jar",
         "@org_apache_curator_curator_recipes//jar",
         "@org_apache_zookeeper_zookeeper//jar",
-        "//third_party/java:logging"
+        "//third_party/java:logging",
     ]
 
 java_library(
@@ -48,7 +48,7 @@ genrule(
     name = "heron-null-statemgr",
     srcs = [":null-statemgr-unshaded_deploy.jar"],
     outs = ["heron-null-statemgr.jar"],
-    cmd  = "cp $< $@",
+    cmd = "cp $< $@",
 )
 
 java_library(
@@ -61,34 +61,34 @@ java_library(
 java_binary(
     name = "localfs-statemgr-unshaded",
     srcs = glob(["**/FileSystemStateManager.java"]) + glob(["**/localfs/**/*.java"]),
+    main_class = "org.apache.heron.statemgr.localfs.LocalFileSystemStateManager",
     resources = glob(["**/localfs/**/*.yaml"]),
     deps = localfs_deps_files,
-    main_class="org.apache.heron.statemgr.localfs.LocalFileSystemStateManager"
 )
 
 genrule(
     name = "heron-localfs-statemgr",
     srcs = [":localfs-statemgr-unshaded_deploy.jar"],
     outs = ["heron-localfs-statemgr.jar"],
-    cmd  = "cp $< $@",
+    cmd = "cp $< $@",
 )
 
 java_library(
     name = "zookeeper-statemgr-java",
     srcs = glob(["**/zookeeper/**/*.java"]) + glob(["**/FileSystemStateManager.java"]),
-    deps = zookeeper_deps_files, 
+    deps = zookeeper_deps_files,
 )
 
 java_binary(
     name = "zookeeper-statemgr-unshaded",
     srcs = glob(["**/zookeeper/**/*.java"]) + glob(["**/FileSystemStateManager.java"]),
+    main_class = "org.apache.heron.statemgr.zookeeper.curator.CuratorStateManager",
     deps = zookeeper_deps_files,
-    main_class="org.apache.heron.statemgr.zookeeper.curator.CuratorStateManager"
 )
 
 genrule(
     name = "heron-zookeeper-statemgr",
     srcs = [":zookeeper-statemgr-unshaded_deploy.jar"],
     outs = ["heron-zookeeper-statemgr.jar"],
-    cmd  = "cp $< $@",
+    cmd = "cp $< $@",
 )
