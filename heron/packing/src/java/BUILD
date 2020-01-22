@@ -5,7 +5,7 @@ packing_deps_files = [
     "//heron/common/src/java:basics-java",
     "//heron/common/src/java:utils-java",
     "//heron/spi/src/java:packing-spi-java",
-    "@com_google_guava_guava//jar",
+    "@maven//:com_google_guava_guava",
     ":builder",
     ":utils",
 ]
@@ -47,7 +47,7 @@ java_library(
         "**/packing/exceptions/*.java",
     ]),
     deps = heron_java_proto_files() + [
-        "@com_google_guava_guava//jar",
+        "@maven//:com_google_guava_guava",
         "//heron/api/src/java:classification",
         "//heron/common/src/java:basics-java",
         "//heron/spi/src/java:packing-spi-java",

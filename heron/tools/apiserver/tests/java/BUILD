@@ -1,6 +1,6 @@
 common_deps_files = [
     "//third_party/java:powermock",
-    "@commons_io_commons_io//jar",
+    "@maven//:commons_io_commons_io",
     "//third_party/java:mockito",
     "//third_party/java:junit4",
 ]

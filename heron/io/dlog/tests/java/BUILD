@@ -5,9 +5,9 @@ common_deps_files = [
 
 dlog_test_deps_files = \
     common_deps_files + [
-        "@com_google_guava_guava//jar",
-        "@org_apache_distributedlog_core//jar",
-        "@io_netty_netty_all//jar",
+        "@maven//:com_google_guava_guava",
+        "@maven//:org_apache_distributedlog_distributedlog_core_shaded",
+        "@maven//:io_netty_netty_all",
         "//heron/io/dlog/src/java:dlog-lib",
     ]
 

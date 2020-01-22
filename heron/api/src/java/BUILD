@@ -35,7 +35,7 @@ java_library(
     javacopts = DOCLINT_HTML_AND_SYNTAX,
     deps = api_deps_files + [
         ":api-java-low-level",
-        "@org_apache_commons_commons_lang3//jar",
+        "@maven//:org_apache_commons_commons_lang3",
     ],
 )
 
@@ -49,7 +49,7 @@ java_library(
     javacopts = DOCLINT_HTML_AND_SYNTAX,
     deps = api_deps_files + [
         "//third_party/java:kryo-neverlink",
-        "@org_apache_commons_commons_lang3//jar",
+        "@maven//:org_apache_commons_commons_lang3",
     ],
 )
 
@@ -61,7 +61,7 @@ java_binary(
     ]),
     deps = api_deps_files + [
         "//third_party/java:kryo-neverlink",
-        "@org_apache_commons_commons_lang3//jar",
+        "@maven//:org_apache_commons_commons_lang3",
     ],
 )
 

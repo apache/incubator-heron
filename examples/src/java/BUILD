@@ -27,7 +27,7 @@ java_binary(
         "//heron/common/src/java:basics-java",
         "//heron/simulator/src/java:simulator-java",
         "//third_party/java:kryo",
-        "@apache_pulsar_client//jar",
+        "@maven//:apache_pulsar_client",
     ],
 )
 

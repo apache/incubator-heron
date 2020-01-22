@@ -1,8 +1,8 @@
 package(default_visibility = ["//visibility:public"])
 
 dlog_deps = [
-    "@org_apache_distributedlog_core//jar",
-    "@io_netty_netty_all//jar",
+    "@maven//:org_apache_distributedlog_distributedlog_core_shaded",
+    "@maven//:io_netty_netty_all",
     "//third_party/java:dlog-java",
 ]
 

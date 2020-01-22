@@ -4,8 +4,8 @@ heron_kafka_bolts_test_dep = [
     "//heron/common/src/java:basics-java",
     "//heron/common/src/java:config-java",
     "//third_party/java:junit4",
-    "@org_apache_kafka_kafka_clients//jar",
-    "@org_mockito_mockito_all//jar",
+    "@maven//:org_apache_kafka_kafka_clients",
+    "@maven//:org_mockito_mockito_all",
 ]
 
 java_test(

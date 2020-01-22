@@ -36,7 +36,7 @@ java_binary(
         "//heron/common/src/java:utils-java",
         "//heron/proto:proto_ckptmgr_java",
         "//heron/spi/src/java:statefulstorage-spi-java",
-        "@commons_cli_commons_cli//jar",
+        "@maven//:commons_cli_commons_cli",
     ],
 )
 

@@ -2,9 +2,9 @@ package(default_visibility = ["//visibility:public"])
 
 common_deps = [
     ":util",
-    "@commons_cli_commons_cli//jar",
-    "@commons_lang_commons_lang//jar",
-    "@com_google_guava_guava//jar",
+    "@maven//:commons_cli_commons_cli",
+    "@maven//:commons_lang_commons_lang",
+    "@maven//:com_google_guava_guava",
     "//third_party/java/bazel:extra_actions_proto_java",
     "//third_party/java/bazel:proto_java",
 ]
@@ -14,7 +14,7 @@ java_binary(
     srcs = ["JavaCheckstyle.java"],
     main_class = "org.apache.bazel.checkstyle.JavaCheckstyle",
     deps = common_deps + [
-        "@com_puppycrawl_tools_checkstyle//jar",
+        "@maven//:com_puppycrawl_tools_checkstyle",
         "//third_party/java:checkstyle",
     ],
 )

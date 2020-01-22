@@ -21,7 +21,7 @@ deps = [
     "//third_party/java:jackson",
     "//third_party/java:cli",
     "@com_google_protobuf//:protobuf_java",
-    "@org_yaml_snakeyaml//jar",
+    "@maven//:org_yaml_snakeyaml",
 ]
 
 filegroup(

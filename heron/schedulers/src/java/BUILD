@@ -3,8 +3,8 @@ package(default_visibility = ["//visibility:public"])
 common_deps_files = [
     "//heron/common/src/java:basics-java",
     "//heron/common/src/java:utils-java",
-    "@commons_io_commons_io//jar",
-    "@com_google_guava_guava//jar",
+    "@maven//:commons_io_commons_io",
+    "@maven//:com_google_guava_guava",
 ]
 
 spi_deps_files = [
@@ -34,10 +34,10 @@ yarn_deps_files = \
 mesos_deps_files = \
     scheduler_deps_files + [
         "//third_party/java:jackson",
-        "@org_apache_mesos_mesos//jar",
-        "@org_apache_curator_curator_client//jar",
-        "@org_apache_curator_curator_framework//jar",
-        "@org_apache_zookeeper_zookeeper//jar",
+        "@maven//:org_apache_mesos_mesos",
+        "@maven//:org_apache_curator_curator_client",
+        "@maven//:org_apache_curator_curator_framework",
+        "@maven//:org_apache_zookeeper_zookeeper",
     ]
 
 marathon_deps_files = \
@@ -53,17 +53,17 @@ kubernetes_deps_files = \
     ]
 
 nomad_sdk_deps = [
-    "@com_hashicorp_nomad//jar",
-    "@com_fasterxml_jackson_core_jackson_annotations//jar",
-    "@com_fasterxml_jackson_core_jackson_core//jar",
-    "@com_fasterxml_jackson_core_jackson_databind//jar",
-    "@com_google_code_findbugs_jsr305//jar",
-    "@commons_codec_commons_codec//jar",
-    "@commons_logging_commons_logging//jar",
-    "@org_apache_httpcomponents_http_client//jar",
-    "@org_apache_httpcomponents_http_core//jar",
-    "@org_bouncycastle_bcpkix_jdk15on//jar",
-    "@org_bouncycastle_bcprov_jdk15on//jar",
+    "@maven//:com_hashicorp_nomad_nomad_sdk",
+    "@maven//:com_fasterxml_jackson_core_jackson_annotations",
+    "@maven//:com_fasterxml_jackson_core_jackson_core",
+    "@maven//:com_fasterxml_jackson_core_jackson_databind",
+    "@maven//:com_google_code_findbugs_jsr305",
+    "@maven//:commons_codec_commons_codec",
+    "@maven//:commons_logging_commons_logging",
+    "@maven//:org_apache_httpcomponents_httpclient",
+    "@maven//:org_apache_httpcomponents_httpcore",
+    "@maven//:org_bouncycastle_bcpkix_jdk15on",
+    "@maven//:org_bouncycastle_bcprov_jdk15on",
 ]
 
 nomad_deps_files = \

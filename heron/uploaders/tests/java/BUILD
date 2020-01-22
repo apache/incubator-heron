@@ -1,6 +1,6 @@
 common_deps_files = [
     "//third_party/java:powermock",
-    "@commons_io_commons_io//jar",
+    "@maven//:commons_io_commons_io",
     "//third_party/java:mockito",
     "//third_party/java:junit4",
 ]
@@ -21,8 +21,8 @@ localfs_deps_files = \
 dlog_deps_files = \
     common_deps_files + \
     spi_deps_files + [
-        "@org_apache_distributedlog_core//jar",
-        "@io_netty_netty_all//jar",
+        "@maven//:org_apache_distributedlog_distributedlog_core_shaded",
+        "@maven//:io_netty_netty_all",
         "//heron/uploaders/src/java:dlog-uploader-java",
     ]
 
@@ -102,10 +102,10 @@ java_test(
     srcs = glob(["**/http/HttpUploaderTest.java"]),
     deps = common_deps_files + spi_deps_files + [
         "//heron/uploaders/src/java:http-uploader-java",
-        "@commons_logging_commons_logging//jar",
+        "@maven//:commons_logging_commons_logging",
         "@maven//:org_apache_httpcomponents_httpcore",
         "@maven//:org_apache_httpcomponents_httpclient",
-        "@org_apache_httpcomponents_http_client_test//jar",
+        "@maven//:org_apache_httpcomponents_httpclient_tests",
         "//heron/common/src/java:basics-java",
     ],
 )

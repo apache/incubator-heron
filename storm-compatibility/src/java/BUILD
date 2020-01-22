@@ -25,7 +25,7 @@ storm_deps_files = [
     "//heron/common/src/java:basics-java",
     "//heron/simulator/src/java:simulator-java",
     "//heron/proto:proto_topology_java",
-    "@com_googlecode_json_simple_json_simple//jar",
+    "@maven//:com_googlecode_json_simple_json_simple",
     "//third_party/java:kryo-neverlink",
 ]
 
