@@ -20,6 +20,7 @@ addons:
       - gcc-4.8-multilib
       - g++-4.8-multilib
       - python3
+      - python3-pip
       - wget
       - pkg-config
       - zip
@@ -28,7 +29,7 @@ addons:
       - libgoogle-perftools-dev
 
 env:
-  - BAZEL_VERSION=0.26.0 CC=gcc-4.8 CXX=g++-4.8 CPP=cpp-4.8 CXXCPP=cpp-4.8 ENABLE_HEAPCHECK=1
+  - BAZEL_VERSION=2.0.0 CC=gcc-4.8 CXX=g++-4.8 CPP=cpp-4.8 CXXCPP=cpp-4.8 ENABLE_HEAPCHECK=1
 
 before_install:
   # download and install bazel
@@ -39,7 +40,7 @@ before_install:
 before_script:
   # install python module for wheel files
   # required for python packaging
-  - sudo pip install wheel
+  # - sudo pip install wheel
 
 script:
   - which gcc-4.8
