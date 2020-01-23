@@ -47,13 +47,6 @@
       "restartArgs"  : "True",
       "expectedTopoResultRelativePath" : "fields_grouping/FieldsGroupingResults.json",
       "checkType" : "topology_structure"
-    },
-    {
-      "topologyName" : "IntegrationTopologyTest_StatefulBasicTopologyOneTask",
-      "classPath"    : "stateful_basic_topology_one_task.StatefulBasicTopologyOneTask",
-      "expectedTopoResultRelativePath" : "stateful_basic_topology_one_task/StatefulBasicTopologyOneTaskTopo.json",
-      "expectedStateResultRelativePath" : "stateful_basic_topology_one_task/StatefulBasicTopologyOneTaskState.json",
-      "checkType" : "checkpoint_state"
     }
   ]
 }
