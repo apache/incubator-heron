@@ -27,6 +27,7 @@ genrule(
         "mkdir -p $$TMP_DIR",
         "cp -LR $$(pwd)/external/org_nongnu_libunwind/* $$TMP_DIR",
         "cd $$TMP_DIR",
+        "autoreconf -f -i",
         "./configure --prefix=$$INSTALL_DIR --enable-shared=no --disable-minidebuginfo",
         'make install SUBDIRS="src tests"',
         "rm -rf $$TMP_DIR",
