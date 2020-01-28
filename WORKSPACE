@@ -289,10 +289,10 @@ http_archive(
 
 http_archive(
     name = "com_github_danmar_cppcheck",
-    urls = ["https://github.com/danmar/cppcheck/archive/1.87.zip"],
-    strip_prefix = "cppcheck-1.87",
+    urls = ["https://github.com/danmar/cppcheck/archive/1.90.zip"],
+    strip_prefix = "cppcheck-1.90",
     build_file = "@//:third_party/cppcheck/cppcheck.BUILD",
-    sha256 = "b3de7fbdc1a23d7341b55f7f88877e106a76847bd5a07fa721c07310b625318b",
+    sha256 = "cb0e66cbe2d6b655fce430cfaaa74b83ad11c91f221e3926f1ca3211bb7c906b",
 )
 
 http_archive(
