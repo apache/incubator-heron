@@ -27,6 +27,7 @@ genrule(
         "mkdir -p $$TMP_DIR",
         "cp -R $$(pwd)/external/org_apache_zookeeper/* $$TMP_DIR",
         "cd $$TMP_DIR/zookeeper-client/zookeeper-client-c",
+        "autoreconf -f -i",
         "./configure --prefix=$$INSTALL_DIR --enable-shared=no",
         "make install",
         "rm -rf $$TMP_DIR",
