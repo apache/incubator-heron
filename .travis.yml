@@ -20,6 +20,7 @@ addons:
       - gcc-4.8-multilib
       - g++-4.8-multilib
       - python2.7
+      - libcppunit-dev
       - wget
       - pkg-config
       - zip
