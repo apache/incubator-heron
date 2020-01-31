@@ -27,6 +27,13 @@ filegroup(
   srcs = glob(["**/DownloadRunner.java"]),
 )
 
+filegroup(
+  name = "downloader-core",
+  srcs = glob(["**/Downloader.java",
+               "**/Extractor.java",
+               "**/Registry.java"])
+)
+
 java_binary(
   name = 'heron-downloader-unshaded',
   srcs = [":downloader-main"],
