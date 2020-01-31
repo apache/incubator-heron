@@ -19,6 +19,9 @@
 #  under the License.
 
 ''' update.py '''
+import argparse
+import re
+
 from heron.common.src.python.utils.log import Log
 from heron.tools.cli.src.python.result import SimpleResult, Status
 
@@ -26,9 +29,6 @@ import heron.tools.cli.src.python.args as args
 import heron.tools.cli.src.python.cli_helper as cli_helper
 import heron.tools.cli.src.python.jars as jars
 import heron.tools.common.src.python.utils.config as config
-
-import argparse
-import re
 
 def create_parser(subparsers):
   """ Create the parse for the update command """
@@ -173,7 +173,8 @@ def run(command, parser, cl_args, unknown_args):
   try:
     dict_extra_args = build_extra_args_dict(cl_args)
   except Exception as err:
-    return SimpleResult(Status.InvocationError, err.message)
+    return SimpleResult(Status.InvocationError, str(err))
+    # return SimpleResult(Status.InvocationError, err.message)
 
   # Execute
   if cl_args['deploy_mode'] == config.SERVER_MODE:

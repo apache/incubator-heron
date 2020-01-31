@@ -26,14 +26,14 @@ import tempfile
 import tarfile
 import argparse
 import socket
-import requests
+import json
 import time
+import requests
 import netifaces
 import yaml
-import json
 
 from heron.common.src.python.utils.log import Log
-from heron.tools.cli.src.python.result   import SimpleResult, Status
+from heron.tools.cli.src.python.result import SimpleResult, Status
 import heron.tools.cli.src.python.args as cli_args
 import heron.tools.common.src.python.utils.config as config
 

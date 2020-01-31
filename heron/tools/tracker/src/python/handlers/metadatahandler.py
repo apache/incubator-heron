@@ -74,4 +74,3 @@ class MetaDataHandler(BaseHandler):
       Log.error("Exception when handling GET request '/topologies/metadata'")
       Log.debug(traceback.format_exc())
       self.write_error_response(e)
-

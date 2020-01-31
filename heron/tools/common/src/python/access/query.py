@@ -20,7 +20,6 @@
 
 ''' query.py '''
 
-
 class QueryHandler(object):
   ''' QueryHandler '''
 
@@ -64,4 +63,3 @@ class QueryHandler(object):
     :return:
     '''
     pass
-

@@ -19,15 +19,15 @@
 #  under the License.
 
 ''' version.py '''
+import sys
+import requests
+
 from heron.common.src.python.utils.log import Log
 from heron.tools.cli.src.python.result import SimpleResult, Status
 import heron.tools.cli.src.python.args as cli_args
 import heron.tools.common.src.python.utils.config as config
 import heron.tools.cli.src.python.cdefs as cdefs
 import heron.tools.cli.src.python.rest as rest
-
-import sys
-import requests
 
 def add_version_titles(parser):
   '''
