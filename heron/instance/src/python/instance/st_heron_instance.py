@@ -24,8 +24,8 @@ import collections
 import logging
 import os
 import resource
-import traceback
 import signal
+import traceback
 import yaml
 
 import heronpy.api.api_constants as api_constants

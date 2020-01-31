@@ -7,7 +7,7 @@ pex_library(
         exclude = ["main.py"],
     ),
     reqs = [
-        "protobuf==3.6.1",
+        "protobuf==3.8.0",
         "tornado==4.0.2",
         "future==0.18.2",
     ],

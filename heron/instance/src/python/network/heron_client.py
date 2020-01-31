@@ -22,10 +22,11 @@
 
 import asyncore
 import socket
+import time
 import traceback
+
 from abc import abstractmethod
 
-import time
 from heron.common.src.python.utils.log import Log
 import heron.instance.src.python.utils.system_constants as constants
 from heron.instance.src.python.network import HeronProtocol, REQID, StatusCode, OutgoingPacket
