@@ -1,4 +1,0 @@
-[submodule "website/public"]
-	path = website/public
-	url = https://github.com/apache/incubator-heron.git
-	branch = gh-pages
