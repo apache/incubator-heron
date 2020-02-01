@@ -19,7 +19,7 @@ FROM ubuntu:14.04
 
 # This is passed to the heron build command via the --config flag
 ENV TARGET_PLATFORM ubuntu
-ENV bazelVersion 0.26.0
+ENV bazelVersion 2.0.0
 
 RUN apt-get update && apt-get install -y software-properties-common
 
@@ -34,9 +34,6 @@ RUN apt-get update && apt-get -y install \
       git \
       libtool \
       python-dev \
-      python3-dev \
-      python3-software-properties \
-      python3-setuptools \
       zip \
       unzip \
       wget \
