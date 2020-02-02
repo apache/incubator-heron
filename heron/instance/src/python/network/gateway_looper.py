@@ -26,8 +26,9 @@ import os
 import time
 import select
 
-from .event_looper import EventLooper
 from heron.common.src.python.utils.log import Log
+from .event_looper import EventLooper
+
 
 class GatewayLooper(EventLooper):
   """A GatewayLooper, inheriting EventLooper
