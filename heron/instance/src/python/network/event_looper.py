@@ -25,6 +25,7 @@ import sys
 
 from abc import abstractmethod
 from heapq import heappush, heappop
+
 from heron.common.src.python.utils.log import Log
 
 class EventLooper(object):

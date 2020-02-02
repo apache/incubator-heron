@@ -24,6 +24,7 @@ import sys
 import heronpy.api.api_constants as constants
 from heronpy.api.topology import TopologyBuilder
 from heronpy.api.stream import Grouping
+
 from examples.src.python.spout import StatefulWordSpout
 from examples.src.python.bolt import StatefulCountBolt
 

@@ -24,6 +24,7 @@ import time
 import random
 
 from collections import namedtuple
+
 from heronpy.api.tuple import Tuple
 
 HeronTuple = namedtuple('Tuple', Tuple._fields + ('creation_time', 'roots'))

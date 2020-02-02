@@ -21,6 +21,7 @@
 """Word spout with error streams"""
 
 from itertools import cycle
+
 from heronpy.api.spout.spout import Spout
 from heronpy.api.stream import Stream
 

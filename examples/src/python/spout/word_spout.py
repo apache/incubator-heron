@@ -21,6 +21,7 @@
 """module for example spout: WordSpout"""
 
 from itertools import cycle
+
 from heronpy.api.spout.spout import Spout
 
 class WordSpout(Spout):

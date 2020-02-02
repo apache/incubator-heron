@@ -25,7 +25,9 @@ import heronpy.api.api_constants as constants
 from heronpy.api.topology import TopologyBuilder
 from heronpy.api.stream import Grouping
 from heronpy.api.bolt.window_bolt import SlidingWindowBolt
+
 from heron.examples.src.python.spout import WordSpout
+
 from examples.src.python.bolt import WindowSizeBolt
 
 # Topology is defined using a topology builder

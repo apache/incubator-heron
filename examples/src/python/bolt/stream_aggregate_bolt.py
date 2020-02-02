@@ -20,6 +20,7 @@
 
 '''stream aggregator'''
 from collections import Counter
+
 from heronpy.api.bolt.bolt import Bolt
 
 # pylint: disable=unused-argument
