@@ -21,6 +21,7 @@
 '''socket_options.py'''
 
 from collections import namedtuple
+
 from heron.common.src.python.utils.log import Log
 import heron.instance.src.python.utils.system_constants as const
 from heron.instance.src.python.utils import system_config

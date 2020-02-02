@@ -20,15 +20,15 @@
 
 
 ''' killexecutorhandler.py '''
-from future.standard_library import install_aliases
-install_aliases()
-
 import logging
 import os
 import signal
 from urllib.parse import parse_qsl
-import tornado.web
 
+from future.standard_library import install_aliases
+install_aliases()
+
+import tornado.web
 from tornado.options import options
 
 class KillExecutorHandler(tornado.web.RequestHandler):
