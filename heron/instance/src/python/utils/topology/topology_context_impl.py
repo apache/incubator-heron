@@ -22,14 +22,13 @@
 import os
 from collections import namedtuple
 
+import heronpy.api.api_constants as api_constants
+from heronpy.api.topology_context import TopologyContext
 from heronpy.api.task_hook import (ITaskHook, EmitInfo, SpoutAckInfo,
                                    SpoutFailInfo, BoltExecuteInfo,
                                    BoltAckInfo, BoltFailInfo)
-from heronpy.api.topology_context import TopologyContext
 
-import heronpy.api.api_constants as api_constants
 from heron.instance.src.python.utils.metrics import MetricsCollector
-
 import heron.instance.src.python.utils.system_constants as system_constants
 import heron.common.src.python.pex_loader as pex_loader
 

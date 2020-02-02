@@ -20,11 +20,10 @@
 
 '''serializer_helper.py'''
 
-from heronpy.api.serializer import PythonSerializer
-
-import heronpy.api.api_constants as constants
-
 import heron.common.src.python.pex_loader as pex_loader
+
+from heronpy.api.serializer import PythonSerializer
+import heronpy.api.api_constants as constants
 
 class SerializerHelper(object):
   """Helper class for getting serializer for component"""

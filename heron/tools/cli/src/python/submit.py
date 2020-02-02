@@ -19,16 +19,16 @@
 #  under the License.
 
 ''' submit.py '''
-from future.standard_library import install_aliases
-install_aliases()
-
 import glob
 import logging
 import os
 import tempfile
-import requests
 import subprocess
 from urllib.parse import urlparse
+import requests
+
+from future.standard_library import install_aliases
+install_aliases()
 
 from heron.common.src.python.utils.log import Log
 from heron.proto import topology_pb2
