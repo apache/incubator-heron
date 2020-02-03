@@ -17,9 +17,9 @@
 
 set -eu
 
-function query() {
-  ./output/bazel query "$@"
-}
+#function query() {
+#  ./output/bazel query "$@"
+#}
 
 set +e
 # Build everything
@@ -44,7 +44,7 @@ function get_heron_thirdparty_dependencies() {
   # bazel-genfiles/external for third_party deps
   # bazel-heron/bazel-out/host/bin/third_party for extra_action proto jars in third_party
   # bazel-heron/bazel-out/host/genfiles/external more third_party deps
-  echo "$(find {bazel-bin/heron/proto,bazel-genfiles/external,bazel-incubator-heron/bazel-out/host/bin/third_party,bazel-incubator-heron/bazel-out/host/genfiles/external}/. -name "*jar" -type f | sort -u)";
+  echo "$(find {bazel-bin/heron/proto,bazel-genfiles/external,bazel-incubator-heron/bazel-out/host/bin/third_party,bazel-incubator-heron/bazel-out/host/bin/external}/. -name "*jar" -type f | sort -u)";
 }
 
 function get_heron_bazel_deps(){
@@ -88,20 +88,20 @@ function get_target_of() {
 }
 
 # Returns the target that consume file $1
-function get_consuming_target() {
-  # Here to the god of bazel, I should probably offer one or two memory chips for that
-  local target=$(get_target_of $1)
-  # Get the rule that generated this file.
-  local generating_target=$(query "kind(rule, deps(${target}, 1)) - ${target}")
-  [[ -n $generating_target ]] || echo "Couldn't get generating target for ${target}" 1>&2
-  local java_library=$(query "rdeps(//heron/..., ${generating_target}, 1) - ${generating_target}")
-  echo "${java_library}"
-}
+#function get_consuming_target() {
+#  # Here to the god of bazel, I should probably offer one or two memory chips for that
+#  local target=$(get_target_of $1)
+#  # Get the rule that generated this file.
+#  local generating_target=$(query "kind(rule, deps(${target}, 1)) - ${target}")
+#  [[ -n $generating_target ]] || echo "Couldn't get generating target for ${target}" 1>&2
+#  local java_library=$(query "rdeps(//heron/..., ${generating_target}, 1) - ${generating_target}")
+#  echo "${java_library}"
+#}
 
 # Returns the library that contains the generated file $1
-function get_containing_library() {
-  get_consuming_target $1 | sed 's|:|/lib|' | sed 's|^//|bazel-bin/|' | sed 's|$|.jar|'
-}
+#function get_containing_library() {
+#  get_consuming_target $1 | sed 's|:|/lib|' | sed 's|^//|bazel-bin/|' | sed 's|$|.jar|'
+#}
 
 function collect_generated_binary_deps() {
   local proto_deps=$(find bazel-bin/heron/proto -type f | grep "jar$");
@@ -112,7 +112,7 @@ function collect_generated_paths() {
   # uniq to avoid doing blaze query on duplicates.
   for path in $(find bazel-genfiles/ -name "*.java" | sed 's|/\{0,1\}bazel-genfiles/\{1,2\}|//|' | uniq); do
     source_path=$(echo ${path} | sed 's|//|bazel-genfiles/|' | sed 's|/com/.*$||')
-    echo "$(get_containing_library ${path}):${source_path}"
+#    echo "$(get_containing_library ${path}):${source_path}"
   done | sort -u
 }
 
