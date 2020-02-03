@@ -16,39 +16,38 @@
 # specific language governing permissions and limitations
 # under the License.
 
-# This is a script to start a docker container that has all
-# tools needed to compire Heron. Developer should be able to
-# compile Heron in the container without any setup works.
-# usage:
+# This is a script to create/start a docker container that has all
+# tools needed to build Heron. Developer should be able to
+# build Heron in the container without any other setup works.
+#
+# Usage:
 # To create a clean development environment with docker and run it,
 # execute the following scripts in the source directory of Heron:
-#   sh docker/scripts/dev-env.sh
+#   sh docker/scripts/dev-env-create.sh CONTAINER_NAME [OS]
 #
-# After the container is started, build Heron with bazel
+# After the container is started, you can build Heron with bazel
 # (ubuntu config is used in the example):
 #   ./bazel_configure.py
 #   bazel build --config=ubuntu heron/...
-#
-# To enter an existing container with a new shell, find the container
-# ID with this command first:
-#   docker ps -a
-# The image name looks like: "heron-dev:ubuntu18.04".=
-# After the container is found, execute the following commands to start
-# the container in case it is not started yet, and then start a new
-# terminal in the container:
-#   docker container start CONTAINER_ID
-#   docker exec -it CONTAINER_ID bash
-#
+#   bazel build --config=ubuntu scripts/packages:binpkgs
 
 set -o nounset
 set -o errexit
 
+case $# in
+  0)
+    echo "Missing arguments."
+    echo "Usage: $0 <container_name> [OS]"
+    exit 1
+    ;;
+esac
+
 # Default platform is ubuntu18.04. Other available platforms
 # include centos7, debian9
-TARGET_PLATFORM=${1:-"ubuntu18.04"}
-SCRATCH_DIR=${2:-"$HOME/.heron-docker"}
+TARGET_PLATFORM=${2:-"ubuntu18.04"}
+SCRATCH_DIR="$HOME/.heron-docker"
 REPOSITORY="heron-dev"
-
+CONTAINER_NAME=$1
 
 realpath() {
   echo "$(cd "$(dirname "$1")"; pwd)/$(basename "$1")"
@@ -83,6 +82,7 @@ docker build -t $REPOSITORY:$TARGET_PLATFORM -f $DOCKER_FILE $SCRATCH_DIR
 
 echo "Creating and starting container and mapping the current dir to /heron"
 docker container run -it \
+    --name $CONTAINER_NAME --rm \
     -e TARGET_PLATFORM=$TARGET_PLATFORM \
     -e SCRATCH_DIR="/scratch" \
     -v $PROJECT_DIR:/heron \
