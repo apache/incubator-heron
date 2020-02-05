@@ -20,10 +20,15 @@
 package org.apache.heron.metricsmgr.sink;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.google.common.cache.Cache;
@@ -32,6 +37,9 @@ import org.apache.heron.metricsmgr.MetricsUtil;
 import org.apache.heron.spi.metricsmgr.metrics.MetricsInfo;
 import org.apache.heron.spi.metricsmgr.metrics.MetricsRecord;
 import org.apache.heron.spi.metricsmgr.sink.SinkContext;
+
+import static java.lang.String.format;
+import static org.apache.heron.metricsmgr.sink.PrometheusSink.Prometheus.sanitizeMetricName;
 
 /**
  * A web sink that exposes and endpoint that Prometheus can scrape
@@ -57,6 +65,7 @@ public class PrometheusSink extends AbstractWebSink {
 
   // This is the cache that is used to serve the metrics
   private Cache<String, Map<String, Double>> metricsCache;
+  private List<Rule> rules = new ArrayList<Rule>();
 
   private String cluster;
   private String role;
@@ -66,6 +75,26 @@ public class PrometheusSink extends AbstractWebSink {
     super();
   }
 
+  private static enum Type {
+    COUNTER,
+    GAUGE,
+    SUMMARY,
+    HISTOGRAM,
+    UNTYPED,
+  }
+
+  private static class Rule {
+    Pattern pattern;
+    String name;
+    String value;
+    Double valueFactor = 1.0;
+    String help;
+    boolean attrNameSnakeCase;
+    Type type = Type.UNTYPED;
+    ArrayList<String> labelNames;
+    ArrayList<String> labelValues;
+  }
+
   @Override
   void initialize(Map<String, Object> configuration, SinkContext context) {
     metricsCache = createCache();
@@ -73,6 +102,61 @@ public class PrometheusSink extends AbstractWebSink {
     cluster = context.getCluster();
     role = context.getRole();
     environment = context.getEnvironment();
+
+    if (configuration.containsKey("rules")) {
+      List<Map<String,Object>> configRules = (List<Map<String,Object>>) configuration.get("rules");
+      for (Map<String, Object> ruleObject : configRules) {
+        Map<String, Object> yamlRule = ruleObject;
+        Rule rule = new Rule();
+        rules.add(rule);
+        if (yamlRule.containsKey("pattern")) {
+          rule.pattern = Pattern.compile("^.*(?:" + (String)yamlRule.get("pattern") + ").*$");
+        }
+        if (yamlRule.containsKey("name")) {
+          rule.name = (String)yamlRule.get("name");
+        }
+        if (yamlRule.containsKey("value")) {
+          rule.value = String.valueOf(yamlRule.get("value"));
+        }
+        if (yamlRule.containsKey("valueFactor")) {
+          String valueFactor = String.valueOf(yamlRule.get("valueFactor"));
+          try {
+            rule.valueFactor = Double.valueOf(valueFactor);
+          } catch (NumberFormatException e) {
+            // use default value
+          }
+        }
+        if (yamlRule.containsKey("attrNameSnakeCase")) {
+          rule.attrNameSnakeCase = (Boolean)yamlRule.get("attrNameSnakeCase");
+        }
+        if (yamlRule.containsKey("type")) {
+          rule.type = Type.valueOf((String)yamlRule.get("type"));
+        }
+        if (yamlRule.containsKey("help")) {
+          rule.help = (String)yamlRule.get("help");
+        }
+        if (yamlRule.containsKey("labels")) {
+          TreeMap labels = new TreeMap((Map<String, Object>)yamlRule.get("labels"));
+          rule.labelNames = new ArrayList<String>();
+          rule.labelValues = new ArrayList<String>();
+          for (Map.Entry<String, Object> entry : (Set<Map.Entry<String, Object>>)labels.entrySet()) {
+            rule.labelNames.add(entry.getKey());
+            rule.labelValues.add((String)entry.getValue());
+          }
+        }
+
+        // Validation.
+        if ((rule.labelNames != null || rule.help != null) && rule.name == null) {
+          throw new IllegalArgumentException("Must provide name, if help or labels are given: " + yamlRule);
+        }
+        if (rule.name != null && rule.pattern == null) {
+          throw new IllegalArgumentException("Must provide pattern, if name is given: " + yamlRule);
+        }
+      }
+    } else {
+      // Default to a single default rule.
+      rules.add(new Rule());
+    }
   }
 
   @Override
@@ -82,6 +166,10 @@ public class PrometheusSink extends AbstractWebSink {
     final StringBuilder sb = new StringBuilder();
 
     metrics.forEach((String source, Map<String, Double> sourceMetrics) -> {
+      // Set the labels.
+      ArrayList<String> labelNames = new ArrayList<String>();
+      ArrayList<String> labelValues = new ArrayList<String>();
+
       String[] sources = source.split("/");
       String topology = sources[0];
       String component = sources[1];
@@ -96,6 +184,18 @@ public class PrometheusSink extends AbstractWebSink {
       final String clusterRoleEnv = hasClusterRoleEnvironment(c, r, e)
           ? String.format("%s/%s/%s", c, r, e) : null;
 
+      labelNames.add("topology"); labelValues.add(topology);
+      labelNames.add("component"); labelValues.add(component);
+      labelNames.add("instance_id"); labelValues.add(instance);
+
+      if (clusterRoleEnv != null) {
+        labelNames.add("cluster_role_env"); labelValues.add(clusterRoleEnv);
+      }
+
+      if (componentType != null) {
+        labelNames.add("component_type"); labelValues.add(componentType);
+      }
+
       sourceMetrics.forEach((String metric, Double value) -> {
 
         // some stream manager metrics in heron contain a instance id as part of the metric name
@@ -104,7 +204,9 @@ public class PrometheusSink extends AbstractWebSink {
         // __time_spent_back_pressure_by_compid/container_1_exclaim1_1
         // TODO convert to small classes for less string manipulation
         final String metricName;
-        final String metricInstanceId;
+        String metricInstanceId = null;
+        String metricTopicName = null;
+        String metricPartitionId = null;
         if (componentIsStreamManger) {
           final boolean metricHasInstanceId = metric.contains("_by_");
           final String[] metricParts = metric.split("/");
@@ -116,17 +218,77 @@ public class PrometheusSink extends AbstractWebSink {
             metricInstanceId = metricParts[1];
           } else {
             metricName = metric;
-            metricInstanceId = null;
           }
-
+        } else if (metric.contains("kafkaOffset")) {
+          // kafkaOffset of KafkaSpout 'kafkaOffset/topicName/totalSpoutLag'
+          // kafkaOffset of KafkaSpout 'kafkaOffset/topicName/partition_2/spoutLag'
+          final boolean metricHasPartition = metric.contains("partition_");
+          final String[] metricParts = metric.split("/");
+          if (metricHasPartition && metricParts.length == 3) {
+            metricName = String.format("%s_%s", metricParts[0], metricParts[3]);
+            metricTopicName = metricParts[1];
+            metricPartitionId = metricParts[1].split("_")[1];
+          } else if (metricParts.length == 2) {
+            metricName = String.format("%s_%s", metricParts[0], metricParts[2]);
+            metricTopicName = metricParts[1];
+          } else {
+            metricName = metric;
+          }
         } else {
           metricName = metric;
-          metricInstanceId = null;
         }
 
+        String name = sanitizeMetricName(metric);
+        for (Rule rule : rules) {
+          Matcher matcher = null;
+          if (rule.pattern != null) {
+            matcher = rule.pattern.matcher(metric);
+            if (!matcher.matches()) {
+              continue;
+            }
+          }
+
+          // If there's no name provided, use default export format.
+          if (rule.name == null || rule.name.isEmpty()) {
+            // nothing
+          } else {
+            // Matcher is set below here due to validation in the constructor.
+            name = sanitizeMetricName(matcher.replaceAll(rule.name));
+            if (name.isEmpty()) {
+              return;
+            }
+          }
+          name = name.toLowerCase();
+          if (rule.labelNames != null) {
+            for (int i = 0; i < rule.labelNames.size(); i++) {
+              final String unsafeLabelName = rule.labelNames.get(i);
+              final String labelValReplacement = rule.labelValues.get(i);
+              try {
+                String labelName = sanitizeMetricName(matcher.replaceAll(unsafeLabelName));
+                String labelValue = matcher.replaceAll(labelValReplacement);
+                labelName = labelName.toLowerCase();
+                if (!labelName.isEmpty() && !labelValue.isEmpty()) {
+                  labelNames.add(labelName);
+                  labelValues.add(labelValue);
+                }
+              } catch (Exception ex) {
+                LOG.warning(format("Matcher '%s' unable to use: '%s' value: '%s'",
+                            matcher, unsafeLabelName, labelValReplacement));
+              }
+            }
+          }
+
+          // Add to samples.
+          LOG.fine("add metric sample: " + name + " " + labelNames + " " + labelValues + " " + value.doubleValue());
+          addSample(new MetricFamilySamples.Sample(name, labelNames, labelValues, value.doubleValue()), rule.type, help);
+          return;
+        }
+
+
         String exportedMetricName = String.format("%s_%s", HERON_PREFIX,
-            metricName.replace("__", "").toLowerCase());
-        sb.append(Prometheus.sanitizeMetricName(exportedMetricName))
+            metricName.replaceAll("[0-9]+", "")
+                .replace("__", "").toLowerCase());
+        sb.append(sanitizeMetricName(exportedMetricName))
             .append("{")
             .append("topology=\"").append(topology).append("\",")
             .append("component=\"").append(component).append("\",")
@@ -144,6 +306,14 @@ public class PrometheusSink extends AbstractWebSink {
           sb.append(",metric_instance_id=\"").append(metricInstanceId).append("\"");
         }
 
+        if (metricTopicName != null) {
+          sb.append(",topic=\"").append(metricTopicName).append("\"");
+        }
+
+        if (metricPartitionId != null) {
+          sb.append(",partition=\"").append(metricPartitionId).append("\"");
+        }
+
         sb.append("} ")
             .append(Prometheus.doubleToGoString(value))
             .append(" ").append(currentTimeMillis())
@@ -152,6 +322,24 @@ public class PrometheusSink extends AbstractWebSink {
     });
 
     return sb.toString().getBytes();
+  }
+
+  static String toSnakeAndLowerCase(String attrName) {
+    if (attrName == null || attrName.isEmpty()) {
+      return attrName;
+    }
+    char firstChar = attrName.subSequence(0, 1).charAt(0);
+    boolean prevCharIsUpperCaseOrUnderscore = Character.isUpperCase(firstChar) || firstChar == '_';
+    StringBuilder resultBuilder = new StringBuilder(attrName.length()).append(Character.toLowerCase(firstChar));
+    for (char attrChar : attrName.substring(1).toCharArray()) {
+      boolean charIsUpperCase = Character.isUpperCase(attrChar);
+      if (!prevCharIsUpperCaseOrUnderscore && charIsUpperCase) {
+        resultBuilder.append("_");
+      }
+      resultBuilder.append(Character.toLowerCase(attrChar));
+      prevCharIsUpperCaseOrUnderscore = charIsUpperCase || attrChar == '_';
+    }
+    return resultBuilder.toString();
   }
 
   @Override
