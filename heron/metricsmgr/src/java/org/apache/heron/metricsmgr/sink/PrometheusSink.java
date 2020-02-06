@@ -204,18 +204,15 @@ public class PrometheusSink extends AbstractWebSink {
         // __time_spent_back_pressure_by_compid/container_1_exclaim1_1
         // TODO convert to small classes for less string manipulation
         final String metricName;
-        String metricInstanceId = null;
-        String metricTopicName = null;
-        String metricPartitionId = null;
         if (componentIsStreamManger) {
           final boolean metricHasInstanceId = metric.contains("_by_");
           final String[] metricParts = metric.split("/");
           if (metricHasInstanceId && metricParts.length == 3) {
-            metricName = String.format("%s_%s", metricParts[0], metricParts[2]);
-            metricInstanceId = metricParts[1];
+            metricName = format("%s_%s", metricParts[0], metricParts[2]);
+            labelNames.add("metric_instance_id"); labelValues.add(metricParts[1]);
           } else if (metricHasInstanceId && metricParts.length == 2) {
             metricName = metricParts[0];
-            metricInstanceId = metricParts[1];
+            labelNames.add("metric_instance_id"); labelValues.add(metricParts[1]);
           } else {
             metricName = metric;
           }
@@ -225,95 +222,71 @@ public class PrometheusSink extends AbstractWebSink {
           final boolean metricHasPartition = metric.contains("partition_");
           final String[] metricParts = metric.split("/");
           if (metricHasPartition && metricParts.length == 3) {
-            metricName = String.format("%s_%s", metricParts[0], metricParts[3]);
-            metricTopicName = metricParts[1];
-            metricPartitionId = metricParts[1].split("_")[1];
+            metricName = format("%s_%s", metricParts[0], metricParts[3]);
+            labelNames.add("topic"); labelValues.add(metricParts[1]);
+            labelNames.add("partition"); labelValues.add(metricParts[1].split("_")[1]);
           } else if (metricParts.length == 2) {
-            metricName = String.format("%s_%s", metricParts[0], metricParts[2]);
-            metricTopicName = metricParts[1];
+            metricName = format("%s_%s", metricParts[0], metricParts[2]);
+            labelNames.add("topic"); labelValues.add(metricParts[1]);
           } else {
             metricName = metric;
           }
         } else {
-          metricName = metric;
-        }
-
-        String name = sanitizeMetricName(metric);
-        for (Rule rule : rules) {
-          Matcher matcher = null;
-          if (rule.pattern != null) {
-            matcher = rule.pattern.matcher(metric);
-            if (!matcher.matches()) {
-              continue;
+          String name = sanitizeMetricName(metric);
+          for (Rule rule : rules) {
+            Matcher matcher = null;
+            if (rule.pattern != null) {
+              matcher = rule.pattern.matcher(metric);
+              if (!matcher.matches()) {
+                continue;
+              }
             }
-          }
 
-          // If there's no name provided, use default export format.
-          if (rule.name == null || rule.name.isEmpty()) {
-            // nothing
-          } else {
-            // Matcher is set below here due to validation in the constructor.
-            name = sanitizeMetricName(matcher.replaceAll(rule.name));
-            if (name.isEmpty()) {
-              return;
+            // If there's no name provided, use default export format.
+            if (rule.name == null || rule.name.isEmpty()) {
+              // nothing
+            } else {
+              // Matcher is set below here due to validation in the constructor.
+              name = sanitizeMetricName(matcher.replaceAll(rule.name));
+              if (name.isEmpty()) {
+                return;
+              }
             }
-          }
-          name = name.toLowerCase();
-          if (rule.labelNames != null) {
-            for (int i = 0; i < rule.labelNames.size(); i++) {
-              final String unsafeLabelName = rule.labelNames.get(i);
-              final String labelValReplacement = rule.labelValues.get(i);
-              try {
-                String labelName = sanitizeMetricName(matcher.replaceAll(unsafeLabelName));
-                String labelValue = matcher.replaceAll(labelValReplacement);
-                labelName = labelName.toLowerCase();
-                if (!labelName.isEmpty() && !labelValue.isEmpty()) {
-                  labelNames.add(labelName);
-                  labelValues.add(labelValue);
+            name = name.toLowerCase();
+            if (rule.labelNames != null) {
+              for (int i = 0; i < rule.labelNames.size(); i++) {
+                final String unsafeLabelName = rule.labelNames.get(i);
+                final String labelValReplacement = rule.labelValues.get(i);
+                try {
+                  String labelName = sanitizeMetricName(matcher.replaceAll(unsafeLabelName));
+                  String labelValue = matcher.replaceAll(labelValReplacement);
+                  labelName = labelName.toLowerCase();
+                  if (!labelName.isEmpty() && !labelValue.isEmpty()) {
+                    labelNames.add(labelName);
+                    labelValues.add(labelValue);
+                  }
+                } catch (Exception ex) {
+                  LOG.warning(format("Matcher '%s' unable to use: '%s' value: '%s'",
+                      matcher, unsafeLabelName, labelValReplacement));
                 }
-              } catch (Exception ex) {
-                LOG.warning(format("Matcher '%s' unable to use: '%s' value: '%s'",
-                            matcher, unsafeLabelName, labelValReplacement));
               }
             }
           }
-
-          // Add to samples.
-          LOG.fine("add metric sample: " + name + " " + labelNames + " " + labelValues + " " + value.doubleValue());
-          addSample(new MetricFamilySamples.Sample(name, labelNames, labelValues, value.doubleValue()), rule.type, help);
-          return;
+          metricName = name;
         }
 
-
-        String exportedMetricName = String.format("%s_%s", HERON_PREFIX,
-            metricName.replaceAll("[0-9]+", "")
-                .replace("__", "").toLowerCase());
+        // TODO Type, Help
+        String exportedMetricName = format("%s_%s", HERON_PREFIX,
+            metricName
+                .replaceAll("[0-9]+", "")
+                .replace("__", "")
+                .toLowerCase());
         sb.append(sanitizeMetricName(exportedMetricName))
-            .append("{")
-            .append("topology=\"").append(topology).append("\",")
-            .append("component=\"").append(component).append("\",")
-            .append("instance_id=\"").append(instance).append("\"");
-
-        if (clusterRoleEnv != null) {
-          sb.append(",cluster_role_env=\"").append(clusterRoleEnv).append("\"");
+            .append("{");
+        for (int i = 0; i < labelNames.size(); i++) {
+          // Add labels
+          sb.append(format("%s=\"%s\",", labelNames.get(i), labelValues.get(i)));
         }
-
-        if (componentType != null) {
-          sb.append(",component_type=\"").append(componentType).append("\"");
-        }
-
-        if (metricInstanceId != null) {
-          sb.append(",metric_instance_id=\"").append(metricInstanceId).append("\"");
-        }
-
-        if (metricTopicName != null) {
-          sb.append(",topic=\"").append(metricTopicName).append("\"");
-        }
-
-        if (metricPartitionId != null) {
-          sb.append(",partition=\"").append(metricPartitionId).append("\"");
-        }
-
         sb.append("} ")
             .append(Prometheus.doubleToGoString(value))
             .append(" ").append(currentTimeMillis())
