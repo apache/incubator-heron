@@ -33,7 +33,7 @@ def _genproto_impl(ctx):
 
   if ctx.attr.gen_java:
     if ctx.outputs.java_src.path.endswith(".srcjar"):
-      srcjar = ctx.new_file(ctx.outputs.java_src.basename[:-6] + "jar")
+      srcjar = ctx.actions.declare_file(ctx.outputs.java_src.basename[:-6] + "jar")
     else:
       srcjar = ctx.outputs.java_src
     outputs += [srcjar]
@@ -43,7 +43,7 @@ def _genproto_impl(ctx):
     outputs += [ctx.outputs.py_src]
     arguments += ["--python_out=" + ctx.configuration.genfiles_dir.path]
 
-  ctx.action(
+  ctx.actions.run(
       mnemonic = "GenProto",
       inputs = inputs,
       outputs = outputs,
@@ -53,7 +53,7 @@ def _genproto_impl(ctx):
   # This is required because protoc only understands .jar extensions, but Bazel
   # requires source JAR files end in .srcjar.
   if ctx.attr.gen_java and srcjar != ctx.outputs.java_src:
-    ctx.action(
+    ctx.actions.run(
         mnemonic = "FixProtoSrcJar",
         inputs = [srcjar],
         outputs = [ctx.outputs.java_src],
@@ -70,7 +70,7 @@ def _genproto_impl(ctx):
 _genproto_attrs = {
     "src": attr.label(
         allow_files = FileType([".proto"]),
-        single_file = True,
+        allow_single_file = True,
     ),
     "deps": attr.label_list(
         allow_files = False,
@@ -88,18 +88,18 @@ _genproto_attrs = {
 def _genproto_outputs(attrs):
   outputs = {}
   if attrs.gen_cc:
-    outputs += {
-        "cc_hdr": "%{src}.pb.h",
-        "cc_src": "%{src}.pb.cc"
-    }
+    outputs += dict(
+        "cc_hdr"= "%{src}.pb.h",
+        "cc_src"= "%{src}.pb.cc"
+    )
   if attrs.gen_java:
-    outputs += {
-        "java_src": "%{src}.srcjar",
-    }
+    outputs += dict(
+        "java_src"= "%{src}.srcjar",
+    )
   if attrs.gen_py:
-    outputs += {
-        "py_src": "%{src}_pb2.py"
-    }
+    outputs += dict(
+        "py_src"= "%{src}_pb2.py"
+    )
   return outputs
 
 genproto = rule(
