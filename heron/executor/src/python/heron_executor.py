@@ -1167,7 +1167,7 @@ def setup(executor):
   sid = os.getsid(pid)
 
   # POSIX prohibits the change of the process group ID of a session leader
-  if pid <> sid:
+  if pid != sid:
     Log.info('Set up process group; executor becomes leader')
     os.setpgrp() # create new process group, become its leader
 
