@@ -25,6 +25,7 @@ genrule(
         "export INSTALL_DIR=$$(pwd)/$(@D)",
         "export TMP_DIR=$$(mktemp -d -t zookeeper.XXXXX)",
         "export CXXFLAGS=-Wno-error",
+        "export CFLAGS=-Wno-error",
         "mkdir -p $$TMP_DIR",
         "cp -R $$(pwd)/external/org_apache_zookeeper/* $$TMP_DIR",
         "cd $$TMP_DIR/zookeeper-client/zookeeper-client-c",
