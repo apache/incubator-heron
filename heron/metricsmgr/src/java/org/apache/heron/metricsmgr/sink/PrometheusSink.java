@@ -75,7 +75,7 @@ public class PrometheusSink extends AbstractWebSink {
     super();
   }
 
-  private static enum Type {
+  private enum Type {
     COUNTER,
     GAUGE,
     SUMMARY,
@@ -84,15 +84,15 @@ public class PrometheusSink extends AbstractWebSink {
   }
 
   private static class Rule {
-    Pattern pattern;
-    String name;
-    String value;
-    Double valueFactor = 1.0;
-    String help;
-    boolean attrNameSnakeCase;
-    Type type = Type.UNTYPED;
-    ArrayList<String> labelNames;
-    ArrayList<String> labelValues;
+    public Pattern pattern;
+    public String name;
+    public String value;
+    public Double valueFactor = 1.0;
+    public String help;
+    public boolean attrNameSnakeCase;
+    public Type type = Type.UNTYPED;
+    public ArrayList<String> labelNames;
+    public ArrayList<String> labelValues;
   }
 
   @Override
@@ -104,16 +104,17 @@ public class PrometheusSink extends AbstractWebSink {
     environment = context.getEnvironment();
 
     if (configuration.containsKey("rules")) {
-      List<Map<String,Object>> configRules = (List<Map<String,Object>>) configuration.get("rules");
+      List<Map<String, Object>> configRules = (List<Map<String, Object>>)
+          configuration.get("rules");
       for (Map<String, Object> ruleObject : configRules) {
         Map<String, Object> yamlRule = ruleObject;
         Rule rule = new Rule();
         rules.add(rule);
         if (yamlRule.containsKey("pattern")) {
-          rule.pattern = Pattern.compile("^.*(?:" + (String)yamlRule.get("pattern") + ").*$");
+          rule.pattern = Pattern.compile("^.*(?:" + (String) yamlRule.get("pattern") + ").*$");
         }
         if (yamlRule.containsKey("name")) {
-          rule.name = (String)yamlRule.get("name");
+          rule.name = (String) yamlRule.get("name");
         }
         if (yamlRule.containsKey("value")) {
           rule.value = String.valueOf(yamlRule.get("value"));
@@ -127,27 +128,29 @@ public class PrometheusSink extends AbstractWebSink {
           }
         }
         if (yamlRule.containsKey("attrNameSnakeCase")) {
-          rule.attrNameSnakeCase = (Boolean)yamlRule.get("attrNameSnakeCase");
+          rule.attrNameSnakeCase = (Boolean) yamlRule.get("attrNameSnakeCase");
         }
         if (yamlRule.containsKey("type")) {
-          rule.type = Type.valueOf((String)yamlRule.get("type"));
+          rule.type = Type.valueOf((String) yamlRule.get("type"));
         }
         if (yamlRule.containsKey("help")) {
-          rule.help = (String)yamlRule.get("help");
+          rule.help = (String) yamlRule.get("help");
         }
         if (yamlRule.containsKey("labels")) {
-          TreeMap labels = new TreeMap((Map<String, Object>)yamlRule.get("labels"));
+          TreeMap labels = new TreeMap((Map<String, Object>) yamlRule.get("labels"));
           rule.labelNames = new ArrayList<String>();
           rule.labelValues = new ArrayList<String>();
-          for (Map.Entry<String, Object> entry : (Set<Map.Entry<String, Object>>)labels.entrySet()) {
+          for (Map.Entry<String, Object> entry : (Set<Map.Entry<String, Object>>) labels
+              .entrySet()) {
             rule.labelNames.add(entry.getKey());
-            rule.labelValues.add((String)entry.getValue());
+            rule.labelValues.add((String) entry.getValue());
           }
         }
 
         // Validation.
         if ((rule.labelNames != null || rule.help != null) && rule.name == null) {
-          throw new IllegalArgumentException("Must provide name, if help or labels are given: " + yamlRule);
+          throw new IllegalArgumentException("Must provide name, if help or labels are given: "
+              + yamlRule);
         }
         if (rule.name != null && rule.pattern == null) {
           throw new IllegalArgumentException("Must provide pattern, if name is given: " + yamlRule);
@@ -184,16 +187,21 @@ public class PrometheusSink extends AbstractWebSink {
       final String clusterRoleEnv = hasClusterRoleEnvironment(c, r, e)
           ? String.format("%s/%s/%s", c, r, e) : null;
 
-      labelNames.add("topology"); labelValues.add(topology);
-      labelNames.add("component"); labelValues.add(component);
-      labelNames.add("instance_id"); labelValues.add(instance);
+      labelNames.add("topology");
+      labelValues.add(topology);
+      labelNames.add("component");
+      labelValues.add(component);
+      labelNames.add("instance_id");
+      labelValues.add(instance);
 
       if (clusterRoleEnv != null) {
-        labelNames.add("cluster_role_env"); labelValues.add(clusterRoleEnv);
+        labelNames.add("cluster_role_env");
+        labelValues.add(clusterRoleEnv);
       }
 
       if (componentType != null) {
-        labelNames.add("component_type"); labelValues.add(componentType);
+        labelNames.add("component_type");
+        labelValues.add(componentType);
       }
 
       sourceMetrics.forEach((String metric, Double value) -> {
@@ -209,10 +217,12 @@ public class PrometheusSink extends AbstractWebSink {
           final String[] metricParts = metric.split("/");
           if (metricHasInstanceId && metricParts.length == 3) {
             metricName = format("%s_%s", metricParts[0], metricParts[2]);
-            labelNames.add("metric_instance_id"); labelValues.add(metricParts[1]);
+            labelNames.add("metric_instance_id");
+            labelValues.add(metricParts[1]);
           } else if (metricHasInstanceId && metricParts.length == 2) {
             metricName = metricParts[0];
-            labelNames.add("metric_instance_id"); labelValues.add(metricParts[1]);
+            labelNames.add("metric_instance_id");
+            labelValues.add(metricParts[1]);
           } else {
             metricName = metric;
           }
@@ -223,11 +233,14 @@ public class PrometheusSink extends AbstractWebSink {
           final String[] metricParts = metric.split("/");
           if (metricHasPartition && metricParts.length == 3) {
             metricName = format("%s_%s", metricParts[0], metricParts[3]);
-            labelNames.add("topic"); labelValues.add(metricParts[1]);
-            labelNames.add("partition"); labelValues.add(metricParts[1].split("_")[1]);
+            labelNames.add("topic");
+            labelValues.add(metricParts[1]);
+            labelNames.add("partition");
+            labelValues.add(metricParts[1].split("_")[1]);
           } else if (metricParts.length == 2) {
             metricName = format("%s_%s", metricParts[0], metricParts[2]);
-            labelNames.add("topic"); labelValues.add(metricParts[1]);
+            labelNames.add("topic");
+            labelValues.add(metricParts[1]);
           } else {
             metricName = metric;
           }
@@ -257,17 +270,12 @@ public class PrometheusSink extends AbstractWebSink {
               for (int i = 0; i < rule.labelNames.size(); i++) {
                 final String unsafeLabelName = rule.labelNames.get(i);
                 final String labelValReplacement = rule.labelValues.get(i);
-                try {
-                  String labelName = sanitizeMetricName(matcher.replaceAll(unsafeLabelName));
-                  String labelValue = matcher.replaceAll(labelValReplacement);
-                  labelName = labelName.toLowerCase();
-                  if (!labelName.isEmpty() && !labelValue.isEmpty()) {
-                    labelNames.add(labelName);
-                    labelValues.add(labelValue);
-                  }
-                } catch (Exception ex) {
-                  LOG.warning(format("Matcher '%s' unable to use: '%s' value: '%s'",
-                      matcher, unsafeLabelName, labelValReplacement));
+                String labelName = sanitizeMetricName(matcher.replaceAll(unsafeLabelName));
+                String labelValue = matcher.replaceAll(labelValReplacement);
+                labelName = labelName.toLowerCase();
+                if (!labelName.isEmpty() && !labelValue.isEmpty()) {
+                  labelNames.add(labelName);
+                  labelValues.add(labelValue);
                 }
               }
             }
@@ -303,7 +311,8 @@ public class PrometheusSink extends AbstractWebSink {
     }
     char firstChar = attrName.subSequence(0, 1).charAt(0);
     boolean prevCharIsUpperCaseOrUnderscore = Character.isUpperCase(firstChar) || firstChar == '_';
-    StringBuilder resultBuilder = new StringBuilder(attrName.length()).append(Character.toLowerCase(firstChar));
+    StringBuilder resultBuilder = new StringBuilder(attrName.length())
+        .append(Character.toLowerCase(firstChar));
     for (char attrChar : attrName.substring(1).toCharArray()) {
       boolean charIsUpperCase = Character.isUpperCase(attrChar);
       if (!prevCharIsUpperCaseOrUnderscore && charIsUpperCase) {
