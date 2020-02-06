@@ -26,7 +26,7 @@ pex_library(
     srcs = glob(["**/*.py"]),
     reqs = [
         "protobuf==3.8.0",
-        "setuptools==18.0.1",
+        "setuptools==18.8.1",
     ],
     deps = [
         ":proto_ckptmgr_py",
@@ -49,7 +49,7 @@ pex_binary(
     srcs = glob(["**/*.py"]),
     reqs = [
         "protobuf==3.8.0",
-        "setuptools==18.0.1",
+        "setuptools==18.8.1",
     ],
     deps = [
         ":proto_ckptmgr_py",
