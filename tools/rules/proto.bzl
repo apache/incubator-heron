@@ -23,7 +23,7 @@ def proto_package_impl(ctx):
 genproto_base_attrs = {
     "src": attr.label(
         allow_files = FileType([".proto"]),
-        single_file = True,
+        allow_single_file = True,
     ),
     "deps": attr.label_list(
         allow_files = False,
@@ -40,7 +40,7 @@ def genproto_java_impl(ctx):
   src = ctx.file.src
   protoc = ctx.file._protoc
 
-  srcjar = ctx.new_file(ctx.configuration.genfiles_dir, ctx.label.name + ".srcjar")
+  srcjar = ctx.actions.declare_file(ctx.configuration.genfiles_dir, ctx.label.name + ".srcjar")
   java_srcs = srcjar.path + ".srcs"
 
   inputs = [src, protoc]
@@ -52,7 +52,7 @@ def genproto_java_impl(ctx):
       "jar cMf " + srcjar.path + " -C " + java_srcs + " .",
       "rm -rf " + java_srcs,
   ])
-  ctx.action(
+  ctx.actions.run(
       inputs = inputs,
       outputs = [srcjar],
       mnemonic = 'ProtocJava',
@@ -63,13 +63,13 @@ def genproto_java_impl(ctx):
 
 genproto_java = rule(
     genproto_java_impl,
-    attrs = genproto_base_attrs + {
-        "_protoc": attr.label(
+    attrs = dict(genproto_base_attrs,
+        "_protoc" = attr.label(
             default = Label("//third_party/protobuf:protoc"),
             allow_files = True,
             single_file = True,
-        ),
-    },
+        )
+    )
 )
 
 def proto_library(name, src=None, includes=[], deps=[], visibility=None,
