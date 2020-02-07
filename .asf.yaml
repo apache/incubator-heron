@@ -24,7 +24,8 @@ publish:
 
 github:
   description: "Apache Heron (Incubating) is a realtime, distributed, fault-tolerant stream processing engine from Twitter"
-  ghp_branch:  gh-pages
+  ghp_branch:  master
+  ghp_path: ~
   homepage: https://heron.incubator.apache.org/
   labels:
     - heron
