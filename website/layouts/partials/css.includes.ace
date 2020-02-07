@@ -1,3 +1,0 @@
-{{- $cssFilename := cond (eq (getenv "ENV") "development") (index .Site.Data.assetHashes "style.css") "style.css" }}
-link rel=stylesheet href=/css/font-awesome.min.css
-link rel=stylesheet href=/css/{{ $cssFilename }}
