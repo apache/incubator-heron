@@ -1,4 +1,0 @@
-meta property=og:site_name content={{.Site.Title}}
-meta property=og:url content={{.Site.BaseURL}}
-meta property=og:description content={{.Site.Params.description}}
-meta name=twitter:description content={{.Site.Params.description}}
