@@ -20,6 +20,9 @@
 
 ## To compile source, into Heron release artifacts, using a docker container:
 Make sure enough resources are configured in Docker settings: 2 CPU, 4G RAM and 128G disk.
+Paramters:
+- platform: ubuntu14.04/ubuntu16.04/ubuntu18.04/debian9/debian10/centos7
+
 ```
 ./docker/scripts/build-artifacts.sh <platform> <version_string> [source-tarball] <output-directory>
 # e.g.  ./docker/scripts/build-artifacts.sh ubuntu14.04 testbuild ~/heron-release
