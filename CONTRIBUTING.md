@@ -19,7 +19,7 @@
 
 ## Contributing to Heron
 
-Discussion about Heron happens on GitHub and over mailing list.
+Discussion about Heron happens on GitHub and over the mailing list.
 
 * GitHub: [apache/incubator-heron](https://github.com/apache/incubator-heron)
 * Heron User Group: [user@heron.incubator.apache.org](https://mail-archives.apache.org/mod_mbox/heron-user/)
@@ -34,6 +34,7 @@ of Heron:
 
 * [Heron Architecture](https://heron.incubator.apache.org/docs/heron-architecture/)
 * [Compiling Heron](https://heron.incubator.apache.org/docs/compiling-overview/)
+* [Heron Codebase](https://heron.incubator.apache.org/docs/compiling-code-organization/)
 
 Heron includes a script to bootstrap an IntelliJ IDEA project. The project includes support for Heron
 code styles and copyright headers. 
@@ -52,7 +53,7 @@ $ ./scripts/setup-eclipse.sh
 In general, contributions that fix bugs or add features (as opposed to stylistic, refactoring, or
 "cleanup" changes) are preferred. If you're looking for places to contribute, issues with label
 [help-wanted](https://github.com/apache/incubator-heron/issues?q=is%3Aopen+is%3Aissue+label%3Ahelp-wanted)
-are good candidates. Please check with [mailing list](https://mail-archives.apache.org/mod_mbox/heron-dev/)
+are good candidates. Please check with the [mailing list](https://mail-archives.apache.org/mod_mbox/heron-dev/)
 if your patch involves lots of changes.
 
 **If you have any question or issues about troubleshooting**,
@@ -71,11 +72,3 @@ Describe clearly in your pull request the changes made. Verify that Travis CI pa
 4. Complete a code review by addressing the reviewer's comments.
 
 5. A project committer will merge the patch to the master branch.
-
-<!--
-TODO - post commit process
-TODO: links to sourcecode and dev and user groups
--->
-
-
-Next: Review the [Heron Codebase](https://heron.incubator.apache.org/docs/compiling-code-organization/)
