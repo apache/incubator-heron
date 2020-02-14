@@ -21,6 +21,10 @@ module.exports = {
         apacheId: 'cckellogg',
       },
       {
+        name: 'Dmitry Rusakov',
+        apacheId: 'dnrusakov',
+      },
+      {
         name: 'Eren Avsarogullari',
         apacheId: 'erenavsar',
       },
@@ -53,6 +57,10 @@ module.exports = {
         apacheId: 'maosongfu',
       },
       {
+        name: "Nick Nezis",
+        apacheId: "nicknezis"
+      },
+      {
         name: 'Neng Lu',
         apacheId: 'nlu90',
       },
@@ -67,6 +75,10 @@ module.exports = {
       {
         name: 'P. Taylor Goetz',
         apacheId: 'ptgoetz',
+      },
+      {
+        name: 'Simon Weng',
+        apacheId: 'simingweng',
       },
       {
         name: 'Sree Vaddi',
