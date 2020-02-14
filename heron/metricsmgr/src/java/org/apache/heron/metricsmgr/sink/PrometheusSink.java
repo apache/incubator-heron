@@ -305,25 +305,6 @@ public class PrometheusSink extends AbstractWebSink {
     return sb.toString().getBytes();
   }
 
-  static String toSnakeAndLowerCase(String attrName) {
-    if (attrName == null || attrName.isEmpty()) {
-      return attrName;
-    }
-    char firstChar = attrName.subSequence(0, 1).charAt(0);
-    boolean prevCharIsUpperCaseOrUnderscore = Character.isUpperCase(firstChar) || firstChar == '_';
-    StringBuilder resultBuilder = new StringBuilder(attrName.length())
-        .append(Character.toLowerCase(firstChar));
-    for (char attrChar : attrName.substring(1).toCharArray()) {
-      boolean charIsUpperCase = Character.isUpperCase(attrChar);
-      if (!prevCharIsUpperCaseOrUnderscore && charIsUpperCase) {
-        resultBuilder.append("_");
-      }
-      resultBuilder.append(Character.toLowerCase(attrChar));
-      prevCharIsUpperCaseOrUnderscore = charIsUpperCase || attrChar == '_';
-    }
-    return resultBuilder.toString();
-  }
-
   @Override
   public void processRecord(MetricsRecord record) {
     final String[] sources = MetricsUtil.splitRecordSource(record);
