@@ -19,7 +19,7 @@ FROM ubuntu:18.04
 
 RUN apt-get update
 RUN apt-get -y install \
-    unzip software-properties-common curl supervisor openjdk-8-jdk-headless
+    unzip software-properties-common curl python3 supervisor openjdk-8-jdk-headless
 
 ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64
 RUN update-ca-certificates -f
