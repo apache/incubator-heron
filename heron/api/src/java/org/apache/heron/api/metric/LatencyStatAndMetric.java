@@ -19,6 +19,7 @@
 
 package org.apache.heron.api.metric;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
@@ -225,7 +226,7 @@ public class LatencyStatAndMetric implements IMetric<Double> {
   }
 
   synchronized Map<String, Double> getTimeLatAvg(long now) {
-    Map<String, Double> ret = new ConcurrentHashMap<>();
+    Map<String, Double> ret = new HashMap<>();
     long lat;
     long count;
     synchronized (currentLock) {
