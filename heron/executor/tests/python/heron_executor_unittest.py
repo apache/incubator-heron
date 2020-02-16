@@ -72,7 +72,7 @@ class MockExecutor(HeronExecutor):
 
   # pylint: disable=no-self-use
   def _load_logging_dir(self, heron_internals_config_file):
-    return "fake_dir"
+    return "log-files"
 
   def _run_process(self, name, cmd, env=None):
     popen = MockPOpen()
@@ -82,12 +82,15 @@ class MockExecutor(HeronExecutor):
   def _get_jvm_version(self):
     return "1.8.y.x"
 
+  def _get_java_major_version(self):
+      return int(self._get_jvm_version().split(".")[0])
+
 class HeronExecutorTest(unittest.TestCase):
   """Unittest for Heron Executor"""
 
   def get_expected_shell_command(container_id):
     return 'heron_shell_binary --port=shell-port ' \
-           '--log_file_prefix=fake_dir/heron-shell-%s.log ' \
+           '--log_file_prefix=log-files/heron-shell-%s.log ' \
            '--secret=topid' % container_id
 
   def build_packing_plan(self, instance_distribution):
@@ -111,7 +114,7 @@ class HeronExecutorTest(unittest.TestCase):
            "-XX:+PrintGCCause -XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=5 " \
            "-XX:GCLogFileSize=100M -XX:+PrintPromotionFailure -XX:+PrintTenuringDistribution " \
            "-XX:+PrintHeapAtGC -XX:+HeapDumpOnOutOfMemoryError -XX:ParallelGCThreads=4 " \
-           "-Xloggc:log-files/gc.metricsmgr-%d.log" \
+           "-Xloggc:log-files/gc.metricsmgr-%d.log " \
            "-cp metricsmgr_classpath org.apache.heron.metricsmgr.MetricsManager " \
            "--id=metricsmgr-%d --port=metricsmgr_port " \
            "--topology=topname --cluster=cluster --role=role --environment=environ --topology-id=topid " \
@@ -138,11 +141,11 @@ class HeronExecutorTest(unittest.TestCase):
   def get_expected_healthmgr_command():
       return "heron_java_home/bin/java -Xmx1024M -XX:+PrintCommandLineFlags " \
              "-Djava.net.preferIPv4Stack=true -verbosegc " \
-             "-XX:+UseConcMarkSweepGC -XX:+CMSScavengeBeforeRemark -XX:TargetSurvivorRatio=90" \
-             "-XX:+PrintGCDetails -XX:+PrintGCTimeStamps -XX:+PrintGCDateStamps" \
-             "-XX:+PrintGCCause -XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=5" \
-             "-XX:GCLogFileSize=100M -XX:+PrintPromotionFailure -XX:+PrintTenuringDistribution" \
-             "-XX:+PrintHeapAtGC -XX:+HeapDumpOnOutOfMemoryError -XX:ParallelGCThreads=4" \
+             "-XX:+UseConcMarkSweepGC -XX:+CMSScavengeBeforeRemark -XX:TargetSurvivorRatio=90 " \
+             "-XX:+PrintGCDetails -XX:+PrintGCTimeStamps -XX:+PrintGCDateStamps " \
+             "-XX:+PrintGCCause -XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=5 " \
+             "-XX:GCLogFileSize=100M -XX:+PrintPromotionFailure -XX:+PrintTenuringDistribution " \
+             "-XX:+PrintHeapAtGC -XX:+HeapDumpOnOutOfMemoryError -XX:ParallelGCThreads=4 " \
              "-Xloggc:log-files/gc.healthmgr.log " \
              "-cp scheduler_classpath:healthmgr_classpath " \
              "org.apache.heron.healthmgr.HealthManager --cluster cluster --role role " \
@@ -151,14 +154,13 @@ class HeronExecutorTest(unittest.TestCase):
   def get_expected_instance_command(component_name, instance_id, container_id):
     instance_name = "container_%d_%s_%d" % (container_id, component_name, instance_id)
     return "heron_java_home/bin/java -Xmx320M -Xms320M -Xmn160M -XX:MaxMetaspaceSize=128M " \
-           "-XX:MetaspaceSize=128M -XX:ReservedCodeCacheSize=64M -XX:+CMSScavengeBeforeRemark " \
-           "-XX:TargetSurvivorRatio=90 -XX:+PrintCommandLineFlags " \
+           "-XX:MetaspaceSize=128M -XX:ReservedCodeCacheSize=64M -XX:+PrintCommandLineFlags " \
            "-Djava.net.preferIPv4Stack=true -verbosegc " \
-           "-XX:+UseConcMarkSweepGC -XX:+CMSScavengeBeforeRemark -XX:TargetSurvivorRatio=90" \
-           "-XX:+PrintGCDetails -XX:+PrintGCTimeStamps -XX:+PrintGCDateStamps" \
-           "-XX:+PrintGCCause -XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=5" \
-           "-XX:GCLogFileSize=100M -XX:+PrintPromotionFailure -XX:+PrintTenuringDistribution" \
-           "-XX:+PrintHeapAtGC -XX:+HeapDumpOnOutOfMemoryError -XX:ParallelGCThreads=4" \
+           "-XX:+UseConcMarkSweepGC -XX:+CMSScavengeBeforeRemark -XX:TargetSurvivorRatio=90 " \
+           "-XX:+PrintGCDetails -XX:+PrintGCTimeStamps -XX:+PrintGCDateStamps " \
+           "-XX:+PrintGCCause -XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=5 " \
+           "-XX:GCLogFileSize=100M -XX:+PrintPromotionFailure -XX:+PrintTenuringDistribution " \
+           "-XX:+PrintHeapAtGC -XX:+HeapDumpOnOutOfMemoryError -XX:ParallelGCThreads=4 " \
            "-Xloggc:log-files/gc.%s.log " \
            "-cp instance_classpath:classpath -XX:+HeapDumpOnOutOfMemoryError " \
            "org.apache.heron.instance.HeronInstance -topology_name topname -topology_id topid -instance_id %s -component_name %s -task_id %d -component_index 0 -stmgr_id stmgr-%d " \
