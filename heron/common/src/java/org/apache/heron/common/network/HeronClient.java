@@ -24,9 +24,9 @@ import java.net.InetSocketAddress;
 import java.nio.channels.SelectableChannel;
 import java.nio.channels.SocketChannel;
 import java.time.Duration;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -194,7 +194,7 @@ public abstract class HeronClient implements ISelectHandler {
                           Duration timeout) {
     // Pack it as a no-timeout request and send it!
     final REQID rid = REQID.generate();
-    contextMap.put(rid, context);
+    contextMap.put(rid, Objects.nonNull(context) ? context: new Object());
     responseMessageMap.put(rid, responseBuilder);
 
     // Add timeout for this request if necessary
@@ -403,15 +403,15 @@ public abstract class HeronClient implements ISelectHandler {
   // Following protected methods are just used for testing
   /////////////////////////////////////////////////////////
   protected Map<String, Message.Builder> getMessageMap() {
-    return new HashMap<String, Message.Builder>(messageMap);
+    return new ConcurrentHashMap<String, Message.Builder>(messageMap);
   }
 
   protected Map<REQID, Message.Builder> getResponseMessageMap() {
-    return new HashMap<REQID, Message.Builder>(responseMessageMap);
+    return new ConcurrentHashMap<REQID, Message.Builder>(responseMessageMap);
   }
 
   protected Map<REQID, Object> getContextMap() {
-    return new HashMap<REQID, Object>(contextMap);
+    return new ConcurrentHashMap<>(contextMap);
   }
 
   protected SocketChannelHelper getSocketChannelHelper() {
