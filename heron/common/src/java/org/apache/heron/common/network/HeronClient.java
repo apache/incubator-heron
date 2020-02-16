@@ -58,7 +58,7 @@ import org.apache.heron.common.basics.NIOLooper;
  */
 public abstract class HeronClient implements ISelectHandler {
   private static final Logger LOG = Logger.getLogger(HeronClient.class.getName());
-  private static final Object dummy = new Object();
+  private static final Object DUMMY = new Object();
 
   // When we send a request, we need to:
   // record the the context for this particular RID, and prepare the response for that RID
@@ -195,7 +195,7 @@ public abstract class HeronClient implements ISelectHandler {
                           Duration timeout) {
     // Pack it as a no-timeout request and send it!
     final REQID rid = REQID.generate();
-    contextMap.put(rid, Objects.nonNull(context) ? context : dummy); // Fix NPE
+    contextMap.put(rid, Objects.nonNull(context) ? context : DUMMY); // Fix NPE
     responseMessageMap.put(rid, responseBuilder);
 
     // Add timeout for this request if necessary
