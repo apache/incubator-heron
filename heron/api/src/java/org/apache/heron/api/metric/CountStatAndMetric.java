@@ -19,9 +19,9 @@
 
 package org.apache.heron.api.metric;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.TimerTask;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -176,7 +176,7 @@ public class CountStatAndMetric implements IMetric<Long> {
   }
 
   synchronized Map<String, Long> getTimeCounts(long now) {
-    Map<String, Long> ret = new ConcurrentHashMap<>();
+    Map<String, Long> ret = new HashMap<>();
     long value = currentBucket.get();
     long timeSpent = now - bucketStart;
     ret.put("600", readApproximateTime(value, timeSpent, tmTime, tmBuckets, 600 * 1000));

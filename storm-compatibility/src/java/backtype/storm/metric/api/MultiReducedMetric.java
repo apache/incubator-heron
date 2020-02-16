@@ -20,10 +20,11 @@ package backtype.storm.metric.api;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @SuppressWarnings("rawtypes")
 public class MultiReducedMetric implements IMetric {
-  private Map<String, ReducedMetric> value = new HashMap<>();
+  private Map<String, ReducedMetric> value = new ConcurrentHashMap<>();
   private IReducer reducer;
 
   public MultiReducedMetric(IReducer reducer) {
