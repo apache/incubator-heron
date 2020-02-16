@@ -194,7 +194,7 @@ public abstract class HeronClient implements ISelectHandler {
                           Duration timeout) {
     // Pack it as a no-timeout request and send it!
     final REQID rid = REQID.generate();
-    contextMap.put(rid, Objects.nonNull(context) ? context: new Object());
+    contextMap.put(rid, Objects.nonNull(context) ? context : new Object());
     responseMessageMap.put(rid, responseBuilder);
 
     // Add timeout for this request if necessary
