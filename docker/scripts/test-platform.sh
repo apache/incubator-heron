@@ -62,4 +62,15 @@ bazel version
 bazel clean
 
 echo "UnitTest"
-bazel test -c opt --jobs 25 --config=$CONFIG_PLATFORM --test_output=all heron/...
+bazel test -c opt --jobs 25 \
+    --config=$CONFIG_PLATFORM \
+    --test_output=all \
+    --test_summary=detailed \
+    heron/... \
+    heronpy/... \
+    examples/... \
+    storm-compatibility-examples/... \
+    eco-storm-examples/... \
+    eco-heron-examples/... \
+    contrib/...
+
