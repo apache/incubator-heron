@@ -26,6 +26,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.heron.api.Config;
 import org.apache.heron.api.generated.TopologyAPI;
@@ -63,8 +64,8 @@ public class GeneralTopologyContextImpl implements GeneralTopologyContext {
     this.topology = topology;
     this.topologyConfig = new HashMap<>(clusterConfig);
     this.taskToComponentMap = taskToComponentMap;
-    this.inputs = new HashMap<>();
-    this.outputs = new HashMap<>();
+    this.inputs = new ConcurrentHashMap<>();
+    this.outputs = new ConcurrentHashMap<>();
     this.componentsOutputFields = new HashMap<>();
 
     for (int i = 0; i < this.topology.getSpoutsCount(); ++i) {

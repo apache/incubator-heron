@@ -27,6 +27,7 @@ import java.time.Duration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -99,9 +100,9 @@ public abstract class HeronClient implements ISelectHandler {
     socketOptions = options;
 
     isConnected = false;
-    contextMap = new HashMap<REQID, Object>();
-    responseMessageMap = new HashMap<REQID, Message.Builder>();
-    messageMap = new HashMap<String, Message.Builder>();
+    contextMap = new ConcurrentHashMap<REQID, Object>();
+    responseMessageMap = new ConcurrentHashMap<REQID, Message.Builder>();
+    messageMap = new ConcurrentHashMap<String, Message.Builder>();
   }
 
   // Register the protobuf Message's name with protobuf Message

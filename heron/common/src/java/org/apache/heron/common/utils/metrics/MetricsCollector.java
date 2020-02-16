@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
 import org.apache.heron.api.metric.CumulativeCountMetric;
@@ -53,8 +54,8 @@ public class MetricsCollector implements IMetricsRegister {
 
   public MetricsCollector(WakeableLooper runnableToGatherMetrics,
                           Communicator<Metrics.MetricPublisherPublishMessage> queue) {
-    metrics = new HashMap<>();
-    timeBucketToMetricNames = new HashMap<>();
+    metrics = new ConcurrentHashMap<>();
+    timeBucketToMetricNames = new ConcurrentHashMap<>();
     this.queue = queue;
     this.runnableToGatherMetrics = runnableToGatherMetrics;
     metricCollectionCount = new CumulativeCountMetric();
