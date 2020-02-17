@@ -35,10 +35,7 @@ RUN yum -y install \
       libtool \
       make \
       patch \
-      python \
       python-devel \
-      python-setuptools \
-      python3 \
       python3-devel \
       python3-setuptools \
       zip \

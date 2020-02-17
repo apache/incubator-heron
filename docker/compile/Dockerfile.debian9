@@ -30,18 +30,17 @@ RUN apt-get update && apt-get -y install \
       git \
       libtool \
       libtool-bin \
-      python \
-      python2.7-dev \
-      python3 \
+      python-dev \
       python3-dev \
       software-properties-common \
-      python-setuptools \
       python3-setuptools \
       tree \
       zip \
       unzip \
       wget \
       openjdk-11-jdk-headless
+
+ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk-amd64
 
 RUN wget -O /tmp/bazel.sh https://github.com/bazelbuild/bazel/releases/download/$bazelVersion/bazel-$bazelVersion-installer-linux-x86_64.sh \
       && chmod +x /tmp/bazel.sh \

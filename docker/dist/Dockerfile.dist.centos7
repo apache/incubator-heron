@@ -23,7 +23,7 @@ RUN yum -y install unzip; yum clean all
 RUN yum -y install which; yum clean all
 RUN yum -y install curl; yum clean all
 RUN yum -y install nmap-ncat; yum clean all
-RUN yum -y install python-setuptools python3-setuptools; yum clean all
+RUN yum -y install python python3-setuptools; yum clean all
 RUN easy_install supervisor
 RUN echo_supervisord_conf > /etc/supervisord.conf
 
