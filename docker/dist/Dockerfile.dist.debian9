@@ -24,7 +24,8 @@ RUN apt-get -y update && apt-get -y install \
     unzip \
     curl \
     vim \
-    supervisor && \
+    supervisor \
+    openjdk-11-jdk-headless && \
     apt-get clean all && \
     rm -rf /var/lib/apt/lists/*
 

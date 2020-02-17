@@ -26,9 +26,9 @@ RUN apt-get -y update && apt-get -y install \
     curl
 
 RUN add-apt-repository ppa:openjdk-r/ppa && apt-get -y update && \
-    apt-get -y install openjdk-8-jdk
+    apt-get -y install openjdk-11-jdk-headless
 
-ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64
+ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk-amd64
 RUN update-ca-certificates -f
 
 ADD artifacts /heron

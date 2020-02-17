@@ -27,9 +27,9 @@ RUN yum -y install python-setuptools python3-setuptools; yum clean all
 RUN easy_install supervisor
 RUN echo_supervisord_conf > /etc/supervisord.conf
 
-RUN yum -y install java-1.8.0-openjdk java-1.8.0-openjdk-devel; yum clean all
+RUN yum -y install java-11-openjdk java-11-openjdk-devel; yum clean all
 
-ENV JAVA_HOME /usr/lib/jvm/java-1.8.0
+ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk
 
 ADD artifacts /heron
 

@@ -26,9 +26,9 @@ RUN apt-get -y install \
     software-properties-common \
     curl \
     supervisor \
-    openjdk-8-jdk-headless
+    openjdk-11-jdk-headless
 
-ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64
+ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk-amd64
 RUN update-ca-certificates -f
 
 ADD artifacts /heron

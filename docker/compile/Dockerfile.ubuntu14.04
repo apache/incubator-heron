@@ -39,12 +39,13 @@ RUN apt-get update && apt-get -y install \
       python3-dev \
       python-software-properties \
       python-setuptools \
+      python3-setuptools \
       zip \
       unzip \
       wget \
       cmake \
       tree \
-      openjdk-8-jdk-headless
+      openjdk-11-jdk-headless
 
 ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64
 
