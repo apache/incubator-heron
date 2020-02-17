@@ -8,7 +8,7 @@ pex_library(
     ),
     reqs = [
         "pycrypto==2.6.1",
-        "requests==2.21.0",
+        "requests==2.12.3",
         "tornado==4.0.2",
     ],
     deps = [
