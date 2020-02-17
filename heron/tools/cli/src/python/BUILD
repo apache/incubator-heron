@@ -13,7 +13,7 @@ pex_library(
     reqs = [
       "PyYAML==3.13",
       "enum34==1.1.6",
-      "requests==2.12.3",
+      "requests==2.21.0",
       "netifaces==0.10.6",
       "future==0.18.2"
     ],
