@@ -57,7 +57,7 @@ import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 @RunWith(PowerMockRunner.class)
-@PowerMockIgnore("jdk.internal.reflect.*")
+@PowerMockIgnore({"jdk.internal.reflect.*", "jdk.internal.loader.*"})
 public class RuntimeManagerMainTest {
   private static final String TOPOLOGY_NAME = "topologyName";
   private static final String TOPOLOGY_ID = "topologyId";
