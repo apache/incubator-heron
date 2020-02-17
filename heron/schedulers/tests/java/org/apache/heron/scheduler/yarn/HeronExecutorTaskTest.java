@@ -48,7 +48,7 @@ import org.apache.heron.spi.utils.ShellUtils;
 import org.apache.reef.runtime.common.files.REEFFileNames;
 
 @RunWith(PowerMockRunner.class)
-@PowerMockIgnore("javax.swing.*")
+@PowerMockIgnore({"javax.swing.*", "jdk.internal.reflect.*"})
 public class HeronExecutorTaskTest {
   @Test
   public void providesConfigsNeededForExecutorCmd() throws Exception {
