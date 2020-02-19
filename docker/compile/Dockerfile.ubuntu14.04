@@ -33,18 +33,18 @@ RUN apt-get update && apt-get -y install \
       libssl-dev \
       git \
       libtool \
-      python \
-      python2.7-dev \
-      python-software-properties \
-      python-setuptools \
+      python-dev \
+      python3-dev \
+      python3-software-properties \
+      python3-setuptools \
       zip \
       unzip \
       wget \
       cmake \
       tree \
-      openjdk-8-jdk-headless
+      openjdk-11-jdk-headless
 
-ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64
+ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk-amd64
 
 RUN wget -O /tmp/bazel.sh https://github.com/bazelbuild/bazel/releases/download/$bazelVersion/bazel-$bazelVersion-installer-linux-x86_64.sh \
       && chmod +x /tmp/bazel.sh \
