@@ -169,7 +169,7 @@ RUN apt-get update && apt-get -y install \
          wget
 ```
 
-### Step 4 --- An installation script for Java 8 and a `JAVA_HOME` environment variable
+### Step 4 --- An installation script for Java 11 and a `JAVA_HOME` environment variable
 
 Here's an example:
 
@@ -178,11 +178,10 @@ RUN \
      echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true | debconf-set-selections && \
      add-apt-repository -y ppa:webupd8team/java && \
      apt-get update && \
-     apt-get install -y oracle-java8-installer && \
-     rm -rf /var/lib/apt/lists/* && \
-     rm -rf /var/cache/oracle-jdk8-installer
+     apt-get install -y openjdk-11-jdk-headless && \
+     rm -rf /var/lib/apt/lists/*
 
-ENV JAVA_HOME /usr/lib/jvm/java-8-oracle
+ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk-amd64
 ```
 
 #### Step 5 - An installation script for [Bazel](http://bazel.io/) version {{% bazelVersion %}} or above.

@@ -35,12 +35,11 @@ The primary programming languages for Heron are C++, Java, and Python.
 [Topology Master](heron-architecture#topology-master), and
 [Stream Manager](heron-architecture#stream-manager).
 
-* **Java 8** is used primarily for Heron's [topology
+* **Java 11** is used primarily for Heron's [topology
 API](heron-topology-concepts), and [Heron Instance](heron-architecture#heron-instance).
 It is currently the only language in which topologies can be written. Instructions can be found
 in [Building Topologies](../../developers/java/topologies), while documentation for the Java
-API can be found [here](/api/org/apache/heron/api/topology/package-summary.html). Please note that Heron topologies do not
-require Java 8 and can be written in Java 7 or later.
+API can be found [here](/api/org/apache/heron/api/topology/package-summary.html). Please note that Heron topologies do not require Java 11 and can be written in Java 7 or later.
 
 * **Python 2** (specifically 2.7) is used primarily for Heron's [CLI interface](user-manuals-heron-cli) and UI components such as [Heron UI](user-manuals-heron-ui) and the [Heron Tracker](user-manuals-heron-tracker-runbook).
 
