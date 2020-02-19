@@ -15,29 +15,28 @@
 #  specific language governing permissions and limitations
 #  under the License.
 
-FROM openjdk:8-jdk-slim
+FROM ubuntu:18.04
 
 # This is passed to the heron build command via the --config flag
-ENV TARGET_PLATFORM debian
+ENV TARGET_PLATFORM ubuntu
 ENV bazelVersion 0.26.0
 
 RUN apt-get update && apt-get -y install \
-      automake \
-      build-essential \
+      g++ \
       cmake \
-      curl \
-      libssl-dev \
-      git \
-      libtool \
+      automake \
       libtool-bin \
+      libunwind8 \
+      patch \
       python-dev \
       python3-dev \
-      software-properties-common \
-      python3-setuptools \
-      tree \
-      zip \
-      unzip \
       wget \
+      zip \
+      virtualenv \
+      unzip \
+      git \
+      curl \
+      tree \
       openjdk-11-jdk-headless
 
 ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk-amd64
@@ -47,4 +46,4 @@ RUN wget -O /tmp/bazel.sh https://github.com/bazelbuild/bazel/releases/download/
       && /tmp/bazel.sh
 
 ADD bazelrc /root/.bazelrc
-ADD scripts/compile-platform.sh /compile-platform.sh
+ADD scripts/test-platform.sh /test-platform.sh
