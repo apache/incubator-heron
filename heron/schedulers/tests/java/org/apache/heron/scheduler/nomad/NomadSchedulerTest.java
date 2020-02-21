@@ -58,8 +58,8 @@ import org.apache.heron.spi.packing.Resource;
 import static org.mockito.Matchers.anyVararg;
 
 @RunWith(PowerMockRunner.class)
+@PowerMockIgnore({"javax.net.ssl.*", "jdk.internal.reflect.*"})
 @PrepareForTest({NomadScheduler.class, Job.class, SchedulerUtils.class})
-@PowerMockIgnore("javax.net.ssl.*")
 public class NomadSchedulerTest {
   private static final Logger LOG = Logger.getLogger(NomadSchedulerTest.class.getName());
 

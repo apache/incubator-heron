@@ -19,9 +19,9 @@ FROM ubuntu:18.04
 
 RUN apt-get update
 RUN apt-get -y install \
-    unzip software-properties-common curl supervisor openjdk-8-jdk-headless
+    unzip software-properties-common curl python python3 supervisor openjdk-11-jdk-headless
 
-ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64
+ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk-amd64
 RUN update-ca-certificates -f
 
 ADD artifacts /heron

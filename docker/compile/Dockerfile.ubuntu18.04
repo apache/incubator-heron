@@ -29,6 +29,7 @@ RUN apt-get update && apt-get -y install \
       libunwind8 \
       patch \
       python-dev \
+      python3-dev \
       wget \
       zip \
       virtualenv \
@@ -36,9 +37,9 @@ RUN apt-get update && apt-get -y install \
       git \
       curl \
       tree \
-      openjdk-8-jdk-headless
+      openjdk-11-jdk-headless
 
-ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64
+ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk-amd64
 
 RUN wget -O /tmp/bazel.sh https://github.com/bazelbuild/bazel/releases/download/$bazelVersion/bazel-$bazelVersion-installer-linux-x86_64.sh \
       && chmod +x /tmp/bazel.sh \

@@ -18,12 +18,14 @@
 FROM openjdk:8-jdk-slim
 
 RUN apt-get -y update && apt-get -y install \
-    netcat \
+    netcat-openbsd \
     python \
+    python3 \
     unzip \
     curl \
     vim \
-    supervisor && \
+    supervisor \
+    openjdk-11-jdk-headless && \
     apt-get clean all && \
     rm -rf /var/lib/apt/lists/*
 

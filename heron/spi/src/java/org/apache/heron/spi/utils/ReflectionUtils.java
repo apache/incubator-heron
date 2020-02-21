@@ -19,7 +19,9 @@
 
 package org.apache.heron.spi.utils;
 
-public final class ReflectionUtils {
+public final class ReflectionUtils extends ClassLoader {
+  private static final ReflectionUtils REF = new ReflectionUtils();
+
   private ReflectionUtils() {
 
   }
@@ -36,6 +38,6 @@ public final class ReflectionUtils {
     if (className == null) {
       throw new ClassNotFoundException("Can not instantiate class. className must not be null");
     }
-    return (T) classLoader.loadClass(className).newInstance();
+    return (T) REF.loadClass(className, false).newInstance();
   }
 }

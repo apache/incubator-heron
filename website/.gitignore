@@ -1,8 +1,0 @@
-# Generated artifacts for the website
-package-lock.json
-node_modules/
-public/
-static/api
-static/css/style*.css
-static/js/app*.js
-data/assetHashes.json

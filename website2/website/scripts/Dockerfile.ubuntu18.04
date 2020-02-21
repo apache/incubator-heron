@@ -36,7 +36,7 @@ RUN apt-get update && apt-get -y install \
       unzip \
       git \
       curl \
-      openjdk-8-jdk-headless \
+      openjdk-11-jdk-headless \
       tree \
       python-setuptools \
       python-dev \
@@ -50,7 +50,7 @@ RUN curl -sL https://deb.nodesource.com/setup_13.x | sudo -E bash -
 
 RUN apt-get update && apt-get install -y nodejs
 
-ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64
+ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk-amd64
 
 ARG UNAME
 ARG UID
