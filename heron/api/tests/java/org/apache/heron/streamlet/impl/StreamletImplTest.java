@@ -461,7 +461,7 @@ public class StreamletImplTest {
     TopologyBuilder topologyBuilder = new TopologyBuilder();
     Set<String> stageNames = new HashSet<>();
     supplierStreamlet.build(topologyBuilder, stageNames);
-    assertTrue(supplierStreamlet.allBuilt());
+    assertTrue(supplierStreamlet.isFullyBuilt());
     assertEquals(supplierStreamlet.getChildren().size(), 1);
     assertTrue(supplierStreamlet.getChildren().get(0) instanceof FlatMapStreamlet);
     FlatMapStreamlet<String, String> fStreamlet =
@@ -499,11 +499,11 @@ public class StreamletImplTest {
     Set<String> stageNames = new HashSet<>();
     supplierStreamlet1.build(topologyBuilder, stageNames);
     assertTrue(supplierStreamlet1.isBuilt());
-    assertFalse(supplierStreamlet1.allBuilt());
+    assertFalse(supplierStreamlet1.isFullyBuilt());
 
     supplierStreamlet2.build(topologyBuilder, stageNames);
-    assertTrue(supplierStreamlet1.allBuilt());
-    assertTrue(supplierStreamlet2.allBuilt());
+    assertTrue(supplierStreamlet1.isFullyBuilt());
+    assertTrue(supplierStreamlet2.isFullyBuilt());
 
     // go over all stuff
     assertEquals(supplierStreamlet1.getChildren().size(), 1);
@@ -546,7 +546,7 @@ public class StreamletImplTest {
     supplierStreamlet.build(topologyBuilder, stageNames);
 
     // verify SupplierStreamlet
-    assertTrue(supplierStreamlet.allBuilt());
+    assertTrue(supplierStreamlet.isFullyBuilt());
     assertEquals(1, supplierStreamlet.getChildren().size());
     assertTrue(supplierStreamlet.getChildren().get(0) instanceof ConsumerStreamlet);
     assertEquals("consumer1", supplierStreamlet.getChildren().get(0).getName());

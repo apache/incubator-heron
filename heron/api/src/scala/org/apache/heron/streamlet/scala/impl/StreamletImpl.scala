@@ -32,9 +32,11 @@ import org.apache.heron.streamlet.{
   SerializablePredicate,
   KVStreamlet => JavaKVStreamlet,
   Streamlet => JavaStreamlet,
+  StreamletBase => JavaStreamletBase,
   WindowConfig
 }
 import org.apache.heron.streamlet.impl.{
+  StreamletBaseImpl => JavaStreamletBaseImpl,
   StreamletImpl => JavaStreamletImpl
 }
 import org.apache.heron.streamlet.impl.streamlets.SupplierStreamlet
@@ -43,7 +45,8 @@ import org.apache.heron.streamlet.scala.{
   SerializableTransformer,
   Sink,
   KVStreamlet,
-  Streamlet
+  Streamlet,
+  StreamletBase
 }
 import org.apache.heron.streamlet.scala.converter.ScalaToJavaConverter._
 
@@ -62,7 +65,7 @@ object StreamletImpl {
  * related Java Streamlet is transformed to Scala version again.
  */
 class StreamletImpl[R](val javaStreamlet: JavaStreamlet[R])
-    extends Streamlet[R] {
+    extends StreamletBaseImpl[R](javaStreamlet) with Streamlet[R] {
 
   import StreamletImpl._
 
@@ -76,13 +79,6 @@ class StreamletImpl[R](val javaStreamlet: JavaStreamlet[R])
     fromJavaStreamlet[R](javaStreamlet.setName(sName))
 
   /**
-    * Gets the name of the Streamlet.
-    *
-    * @return Returns the name of the Streamlet
-    */
-  override def getName(): String = javaStreamlet.getName
-
-  /**
     * Sets the number of partitions of the streamlet
     *
     * @param numPartitions The user assigned number of partitions
@@ -90,13 +86,6 @@ class StreamletImpl[R](val javaStreamlet: JavaStreamlet[R])
     */
   override def setNumPartitions(numPartitions: Int): Streamlet[R] =
     fromJavaStreamlet[R](javaStreamlet.setNumPartitions(numPartitions))
-
-  /**
-    * Gets the number of partitions of this Streamlet.
-    *
-    * @return the number of partitions of this Streamlet
-    */
-  override def getNumPartitions(): Int = javaStreamlet.getNumPartitions
 
   /**
    * Set the id of the stream to be used by the children nodes.
@@ -480,7 +469,10 @@ class StreamletImpl[R](val javaStreamlet: JavaStreamlet[R])
     * Logs every element of the streamlet using String.valueOf function
     * This is one of the sink functions in the sense that this operation returns void
     */
-  override def log(): Unit = javaStreamlet.log()
+  override def log(): StreamletBase[R] = {
+    val newJavaStreamletBase = javaStreamlet.log()
+    StreamletBaseImpl.fromJavaStreamletBase(newJavaStreamletBase)
+  }
 
   /**
     * Applies the consumer function to every element of the stream
@@ -489,9 +481,10 @@ class StreamletImpl[R](val javaStreamlet: JavaStreamlet[R])
     * @param consumer The user supplied consumer function that is invoked for each element
     *                 of this streamlet.
     */
-  override def consume(consumer: R => Unit): Unit = {
+  override def consume(consumer: R => Unit): StreamletBase[R] = {
     val serializableConsumer = toSerializableConsumer[R](consumer)
-    javaStreamlet.consume(serializableConsumer)
+    val newJavaStreamletBase = javaStreamlet.consume(serializableConsumer)
+    StreamletBaseImpl.fromJavaStreamletBase(newJavaStreamletBase)
   }
 
   /**
@@ -501,9 +494,10 @@ class StreamletImpl[R](val javaStreamlet: JavaStreamlet[R])
     * @param sink The Sink whose put method consumes each element
     *             of this streamlet.
     */
-  override def toSink(sink: Sink[R]): Unit = {
+  override def toSink(sink: Sink[R]): StreamletBase[R] = {
     val javaSink = toJavaSink[R](sink)
-    javaStreamlet.toSink(javaSink)
+    val newJavaStreamletBase = javaStreamlet.toSink(javaSink)
+    StreamletBaseImpl.fromJavaStreamletBase(newJavaStreamletBase)
   }
 
   /**
@@ -513,11 +507,11 @@ class StreamletImpl[R](val javaStreamlet: JavaStreamlet[R])
     *
     * @return The kid streamlets
     */
-  private[impl] def getChildren: List[JavaStreamletImpl[_]] = {
+  private[impl] def getChildren: List[JavaStreamletBaseImpl[_]] = {
     import _root_.scala.collection.JavaConversions._
     val children =
       javaStreamlet
-        .asInstanceOf[JavaStreamletImpl[_]]
+        .asInstanceOf[JavaStreamletBaseImpl[_]]
         .getChildren
     children.toList
   }

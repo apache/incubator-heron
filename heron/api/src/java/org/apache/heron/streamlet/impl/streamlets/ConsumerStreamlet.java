@@ -24,6 +24,7 @@ import java.util.Set;
 
 import org.apache.heron.api.topology.TopologyBuilder;
 import org.apache.heron.streamlet.SerializableConsumer;
+import org.apache.heron.streamlet.impl.StreamletBaseImpl;
 import org.apache.heron.streamlet.impl.StreamletImpl;
 import org.apache.heron.streamlet.impl.sinks.ConsumerSink;
 
@@ -32,7 +33,7 @@ import org.apache.heron.streamlet.impl.sinks.ConsumerSink;
  * streamlet after consuming every element. Since elements of the parents are just consumed
  * by the user passed consumer function, nothing is emitted, thus this streamlet is empty.
  */
-public class ConsumerStreamlet<R> extends StreamletImpl<R> {
+public class ConsumerStreamlet<R> extends StreamletBaseImpl<R> {
   private StreamletImpl<R> parent;
   private SerializableConsumer<R> consumer;
 

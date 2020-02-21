@@ -92,6 +92,7 @@ object ScalaClassicalMusicTopology {
       )
       .setName("joined-classical-musics-by-year")
       .log()
+      .setName("log")
 
     val config = Config.defaultConfig()
 
