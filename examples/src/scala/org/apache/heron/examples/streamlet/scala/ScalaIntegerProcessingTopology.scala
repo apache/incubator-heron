@@ -58,6 +58,8 @@ object ScalaIntegerProcessingTopology {
       .union(zeroes)
       .setName("union-of-numbers")
       .log()
+      .setName("log")
+      .setNumPartitions(1)
 
     val config = Config.newBuilder
       .setNumContainers(NUM_CONTAINERS)

@@ -91,7 +91,7 @@ public final class BuilderImpl implements Builder {
       streamlet.build(builder, stageNames);
     }
     for (StreamletImpl<?> streamlet : sources) {
-      if (!streamlet.allBuilt()) {
+      if (!streamlet.isFullyBuilt()) {
         throw new RuntimeException("Topology cannot be fully built! Are all sources added?");
       }
     }
