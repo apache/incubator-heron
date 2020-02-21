@@ -45,7 +45,7 @@ import org.apache.heron.classification.InterfaceStability;
  * Streamlet before doing the transformation.
  */
 @InterfaceStability.Evolving
-public interface Streamlet<R> {
+public interface Streamlet<R> extends StreamletBase<R> {
 
   /**
    * Sets the name of the BaseStreamlet.
@@ -299,7 +299,7 @@ public interface Streamlet<R> {
    * Logs every element of the streamlet using String.valueOf function
    * This is one of the sink functions in the sense that this operation returns void
    */
-  void log();
+  StreamletBase<R> log();
 
   /**
    * Applies the consumer function to every element of the stream
@@ -307,7 +307,7 @@ public interface Streamlet<R> {
    * @param consumer The user supplied consumer function that is invoked for each element
    * of this streamlet.
    */
-  void consume(SerializableConsumer<R> consumer);
+  StreamletBase<R> consume(SerializableConsumer<R> consumer);
 
   /**
    * Applies the sink's put function to every element of the stream
@@ -315,5 +315,5 @@ public interface Streamlet<R> {
    * @param sink The Sink whose put method consumes each element
    * of this streamlet.
    */
-  void toSink(Sink<R> sink);
+  StreamletBase<R> toSink(Sink<R> sink);
 }

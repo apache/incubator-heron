@@ -46,7 +46,7 @@ import org.apache.heron.streamlet.{
   * transformation wants to operate at a different parallelism, one can repartition the
   * Streamlet before doing the transformation.
   */
-trait Streamlet[R] {
+trait Streamlet[R] extends StreamletBase[R] {
 
   /**
     * Sets the name of the Streamlet.
@@ -57,26 +57,12 @@ trait Streamlet[R] {
   def setName(sName: String): Streamlet[R]
 
   /**
-    * Gets the name of the Streamlet.
-    *
-    * @return Returns the name of the Streamlet
-    */
-  def getName: String
-
-  /**
     * Sets the number of partitions of the streamlet
     *
     * @param numPartitions The user assigned number of partitions
     * @return Returns back the Streamlet with changed number of partitions
     */
   def setNumPartitions(numPartitions: Int): Streamlet[R]
-
-  /**
-    * Gets the number of partitions of this Streamlet.
-    *
-    * @return the number of partitions of this Streamlet
-    */
-  def getNumPartitions: Int
 
   /**
    * Set the id of the stream to be used by the children nodes.
@@ -320,7 +306,7 @@ trait Streamlet[R] {
     * Logs every element of the streamlet using String.valueOf function
     * This is one of the sink functions in the sense that this operation returns void
     */
-  def log(): Unit
+  def log(): StreamletBase[R]
 
   /**
     * Applies the consumer function to every element of the stream
@@ -329,7 +315,7 @@ trait Streamlet[R] {
     * @param consumer The user supplied consumer function that is invoked for each element
     *                 of this streamlet.
     */
-  def consume(consumer: R => Unit): Unit
+  def consume(consumer: R => Unit): StreamletBase[R]
 
   /**
     * Applies the sink's put function to every element of the stream
@@ -338,6 +324,6 @@ trait Streamlet[R] {
     * @param sink The Sink whose put method consumes each element
     *             of this streamlet.
     */
-  def toSink(sink: Sink[R]): Unit
+  def toSink(sink: Sink[R]): StreamletBase[R]
 
 }

@@ -144,13 +144,15 @@ public final class StreamletCloneTopology {
      * Elements in the first cloned streamlet go to the database sink.
      */
     splitGameScoreStreamlet.get(0)
-        .toSink(new DatabaseSink());
+        .toSink(new DatabaseSink())
+        .setName("sink0");
 
     /**
      * Elements in the second cloned streamlet go to the logging sink.
      */
     splitGameScoreStreamlet.get(1)
-        .toSink(new FormattedLogSink());
+        .toSink(new FormattedLogSink())
+        .setName("sink1");
 
     Config config = Config.defaultConfig();
 
