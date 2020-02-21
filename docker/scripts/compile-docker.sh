@@ -63,4 +63,6 @@ docker run \
     -e HERON_TREE_STATUS="${HERON_TREE_STATUS}" \
     -v "$SOURCE_TARBALL:/src.tar.gz:ro" \
     -v "$OUTPUT_DIRECTORY:/dist" \
-    -t heron-compiler:$TARGET_PLATFORM /compile-platform.sh
+    -t heron-compiler:$TARGET_PLATFORM \
+    /bin/bash
+#    /compile-platform.sh

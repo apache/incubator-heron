@@ -26,6 +26,7 @@ pex_pytest(
         "zkstatemanager_unittest.py",
     ],
     reqs = [
+        "setuptools",
         "py==1.4.34",
         "pytest==3.2.2",
         "unittest2==1.1.0",

@@ -18,7 +18,7 @@ pex_binary(
     srcs = ["instance/st_heron_instance.py"],
     reqs = [
         "colorlog==2.6.1",
-        "future==0.18.2",
+#        "future==0.18.2",
         "PyYAML==3.13",
     ],
     deps = [":instance-py"],

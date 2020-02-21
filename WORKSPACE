@@ -153,6 +153,7 @@ SETUPTOOLS_SRC = "https://pypi.python.org/packages/68/13/1bfbfbd86560e61fa9803d2
 VIRTUALENV_SRC = "https://pypi.python.org/packages/d4/0c/9840c08189e030873387a73b90ada981885010dd9aea134d6de30cd24cb8/virtualenv-15.1.0.tar.gz"
 VIRTUALENV_PREFIX = "virtualenv-15.1.0"
 WHEEL_SRC = "https://pypi.python.org/packages/c9/1d/bd19e691fd4cfe908c76c429fe6e4436c9e83583c4414b54f6c85471954a/wheel-0.29.0.tar.gz"
+#WHEEL_SRC = "https://files.pythonhosted.org/packages/75/28/521c6dc7fef23a68368efefdcd682f5b3d1d58c2b90b06dc1d0b805b51ae/wheel-0.34.2.tar.gz"
 
 http_file(
     name = "pytest_whl",
@@ -169,6 +170,7 @@ http_file(
 http_file(
     name = "wheel_src",
     downloaded_file_path = "wheel-0.29.0.tar.gz",
+#    downloaded_file_path = "wheel-0.34.2.tar.gz",
     urls = [WHEEL_SRC],
 )
 
@@ -362,9 +364,9 @@ http_archive(
 
 http_archive(
     name = "nomad_linux",
-    urls = ["https://releases.hashicorp.com/nomad/0.7.0/nomad_0.7.0_linux_amd64.zip"],
+    urls = ["https://releases.hashicorp.com/nomad/0.10.4/nomad_0.10.4_linux_amd64.zip"],
     build_file = "@//:third_party/nomad/nomad.BUILD",
-    sha256 = "b3b78dccbdbd54ddc7a5ffdad29bce2d745cac93ea9e45f94e078f57b756f511",
+    sha256 = "7b12ff24c9ff592978d4c5b5ea06f60bb0aa679055a356b7898e480f0ba63d63",
 )
 
 # scala integration

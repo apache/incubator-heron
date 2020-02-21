@@ -22,4 +22,7 @@ pex_binary(
     deps = [
         ":explorer-py",
     ],
+    reqs = [
+        "wheel",
+    ],
 )

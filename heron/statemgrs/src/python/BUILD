@@ -6,7 +6,7 @@ pex_library(
     reqs = [
         "PyYAML==3.13",
         "kazoo==1.3.1",
-        "zope.interface==4.0.5",
+        "zope.interface==4.7.1",
     ],
     deps = [
         "//heron/proto:proto-py",
