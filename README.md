@@ -29,7 +29,7 @@ Heron is realtime analytics platform developed by Twitter.  It has a wide array 
 [https://heron.incubator.apache.org/](https://heron.incubator.apache.org/)
 
 #### Heron Requirements:
- * Java JDK 1.8
+ * Java 11
  * Python 3
  * Bazel 0.26.0
 
