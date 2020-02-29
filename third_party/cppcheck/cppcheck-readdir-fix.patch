@@ -1,0 +1,12 @@
+diff -Naur cppcheck/cppcheck-1.90/cli/filelister.cpp cppcheck-fixed/cppcheck-1.90/cli/filelister.cpp
+--- cppcheck/cppcheck-1.90/cli/filelister.cpp	2020-02-20 22:42:28.000000000 -0500
++++ cppcheck-fixed/cppcheck-1.90/cli/filelister.cpp	2020-02-20 22:44:48.000000000 -0500
+@@ -194,7 +194,7 @@
+             std::string new_path;
+             new_path.reserve(path.length() + 100);// prealloc some memory to avoid constant new/deletes in loop
+ 
+-            while ((readdir_r(dir, &entry, &dir_result) == 0) && (dir_result != nullptr)) {
++            while ((dir_result = readdir(dir)) != NULL) {
+ 
+                 if ((std::strcmp(dir_result->d_name, ".") == 0) ||
+                     (std::strcmp(dir_result->d_name, "..") == 0))
