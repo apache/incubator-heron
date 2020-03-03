@@ -22,10 +22,10 @@ sidebar_label: Compiling on Linux
 
 Heron can currently be built on the following Linux platforms:
 
-* [Ubuntu 14.04](#building-on-ubuntu-18.04)
+* [Ubuntu 18.04](#building-on-ubuntu-18.04)
 * [CentOS 7](#building-on-centos-7)
 
-## Building on Ubuntu 14.04
+## Building on Ubuntu 18.04
 
 To build Heron on a fresh Ubuntu 18.04 installation:
 
@@ -96,13 +96,13 @@ $ ./bazel_configure.py
 ### Step 10 --- Build the project
 
 ```bash
-$ bazel build --config=ubuntu heron/...  
+$ bazel build --config=ubuntu heron/...
 ```
 
 ### Step 11 --- Build the packages
 
 ```bash
-$ bazel build --config=ubuntu scripts/packages:binpkgs  
+$ bazel build --config=ubuntu scripts/packages:binpkgs
 $ bazel build --config=ubuntu scripts/packages:tarpkgs
 ```
 

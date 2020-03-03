@@ -22,13 +22,14 @@ original_id: compiling-overview
 -->
 
 Heron is currently available for [Mac OS X 10.14](compiling-osx),
-[Ubuntu 14.04](compiling-linux), and [CentOS
+[Ubuntu 18.04](compiling-linux), and [CentOS
 7](compiling-linux#building-on-centos-7). This guide describes the basics of the
 Heron build system. For step-by-step build instructions for a specific platform,
 the following guides are available:
 
 * [Building on Linux Platforms](compiling-linux)
-* [Building on Mac OS X](compiling-mac)
+* [Building on Mac OS X](compiling-osx)
+* [Building in Docker Container](compiling-docker)
 
 Heron can be built either [in its entirety](#building-all-components), as [individual components](#building-specific-components).
 
@@ -93,8 +94,8 @@ OS-specific configuration using the `--config` flag. The following OS values
 are supported:
 
 * `darwin` (Mac OS X)
-* `ubuntu` (Ubuntu 14.04)
-* `centos5` (CentOS 5)
+* `ubuntu` (Ubuntu)
+* `centos` (CentOS)
 
 For example, on Mac OS X (`darwin`), the following command will build all
 packages:
