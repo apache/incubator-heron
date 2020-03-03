@@ -27,7 +27,7 @@ Heron build system. For step-by-step build instructions for a specific platform,
 the following guides are available:
 
 * [Building on Linux Platforms](compiling-linux)
-* [Building on Mac OS X](compiling-mac)
+* [Building on Mac OS X](compiling-osx)
 
 Heron can be built either [in its entirety](#building-all-components), as [individual components](#building-specific-components).
 
