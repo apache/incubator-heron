@@ -24,9 +24,10 @@ import java.net.InetSocketAddress;
 import java.nio.channels.SelectableChannel;
 import java.nio.channels.SocketChannel;
 import java.time.Duration;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -57,6 +58,7 @@ import org.apache.heron.common.basics.NIOLooper;
  */
 public abstract class HeronClient implements ISelectHandler {
   private static final Logger LOG = Logger.getLogger(HeronClient.class.getName());
+  private static final Object DUMMY = new Object();
 
   // When we send a request, we need to:
   // record the the context for this particular RID, and prepare the response for that RID
@@ -99,9 +101,9 @@ public abstract class HeronClient implements ISelectHandler {
     socketOptions = options;
 
     isConnected = false;
-    contextMap = new HashMap<REQID, Object>();
-    responseMessageMap = new HashMap<REQID, Message.Builder>();
-    messageMap = new HashMap<String, Message.Builder>();
+    contextMap = new ConcurrentHashMap<REQID, Object>();
+    responseMessageMap = new ConcurrentHashMap<REQID, Message.Builder>();
+    messageMap = new ConcurrentHashMap<String, Message.Builder>();
   }
 
   // Register the protobuf Message's name with protobuf Message
@@ -193,7 +195,7 @@ public abstract class HeronClient implements ISelectHandler {
                           Duration timeout) {
     // Pack it as a no-timeout request and send it!
     final REQID rid = REQID.generate();
-    contextMap.put(rid, context);
+    contextMap.put(rid, Objects.nonNull(context) ? context : DUMMY); // Fix NPE
     responseMessageMap.put(rid, responseBuilder);
 
     // Add timeout for this request if necessary
@@ -402,15 +404,15 @@ public abstract class HeronClient implements ISelectHandler {
   // Following protected methods are just used for testing
   /////////////////////////////////////////////////////////
   protected Map<String, Message.Builder> getMessageMap() {
-    return new HashMap<String, Message.Builder>(messageMap);
+    return new ConcurrentHashMap<String, Message.Builder>(messageMap);
   }
 
   protected Map<REQID, Message.Builder> getResponseMessageMap() {
-    return new HashMap<REQID, Message.Builder>(responseMessageMap);
+    return new ConcurrentHashMap<REQID, Message.Builder>(responseMessageMap);
   }
 
   protected Map<REQID, Object> getContextMap() {
-    return new HashMap<REQID, Object>(contextMap);
+    return new ConcurrentHashMap<>(contextMap);
   }
 
   protected SocketChannelHelper getSocketChannelHelper() {

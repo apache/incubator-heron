@@ -20,9 +20,10 @@ package backtype.storm.metric.api;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class MultiCountMetric implements IMetric {
-  private Map<String, CountMetric> value = new HashMap<>();
+  private Map<String, CountMetric> value = new ConcurrentHashMap<>();
 
   public MultiCountMetric() {
   }
