@@ -18,24 +18,12 @@
 FROM openjdk:11.0.6-slim-buster
 
 RUN apt-get update && apt-get -y install \
-      automake \
-      apt-utils \
-      build-essential \
-      cmake \
+      netcat-openbsd \
       curl \
-      libssl-dev \
-      git \
-      libtool \
-      libtool-bin \
       python \
       python2.7-dev \
-      software-properties-common \
       supervisor \
-      python-setuptools \
-      tree \
-      zip \
-      unzip \
-      wget
+      unzip
 
 ADD artifacts /heron
 
