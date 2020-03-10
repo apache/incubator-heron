@@ -24,7 +24,7 @@ For developing Heron, you will need to compile it for the environment that you
 want to use it in. If you'd like to use Docker to create that build environment,
 Heron provides a convenient script to make that process easier.
 
-Currently, only Ubuntu 14.04, Ubuntu 18.04, and CentOS 7 are supported, but if you
+Currently, only Debian10 is actively being supported.  There is also limited support for Ubuntu 14.04, Ubuntu 18.04, Debian9, and CentOS 7. If you
 need another platform there are instructions for adding new ones
 [below](#contributing-new-environments).
 
@@ -71,8 +71,18 @@ NOTE: If running on OSX, the output directory will need to
 
 The following arguments are required:
 
-* `platform` --- Currently, this can be one of: `ubuntu14.04`, `centos7`. You
-  can add other platforms using the [instructions
+* `platform` --- Currently we are focused on supporting the `debian10` platform as the official Heron Docker container.  
+We also support building Heron locally on OSX.  You can specify this as listing `darwin` as the platform.
+ All options are:
+   - `centos7`
+   - `darwin`
+   - `debian9`
+   - `debian10`
+   - `ubuntu14.04`
+   - `ubuntu18.04`
+    
+   
+  You can add other platforms using the [instructions
   below](#contributing-new-environments).
 * `version-string` --- The Heron release for which you'd like to build
   artifacts.
@@ -82,10 +92,10 @@ The following arguments are required:
 Here's an example usage:
 
 ```bash
-$ docker/scripts/build-artifacts.sh ubuntu14.04 0.12.0 ~/heron-release
+$ docker/scripts/build-artifacts.sh debian10 0.22.1-incubating ~/heron-release
 ```
 
-This will build a Docker container specific to Ubuntu 14.04, create a source
+This will build a Docker container specific to Debian10, create a source
 tarball of the Heron repository, run a full release build of Heron, and then
 copy the artifacts into the `~/heron-release` directory.
 
@@ -105,12 +115,12 @@ of the generated artifacts:
 
 ```bash
 $ ls ~/heron-release
-heron-0.12.0-ubuntu14.04.tar
-heron-0.12.0-ubuntu14.04.tar.gz
-heron-core-0.12.0-ubuntu14.04.tar.gz
-heron-install-0.12.0-ubuntu14.04.sh
-heron-layer-0.12.0-ubuntu14.04.tar
-heron-tools-0.12.0-ubuntu14.04.tar.gz
+heron-0.22.1-incubating-debian10.tar
+heron-0.22.1-incubating-debian10.tar.gz
+heron-core-0.22.1-incubating-debian10.tar.gz
+heron-install-0.22.1-incubating-debian10.sh
+heron-layer-0.22.1-incubating-debian10.tar
+heron-tools-0.22.1-incubating-debian10.tar.gz
 ```
 
 ## Set Up A Docker Based Development Environment
@@ -130,8 +140,8 @@ After the commands, a new docker container is started with all the libraries and
 installed. The operation system is Ubuntu 18.04 by default. Now you can build Heron
 like:
 ```bash
-\# bazel build --config=ubuntu scripts/packages:binpkgs
-\# bazel build --config=ubuntu scripts/packages:tarpkgs
+\# bazel build --config=debian scripts/packages:binpkgs
+\# bazel build --config=debian scripts/packages:tarpkgs
 ```
 
 The current folder is mapped to the '/heron' directory in the container and any changes
