@@ -15,17 +15,16 @@
 #  specific language governing permissions and limitations
 #  under the License.
 
-FROM openjdk:8-jdk-slim
+FROM openjdk:11-jdk-slim-stretch
 
 RUN apt-get -y update && apt-get -y install \
     netcat-openbsd \
     python \
-    python3 \
+    python-dev \
     unzip \
     curl \
     vim \
-    supervisor \
-    openjdk-11-jdk-headless && \
+    supervisor && \
     apt-get clean all && \
     rm -rf /var/lib/apt/lists/*
 

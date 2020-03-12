@@ -15,7 +15,7 @@
 #  specific language governing permissions and limitations
 #  under the License.
 
-FROM openjdk:8-jdk-slim
+FROM openjdk:11-jdk-slim-stretch
 
 # This is passed to the heron build command via the --config flag
 ENV TARGET_PLATFORM debian
@@ -37,10 +37,7 @@ RUN apt-get update && apt-get -y install \
       tree \
       zip \
       unzip \
-      wget \
-      openjdk-11-jdk-headless
-
-ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk-amd64
+      wget
 
 RUN wget -O /tmp/bazel.sh https://github.com/bazelbuild/bazel/releases/download/$bazelVersion/bazel-$bazelVersion-installer-linux-x86_64.sh \
       && chmod +x /tmp/bazel.sh \
