@@ -31,7 +31,7 @@ RUN apt-get update && apt-get -y install \
       libtool \
       libtool-bin \
       python \
-      python2.7-dev \
+      python-dev \
       software-properties-common \
       python-setuptools \
       tree \
