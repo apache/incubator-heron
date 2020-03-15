@@ -15,10 +15,10 @@ addons:
       - ubuntu-toolchain-r-test
 
     packages:
-#      - gcc-4.8
-      - g++-4.8
+      - gcc
+      - g++
 #      - gcc-4.8-multilib
-      - g++-4.8-multilib
+#      - g++-4.8-multilib
       - libtool-bin
       - python2.7
       - wget
@@ -29,7 +29,7 @@ addons:
       - libgoogle-perftools-dev
 
 env:
-  - BAZEL_VERSION=0.26.0 CC=gcc-4.8 CXX=g++-4.8 CPP=cpp-4.8 CXXCPP=cpp-4.8 ENABLE_HEAPCHECK=1
+  - BAZEL_VERSION=0.26.0 CC=gcc CXX=g++ CPP=cpp CXXCPP=cpp ENABLE_HEAPCHECK=1
 
 before_install:
   # download and install bazel
