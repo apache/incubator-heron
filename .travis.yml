@@ -15,15 +15,16 @@ addons:
       - ubuntu-toolchain-r-test
 
     packages:
-      - gcc-4.8
+#      - gcc-4.8
       - g++-4.8
-      - gcc-4.8-multilib
+#      - gcc-4.8-multilib
       - g++-4.8-multilib
+      - libtool-bin
       - python2.7
       - wget
-      - pkg-config
+#      - pkg-config
       - zip
-      - zlib1g-dev
+#      - zlib1g-dev
       - google-perftools
       - libgoogle-perftools-dev
 
@@ -42,9 +43,9 @@ before_script:
   - sudo pip install wheel
 
 script:
-  - which gcc-4.8
+  - which gcc
   - gcc --version
-  - which g++-4.8
+  - which g++
   - g++ --version
   - which python
   - python -V
