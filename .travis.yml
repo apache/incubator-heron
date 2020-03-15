@@ -2,7 +2,7 @@ group: edge
 
 sudo: required
 
-dist: trusty
+dist: bionic
 
 language: java
 
