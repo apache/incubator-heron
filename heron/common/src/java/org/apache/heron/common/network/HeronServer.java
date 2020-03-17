@@ -26,9 +26,9 @@ import java.nio.channels.SelectableChannel;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.time.Duration;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -71,9 +71,9 @@ public abstract class HeronServer implements ISelectHandler {
     nioLooper = s;
     endpoint = new InetSocketAddress(host, port);
     socketOptions = options;
-    requestMap = new HashMap<String, Message.Builder>();
-    messageMap = new HashMap<String, Message.Builder>();
-    activeConnections = new HashMap<SocketChannel, SocketChannelHelper>();
+    requestMap = new ConcurrentHashMap<String, Message.Builder>();
+    messageMap = new ConcurrentHashMap<String, Message.Builder>();
+    activeConnections = new ConcurrentHashMap<SocketChannel, SocketChannelHelper>();
   }
 
   public InetSocketAddress getEndpoint() {

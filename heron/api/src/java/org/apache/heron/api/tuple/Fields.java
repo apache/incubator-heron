@@ -22,16 +22,16 @@ package org.apache.heron.api.tuple;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Fields implements Iterable<String>, Serializable {
   private static final long serialVersionUID = -1045737418722082345L;
 
   private List<String> fields;
-  private Map<String, Integer> mIndex = new HashMap<String, Integer>();
+  private Map<String, Integer> mIndex = new ConcurrentHashMap<String, Integer>();
 
   public Fields(String... pFields) {
     this(Arrays.asList(pFields));

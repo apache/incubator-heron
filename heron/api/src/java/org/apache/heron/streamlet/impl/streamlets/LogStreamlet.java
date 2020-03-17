@@ -22,6 +22,7 @@ package org.apache.heron.streamlet.impl.streamlets;
 import java.util.Set;
 
 import org.apache.heron.api.topology.TopologyBuilder;
+import org.apache.heron.streamlet.impl.StreamletBaseImpl;
 import org.apache.heron.streamlet.impl.StreamletImpl;
 import org.apache.heron.streamlet.impl.sinks.LogSink;
 
@@ -30,7 +31,7 @@ import org.apache.heron.streamlet.impl.sinks.LogSink;
  * streamlet after logging each element. Since elements of the parents are just logged
  * nothing is emitted, thus this streamlet is empty.
  */
-public class LogStreamlet<R> extends StreamletImpl<R> {
+public class LogStreamlet<R> extends StreamletBaseImpl<R> {
   private StreamletImpl<R> parent;
 
   public LogStreamlet(StreamletImpl<R> parent) {

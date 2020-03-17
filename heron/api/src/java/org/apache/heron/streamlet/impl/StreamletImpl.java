@@ -20,7 +20,6 @@ package org.apache.heron.streamlet.impl;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -29,7 +28,6 @@ import java.util.logging.Logger;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.heron.api.grouping.NoneStreamGrouping;
 import org.apache.heron.api.grouping.StreamGrouping;
-import org.apache.heron.api.topology.TopologyBuilder;
 import org.apache.heron.api.utils.Utils;
 import org.apache.heron.streamlet.IStreamletOperator;
 import org.apache.heron.streamlet.JoinType;
@@ -43,6 +41,7 @@ import org.apache.heron.streamlet.SerializablePredicate;
 import org.apache.heron.streamlet.SerializableTransformer;
 import org.apache.heron.streamlet.Sink;
 import org.apache.heron.streamlet.Streamlet;
+import org.apache.heron.streamlet.StreamletBase;
 import org.apache.heron.streamlet.WindowConfig;
 import org.apache.heron.streamlet.impl.streamlets.ConsumerStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.CountByKeyAndWindowStreamlet;
@@ -89,72 +88,9 @@ import static org.apache.heron.streamlet.impl.utils.StreamletUtils.require;
  * transformation wants to operate at a different parallelism, one can repartition the
  * Streamlet before doing the transformation.
  */
-public abstract class StreamletImpl<R> implements Streamlet<R> {
+public abstract class StreamletImpl<R>
+    extends StreamletBaseImpl<R> implements Streamlet<R> {
   private static final Logger LOG = Logger.getLogger(StreamletImpl.class.getName());
-  protected String name;
-  protected int nPartitions;
-  private List<StreamletImpl<?>> children;
-  private boolean built;
-
-  public boolean isBuilt() {
-    return built;
-  }
-
-  public boolean allBuilt() {
-    if (!built) {
-      return false;
-    }
-    for (StreamletImpl<?> child : children) {
-      if (!child.allBuilt()) {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  protected enum StreamletNamePrefix {
-    CONSUMER("consumer"),
-    COUNT("count"),
-    CUSTOM("custom"),
-    CUSTOM_BASIC("customBasic"),
-    CUSTOM_WINDOW("customWindow"),
-    FILTER("filter"),
-    FLATMAP("flatmap"),
-    JOIN("join"),
-    KEYBY("keyBy"),
-    LOGGER("logger"),
-    MAP("map"),
-    SOURCE("generator"),
-    REDUCE("reduce"),
-    REMAP("remap"),
-    SINK("sink"),
-    SPLIT("split"),
-    SPOUT("spout"),
-    SUPPLIER("supplier"),
-    TRANSFORM("transform"),
-    UNION("union");
-
-    private final String prefix;
-
-    StreamletNamePrefix(final String prefix) {
-      this.prefix = prefix;
-    }
-
-    @Override
-    public String toString() {
-      return prefix;
-    }
-  }
-
-  /**
-   * Gets all the children of this streamlet.
-   * Children of a streamlet are streamlets that are resulting from transformations of elements of
-   * this and potentially other streamlets.
-   * @return The kid streamlets
-   */
-  public List<StreamletImpl<?>> getChildren() {
-    return children;
-  }
 
   /**
    * Sets the name of the Streamlet.
@@ -163,36 +99,8 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
    */
   @Override
   public Streamlet<R> setName(String sName) {
-    checkNotBlank(sName, "Streamlet name cannot be null/blank");
-
-    this.name = sName;
+    super.setName(sName);
     return this;
-  }
-
-  /**
-   * Gets the name of the Streamlet.
-   * @return Returns the name of the Streamlet
-   */
-  @Override
-  public String getName() {
-    return name;
-  }
-
-  /**
-   * Sets a default unique name to the Streamlet by type if it is not set.
-   * Otherwise, just checks its uniqueness.
-   * @param prefix The name prefix of this streamlet
-   * @param stageNames The collections of created streamlet/stage names
-   */
-  protected void setDefaultNameIfNone(StreamletNamePrefix prefix, Set<String> stageNames) {
-    if (getName() == null) {
-      setName(defaultNameCalculator(prefix, stageNames));
-    }
-    if (stageNames.contains(getName())) {
-      throw new RuntimeException(String.format(
-          "The stage name %s is used multiple times in the same topology", getName()));
-    }
-    stageNames.add(getName());
   }
 
   /**
@@ -202,19 +110,8 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
    */
   @Override
   public Streamlet<R> setNumPartitions(int numPartitions) {
-    require(numPartitions > 0, "Streamlet's partitions number should be > 0");
-
-    this.nPartitions = numPartitions;
+    super.setNumPartitions(numPartitions);
     return this;
-  }
-
-  /**
-   * Gets the number of partitions of this Streamlet.
-   * @return the number of partitions of this Streamlet
-   */
-  @Override
-  public int getNumPartitions() {
-    return nPartitions;
   }
 
   /**
@@ -271,45 +168,7 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
    * Only used by the implementors
    */
   protected StreamletImpl() {
-    this.nPartitions = -1;
-    this.children = new LinkedList<>();
-    this.built = false;
-  }
-
-  public void build(TopologyBuilder bldr, Set<String> stageNames) {
-    if (built) {
-      throw new RuntimeException("Logic Error While building " + getName());
-    }
-
-    if (doBuild(bldr, stageNames)) {
-      built = true;
-      for (StreamletImpl<?> streamlet : children) {
-        streamlet.build(bldr, stageNames);
-      }
-    }
-  }
-
-  // This is the main interface that every Streamlet implementation should implement
-  // The main tasks are generally to make sure that appropriate names/partitions are
-  // computed and add a spout/bolt to the TopologyBuilder
-  protected abstract boolean doBuild(TopologyBuilder bldr, Set<String> stageNames);
-
-  public <T> void addChild(StreamletImpl<T> child) {
-    children.add(child);
-  }
-
-  private String defaultNameCalculator(StreamletNamePrefix prefix, Set<String> stageNames) {
-    int index = 1;
-    String calculatedName;
-    while (true) {
-      calculatedName = new StringBuilder(prefix.toString()).append(index).toString();
-      if (!stageNames.contains(calculatedName)) {
-        break;
-      }
-      index++;
-    }
-    LOG.info("Calculated stage Name as " + calculatedName);
-    return calculatedName;
+    super();
   }
 
   /**
@@ -571,9 +430,10 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
    * that does not contain any tuple. Thus this function returns void.
    */
   @Override
-  public void log() {
+  public StreamletBase<R> log() {
     LogStreamlet<R> logger = new LogStreamlet<>(this);
     addChild(logger);
+    return logger;
   }
 
   /**
@@ -581,11 +441,12 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
    * @param consumer The user supplied consumer function that is invoked for each element
    */
   @Override
-  public void consume(SerializableConsumer<R> consumer) {
+  public StreamletBase<R> consume(SerializableConsumer<R> consumer) {
     checkNotNull(consumer, "consumer cannot be null");
 
     ConsumerStreamlet<R> consumerStreamlet = new ConsumerStreamlet<>(this, consumer);
     addChild(consumerStreamlet);
+    return consumerStreamlet;
   }
 
   /**
@@ -593,11 +454,12 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
    * @param sink The Sink that consumes
    */
   @Override
-  public void toSink(Sink<R> sink) {
+  public StreamletBase<R> toSink(Sink<R> sink) {
     checkNotNull(sink, "sink cannot be null");
 
     SinkStreamlet<R> sinkStreamlet = new SinkStreamlet<>(this, sink);
     addChild(sinkStreamlet);
+    return sinkStreamlet;
   }
 
   /**
