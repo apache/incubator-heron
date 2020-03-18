@@ -115,7 +115,7 @@ bool StMgrClientMgr::DidAnnounceBackPressure() {
   return stream_manager_->DidAnnounceBackPressure();
 }
 
-shared_ptr<StMgrClient> StMgrClientMgr::CreateClient(const sp_string& _other_stmgr_id,
+StMgrClient* StMgrClientMgr::CreateClient(const sp_string& _other_stmgr_id,
                                           const sp_string& _hostname, sp_int32 _port) {
   stmgr_clientmgr_metrics_->scope(METRIC_STMGR_NEW_CONNECTIONS)->incr();
   NetworkOptions options;
@@ -126,7 +126,7 @@ shared_ptr<StMgrClient> StMgrClientMgr::CreateClient(const sp_string& _other_stm
   options.set_high_watermark(high_watermark_);
   options.set_low_watermark(low_watermark_);
   options.set_socket_family(PF_INET);
-  auto client = make_shared<StMgrClient>(eventLoop_, options, topology_name_, topology_id_,
+  StMgrClient* client = new StMgrClient(eventLoop_, options, topology_name_, topology_id_,
                                         stmgr_id_, _other_stmgr_id, this, metrics_manager_client_,
                                         droptuples_upon_backpressure_);
   client->Start();
