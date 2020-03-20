@@ -168,6 +168,50 @@ public class PrometheusSinkTests {
   }
 
   @Test
+  public void testApacheStormKafkaMetrics() throws IOException {
+    Iterable<MetricsInfo> infos = Arrays.asList(
+        new MetricsInfo("kafkaOffset/event_data/partition_0/spoutLag", "1.0"),
+        new MetricsInfo("kafkaOffset/event_data/partition_10/spoutLag", "1.0"),
+        new MetricsInfo("kafkaOffset/event_data/partition_0/earliestTimeOffset", "1.0"),
+        new MetricsInfo("kafkaOffset/event_data/totalRecordsInPartitions", "1.0"),
+        new MetricsInfo("kafkaOffset/event_data/totalSpoutLag", "1.0"),
+        new MetricsInfo("kafkaOffset/event_data/partition_2/spoutLag", "1.0")
+    );
+
+    records = Arrays.asList(
+        newRecord("shared-aurora-036:31/spout-release-1/container_1_spout-release-1_31",
+            infos, Collections.emptyList())
+    );
+    PrometheusTestSink sink = new PrometheusTestSink();
+    sink.init(defaultConf, context);
+    for (MetricsRecord r : records) {
+      sink.processRecord(r);
+    }
+
+    final String topology = "testTopology";
+
+    final List<String> expectedLines = Arrays.asList(
+        createOffsetMetric(topology, "spout-release-1", "container_1_spout-release-1_31", "kafkaoffset_partition_spoutlag", "event_data", "0", "1.0"),
+        createOffsetMetric(topology, "spout-release-1", "container_1_spout-release-1_31", "kafkaoffset_partition_spoutlag", "event_data", "10","1.0"),
+        createOffsetMetric(topology, "spout-release-1", "container_1_spout-release-1_31", "kafkaoffset_partition_earliesttimeoffset", "event_data", "0", "1.0"),
+        createOffsetMetric(topology, "spout-release-1", "container_1_spout-release-1_31", "kafkaoffset_totalrecordsinpartitions", "event_data", null, "1.0"),
+        createOffsetMetric(topology, "spout-release-1", "container_1_spout-release-1_31", "kafkaoffset_totalspoutlag", "event_data", null,"1.0"),
+        createOffsetMetric(topology, "spout-release-1", "container_1_spout-release-1_31", "kafkaoffset_partition_spoutlag", "event_data", "2", "1.0")
+    );
+
+    final Set<String> generatedLines =
+        new HashSet<>(Arrays.asList(new String(sink.generateResponse()).split("\n")));
+
+    assertEquals(expectedLines.size(), generatedLines.size());
+
+    System.out.println("@@@@ " + generatedLines);
+    expectedLines.forEach((String line) -> {
+      System.out.println("#### " + line);
+      assertTrue(generatedLines.contains(line));
+    });
+  }
+
+  @Test
   public void testComponentType() {
     Map<String, Double> metrics = new HashMap<>();
     metrics.put("__execute-time-ns/default", 1d);
@@ -195,12 +239,26 @@ public class PrometheusSinkTests {
 
     if (metricNameInstanceId != null) {
       return String.format("heron_%s"
-              + "{topology=\"%s\",component=\"%s\",instance_id=\"%s\",metric_instance_id=\"%s\"}"
+              + "{component=\"%s\",instance_id=\"%s\",metric_instance_id=\"%s\",topology=\"%s\"}"
               + " %s %d",
-          metric, topology, component, instance, metricNameInstanceId, value, NOW);
+          metric, component, instance, metricNameInstanceId, topology, value, NOW);
     } else {
-      return String.format("heron_%s{topology=\"%s\",component=\"%s\",instance_id=\"%s\"} %s %d",
-          metric, topology, component, instance, value, NOW);
+      return String.format("heron_%s{component=\"%s\",instance_id=\"%s\",topology=\"%s\"} %s %d",
+          metric, component, instance, topology, value, NOW);
+    }
+  }
+
+  private String createOffsetMetric(String topology, String component, String instance,
+                              String metric, String topic, String partition, String value) {
+
+    if (partition != null) {
+      return String.format("heron_%s"
+              + "{component=\"%s\",instance_id=\"%s\",partition=\"%s\",topic=\"%s\",topology=\"%s\"}"
+              + " %s %d",
+          metric, component, instance, partition, topic, topology, value, NOW);
+    } else {
+      return String.format("heron_%s{component=\"%s\",instance_id=\"%s\",topic=\"%s\",topology=\"%s\"} %s %d",
+          metric, component, instance, topic, topology, value, NOW);
     }
   }
 

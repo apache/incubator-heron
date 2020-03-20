@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -169,9 +170,8 @@ public class PrometheusSink extends AbstractWebSink {
     final StringBuilder sb = new StringBuilder();
 
     metrics.forEach((String source, Map<String, Double> sourceMetrics) -> {
-      // Set the labels.
-      ArrayList<String> labelNames = new ArrayList<String>();
-      ArrayList<String> labelValues = new ArrayList<String>();
+      // Map the labels.
+      final Map<String, String> labelKV = new TreeMap<String, String>();
 
       String[] sources = source.split("/");
       String topology = sources[0];
@@ -187,21 +187,16 @@ public class PrometheusSink extends AbstractWebSink {
       final String clusterRoleEnv = hasClusterRoleEnvironment(c, r, e)
           ? String.format("%s/%s/%s", c, r, e) : null;
 
-      labelNames.add("topology");
-      labelValues.add(topology);
-      labelNames.add("component");
-      labelValues.add(component);
-      labelNames.add("instance_id");
-      labelValues.add(instance);
+      labelKV.put("topology", topology);
+      labelKV.put("component", component);
+      labelKV.put("instance_id", instance);
 
       if (clusterRoleEnv != null) {
-        labelNames.add("cluster_role_env");
-        labelValues.add(clusterRoleEnv);
+        labelKV.put("cluster_role_env", clusterRoleEnv);
       }
 
       if (componentType != null) {
-        labelNames.add("component_type");
-        labelValues.add(componentType);
+        labelKV.put("component_type", componentType);
       }
 
       sourceMetrics.forEach((String metric, Double value) -> {
@@ -217,30 +212,25 @@ public class PrometheusSink extends AbstractWebSink {
           final String[] metricParts = metric.split("/");
           if (metricHasInstanceId && metricParts.length == 3) {
             metricName = format("%s_%s", metricParts[0], metricParts[2]);
-            labelNames.add("metric_instance_id");
-            labelValues.add(metricParts[1]);
+            labelKV.put("metric_instance_id", metricParts[1]);
           } else if (metricHasInstanceId && metricParts.length == 2) {
             metricName = metricParts[0];
-            labelNames.add("metric_instance_id");
-            labelValues.add(metricParts[1]);
+            labelKV.put("metric_instance_id", metricParts[1]);
           } else {
             metricName = metric;
           }
-        } else if (metric.contains("kafkaOffset")) {
+        } else if (metric.startsWith("kafkaOffset")) {
           // kafkaOffset of KafkaSpout 'kafkaOffset/topicName/totalSpoutLag'
           // kafkaOffset of KafkaSpout 'kafkaOffset/topicName/partition_2/spoutLag'
           final boolean metricHasPartition = metric.contains("partition_");
           final String[] metricParts = metric.split("/");
-          if (metricHasPartition && metricParts.length == 3) {
-            metricName = format("%s_%s", metricParts[0], metricParts[3]);
-            labelNames.add("topic");
-            labelValues.add(metricParts[1]);
-            labelNames.add("partition");
-            labelValues.add(metricParts[1].split("_")[1]);
-          } else if (metricParts.length == 2) {
+          if (metricHasPartition && metricParts.length == 4) {
+            metricName = format("%s_partition_%s", metricParts[0], metricParts[3]);
+            labelKV.put("topic", metricParts[1]);
+            labelKV.put("partition", metricParts[2].split("_")[1]);
+          } else if (metricParts.length == 3) {
             metricName = format("%s_%s", metricParts[0], metricParts[2]);
-            labelNames.add("topic");
-            labelValues.add(metricParts[1]);
+            labelKV.put("topic", metricParts[1]);
           } else {
             metricName = metric;
           }
@@ -274,8 +264,7 @@ public class PrometheusSink extends AbstractWebSink {
                 String labelValue = matcher.replaceAll(labelValReplacement);
                 labelName = labelName.toLowerCase();
                 if (!labelName.isEmpty() && !labelValue.isEmpty()) {
-                  labelNames.add(labelName);
-                  labelValues.add(labelValue);
+                  labelKV.put(labelName, labelValue);
                 }
               }
             }
@@ -286,15 +275,19 @@ public class PrometheusSink extends AbstractWebSink {
         // TODO Type, Help
         String exportedMetricName = format("%s_%s", HERON_PREFIX,
             metricName
-                .replaceAll("[0-9]+", "")
                 .replace("__", "")
                 .toLowerCase());
         sb.append(sanitizeMetricName(exportedMetricName))
             .append("{");
-        for (int i = 0; i < labelNames.size(); i++) {
+        final AtomicBoolean isFirst = new AtomicBoolean(true);
+        labelKV.forEach((k, v) -> {
           // Add labels
-          sb.append(format("%s=\"%s\",", labelNames.get(i), labelValues.get(i)));
-        }
+          if (!isFirst.get()) {
+            sb.append(',');
+          }
+          sb.append(format("%s=\"%s\"", k, v));
+          isFirst.set(false);
+        });
         sb.append("} ")
             .append(Prometheus.doubleToGoString(value))
             .append(" ").append(currentTimeMillis())
