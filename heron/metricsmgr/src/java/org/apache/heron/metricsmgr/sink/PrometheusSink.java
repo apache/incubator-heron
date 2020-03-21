@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -219,29 +220,15 @@ public class PrometheusSink extends AbstractWebSink {
           } else {
             metricName = metric;
           }
-        } else if (metric.startsWith("kafkaOffset")) {
-          // kafkaOffset of KafkaSpout 'kafkaOffset/topicName/totalSpoutLag'
-          // kafkaOffset of KafkaSpout 'kafkaOffset/topicName/partition_2/spoutLag'
-          final boolean metricHasPartition = metric.contains("partition_");
-          final String[] metricParts = metric.split("/");
-          if (metricHasPartition && metricParts.length == 4) {
-            metricName = format("%s_partition_%s", metricParts[0], metricParts[3]);
-            labelKV.put("topic", metricParts[1]);
-            labelKV.put("partition", metricParts[2].split("_")[1]);
-          } else if (metricParts.length == 3) {
-            metricName = format("%s_%s", metricParts[0], metricParts[2]);
-            labelKV.put("topic", metricParts[1]);
-          } else {
-            metricName = metric;
-          }
         } else {
-          String name = sanitizeMetricName(metric);
-          for (Rule rule : rules) {
+          final AtomicReference<String> name = new AtomicReference<>(sanitizeMetricName(metric));
+          rules.forEach(rule -> {
+            String ruleName = name.get();
             Matcher matcher = null;
             if (rule.pattern != null) {
               matcher = rule.pattern.matcher(metric);
               if (!matcher.matches()) {
-                continue;
+                return;
               }
             }
 
@@ -250,12 +237,12 @@ public class PrometheusSink extends AbstractWebSink {
               // nothing
             } else {
               // Matcher is set below here due to validation in the constructor.
-              name = sanitizeMetricName(matcher.replaceAll(rule.name));
-              if (name.isEmpty()) {
+              ruleName = sanitizeMetricName(matcher.replaceAll(rule.name));
+              if (ruleName.isEmpty()) {
                 return;
               }
             }
-            name = name.toLowerCase();
+            name.set(ruleName.toLowerCase());
             if (rule.labelNames != null) {
               for (int i = 0; i < rule.labelNames.size(); i++) {
                 final String unsafeLabelName = rule.labelNames.get(i);
@@ -268,8 +255,8 @@ public class PrometheusSink extends AbstractWebSink {
                 }
               }
             }
-          }
-          metricName = name;
+          });
+          metricName = name.get();
         }
 
         // TODO Type, Help
