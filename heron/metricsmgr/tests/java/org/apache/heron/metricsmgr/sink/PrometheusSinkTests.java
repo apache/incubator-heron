@@ -229,12 +229,18 @@ public class PrometheusSinkTests {
     final String topology = "testTopology";
 
     final List<String> expectedLines = Arrays.asList(
-        createOffsetMetric(topology, "spout-release-1", "container_1_spout-release-1_31", "kafka_offset_partition_spoutlag", "event_data", "0", "1.0"),
-        createOffsetMetric(topology, "spout-release-1", "container_1_spout-release-1_31", "kafka_offset_partition_spoutlag", "event_data", "10","1.0"),
-        createOffsetMetric(topology, "spout-release-1", "container_1_spout-release-1_31", "kafka_offset_partition_earliesttimeoffset", "event_data", "0", "1.0"),
-        createOffsetMetric(topology, "spout-release-1", "container_1_spout-release-1_31", "kafka_offset_totalrecordsinpartitions", "event_data", null, "1.0"),
-        createOffsetMetric(topology, "spout-release-1", "container_1_spout-release-1_31", "kafka_offset_totalspoutlag", "event_data", null,"1.0"),
-        createOffsetMetric(topology, "spout-release-1", "container_1_spout-release-1_31", "kafka_offset_partition_spoutlag", "event_data", "2", "1.0")
+        createOffsetMetric(topology, "spout-release-1", "container_1_spout-release-1_31",
+            "kafka_offset_partition_spoutlag", "event_data", "0", "1.0"),
+        createOffsetMetric(topology, "spout-release-1", "container_1_spout-release-1_31",
+            "kafka_offset_partition_spoutlag", "event_data", "10","1.0"),
+        createOffsetMetric(topology, "spout-release-1", "container_1_spout-release-1_31",
+            "kafka_offset_partition_earliesttimeoffset", "event_data", "0", "1.0"),
+        createOffsetMetric(topology, "spout-release-1", "container_1_spout-release-1_31",
+            "kafka_offset_totalrecordsinpartitions", "event_data", null, "1.0"),
+        createOffsetMetric(topology, "spout-release-1", "container_1_spout-release-1_31",
+            "kafka_offset_totalspoutlag", "event_data", null,"1.0"),
+        createOffsetMetric(topology, "spout-release-1", "container_1_spout-release-1_31",
+            "kafka_offset_partition_spoutlag", "event_data", "2", "1.0")
     );
 
     final Set<String> generatedLines =
