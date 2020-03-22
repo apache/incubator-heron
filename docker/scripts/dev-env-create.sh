@@ -42,9 +42,9 @@ case $# in
     ;;
 esac
 
-# Default platform is debian10. Other available platforms
-# include centos7, debian9, ubuntu18.04
-TARGET_PLATFORM=${2:-"debian10"}
+# Default platform is ubuntu18.04. Other available platforms
+# include centos7, debian9, debian10, ubuntu18.04
+TARGET_PLATFORM=${2:-"ubuntu18.04"}
 SCRATCH_DIR="$HOME/.heron-docker"
 REPOSITORY="heron-dev"
 CONTAINER_NAME=$1
