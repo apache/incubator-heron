@@ -24,7 +24,7 @@ For developing Heron, you will need to compile it for the environment that you
 want to use it in. If you'd like to use Docker to create that build environment,
 Heron provides a convenient script to make that process easier.
 
-Currently, only Ubuntu 14.04, Ubuntu 18.04, and CentOS 7 are supported, but if you
+Currently Debian10 and Ubuntu 18.04 are actively being supported.  There is also limited support for Ubuntu 14.04, Debian9, and CentOS 7. If you
 need another platform there are instructions for adding new ones
 [below](#contributing-new-environments).
 
@@ -58,12 +58,20 @@ $ docker/build-artifacts.sh
 Running the script by itself will display usage information:
 
 ```
-Usage: docker/build-artifacts.sh <platform> <version_string> [source-tarball] <output-directory>
-
-Platforms Supported: darwin, ubuntu14.04, ubuntu18.04, centos7
-
+Script to build heron docker image for different platforms
+  Input - directory containing the artifacts from the directory <artifact-directory>
+  Output - docker image tar file saved in the directory <artifact-directory> 
+  
+Usage: ./docker/scripts/build-docker.sh <platform> <version_string> <artifact-directory> [-s|--squash]
+  
+Argument options:
+  <platform>: darwin, debian9, debian10, ubuntu14.04, ubuntu18.04, centos7
+  <version_string>: Version of Heron build, e.g. v0.17.5.1-rc
+  <artifact-directory>: Location of compiled Heron artifact
+  [-s|--squash]: Enables using Docker experimental feature --squash
+  
 Example:
-  ./build-artifacts.sh ubuntu14.04 0.12.0 .
+  ./build-docker.sh ubuntu18.04 0.12.0 ~/ubuntu
 
 NOTE: If running on OSX, the output directory will need to
       be under /Users so virtualbox has access to.
@@ -71,8 +79,18 @@ NOTE: If running on OSX, the output directory will need to
 
 The following arguments are required:
 
-* `platform` --- Currently, this can be one of: `ubuntu14.04`, `centos7`. You
-  can add other platforms using the [instructions
+* `platform` --- Currently we are focused on supporting the `debian10` and `ubuntu18.04` platforms.  
+We also support building Heron locally on OSX.  You can specify this as listing `darwin` as the platform.
+ All options are:
+   - `centos7`
+   - `darwin`
+   - `debian9`
+   - `debian10`
+   - `ubuntu14.04`
+   - `ubuntu18.04`
+    
+   
+  You can add other platforms using the [instructions
   below](#contributing-new-environments).
 * `version-string` --- The Heron release for which you'd like to build
   artifacts.
@@ -82,10 +100,10 @@ The following arguments are required:
 Here's an example usage:
 
 ```bash
-$ docker/scripts/build-artifacts.sh ubuntu14.04 0.12.0 ~/heron-release
+$ docker/scripts/build-artifacts.sh debian10 0.22.1-incubating ~/heron-release
 ```
 
-This will build a Docker container specific to Ubuntu 14.04, create a source
+This will build a Docker container specific to Debian10, create a source
 tarball of the Heron repository, run a full release build of Heron, and then
 copy the artifacts into the `~/heron-release` directory.
 
@@ -105,12 +123,12 @@ of the generated artifacts:
 
 ```bash
 $ ls ~/heron-release
-heron-0.12.0-ubuntu14.04.tar
-heron-0.12.0-ubuntu14.04.tar.gz
-heron-core-0.12.0-ubuntu14.04.tar.gz
-heron-install-0.12.0-ubuntu14.04.sh
-heron-layer-0.12.0-ubuntu14.04.tar
-heron-tools-0.12.0-ubuntu14.04.tar.gz
+heron-0.22.1-incubating-debian10.tar
+heron-0.22.1-incubating-debian10.tar.gz
+heron-core-0.22.1-incubating-debian10.tar.gz
+heron-install-0.22.1-incubating-debian10.sh
+heron-layer-0.22.1-incubating-debian10.tar
+heron-tools-0.22.1-incubating-debian10.tar.gz
 ```
 
 ## Set Up A Docker Based Development Environment
@@ -130,8 +148,8 @@ After the commands, a new docker container is started with all the libraries and
 installed. The operation system is Ubuntu 18.04 by default. Now you can build Heron
 like:
 ```bash
-\# bazel build --config=ubuntu scripts/packages:binpkgs
-\# bazel build --config=ubuntu scripts/packages:tarpkgs
+\# bazel build --config=debian scripts/packages:binpkgs
+\# bazel build --config=debian scripts/packages:tarpkgs
 ```
 
 The current folder is mapped to the '/heron' directory in the container and any changes
@@ -221,7 +239,7 @@ ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk-amd64
 Here's an example:
 
 ```dockerfile
-RUN wget -O /tmp/bazel.sh https://github.com/bazelbuild/bazel/releases/download/0.23.2/bazel-0.23.2-installer-linux-x86_64.sh \
+RUN wget -O /tmp/bazel.sh https://github.com/bazelbuild/bazel/releases/download/0.26.0/bazel-0.26.0-installer-linux-x86_64.sh \
          && chmod +x /tmp/bazel.sh \
          && /tmp/bazel.sh
 ```

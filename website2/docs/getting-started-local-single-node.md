@@ -22,63 +22,44 @@ sidebar_label: Local (Single Node)
 
 > The current version of Heron is {{heron:version}}
 
-
-The easiest way to get started learning Heron is to install the Heron client tools, which are currently available for:
+The current way to get started learning Heron is to build from source. 
+Please refer to the [guide to compiling Heron](compiling-overview). The Heron community is working to add release scripts and Heron
+binaries available from Apache mirrors soon.
 
 * [MacOS](#macos-homebrew)
-* [Ubuntu >= 14.04](#using-installation-scripts)
+* [Ubuntu 18.04](#using-installation-scripts)
 * [CentOS](#using-installation-scripts)
 
-For other platforms, you need to build from source. Please refer to the [guide to compiling Heron](compiling-overview).
+## Building installation scripts
 
-## Step 1 --- Download the Heron tools
+The only way to obtain the installation scripts at this time are to compile from source.  We are working to add release scripts and Heron
+binaries available from Apache mirrors soon.
 
-Heron tools can be installed on [macOS](#macos-homebrew) using [Homebrew](https://brew.sh) and on Linux using [installation scripts](#using-installation-scripts).
+See how to get setup building Heron see the notes [here](compiling-overview.md)
 
-> You can install using [installation scripts](#using-installation-scripts) on macOS as well.
-
-## macOS/Homebrew
-
-The easiest way to get started with Heron on macOS is using [Homebrew](https://brew.sh):
+If you already have Bazel and the other required tools installed for your platform you can execute the following:
 
 ```bash
-$ brew tap streamlio/homebrew-formulae
-$ brew update
-$ brew install heron
+$ bazel build --config=[platform] scripts/packages:binpkgs
+```
+Options for the config flag are:
+* `debian` (Debian10)
+* `ubuntu` (Ubuntu)
+* `darwin` (OSX)
+
+This command will take approximately 45 minutes to compile based on your machine settings. 
+ It will output a script called `heron-install.sh`  You will be able to find it relative to the Heron root folder:
+ 
+ ```bash
+$ ./bazel-bin/scripts/packages/heron-install.sh 
 ```
 
-This will install a variety of executables and other resources by default in `/usr/local/opt/heron`.
-
-> Homebrew may use a different folder than `/usr/local/opt/heron`. To check which folder is being used, run `brew --prefix heron`.
-
-## Using installation scripts
-
-To install Heron binaries directly, using installation scripts, go to Heron's [releases page](https://github.com/apache/incubator-heron/releases) on GitHub
-and see a full listing of Heron releases for each available platform. The installation script for macOS (`darwin`), for example, is named
-`heron-install-{{% heronVersion %}}-darwin.sh`.
-
-```bash
-$ wget https://github.com/apache/incubator-heron/releases/download/{{% heronVersion %}}/heron-install-{{% heronVersion %}}-darwin.sh
-```
-
-Download the for your platform either from the releases page or using [`wget`](https://www.gnu.org/software/wget/). Here's a `wget` example for Ubuntu:
-
-```bash
-$ wget https://github.com/apache/incubator-heron/releases/download/{{% heronVersion %}}/heron-install-{{% heronVersion %}}-ubuntu.sh
-```
-
-Once you've downloaded the script, make it executable using [chmod](https://en.wikipedia.org/wiki/Chmod):
-
-```bash
-$ chmod +x heron-*.sh
-```
+Now run the [Heron client](user-manuals-heron-cli) installation script with the `--user` flag set. Here's an example:
 
 > The script will install executables in the `~/bin` folder. You should add that folder to your `PATH` using `export PATH=~/bin:$PATH`.
 
-Now run the [Heron client](user-manuals-heron-cli) installation script with the `--user` flag set. Here's an example for Ubuntu:
-
 ```bash
-$ ./heron-install-{{% heronVersion %}}-ubuntu.sh --user
+$ ./heron-install.sh --user
 Heron installer
 ---------------
 
@@ -91,13 +72,13 @@ To check that Heron is successfully installed, run `heron version`:
 
 ```bash
 $ heron version
-heron.build.git.revision : 26bb4096130a05f9799510bbce6c37a69a7342ef
-heron.build.git.status : Clean
-heron.build.host : ...
-heron.build.time : Sat Aug  6 12:35:47 PDT {{% currentYear %}}
-heron.build.timestamp : 1470512147000
+heron.build.git.revision : b580f689d8cbcb3026966bde2aacf6da74d5bcf5
+heron.build.git.status : Modified
+heron.build.host : MBP
+heron.build.time : Sun Mar 22 06:42:05 CDT 2020
+heron.build.timestamp : 1584877325000
 heron.build.user : ...
-heron.build.version : {{% heronVersion %}}
+heron.build.version : update-docs-compiling
 ```
 
 ## Step 2 --- Launch an example topology
@@ -261,7 +242,7 @@ Optional arguments:
 
 The source code for the example topologies can be found
 [on
-GitHub]({{% githubMaster %}}/examples/src/java/org/apache/heron/examples).
+GitHub](https://github.com/apache/incubator-heron/tree/master/examples/src/java/org/apache/heron/examples).
 The included example topologies:
 
 * `AckingTopology.java` --- A topology with acking enabled.
