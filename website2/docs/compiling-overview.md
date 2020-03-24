@@ -21,9 +21,9 @@ sidebar_label: Compiling Overview
 -->
 
 Heron is currently available for [Mac OS X 10.14](compiling-osx),
-[Ubuntu 14.04](compiling-linux), and [CentOS
-7](compiling-linux#building-on-centos-7). This guide describes the basics of the
-Heron build system. For step-by-step build instructions for a specific platform,
+[Ubuntu 18.04](compiling-linux), and [Debian10](compiling-docker#building-heron).
+ This guide describes the basics of the
+Heron build system. For step-by-step build instructions for other platforms,
 the following guides are available:
 
 * [Building on Linux Platforms](compiling-linux)
@@ -38,11 +38,10 @@ Instructions on running unit tests for Heron can also be found in [Testing Heron
 You must have the following installed to compile Heron:
 
 * [Bazel](http://bazel.io/docs/install.html) = {{% bazelVersion %}}. Later
-  versions might work but have not been tested. See [Installing Bazel]({{< ref
-  "#installing-bazel" >}}) below.
+  versions might work but have not been tested. See [Installing Bazel](#installing-bazel)below.
 * [Java 11](https://www.oracle.com/java/technologies/javase-jdk11-downloads.html)
   is required by Bazel and Heron;
-  [topologies](../../../concepts/topologies) can be written in Java 7 or above
+  topologies can be written in Java 7 or above
   , but Heron jars are required to run with a Java 11 JRE.
 * [Autoconf](http://www.gnu.org/software/autoconf/autoconf.html) >=
   2.6.3
@@ -65,8 +64,8 @@ $ echo $CC $CXX
 
 ## Installing Bazel
 
-Heron uses the [Bazel](http://bazel.io) build tool. Bazel releases can be found
-[here](https://github.com/bazelbuild/bazel/releases/tag/{{% bazelVersion %}})
+Heron uses the [Bazel](http://bazel.io) build tool. Bazel releases can be found here:
+https://github.com/bazelbuild/bazel/releases/tag/{{% bazelVersion %}}
 and installation instructions can be found [here](http://bazel.io/docs/install.html).
 
 To ensure that Bazel has been installed, run `bazel version` and check the
@@ -92,8 +91,9 @@ OS-specific configuration using the `--config` flag. The following OS values
 are supported:
 
 * `darwin` (Mac OS X)
-* `ubuntu` (Ubuntu 14.04)
-* `centos5` (CentOS 5)
+* `ubuntu` (Ubuntu 18.04)
+* `debian` (Debian10)
+* `centos5` (CentOS 7)
 
 For example, on Mac OS X (`darwin`), the following command will build all
 packages:
