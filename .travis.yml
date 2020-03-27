@@ -22,7 +22,8 @@ addons:
 #      - gcc-4.8-multilib
 #      - g++-4.8-multilib
       - libtool-bin
-      - python2.7
+      - python-dev
+#      - python2.7
       - wget
       # - pkg-config
       - zip
