@@ -1,5 +1,5 @@
-group: edge
-
+---
+  
 dist: bionic
 
 language: java
@@ -12,6 +12,7 @@ addons:
     packages:
       - libtool-bin
       - python-dev
+      - python-wheel
       - wget
       - zip
 
@@ -24,10 +25,10 @@ before_install:
   - chmod +x bazel-${BAZEL_VERSION}-installer-linux-x86_64.sh
   - ./bazel-${BAZEL_VERSION}-installer-linux-x86_64.sh --user
 
-before_script:
-  # install python module for wheel files
-  # required for python packaging
-  - sudo pip install wheel
+# before_script:
+#   # install python module for wheel files
+#   # required for python packaging
+#   - sudo pip install wheel
 
 script:
   - which gcc
