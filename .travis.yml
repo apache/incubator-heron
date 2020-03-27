@@ -1,7 +1,5 @@
 group: edge
 
-sudo: required
-
 dist: bionic
 
 language: java
