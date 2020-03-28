@@ -1,5 +1,7 @@
 ---
 
+group: edge
+
 dist: bionic
 
 language: java
