@@ -1,8 +1,10 @@
 ---
-  
+
 dist: bionic
 
 language: java
+
+os: linux
 
 jdk:
   - oraclejdk11
