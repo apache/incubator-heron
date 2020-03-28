@@ -77,9 +77,11 @@ public final class ComponentConfigTopology {
         .build();
 
     config.getHeronConfig().setComponentCpu("random-sentences-source", 0.3);
-    config.getHeronConfig().setComponentRam("random-sentences-source", ByteAmount.fromMegabytes(300));
+    config.getHeronConfig().setComponentRam("random-sentences-source",
+        ByteAmount.fromMegabytes(300));
     config.getHeronConfig().setComponentCpu("flatten-into-individual-words", 0.3);
-    config.getHeronConfig().setComponentRam("flatten-into-individual-words", ByteAmount.fromMegabytes(300));
+    config.getHeronConfig().setComponentRam("flatten-into-individual-words",
+        ByteAmount.fromMegabytes(300));
     config.getHeronConfig().setComponentCpu("consumer", 0.2);
     config.getHeronConfig().setComponentRam("consumer", ByteAmount.fromMegabytes(200));
 
