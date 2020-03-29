@@ -19,6 +19,9 @@ addons:
       - python-wheel
       - wget
       - zip
+      - zlib1g-dev
+      - google-perftools
+      - libgoogle-perftools-dev
 
 env:
   - BAZEL_VERSION=0.26.0 ENABLE_HEAPCHECK=1
