@@ -8,7 +8,7 @@ common_deps_files = [
     "@maven//:commons_cli_commons_cli",
     "@maven//:com_google_guava_guava",
     "@maven//:org_apache_commons_commons_lang3",
-    "@maven//:javax_xml_bind_jaxb",
+    "@maven//:javax_xml_bind_jaxb_api",
     "//third_party/java:jackson",
 ]
 

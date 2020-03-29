@@ -117,6 +117,8 @@ maven_install(
     "com.fasterxml.jackson.core:jackson-databind:" + jackson_version,
     "com.fasterxml.jackson.jaxrs:jackson-jaxrs-base:2.8.8",
     "com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider:2.8.8",
+    "javax.xml.bind:jaxb-api:2.3.0",
+    "javax.activation:activation:1.1.1",
     "org.mockito:mockito-all:1.10.19",
     "org.sonatype.plugins:jarjar-maven-plugin:1.9",
     "org.powermock:powermock-api-mockito:" + powermock_version,

@@ -20,7 +20,7 @@ simulator_deps_files = \
         "//heron/common/src/java:utils-java",
         "//heron/instance/src/java:instance-java",
         "@maven//:org_yaml_snakeyaml",
-        "@maven//:javax_xml_bind_jaxb",
+        "@maven//:javax_xml_bind_jaxb_api",
     ]
 
 java_library(

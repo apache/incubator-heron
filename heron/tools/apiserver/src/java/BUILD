@@ -50,7 +50,7 @@ apiserver_deps_files = \
     "//third_party/java:logging",
     "@maven//:javax_activation_activation",
     "@maven//:javax_annotation_javax_annotation_api",
-    "@maven//:javax_xml_bind_jaxb",
+    "@maven//:javax_xml_bind_jaxb_api",
     "@maven//:org_yaml_snakeyaml",
   ]
 

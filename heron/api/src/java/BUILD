@@ -16,7 +16,7 @@ api_deps_files = \
     heron_java_api_proto_files() + [
         ":classification",
         "//heron/common/src/java:basics-java",
-        "@javax_xml_bind_jaxb//jar",
+        "@maven//:javax_xml_bind_jaxb_api",
     ]
 
 # Low Level Api

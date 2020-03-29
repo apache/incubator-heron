@@ -21,7 +21,7 @@ java_library(
     srcs = glob(["**/config/*.java"]),
     deps = [
         ":basics-java",
-        "@maven//:javax_xml_bind_jaxb",
+        "@maven//:javax_xml_bind_jaxb_api",
         "@maven//:org_yaml_snakeyaml",
     ],
 )
