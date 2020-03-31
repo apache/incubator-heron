@@ -85,13 +85,15 @@ public class PrometheusSinkTests {
     Mockito.when(context.getSinkId()).thenReturn("testId");
 
     /*
-    # example:
-    - pattern: kafka.(\w+)<type=(.+), name=(.+)PerSec\w*, (.+)=(.+)><>Count
-      name: kafka_$1_$2_$3_total
-      type: COUNTER
-      labels:
-        "$4": "$5"
-      type: COUNTER
+    # example: metrics.yaml
+    rules:
+      - pattern: kafka.(\w+)<type=(.+), name=(.+)PerSec\w*, (.+)=(.+)><>Count
+        name: kafka_$1_$2_$3_total
+        attrNameSnakeCase: true
+        type: COUNTER
+        labels:
+          "$4": "$5"
+        type: COUNTER
     */
     /*
     example: metrics
@@ -106,6 +108,7 @@ public class PrometheusSinkTests {
     rule1.put("pattern", "kafkaOffset/(.+)/(.+)");
     rule1.put("name", "kafka_offset_$2");
     rule1.put("type", "COUNTER");
+    rule1.put("attrNameSnakeCase", true);
     rule1.put("labels", labels1);
     labels1.put("topic", "$1");
 
@@ -116,6 +119,7 @@ public class PrometheusSinkTests {
     rule2.put("name", "kafka_offset_partition_$3");
     rule2.put("type", "COUNTER");
     rule2.put("labels", labels2);
+    rule2.put("attrNameSnakeCase", true);
     labels2.put("topic", "$1");
     labels2.put("partition", "$2");
 
@@ -171,7 +175,9 @@ public class PrometheusSinkTests {
   public void testResponseWhenMetricNamesHaveAnInstanceId() throws IOException {
     Iterable<MetricsInfo> infos = Arrays.asList(
         new MetricsInfo("__connection_buffer_by_instanceid/container_1_word_5/packets", "1.0"),
-        new MetricsInfo("__time_spent_back_pressure_by_compid/container_1_exclaim1_1", "1.0")
+        new MetricsInfo("__time_spent_back_pressure_by_compid/container_1_exclaim1_1", "1.0"),
+        new MetricsInfo("__client_stmgr-92/__ack_tuples_to_stmgrs", "1.0"),
+        new MetricsInfo("__instance_bytes_received/1", "1.0")
     );
 
     records = Arrays.asList(
@@ -192,7 +198,11 @@ public class PrometheusSinkTests {
             "container_1_word_5", "1.0"),
         createMetric(topology, "__stmgr__", "stmgr-1",
             "time_spent_back_pressure_by_compid",
-            "container_1_exclaim1_1", "1.0")
+            "container_1_exclaim1_1", "1.0"),
+        createMetric(topology, "__stmgr__", "stmgr-1",
+            "client_stmgr_ack_tuples_to_stmgrs", "stmgr-92","1.0"),
+        createMetric(topology, "__stmgr__", "stmgr-1",
+            "instance_bytes_received", "1","1.0")
     );
 
     final Set<String> generatedLines =
@@ -230,17 +240,17 @@ public class PrometheusSinkTests {
 
     final List<String> expectedLines = Arrays.asList(
         createOffsetMetric(topology, "spout-release-1", "container_1_spout-release-1_31",
-            "kafka_offset_partition_spoutlag", "event_data", "0", "1.0"),
+            "kafka_offset_partition_spout_lag", "event_data", "0", "1.0"),
         createOffsetMetric(topology, "spout-release-1", "container_1_spout-release-1_31",
-            "kafka_offset_partition_spoutlag", "event_data", "10", "1.0"),
+            "kafka_offset_partition_spout_lag", "event_data", "10", "1.0"),
         createOffsetMetric(topology, "spout-release-1", "container_1_spout-release-1_31",
-            "kafka_offset_partition_earliesttimeoffset", "event_data", "0", "1.0"),
+            "kafka_offset_partition_earliest_time_offset", "event_data", "0", "1.0"),
         createOffsetMetric(topology, "spout-release-1", "container_1_spout-release-1_31",
-            "kafka_offset_totalrecordsinpartitions", "event_data", null, "1.0"),
+            "kafka_offset_total_records_in_partitions", "event_data", null, "1.0"),
         createOffsetMetric(topology, "spout-release-1", "container_1_spout-release-1_31",
-            "kafka_offset_totalspoutlag", "event_data", null, "1.0"),
+            "kafka_offset_total_spout_lag", "event_data", null, "1.0"),
         createOffsetMetric(topology, "spout-release-1", "container_1_spout-release-1_31",
-            "kafka_offset_partition_spoutlag", "event_data", "2", "1.0")
+            "kafka_offset_partition_spout_lag", "event_data", "2", "1.0")
     );
 
     final Set<String> generatedLines =

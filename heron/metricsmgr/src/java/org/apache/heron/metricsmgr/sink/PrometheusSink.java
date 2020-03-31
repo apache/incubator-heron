@@ -109,37 +109,36 @@ public class PrometheusSink extends AbstractWebSink {
       List<Map<String, Object>> configRules = (List<Map<String, Object>>)
           configuration.get("rules");
       for (Map<String, Object> ruleObject : configRules) {
-        Map<String, Object> yamlRule = ruleObject;
         Rule rule = new Rule();
         rules.add(rule);
-        if (yamlRule.containsKey("pattern")) {
-          rule.pattern = Pattern.compile("^.*(?:" + (String) yamlRule.get("pattern") + ").*$");
+        if (ruleObject.containsKey("pattern")) {
+          rule.pattern = Pattern.compile("^.*(?:" + (String) ruleObject.get("pattern") + ").*$");
         }
-        if (yamlRule.containsKey("name")) {
-          rule.name = (String) yamlRule.get("name");
+        if (ruleObject.containsKey("name")) {
+          rule.name = (String) ruleObject.get("name");
         }
-        if (yamlRule.containsKey("value")) {
-          rule.value = String.valueOf(yamlRule.get("value"));
+        if (ruleObject.containsKey("value")) {
+          rule.value = String.valueOf(ruleObject.get("value"));
         }
-        if (yamlRule.containsKey("valueFactor")) {
-          String valueFactor = String.valueOf(yamlRule.get("valueFactor"));
+        if (ruleObject.containsKey("valueFactor")) {
+          String valueFactor = String.valueOf(ruleObject.get("valueFactor"));
           try {
             rule.valueFactor = Double.valueOf(valueFactor);
           } catch (NumberFormatException e) {
             // use default value
           }
         }
-        if (yamlRule.containsKey("attrNameSnakeCase")) {
-          rule.attrNameSnakeCase = (Boolean) yamlRule.get("attrNameSnakeCase");
+        if (ruleObject.containsKey("attrNameSnakeCase")) {
+          rule.attrNameSnakeCase = (Boolean) ruleObject.get("attrNameSnakeCase");
         }
-        if (yamlRule.containsKey("type")) {
-          rule.type = Type.valueOf((String) yamlRule.get("type"));
+        if (ruleObject.containsKey("type")) {
+          rule.type = Type.valueOf((String) ruleObject.get("type"));
         }
-        if (yamlRule.containsKey("help")) {
-          rule.help = (String) yamlRule.get("help");
+        if (ruleObject.containsKey("help")) {
+          rule.help = (String) ruleObject.get("help");
         }
-        if (yamlRule.containsKey("labels")) {
-          TreeMap labels = new TreeMap((Map<String, Object>) yamlRule.get("labels"));
+        if (ruleObject.containsKey("labels")) {
+          TreeMap labels = new TreeMap((Map<String, Object>) ruleObject.get("labels"));
           rule.labelNames = new ArrayList<String>();
           rule.labelValues = new ArrayList<String>();
           for (Map.Entry<String, Object> entry : (Set<Map.Entry<String, Object>>) labels
@@ -152,10 +151,11 @@ public class PrometheusSink extends AbstractWebSink {
         // Validation.
         if ((rule.labelNames != null || rule.help != null) && rule.name == null) {
           throw new IllegalArgumentException("Must provide name, if help or labels are given: "
-              + yamlRule);
+              + ruleObject);
         }
         if (rule.name != null && rule.pattern == null) {
-          throw new IllegalArgumentException("Must provide pattern, if name is given: " + yamlRule);
+          throw new IllegalArgumentException("Must provide pattern, if name is given: "
+              + ruleObject);
         }
       }
     } else {
@@ -212,13 +212,15 @@ public class PrometheusSink extends AbstractWebSink {
           final boolean metricHasInstanceId = metric.contains("_by_");
           final String[] metricParts = metric.split("/");
           if (metricHasInstanceId && metricParts.length == 3) {
-            metricName = format("%s_%s", metricParts[0], metricParts[2]);
+            metricName = splitTargetInstance(metricParts[0], metricParts[2], labelKV);
             labelKV.put("metric_instance_id", metricParts[1]);
           } else if (metricHasInstanceId && metricParts.length == 2) {
-            metricName = metricParts[0];
+            metricName = splitTargetInstance(metricParts[0], null, labelKV);
             labelKV.put("metric_instance_id", metricParts[1]);
+          } else if (metricParts.length == 2) {
+            metricName = splitTargetInstance(metricParts[0], metricParts[1], labelKV);
           } else {
-            metricName = metric;
+            metricName = splitTargetInstance(metric, null, labelKV);
           }
         } else {
           final AtomicReference<String> name = new AtomicReference<>(sanitizeMetricName(metric));
@@ -242,7 +244,11 @@ public class PrometheusSink extends AbstractWebSink {
                 return;
               }
             }
-            name.set(ruleName.toLowerCase());
+            if (rule.attrNameSnakeCase) {
+              name.set(toSnakeAndLowerCase(ruleName));
+            } else {
+              name.set(ruleName.toLowerCase());
+            }
             if (rule.labelNames != null) {
               for (int i = 0; i < rule.labelNames.size(); i++) {
                 final String unsafeLabelName = rule.labelNames.get(i);
@@ -283,6 +289,45 @@ public class PrometheusSink extends AbstractWebSink {
     });
 
     return sb.toString().getBytes();
+  }
+
+  private static final Pattern SPLIT_TARGET = Pattern.compile("__(?<name>\\w+)"
+      + "_(?<target>(?<instance>\\w+)-\\d+)");
+  private static final Pattern DIGIT = Pattern.compile("[0-9]+");
+
+  private String splitTargetInstance(String part1, String part2, Map<String, String> labelKV) {
+    if (part2 != null) {
+      if (DIGIT.matcher(part2).matches()) {
+        labelKV.put("metric_instance_id", part2);
+        return part1;
+      }
+      final Matcher m = SPLIT_TARGET.matcher(part1);
+      if (m.matches()) {
+        labelKV.put("metric_instance_id", m.group("target"));
+        return String.format("%s_%s_%s", m.group("name"), m.group("instance"), part2);
+      }
+      return String.format("%s_%s", part1, part2);
+    }
+    return part1;
+  }
+
+  static String toSnakeAndLowerCase(String attrName) {
+    if (attrName == null || attrName.isEmpty()) {
+      return attrName;
+    }
+    char firstChar = attrName.subSequence(0, 1).charAt(0);
+    boolean prevCharIsUpperCaseOrUnderscore = Character.isUpperCase(firstChar) || firstChar == '_';
+    StringBuilder resultBuilder = new StringBuilder(attrName.length())
+        .append(Character.toLowerCase(firstChar));
+    for (char attrChar : attrName.substring(1).toCharArray()) {
+      boolean charIsUpperCase = Character.isUpperCase(attrChar);
+      if (!prevCharIsUpperCaseOrUnderscore && charIsUpperCase) {
+        resultBuilder.append("_");
+      }
+      resultBuilder.append(Character.toLowerCase(attrChar));
+      prevCharIsUpperCaseOrUnderscore = charIsUpperCase || attrChar == '_';
+    }
+    return resultBuilder.toString();
   }
 
   @Override
