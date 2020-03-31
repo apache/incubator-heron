@@ -68,40 +68,40 @@ mkdir -p $OUTPUT_DIR/$VERSION_TAG/heron-kafka-spout
 mkdir -p $OUTPUT_DIR/$VERSION_TAG/heron-kafka-bolt
 
 echo "Copy heron-api artifacts ... "
-cp ./release/heron-api-$VERSION_TAG.pom $OUTPUT_DIR/$VERSION_TAG/heron-api/
-cp ./bazel-bin/heron/api/src/java/api-shaded.jar $OUTPUT_DIR/$VERSION_TAG/heron-api/heron-api-$VERSION_TAG.jar
-cp ./bazel-bin/heron/api/src/java/heron-api-javadoc.zip $OUTPUT_DIR/$VERSION_TAG/heron-api/heron-api-$VERSION_TAG-javadoc.jar
-cp ./bazel-bin/heron/api/src/java/libapi-java-low-level-functional-src.jar $OUTPUT_DIR/$VERSION_TAG/heron-api/heron-api-$VERSION_TAG-sources.jar
+cp -p -f ./release/heron-api-$VERSION_TAG.pom $OUTPUT_DIR/$VERSION_TAG/heron-api/
+cp -p -f ./bazel-bin/heron/api/src/java/api-shaded.jar $OUTPUT_DIR/$VERSION_TAG/heron-api/heron-api-$VERSION_TAG.jar
+cp -p -f ./bazel-bin/heron/api/src/java/heron-api-javadoc.zip $OUTPUT_DIR/$VERSION_TAG/heron-api/heron-api-$VERSION_TAG-javadoc.jar
+cp -p -f ./bazel-bin/heron/api/src/java/libapi-java-low-level-functional-src.jar $OUTPUT_DIR/$VERSION_TAG/heron-api/heron-api-$VERSION_TAG-sources.jar
 
 echo "Copy heron-spi artifacts ... "
-cp ./release/heron-spi-$VERSION_TAG.pom ./$OUTPUT_DIR/$VERSION_TAG/heron-spi/
-cp ./bazel-bin/heron/spi/src/java/spi-unshaded_deploy.jar ./$OUTPUT_DIR/$VERSION_TAG/heron-spi/heron-spi-$VERSION_TAG.jar
-cp ./bazel-bin/heron/spi/src/java/heron-spi-javadoc.zip ./$OUTPUT_DIR/$VERSION_TAG/heron-spi/heron-spi-$VERSION_TAG-javadoc.jar
-cp ./bazel-bin/heron/spi/src/java/libheron-spi-src.jar ./$OUTPUT_DIR/$VERSION_TAG/heron-spi/heron-spi-$VERSION_TAG-sources.jar
+cp -p -f ./release/heron-spi-$VERSION_TAG.pom $OUTPUT_DIR/$VERSION_TAG/heron-spi/
+cp -p -f ./bazel-bin/heron/spi/src/java/spi-unshaded_deploy.jar $OUTPUT_DIR/$VERSION_TAG/heron-spi/heron-spi-$VERSION_TAG.jar
+cp -p -f ./bazel-bin/heron/spi/src/java/heron-spi-javadoc.zip $OUTPUT_DIR/$VERSION_TAG/heron-spi/heron-spi-$VERSION_TAG-javadoc.jar
+cp -p -f ./bazel-bin/heron/spi/src/java/libheron-spi-src.jar $OUTPUT_DIR/$VERSION_TAG/heron-spi/heron-spi-$VERSION_TAG-sources.jar
 
 echo "Copy heron-simulator artifacts ... "
-cp ./release/heron-simulator-$VERSION_TAG.pom ./$OUTPUT_DIR/$VERSION_TAG/heron-simulator/
-cp ./bazel-bin/heron/simulator/src/java/simulator-shaded.jar ./$OUTPUT_DIR/$VERSION_TAG/heron-simulator/heron-simulator-$VERSION_TAG.jar
-cp ./bazel-bin/heron/simulator/src/java/heron-simulator-javadoc.zip ./$OUTPUT_DIR/$VERSION_TAG/heron-simulator/heron-simulator-$VERSION_TAG-javadoc.jar
-cp ./bazel-bin/heron/simulator/src/java/libsimulator-java-src.jar ./$OUTPUT_DIR/$VERSION_TAG/heron-simulator/heron-simulator-$VERSION_TAG-sources.jar
+cp -p -f ./release/heron-simulator-$VERSION_TAG.pom $OUTPUT_DIR/$VERSION_TAG/heron-simulator/
+cp -p -f ./bazel-bin/heron/simulator/src/java/simulator-shaded.jar $OUTPUT_DIR/$VERSION_TAG/heron-simulator/heron-simulator-$VERSION_TAG.jar
+cp -p -f ./bazel-bin/heron/simulator/src/java/heron-simulator-javadoc.zip $OUTPUT_DIR/$VERSION_TAG/heron-simulator/heron-simulator-$VERSION_TAG-javadoc.jar
+cp -p -f ./bazel-bin/heron/simulator/src/java/libsimulator-java-src.jar $OUTPUT_DIR/$VERSION_TAG/heron-simulator/heron-simulator-$VERSION_TAG-sources.jar
 
 echo "Copy heron-storm artifacts ... "
-cp ./release/heron-storm-$VERSION_TAG.pom ./$OUTPUT_DIR/$VERSION_TAG/heron-storm/
-cp ./bazel-bin/storm-compatibility/src/java/heron-storm.jar ./$OUTPUT_DIR/$VERSION_TAG/heron-storm/heron-storm-$VERSION_TAG.jar
-cp ./bazel-bin/storm-compatibility/src/java/heron-storm-javadoc.zip ./$OUTPUT_DIR/$VERSION_TAG/heron-storm/heron-storm-$VERSION_TAG-javadoc.jar
-cp ./bazel-bin/storm-compatibility/src/java/libstorm-compatibility-java-src.jar ./$OUTPUT_DIR/$VERSION_TAG/heron-storm/heron-storm-$VERSION_TAG-sources.jar
+cp -p -f ./release/heron-storm-$VERSION_TAG.pom $OUTPUT_DIR/$VERSION_TAG/heron-storm/
+cp -p -f ./bazel-bin/storm-compatibility/src/java/heron-storm.jar $OUTPUT_DIR/$VERSION_TAG/heron-storm/heron-storm-$VERSION_TAG.jar
+cp -p -f ./bazel-bin/storm-compatibility/src/java/heron-storm-javadoc.zip $OUTPUT_DIR/$VERSION_TAG/heron-storm/heron-storm-$VERSION_TAG-javadoc.jar
+cp -p -f ./bazel-bin/storm-compatibility/src/java/libstorm-compatibility-java-src.jar $OUTPUT_DIR/$VERSION_TAG/heron-storm/heron-storm-$VERSION_TAG-sources.jar
 
 echo "Copy heron-kafka-spout artifacts ... "
-cp ./release/heron-kafka-spout-$VERSION_TAG.pom ./$OUTPUT_DIR/$VERSION_TAG/heron-kafka-spout/
-cp ./bazel-bin/contrib/spouts/kafka/src/java/libheron-kafka-spout-java.jar ./$OUTPUT_DIR/$VERSION_TAG/heron-kafka-spout/heron-kafka-spout-$VERSION_TAG.jar
-cp ./bazel-bin/contrib/spouts/kafka/src/java/heron-kafka-spout-javadoc.zip ./$OUTPUT_DIR/$VERSION_TAG/heron-kafka-spout/heron-kafka-spout-$VERSION_TAG-javadoc.jar
-cp ./bazel-bin/contrib/spouts/kafka/src/java/libheron-kafka-spout-java-src.jar ./$OUTPUT_DIR/$VERSION_TAG/heron-kafka-spout/heron-kafka-spout-$VERSION_TAG-sources.jar
+cp -p -f ./release/heron-kafka-spout-$VERSION_TAG.pom $OUTPUT_DIR/$VERSION_TAG/heron-kafka-spout/
+cp -p -f ./bazel-bin/contrib/spouts/kafka/src/java/libheron-kafka-spout-java.jar $OUTPUT_DIR/$VERSION_TAG/heron-kafka-spout/heron-kafka-spout-$VERSION_TAG.jar
+cp -p -f ./bazel-bin/contrib/spouts/kafka/src/java/heron-kafka-spout-javadoc.zip $OUTPUT_DIR/$VERSION_TAG/heron-kafka-spout/heron-kafka-spout-$VERSION_TAG-javadoc.jar
+cp -p -f ./bazel-bin/contrib/spouts/kafka/src/java/libheron-kafka-spout-java-src.jar $OUTPUT_DIR/$VERSION_TAG/heron-kafka-spout/heron-kafka-spout-$VERSION_TAG-sources.jar
 
 echo "Copy heron-kafka-spout artifacts ... "
-cp ./release/heron-kafka-bolt-$VERSION_TAG.pom ./$OUTPUT_DIR/$VERSION_TAG/heron-kafka-bolt/
-cp ./bazel-bin/contrib/bolts/kafka/src/java/libheron-kafka-bolt-java.jar ./$OUTPUT_DIR/$VERSION_TAG/heron-kafka-bolt/heron-kafka-bolt-$VERSION_TAG.jar
-cp ./bazel-bin/contrib/bolts/kafka/src/java/heron-kafka-bolt-javadoc.zip ./$OUTPUT_DIR/$VERSION_TAG/heron-kafka-bolt/heron-kafka-bolt-$VERSION_TAG-javadoc.jar
-cp ./bazel-bin/contrib/bolts/kafka/src/java/libheron-kafka-bolt-java-src.jar ./$OUTPUT_DIR/$VERSION_TAG/heron-kafka-bolt/heron-kafka-bolt-$VERSION_TAG-sources.jar
+cp -p -f ./release/heron-kafka-bolt-$VERSION_TAG.pom $OUTPUT_DIR/$VERSION_TAG/heron-kafka-bolt/
+cp -p -f ./bazel-bin/contrib/bolts/kafka/src/java/libheron-kafka-bolt-java.jar $OUTPUT_DIR/$VERSION_TAG/heron-kafka-bolt/heron-kafka-bolt-$VERSION_TAG.jar
+cp -p -f ./bazel-bin/contrib/bolts/kafka/src/java/heron-kafka-bolt-javadoc.zip $OUTPUT_DIR/$VERSION_TAG/heron-kafka-bolt/heron-kafka-bolt-$VERSION_TAG-javadoc.jar
+cp -p -f ./bazel-bin/contrib/bolts/kafka/src/java/libheron-kafka-bolt-java-src.jar $OUTPUT_DIR/$VERSION_TAG/heron-kafka-bolt/heron-kafka-bolt-$VERSION_TAG-sources.jar
 
 echo "Compress all artifacts into a bundle file ..."
 tar -czf "heron-artifacts-${VERSION_TAG}.tar.gz" $OUTPUT_DIR
