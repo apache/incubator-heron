@@ -200,9 +200,9 @@ public class PrometheusSinkTests {
             "time_spent_back_pressure_by_compid",
             "container_1_exclaim1_1", "1.0"),
         createMetric(topology, "__stmgr__", "stmgr-1",
-            "client_stmgr_ack_tuples_to_stmgrs", "stmgr-92","1.0"),
+            "client_stmgr_ack_tuples_to_stmgrs", "stmgr-92", "1.0"),
         createMetric(topology, "__stmgr__", "stmgr-1",
-            "instance_bytes_received", "1","1.0")
+            "instance_bytes_received", "1", "1.0")
     );
 
     final Set<String> generatedLines =
