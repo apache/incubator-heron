@@ -874,10 +874,10 @@ http_archive(
 
 http_archive(
     name = "org_nongnu_libunwind",
-    urls = ["https://download.savannah.nongnu.org/releases/libunwind/libunwind-1.1.tar.gz"],
+    urls = ["https://github.com/libunwind/libunwind/archive/v1.1.tar.gz"],
     strip_prefix = "libunwind-1.1",
     build_file = "@//:third_party/libunwind/libunwind.BUILD",
-    sha256 = "9dfe0fcae2a866de9d3942c66995e4b460230446887dbdab302d41a8aee8d09a",
+    sha256 = "1a9b0a6bd405546c5a38bf61a85ddb0c4e38f3f2c55c3249783fd1d6fd4c7fb1",
 )
 
 http_archive(
