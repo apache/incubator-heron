@@ -877,7 +877,7 @@ http_archive(
     urls = ["https://github.com/libunwind/libunwind/archive/v1.1.tar.gz"],
     strip_prefix = "libunwind-1.1",
     build_file = "@//:third_party/libunwind/libunwind.BUILD",
-    sha256 = "1a9b0a6bd405546c5a38bf61a85ddb0c4e38f3f2c55c3249783fd1d6fd4c7fb1",
+    sha256 = "2cd6bfa8d1862bcc0b3b1f70f49213c67dec162dc4b0f4e7bb96a60aeb8a0345",
 )
 
 http_archive(
