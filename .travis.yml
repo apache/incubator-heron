@@ -15,6 +15,7 @@ addons:
   apt:
     packages:
       - libtool-bin
+      - libcppunit-dev
       - python-dev
       - python-wheel
       - wget
