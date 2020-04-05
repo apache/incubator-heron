@@ -74,7 +74,6 @@ maven_install(
     "com.google.apis:google-api-services-storage:v1-rev108-1.22.0",
     "org.apache.pulsar:pulsar-client:jar:shaded:1.19.0-incubating",
     "io.kubernetes:client-java:7.0.0",
-    "com.hashicorp.nomad:nomad-sdk:0.7.0",
     "com.microsoft.dhalion:dhalion:0.2.3",
     "org.objenesis:objenesis:2.1",
     "org.ow2.asm:asm-all:5.1",
