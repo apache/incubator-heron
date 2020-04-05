@@ -248,8 +248,10 @@ http_archive(
     name = "org_apache_zookeeper",
     urls = ["https://archive.apache.org/dist/zookeeper/zookeeper-3.4.14/zookeeper-3.4.14.tar.gz"],
     strip_prefix = "zookeeper-3.4.14",
-    build_file = "@//:third_party/zookeeper/zookeeper.BUILD",
+    build_file = "@//:third_party/zookeeper/BUILD",
     sha256 = "b14f7a0fece8bd34c7fffa46039e563ac5367607c612517aa7bd37306afbd1cd",
+    patches = ["//third_party/zookeeper:pkgconfig.patch"],
+    patch_args = ["-p2"],
 )
 
 http_archive(
