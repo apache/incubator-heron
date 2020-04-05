@@ -1,6 +1,8 @@
-package(default_visibility = ["//visibility:public"])
+# load("@bazel_tools//tools/build_defs/pkg:pkg.bzl", "pkg_deb", "pkg_tar")
+load("@bazel_tools//tools/build_defs/pkg:pkg.bzl", "pkg_tar")
+load("//scripts/packages:self_extract_binary.bzl", "self_extract_binary")
 
-load("@bazel_tools//tools/build_defs/pkg:pkg.bzl", "pkg_deb", "pkg_tar")
+package(default_visibility = ["//visibility:public"])
 
 generated_release_files = [
     "release.yaml",
@@ -271,7 +273,7 @@ pkg_tar(
         "//heron/tools/explorer/src/python:heron-explorer",
         "//heron/tools/tracker/src/python:heron-tracker",
         "//heron/tools/ui/src/python:heron-ui",
-        "//third_party/nomad:heron-nomad",
+        # "//third_party/nomad:heron-nomad",
     ],
     package_dir = "bin",
 )
@@ -745,8 +747,6 @@ genrule(
         echo "$${bin_common}\n\n$${template//%release_info%/$${release_info}}" >$@
         """,
 )
-
-load("//scripts/packages:self_extract_binary.bzl", "self_extract_binary")
 
 self_extract_binary(
     name = "heron-install.sh",
