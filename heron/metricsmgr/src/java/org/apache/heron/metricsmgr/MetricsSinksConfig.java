@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.constructor.SafeConstructor;
 
 import org.apache.heron.common.basics.TypeUtils;
 
@@ -62,7 +63,7 @@ public class MetricsSinksConfig {
       return Collections.emptyMap();
     }
 
-    Yaml yaml = new Yaml();
+    Yaml yaml = new Yaml(new SafeConstructor());
     try (InputStream inputStream = new FileInputStream(configFile)) {
       return (Map<Object, Object>) yaml.load(inputStream);
     }
