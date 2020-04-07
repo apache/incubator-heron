@@ -139,7 +139,8 @@ public final class ConfigUtils {
     ) {
       stateManagerReader = Files.newBufferedReader(stateManagerPath);
 
-      final Map<String, Object> overrides = (Map<String, Object>) new Yaml(new SafeConstructor()).load(overrideReader);
+      final Map<String, Object> overrides =
+          (Map<String, Object>) new Yaml(new SafeConstructor()).load(overrideReader);
       final Map<String, Object> stateMangerConfig =
           (Map<String, Object>) new Yaml(new SafeConstructor()).load(stateManagerReader);
       // update the state manager config with the overrides
