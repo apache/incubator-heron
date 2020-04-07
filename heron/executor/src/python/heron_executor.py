@@ -27,6 +27,7 @@ import functools
 import json
 import os
 import random
+import shutil
 import signal
 import string
 import subprocess
@@ -129,7 +130,7 @@ def atomic_write_file(path, content):
     os.fsync(f.fileno())
 
   # Rename the tmp file
-  os.rename(tmp_file, path)
+  shutil.move(tmp_file, path)
 
 def log_pid_for_process(process_name, pid):
   filename = get_process_pid_filename(process_name)

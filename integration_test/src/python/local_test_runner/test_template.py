@@ -26,10 +26,11 @@ import json
 import logging
 import os
 import time
-from urllib.request import urlopen
+import shutil
 import signal
 import subprocess
 from collections import namedtuple
+from urllib.request import urlopen
 
 from ..common import status
 
@@ -152,7 +153,7 @@ class TestTemplate(object):
     # move to read file. This guarantees contents will be put into the file the
     # spout is reading from atomically
     # which increases the determinism
-    os.rename('temp.txt', self.params['readFile'])
+    shutil.move('temp.txt', self.params['readFile'])
 
   def _check_results(self):
     """ get actual and expected result.
