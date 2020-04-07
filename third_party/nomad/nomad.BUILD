@@ -3,6 +3,6 @@ licenses(["notice"])
 package(default_visibility = ["//visibility:public"])
 
 filegroup(
-    name = "nomad",
+    name = "nomad-bin",
     srcs = ["nomad"],
 )
