@@ -273,7 +273,7 @@ pkg_tar(
         "//heron/tools/explorer/src/python:heron-explorer",
         "//heron/tools/tracker/src/python:heron-tracker",
         "//heron/tools/ui/src/python:heron-ui",
-        # "//third_party/nomad:heron-nomad",
+        "//third_party/nomad:heron-nomad",
     ],
     package_dir = "bin",
 )

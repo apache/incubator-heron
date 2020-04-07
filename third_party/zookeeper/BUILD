@@ -20,20 +20,33 @@ genrule(
         "lib/libzookeeper_mt.a",
         "lib/libzookeeper_st.a",
     ],
-
-    cmd = "\n".join([
-        "export INSTALL_DIR=$$(pwd)/$(@D)",
-        "export TMP_DIR=$$(mktemp -d -t zookeeper.XXXXX)",
-        "export CXXFLAGS=-Wno-error",
-        "export CFLAGS=-Wno-error",
-        "mkdir -p $$TMP_DIR",
-        "cp -R $$(pwd)/external/org_apache_zookeeper/* $$TMP_DIR",
-        "cd $$TMP_DIR/zookeeper-client/zookeeper-client-c",
-        "autoreconf -if",
-        "./configure --prefix=$$INSTALL_DIR --enable-shared=no",
-        "make install",
-        "rm -rf $$TMP_DIR",
-    ]),
+    cmd = select({
+        ":darwin": "\n".join([
+            "export INSTALL_DIR=$$(pwd)/$(@D)",
+            "export TMP_DIR=$$(mktemp -d -t zookeeper.XXXXX)",
+            "export CXXFLAGS=-Wno-error",
+            "export CFLAGS=-Wno-error",
+            "mkdir -p $$TMP_DIR",
+            "cp -R $$(pwd)/external/org_apache_zookeeper/* $$TMP_DIR",
+            "cd $$TMP_DIR/zookeeper-client/zookeeper-client-c",
+            "./configure --prefix=$$INSTALL_DIR --enable-shared=no",
+            "make install",
+            "rm -rf $$TMP_DIR",
+        ]),
+        "//conditions:default": "\n".join([
+            "export INSTALL_DIR=$$(pwd)/$(@D)",
+            "export TMP_DIR=$$(mktemp -d -t zookeeper.XXXXX)",
+            "export CXXFLAGS=-Wno-error",
+            "export CFLAGS=-Wno-error",
+            "mkdir -p $$TMP_DIR",
+            "cp -R $$(pwd)/external/org_apache_zookeeper/* $$TMP_DIR",
+            "cd $$TMP_DIR/zookeeper-client/zookeeper-client-c",
+            "autoreconf -if",
+            "./configure --prefix=$$INSTALL_DIR --enable-shared=no",
+            "make install",
+            "rm -rf $$TMP_DIR",
+        ]),
+    }),
 )
 
 cc_library(
@@ -72,4 +85,12 @@ cc_library(
         "include",
     ],
     linkstatic = 1,
+)
+
+config_setting(
+    name = "darwin",
+    values = {
+        "cpu": "darwin",
+    },
+    visibility = ["//visibility:public"],
 )
