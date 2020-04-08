@@ -97,6 +97,8 @@ function discover_platform {
     echo "centos"
   elif [[ $discover =~ ^.*Ubuntu.*$ ]]; then
     echo "ubuntu"
+  elif [[ $discover =~ ^.*debian.*$ ]]; then
+    echo "debian"
   elif [[ $discover =~ ^Darwin.*$ ]]; then
     echo "darwin"
   else
