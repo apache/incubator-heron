@@ -19,7 +19,7 @@ FROM openjdk:11.0.6-slim-buster
 
 # This is passed to the heron build command via the --config flag
 ENV TARGET_PLATFORM debian
-ENV bazelVersion 0.26.0
+ENV bazelVersion 3.0.0
 
 RUN apt-get update && apt-get -y install \
       automake \
