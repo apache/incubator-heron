@@ -50,7 +50,7 @@ public class ConfigUtilsTests {
     final String overridesPath = ConfigUtils.createOverrideConfiguration(overrideProperties);
     try (Reader reader = Files.newBufferedReader(Paths.get(overridesPath))) {
       final Map<String, Object> overrides =
-          (Map<String, Object>) new Yaml(new SafeConstructor()).loadAs(reader, Map.class);
+          (Map<String, Object>) new Yaml(new SafeConstructor()).load(reader);
       assertEquals(overrides.size(), overrideProperties.size());
       for (String key : overrides.keySet()) {
         assertEquals(overrides.get(key), overrideProperties.getProperty(key));
@@ -82,7 +82,7 @@ public class ConfigUtilsTests {
 
     try (Reader reader = Files.newBufferedReader(stateManagerPath)) {
       final Map<String, Object> stateManagerWithOverrides =
-          (Map<String, Object>) new Yaml(new SafeConstructor()).loadAs(reader, Map.class);
+          (Map<String, Object>) new Yaml(new SafeConstructor()).load(reader);
       assertEquals(stateManagerWithOverrides.size(), 1);
       assertEquals(stateManagerWithOverrides.get("heron.statemgr.connection.string"),
           "zookeeper:2181");
@@ -112,7 +112,7 @@ public class ConfigUtilsTests {
 
     try (Reader reader = Files.newBufferedReader(stateManagerPath)) {
       final Map<String, Object> stateManagerWithOverrides =
-          (Map<String, Object>) new Yaml(new SafeConstructor()).loadAs(reader, Map.class);
+          (Map<String, Object>) new Yaml(new SafeConstructor()).load(reader);
       assertEquals(stateManagerWithOverrides.size(), 1);
       assertEquals(stateManagerWithOverrides.get("heron.statemgr.connection.string"),
           "<host>:<port>");
@@ -143,7 +143,7 @@ public class ConfigUtilsTests {
 
     try (Reader reader = Files.newBufferedReader(Paths.get(overridesPath))) {
       final Map<String, Object> newOverrides =
-          (Map<String, Object>) new Yaml(new SafeConstructor()).loadAs(reader, Map.class);
+          (Map<String, Object>) new Yaml(new SafeConstructor()).load(reader);
       assertEquals(newOverrides, combinedOverrides);
     }
   }
@@ -167,7 +167,7 @@ public class ConfigUtilsTests {
 
     try (Reader reader = Files.newBufferedReader(Paths.get(overridesPath))) {
       final Map<String, Object> newOverrides =
-          (Map<String, Object>) new Yaml(new SafeConstructor()).loadAs(reader, Map.class);
+          (Map<String, Object>) new Yaml(new SafeConstructor()).load(reader);
       assertEquals(newOverrides, overrides);
     }
   }
