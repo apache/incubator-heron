@@ -52,11 +52,10 @@ RUN apt-get update && apt-get install -y nodejs
 
 ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk-amd64
 
-
 RUN wget -O /tmp/bazel.sh https://github.com/bazelbuild/bazel/releases/download/$bazelVersion/bazel-$bazelVersion-installer-linux-x86_64.sh \
       && chmod +x /tmp/bazel.sh \
       && /tmp/bazel.sh --user
 
-ADD bazelrc /$USER/.bazelrc
-ENV PATH="/$USER/bin:${PATH}"
+ADD bazelrc /root/.bazelrc
+ENV PATH="/root/bin:${PATH}"
 
