@@ -54,9 +54,6 @@ echo $DOCKER_FILE
 
 echo "Building heron-compiler container"
 docker build \
-  --build-arg UNAME=$USER \
-  --build-arg UID=$(id -u ${USER}) \
-  --build-arg GID=$(id -g ${USER}) \
   -t heron-compiler:$TARGET_PLATFORM -f $DOCKER_FILE .
 
 
