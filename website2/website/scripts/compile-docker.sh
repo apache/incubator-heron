@@ -42,8 +42,6 @@ copy_bazel_rc_to() {
   cp $PROJECT_DIR/../tools/docker/bazel.rc $1
 }
 
-
-
 TARGET_PLATFORM="ubuntu18.04"
 DOCKER_FILE=$(dockerfile_path_for_platform $TARGET_PLATFORM)
 verify_dockerfile_exists $DOCKER_FILE
@@ -54,16 +52,10 @@ echo $DOCKER_FILE
 
 echo "Building heron-compiler container"
 docker build \
-  --build-arg UNAME=$USER \
-  --build-arg UID=$(id -u ${USER}) \
-  --build-arg GID=$(id -g ${USER}) \
   -t heron-compiler:$TARGET_PLATFORM -f $DOCKER_FILE .
-
 
 docker run \
   --rm \
-  -u `id -u`:`id -g` \
   -v $PROJECT_DIR/..:/home/$USER/heron \
-  -v /etc/passwd:/etc/passwd \
   -t heron-compiler:$TARGET_PLATFORM  make -C /home/$USER/heron/website2/website/ buildsite
 
