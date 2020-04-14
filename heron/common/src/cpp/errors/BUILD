@@ -20,7 +20,7 @@ genrule(
         "mkdir -p $$INSTALL_DIR",
         "cp -R $(SRCS) $$TMP_DIR",
         "cd $$TMP_DIR",
-        "$$WORKSPACE_ROOT/$(location //scripts/compile:gen_errcodes) -p -e " + error_file,
+        "$$WORKSPACE_ROOT/$(execpath //scripts/compile:gen_errcodes) -p -e " + error_file,
         "cp -r $$TMP_DIR/*.h $$INSTALL_DIR",
         "rm -rf $$TMP_DIR",
     ]),

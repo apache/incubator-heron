@@ -16,9 +16,9 @@ action_listener(
 
 extra_action(
     name = "checkstyle_cpp",
-    cmd = "$(location //tools/java/src/org/apache/bazel/checkstyle:checkstyle_cpp) " +
+    cmd = "$(execpath //tools/java/src/org/apache/bazel/checkstyle:checkstyle_cpp) " +
           "--extra_action_file $(EXTRA_ACTION_FILE) " +
-          "--cpplint_file $$(pwd)/$(location //third_party/python/cpplint)",
+          "--cpplint_file $$(pwd)/$(execpath //third_party/python/cpplint)",
     requires_action_output = True,
     tools = [
         "//third_party/python/cpplint",
@@ -28,9 +28,9 @@ extra_action(
 
 extra_action(
     name = "cpp_cppcheck",
-    cmd = "$(location //tools/java/src/org/apache/bazel/cppcheck:cppcheck_cpp) " +
+    cmd = "$(execpath //tools/java/src/org/apache/bazel/cppcheck:cppcheck_cpp) " +
           "--extra_action_file $(EXTRA_ACTION_FILE) " +
-          "--cppcheck_file $$(pwd)/$(location //third_party/cppcheck:heron-cppcheck)",
+          "--cppcheck_file $$(pwd)/$(execpath //third_party/cppcheck:heron-cppcheck)",
     requires_action_output = True,
     tools = [
         "//third_party/cppcheck:heron-cppcheck",

@@ -10,9 +10,9 @@ action_listener(
 
 extra_action(
     name = "checkstyle_python",
-    cmd = "$(location //tools/java/src/org/apache/bazel/checkstyle:checkstyle_python) " +
+    cmd = "$(execpath //tools/java/src/org/apache/bazel/checkstyle:checkstyle_python) " +
           "--extra_action_file $(EXTRA_ACTION_FILE) " +
-          "--pylint_file $$(pwd)/$(location //third_party/python/pylint)",
+          "--pylint_file $$(pwd)/$(execpath //third_party/python/pylint)",
     requires_action_output = True,
     tools = [
         "//third_party/python/pylint",
