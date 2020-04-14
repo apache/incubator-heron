@@ -32,6 +32,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.constructor.SafeConstructor;
 
 /**
  * Loads config file in Yaml file format.
@@ -79,7 +80,7 @@ public final class ConfigReader {
       try {
         FileInputStream fin = new FileInputStream(new File(fileName));
         try {
-          Yaml yaml = new Yaml();
+          Yaml yaml = new Yaml(new SafeConstructor());
           propsYaml = (Map<String, Object>) yaml.load(fin);
           LOG.log(Level.FINE, "Successfully read config file {0}", fileName);
         } finally {
@@ -104,7 +105,7 @@ public final class ConfigReader {
   public static Map<String, Object> loadStream(InputStream inputStream) {
     LOG.fine("Reading config stream");
 
-    Yaml yaml = new Yaml();
+    Yaml yaml = new Yaml(new SafeConstructor());
     Map<Object, Object> propsYaml = (Map<Object, Object>) yaml.load(inputStream);
     LOG.fine("Successfully read config");
 
