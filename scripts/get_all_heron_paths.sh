@@ -42,9 +42,9 @@ function get_heron_python_paths() {
 function get_heron_thirdparty_dependencies() {
   # bazel-bin/heron/proto for heron proto jars from heron/proto
   # bazel-bin/external for third_party deps
-  # bazel-heron/bazel-out/host/bin/third_party for extra_action proto jars in third_party
-  # bazel-heron/bazel-out/host/genfiles/external more third_party deps
-  echo "$(find {bazel-bin/heron/proto,bazel-bin/external,bazel-incubator-heron/bazel-out/host/bin/third_party,bazel-incubator-heron/bazel-out/host/genfiles/external}/. -name "*jar" -type f | sort -u)";
+  # bazel-heron/bazel-bin/host/bin/third_party for extra_action proto jars in third_party
+  # bazel-heron/bazel-bin/host/genfiles/external more third_party deps
+  echo "$(find {bazel-bin/heron/proto,bazel-bin/external,bazel-incubator-heron/bazel-bin/host/bin/third_party,bazel-incubator-heron/bazel-bin/host/genfiles/external}/. -name "*jar" -type f | sort -u)";
 }
 
 function get_heron_bazel_deps(){
