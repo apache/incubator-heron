@@ -1,3 +1,5 @@
+load("@rules_java//java:defs.bzl", "java_library")
+
 test_deps_files = \
     heron_java_proto_files() + [
         "//heron/api/src/java:api-java-low-level",

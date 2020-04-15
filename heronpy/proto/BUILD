@@ -1,3 +1,5 @@
+load("//tools/rules:genproto.bzl", "proto_library")
+
 package(default_visibility = ["//visibility:public"])
 
 genrule(

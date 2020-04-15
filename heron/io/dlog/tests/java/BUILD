@@ -1,3 +1,5 @@
+load("@rules_java//java:defs.bzl", "java_test")
+
 common_deps_files = [
     "//third_party/java:mockito",
     "//third_party/java:junit4",

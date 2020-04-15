@@ -1,3 +1,5 @@
+load("@rules_java//java:defs.bzl", "java_library")
+
 java_library(
     name = "metricsmgr-tests",
     srcs = glob(["**/*.java"]),
@@ -14,8 +16,8 @@ java_library(
         "//heron/spi/src/java:metricsmgr-spi-java",
         "//third_party/java:junit4",
         "//third_party/java:mockito",
-        "@maven//:com_google_guava_guava",
         "@com_google_protobuf//:protobuf_java",
+        "@maven//:com_google_guava_guava",
     ],
 )
 

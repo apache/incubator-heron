@@ -1,3 +1,7 @@
+load("//tools/rules:genproto.bzl", "proto_library")
+load("@rules_java//java:defs.bzl", "java_library")
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
 package(default_visibility = ["//visibility:public"])
 
 filegroup(

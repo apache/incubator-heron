@@ -1,9 +1,10 @@
+load("@rules_java//java:defs.bzl", "java_library")
+load("//tools/rules:build_defs.bzl", "DOCLINT_HTML_AND_SYNTAX")
+load("//tools/rules:javadoc.bzl", "java_doc")
+
 licenses(["notice"])
 
 package(default_visibility = ["//visibility:public"])
-
-load("//tools/rules:build_defs.bzl", "DOCLINT_HTML_AND_SYNTAX")
-load("//tools/rules:javadoc.bzl", "java_doc")
 
 java_doc(
     name = "heron-kafka-spout-javadoc",

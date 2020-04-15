@@ -1,3 +1,5 @@
+load("@rules_java//java:defs.bzl", "java_library", "java_test")
+
 test_deps_files = \
     heron_java_proto_files() + [
         "//heron/spi/src/java:statefulstorage-spi-java",

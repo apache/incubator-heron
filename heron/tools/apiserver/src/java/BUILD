@@ -1,3 +1,5 @@
+load("@rules_java//java:defs.bzl", "java_binary")
+
 package(default_visibility = ["//visibility:public"])
 
 api_deps_files = [
@@ -37,22 +39,22 @@ state_manager_deps_files = [
 ]
 
 apiserver_deps_files = \
-  api_deps_files + \
-  heron_java_proto_files() + \
-  state_manager_deps_files + \
-  scheduler_deps_files + \
-  packing_deps_files + \
-  uploader_deps_files + [
-    "//third_party/java:cli",
-    "//third_party/java:jetty-jersey-java",
-    "//third_party/java:commons-compress",
-    "//third_party/java:jackson",
-    "//third_party/java:logging",
-    "@maven//:javax_activation_activation",
-    "@maven//:javax_annotation_javax_annotation_api",
-    "@maven//:javax_xml_bind_jaxb_api",
-    "@maven//:org_yaml_snakeyaml",
-  ]
+    api_deps_files + \
+    heron_java_proto_files() + \
+    state_manager_deps_files + \
+    scheduler_deps_files + \
+    packing_deps_files + \
+    uploader_deps_files + [
+        "//third_party/java:cli",
+        "//third_party/java:jetty-jersey-java",
+        "//third_party/java:commons-compress",
+        "//third_party/java:jackson",
+        "//third_party/java:logging",
+        "@maven//:javax_activation_activation",
+        "@maven//:javax_annotation_javax_annotation_api",
+        "@maven//:javax_xml_bind_jaxb_api",
+        "@maven//:org_yaml_snakeyaml",
+    ]
 
 java_binary(
     name = "heron-apiserver-unshaded",

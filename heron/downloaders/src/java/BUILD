@@ -1,3 +1,5 @@
+load("@rules_java//java:defs.bzl", "java_binary", "java_library")
+
 licenses(["notice"])
 
 package(default_visibility = ["//visibility:public"])
@@ -28,10 +30,12 @@ filegroup(
 )
 
 filegroup(
-  name = "downloader-core",
-  srcs = glob(["**/Downloader.java",
-               "**/Extractor.java",
-               "**/Registry.java"])
+    name = "downloader-core",
+    srcs = glob([
+        "**/Downloader.java",
+        "**/Extractor.java",
+        "**/Registry.java",
+    ]),
 )
 
 java_binary(

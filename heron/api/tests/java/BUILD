@@ -1,4 +1,6 @@
-api_deps_files = [
+load("@rules_java//java:defs.bzl", "java_library")
+
+local_api_deps_files = [
     "//heron/api/src/java:api-java-low-level",
     "//heron/api/src/java:api-java",
     "//heron/common/src/java:utils-java",
@@ -11,7 +13,7 @@ api_deps_files = [
 
 api_deps_files = \
     heron_java_api_proto_files() + \
-    api_deps_files
+    local_api_deps_files
 
 java_library(
     name = "api-tests",

@@ -1,3 +1,5 @@
+load("@rules_java//java:defs.bzl", "java_library", "java_test")
+
 common_deps_files = [
     "//heron/common/src/java:basics-java",
     "//heron/common/src/java:config-java",

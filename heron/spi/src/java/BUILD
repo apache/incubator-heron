@@ -1,7 +1,8 @@
-package(default_visibility = ["//visibility:public"])
-
+load("@rules_java//java:defs.bzl", "java_binary", "java_library")
 load("//tools/rules:build_defs.bzl", "DOCLINT_HTML_AND_SYNTAX")
 load("//tools/rules:javadoc.bzl", "java_doc")
+
+package(default_visibility = ["//visibility:public"])
 
 java_doc(
     name = "heron-spi-javadoc",
@@ -37,8 +38,8 @@ java_library(
         "//heron/proto:proto_scheduler_java",
         "//heron/proto:proto_tmaster_java",
         "//heron/proto:proto_topology_java",
-        "@maven//:com_google_guava_guava",
         "@com_google_protobuf//:protobuf_java",
+        "@maven//:com_google_guava_guava",
         "@maven//:org_yaml_snakeyaml",
     ],
 )

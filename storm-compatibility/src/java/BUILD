@@ -15,10 +15,11 @@
 #  specific language governing permissions and limitations
 #  under the License.
 
-package(default_visibility = ["//visibility:public"])
-
+load("@rules_java//java:defs.bzl", "java_binary", "java_library")
 load("//tools/rules:build_defs.bzl", "DOCLINT_HTML_AND_SYNTAX")
 load("//tools/rules:javadoc.bzl", "java_doc")
+
+package(default_visibility = ["//visibility:public"])
 
 storm_deps_files = [
     "//heron/api/src/java:api-java-low-level",

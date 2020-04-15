@@ -1,3 +1,5 @@
+load("@rules_java//java:defs.bzl", "java_test")
+
 heron_kafka_spouts_test_dep = [
     "//contrib/spouts/kafka/src/java:heron-kafka-spout-java",
     "//heron/api/src/java:api-java-low-level",

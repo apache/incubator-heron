@@ -1,3 +1,5 @@
+load("@rules_java//java:defs.bzl", "java_library")
+
 metricscachemgr_deps_files = [
     "//heron/spi/src/java:common-spi-java",
     "//heron/metricsmgr/src/java:metricsmgr-java",

@@ -1,3 +1,5 @@
+load("@rules_java//java:defs.bzl", "java_library", "java_test")
+
 packing_deps_files = [
     ":packing-utils",
     "//heron/spi/src/java:common-spi-java",

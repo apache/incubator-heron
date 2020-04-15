@@ -1,3 +1,5 @@
+load("@rules_java//java:defs.bzl", "java_library", "java_test")
+
 common_deps_files = [
     "//third_party/java:powermock",
     "@maven//:commons_io_commons_io",

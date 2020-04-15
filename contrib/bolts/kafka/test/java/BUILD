@@ -1,3 +1,5 @@
+load("@rules_java//java:defs.bzl", "java_test")
+
 heron_kafka_bolts_test_dep = [
     "//contrib/bolts/kafka/src/java:heron-kafka-bolt-java",
     "//heron/api/src/java:api-java-low-level",
