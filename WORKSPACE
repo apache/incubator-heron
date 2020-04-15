@@ -158,6 +158,19 @@ load("@maven//:defs.bzl", "pinned_maven_install")
 
 pinned_maven_install()
 
+http_archive(
+    name = "rules_python",
+    sha256 = "aa96a691d3a8177f3215b14b0edc9641787abaaa30363a080165d06ab65e1161",
+    url = "https://github.com/bazelbuild/rules_python/releases/download/0.0.1/rules_python-0.0.1.tar.gz",
+)
+
+load("@rules_python//python:repositories.bzl", "py_repositories")
+
+py_repositories()
+# Only needed if using the packaging rules.
+# load("@rules_python//python:pip.bzl", "pip_repositories")
+# pip_repositories()
+
 # for pex repos
 PEX_SRC = "https://pypi.python.org/packages/3a/1d/cd41cd3765b78a4353bbf27d18b099f7afbcd13e7f2dc9520f304ec8981c/pex-1.2.15.tar.gz"
 
@@ -214,6 +227,7 @@ http_file(
 http_archive(
     name = "virtualenv",
     build_file_content = "\n".join([
+        "load(\"@rules_python//python:defs.bzl\", \"py_binary\")",
         "py_binary(",
         "    name = 'virtualenv',",
         "    srcs = ['virtualenv.py'],",

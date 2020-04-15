@@ -1,4 +1,4 @@
-load("@rules_proto//proto:defs.bzl", "proto_library")
+load("//tools/rules:genproto.bzl", "proto_library")
 load("@rules_java//java:defs.bzl", "java_library")
 
 licenses(["notice"])
