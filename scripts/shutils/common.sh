@@ -121,6 +121,12 @@ function ci_environ {
   fi
 }
 
+function pathadd {
+  if [ -d "$1" ] && [[ ":$PATH:" != *":$1:"* ]]; then
+    PATH="${PATH:+"$PATH:"}$1"
+  fi
+}
+
 # Uncomment below to test changes:
 #T="task one"
 #start_timer "$T"
