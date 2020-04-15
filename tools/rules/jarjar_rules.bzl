@@ -13,24 +13,25 @@
 # limitations under the License.
 
 def jarjar_binary_impl(ctx):
-  src_file = ctx.file.src
-  shade_file = ctx.file.shade
-  jarjar = ctx.executable._jarjar
-  class_jar = ctx.outputs.class_jar
+    src_file = ctx.file.src
+    shade_file = ctx.file.shade
+    jarjar = ctx.executable._jarjar
+    class_jar = ctx.outputs.class_jar
 
-  ctx.actions.run(
-      executable = jarjar,
-      inputs = [ src_file, shade_file ],
-      outputs = [ class_jar ],
-      arguments = ["process", shade_file.path, src_file.path, class_jar.path])
+    ctx.actions.run(
+        executable = jarjar,
+        inputs = [src_file, shade_file],
+        outputs = [class_jar],
+        arguments = ["process", shade_file.path, src_file.path, class_jar.path],
+    )
 
-  return [
-      JavaInfo(
-          output_jar = class_jar,
-          compile_jar = class_jar,
-      ),
-      DefaultInfo(files = depset([class_jar])),
-  ]
+    return [
+        JavaInfo(
+            output_jar = class_jar,
+            compile_jar = class_jar,
+        ),
+        DefaultInfo(files = depset([class_jar])),
+    ]
 
 jarjar_attrs = {
     "src": attr.label(
