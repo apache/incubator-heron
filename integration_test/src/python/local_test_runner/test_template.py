@@ -26,11 +26,11 @@ import json
 import logging
 import os
 import time
-from urllib.request import urlopen
 import shutil
 import signal
 import subprocess
 from collections import namedtuple
+from urllib.request import urlopen
 
 from ..common import status
 

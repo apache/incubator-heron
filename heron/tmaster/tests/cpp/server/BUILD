@@ -1,46 +1,44 @@
+load("@rules_cc//cc:defs.bzl", "cc_test")
+
 package(default_visibility = ["//visibility:public"])
 
 cc_test(
     name = "tmaster_unittest",
-    args = ["$(location //heron/config/src/yaml:test-config-internals-yaml)"],
+    size = "small",
     srcs = [
         "dummystmgr.cpp",
-        "tmaster_unittest.cpp",
         "dummystmgr.h",
+        "tmaster_unittest.cpp",
     ],
-    deps = [
-        "//heron/stmgr/src/cpp:manager-cxx",
-        "//heron/tmaster/src/cpp:tmaster-cxx",
-        "@com_google_googletest//:gtest",
+    args = ["$(location //heron/config/src/yaml:test-config-internals-yaml)"],
+    copts = [
+        "-Iheron",
+        "-Iheron/common/src/cpp",
+        "-Iheron/statemgrs/src/cpp",
+        "-Iheron/stmgr/src/cpp",
+        "-Iheron/tmaster/src/cpp",
+        "-Iheron/tmaster/tests/cpp",
+        "-I$(GENDIR)/heron",
+        "-I$(GENDIR)/heron/common/src/cpp",
     ],
     data = [
         "//heron/config/src/yaml:test-config-internals-yaml",
     ],
-    copts = [
-        "-Iheron",
-        "-Iheron/common/src/cpp",
-        "-Iheron/statemgrs/src/cpp",
-        "-Iheron/stmgr/src/cpp",
-        "-Iheron/tmaster/src/cpp",
-        "-Iheron/tmaster/tests/cpp",
-        "-I$(GENDIR)/heron",
-        "-I$(GENDIR)/heron/common/src/cpp",
-    ],
-    size = "small",
     flaky = 1,
     linkstatic = 1,
-)
-
-cc_test(
-    name = "stateful_checkpointer_unittest",
-    srcs = [
-        "stateful_checkpointer_unittest.cpp",
-    ],
     deps = [
         "//heron/stmgr/src/cpp:manager-cxx",
         "//heron/tmaster/src/cpp:tmaster-cxx",
         "@com_google_googletest//:gtest",
     ],
+)
+
+cc_test(
+    name = "stateful_checkpointer_unittest",
+    size = "small",
+    srcs = [
+        "stateful_checkpointer_unittest.cpp",
+    ],
     copts = [
         "-Iheron",
         "-Iheron/common/src/cpp",
@@ -51,23 +49,24 @@ cc_test(
         "-I$(GENDIR)/heron",
         "-I$(GENDIR)/heron/common/src/cpp",
     ],
-    size = "small",
     flaky = 1,
     linkstatic = 1,
+    deps = [
+        "//heron/stmgr/src/cpp:manager-cxx",
+        "//heron/tmaster/src/cpp:tmaster-cxx",
+        "@com_google_googletest//:gtest",
+    ],
 )
 
 cc_test(
     name = "stateful_restorer_unittest",
+    size = "small",
     srcs = [
-        "stateful_restorer_unittest.cpp",
-        "dummytmaster.cpp",
         "dummystmgr.cpp",
-        "dummytmaster.h",
         "dummystmgr.h",
-    ],
-    deps = [
-        "//heron/tmaster/src/cpp:tmaster-cxx",
-        "@com_google_googletest//:gtest",
+        "dummytmaster.cpp",
+        "dummytmaster.h",
+        "stateful_restorer_unittest.cpp",
     ],
     copts = [
         "-Iheron",
@@ -78,19 +77,19 @@ cc_test(
         "-I$(GENDIR)/heron",
         "-I$(GENDIR)/heron/common/src/cpp",
     ],
-    size = "small",
     flaky = 1,
     linkstatic = 1,
+    deps = [
+        "//heron/tmaster/src/cpp:tmaster-cxx",
+        "@com_google_googletest//:gtest",
+    ],
 )
 
 cc_test(
     name = "tcontroller_unittest",
+    size = "small",
     srcs = [
-        "tcontroller_unittest.cpp"
-    ],
-    deps = [
-        "//heron/tmaster/src/cpp:tmaster-cxx",
-        "@com_google_googletest//:gtest",
+        "tcontroller_unittest.cpp",
     ],
     copts = [
         "-Iheron",
@@ -101,7 +100,10 @@ cc_test(
         "-I$(GENDIR)/heron",
         "-I$(GENDIR)/heron/common/src/cpp",
     ],
-    size = "small",
     flaky = 0,
     linkstatic = 1,
+    deps = [
+        "//heron/tmaster/src/cpp:tmaster-cxx",
+        "@com_google_googletest//:gtest",
+    ],
 )

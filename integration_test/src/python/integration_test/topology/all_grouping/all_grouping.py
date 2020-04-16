@@ -26,7 +26,6 @@ from integration_test.src.python.integration_test.core import TestTopologyBuilde
 from integration_test.src.python.integration_test.common.bolt import IdentityBolt
 from integration_test.src.python.integration_test.common.spout import ABSpout
 
-
 def all_grouping_builder(topology_name, http_server_url):
   """Integration test topology builder for all grouping"""
   builder = TestTopologyBuilder(topology_name, http_server_url)

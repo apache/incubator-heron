@@ -29,7 +29,7 @@ if [ "$#" -ne 1 ]; then
     exit 1
 fi
 BAZEL_OS=$1
-BAZEL_VERSION=0.26.0
+BAZEL_VERSION=3.0.0
 
 # Install Bazel
 BAZEL_INSTALLER=bazel-$BAZEL_VERSION-installer-$BAZEL_OS-x86_64.sh

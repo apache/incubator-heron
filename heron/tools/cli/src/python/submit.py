@@ -26,9 +26,9 @@ import glob
 import logging
 import os
 import tempfile
-import requests
 import subprocess
 from urllib.parse import urlparse
+import requests
 
 from heron.common.src.python.utils.log import Log
 from heron.proto import topology_pb2

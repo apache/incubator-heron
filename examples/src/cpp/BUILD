@@ -1,76 +1,78 @@
+load("@rules_cc//cc:defs.bzl", "cc_binary")
+
 package(default_visibility = ["//visibility:public"])
 
 cc_binary(
-    name='exclamationTopology',
+    name = "exclamationTopology",
     srcs = [
-      "exclamation/exclamation-topology.cpp",
-      "spouts/test-word-spout.h",
+        "exclamation/exclamation-topology.cpp",
+        "spouts/test-word-spout.h",
     ],
     copts = [
-      "-Iexamples/src/cpp",
-      "-Iheron",
-      "-Iheron/api/src/cpp",
-      "-I$(GENDIR)/heron",
-      "-I$(GENDIR)/third_party/glog/include",
+        "-Iexamples/src/cpp",
+        "-Iheron",
+        "-Iheron/api/src/cpp",
+        "-I$(GENDIR)/heron",
+        "-I$(GENDIR)/third_party/glog/include",
     ],
+    linkstatic = 1,
     deps = [
         "//heron/api/src/cpp:cxx-api",
     ],
-    linkstatic = 1,
 )
 
 cc_binary(
-    name='libexclamationTopology.so',
+    name = "libexclamationTopology.so",
     srcs = [
-      "exclamation/exclamation-topology.cpp",
-      "spouts/test-word-spout.h",
+        "exclamation/exclamation-topology.cpp",
+        "spouts/test-word-spout.h",
     ],
     copts = [
-      "-Iexamples/src/cpp",
-      "-Iheron/api/src/cpp",
-      "-Iheron",
-      "-I$(GENDIR)/heron",
-      "-I$(GENDIR)/third_party/glog/include",
+        "-Iexamples/src/cpp",
+        "-Iheron/api/src/cpp",
+        "-Iheron",
+        "-I$(GENDIR)/heron",
+        "-I$(GENDIR)/third_party/glog/include",
     ],
+    linkstatic = 1,
     deps = [
         "//heron/api/src/cpp:cxx-api",
     ],
-    linkstatic = 1,
 )
 
 cc_binary(
-    name='ackfailTopology',
+    name = "ackfailTopology",
     srcs = [
-      "ackfail/ackfail-topology.cpp",
-      "spouts/test-word-spout.h",
+        "ackfail/ackfail-topology.cpp",
+        "spouts/test-word-spout.h",
     ],
     copts = [
-      "-Iexamples/src/cpp",
-      "-Iheron/api/src/cpp",
-      "-Iheron",
-      "-I$(GENDIR)/heron",
-      "-I$(GENDIR)/third_party/glog/include",
+        "-Iexamples/src/cpp",
+        "-Iheron/api/src/cpp",
+        "-Iheron",
+        "-I$(GENDIR)/heron",
+        "-I$(GENDIR)/third_party/glog/include",
     ],
+    linkstatic = 1,
     deps = [
         "//heron/api/src/cpp:cxx-api",
     ],
-    linkstatic = 1,
 )
 
 cc_binary(
-    name='libackfailTopology.so',
+    name = "libackfailTopology.so",
     srcs = [
-      "ackfail/ackfail-topology.cpp",
-      "spouts/test-word-spout.h",
+        "ackfail/ackfail-topology.cpp",
+        "spouts/test-word-spout.h",
     ],
     copts = [
-      "-Iexamples/src/cpp",
-      "-Iheron/api/src/cpp",
-      "-Iheron",
-      "-I$(GENDIR)/heron",
+        "-Iexamples/src/cpp",
+        "-Iheron/api/src/cpp",
+        "-Iheron",
+        "-I$(GENDIR)/heron",
     ],
+    linkstatic = 1,
     deps = [
         "//heron/api/src/cpp:cxx-api",
     ],
-    linkstatic = 1,
 )

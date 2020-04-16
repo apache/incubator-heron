@@ -1,61 +1,63 @@
+load("@rules_cc//cc:defs.bzl", "cc_test")
+
 package(default_visibility = ["//visibility:public"])
 
 cc_test(
     name = "fileutils_unittest",
+    size = "small",
     srcs = ["fileutils_unittest.cpp"],
-    deps = [
-        "//heron/common/src/cpp/basics:basics-cxx",
-        "@com_google_googletest//:gtest",
-    ],
     copts = [
         "-I.",
         "-Iheron/common/src/cpp",
     ],
-    size = "small",
     linkstatic = 1,
+    deps = [
+        "//heron/common/src/cpp/basics:basics-cxx",
+        "@com_google_googletest//:gtest",
+    ],
 )
 
 cc_test(
     name = "rid_unittest",
+    size = "small",
     srcs = ["rid_unittest.cpp"],
-    deps = [
-        "//heron/common/src/cpp/basics:basics-cxx",
-        "@com_google_googletest//:gtest",
-    ],
     copts = [
         "-I.",
         "-Iheron/common/src/cpp",
     ],
-    size = "small",
     linkstatic = 1,
+    deps = [
+        "//heron/common/src/cpp/basics:basics-cxx",
+        "@com_google_googletest//:gtest",
+    ],
 )
 
 cc_test(
     name = "strutils_unittest",
+    size = "small",
     srcs = ["strutils_unittest.cpp"],
-    deps = [
-        "//heron/common/src/cpp/basics:basics-cxx",
-        "@com_google_googletest//:gtest",
-    ],
     copts = [
         "-I.",
         "-Iheron/common/src/cpp",
     ],
-    size = "small",
     linkstatic = 1,
+    deps = [
+        "//heron/common/src/cpp/basics:basics-cxx",
+        "@com_google_googletest//:gtest",
+    ],
 )
 
 cc_test(
     name = "utils_unittest",
+    size = "small",
     srcs = ["utils_unittest.cpp"],
-    deps = [
-        "//heron/common/src/cpp/basics:basics-cxx",
-        "@com_google_googletest//:gtest",
-    ],
     copts = [
         "-I.",
         "-Iheron/common/src/cpp",
     ],
-    size = "small",
     linkstatic = 1,
+    deps = [
+        "//heron/common/src/cpp/basics:basics-cxx",
+        "@com_google_googletest//:gtest",
+    ],
 )

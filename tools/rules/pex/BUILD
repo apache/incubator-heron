@@ -1,28 +1,30 @@
-exports_files(["pex_rules.bzl", "testlauncher.sh.template"])
+exports_files([
+    "pex_rules.bzl",
+    "testlauncher.sh.template",
+])
 
 # Can't use pex_binary to build this one, so we have this elaborate ritual:
 PRE_EXECUTE = [
-    'OUTDIR=$$(cd $(@D) && pwd)',
+    "OUTDIR=$$(cd $(@D) && pwd)",
 ]
 
 DARWIN_EXECUTE = [
-    '# Workaround really long shebang lines breaking on linux:',
-    '# Use a /tmp path, but keep the actual venv inside the bazel outdir.',
-    '# Avoids having to worry about cleanup, even if sandboxing is off.',
-    'TMPF=$$(mktemp -d -t pex.XXXXX)',
+    "# Workaround really long shebang lines breaking on linux:",
+    "# Use a /tmp path, but keep the actual venv inside the bazel outdir.",
+    "# Avoids having to worry about cleanup, even if sandboxing is off.",
+    "TMPF=$$(mktemp -d -t pex.XXXXX)",
 ]
 
 LINUX_EXECUTE = [
-    '# Workaround really long shebang lines breaking on linux:',
-    '# Use a /tmp path, but keep the actual venv inside the bazel outdir.',
-    '# Avoids having to worry about cleanup, even if sandboxing is off.',
-    'TMPF=$$(mktemp -d -p /tmp pex.XXXXX)',
+    "# Workaround really long shebang lines breaking on linux:",
+    "# Use a /tmp path, but keep the actual venv inside the bazel outdir.",
+    "# Avoids having to worry about cleanup, even if sandboxing is off.",
+    "TMPF=$$(mktemp -d -p /tmp pex.XXXXX)",
 ]
 
 POST_EXECUTE = [
     'ln -sf "$$OUTDIR" "$$TMPF"',
-    'VENV="$${TMPF}/venv"', 
-
+    'VENV="$${TMPF}/venv"',
     '$(location @virtualenv//:virtualenv) --no-download --quiet --clear "$$VENV"',
     'PYTHON="$$VENV/bin/python"',
 
@@ -43,7 +45,7 @@ POST_EXECUTE = [
             --find-links $$(dirname $(location @setuptools_src//file)) \
             --find-links $$(dirname $(location @requests_src//file)) \
             --find-links $$(dirname $(location @wheel_src//file))',
-]
+   ]
 
 genrule(
     name = "pex_wrapper",
@@ -56,14 +58,14 @@ genrule(
         "@pex_src//file",
         "@requests_src//file",
     ],
-    tools = ["@virtualenv//:virtualenv"],
     outs = ["pex_wrapper.pex"],
-    executable = True,
-    output_to_bindir = True,
-    message = "Bootstrapping pex",
     cmd = select({
         "//tools/platform:darwin": "\n".join(PRE_EXECUTE + DARWIN_EXECUTE + POST_EXECUTE),
         "//conditions:default": "\n".join(PRE_EXECUTE + LINUX_EXECUTE + POST_EXECUTE),
     }),
+    executable = True,
+    message = "Bootstrapping pex",
+    output_to_bindir = True,
+    tools = ["@virtualenv"],
     visibility = ["//visibility:public"],
 )

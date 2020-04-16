@@ -15,5 +15,5 @@ pex_binary(
     deps = [
         ":heron-python-streamlet-py",
         "//heronpy/api:heron-python-py",
-    ]
+    ],
 )

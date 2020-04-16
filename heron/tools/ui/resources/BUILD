@@ -2,11 +2,10 @@ package(default_visibility = ["//visibility:public"])
 
 filegroup(
     name = "templates",
-    srcs = glob(['templates/**/*.html']),
+    srcs = glob(["templates/**/*.html"]),
 )
 
 filegroup(
     name = "static",
-    srcs = glob(['static/**/*']),
+    srcs = glob(["static/**/*"]),
 )
-

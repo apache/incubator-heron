@@ -1,3 +1,5 @@
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
 package(default_visibility = ["//visibility:public"])
 
 cc_library(
@@ -8,8 +10,8 @@ cc_library(
         "statemgr/heron-zkstatemgr.cpp",
     ],
     hdrs = [
-        "statemgr/heron-statemgr.h",
         "statemgr/heron-localfilestatemgr.h",
+        "statemgr/heron-statemgr.h",
         "statemgr/heron-zkstatemgr.h",
     ],
     copts = [
@@ -19,10 +21,10 @@ cc_library(
         "-I$(GENDIR)/heron",
         "-I$(GENDIR)/heron/common/src/cpp",
     ],
+    linkstatic = 1,
     deps = [
         "//config:config-cxx",
-        "//heron/proto:proto-cxx",
         "//heron/common/src/cpp/zookeeper:zookeeper-cxx",
+        "//heron/proto:proto-cxx",
     ],
-    linkstatic = 1,
 )

@@ -1,35 +1,34 @@
+load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
+
 package(default_visibility = ["//visibility:public"])
 
 cc_library(
     name = "tmaster-cxx",
     srcs = [
+        "manager/ckptmgr-client.cpp",
+        "manager/ckptmgr-client.h",
+        "manager/stateful-checkpointer.cpp",
+        "manager/stateful-checkpointer.h",
+        "manager/stateful-controller.cpp",
+        "manager/stateful-controller.h",
+        "manager/stateful-restorer.cpp",
+        "manager/stateful-restorer.h",
         "manager/stats-interface.cpp",
+        "manager/stats-interface.h",
         "manager/stmgrstate.cpp",
+        "manager/stmgrstate.h",
         "manager/tcontroller.cpp",
+        "manager/tcontroller.h",
         "manager/tmaster.cpp",
         "manager/tmasterserver.cpp",
-        "manager/tmetrics-collector.cpp",
-        "manager/ckptmgr-client.cpp",
-        "manager/stateful-restorer.cpp",
-        "manager/stateful-checkpointer.cpp",
-        "manager/stateful-controller.cpp",
-
-        "processor/stmgr-heartbeat-processor.cpp",
-        "processor/stmgr-register-processor.cpp",
-        "processor/tmaster-processor.cpp",
-
-        "manager/stats-interface.h",
-        "manager/stmgrstate.h",
-        "manager/tcontroller.h",
         "manager/tmasterserver.h",
+        "manager/tmetrics-collector.cpp",
         "manager/tmetrics-collector.h",
-        "manager/ckptmgr-client.h",
-        "manager/stateful-restorer.h",
-        "manager/stateful-checkpointer.h",
-        "manager/stateful-controller.h",
-
+        "processor/stmgr-heartbeat-processor.cpp",
         "processor/stmgr-heartbeat-processor.h",
+        "processor/stmgr-register-processor.cpp",
         "processor/stmgr-register-processor.h",
+        "processor/tmaster-processor.cpp",
         "processor/tmaster-processor.h",
     ],
     hdrs = [
@@ -44,16 +43,16 @@ cc_library(
         "-I$(GENDIR)/heron",
         "-I$(GENDIR)/heron/common/src/cpp",
     ],
+    linkstatic = 1,
     deps = [
+        "//heron/common/src/cpp/metrics:metrics-cxx",
         "//heron/common/src/cpp/network:network-cxx",
         "//heron/common/src/cpp/zookeeper:zookeeper-cxx",
-        "//heron/common/src/cpp/metrics:metrics-cxx",
-        "//heron/statemgrs/src/cpp:statemgrs-cxx",
         "//heron/proto:proto-cxx",
-        "@com_github_jbeder_yaml_cpp//:yaml-cxx",
+        "//heron/statemgrs/src/cpp:statemgrs-cxx",
         "@com_github_cereal//:cereal-cxx",
+        "@com_github_jbeder_yaml_cpp//:yaml-cxx",
     ],
-    linkstatic = 1,
 )
 
 cc_binary(
@@ -69,15 +68,15 @@ cc_binary(
         "-I$(GENDIR)/heron",
         "-I$(GENDIR)/heron/common/src/cpp",
     ],
+    linkstatic = 1,
     deps = [
         ":tmaster-cxx",
-        "//heron/common/src/cpp/metrics:metrics-cxx",
-        "//heron/statemgrs/src/cpp:statemgrs-cxx",
-        "//heron/common/src/cpp/config:config-cxx",
-        "//heron/proto:proto-cxx",
-        "//heron/common/src/cpp/zookeeper:zookeeper-cxx",
-        "//heron/common/src/cpp/network:network-cxx",
         "//config:config-cxx",
+        "//heron/common/src/cpp/config:config-cxx",
+        "//heron/common/src/cpp/metrics:metrics-cxx",
+        "//heron/common/src/cpp/network:network-cxx",
+        "//heron/common/src/cpp/zookeeper:zookeeper-cxx",
+        "//heron/proto:proto-cxx",
+        "//heron/statemgrs/src/cpp:statemgrs-cxx",
     ],
-    linkstatic = 1,
 )

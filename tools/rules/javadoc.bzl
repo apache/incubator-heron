@@ -14,45 +14,45 @@
 # Javadoc rule.
 
 def _impl(ctx):
-  zip_output = ctx.outputs.zip
-  transitive_jar_set = []
-  source_jars = []
-  for l in ctx.attr.libs:
-    source_jars += l.java.source_jars.to_list()
-    transitive_jar_set += l.java.transitive_deps.to_list()
-  transitive_jar_paths = [j.path for j in transitive_jar_set]
-  dir = ctx.outputs.zip.path + ".dir"
-  source = ctx.outputs.zip.path + ".source"
-  external_docs = ["http://docs.oracle.com/javase/8/docs/api"] + ctx.attr.external_docs
-  cmd = [
-      "rm -rf %s" % source,
-      "mkdir %s" % source,
-      " && ".join(["unzip -qud %s %s" % (source, j.path) for j in source_jars]),
-      "rm -rf %s" % dir,
-      "mkdir %s" % dir,
-      " ".join([
-        ctx.file._javadoc.path,
-        "-Xdoclint:-missing",
-        "-protected",
-        "-encoding UTF-8",
-        "-charset UTF-8",
-        "-notimestamp",
-        "-quiet",
-        "-windowtitle '%s'" % ctx.attr.title,
-        " ".join(['-link %s' % url for url in external_docs]),
-        "-sourcepath %s" % source,
-        "-subpackages ",
-        ":".join(ctx.attr.pkgs),
-        " -classpath ",
-        ":".join(transitive_jar_paths),
-        "-d %s" % dir]),
-    "find %s -exec touch -t 198001010000 '{}' ';'" % dir,
-    "(cd %s && zip -qr ../%s *)" % (dir, ctx.outputs.zip.basename),
-  ]
-  ctx.actions.run_shell(
-      inputs = list(transitive_jar_set) + list(source_jars) + ctx.files._jdk,
-      outputs = [zip_output],
-      command = " && ".join(cmd))
+    zip_output = ctx.outputs.zip
+    source_jars = depset(transitive = [depset(j[JavaInfo].source_jars) for j in ctx.attr.libs])
+    transitive_jar_set = depset(transitive = [j[JavaInfo].transitive_deps for j in ctx.attr.libs])
+    transitive_jar_paths = [j.path for j in transitive_jar_set.to_list()]
+    dir = ctx.outputs.zip.path + ".dir"
+    source = ctx.outputs.zip.path + ".source"
+    external_docs = ["http://docs.oracle.com/javase/8/docs/api"] + ctx.attr.external_docs
+    cmd = [
+        "rm -rf %s" % source,
+        "mkdir %s" % source,
+        " && ".join(["unzip -qud %s %s" % (source, j.path) for j in source_jars.to_list()]),
+        "rm -rf %s" % dir,
+        "mkdir %s" % dir,
+        " ".join([
+            ctx.file._javadoc.path,
+            "-Xdoclint:-missing",
+            "-protected",
+            "-encoding UTF-8",
+            "-charset UTF-8",
+            "-notimestamp",
+            "-quiet",
+            "-windowtitle '%s'" % ctx.attr.title,
+            " ".join(["-link %s" % url for url in external_docs]),
+            "-sourcepath %s" % source,
+            "-subpackages ",
+            ":".join(ctx.attr.pkgs),
+            " -classpath ",
+            ":".join(transitive_jar_paths),
+            "-d %s" % dir,
+        ]),
+        "find %s -exec touch -t 198001010000 '{}' ';'" % dir,
+        "(cd %s && zip -qr ../%s *)" % (dir, ctx.outputs.zip.basename),
+    ]
+    ctx.actions.run_shell(
+        inputs = list(transitive_jar_set.to_list()) + list(source_jars.to_list()) + ctx.files._jdk,
+        outputs = [zip_output],
+        command = " && ".join(cmd),
+    )
+
 java_doc = rule(
     attrs = {
         "libs": attr.label_list(allow_files = False),

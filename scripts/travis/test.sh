@@ -52,6 +52,8 @@ start_timer "$T"
 python ${UTILS}/save-logs.py "heron_tests_install.txt" bazel --bazelrc=tools/travis/bazel.rc run --config=$PLATFORM -- scripts/packages:heron-tests-install.sh --user
 end_timer "$T"
 
+pathadd ${HOME}/bin/
+
 # run local integration test
 T="heron integration_test local"
 start_timer "$T"

@@ -27,8 +27,8 @@ import logging
 import os
 import signal
 from urllib.parse import parse_qsl
-import tornado.web
 
+import tornado.web
 from tornado.options import options
 
 class KillExecutorHandler(tornado.web.RequestHandler):

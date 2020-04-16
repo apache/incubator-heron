@@ -1,31 +1,32 @@
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
 package(default_visibility = ["//visibility:public"])
 
 cc_library(
     name = "basics-cxx",
     srcs = [
         "basics.cpp",
-        "execmeta.cpp",
-        "fileutils.cpp",
-        "iputils.cpp",
-        "modinit.cpp",
-        "processutils.cpp",
-        "randutils.cpp",
-        "ridgen.cpp",
-        "sockutils.cpp",
-        "strutils.cpp",
-        "mempool.cpp",
-
         "callback.h",
         "callback1.h",
         "classcallback.h",
         "classcallback1.h",
+        "execmeta.cpp",
         "execmeta.h",
+        "fileutils.cpp",
         "fileutils.h",
+        "iputils.cpp",
         "iputils.h",
+        "mempool.cpp",
+        "mempool.h",
+        "modinit.cpp",
         "modinit.h",
+        "processutils.cpp",
         "processutils.h",
+        "randutils.cpp",
         "randutils.h",
+        "ridgen.cpp",
         "ridgen.h",
+        "sockutils.cpp",
         "sockutils.h",
         "spconsts.h",
         "spfuncs.h",
@@ -33,10 +34,10 @@ cc_library(
         "sprcodes.h",
         "sptest.h",
         "sptypes.h",
+        "strutils.cpp",
         "strutils.h",
-        "mempool.h",
     ],
-    hdrs = [ 
+    hdrs = [
         "basics.h",
     ],
     copts = [
@@ -44,6 +45,7 @@ cc_library(
         "-Iheron/common/src/cpp",
         "-I.",
     ],
+    linkstatic = 1,
     deps = [
         "//config:config-cxx",
         "@com_github_google_glog//:glog",
@@ -52,8 +54,7 @@ cc_library(
         "//third_party/kashmir:kashmir-cxx",
         "@com_google_protobuf//:protobuf",
     ] + select({
-        "//tools/platform:darwin": [], 
+        "//tools/platform:darwin": [],
         "//conditions:default": ["@org_nongnu_libunwind//:libunwind"],
     }),
-    linkstatic = 1,
 )
