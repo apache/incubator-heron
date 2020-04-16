@@ -19,7 +19,7 @@ FROM ubuntu:18.04
 
 # This is passed to the heron build command via the --config flag
 ENV TARGET_PLATFORM ubuntu
-ENV bazelVersion 0.26.0
+ENV bazelVersion 3.0.0
 
 RUN apt-get update && apt-get -y install \
       g++ \
@@ -27,9 +27,10 @@ RUN apt-get update && apt-get -y install \
       automake \
       libtool-bin \
       libunwind8 \
+      libcppunit-dev \
       patch \
       python-dev \
-      python3-dev \
+      pkg-config \
       wget \
       zip \
       virtualenv \

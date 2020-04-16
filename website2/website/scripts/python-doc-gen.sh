@@ -24,7 +24,7 @@ cd ${HERON_ROOT_DIR}
 
 ./bazel_configure.py
 
-# Generate python whl packages, packages will be generated in ${HERON_ROOT_DIR}/bazel-genfiles/scripts/packages/
+# Generate python whl packages, packages will be generated in ${HERON_ROOT_DIR}/bazel-bin/scripts/packages/
 bazel build  --config=ubuntu scripts/packages:pypkgs
 
 cd website2/website/
@@ -34,7 +34,7 @@ rm -rf ./venv/
 mkdir -p ./venv/
 VENV=./venv/
 echo $VENV
-PIP_LOCATION=${HERON_ROOT_DIR}/bazel-genfiles/scripts/packages
+PIP_LOCATION=${HERON_ROOT_DIR}/bazel-bin/scripts/packages
 
 virtualenv "$VENV"
 source "$VENV/bin/activate"

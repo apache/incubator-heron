@@ -1,13 +1,12 @@
+load("@rules_cc//cc:defs.bzl", "cc_test")
+
 package(default_visibility = ["//visibility:public"])
 
 cc_test(
     name = "zk-statemgr_unittest",
+    size = "small",
     srcs = [
         "zkstatemgr_unittest.cpp",
-    ],
-    deps = [
-        "//heron/statemgrs/src/cpp:statemgrs-cxx",
-        "@com_google_googletest//:gtest",
     ],
     copts = [
         "-Iheron",
@@ -16,6 +15,9 @@ cc_test(
         "-I$(GENDIR)/heron",
         "-I$(GENDIR)/heron/common/src/cpp",
     ],
-    size = "small",
     linkstatic = 1,
+    deps = [
+        "//heron/statemgrs/src/cpp:statemgrs-cxx",
+        "@com_google_googletest//:gtest",
+    ],
 )

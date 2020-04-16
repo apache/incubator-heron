@@ -41,10 +41,10 @@ function get_heron_python_paths() {
 
 function get_heron_thirdparty_dependencies() {
   # bazel-bin/heron/proto for heron proto jars from heron/proto
-  # bazel-genfiles/external for third_party deps
-  # bazel-heron/bazel-out/host/bin/third_party for extra_action proto jars in third_party
-  # bazel-heron/bazel-out/host/genfiles/external more third_party deps
-  echo "$(find {bazel-bin/heron/proto,bazel-genfiles/external,bazel-incubator-heron/bazel-out/host/bin/third_party,bazel-incubator-heron/bazel-out/host/genfiles/external}/. -name "*jar" -type f | sort -u)";
+  # bazel-bin/external for third_party deps
+  # bazel-heron/bazel-bin/host/bin/third_party for extra_action proto jars in third_party
+  # bazel-heron/bazel-bin/host/genfiles/external more third_party deps
+  echo "$(find {bazel-bin/heron/proto,bazel-bin/external,bazel-incubator-heron/bazel-bin/host/bin/third_party,bazel-incubator-heron/bazel-bin/host/genfiles/external}/. -name "*jar" -type f | sort -u)";
 }
 
 function get_heron_bazel_deps(){
@@ -110,8 +110,8 @@ function collect_generated_binary_deps() {
 
 function collect_generated_paths() {
   # uniq to avoid doing blaze query on duplicates.
-  for path in $(find bazel-genfiles/ -name "*.java" | sed 's|/\{0,1\}bazel-genfiles/\{1,2\}|//|' | uniq); do
-    source_path=$(echo ${path} | sed 's|//|bazel-genfiles/|' | sed 's|/com/.*$||')
+  for path in $(find bazel-bin/ -name "*.java" | sed 's|/\{0,1\}bazel-bin/\{1,2\}|//|' | uniq); do
+    source_path=$(echo ${path} | sed 's|//|bazel-bin/|' | sed 's|/com/.*$||')
     echo "$(get_containing_library ${path}):${source_path}"
   done | sort -u
 }

@@ -16,6 +16,5 @@ pex_binary(
     srcs = glob(["**/*.py"]),
     deps = [
         "//heronpy/api:heron-python-py",
-    ]
+    ],
 )
-

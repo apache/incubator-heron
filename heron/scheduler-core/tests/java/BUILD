@@ -1,6 +1,8 @@
+load("@rules_java//java:defs.bzl", "java_library")
+
 common_deps_files = [
-    "@com_google_guava_guava//jar",
-    "@commons_io_commons_io//jar",
+    "@maven//:com_google_guava_guava",
+    "@maven//:commons_io_commons_io",
     "//third_party/java:powermock",
     "//heron/api/src/java:api-java-low-level",
     "//heron/common/src/java:basics-java",

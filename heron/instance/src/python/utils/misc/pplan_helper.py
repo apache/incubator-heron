@@ -21,13 +21,13 @@
 '''pplan_helper.py'''
 import socket
 
-from heronpy.api.custom_grouping import ICustomGrouping
-from heronpy.api.serializer import default_serializer
 from heron.proto import topology_pb2
 from heron.common.src.python.utils.log import Log
 import heron.common.src.python.pex_loader as pex_loader
-
 from heron.instance.src.python.utils.topology import TopologyContextImpl
+
+from heronpy.api.custom_grouping import ICustomGrouping
+from heronpy.api.serializer import default_serializer
 
 from .custom_grouping_helper import CustomGroupingHelper
 

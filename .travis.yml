@@ -15,6 +15,8 @@ addons:
   apt:
     packages:
       - libtool-bin
+      - libcppunit-dev
+      - pkg-config
       - python-dev
       - python-wheel
       - wget
@@ -24,7 +26,7 @@ addons:
       - libgoogle-perftools-dev
 
 env:
-  - BAZEL_VERSION=0.26.0 ENABLE_HEAPCHECK=1
+  - BAZEL_VERSION=3.0.0 ENABLE_HEAPCHECK=1
 
 before_install:
   # download and install bazel

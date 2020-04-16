@@ -1,3 +1,5 @@
+load("@rules_java//java:defs.bzl", "java_library")
+
 test_deps_files = \
     heron_java_proto_files() + [
         "//heron/api/src/java:api-java-low-level",
@@ -19,6 +21,8 @@ java_library(
 )
 
 java_tests(
+    size = "small",
+    data = ["//heron/config/src/yaml:test-config-internals-yaml"],
     test_classes = [
         "org.apache.heron.grouping.CustomGroupingTest",
         "org.apache.heron.grouping.EmitDirectBoltTest",
@@ -37,6 +41,4 @@ java_tests(
     runtime_deps = [
         ":instance-tests",
     ],
-    data = ["//heron/config/src/yaml:test-config-internals-yaml"],
-    size = "small",
 )

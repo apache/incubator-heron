@@ -1,3 +1,5 @@
+load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
+
 package(default_visibility = ["//visibility:public"])
 
 cc_library(
@@ -12,11 +14,11 @@ cc_library(
         "grouping/shuffle-grouping.cpp",
     ],
     hdrs = [
-        "grouping/grouping.h",
         "grouping/all-grouping.h",
         "grouping/custom-grouping.h",
         "grouping/direct-grouping.h",
         "grouping/fields-grouping.h",
+        "grouping/grouping.h",
         "grouping/lowest-grouping.h",
         "grouping/shuffle-grouping.h",
     ],
@@ -28,26 +30,25 @@ cc_library(
         "-I$(GENDIR)/heron",
         "-I$(GENDIR)/heron/common/src/cpp",
     ],
+    linkstatic = 1,
     deps = [
         "//config:config-cxx",
-        "//heron/proto:proto-cxx",
         "//heron/common/src/cpp/network:network-cxx",
+        "//heron/proto:proto-cxx",
     ],
-    linkstatic = 1,
 )
 
 cc_library(
     name = "util-cxx",
     srcs = [
-        "util/rotating-map.cpp",
-        "util/tuple-cache.cpp",
-        "util/xor-manager.cpp",
         "util/neighbour-calculator.cpp",
-
-        "util/rotating-map.h",
-        "util/tuple-cache.h",
-        "util/xor-manager.h",
         "util/neighbour-calculator.h",
+        "util/rotating-map.cpp",
+        "util/rotating-map.h",
+        "util/tuple-cache.cpp",
+        "util/tuple-cache.h",
+        "util/xor-manager.cpp",
+        "util/xor-manager.h",
     ],
     copts = [
         "-Iheron",
@@ -56,41 +57,39 @@ cc_library(
         "-I$(GENDIR)/heron",
         "-I$(GENDIR)/heron/common/src/cpp",
     ],
+    linkstatic = 1,
     deps = [
         "//config:config-cxx",
-        "//heron/proto:proto-cxx",
-        "//heron/common/src/cpp/network:network-cxx",
         "//heron/common/src/cpp/config:config-cxx",
+        "//heron/common/src/cpp/network:network-cxx",
+        "//heron/proto:proto-cxx",
         "@com_github_hopscotch_hashmap//:hopscotch-hashmap",
     ],
-    linkstatic = 1,
 )
-
 
 cc_library(
     name = "manager-cxx",
     srcs = [
-        "manager/stmgr-client.cpp",
-        "manager/stmgr-clientmgr.cpp",
-        "manager/stmgr-server.cpp",
-        "manager/instance-server.cpp",
-        "manager/stmgr.cpp",
-        "manager/stream-consumers.cpp",
-        "manager/tmaster-client.cpp",
-        "manager/ckptmgr-client.cpp",
         "manager/checkpoint-gateway.cpp",
-        "manager/stateful-restorer.cpp",
-
-        "manager/stmgr-client.h",
-        "manager/stmgr-clientmgr.h",
-        "manager/stmgr-server.h",
-        "manager/instance-server.h",
-        "manager/stmgr.h",
-        "manager/stream-consumers.h",
-        "manager/tmaster-client.h",
-        "manager/ckptmgr-client.h",
         "manager/checkpoint-gateway.h",
+        "manager/ckptmgr-client.cpp",
+        "manager/ckptmgr-client.h",
+        "manager/instance-server.cpp",
+        "manager/instance-server.h",
+        "manager/stateful-restorer.cpp",
         "manager/stateful-restorer.h",
+        "manager/stmgr.cpp",
+        "manager/stmgr.h",
+        "manager/stmgr-client.cpp",
+        "manager/stmgr-client.h",
+        "manager/stmgr-clientmgr.cpp",
+        "manager/stmgr-clientmgr.h",
+        "manager/stmgr-server.cpp",
+        "manager/stmgr-server.h",
+        "manager/stream-consumers.cpp",
+        "manager/stream-consumers.h",
+        "manager/tmaster-client.cpp",
+        "manager/tmaster-client.h",
     ],
     copts = [
         "-Iheron",
@@ -100,18 +99,18 @@ cc_library(
         "-I$(GENDIR)/heron",
         "-I$(GENDIR)/heron/common/src/cpp",
     ],
+    linkstatic = 1,
     deps = [
         ":grouping-cxx",
         ":util-cxx",
         "//config:config-cxx",
-        "//heron/proto:proto-cxx",
-        "//heron/common/src/cpp/network:network-cxx",
         "//heron/common/src/cpp/config:config-cxx",
         "//heron/common/src/cpp/metrics:metrics-cxx",
+        "//heron/common/src/cpp/network:network-cxx",
+        "//heron/proto:proto-cxx",
         "//heron/statemgrs/src/cpp:statemgrs-cxx",
         "@com_github_jbeder_yaml_cpp//:yaml-cxx",
     ],
-    linkstatic = 1,
 )
 
 cc_binary(
@@ -127,17 +126,17 @@ cc_binary(
         "-I$(GENDIR)/heron",
         "-I$(GENDIR)/heron/common/src/cpp",
     ],
+    linkstatic = 1,
     deps = [
-        ":manager-cxx",
         ":grouping-cxx",
+        ":manager-cxx",
         ":util-cxx",
         "//config:config-cxx",
-        "//heron/proto:proto-cxx",
+        "//heron/common/src/cpp/metrics:metrics-cxx",
         "//heron/common/src/cpp/network:network-cxx",
         "//heron/common/src/cpp/zookeeper:zookeeper-cxx",
-        "//heron/common/src/cpp/metrics:metrics-cxx",
+        "//heron/proto:proto-cxx",
         "//heron/statemgrs/src/cpp:statemgrs-cxx",
         "@com_github_jbeder_yaml_cpp//:yaml-cxx",
     ],
-    linkstatic = 1,
 )

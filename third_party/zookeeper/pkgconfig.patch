@@ -1,0 +1,12 @@
+diff -Naur /tmp/zookeeper-client/zookeeper-client-c/configure.ac /tmp/zookeeper-client/zookeeper-client-c/configure.ac
+--- /tmp/zookeeper-client/zookeeper-client-c/configure.ac	2019-03-06 16:50:47.000000000 +0000
++++ /tmp/zookeeper-client/zookeeper-client-c/configure.ac	2020-04-04 23:44:40.442252000 +0000
+@@ -34,7 +34,7 @@
+    CPPUNIT_INCLUDE=
+    CPPUNIT_LIBS=
+ else
+-   AM_PATH_CPPUNIT(1.10.2)
++   PKG_CHECK_MODULES([CPPUNIT], [cppunit >= 1.10.2])
+ fi
+ 
+ if test "$CALLER" = "ANT" ; then

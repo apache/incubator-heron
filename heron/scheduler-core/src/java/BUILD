@@ -1,3 +1,5 @@
+load("@rules_java//java:defs.bzl", "java_binary", "java_library")
+
 package(default_visibility = ["//visibility:public"])
 
 common_deps_files = [
@@ -5,10 +7,10 @@ common_deps_files = [
     "//heron/common/src/java:config-java",
     "//heron/common/src/java:utils-java",
     "//heron/api/src/java:classification",
-    "@commons_cli_commons_cli//jar",
-    "@com_google_guava_guava//jar",
-    "@javax_xml_bind_jaxb//jar",
-    "@org_apache_commons_commons_lang3//jar",
+    "@maven//:commons_cli_commons_cli",
+    "@maven//:com_google_guava_guava",
+    "@maven//:org_apache_commons_commons_lang3",
+    "@maven//:javax_xml_bind_jaxb_api",
     "//third_party/java:jackson",
 ]
 
@@ -28,7 +30,7 @@ scheduler_deps_files = \
     spi_deps_files
 
 java_library(
-    name = 'scheduler-java',
+    name = "scheduler-java",
     srcs = glob(
         ["**/*.java"],
     ),
@@ -36,7 +38,7 @@ java_library(
 )
 
 java_binary(
-    name = 'scheduler-unshaded',
+    name = "scheduler-unshaded",
     srcs = glob(["**/*.java"]),
     deps = scheduler_deps_files,
 )
@@ -45,5 +47,5 @@ genrule(
     name = "heron-scheduler",
     srcs = [":scheduler-unshaded_deploy.jar"],
     outs = ["heron-scheduler.jar"],
-    cmd  = "cp $< $@",
+    cmd = "cp $< $@",
 )

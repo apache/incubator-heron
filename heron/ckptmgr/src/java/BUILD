@@ -1,3 +1,5 @@
+load("@rules_java//java:defs.bzl", "java_binary", "java_library")
+
 licenses(["notice"])
 
 package(default_visibility = ["//visibility:public"])
@@ -14,8 +16,8 @@ java_library(
         "//heron/common/src/java:config-java",
         "//heron/common/src/java:network-java",
         "//heron/common/src/java:utils-java",
-        "//heron/proto:proto_common_java",
         "//heron/proto:proto_ckptmgr_java",
+        "//heron/proto:proto_common_java",
         "//heron/proto:proto_physical_plan_java",
         "//heron/proto:proto_stmgr_java",
         "//heron/proto:proto_topology_java",
@@ -36,7 +38,7 @@ java_binary(
         "//heron/common/src/java:utils-java",
         "//heron/proto:proto_ckptmgr_java",
         "//heron/spi/src/java:statefulstorage-spi-java",
-        "@commons_cli_commons_cli//jar",
+        "@maven//:commons_cli_commons_cli",
     ],
 )
 
@@ -44,5 +46,5 @@ jarjar_binary(
     name = "heron-ckptmgr",
     src = ":ckptmgr-unshaded_deploy.jar",
     shade = "shade.conf",
-    deps = ["@org_sonatype_plugins_jarjar_maven_plugin//jar"]
+    deps = ["@maven//:org_sonatype_plugins_jarjar_maven_plugin"],
 )

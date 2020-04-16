@@ -1,11 +1,13 @@
+load("@rules_java//java:defs.bzl", "java_test")
+
 heron_kafka_spouts_test_dep = [
     "//contrib/spouts/kafka/src/java:heron-kafka-spout-java",
     "//heron/api/src/java:api-java-low-level",
     "//heron/common/src/java:basics-java",
     "//heron/common/src/java:config-java",
     "//third_party/java:junit4",
-    "@org_apache_kafka_kafka_clients//jar",
-    "@org_mockito_mockito_all//jar",
+    "@maven//:org_apache_kafka_kafka_clients",
+    "@maven//:org_mockito_mockito_all",
 ]
 
 java_test(

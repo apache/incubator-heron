@@ -97,6 +97,8 @@ function discover_platform {
     echo "centos"
   elif [[ $discover =~ ^.*Ubuntu.*$ ]]; then
     echo "ubuntu"
+  elif [[ $discover =~ ^.*debian.*$ ]]; then
+    echo "debian"
   elif [[ $discover =~ ^Darwin.*$ ]]; then
     echo "darwin"
   else
@@ -116,6 +118,12 @@ function ci_environ {
   else
     echo "$environ ci not supported"
     exit 1
+  fi
+}
+
+function pathadd {
+  if [ -d "$1" ] && [[ ":$PATH:" != *":$1:"* ]]; then
+    PATH="${PATH:+"$PATH:"}$1"
   fi
 }
 

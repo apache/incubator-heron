@@ -21,6 +21,7 @@ from pex.variables import ENV
 
 import json
 import os
+import shutil
 import sys
 
 
@@ -115,7 +116,7 @@ def main():
         tmp_name = poptions.pex_name + '~'
         safe_delete(tmp_name)
         pex_builder.build(tmp_name)
-        os.rename(tmp_name, poptions.pex_name)
+        shutil.move(tmp_name, poptions.pex_name)
 
 
 if __name__ == '__main__':

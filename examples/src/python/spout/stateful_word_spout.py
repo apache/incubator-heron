@@ -22,6 +22,7 @@
 
 from itertools import cycle
 from collections import Counter
+
 from heronpy.api.spout.spout import Spout
 from heronpy.api.state.stateful_component import StatefulComponent
 

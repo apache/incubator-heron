@@ -5,23 +5,23 @@ pex_library(
     srcs = glob(
         ["**/*.py"],
     ),
-    deps = [
-        "//heron/common/src/python:common-py",
-    ],
     reqs = [
         "requests==2.12.3",
         "tornado==4.0.2",
         "future==0.18.2",
+    ],
+    deps = [
+        "//heron/common/src/python:common-py",
     ],
 )
 
 pex_binary(
     name = "heron-shell",
     srcs = ["main.py"],
+    resources = [
+        "//heron/shell/assets",
+    ],
     deps = [
         ":heron-shell-lib",
-    ],
-    resources = [
-        "//heron/shell/assets:assets",
     ],
 )

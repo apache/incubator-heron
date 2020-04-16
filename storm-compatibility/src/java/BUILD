@@ -15,48 +15,54 @@
 #  specific language governing permissions and limitations
 #  under the License.
 
-package(default_visibility = ["//visibility:public"])
-
+load("@rules_java//java:defs.bzl", "java_binary", "java_library")
 load("//tools/rules:build_defs.bzl", "DOCLINT_HTML_AND_SYNTAX")
 load("//tools/rules:javadoc.bzl", "java_doc")
+
+package(default_visibility = ["//visibility:public"])
 
 storm_deps_files = [
     "//heron/api/src/java:api-java-low-level",
     "//heron/common/src/java:basics-java",
     "//heron/simulator/src/java:simulator-java",
     "//heron/proto:proto_topology_java",
-    "@com_googlecode_json_simple_json_simple//jar",
+    "@maven//:com_googlecode_json_simple_json_simple",
     "//third_party/java:kryo-neverlink",
 ]
 
 java_doc(
     name = "heron-storm-javadoc",
     libs = [":storm-compatibility-java"],
-    pkgs = ["backtype", "clojure", "org", "storm"],
+    pkgs = [
+        "backtype",
+        "clojure",
+        "org",
+        "storm",
+    ],
     title = "Heron Storm Compatibility Api Documentation",
 )
 
 java_library(
-    name='storm-compatibility-java-neverlink',
+    name = "storm-compatibility-java-neverlink",
     srcs = glob(["**/*.java"]),
     javacopts = DOCLINT_HTML_AND_SYNTAX,
-    deps = storm_deps_files, 
     neverlink = 1,
+    deps = storm_deps_files,
 )
 
 # Kryo is bundled here for integration test
 java_library(
-    name='storm-compatibility-java',
+    name = "storm-compatibility-java",
     srcs = glob(["**/*.java"]),
     javacopts = DOCLINT_HTML_AND_SYNTAX,
     deps = storm_deps_files + [
         "//eco/src/java:eco-java",
-        "//third_party/java:kryo"
+        "//third_party/java:kryo",
     ],
 )
 
 java_binary(
-    name="storm-compatibility-unshaded",
+    name = "storm-compatibility-unshaded",
     srcs = glob(["**/*.java"]),
     deps = storm_deps_files + [
         "//eco/src/java:eco-java",
@@ -67,5 +73,5 @@ jarjar_binary(
     name = "heron-storm",
     src = ":storm-compatibility-unshaded_deploy.jar",
     shade = "shade.conf",
-    deps = ["@org_sonatype_plugins_jarjar_maven_plugin//jar"]
+    deps = ["@maven//:org_sonatype_plugins_jarjar_maven_plugin"],
 )

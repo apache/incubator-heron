@@ -17,8 +17,8 @@
 set -e
 DIR=`dirname $0`
 
-if [ ! -d $DIR/../bazel-genfiles ]; then
-    echo "Error: Directory $DIR/../bazel-genfiles does not exists." 
+if [ ! -d $DIR/../bazel-bin ]; then
+    echo "Error: Directory $DIR/../bazel-bin does not exists." 
     echo "please buid heron first"
     exit 1
 fi
@@ -119,7 +119,7 @@ generate_source_dirs
 #generate_source_dirs
 
 
-for jarfile in `find $DIR/../bazel-genfiles/ -name \*.jar | cut -d '/' -f 4-`; do 
+for jarfile in `find $DIR/../bazel-bin/ -name \*.jar | cut -d '/' -f 4-`; do 
   cat >> $classpath_file << EOH
   <classpathentry kind="lib" path="$jarfile"/>
 EOH

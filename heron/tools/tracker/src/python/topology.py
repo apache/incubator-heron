@@ -22,8 +22,9 @@
 import traceback
 import uuid
 
-from heronpy.api import api_constants
 from heron.common.src.python.utils.log import Log
+
+from heronpy.api import api_constants
 
 # pylint: disable=too-many-instance-attributes
 class Topology(object):
