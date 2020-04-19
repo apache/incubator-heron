@@ -32,6 +32,7 @@ RUN apt-get update && apt-get -y install \
       libunwind8 \
       libunwind-setjmp0-dev \
       python-dev \
+      libcppunit-dev \
       tree \
       zip \
       unzip \

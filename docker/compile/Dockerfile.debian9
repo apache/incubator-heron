@@ -30,6 +30,7 @@ RUN apt-get update && apt-get -y install \
       git \
       libtool \
       libtool-bin \
+      libcppunit-dev \
       python-dev \
       python3-dev \
       software-properties-common \
