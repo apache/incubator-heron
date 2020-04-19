@@ -34,6 +34,7 @@ RUN apt-get update && apt-get -y install \
       git \
       libtool \
       python-dev \
+      libcppunit-dev \
       zip \
       unzip \
       wget \
