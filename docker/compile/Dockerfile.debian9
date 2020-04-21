@@ -31,6 +31,7 @@ RUN apt-get update && apt-get -y install \
       libtool \
       libtool-bin \
       libcppunit-dev \
+      pkg-config \
       python-dev \
       python3-dev \
       software-properties-common \
