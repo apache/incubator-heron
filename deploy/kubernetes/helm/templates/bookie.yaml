@@ -41,23 +41,26 @@ data:
   BK_indexDirectories: "/bookkeeper/data/ledgers" 
   BK_zkServers: {{ .Release.Name }}-zookeeper:{{ .Values.zookeeper.clientPort }}
   BK_autoRecoveryDaemonEnabled: "true"
+  {{- if or (eq .Values.platform "gke") (eq .Values.platform "minikube") }}
+  BK_useHostNameAsBookieID: "true"
+  {{- end }}
   # TODO: Issue 458: https://github.com/apache/bookkeeper/issues/458
   {{- if eq .Values.bookkeeper.prometheus.enabled true }}
   BK_enableStatistics: "true"
   BK_enableTaskExecutionStats: "true"
   BK_statsProviderClass: org.apache.bookkeeper.stats.prometheus.PrometheusMetricsProvider
   {{- end }}
----
 
+---
 ## BookKeeper servers need to access the local disks and the pods
 ## cannot be moved across different nodes.
 ## For this reason, we run BK as a daemon set, one for each node in the
 ## cluster, unless restricted by label selectors
 {{- if or (eq .Values.platform "gke") (eq .Values.platform "minikube") }}
-apiVersion: apps/v1beta1
+apiVersion: apps/v1
 kind: StatefulSet
 {{- else }}
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: DaemonSet
 {{- end }}
 
@@ -67,8 +70,13 @@ metadata:
     app: {{ .Release.Name }}-bookkeeper
     component: {{ .Release.Name }}-bookie
 spec:
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-bookkeeper
+      component: {{ .Release.Name }}-bookie
+      cluster: {{ .Release.Name }}-bookkeeper
 {{- if or (eq .Values.platform "gke") (eq .Values.platform "minikube") }}
-  serviceName: {{ .Release.Name }}-bookkeeper
+  serviceName: {{ .Release.Name }}-bookie
   replicas: {{ $bookieReplicas }}
 {{- end }}
 
@@ -187,8 +195,8 @@ spec:
           requests:
             storage: {{ $bookieStorageCapacity }}
 {{- end }}
----
 
+---
 ##
 ## Define the Bookie headless service
 ## In practice, in this case, it is only useful to have a view of
@@ -197,6 +205,10 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
+  {{- if or (eq .Values.platform "gke") (eq .Values.platform "minikube") }}
+  annotations:
+    service.alpha.kubernetes.io/tolerate-unready-endpoints: "true"
+  {{- end }}
   name: {{ .Release.Name }}-bookie
   labels:
     app: {{ .Release.Name }}-bookkeeper

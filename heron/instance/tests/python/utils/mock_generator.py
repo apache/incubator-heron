@@ -29,6 +29,7 @@ from mock import patch
 from heronpy.api.task_hook import ITaskHook
 from heronpy.api.custom_grouping import ICustomGrouping
 from heronpy.api.serializer import PythonSerializer
+
 from heron.instance.src.python.utils.metrics import MetricsCollector
 from heron.instance.src.python.utils.misc import (OutgoingTupleHelper, PhysicalPlanHelper,
                                                 HeronCommunicator)
@@ -93,8 +94,8 @@ def get_a_sample_pplan():
   pplan = mock_protobuf.get_mock_pplan(topology=topology, instances=instances)
 
   keys = ["instance_id", "task_id", "comp_index", "comp_name"]
-  zipped = zip(instance_ids, task_ids, comp_indexes, comp_names)
-  return pplan, [dict(zip(keys, z)) for z in zipped]
+  zipped = list(zip(instance_ids, task_ids, comp_indexes, comp_names))
+  return pplan, [dict(list(zip(keys, z))) for z in zipped]
 
 def make_data_tuple_from_list(lst, serializer=PythonSerializer()):
   """Make HeronDataTuple from a list of objects"""

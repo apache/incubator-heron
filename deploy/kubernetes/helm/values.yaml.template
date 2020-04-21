@@ -29,7 +29,6 @@ platform: minikube
 
 # Heron image to use
 image: heron/heron:VERSION
-kubectlImage: heron/kubectl:latest
 
 # Heron image pull policy
 imagePullPolicy: IfNotPresent
@@ -40,7 +39,7 @@ jobReplicas: 1
 # amount of memory to provide for API server
 apiServerMemory: 512M
 heron:
-  url:/api/v1/namespaces/{{ .Release.Namespace }}/services/{{ .Release.Name }}-ui:8889/proxy
+  url: /api/v1/namespaces/{{ .Release.Namespace }}/services/{{ .Release.Name }}-ui:8889/proxy
 # Topologies uploader
 uploader:
   class: dlog # s3

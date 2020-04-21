@@ -23,15 +23,15 @@ import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.squareup.okhttp.Response;
-
 import org.apache.heron.common.basics.ByteAmount;
 import org.apache.heron.common.basics.SysUtils;
 import org.apache.heron.scheduler.utils.Runtime;
 import org.apache.heron.spi.common.Config;
 import org.apache.heron.spi.common.Context;
 
-import io.kubernetes.client.ApiException;
+import io.kubernetes.client.openapi.ApiException;
+
+import okhttp3.Response;
 
 final class KubernetesUtils {
 

@@ -16,21 +16,42 @@
 # specific language governing permissions and limitations
 # under the License.
 
+set -e
+
 ROOT_DIR=$(git rev-parse --show-toplevel)
 WORK_DIR=${ROOT_DIR}/generated-site/content
 ME=`basename $0`
 
-# push all of the results to asf-site branch
-git checkout asf-site
-git clean -f -d
-git pull origin asf-site
+ORIGIN_REPO=$(git remote show origin | grep 'Push  URL' | awk -F// '{print $NF}')
+echo "ORIGIN_REPO: $ORIGIN_REPO"
 
-rm -rf ${ROOT_DIR}/content
-mkdir ${ROOT_DIR}/content
+HERON_SITE_TMP=/tmp/heron-site
+(
 
-cp -a $WORK_DIR/* ${ROOT_DIR}/content
-cp -a ${ROOT_DIR}/.htaccess ${ROOT_DIR}/content
+  cd $ROOT_DIR
+  rm -rf $HERON_SITE_TMP
+  mkdir $HERON_SITE_TMP
+  cd $HERON_SITE_TMP
 
-git add ${ROOT_DIR}/content
-git commit -m "git-site-role commit from $ME"
-git push origin asf-site
+  git clone "https://$GH_TOKEN@$ORIGIN_REPO" .
+  git config user.name "Heron Site Updater"
+  git config user.email "dev@heron.incubator.apache.org"
+  git checkout asf-site
+
+
+   # clean content directory
+  rm -rf $HERON_SITE_TMP/content/
+  mkdir $HERON_SITE_TMP/content
+
+  # copy the generated dir
+  cp -r $WORK_DIR/* $HERON_SITE_TMP/content
+
+  #  copy the asf.yaml
+  cp $ROOT_DIR/.asf.yaml $HERON_SITE_TMP/
+
+  # push all of the results to asf-site branch
+  git add -A .
+  git diff-index --quiet HEAD || (git commit -m "git-site-role commit from $ME" && git push -q origin HEAD:asf-site)
+  rm -rf $HERON_SITE_TMP
+
+)

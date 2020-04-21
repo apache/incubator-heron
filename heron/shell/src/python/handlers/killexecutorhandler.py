@@ -20,12 +20,15 @@
 
 
 ''' killexecutorhandler.py '''
+from future.standard_library import install_aliases
+install_aliases()
+
 import logging
 import os
 import signal
-import urlparse
-import tornado.web
+from urllib.parse import parse_qsl
 
+import tornado.web
 from tornado.options import options
 
 class KillExecutorHandler(tornado.web.RequestHandler):
@@ -46,7 +49,7 @@ class KillExecutorHandler(tornado.web.RequestHandler):
 
     logger = logging.getLogger(__file__)
     logger.info("Received 'Killing process' request")
-    data = dict(urlparse.parse_qsl(self.request.body))
+    data = dict(parse_qsl(self.request.body))
 
     # check shared secret
     sharedSecret = data.get('secret')

@@ -1,14 +1,12 @@
+load("@rules_cc//cc:defs.bzl", "cc_test")
+
 package(default_visibility = ["//visibility:public"])
 
 cc_test(
     name = "serialization_unittest",
+    size = "small",
     srcs = [
         "serialization_unittest.cpp",
-    ],
-    deps = [
-        "//heron/api/src/cpp:cxx-api",
-        "//heron/common/src/cpp/basics:basics-cxx",
-        "@com_google_googletest//:gtest",
     ],
     copts = [
         "-Iheron/api/src/cpp",
@@ -16,6 +14,10 @@ cc_test(
         "-Iheron",
         "-I$(GENDIR)/heron",
     ],
-    size = "small",
     linkstatic = 1,
+    deps = [
+        "//heron/api/src/cpp:cxx-api",
+        "//heron/common/src/cpp/basics:basics-cxx",
+        "@com_google_googletest//:gtest",
+    ],
 )

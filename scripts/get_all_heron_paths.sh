@@ -41,10 +41,10 @@ function get_heron_python_paths() {
 
 function get_heron_thirdparty_dependencies() {
   # bazel-bin/heron/proto for heron proto jars from heron/proto
-  # bazel-genfiles/external for third_party deps
-  # bazel-heron/bazel-out/host/bin/third_party for extra_action proto jars in third_party
-  # bazel-heron/bazel-out/host/genfiles/external more third_party deps
-  echo "$(find {bazel-bin/heron/proto,bazel-genfiles/external,bazel-incubator-heron/bazel-out/host/bin/third_party,bazel-incubator-heron/bazel-out/host/genfiles/external}/. -name "*jar" -type f | sort -u)";
+  # bazel-bin/external for third_party deps
+  # bazel-heron/bazel-bin/host/bin/third_party for extra_action proto jars in third_party
+  # bazel-heron/bazel-bin/host/genfiles/external more third_party deps
+  echo "$(find {bazel-bin/heron/proto,bazel-bin/external,bazel-incubator-heron/bazel-bin/host/bin/third_party,bazel-incubator-heron/bazel-bin/host/genfiles/external}/. -name "*jar" -type f | sort -u)";
 }
 
 function get_heron_bazel_deps(){
@@ -67,7 +67,7 @@ function get_package_of() {
 }
 
 function get_heron_java_paths() {
-  local java_paths=$(find {heron,heron/tools,tools,integration_test,storm-compatibility,eco,eco-storm-examples,eco-heron-examples,contrib} -name "*.java" | sed "s|/src/java/.*$|/src/java|"| sed "s|/java/src/.*$|/java/src|" |  sed "s|/tests/java/.*$|/tests/java|" | sort -u | fgrep -v "heron/scheduler/" | fgrep -v "heron/scheduler/" )
+  local java_paths=$(find {heron,heron/tools,tools,integration_test,examples,storm-compatibility,eco,eco-storm-examples,eco-heron-examples,contrib} -name "*.java" | sed "s|/src/java/.*$|/src/java|"| sed "s|/java/src/.*$|/java/src|" |  sed "s|/tests/java/.*$|/tests/java|" | sort -u | fgrep -v "heron/scheduler/" | fgrep -v "heron/scheduler/" )
   if [ "$(uname -s | tr 'A-Z' 'a-z')" != "darwin" ]; then
     java_paths=$(echo "${java_paths}" | fgrep -v "/objc_tools/")
   fi
@@ -110,8 +110,8 @@ function collect_generated_binary_deps() {
 
 function collect_generated_paths() {
   # uniq to avoid doing blaze query on duplicates.
-  for path in $(find bazel-genfiles/ -name "*.java" | sed 's|/\{0,1\}bazel-genfiles/\{1,2\}|//|' | uniq); do
-    source_path=$(echo ${path} | sed 's|//|bazel-genfiles/|' | sed 's|/com/.*$||')
+  for path in $(find bazel-bin/ -name "*.java" | sed 's|/\{0,1\}bazel-bin/\{1,2\}|//|' | uniq); do
+    source_path=$(echo ${path} | sed 's|//|bazel-bin/|' | sed 's|/com/.*$||')
     echo "$(get_containing_library ${path}):${source_path}"
   done | sort -u
 }

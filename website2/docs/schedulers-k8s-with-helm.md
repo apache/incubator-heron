@@ -50,47 +50,43 @@ $ brew install kubernetes-helm
 You can install Helm on Linux using a simple installation script:
 
 ```bash
-$ curl https://raw.githubusercontent.com/kubernetes/helm/master/scripts/get > install-helm.sh
-$ chmod 700 install-helm.sh
-$ ./install-helm.sh
+$ curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3
+$ chmod 700 get_helm.sh
+$ ./get_helm.sh
 ```
 
-## Installing Helm in your Kubernetes cluster
+## Installing Heron on Kubernetes
 
-To run Helm on Kubernetes, you need to first make sure that [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl) is using the right configuration context for your cluster. To check which context is being used:
+To use Helm with Kubernetes, you need to first make sure that [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl) is using the right configuration context for your cluster. To check which context is being used:
 
 ```bash
 $ kubectl config current-context
 ```
 
-If the context is correct, then you can get Helm running using just one command:
-
-```bash
-$ helm init
-```
-
-If the output of that command includes `Happy Helming!` then Helm is ready to go.
-
-## Installing Heron on Kubernetes
-
-Once you've installed the Helm client on your machine and gotten Helm running in your Kubernetes cluster, you need to make your client aware of the `heron-charts` Helm repository, which houses the chart for Heron:
+Once you've installed the Helm client on your machine and gotten Helm pointing to your Kubernetes cluster, you need to make your client aware of the `heron-charts` Helm repository, which houses the chart for Heron:
 
 ```bash
 $ helm repo add heron-charts https://storage.googleapis.com/heron-charts
 "heron-charts" has been added to your repositories
 ```
 
+Create a namespace to install into:
+
+```bash
+$ kubectl create namespace heron
+```
+
 Now you can install the Heron package:
 
 ```bash
-$ helm install heron-charts/heron
+$ helm install heron-charts/heron -g -n heron
 ```
 
-This will install Heron and provide the installation with a random name like `jazzy-anaconda`. To provide the installation with a name, such as `heron-kubernetes`:
+This will install Heron and provide the installation in the `heron` namespace (`-n`) with a random name (`-g`) like `jazzy-anaconda`. To provide the installation with a name, such as `heron-kube`:
 
 ```bash
-$ helm install heron-charts/heron \
-  --name heron-kubernetes
+$ helm install heron-kube heron-charts/heron \
+  --namespace heron
 ```
 
 ### Specifying a platform
@@ -98,7 +94,8 @@ $ helm install heron-charts/heron \
 The default platform for running Heron on Kubernetes is [Minikube](#minikube). To specify a different platform, you can use the `--set platform=PLATFORM` flag. Here's an example:
 
 ```bash
-$ helm install heron-charts/heron \
+$ helm install heron-kube heron-charts/heron \
+  --namespace heron \
   --set platform=gke
 ```
 
@@ -130,12 +127,20 @@ $ minikube start \
 
 Once Minikube is running, you can then install Heron in one of two ways:
 
+Create a namespace to install into:
+
+```bash
+$ kubectl create namespace heron
+```
+
 ```bash
 # Use the Minikube default
-$ helm install heron-charts/heron
+$ helm install heron-kube heron-charts/heron \
+  --namespace heron
 
 # Explicitly select Minikube
-$ helm install heron-charts/heron \
+$ helm install heron-kube heron-charts/heron \
+  --namespace heron \
   --set platform=minikube
 ```
 
@@ -173,29 +178,17 @@ Once the cluster has been successfully created, you'll need to install that clus
 $ gcloud container clusters get-credentials heron-gke-dev-cluster # or heron-gke-prod-cluster
 ```
 
-Once, the cluster is running (that could take a few minutes), you can initialize Helm on the cluster:
+Create a namespace to install into:
 
 ```bash
-$ helm init
+$ kubectl create namespace heron
 ```
 
-Then, you'll need to adjust some RBAC permissions for your cluster:
+Now you can install Heron:
 
 ```bash
-$ kubectl create serviceaccount tiller \
-  --namespace kube-system \
-$ kubectl create clusterrolebinding tiller-cluster-rule \
-  --clusterrole cluster-admin \
-  --serviceaccount kube-system:tiller
-$ kubectl patch deploy tiller-deploy \
-  --namespace kube-system \
-  --patch '{"spec":{"template":{"spec":{"serviceAccount":"tiller"}}}}'
-```
-
-Finally, you can install Heron:
-
-```bash
-$ helm install heron-charts/heron \
+$ helm install heron-kube heron-charts/heron \
+  --namespace heron \
   --set platform=gke
 ```
 
@@ -211,7 +204,8 @@ Configuration | Description
 To apply the `small` configuration, for example:
 
 ```bash
-$ helm install heron-charts/heron \
+$ helm install heron-kube heron-charts/heron \
+  --namespace heron \
   --set platform=gke \
   --values https://raw.githubusercontent.com/apache/incubator-heron/master/deploy/kubernetes/gcp/small.yaml
 ```
@@ -221,7 +215,8 @@ $ helm install heron-charts/heron \
 To run Heron on Kubernetes on Amazon Web Services (AWS), you'll need to 
 
 ```bash
-$ helm install heron-charts/heron \
+$ helm install heron-kube heron-charts/heron \
+  --namespace heron \
   --set platform=aws
 ```
 
@@ -230,7 +225,8 @@ $ helm install heron-charts/heron \
 You can make Heron to use S3 to distribute the user topologies. First you need to set up a S3 bucket and configure an IAM user with enough permissions over it. Get access keys for the user. Then you can deploy Heron like this:
 
 ```bash
-$ helm install heron-charts/heron \
+$ helm install heron-kube heron-charts/heron \
+  --namespace heron \
   --set platform=aws \
   --set uploader.class=s3 \
   --set uploader.s3Bucket=heron \
@@ -245,7 +241,8 @@ $ helm install heron-charts/heron \
 To run Heron on a bare metal Kubernetes cluster:
 
 ```bash
-$ helm install heron-charts/heron \
+$ helm install heron-kube heron-charts/heron \
+  --namespace heron \
   --set platform=baremetal
 ```
 

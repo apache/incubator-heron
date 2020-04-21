@@ -22,12 +22,12 @@ sidebar_label: Compiling on Linux
 
 Heron can currently be built on the following Linux platforms:
 
-* [Ubuntu 14.04](#building-on-ubuntu-14.04)
+* [Ubuntu 18.04](#building-on-ubuntu-18.04)
 * [CentOS 7](#building-on-centos-7)
 
-## Building on Ubuntu 14.04
+## Building on Ubuntu 18.04
 
-To build Heron on a fresh Ubuntu 14.04 installation:
+To build Heron on a fresh Ubuntu 18.04 installation:
 
 ### Step 1 --- Update Ubuntu
 
@@ -50,19 +50,19 @@ export CC=/usr/bin/gcc
 export CCX=/usr/bin/g++
 ```
 
-### Step 4 --- Install JDK 8 and set JAVA_HOME
+### Step 4 --- Install JDK 11 and set JAVA_HOME
 
 ```bash
 $ sudo add-apt-repository ppa:webupd8team/java
 $ sudo apt-get update -y
-$ sudo apt-get install oracle-java8-installer -y
-$ export JAVA_HOME="/usr/lib/jvm/java-8-oracle"
+$ sudo apt-get install openjdk-11-jdk-headless -y
+$ export JAVA_HOME="/usr/lib/jvm/java-11-openjdk-amd64"
 ```
 
 #### Step 5 - Install Bazel {{% bazelVersion %}}
 
 ```bash
-wget -O /tmp/bazel.sh https://github.com/bazelbuild/bazel/releases/download/0.23.2/bazel-0.23.2-installer-linux-x86_64.sh
+wget -O /tmp/bazel.sh https://github.com/bazelbuild/bazel/releases/download/0.26.0/bazel-0.26.0-installer-linux-x86_64.sh
 chmod +x /tmp/bazel.sh
 /tmp/bazel.sh --user
 ```
@@ -96,13 +96,13 @@ $ ./bazel_configure.py
 ### Step 10 --- Build the project
 
 ```bash
-$ bazel build --config=ubuntu heron/...  
+$ bazel build --config=ubuntu heron/...
 ```
 
 ### Step 11 --- Build the packages
 
 ```bash
-$ bazel build --config=ubuntu scripts/packages:binpkgs  
+$ bazel build --config=ubuntu scripts/packages:binpkgs
 $ bazel build --config=ubuntu scripts/packages:tarpkgs
 ```
 
@@ -175,45 +175,17 @@ $ export CC=/usr/bin/gcc
 $ export CCX=/usr/bin/g++
 ```
 
-### Step 4 --- Install JDK 8
+### Step 4 --- Install JDK 11
 
 ```bash
-$ cd /opt/
-$ sudo wget --no-cookies --no-check-certificate \
-  --header "Cookie: gpw_e24=http%3A%2F%2Fwww.oracle.com%2F; oraclelicense=accept-securebackup-cookie" \
-  "http://download.oracle.com/otn-pub/java/jdk/8u91-b14/jdk-8u91-linux-x64.tar.gz"
-$ sudo tar xzf jdk-8u91-linux-x64.tar.gz
-```
-
-Use `alternatives` to configure the Java version:
-
-```bash
-$ sudo cd /opt/jdk1.8.0_91/
-$ sudo alternatives --install /usr/bin/java java /opt/jdk1.8.0_91/bin/java 2
-$ sudo alternatives --config java
-```
-
-Set the `javac` and `jar` commands:
-
-```bash
-$ sudo alternatives --install /usr/bin/jar jar /opt/jdk1.8.0_91/bin/jar 2
-$ sudo alternatives --install /usr/bin/javac javac /opt/jdk1.8.0_91/bin/javac 2
-$ sudo alternatives --set jar /opt/jdk1.8.0_91/bin/jar
-$ sudo alternatives --set javac /opt/jdk1.8.0_91/bin/javac
-```
-
-Export Java-related environment variables:
-
-```bash
-export JAVA_HOME=/opt/jdk1.8.0_91
-export JRE_HOME=/opt/jdk1.8.0_91/jre
-export PATH=$PATH:/opt/jdk1.8.0_91/bin:/opt/jdk1.8.0_91/jre/bin
+$ sudo yum install java-11-openjdk java-11-openjdk-devel
+$ export JAVA_HOME=/usr/lib/jvm/java-11-openjdk
 ```
 
 #### Step 5 - Install Bazel {{% bazelVersion %}}
 
 ```bash
-wget -O /tmp/bazel.sh https://github.com/bazelbuild/bazel/releases/download/0.23.2/bazel-0.23.2-installer-linux-x86_64.sh
+wget -O /tmp/bazel.sh https://github.com/bazelbuild/bazel/releases/download/0.26.0/bazel-0.26.0-installer-linux-x86_64.sh
 chmod +x /tmp/bazel.sh
 /tmp/bazel.sh --user
 ```

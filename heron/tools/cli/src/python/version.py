@@ -19,15 +19,15 @@
 #  under the License.
 
 ''' version.py '''
+import sys
+import requests
+
 from heron.common.src.python.utils.log import Log
 from heron.tools.cli.src.python.result import SimpleResult, Status
 import heron.tools.cli.src.python.args as cli_args
 import heron.tools.common.src.python.utils.config as config
 import heron.tools.cli.src.python.cdefs as cdefs
 import heron.tools.cli.src.python.rest as rest
-
-import sys
-import requests
 
 def add_version_titles(parser):
   '''
@@ -100,7 +100,7 @@ def run(command, parser, cl_args, unknown_args):
       r = service_method(service_apiurl)
       if r.status_code != requests.codes.ok:
         Log.error(r.json().get('message', "Unknown error from API server %d" % r.status_code))
-      sorted_items = sorted(r.json().items(), key=lambda tup: tup[0])
+      sorted_items = sorted(list(r.json().items()), key=lambda tup: tup[0])
       for key, value in sorted_items:
         print("%s : %s" % (key, value))
     except (requests.exceptions.ConnectionError, requests.exceptions.HTTPError) as err:

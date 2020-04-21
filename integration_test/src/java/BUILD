@@ -1,3 +1,5 @@
+load("@rules_java//java:defs.bzl", "java_binary", "java_library")
+
 licenses(["notice"])
 
 package(default_visibility = ["//visibility:public"])
@@ -20,13 +22,13 @@ java_library(
     deps = [
         "//heron/api/src/java:api-java",
         "//heron/api/src/java:api-java-low-level",
-        "//storm-compatibility/src/java:storm-compatibility-java",
         "//heron/proto:proto_topology_java",
+        "//storm-compatibility/src/java:storm-compatibility-java",
         "//third_party/java:jackson",
-        "@commons_logging_commons_logging//jar",
         "@com_google_protobuf//:protobuf_java",
-        "@org_apache_httpcomponents_http_client//jar",
-        "@org_apache_httpcomponents_http_core//jar",
+        "@maven//:commons_logging_commons_logging",
+        "@maven//:org_apache_httpcomponents_httpclient",
+        "@maven//:org_apache_httpcomponents_httpcore",
     ],
 )
 
@@ -36,59 +38,59 @@ java_library(
         ["org/apache/heron/integration_test/common/**/*.java"],
     ),
     deps = [
+        ":core",
         "//heron/api/src/java:api-java",
         "//heron/api/src/java:api-java-low-level",
         "//storm-compatibility/src/java:storm-compatibility-java",
         "//third_party/java:hadoop-core",
         "//third_party/java:jackson",
-        "@commons_cli_commons_cli//jar",
-        ":core"
+        "@maven//:commons_cli_commons_cli",
     ],
 )
 
 java_library(
     name = "integration-tests-lib",
     srcs = glob(
-       ["org/apache/heron/integration_test/topology/**/*.java"],
+        ["org/apache/heron/integration_test/topology/**/*.java"],
     ),
     deps = [
+        ":common",
+        ":core",
         "//heron/api/src/java:api-java",
         "//heron/api/src/java:api-java-low-level",
         "//storm-compatibility/src/java:storm-compatibility-java",
-        "@com_googlecode_json_simple_json_simple//jar",
-        "@commons_cli_commons_cli//jar",
-        ":common",
-        ":core"
+        "@maven//:com_googlecode_json_simple_json_simple",
+        "@maven//:commons_cli_commons_cli",
     ],
 )
 
 java_library(
     name = "local-integration-tests-lib",
     srcs = glob(
-       ["org/apache/heron/local_integration_test/topology/**/*.java"],
+        ["org/apache/heron/local_integration_test/topology/**/*.java"],
     ),
     deps = [
+        ":common",
+        ":core",
         "//heron/api/src/java:api-java",
         "//heron/api/src/java:api-java-low-level",
         "//storm-compatibility/src/java:storm-compatibility-java",
-        ":common",
-        ":core"
     ],
 )
 
 java_binary(
     name = "integration-tests-unshaded",
     srcs = glob(
-       ["org/apache/heron/integration_test/topology/**/*.java"],
+        ["org/apache/heron/integration_test/topology/**/*.java"],
     ),
     deps = [
+        ":common",
+        ":core",
         "//heron/api/src/java:api-java",
         "//heron/api/src/java:api-java-low-level",
         "//storm-compatibility/src/java:storm-compatibility-java",
-        "@commons_cli_commons_cli//jar",
-        "@com_googlecode_json_simple_json_simple//jar",
-        ":common",
-        ":core"
+        "@maven//:com_googlecode_json_simple_json_simple",
+        "@maven//:commons_cli_commons_cli",
     ],
 )
 
@@ -102,14 +104,14 @@ genrule(
 java_binary(
     name = "local-integration-tests-unshaded",
     srcs = glob(
-       ["org/apache/heron/local_integration_test/**/*.java"],
+        ["org/apache/heron/local_integration_test/**/*.java"],
     ),
     deps = [
+        ":common",
+        ":core",
         "//heron/api/src/java:api-java",
         "//heron/api/src/java:api-java-low-level",
         "//storm-compatibility/src/java:storm-compatibility-java",
-        ":common",
-        ":core"
     ],
 )
 
@@ -128,13 +130,13 @@ java_library(
     deps = [
         "//heron/api/src/java:api-java",
         "//heron/api/src/java:api-java-low-level",
-        "//storm-compatibility/src/java:storm-compatibility-java",
         "//heron/proto:proto_topology_java",
+        "//storm-compatibility/src/java:storm-compatibility-java",
         "//third_party/java:jackson",
-        "@commons_logging_commons_logging//jar",
         "@com_google_protobuf//:protobuf_java",
-        "@org_apache_httpcomponents_http_client//jar",
-        "@org_apache_httpcomponents_http_core//jar",
+        "@maven//:commons_logging_commons_logging",
+        "@maven//:org_apache_httpcomponents_httpclient",
+        "@maven//:org_apache_httpcomponents_httpcore",
     ],
 )
 
@@ -144,50 +146,50 @@ java_library(
         ["org/apache/heron/integration_topology_test/common/**/*.java"],
     ),
     deps = [
+        ":core",
+        ":core-topology",
         "//heron/api/src/java:api-java",
         "//heron/api/src/java:api-java-low-level",
         "//storm-compatibility/src/java:storm-compatibility-java",
         "//third_party/java:hadoop-core",
         "//third_party/java:jackson",
-        "@commons_cli_commons_cli//jar",
-        ":core",
-        ":core-topology"
+        "@maven//:commons_cli_commons_cli",
     ],
 )
 
 java_library(
     name = "integration-topology-tests-lib",
     srcs = glob(
-       ["org/apache/heron/integration_topology_test/topology/**/*.java"],
+        ["org/apache/heron/integration_topology_test/topology/**/*.java"],
     ),
     deps = [
+        ":common",
+        ":common_topology_test",
+        ":core",
+        ":core-topology",
         "//heron/api/src/java:api-java",
         "//heron/api/src/java:api-java-low-level",
         "//storm-compatibility/src/java:storm-compatibility-java",
-        "@com_googlecode_json_simple_json_simple//jar",
-        "@commons_cli_commons_cli//jar",
-        ":common_topology_test",
-        ":common",
-        ":core",
-        ":core-topology"
+        "@maven//:com_googlecode_json_simple_json_simple",
+        "@maven//:commons_cli_commons_cli",
     ],
 )
 
 java_binary(
     name = "integration-topology-tests-unshaded",
     srcs = glob(
-       ["org/apache/heron/integration_topology_test/topology/**/*.java"],
+        ["org/apache/heron/integration_topology_test/topology/**/*.java"],
     ),
     deps = [
+        ":common",
+        ":common_topology_test",
+        ":core",
+        ":core-topology",
         "//heron/api/src/java:api-java",
         "//heron/api/src/java:api-java-low-level",
         "//storm-compatibility/src/java:storm-compatibility-java",
-        "@commons_cli_commons_cli//jar",
-        "@com_googlecode_json_simple_json_simple//jar",
-        ":common_topology_test",
-        ":common",
-        ":core",
-        ":core-topology"
+        "@maven//:com_googlecode_json_simple_json_simple",
+        "@maven//:commons_cli_commons_cli",
     ],
 )
 

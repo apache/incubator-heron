@@ -187,7 +187,7 @@ def main():
   # stop Tornado IO loop
   def signal_handler(signum, frame):
     # start a new line after ^C character because this looks nice
-    print('\n', end='')
+    print('\n')
     Log.debug('SIGINT received. Stopping UI')
     tornado.ioloop.IOLoop.instance().stop()
 

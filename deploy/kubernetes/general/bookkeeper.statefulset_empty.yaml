@@ -34,9 +34,9 @@ data:
     #BK_statsProviderClass: org.apache.bookkeeper.stats.prometheus.PrometheusMetricsProvider
     # use hostname as bookie id for StatefulSets deployment
     BK_useHostNameAsBookieID: "true"
----
 
-apiVersion: apps/v1beta1
+---
+apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: bookie
@@ -44,6 +44,10 @@ metadata:
     app: bookkeeper
     component: bookie
 spec:
+  selector:
+    matchLabels:
+      app: bookkeeper
+      component: bookie
   serviceName: "bookkeeper"
   replicas: 3
   template:
@@ -129,11 +133,15 @@ spec:
 ## Auto-Recovery makes sure to restore the replication factor when any bookie
 ## crashes and it's not recovering on its own.
 ##
-apiVersion: apps/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: bookie-autorecovery
 spec:
+  selector:
+    matchLabels:
+      app: bookkeeper
+      component: bookkeeper-replication  
   replicas: 2
   template:
     metadata:

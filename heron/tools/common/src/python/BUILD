@@ -12,8 +12,8 @@ pex_library(
         exclude = ["access"],
         exclude_directories = 1,
     ),
+    reqs = ["PyYAML==3.13"],
     deps = [
         "//heron/common/src/python:common-py",
     ],
-    reqs = ["PyYAML==3.13"],
 )

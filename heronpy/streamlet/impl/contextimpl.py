@@ -36,7 +36,7 @@ class ContextImpl(Context):
     return self._top_context.get_cluster_config()
 
   def get_stream_name(self):
-    return self._top_context.get_this_sources().keys()[0].id
+    return list(self._top_context.get_this_sources().keys())[0].id
 
   def get_num_partitions(self):
     return len(self._top_context.get_component_tasks(self._top_context.get_component_id()))

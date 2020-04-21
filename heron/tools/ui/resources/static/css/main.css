@@ -583,8 +583,7 @@ header {
           left: 0; }
 
 .dashboard-wrapper {
-  /*padding: 30px;*/
-  padding: 0px 30px 30px 10px;
+  padding: 0px 10px 20px 10px;
   position: relative;
   margin: 0px 0px 10px 10px;
   background: white;
@@ -2252,4 +2251,50 @@ nav {
 }
 .navbar-custom .navbar-link:hover {
   color: #ffecb3;
+}
+
+/* Topology details */
+div#display-navigator {
+  border-style: solid;
+  border-width: 1px;
+  border-color: #dddddd;
+  border-bottom-width: 0px;
+}
+
+#display-navigator .navbar-default button {
+  padding-left: 15px;
+  padding-right: 15px;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  background-color: transparent;
+  border-width: 0px;
+  outline: none;  /* disable outline after clicked on */
+}
+
+#display-navigator .navbar-default button.active {
+  background-color: lightskyblue;
+}
+
+/* Select the right topology details to show */
+div#topologydetails {
+  border-style: solid;
+  border-width: 1px;
+  border-color: #dddddd;
+  overflow-y: scroll;
+}
+
+div#topologydetails div.display-info {
+  display: none;
+}
+
+div#topologydetails.display-stats div.display-info.display-stats,
+div#topologydetails.display-counters div.display-info.display-counters,
+div#topologydetails.display-config div.display-info.display-config {
+  display: block;
+}
+
+/* Backdrop in bootstrap 3 seems to have solid color and we would like it to be half transparent */
+div.modal-backdrop.fade.in {
+  opacity: 0.5;
+  filter: alpha(opacity=50);
 }

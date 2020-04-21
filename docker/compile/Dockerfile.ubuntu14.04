@@ -19,7 +19,7 @@ FROM ubuntu:14.04
 
 # This is passed to the heron build command via the --config flag
 ENV TARGET_PLATFORM ubuntu
-ENV bazelVersion 0.26.0
+ENV bazelVersion 3.0.0
 
 RUN apt-get update && apt-get install -y software-properties-common
 
@@ -33,17 +33,16 @@ RUN apt-get update && apt-get -y install \
       libssl-dev \
       git \
       libtool \
-      python \
-      python2.7-dev \
-      python-software-properties \
-      python-setuptools \
+      python-dev \
+      libcppunit-dev \
       zip \
       unzip \
       wget \
       cmake \
-      openjdk-8-jdk-headless
+      tree \
+      openjdk-11-jdk-headless
 
-ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64
+ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk-amd64
 
 RUN wget -O /tmp/bazel.sh https://github.com/bazelbuild/bazel/releases/download/$bazelVersion/bazel-$bazelVersion-installer-linux-x86_64.sh \
       && chmod +x /tmp/bazel.sh \

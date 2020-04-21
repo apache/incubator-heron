@@ -1,3 +1,5 @@
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
 package(default_visibility = ["//visibility:public"])
 
 cc_library(
@@ -11,12 +13,12 @@ cc_library(
         "-I$(GENDIR)/heron",
         "-I$(GENDIR)/heron/common/src/cpp",
     ],
+    linkstatic = 1,
     deps = [
         "//config:config-cxx",
-        "//heron/proto:proto-cxx",
         "//heron/common/src/cpp/network:network-cxx",
         "//heron/common/src/cpp/zookeeper:zookeeper-cxx",
+        "//heron/proto:proto-cxx",
         "@com_github_jbeder_yaml_cpp//:yaml-cxx",
     ],
-    linkstatic = 1,
 )

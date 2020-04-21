@@ -15,11 +15,11 @@
 #  specific language governing permissions and limitations
 #  under the License.
 
-FROM openjdk:8-jdk-slim
+FROM openjdk:11-jdk-slim-stretch
 
 # This is passed to the heron build command via the --config flag
 ENV TARGET_PLATFORM debian
-ENV bazelVersion 0.26.0
+ENV bazelVersion 3.0.0
 
 RUN apt-get update && apt-get -y install \
       automake \
@@ -30,10 +30,13 @@ RUN apt-get update && apt-get -y install \
       git \
       libtool \
       libtool-bin \
-      python \
-      python2.7-dev \
+      libcppunit-dev \
+      pkg-config \
+      python-dev \
+      python3-dev \
       software-properties-common \
-      python-setuptools \
+      python3-setuptools \
+      tree \
       zip \
       unzip \
       wget

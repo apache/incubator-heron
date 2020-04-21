@@ -51,7 +51,7 @@ rm -rf $JAVADOC_OUTPUT_DIR
 mkdir -p $JAVADOC_OUTPUT_DIR
 
 BIN_JARS=`find $HERON_ROOT_DIR/bazel-incubator-heron/_bin/. -name "*\.jar" | tr '\n' ':'`
-GEN_JARS=`find $HERON_ROOT_DIR/bazel-genfiles/external/. -name "*\.jar" | tr '\n' ':'`
+GEN_JARS=`find $HERON_ROOT_DIR/bazel-bin/external/. -name "*\.jar" | tr '\n' ':'`
 SCRIBE_JARS=`find $HERON_ROOT_DIR/bazel-bin/. -name "libthrift_scribe_java.jar" | tr '\n' ':'`
 PROTO_JARS=`find $HERON_ROOT_DIR/bazel-bin/heron/proto/. -name "*\.jar" | tr '\n' ':'`
 CLOSURE_CLASSES="$HERON_ROOT_DIR/bazel-bin/storm-compatibility/src/java/_javac/storm-compatibility-java/libstorm-compatibility-java_classes/."
@@ -59,6 +59,7 @@ CLOSURE_CLASSES="$HERON_ROOT_DIR/bazel-bin/storm-compatibility/src/java/_javac/s
 export CLASSPATH=$BIN_JARS:$GEN_JARS:$SCRIBE_JARS:$PROTO_JARS:$CLOSURE_CLASSES
 
 $JAVADOC $FLAGS \
+  -encoding "UTF-8" \
   -windowtitle "Heron Java API" \
   -doctitle "The Heron Java API" \
   -overview $OVERVIEW_HTML_FILE \

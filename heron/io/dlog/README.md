@@ -34,10 +34,10 @@ bazel build heron/io/dlog/src/java:dlog-util
 
 3. Upload a file to dlog.
 ```
-java -jar ./bazel-genfiles/heron/io/dlog/src/java/dlog-util.jar distributedlog://127.0.0.1/path/to/stream /path/to/file
+java -jar ./bazel-bin/heron/io/dlog/src/java/dlog-util.jar distributedlog://127.0.0.1/path/to/stream /path/to/file
 ```
 
 4. Download a dlog stream as a file
 ```
-java -jar ./bazel-genfiles/heron/io/dlog/src/java/dlog-util.jar distributedlog://127.0.0.1/path/to/stream /path/to/file
+java -jar ./bazel-bin/heron/io/dlog/src/java/dlog-util.jar distributedlog://127.0.0.1/path/to/stream /path/to/file
 ```

@@ -55,7 +55,7 @@ install_jdk8() {
     apt-get -y install oracle-java8-installer oracle-java8-set-default vim wget screen git    
 }
 
-bazelVersion=0.26.0
+bazelVersion=3.0.0
 bazel_install() {
     install_jdk8
     apt-get install -y g++ automake cmake gcc-4.8 g++-4.8 zlib1g-dev zip pkg-config wget libssl-dev

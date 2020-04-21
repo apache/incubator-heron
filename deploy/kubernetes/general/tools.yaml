@@ -18,12 +18,15 @@
 ##
 ## Deployment Pod for tracker and ui
 ##
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: heron-tracker
   namespace: default
 spec:
+  selector:
+    matchLabels:
+      app: heron-tracker
   template:
     metadata:
       labels:
@@ -57,6 +60,13 @@ spec:
               --name=localzk
               --hostport=zookeeper:2181
               --rootpath="/heron"
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "200M"
+            limits:
+              cpu: "400m"
+              memory: "512M"
         - name: heron-ui
           image: heron/heron:latest
           ports:
@@ -68,8 +78,15 @@ spec:
               heron-ui
               --port=8889
               --base_url=/api/v1/namespaces/default/services/heron-ui:8889/proxy
----
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "200M"
+            limits:
+              cpu: "400m"
+              memory: "512M"
 
+---
 ##
 ## Service to expose the heron-ui
 ##

@@ -1,25 +1,24 @@
+load("//tools/rules:genproto.bzl", "proto_library")
+load("@rules_cc//cc:defs.bzl", "cc_test")
+
 package(default_visibility = ["//visibility:public"])
 
 proto_library(
     name = "proto_unittests",
     src = "unittests.proto",
-    includes = ["heron/common/tests/cpp/network"],
     gen_cc = 1,
+    includes = ["heron/common/tests/cpp/network"],
 )
 
 cc_test(
     name = "http_unittest",
+    size = "small",
     srcs = [
-        "http_unittest.cpp",
+        "host_unittest.h",
         "http_client_unittest.cpp",
         "http_server_unittest.cpp",
-
-        "host_unittest.h",
         "http_server_unittest.h",
-    ],
-    deps = [
-        "//heron/common/src/cpp/network:network-cxx",
-        "@com_google_googletest//:gtest",
+        "http_unittest.cpp",
     ],
     copts = [
         "-Iheron/common/src/cpp",
@@ -27,25 +26,23 @@ cc_test(
         "-I$(GENDIR)/heron/common/src/cpp",
         "-I$(GENDIR)/heron/common/tests/cpp",
     ],
-    size = "small",
     linkstatic = 1,
+    deps = [
+        "//heron/common/src/cpp/network:network-cxx",
+        "@com_google_googletest//:gtest",
+    ],
 )
 
 cc_test(
     name = "order_unittest",
+    size = "small",
     srcs = [
-        "order_unittest.cpp",
-        "oclient_unittest.cpp",
-        "oserver_unittest.cpp",
-
         "host_unittest.h",
+        "oclient_unittest.cpp",
         "oclient_unittest.h",
+        "order_unittest.cpp",
+        "oserver_unittest.cpp",
         "oserver_unittest.h",
-    ],
-    deps = [
-        ":proto_unittests_cc",
-        "//heron/common/src/cpp/network:network-cxx",
-        "@com_google_googletest//:gtest",
     ],
     copts = [
         "-Iheron/common/src/cpp",
@@ -53,44 +50,43 @@ cc_test(
         "-I$(GENDIR)/heron/common/src/cpp",
         "-I$(GENDIR)/heron/common/tests/cpp",
     ],
-    size = "small",
     linkstatic = 1,
+    deps = [
+        ":proto_unittests_cc",
+        "//heron/common/src/cpp/network:network-cxx",
+        "@com_google_googletest//:gtest",
+    ],
 )
 
 cc_test(
     name = "packet_unittest",
+    size = "small",
     srcs = [
         "packet_unittest.cpp",
-    ],
-    deps = [
-        ":proto_unittests_cc",
-        "//heron/common/src/cpp/network:network-cxx",
-        "@com_google_googletest//:gtest",
     ],
     copts = [
         "-Iheron/common/src/cpp",
         "-I$(GENDIR)/heron/common/src/cpp",
         "-I$(GENDIR)/heron/common/tests/cpp",
     ],
-    size = "small",
     linkstatic = 1,
+    deps = [
+        ":proto_unittests_cc",
+        "//heron/common/src/cpp/network:network-cxx",
+        "@com_google_googletest//:gtest",
+    ],
 )
 
 cc_test(
     name = "switch_unittest",
+    size = "small",
     srcs = [
-        "switch_unittest.cpp",
         "client_unittest.cpp",
-        "server_unittest.cpp",
-
         "client_unittest.h",
-        "server_unittest.h",
         "host_unittest.h",
-    ],
-    deps = [
-        ":proto_unittests_cc",
-        "//heron/common/src/cpp/network:network-cxx",
-        "@com_google_googletest//:gtest",
+        "server_unittest.cpp",
+        "server_unittest.h",
+        "switch_unittest.cpp",
     ],
     copts = [
         "-Iheron/common/src/cpp",
@@ -98,43 +94,42 @@ cc_test(
         "-I$(GENDIR)/heron/common/src/cpp",
         "-I$(GENDIR)/heron/common/tests/cpp",
     ],
-    size = "small",
     linkstatic = 1,
+    deps = [
+        ":proto_unittests_cc",
+        "//heron/common/src/cpp/network:network-cxx",
+        "@com_google_googletest//:gtest",
+    ],
 )
 
 cc_test(
     name = "piper_unittest",
+    size = "small",
     srcs = [
-        "piper_unittest.cpp"
-    ],
-    deps = [
-        "//heron/common/src/cpp/network:network-cxx",
-        "@com_google_googletest//:gtest",
+        "piper_unittest.cpp",
     ],
     copts = [
         "-Iheron/common/src/cpp",
         "-I$(GENDIR)/heron/common/src/cpp",
         "-I$(GENDIR)/heron/common/tests/cpp",
     ],
-    size = "small",
     linkstatic = 1,
+    deps = [
+        "//heron/common/src/cpp/network:network-cxx",
+        "@com_google_googletest//:gtest",
+    ],
 )
 
 cc_test(
     name = "rate_limit_unittest",
+    size = "small",
     srcs = [
-        "rate_limit_unittest.cpp",
         "client_unittest.cpp",
-        "server_unittest.cpp",
-
         "client_unittest.h",
-        "server_unittest.h",
         "host_unittest.h",
-    ],
-    deps = [
-        ":proto_unittests_cc",
-        "//heron/common/src/cpp/network:network-cxx",
-        "@com_google_googletest//:gtest",
+        "rate_limit_unittest.cpp",
+        "server_unittest.cpp",
+        "server_unittest.h",
     ],
     copts = [
         "-Iheron/common/src/cpp",
@@ -142,6 +137,10 @@ cc_test(
         "-I$(GENDIR)/heron/common/src/cpp",
         "-I$(GENDIR)/heron/common/tests/cpp",
     ],
-    size = "small",
     linkstatic = 1,
+    deps = [
+        ":proto_unittests_cc",
+        "//heron/common/src/cpp/network:network-cxx",
+        "@com_google_googletest//:gtest",
+    ],
 )

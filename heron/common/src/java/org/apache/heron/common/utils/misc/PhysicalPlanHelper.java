@@ -26,6 +26,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
 import org.apache.heron.api.Config;
@@ -101,7 +102,7 @@ public class PhysicalPlanHelper {
     }
 
     // setup outputSchema
-    outputSchema = new HashMap<String, Integer>();
+    outputSchema = new ConcurrentHashMap<String, Integer>();
     List<TopologyAPI.OutputStream> outputs;
     if (mySpout != null) {
       outputs = mySpout.getOutputsList();

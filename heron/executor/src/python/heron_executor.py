@@ -27,6 +27,7 @@ import functools
 import json
 import os
 import random
+import shutil
 import signal
 import string
 import subprocess
@@ -34,9 +35,10 @@ import sys
 import stat
 import threading
 import time
-import yaml
 import socket
 import traceback
+import itertools
+import yaml
 
 from heron.common.src.python.utils import log
 from heron.common.src.python.utils import proc
@@ -128,7 +130,7 @@ def atomic_write_file(path, content):
     os.fsync(f.fileno())
 
   # Rename the tmp file
-  os.rename(tmp_file, path)
+  shutil.move(tmp_file, path)
 
 def log_pid_for_process(process_name, pid):
   filename = get_process_pid_filename(process_name)
@@ -236,11 +238,10 @@ class HeronExecutor(object):
     self.tmaster_stats_port = parsed_args.tmaster_stats_port
     self.heron_internals_config_file = parsed_args.heron_internals_config_file
     self.override_config_file = parsed_args.override_config_file
-    self.component_ram_map =\
-        map(lambda x: {x.split(':')[0]:
-                           int(x.split(':')[1])}, parsed_args.component_ram_map.split(','))
-    self.component_ram_map =\
-        functools.reduce(lambda x, y: dict(x.items() + y.items()), self.component_ram_map)
+    self.component_ram_map = [{x.split(':')[0]:int(x.split(':')[1])}
+                              for x in parsed_args.component_ram_map.split(',')]
+    self.component_ram_map = functools.reduce(lambda x, y: dict(list(x.items()) + list(y.items())),
+                                              self.component_ram_map)
 
     # component_jvm_opts_in_base64 itself is a base64-encoding-json-map, which is appended with
     # " at the start and end. It also escapes "=" to "&equals" due to aurora limitation
@@ -256,7 +257,7 @@ class HeronExecutor(object):
         base64.b64decode(parsed_args.component_jvm_opts.
                          lstrip('"').rstrip('"').replace('(61)', '=').replace('&equals;', '='))
     if component_jvm_opts_in_json != "":
-      for (k, v) in json.loads(component_jvm_opts_in_json).items():
+      for (k, v) in list(json.loads(component_jvm_opts_in_json).items()):
         # In json, the component name and JVM options are still in base64 encoding
         self.component_jvm_opts[base64.b64decode(k)] = base64.b64decode(v)
 
@@ -366,7 +367,7 @@ class HeronExecutor(object):
     parser.add_argument("--is-stateful", required=True)
     parser.add_argument("--checkpoint-manager-classpath", required=True)
     parser.add_argument("--checkpoint-manager-port", required=True)
-    parser.add_argument("--checkpoint-manager-ram", type=long, required=True)
+    parser.add_argument("--checkpoint-manager-ram", type=int, required=True)
     parser.add_argument("--stateful-config-file", required=True)
     parser.add_argument("--health-manager-mode", required=True)
     parser.add_argument("--health-manager-classpath", required=True)
@@ -432,21 +433,6 @@ class HeronExecutor(object):
                       # for instance, the default -Xmx in Twitter mesos machine is around 18GB
                       '-Xmx1024M',
                       '-XX:+PrintCommandLineFlags',
-                      '-verbosegc',
-                      '-XX:+PrintGCDetails',
-                      '-XX:+PrintGCTimeStamps',
-                      '-XX:+PrintGCDateStamps',
-                      '-XX:+PrintGCCause',
-                      '-XX:+UseGCLogFileRotation',
-                      '-XX:NumberOfGCLogFiles=5',
-                      '-XX:GCLogFileSize=100M',
-                      '-XX:+PrintPromotionFailure',
-                      '-XX:+PrintTenuringDistribution',
-                      '-XX:+PrintHeapAtGC',
-                      '-XX:+HeapDumpOnOutOfMemoryError',
-                      '-XX:+UseConcMarkSweepGC',
-                      '-XX:+PrintCommandLineFlags',
-                      '-Xloggc:log-files/gc.' + metricsManagerId + '.log',
                       '-Djava.net.preferIPv4Stack=true',
                       '-cp',
                       self.metrics_manager_classpath,
@@ -462,6 +448,8 @@ class HeronExecutor(object):
                       '--override-config-file=' + self.override_config_file,
                       '--sink-config-file=' + sink_config_file]
 
+    # Insert GC Options
+    metricsmgr_cmd = self._get_java_gc_instance_cmd(metricsmgr_cmd, metricsManagerId)
     return Command(metricsmgr_cmd, self.shell_env)
 
   def _get_metrics_cache_cmd(self):
@@ -473,21 +461,6 @@ class HeronExecutor(object):
                            # for instance, the default -Xmx in Twitter mesos machine is around 18GB
                            '-Xmx1024M',
                            '-XX:+PrintCommandLineFlags',
-                           '-verbosegc',
-                           '-XX:+PrintGCDetails',
-                           '-XX:+PrintGCTimeStamps',
-                           '-XX:+PrintGCDateStamps',
-                           '-XX:+PrintGCCause',
-                           '-XX:+UseGCLogFileRotation',
-                           '-XX:NumberOfGCLogFiles=5',
-                           '-XX:GCLogFileSize=100M',
-                           '-XX:+PrintPromotionFailure',
-                           '-XX:+PrintTenuringDistribution',
-                           '-XX:+PrintHeapAtGC',
-                           '-XX:+HeapDumpOnOutOfMemoryError',
-                           '-XX:+UseConcMarkSweepGC',
-                           '-XX:+PrintCommandLineFlags',
-                           '-Xloggc:log-files/gc.metricscache.log',
                            '-Djava.net.preferIPv4Stack=true',
                            '-cp',
                            self.metricscache_manager_classpath,
@@ -504,6 +477,8 @@ class HeronExecutor(object):
                            "--role", self.role,
                            "--environment", self.environment]
 
+    # Insert GC Options
+    metricscachemgr_cmd = self._get_java_gc_instance_cmd(metricscachemgr_cmd, 'metricscache')
     return Command(metricscachemgr_cmd, self.shell_env)
 
   def _get_healthmgr_cmd(self):
@@ -515,21 +490,6 @@ class HeronExecutor(object):
                      # for instance, the default -Xmx in Twitter mesos machine is around 18GB
                      '-Xmx1024M',
                      '-XX:+PrintCommandLineFlags',
-                     '-verbosegc',
-                     '-XX:+PrintGCDetails',
-                     '-XX:+PrintGCTimeStamps',
-                     '-XX:+PrintGCDateStamps',
-                     '-XX:+PrintGCCause',
-                     '-XX:+UseGCLogFileRotation',
-                     '-XX:NumberOfGCLogFiles=5',
-                     '-XX:GCLogFileSize=100M',
-                     '-XX:+PrintPromotionFailure',
-                     '-XX:+PrintTenuringDistribution',
-                     '-XX:+PrintHeapAtGC',
-                     '-XX:+HeapDumpOnOutOfMemoryError',
-                     '-XX:+UseConcMarkSweepGC',
-                     '-XX:+PrintCommandLineFlags',
-                     '-Xloggc:log-files/gc.healthmgr.log',
                      '-Djava.net.preferIPv4Stack=true',
                      '-cp', self.health_manager_classpath,
                      healthmgr_main_class,
@@ -539,6 +499,8 @@ class HeronExecutor(object):
                      "--topology_name", self.topology_name,
                      "--metricsmgr_port", self.metrics_manager_port]
 
+    # Insert GC Options
+    healthmgr_cmd = self._get_java_gc_instance_cmd(healthmgr_cmd, 'healthmgr')
     return Command(healthmgr_cmd, self.shell_env)
 
   def _get_tmaster_processes(self):
@@ -619,6 +581,46 @@ class HeronExecutor(object):
   def _get_jvm_instance_cmd(self):
     return Command(os.path.join(self.heron_java_home, 'bin/java'), self.shell_env)
 
+  def _get_java_major_version(self):
+    return int(self._get_jvm_version().split(".")[0])
+
+  def _get_java_gc_instance_cmd(self, cmd, gc_name):
+    gc_cmd = ['-verbosegc']
+    if self._get_java_major_version() >= 9:
+      gc_cmd += [
+          '-XX:+UseG1GC',
+          '-XX:+ParallelRefProcEnabled',
+          '-XX:+UseStringDeduplication',
+          '-XX:MaxGCPauseMillis=100',
+          '-XX:InitiatingHeapOccupancyPercent=30',
+          '-XX:+HeapDumpOnOutOfMemoryError',
+          '-XX:ParallelGCThreads=4',
+          '-Xlog:gc*,safepoint=info:file=' + self.log_dir + '/gc.' + gc_name +
+          '.log:tags,time,uptime,level:filecount=5,filesize=100M']
+    else:
+      gc_cmd += [
+          '-XX:+UseConcMarkSweepGC',
+          '-XX:+CMSScavengeBeforeRemark',
+          '-XX:TargetSurvivorRatio=90',
+          '-XX:+PrintGCDetails',
+          '-XX:+PrintGCTimeStamps',
+          '-XX:+PrintGCDateStamps',
+          '-XX:+PrintGCCause',
+          '-XX:+UseGCLogFileRotation',
+          '-XX:NumberOfGCLogFiles=5',
+          '-XX:GCLogFileSize=100M',
+          '-XX:+PrintPromotionFailure',
+          '-XX:+PrintTenuringDistribution',
+          '-XX:+PrintHeapAtGC',
+          '-XX:+HeapDumpOnOutOfMemoryError',
+          '-XX:ParallelGCThreads=4',
+          '-Xloggc:' + self.log_dir + '/gc.' + gc_name + '.log']
+    try:
+      cp_index = cmd.index('-cp')
+      return list(itertools.chain(*[cmd[0:cp_index], gc_cmd, cmd[cp_index:]]))
+    except ValueError:
+      return cmd
+
   def _get_jvm_instance_options(self, instance_id, component_name, remote_debugger_port):
     code_cache_size_mb = 64
     java_metasize_mb = 128
@@ -645,28 +647,13 @@ class HeronExecutor(object):
         '-XX:Max%s=%dM' % (java_metasize_param, java_metasize_mb),
         '-XX:%s=%dM' % (java_metasize_param, java_metasize_mb),
         '-XX:ReservedCodeCacheSize=%dM' % code_cache_size_mb,
-        '-XX:+CMSScavengeBeforeRemark',
-        '-XX:TargetSurvivorRatio=90',
         '-XX:+PrintCommandLineFlags',
-        '-verbosegc',
-        '-XX:+PrintGCDetails',
-        '-XX:+PrintGCTimeStamps',
-        '-XX:+PrintGCDateStamps',
-        '-XX:+PrintGCCause',
-        '-XX:+UseGCLogFileRotation',
-        '-XX:NumberOfGCLogFiles=5',
-        '-XX:GCLogFileSize=100M',
-        '-XX:+PrintPromotionFailure',
-        '-XX:+PrintTenuringDistribution',
-        '-XX:+PrintHeapAtGC',
-        '-XX:+HeapDumpOnOutOfMemoryError',
-        '-XX:+UseConcMarkSweepGC',
-        '-XX:ParallelGCThreads=4',
-        '-Xloggc:log-files/gc.%s.log' % instance_id,
         '-Djava.net.preferIPv4Stack=true',
         '-cp',
         '%s:%s'% (self.instance_classpath, self.classpath)]
 
+    # Insert GC Options
+    instance_options = self._get_java_gc_instance_cmd(instance_options, instance_id)
     # Append debugger ports when it is available
     if remote_debugger_port:
       instance_options.append('-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=%s'
@@ -793,7 +780,7 @@ class HeronExecutor(object):
         '--zkhostportlist=%s' % self.state_manager_connection,
         '--zkroot=%s' % self.state_manager_root,
         '--stmgr_id=%s' % self.stmgr_ids[self.shard],
-        '--instance_ids=%s' % ','.join(map(lambda x: x[0], instance_info)),
+        '--instance_ids=%s' % ','.join([x[0] for x in instance_info]),
         '--myhost=%s' % self.master_host,
         '--data_port=%s' % str(self.master_port),
         '--local_data_port=%s' % str(self.tmaster_controller_port),
@@ -850,21 +837,6 @@ class HeronExecutor(object):
                    '-Xms%dM' % ckptmgr_ram_mb,
                    '-Xmx%dM' % ckptmgr_ram_mb,
                    '-XX:+PrintCommandLineFlags',
-                   '-verbosegc',
-                   '-XX:+PrintGCDetails',
-                   '-XX:+PrintGCTimeStamps',
-                   '-XX:+PrintGCDateStamps',
-                   '-XX:+PrintGCCause',
-                   '-XX:+UseGCLogFileRotation',
-                   '-XX:NumberOfGCLogFiles=5',
-                   '-XX:GCLogFileSize=100M',
-                   '-XX:+PrintPromotionFailure',
-                   '-XX:+PrintTenuringDistribution',
-                   '-XX:+PrintHeapAtGC',
-                   '-XX:+HeapDumpOnOutOfMemoryError',
-                   '-XX:+UseConcMarkSweepGC',
-                   '-XX:+UseConcMarkSweepGC',
-                   '-Xloggc:log-files/gc.' + ckptmgr_id + '.log',
                    '-Djava.net.preferIPv4Stack=true',
                    '-cp',
                    self.checkpoint_manager_classpath,
@@ -876,6 +848,9 @@ class HeronExecutor(object):
                    '-f' + self.stateful_config_file,
                    '-o' + self.override_config_file,
                    '-g' + self.heron_internals_config_file]
+
+    # Insert GC Options
+    ckptmgr_cmd = self._get_java_gc_instance_cmd(ckptmgr_cmd, ckptmgr_id)
     retval = {}
     retval[self.ckptmgr_ids[self.shard]] = Command(ckptmgr_cmd, self.shell_env)
 
@@ -958,8 +933,8 @@ class HeronExecutor(object):
   def _kill_processes(self, commands):
     # remove the command from processes_to_monitor and kill the process
     with self.process_lock:
-      for command_name, command in commands.items():
-        for process_info in self.processes_to_monitor.values():
+      for command_name, command in list(commands.items()):
+        for process_info in list(self.processes_to_monitor.values()):
           if process_info.name == command_name:
             del self.processes_to_monitor[process_info.pid]
             Log.info("Killing %s process with pid %d: %s" %
@@ -978,7 +953,7 @@ class HeronExecutor(object):
     Log.info("Start processes")
     processes_to_monitor = {}
     # First start all the processes
-    for (name, command) in commands.items():
+    for (name, command) in list(commands.items()):
       p = self._run_process(name, command)
       processes_to_monitor[p.pid] = ProcessInfo(p, name, command)
 
@@ -999,7 +974,7 @@ class HeronExecutor(object):
         (pid, status) = os.wait()
 
         with self.process_lock:
-          if pid in self.processes_to_monitor.keys():
+          if pid in list(self.processes_to_monitor.keys()):
             old_process_info = self.processes_to_monitor[pid]
             name = old_process_info.name
             command = old_process_info.command
@@ -1061,10 +1036,10 @@ class HeronExecutor(object):
 
     # if the current command has a matching command in the updated commands we keep it
     # otherwise we kill it
-    for current_name, current_command in current_commands.items():
+    for current_name, current_command in list(current_commands.items()):
       # We don't restart tmaster since it watches the packing plan and updates itself. The stream
       # manager is restarted just to reset state, but we could update it to do so without a restart
-      if current_name in updated_commands.keys() and \
+      if current_name in list(updated_commands.keys()) and \
         current_command == updated_commands[current_name] and \
         not current_name.startswith('stmgr-'):
         commands_to_keep[current_name] = current_command
@@ -1072,8 +1047,8 @@ class HeronExecutor(object):
         commands_to_kill[current_name] = current_command
 
     # updated commands not in the keep list need to be started
-    for updated_name, updated_command in updated_commands.items():
-      if updated_name not in commands_to_keep.keys():
+    for updated_name, updated_command in list(updated_commands.items()):
+      if updated_name not in list(commands_to_keep.keys()):
         commands_to_start[updated_name] = updated_command
 
     return commands_to_kill, commands_to_keep, commands_to_start
@@ -1083,8 +1058,8 @@ class HeronExecutor(object):
     Then starts new ones required and kills old ones no longer required.
     '''
     with self.process_lock:
-      current_commands = dict(map((lambda process: (process.name, process.command)),
-                                  self.processes_to_monitor.values()))
+      current_commands = dict(list(map((lambda process: (process.name, process.command)),
+                                       list(self.processes_to_monitor.values()))))
       updated_commands = self.get_commands_to_run()
 
       # get the commands to kill, keep and start
@@ -1176,7 +1151,7 @@ def setup(executor):
     Log.info('Executor terminated; exiting all process in executor.')
 
     # Kill child processes first and wait for log collection to finish
-    for pid in executor.processes_to_monitor.keys():
+    for pid in list(executor.processes_to_monitor.keys()):
       os.kill(pid, signal.SIGTERM)
     time.sleep(5)
 
@@ -1192,7 +1167,7 @@ def setup(executor):
   sid = os.getsid(pid)
 
   # POSIX prohibits the change of the process group ID of a session leader
-  if pid <> sid:
+  if pid != sid:
     Log.info('Set up process group; executor becomes leader')
     os.setpgrp() # create new process group, become its leader
 

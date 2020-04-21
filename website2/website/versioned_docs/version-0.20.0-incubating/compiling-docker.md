@@ -25,7 +25,7 @@ For developing Heron, you will need to compile it for the environment that you
 want to use it in. If you'd like to use Docker to create that build environment,
 Heron provides a convenient script to make that process easier.
 
-Currently, only Ubuntu 14.04, Ubuntu 15.10, and CentOS 7 are supported, but if you
+Currently Debian10 and Ubuntu 18.04 are actively being supported.  There is also limited support for Ubuntu 14.04, Debian9, and CentOS 7. If you
 need another platform there are instructions for adding new ones
 [below](#contributing-new-environments).
 
@@ -61,10 +61,10 @@ Running the script by itself will display usage information:
 ```
 Usage: docker/build-artifacts.sh <platform> <version_string> [source-tarball] <output-directory>
 
-Platforms Supported: darwin, ubuntu14.04, ubuntu15.10, centos7
+Platforms Supported: darwin, ubuntu14.04, ubuntu18.04, centos7
 
 Example:
-  ./build-artifacts.sh ubuntu14.04 0.12.0 .
+  ./build-artifacts.sh debian10 0.12.0 .
 
 NOTE: If running on OSX, the output directory will need to
       be under /Users so virtualbox has access to.
@@ -72,8 +72,18 @@ NOTE: If running on OSX, the output directory will need to
 
 The following arguments are required:
 
-* `platform` --- Currently, this can be one of: `ubuntu14.04`, `centos7`. You
-  can add other platforms using the [instructions
+* `platform` --- Currently we are focused on supporting the `debian10` and `ubuntu18.04` platforms.  
+We also support building Heron locally on OSX.  You can specify this as listing `darwin` as the platform.
+ All options are:
+   - `centos7`
+   - `darwin`
+   - `debian9`
+   - `debian10`
+   - `ubuntu14.04`
+   - `ubuntu18.04`
+    
+   
+  You can add other platforms using the [instructions
   below](#contributing-new-environments).
 * `version-string` --- The Heron release for which you'd like to build
   artifacts.
@@ -83,10 +93,10 @@ The following arguments are required:
 Here's an example usage:
 
 ```bash
-$ docker/scripts/build-artifacts.sh ubuntu14.04 0.12.0 ~/heron-release
+$ docker/scripts/build-artifacts.sh debian10 0.22.1-incubating ~/heron-release
 ```
 
-This will build a Docker container specific to Ubuntu 14.04, create a source
+This will build a Docker container specific to Debian10, create a source
 tarball of the Heron repository, run a full release build of Heron, and then
 copy the artifacts into the `~/heron-release` directory.
 
@@ -106,12 +116,45 @@ of the generated artifacts:
 
 ```bash
 $ ls ~/heron-release
-heron-0.12.0-ubuntu14.04.tar
-heron-0.12.0-ubuntu14.04.tar.gz
-heron-core-0.12.0-ubuntu14.04.tar.gz
-heron-install-0.12.0-ubuntu14.04.sh
-heron-layer-0.12.0-ubuntu14.04.tar
-heron-tools-0.12.0-ubuntu14.04.tar.gz
+heron-0.22.1-incubating-debian10.tar
+heron-0.22.1-incubating-debian10.tar.gz
+heron-core-0.22.1-incubating-debian10.tar.gz
+heron-install-0.22.1-incubating-debian10.sh
+heron-layer-0.22.1-incubating-debian10.tar
+heron-tools-0.22.1-incubating-debian10.tar.gz
+```
+
+## Set Up A Docker Based Development Environment
+
+In case you want to have a development environment instead of making a full build,
+Heron provides two helper scripts for you. It could be convenient if you don't want
+to set up all the libraries and tools on your machine directly.
+
+The following commands are to create a new docker image with a development environment
+and start the container based on it:
+```bash
+$ cd /path/to/heron/repo
+$ docker/scripts/dev-env-create.sh heron-dev
+```
+
+After the commands, a new docker container is started with all the libraries and tools
+installed. The operation system is Ubuntu 18.04 by default. Now you can build Heron
+like:
+```bash
+\# bazel build --config=debian scripts/packages:binpkgs
+\# bazel build --config=debian scripts/packages:tarpkgs
+```
+
+The current folder is mapped to the '/heron' directory in the container and any changes
+you make on the host machine will be reflected in the container. Note that when you exit
+the container and re-run the script, a new container will be started with a fresh new
+environment.
+
+When a development environment container is running, you can use the follow script
+to start a new terminal in the container.
+```bash
+$ cd /path/to/heron/repo
+$ docker/scripts/dev-env-run.sh heron-dev
 ```
 
 ## Contributing New Environments
@@ -170,7 +213,7 @@ RUN apt-get update && apt-get -y install \
          wget
 ```
 
-### Step 4 --- An installation script for Java 8 and a `JAVA_HOME` environment variable
+### Step 4 --- An installation script for Java 11 and a `JAVA_HOME` environment variable
 
 Here's an example:
 
@@ -179,18 +222,17 @@ RUN \
      echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true | debconf-set-selections && \
      add-apt-repository -y ppa:webupd8team/java && \
      apt-get update && \
-     apt-get install -y oracle-java8-installer && \
-     rm -rf /var/lib/apt/lists/* && \
-     rm -rf /var/cache/oracle-jdk8-installer
+     apt-get install -y openjdk-11-jdk-headless && \
+     rm -rf /var/lib/apt/lists/*
 
-ENV JAVA_HOME /usr/lib/jvm/java-8-oracle
+ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk-amd64
 ```
 
 #### Step 5 - An installation script for [Bazel](http://bazel.io/) version {{% bazelVersion %}} or above.
 Here's an example:
 
 ```dockerfile
-RUN wget -O /tmp/bazel.sh https://github.com/bazelbuild/bazel/releases/download/0.23.2/bazel-0.23.2-installer-linux-x86_64.sh \
+RUN wget -O /tmp/bazel.sh https://github.com/bazelbuild/bazel/releases/download/0.26.0/bazel-0.26.0-installer-linux-x86_64.sh \
          && chmod +x /tmp/bazel.sh \
          && /tmp/bazel.sh
 ```

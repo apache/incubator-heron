@@ -24,7 +24,7 @@ import re
 import sys
 import time
 import uuid
-from httplib import HTTPConnection
+from http.client import HTTPConnection
 from threading import Lock, Thread
 
 from ..common import status
@@ -198,7 +198,7 @@ class InstanceStateResultChecker(TopologyStructureResultChecker):
       raise status.TestFailure("Fail to get actual results of instance states for topology %s"
                                % self.topology_name)
 
-    if '_' not in expected_result[0].keys()[0]:
+    if '_' not in list(expected_result[0].keys())[0]:
       actual_result = self._parse_instance_id(actual_result)
 
     return self._compare_state(sorted(expected_result), sorted(actual_result))
@@ -210,8 +210,8 @@ class InstanceStateResultChecker(TopologyStructureResultChecker):
     else:
       failure = status.TestFailure("Actual result did not match expected result")
       # lambda required below to remove the unicode 'u' from the output
-      logging.info("Actual result ---------- \n" + str(map(lambda x: str(x), actual_results)))
-      logging.info("Expected result ---------- \n" + str(map(lambda x: str(x), expected_results)))
+      logging.info("Actual result ---------- \n" + str([str(x) for x in actual_results]))
+      logging.info("Expected result ---------- \n" + str([str(x) for x in expected_results]))
       raise failure
 
   def _parse_instance_id(self, input):
@@ -345,11 +345,11 @@ def filter_test_topologies(test_topologies, test_pattern):
   initial_topologies = test_topologies
   if test_pattern:
     pattern = re.compile(test_pattern)
-    test_topologies = filter(lambda x: pattern.match(x['topologyName']), test_topologies)
+    test_topologies = [x for x in test_topologies if pattern.match(x['topologyName'])]
 
   if len(test_topologies) == 0:
     logging.error("Test filter '%s' did not match any configured test names:\n%s",
-      test_pattern, '\n'.join(map(lambda x: x['topologyName'], initial_topologies)))
+      test_pattern, '\n'.join([x['topologyName'] for x in initial_topologies]))
     sys.exit(1)
   return test_topologies
 

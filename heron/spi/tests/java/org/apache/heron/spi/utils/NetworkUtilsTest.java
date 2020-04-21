@@ -42,6 +42,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Matchers;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
@@ -49,8 +50,8 @@ import org.apache.heron.common.basics.Pair;
 import org.apache.heron.common.basics.SysUtils;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({
-    SysUtils.class, NetworkUtils.class, ShellUtils.class})
+@PowerMockIgnore("jdk.internal.reflect.*")
+@PrepareForTest({SysUtils.class, NetworkUtils.class, ShellUtils.class})
 public class NetworkUtilsTest {
   private static final Logger LOG = Logger.getLogger(NetworkUtilsTest.class.getName());
 

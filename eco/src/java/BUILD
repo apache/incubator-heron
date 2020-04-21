@@ -1,10 +1,12 @@
+load("@rules_java//java:defs.bzl", "java_library")
+
 licenses(["notice"])
 
 package(default_visibility = ["//visibility:public"])
 
 eco_deps = [
-    "@commons_cli_commons_cli//jar",
-    "@org_yaml_snakeyaml//jar",
+    "@maven//:commons_cli_commons_cli",
+    "@maven//:org_yaml_snakeyaml",
     "//third_party/java:logging",
     "//storm-compatibility/src/java:storm-compatibility-java-neverlink",
     "//heron/api/src/java:api-java-low-level",
@@ -50,7 +52,7 @@ java_library(
 java_library(
     name = "eco-submit-java",
     srcs = glob(["org/apache/heron/eco/submit/*.java"]),
-    deps = eco_deps, 
+    deps = eco_deps,
 )
 
 java_library(

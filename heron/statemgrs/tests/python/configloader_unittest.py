@@ -40,7 +40,7 @@ class ConfigLoaderTest(unittest.TestCase):
     return configloader.load_state_manager_locations(cluster, yaml_path)
 
   def test_load_state_manager_locations_aurora(self):
-    self.assertEquals([{
+    self.assertEqual([{
       'hostport': 'LOCALMODE',
       'name': 'local',
       'rootpath': '/vagrant/.herondata/repository/state/aurora',
@@ -49,7 +49,7 @@ class ConfigLoaderTest(unittest.TestCase):
     }], self.load_locations('aurora'))
 
   def test_load_state_manager_locations_local(self):
-    self.assertEquals([{
+    self.assertEqual([{
       'hostport': 'LOCALMODE',
       'name': 'local',
       'rootpath': '/user/fake/.herondata/repository/state/local',
@@ -58,7 +58,7 @@ class ConfigLoaderTest(unittest.TestCase):
     }], self.load_locations('local'))
 
   def test_load_state_manager_locations_localzk(self):
-    self.assertEquals([{
+    self.assertEqual([{
       'hostport': '127.0.0.1:2181',
       'name': 'zk',
       'rootpath': '/heron',
@@ -67,7 +67,7 @@ class ConfigLoaderTest(unittest.TestCase):
     }], self.load_locations('localzk'))
 
   def test_load_state_manager_locations_marathon(self):
-    self.assertEquals([{
+    self.assertEqual([{
       'hostport': 'LOCALMODE',
       'name': 'local',
       'rootpath': '/user/fake/.herondata/repository/state/marathon',
@@ -76,7 +76,7 @@ class ConfigLoaderTest(unittest.TestCase):
     }], self.load_locations('marathon'))
 
   def test_load_state_manager_locations_mesos(self):
-    self.assertEquals([{
+    self.assertEqual([{
       'hostport': 'LOCALMODE',
       'name': 'local',
       'rootpath': '/user/fake/.herondata/repository/state/mesos',
@@ -85,7 +85,7 @@ class ConfigLoaderTest(unittest.TestCase):
     }], self.load_locations('mesos'))
 
   def test_load_state_manager_locations_slurm(self):
-    self.assertEquals([{
+    self.assertEqual([{
       'hostport': 'LOCALMODE',
       'name': 'local',
       'rootpath': '/user/fake/.herondata/repository/state/slurm',
@@ -94,7 +94,7 @@ class ConfigLoaderTest(unittest.TestCase):
     }], self.load_locations('slurm'))
 
   def test_load_state_manager_locations_yarn(self):
-    self.assertEquals([{
+    self.assertEqual([{
       'hostport': 'LOCALMODE',
       'name': 'local',
       'rootpath': '/user/fake/.herondata/repository/state/yarn',

@@ -1,3 +1,5 @@
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
 package(default_visibility = ["//visibility:public"])
 
 cc_library(
@@ -6,7 +8,7 @@ cc_library(
         "zkclient.cpp",
         "zkclient_factory.h",
     ],
-    hdrs = [ 
+    hdrs = [
         "mock_zkclient.h",
         "zkclient.h",
     ],
@@ -14,11 +16,11 @@ cc_library(
         "-Iheron/common/src/cpp",
         "-I$(GENDIR)/heron//common/src/cpp",
     ],
-    deps = [
-        "@org_apache_zookeeper//:zookeeper",
-        "//heron/common/src/cpp/network:network-cxx",
-        "//heron/common/src/cpp/errors:errors-cxx",
-        "//heron/common/src/cpp/basics:basics-cxx",
-    ],
     linkstatic = 1,
+    deps = [
+        "//heron/common/src/cpp/basics:basics-cxx",
+        "//heron/common/src/cpp/errors:errors-cxx",
+        "//heron/common/src/cpp/network:network-cxx",
+        "@org_apache_zookeeper//:zookeeper",
+    ],
 )

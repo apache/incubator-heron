@@ -143,7 +143,7 @@ config.setNumContainers(2);
 new Runner("IntegerProcessingGraph", config, builder).run();
 ```
 
-As you can see, the Java code for the example streamlet processing graph requires very little boilerplate and is heavily indebted to Java 8 [lambda](https://docs.oracle.com/javase/tutorial/java/javaOO/lambdaexpressions.html) patterns.
+As you can see, the Java code for the example streamlet processing graph requires very little boilerplate and is heavily indebted to Java [lambda](https://docs.oracle.com/javase/tutorial/java/javaOO/lambdaexpressions.html) patterns.
 
 ## Streamlet operations
 

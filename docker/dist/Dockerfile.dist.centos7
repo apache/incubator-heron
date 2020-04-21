@@ -22,13 +22,14 @@ RUN yum -y install python; yum clean all
 RUN yum -y install unzip; yum clean all
 RUN yum -y install which; yum clean all
 RUN yum -y install curl; yum clean all
-RUN yum -y install python-setuptools; yum clean all
+RUN yum -y install nmap-ncat; yum clean all
+RUN yum -y install python python3-setuptools; yum clean all
 RUN easy_install supervisor
 RUN echo_supervisord_conf > /etc/supervisord.conf
 
-RUN yum -y install java-1.8.0-openjdk java-1.8.0-openjdk-devel; yum clean all
+RUN yum -y install java-11-openjdk java-11-openjdk-devel; yum clean all
 
-ENV JAVA_HOME /usr/lib/jvm/java-1.8.0
+ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk
 
 ADD artifacts /heron
 
@@ -50,3 +51,12 @@ RUN ln -s /usr/local/heron/dist/heron-core /heron \
 
 ENV HERON_HOME /heron/heron-core/
 RUN export HERON_HOME
+
+# install zookeeper
+ARG ZK_DIST=zookeeper-3.4.14
+ADD dist/scripts /opt/heron-docker/scripts
+
+RUN sh /opt/heron-docker/scripts/install-zookeeper.sh $ZK_DIST
+
+ADD dist/conf/zookeeper.conf /opt/zookeeper/conf/zookeeper.conf
+ADD dist/conf/sandbox.conf /etc/supervisor/conf.d/

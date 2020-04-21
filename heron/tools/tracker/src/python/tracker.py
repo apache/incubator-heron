@@ -135,7 +135,7 @@ class Tracker(object):
       Log.info("State watch triggered for topologies.")
       Log.debug("Topologies: " + str(topologies))
       existingTopologies = self.getTopologiesForStateLocation(state_manager.name)
-      existingTopNames = map(lambda t: t.name, existingTopologies)
+      existingTopNames = [t.name for t in existingTopologies]
       Log.debug("Existing topologies: " + str(existingTopNames))
       for name in existingTopNames:
         if name not in topologies:
@@ -164,10 +164,10 @@ class Tracker(object):
     an optional role.
     Raises exception if topology is not found, or more than one are found.
     """
-    topologies = list(filter(lambda t: t.name == topologyName
-                             and t.cluster == cluster
-                             and (not role or t.execution_state.role == role)
-                             and t.environ == environ, self.topologies))
+    topologies = list([t for t in self.topologies if t.name == topologyName
+                       and t.cluster == cluster
+                       and (not role or t.execution_state.role == role)
+                       and t.environ == environ])
     if not topologies or len(topologies) > 1:
       if role is not None:
         raise Exception("Topology not found for {0}, {1}, {2}, {3}".format(
@@ -183,7 +183,7 @@ class Tracker(object):
     """
     Returns all the topologies for a given state manager.
     """
-    return filter(lambda t: t.state_manager_name == name, self.topologies)
+    return [t for t in self.topologies if t.state_manager_name == name]
 
   def addNewTopology(self, state_manager, topologyName):
     """
@@ -672,7 +672,7 @@ class Tracker(object):
     Raises exception if no such topology is found.
     """
     # Iterate over the values to filter the desired topology.
-    for (topology_name, _), topologyInfo in self.topologyInfos.items():
+    for (topology_name, _), topologyInfo in list(self.topologyInfos.items()):
       executionState = topologyInfo["execution_state"]
       if (topologyName == topology_name and
           cluster == executionState["cluster"] and

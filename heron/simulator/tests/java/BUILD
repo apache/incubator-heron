@@ -1,7 +1,9 @@
+load("@rules_java//java:defs.bzl", "java_library")
+
 java_library(
     name = "simulator-tests",
     srcs = glob(["**/*.java"]),
-    deps =  heron_java_proto_files() + [
+    deps = heron_java_proto_files() + [
         "//heron/api/src/java:api-java-low-level",
         "//heron/common/src/java:basics-java",
         "//heron/common/src/java:config-java",
@@ -14,6 +16,7 @@ java_library(
 )
 
 java_tests(
+    size = "small",
     test_classes = [
         "org.apache.heron.simulator.executors.InstanceExecutorTest",
         "org.apache.heron.simulator.grouping.AllGroupingTest",
@@ -30,5 +33,4 @@ java_tests(
     runtime_deps = [
         ":simulator-tests",
     ],
-    size = "small",
 )

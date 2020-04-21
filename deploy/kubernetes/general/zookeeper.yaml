@@ -30,10 +30,10 @@ spec:
     matchLabels:
       app: zk
   minAvailable: 1
----
 
+---
 ## Define a StatefulSet for ZK servers
-apiVersion: apps/v1beta1
+apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: zk
@@ -43,6 +43,10 @@ metadata:
 spec:
   serviceName: zookeeper
   replicas: 1
+  selector:
+    matchLabels:
+      app: heron
+      component: zookeeper
   template:
     metadata:
       labels:
@@ -66,7 +70,7 @@ spec:
                 topologyKey: "kubernetes.io/hostname"
       containers:
         - name: zookeeper
-          image: heron/heron:0.16.2
+          image: heron/heron:latest
           command: ["sh", "-c"]
           args:
             - >
@@ -103,7 +107,6 @@ spec:
           emptyDir: {}
 
 ---
-
 ##
 ## Define the ZooKeeper headless service
 ##

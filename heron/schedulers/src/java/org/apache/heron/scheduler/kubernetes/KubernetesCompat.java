@@ -23,32 +23,48 @@ import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.squareup.okhttp.Response;
-
 import org.apache.heron.scheduler.TopologyRuntimeManagementException;
 
-import io.kubernetes.client.ApiClient;
-import io.kubernetes.client.ApiException;
-import io.kubernetes.client.apis.CoreV1Api;
+import io.kubernetes.client.openapi.ApiClient;
+import io.kubernetes.client.openapi.ApiException;
+import io.kubernetes.client.openapi.Configuration;
+import io.kubernetes.client.openapi.apis.CoreV1Api;
+
+import okhttp3.Response;
 
 public class KubernetesCompat {
 
   private static final Logger LOG = Logger.getLogger(KubernetesCompat.class.getName());
 
   boolean killTopology(String kubernetesUri, String topology, String namespace) {
-    final CoreV1Api client = new CoreV1Api(new ApiClient().setBasePath(kubernetesUri));
+    CoreV1Api coreClient;
+    try {
+      final ApiClient apiClient = io.kubernetes.client.util.Config.defaultClient();
+      Configuration.setDefaultApiClient(apiClient);
+      coreClient = new CoreV1Api(apiClient);
+    } catch (IOException e) {
+      LOG.log(Level.SEVERE, "Failed to setup Kubernetes client" + e);
+      throw new RuntimeException(e);
+    }
 
     // old version deployed topologies as naked pods
     try {
       final String labelSelector = KubernetesConstants.LABEL_TOPOLOGY + "=" + topology;
       final Response response =
-          client.deleteCollectionNamespacedPodCall(namespace, null, null, null, null,
-          labelSelector, null, null, null, null, null, null)
-          .execute();
-      if (!response.isSuccessful()) {
+          coreClient.deleteCollectionNamespacedPodCall(namespace, null, null, null, null, null,
+          null, labelSelector, null, null,
+          KubernetesConstants.DELETE_OPTIONS_PROPAGATION_POLICY,
+          null, null, null, null, null).execute();
+
+      if (response.isSuccessful()) {
+        LOG.log(Level.INFO, "Pods for the Job [" + topology
+            + "] in namespace [" + namespace + "] are deleted.");
+        return true;
+      } else {
+        LOG.log(Level.SEVERE, "Error when deleting the Pods of the job ["
+            + topology + "]: in namespace [" + namespace + "]");
         LOG.log(Level.SEVERE, "Error killing topology message: " + response.message());
         KubernetesUtils.logResponseBodyIfPresent(LOG, response);
-
         throw new TopologyRuntimeManagementException(
             KubernetesUtils.errorMessageFromResponse(response));
       }
@@ -59,7 +75,5 @@ public class KubernetesCompat {
       }
       return false;
     }
-
-    return true;
   }
 }

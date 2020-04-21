@@ -13,8 +13,8 @@ pex_library(
     ),
     deps = [
         "//heronpy/api:heron-python-py",
-        "//heronpy/streamlet:heron-python-streamlet-py",
         "//heronpy/connectors:heron-pythonconnectors-py",
+        "//heronpy/streamlet:heron-python-streamlet-py",
         "//integration_test/src/python/integration_test/common:heron-integration-common-py",
         "//integration_test/src/python/integration_test/core:heron-integration-core-py",
     ],

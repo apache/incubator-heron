@@ -69,7 +69,7 @@ class _HelpAction(argparse._HelpAction):
     # but better save than sorry
     for subparsers_action in subparsers_actions:
       # get all subparsers and print help
-      for choice, subparser in subparsers_action.choices.items():
+      for choice, subparser in list(subparsers_action.choices.items()):
         print("Subparser '{}'".format(choice))
         print(subparser.format_help())
         return

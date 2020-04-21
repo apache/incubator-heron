@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.heron.api.topology.TopologyBuilder;
+import org.apache.heron.streamlet.impl.StreamletBaseImpl;
 import org.apache.heron.streamlet.impl.StreamletImpl;
 
 /**
@@ -100,8 +101,7 @@ public class StreamletShadow<R> extends StreamletImpl<R> {
   /*
    * Functions related to topology building need to be overriden.
    */
-  @Override
-  public <T> void addChild(StreamletImpl<T> child) {
+  public <T> void addChild(StreamletBaseImpl<T> child) {
     real.addChild(child);
   }
 
@@ -112,7 +112,7 @@ public class StreamletShadow<R> extends StreamletImpl<R> {
    * @return The kid streamlets
    */
   @Override
-  public List<StreamletImpl<?>> getChildren() {
+  public List<StreamletBaseImpl<?>> getChildren() {
     return real.getChildren();
   }
 

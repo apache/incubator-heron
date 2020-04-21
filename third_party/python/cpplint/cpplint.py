@@ -585,7 +585,7 @@ _ALT_TOKEN_REPLACEMENT = {
 # False positives include C-style multi-line comments and multi-line strings
 # but those have always been troublesome for cpplint.
 _ALT_TOKEN_REPLACEMENT_PATTERN = re.compile(
-    r'[ =()](' + ('|'.join(_ALT_TOKEN_REPLACEMENT.keys())) + r')(?=[ (]|$)')
+    r'[ =()](' + ('|'.join(list(_ALT_TOKEN_REPLACEMENT.keys()))) + r')(?=[ (]|$)')
 
 
 # These constants define types of headers for use with
@@ -6247,9 +6247,9 @@ def ProcessFile(filename, vlevel, extra_check_functions=None):
   if filename != '-' and file_extension not in GetAllExtensions():
     # bazel 0.5.1> uses four distinct generated files that gives a warning
     # we suppress the warning for these files
-    bazel_gen_files = set([ 
+    bazel_gen_files = set([
         "external/local_config_cc/libtool",
-        "external/local_config_cc/make_hashed_objlist.py", 
+        "external/local_config_cc/make_hashed_objlist.py",
         "external/local_config_cc/wrapped_ar",
         "external/local_config_cc/wrapped_clang",
         "external/local_config_cc/xcrunwrapper.sh",

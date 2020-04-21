@@ -32,10 +32,16 @@ install it using this one-liner:
 $ /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 ```
 
-### Step 2 --- Install bazel and other required libraries
+### Step 2 -- Install Bazel
+```bash
+wget -O /tmp/bazel.sh https://github.com/bazelbuild/bazel/releases/download/0.26.0/bazel-0.26.0-installer-darwin-x86_64.sh
+chmod +x /tmp/bazel.sh
+/tmp/bazel.sh --user
+```
+
+### Step 2 --- Install other required libraries
 
 ```bash
-brew install bazel
 brew install automake
 brew install cmake
 brew install libtool

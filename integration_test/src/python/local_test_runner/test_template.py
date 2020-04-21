@@ -19,14 +19,18 @@
 #  under the License.
 
 """ test_template.py """
+from future.standard_library import install_aliases
+install_aliases()
+
 import json
 import logging
 import os
 import time
-import urllib
+import shutil
 import signal
 import subprocess
 from collections import namedtuple
+from urllib.request import urlopen
 
 from ..common import status
 
@@ -149,7 +153,7 @@ class TestTemplate(object):
     # move to read file. This guarantees contents will be put into the file the
     # spout is reading from atomically
     # which increases the determinism
-    os.rename('temp.txt', self.params['readFile'])
+    shutil.move('temp.txt', self.params['readFile'])
 
   def _check_results(self):
     """ get actual and expected result.
@@ -252,7 +256,7 @@ class TestTemplate(object):
     url = 'http://localhost:%s/topologies/physicalplan?' % self.params['trackerPort']\
           + 'cluster=local&environ=default&topology=IntegrationTest_LocalReadWriteTopology'
     logging.debug("Fetching physical plan from %s", url)
-    response = urllib.urlopen(url)
+    response = urlopen(url)
     physical_plan_json = json.loads(response.read())
 
     if 'result' not in physical_plan_json:

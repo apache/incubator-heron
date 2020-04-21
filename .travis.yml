@@ -1,34 +1,32 @@
+---
+
 group: edge
 
-sudo: required
-
-dist: trusty
+dist: bionic
 
 language: java
 
+os: linux
+
 jdk:
-  - oraclejdk8
+  - oraclejdk11
 
 addons:
   apt:
-    sources:
-      - ubuntu-toolchain-r-test
-
     packages:
-      - gcc-4.8
-      - g++-4.8
-      - gcc-4.8-multilib
-      - g++-4.8-multilib
-      - python2.7
-      - wget
+      - libtool-bin
+      - libcppunit-dev
       - pkg-config
+      - python-dev
+      - python-wheel
+      - wget
       - zip
       - zlib1g-dev
       - google-perftools
       - libgoogle-perftools-dev
 
 env:
-  - BAZEL_VERSION=0.26.0 CC=gcc-4.8 CXX=g++-4.8 CPP=cpp-4.8 CXXCPP=cpp-4.8 ENABLE_HEAPCHECK=1
+  - BAZEL_VERSION=3.0.0 ENABLE_HEAPCHECK=1
 
 before_install:
   # download and install bazel
@@ -36,15 +34,10 @@ before_install:
   - chmod +x bazel-${BAZEL_VERSION}-installer-linux-x86_64.sh
   - ./bazel-${BAZEL_VERSION}-installer-linux-x86_64.sh --user
 
-before_script:
-  # install python module for wheel files
-  # required for python packaging
-  - sudo pip install wheel
-
 script:
-  - which gcc-4.8
+  - which gcc
   - gcc --version
-  - which g++-4.8
+  - which g++
   - g++ --version
   - which python
   - python -V

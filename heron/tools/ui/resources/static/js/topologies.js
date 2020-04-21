@@ -23,6 +23,14 @@ var SUM = 0,
     AVG = 1,
     LAST = 2;
 
+var countersUrlFlags = {};
+setInterval(function() {
+  // Reset fetch flags every minute so that new fetches can go through
+  countersUrlFlags = {};
+}, 60000);
+
+const ParallelismConfig = "topology.component.parallelism";
+
 var AllExceptions = React.createClass({
   getInitialState: function() {
     return {}
@@ -263,7 +271,7 @@ var AllMetrics = React.createClass({
 
   fetchLplan: function () {
     if (this.state.lplan === undefined) {
-      var fetch_url = this.props.baseUrl +
+      const fetch_url = this.props.baseUrl +
        "/topologies/" +
         this.props.cluster + "/" +
         this.props.environ + "/" +
@@ -385,9 +393,8 @@ var AllMetrics = React.createClass({
   },
 
   fetchCounters: function() {
-    var fetch_url = "";
     if (this.props.hasOwnProperty("comp_name")) {
-      fetch_url = this.props.baseUrl + "/topologies/metrics?" +
+      const fetch_url = this.props.baseUrl + "/topologies/metrics?" +
         "cluster=" + this.props.cluster + "&" +
         "environ=" + this.props.environ + "&" +
         "topology=" + this.props.topology + "&" +
@@ -430,47 +437,80 @@ var AllMetrics = React.createClass({
           }
         }
       }
-      for (var i = 0; i < metricnames.length; i++) {
-        for (var timeRange in this.timeRanges) {
-          if (this.timeRanges.hasOwnProperty(timeRange)) {
-            var url = fetch_url +
-              "&metricname=" + metricnames[i] +
-              "&interval=" + this.timeRanges[timeRange];
-            this.fetchCountersURL(url, timeRange);
-          }
+      for (var timeRange in this.timeRanges) {
+        metricnameargs = "";
+        for (var i = 0; i < metricnames.length; i++) {
+          metricnameargs += "&metricname=" + metricnames[i];
+        }
+        if (this.timeRanges.hasOwnProperty(timeRange) && metricnameargs != "") {
+          var url = fetch_url + metricnameargs +
+            "&interval=" + this.timeRanges[timeRange];
+          this.fetchCountersURL(url, timeRange);
         }
       }
     } else if (!this.props.hasOwnProperty("comp_name")) {
       // Fetch all metrics for all the spouts.
       // Must have pplan and metricnames to continue.
       if (this.state.pplan && this.state.lplan) {
+        const fetch_url = this.props.baseUrl + "/topologies/metrics?" +
+          "cluster=" + this.props.cluster + "&" +
+          "environ=" + this.props.environ + "&" +
+          "topology=" + this.props.topology;
+
         var spoutNames = [];
         for (var name in this.state.lplan.spouts) {
           if (this.state.lplan.spouts.hasOwnProperty(name)) {
             spoutNames.push(name);
           }
         }
-        fetch_url = this.props.baseUrl + "/topologies/metrics?" +
-          "cluster=" + this.props.cluster + "&" +
-          "environ=" + this.props.environ + "&" +
-          "topology=" + this.props.topology;
+
+        // Load metrics for spouts.
         for (var i = 0; i < spoutNames.length; i++) {
           var spout = spoutNames[i];
-          var url = fetch_url + "&component=" + spout;
           for (var j = 0; j < this.state.lplan.spouts[spout].outputs.length; j++) {
             var streamName = this.state.lplan.spouts[spout].outputs[j].stream_name;
-            for (var spoutMetric in this.spoutMetrics) {
-              if (this.spoutMetrics.hasOwnProperty(spoutMetric)) {
-                var metricname = spoutMetric + streamName;
-                for (var timeRange in this.timeRanges) {
-                  if (this.timeRanges.hasOwnProperty(timeRange)) {
-                    var url = fetch_url +
-                      "&component=" + spout +
-                      "&metricname=" + metricname +
-                      "&interval=" + this.timeRanges[timeRange];
-                    this.fetchCountersURL(url, timeRange);
-                  }
+            for (var timeRange in this.timeRanges) {
+              metricnameargs = "";
+              for (var spoutMetric in this.spoutMetrics) {
+                if (this.spoutMetrics.hasOwnProperty(spoutMetric)) {
+                  metricnameargs += "&metricname=" + spoutMetric + streamName;
                 }
+              }
+              if (this.timeRanges.hasOwnProperty(timeRange) && metricnameargs != "") {
+                var url = fetch_url + metricnameargs +
+                  "&component=" + spout +
+                  "&interval=" + this.timeRanges[timeRange];
+
+                this.fetchCountersURL(url, timeRange);
+              }
+            }
+          }
+        }
+        // Load metrics for bolts.
+        var boltNames = [];
+        for (var name in this.state.lplan.bolts) {
+          if (this.state.lplan.bolts.hasOwnProperty(name)) {
+            boltNames.push(name);
+          }
+        }
+
+        for (var i = 0; i < boltNames.length; i++) {
+          var bolt = boltNames[i];
+          for (var j = 0; j < this.state.lplan.bolts[bolt].outputs.length; j++) {
+            var streamName = this.state.lplan.bolts[bolt].outputs[j].stream_name;
+            for (var timeRange in this.timeRanges) {
+              metricnameargs = "";
+              for (var boltMetric in this.boltMetricsInput) {
+                if (this.boltMetricsInput.hasOwnProperty(boltMetric)) {
+                  metricnameargs += "&metricname=" + boltMetric + streamName;
+                }
+              }
+              if (this.timeRanges.hasOwnProperty(timeRange) && metricnameargs != "") {
+                var url = fetch_url + metricnameargs +
+                  "&component=" + bolt +
+                  "&interval=" + this.timeRanges[timeRange];
+
+                this.fetchCountersURL(url, timeRange);
               }
             }
           }
@@ -480,50 +520,58 @@ var AllMetrics = React.createClass({
   },
 
   fetchCountersURL: function(url, timeRange) {
-    $.ajax({
-      url:       url,
-      dataType:  'json',
-      success: function(response) {
-        if (response.hasOwnProperty("metrics")) {
-          var component = response.component;
-          var metrics = this.metrics;
-          if (!metrics.hasOwnProperty(component)) {
-            metrics[response.component] = {};
-          }
-          if (!metrics[component].hasOwnProperty(timeRange)) {
-            metrics[component][timeRange] = {};
-          }
-          for (var name in response.metrics) {
-            if (response.metrics.hasOwnProperty(name)) {
-              var metricname = name;
-              // Handle __jvm-uptime-secs as a special case.
-              if (name !== "__jvm-uptime-secs") {
-                metricname = name.split("/")[0] + "/";
-              }
-              var displayName = this.supportedMetricNames[metricname].name;
-              if (!metrics[component][timeRange].hasOwnProperty(displayName)) {
-                metrics[component][timeRange][displayName] = {};
-              }
-              var tmpMetrics = {
-                metrics: response.metrics[name],
-                scaleDevisor: this.supportedMetricNames[metricname].scaleDevisor,
-                aggregationType: this.supportedMetricNames[metricname].aggregationType
-              };
-              if (name === "__jvm-uptime-secs") {
-                metrics[component][timeRange][displayName][""] = tmpMetrics;
-              } else {
-                metrics[component][timeRange][displayName][name.split("/")[1]] = tmpMetrics;
+    // This function might be called multiple times with the same url. Note
+    // that the timeRange value is inlcuded in the url so it can be ignored in
+    // the check. We check if the request has been made before first and
+    // skip if this is a duplicated request.
+    if (!countersUrlFlags[url]) {
+      countersUrlFlags[url] = true;  // Set the flag
+
+      $.ajax({
+        url:       url,
+        dataType:  'json',
+        success: function(response) {
+          if (response.hasOwnProperty("metrics")) {
+            var component = response.component;
+            var metrics = this.metrics;
+            if (!metrics.hasOwnProperty(component)) {
+              metrics[response.component] = {};
+            }
+            if (!metrics[component].hasOwnProperty(timeRange)) {
+              metrics[component][timeRange] = {};
+            }
+            for (var name in response.metrics) {
+              if (response.metrics.hasOwnProperty(name)) {
+                var metricname = name;
+                // Handle __jvm-uptime-secs as a special case.
+                if (name !== "__jvm-uptime-secs") {
+                  metricname = name.split("/")[0] + "/";
+                }
+                var displayName = this.supportedMetricNames[metricname].name;
+                if (!metrics[component][timeRange].hasOwnProperty(displayName)) {
+                  metrics[component][timeRange][displayName] = {};
+                }
+                var tmpMetrics = {
+                  metrics: response.metrics[name],
+                  scaleDevisor: this.supportedMetricNames[metricname].scaleDevisor,
+                  aggregationType: this.supportedMetricNames[metricname].aggregationType
+                };
+                if (name === "__jvm-uptime-secs") {
+                  metrics[component][timeRange][displayName][""] = tmpMetrics;
+                } else {
+                  metrics[component][timeRange][displayName][name.split("/")[1]] = tmpMetrics;
+                }
               }
             }
+            metrics[component][timeRange]["__interval"] = response.interval;
+            this.setMetrics(metrics);
           }
-          metrics[component][timeRange]["__interval"] = response.interval;
-          this.setMetrics(metrics);
-        }
-      }.bind(this),
+        }.bind(this),
 
-      error: function() {
-      }
-    });
+        error: function() {
+        }
+      });
+    }
   },
 
   render: function() {
@@ -550,7 +598,10 @@ var AllMetrics = React.createClass({
       instance: this.props.instance,
     };
     return (
-      <div>
+      <div className="display-info display-counters">
+        <TopologyCounters info={info} />
+        <SpoutRunningInfo info={info} />
+        <BoltRunningInfo info={info} />
         <ComponentCounters info={info} />
         <InstanceCounters info={info} />
       </div>
@@ -558,7 +609,8 @@ var AllMetrics = React.createClass({
   }
 });
 
-var ComponentCounters = React.createClass({
+
+var TopologyCounters = React.createClass({
   capitalize: function(astr) {
     if (astr) {
         return astr.charAt(0).toUpperCase() + astr.slice(1);
@@ -567,79 +619,13 @@ var ComponentCounters = React.createClass({
   },
 
   getTitle: function () {
-    if (this.props.info.comp_name) {
-      var comp_type = this.capitalize(this.props.info.comp_type);
-      var title = " " + comp_type + " Counters - " + this.props.info.comp_name;
-      if (this.props.info.comp_spout_type !== undefined
-          && this.props.info.comp_spout_type !== "default") {
-        title += " - " + this.props.info.comp_spout_type + "/" + this.props.info.comp_spout_source;
-      }
-      return title;
-    }
-    return " Topology Counters";
-  },
-
-  getComponentMetricsRows: function () {
-    var metrics = {};
-    if (this.props.info.metrics.hasOwnProperty(this.props.info.comp_name)) {
-      metrics = this.props.info.metrics[this.props.info.comp_name];
-    }
-    var aggregatedMetrics = {};
-    var timeRanges = ["10 mins", "1 hr", "3 hrs", "All Time"];
-
-    for (var time in metrics) {
-      if (metrics.hasOwnProperty(time)) {
-        for (var metricname in metrics[time]) {
-          if (metrics[time].hasOwnProperty(metricname) &&
-              metricname !== "__interval" &&
-              metricname !== "Uptime (ddd:hh:mm:ss)") {
-            for (var stream in metrics[time][metricname]) {
-              if (metrics[time][metricname].hasOwnProperty(stream)) {
-                displayName = metricname + " (" + stream + ")";
-                var value = 0;
-                var allMetrics = metrics[time][metricname][stream].metrics;
-                var aggregationType = metrics[time][metricname][stream].aggregationType;
-                var count = 0;
-                for (var m in allMetrics) {
-                  if (allMetrics.hasOwnProperty(m)) {
-                    value += Number(allMetrics[m]);
-                    count++;
-                  }
-                }
-                if (aggregationType === AVG && count > 0) {
-                  value /= count;
-                }
-                if (!aggregatedMetrics.hasOwnProperty(displayName)) {
-                  aggregatedMetrics[displayName] = {};
-                }
-                value /= (metrics[time][metricname][stream].scaleDevisor || 1);
-                aggregatedMetrics[displayName][time] = value;
-              }
-            }
-          }
-        }
-      }
-    }
-
-    var rows = [];
-    for (var name in aggregatedMetrics) {
-      if (aggregatedMetrics.hasOwnProperty(name)) {
-        var row = [];
-        row.push(name);
-        for (var i = 0; i < timeRanges.length; i++) {
-          var time = timeRanges[i];
-          row.push(Number(Number(aggregatedMetrics[name][time] || 0).toFixed(2)));
-        }
-        rows.push(row);
-      }
-    }
-    return rows;
+    return "Topology Counters";
   },
 
   getTopologyMetricsRows: function () {
-    var metrics = this.props.info.metrics;
+    const metrics = this.props.info.metrics;
+    const timeRanges = ["10 mins", "1 hr", "3 hrs", "All Time"];
     var aggregatedMetrics = {};
-    var timeRanges = ["10 mins", "1 hr", "3 hrs", "All Time"];
 
     // Get spout names.
     var spoutNames = [];
@@ -704,26 +690,570 @@ var ComponentCounters = React.createClass({
   },
 
   render: function () {
+    if (this.props.info.comp_name) {
+      // A component is selected, return empty div.
+      return (<div id="topologycounters"></div>)
+    }
     var title = this.getTitle();
+    var rows = this.getTopologyMetricsRows();
 
     var timeRanges = ["10 mins", "1 hr", "3 hrs", "All Time"];
     var headings = ["Metrics"];
     headings.push.apply(headings, timeRanges);
 
-    var rows = [];
-    var extraLinks = [];
-    if (this.props.info.comp_name) {
-      rows = this.getComponentMetricsRows();
-      var spoutDetail = this.props.info.lplan.spouts[this.props.info.comp_name];
-      if (spoutDetail) {
-        extraLinks = spoutDetail.extra_links;
+    return (
+      <div id="topologycounters">
+        <div className="widget-header">
+          <div className="title">
+            <h4 style={{
+              "display": "inline-block",
+              "float": "left",
+              "margin-right": "10px"
+            }}>{title}</h4>
+            <div style={{
+              "padding-top": "10px",
+              "padding-bottom": "10px",
+            }}>
+            </div>
+          </div>
+        </div>
+        <table className="table table-striped table-hover no-margin">
+          <thead>
+            <tr>
+              {headings.map(function (heading, i) {
+                  return <th key={i}>{heading}</th>;
+              })}
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map(function (row) {
+              return <tr key={row[0]}>{
+                row.map(function (value, i) {
+                  return <td className="col-md-2" key={i}>{value}</td>;
+                })}</tr>;
+            })}
+          </tbody>
+        </table>
+      </div>
+    );
+  }
+});
+
+/*
+ * This section contains key running information for all spouts.
+ * It is visible only when no component is selected.
+ */
+var SpoutRunningInfo = React.createClass({
+  capitalize: function(astr) {
+    if (astr) {
+        return astr.charAt(0).toUpperCase() + astr.slice(1);
+    }
+    return undefined;
+  },
+
+  getTitle: function () {
+    return "Spout Running Info: " + this.state.time;
+  },
+
+  getInitialState: function () {
+    return {
+      sortBy: 0,
+      reverse: false,
+      time: "10 mins"  // 10 mins metrics is used.
+    };
+  },
+
+  getSpoutRows: function (time) {
+    const metrics = this.props.info.metrics;
+    const metricNames = ["Emit Count", "Ack Count"];
+    var aggregatedMetrics = {};
+    var spoutNames = [];
+
+    // Get spout names.
+    var spouts = this.props.info.pplan.spouts;
+    for (var name in spouts) {
+      if (spouts.hasOwnProperty(name)) {
+        spoutNames.push(name);
       }
-    } else {
-      rows = this.getTopologyMetricsRows();
+    }
+
+    for (var s = 0; s < spoutNames.length; s++) {
+      var spoutName = spoutNames[s];
+      // Init results to "_"
+      aggregatedMetrics[spoutName] = {};
+      for (var i in metricNames) {
+        var metricName = metricNames[i];
+        aggregatedMetrics[spoutName][metricName] = "_";
+      }
+      // Aggregate
+      if (metrics[spoutName].hasOwnProperty(time)) {
+        // For all metrics
+        for (var i in metricNames) {
+          var metricName = metricNames[i];
+          var count = 0;
+          var sum = 0;
+          if (metrics[spoutName][time].hasOwnProperty(metricName)) {
+            // For all streams/instances
+            for (var stream in metrics[spoutName][time][metricName]) {
+              if (metrics[spoutName][time][metricName].hasOwnProperty(stream)) {
+                var allMetrics = metrics[spoutName][time][metricName][stream].metrics;
+                for (var m in allMetrics) {
+                  if (allMetrics.hasOwnProperty(m)) {
+                    var v = Number(allMetrics[m]) / (metrics[spoutName][time][metricName][stream].scaleDevisor || 1);
+                    count++;
+                    sum += v;
+                  }
+                }
+              }
+            }
+          }
+          if (count > 0) {
+            aggregatedMetrics[spoutName][metricName] = sum;
+          }
+        }
+      }
+    }
+
+    var rows = [];
+    for (var id in spoutNames) {
+      var spoutName = spoutNames[id];
+      var row = [];
+      row.push(spoutName);
+      // Put parallelism
+      var spouts = this.props.info.lplan.spouts;
+      var parallelism = spouts[spoutName]["config"][ParallelismConfig];
+      row.push(parallelism);
+
+      // Put metrics
+      for (var i in metricNames) {
+        var metricName = metricNames[i];
+        row.push(aggregatedMetrics[spoutName][metricName]);
+      }
+
+      rows.push(row);
+    }
+    return rows;
+  },
+
+  render: function () {
+    if (this.props.info.comp_name) {
+      // A component is selected, return empty div.
+      return (<div id="spoutrunninginfo"></div>)
+    }
+    var title = this.getTitle();
+    var rows = this.getSpoutRows(this.state.time);
+
+    var reverse = this.state.reverse;
+    var sortKey = this.state.sortBy;
+    rows.sort(function (a, b) {
+      var aVal = a[sortKey];
+      var bVal = b[sortKey];
+      return (typeof aVal === "string" ? aVal.localeCompare(bVal) : (bVal - aVal)) * (reverse ? 1 : -1);
+    });
+    var setState = this.setState.bind(this);
+
+    const headings = ["Spout", "Parallelism", "Emit Count", "Ack Count"];
+
+    return (
+      <div id="spoutrunninginfo">
+        <div className="widget-header">
+          <div className="title">
+            <h4 style={{
+              "display": "inline-block",
+              "float": "left",
+              "margin-right": "10px"
+            }}>{title}</h4>
+            <div style={{
+              "padding-top": "10px",
+              "padding-bottom": "10px",
+            }}>
+            </div>
+          </div>
+        </div>
+        <table className="table table-striped table-hover no-margin">
+          <thead>
+            <tr>
+              {headings.map(function (heading, i) {
+                var classNameVals = [
+                  'sort',
+                  ((sortKey === i) && reverse) ? 'asc' : '',
+                  ((sortKey === i) && !reverse) ? 'desc' : ''
+                ].join(' ');
+                function clicked() {
+                  setState({
+                    sortBy: i,
+                    reverse: i === sortKey ? (!reverse) : true
+                  });
+                }
+                return <th key={i} className={classNameVals} onClick={clicked}>{heading}</th>;
+              })}
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map(function (row) {
+              return <tr key={row[0]}>{
+                row.map(function (value, i) {
+                  return <td className="col-md-2" key={i}>{value}</td>;
+                })}</tr>;
+            })}
+          </tbody>
+        </table>
+      </div>
+    );
+  }
+});
+
+/*
+ * This section contains key running information for all bolts.
+ * It is visible only when no component is selected.
+ */
+var BoltRunningInfo = React.createClass({
+  capitalize: function(astr) {
+    if (astr) {
+        return astr.charAt(0).toUpperCase() + astr.slice(1);
+    }
+    return undefined;
+  },
+
+  getTitle: function () {
+    return "Bolt Running Info: " + this.state.time;
+  },
+
+  getInitialState: function () {
+    return {
+      sortBy: 0,
+      reverse: false,
+      time: "10 mins"  // 10 mins metrics is used.
+    };
+  },
+
+  getBoltRows: function (time) {
+    const metrics = this.props.info.metrics;
+    const metricNames = ["Execute Count", "Fail Count"];
+    const minUtilizationName = "Min Capacity Utilization";
+    const maxUtilizationName = "Max Capacity Utilization";
+    var aggregatedMetrics = {};
+    var boltNames = [];
+
+    // Get bolt names.
+    var bolts = this.props.info.pplan.bolts;
+    for (var name in bolts) {
+      if (bolts.hasOwnProperty(name)) {
+        boltNames.push(name);
+      }
+    }
+
+    for (var b = 0; b < boltNames.length; b++) {
+      var boltName = boltNames[b];
+      // Init results to "_"
+      aggregatedMetrics[boltName] = {};
+      for (var i in metricNames) {
+        var metricName = metricNames[i];
+        aggregatedMetrics[boltName][metricName] = "_";
+      }
+      aggregatedMetrics[boltName][minUtilizationName] = "_";
+      aggregatedMetrics[boltName][maxUtilizationName] = "_";
+
+      // Aggregate
+      if (metrics[boltName].hasOwnProperty(time)) {
+        // For all metrics
+        for (var i in metricNames) {
+          var metricName = metricNames[i];
+          var count = 0;
+          var sum = 0;
+          if (metrics[boltName][time].hasOwnProperty(metricName)) {
+            // For all streams/instances
+            for (var stream in metrics[boltName][time][metricName]) {
+              if (metrics[boltName][time][metricName].hasOwnProperty(stream)) {
+                var allMetrics = metrics[boltName][time][metricName][stream].metrics;
+                for (var m in allMetrics) {
+                  if (allMetrics.hasOwnProperty(m)) {
+                    var v = Number(allMetrics[m]) / (metrics[boltName][time][metricName][stream].scaleDevisor || 1);
+                    count++;
+                    sum += v;
+                  }
+                }
+              }
+            }
+          }
+          if (count > 0) {
+            aggregatedMetrics[boltName][metricName] = sum;
+          }
+        }
+        // For capacity utilization. Manually calculate it by execution count times latency.
+        const executeCountMetricName = "Execute Count";
+        const executeLatencyMetricName = "Execute Latency (ms)";
+        if (metrics[boltName][time].hasOwnProperty(executeCountMetricName) &&
+            metrics[boltName][time].hasOwnProperty(executeLatencyMetricName)) {
+          // For all streams/instances
+          var instanceUtilization = {};  // milliseconds spend on execution, in the window.
+          for (var stream in metrics[boltName][time][executeCountMetricName]) {
+            if (metrics[boltName][time][executeCountMetricName].hasOwnProperty(stream) &&
+                metrics[boltName][time][executeLatencyMetricName].hasOwnProperty(stream)) {
+              var countMetrics = metrics[boltName][time][executeCountMetricName][stream].metrics;
+              var latencyMetrics = metrics[boltName][time][executeLatencyMetricName][stream].metrics;
+              // For each intance
+              for (var m in countMetrics) {
+                if (countMetrics.hasOwnProperty(m) && latencyMetrics.hasOwnProperty(m)) {
+                  var count = Number(countMetrics[m]) / (metrics[boltName][time][executeCountMetricName][stream].scaleDevisor || 1);
+                  var latency = Number(latencyMetrics[m]) / (metrics[boltName][time][executeLatencyMetricName][stream].scaleDevisor || 1);
+                  var utilization = count * latency;
+
+                  instanceUtilization[m] = (instanceUtilization[m] || 0) + utilization;
+                }
+              }
+            }
+          }
+          // Calculate min/max.
+          var min = -1;
+          var max = -1;
+          for (var i in instanceUtilization) {
+            if (instanceUtilization.hasOwnProperty(i)) {
+              var utilization = instanceUtilization[i] * 100 / (10 * 60 * 1000);   // Divide by the time window and get percentage.
+              if (min === -1 || min > utilization) {
+                min = utilization;
+              }
+              if (max === -1 || max < utilization) {
+                max = utilization;
+              }
+            }
+          }
+
+          if (min !== -1) {
+            aggregatedMetrics[boltName][minUtilizationName] = min.toFixed(2) + "%";
+            aggregatedMetrics[boltName][maxUtilizationName] = max.toFixed(2) + "%";
+          }
+        }
+      }
+    }
+
+    var rows = [];
+    for (var id in boltNames) {
+      var boltName = boltNames[id];
+      var row = [];
+      row.push(boltName);
+      // Put parallelism
+      var bolts = this.props.info.lplan.bolts;
+      var parallelism = bolts[boltName]["config"][ParallelismConfig];
+      row.push(parallelism);
+
+      // Put metrics
+      for (var i in metricNames) {
+        var metricName = metricNames[i];
+        row.push(aggregatedMetrics[boltName][metricName]);
+      }
+      row.push(aggregatedMetrics[boltName][minUtilizationName]);
+      row.push(aggregatedMetrics[boltName][maxUtilizationName]);
+
+      rows.push(row);
+    }
+    return rows;
+  },
+
+  render: function () {
+    if (this.props.info.comp_name) {
+      // A component is selected, return empty div.
+      return (<div id="boltrunninginfo"></div>)
+    }
+    var title = this.getTitle();
+    var rows = this.getBoltRows(this.state.time);
+
+    var reverse = this.state.reverse;
+    var sortKey = this.state.sortBy;
+    rows.sort(function (a, b) {
+      var aVal = a[sortKey];
+      var bVal = b[sortKey];
+      return (typeof aVal === "string" ? aVal.localeCompare(bVal) : (bVal - aVal)) * (reverse ? 1 : -1);
+    });
+    var setState = this.setState.bind(this);
+
+    const headings = [
+      { name: "Bolt", sortable: true },
+      { name: "Parallelism", sortable: true },
+      { name: "Execute Count", sortable: true },
+      { name: "Failure Count", sortable: true },
+      { name: "Capacity Utilization(min)", sortable: true },
+      { name: "Capacity Utilization(max)", sortable: true },
+      { name: "Parallelism Calculator", sortable: false }
+    ];
+
+    var openParallelismCalculator = function (e, index) {
+      var row = rows[index];
+
+      var calculator = $("#parallelism-calculator-modal");
+      calculator.find('#modal-component').text(row[0]);
+      calculator.attr('data-execute-count', row[2]);
+      calculator.find('#modal-execute-count').text(row[2]);
+      calculator.find('#target-execute-count').val(row[2]);
+      calculator.attr('data-max-utilization', row[5].replace("%", ""));
+      calculator.find('#modal-max-utilization').text(row[5]);
+      calculator.find('#target-max-utilization').val(row[5].replace("%", ""));
+      calculator.attr('data-parallelism', row[1]);
+      calculator.find('#modal-parallelism').text(row[1]);
+      calculator.find('#target-parallelism').val(row[1]);
+
+      calculator.modal({keyboard: true});
+    };
+
+    return (
+      <div id="componentrunninginfo">
+        <div className="widget-header">
+          <div className="title">
+            <h4 style={{
+              "display": "inline-block",
+              "float": "left",
+              "margin-right": "10px"
+            }}>{title}</h4>
+            <div style={{
+              "padding-top": "10px",
+              "padding-bottom": "10px",
+            }}>
+            </div>
+          </div>
+        </div>
+        <table className="table table-striped table-hover no-margin">
+          <thead>
+            <tr>
+              {headings.map(function (heading, i) {
+                var classNameVals = [
+                  'sort',
+                  ((sortKey === i) && reverse) ? 'asc' : '',
+                  ((sortKey === i) && !reverse) ? 'desc' : ''
+                ].join(' ');
+                function clicked() {
+                  setState({
+                    sortBy: i,
+                    reverse: i === sortKey ? (!reverse) : true
+                  });
+                }
+
+                if (heading.sortable) {
+                  return <th key={i} className={classNameVals} onClick={clicked}>{heading.name}</th>;
+                } else {
+                  return <th key={i}>{heading.name}</th>;
+                }
+              })}
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map(function (row, index) {
+              return <tr key={row[0]}>{
+                  row.map(function (value, i) {
+                    return <td className="col-md-2" key={i}>{value}</td>;
+                  })}
+                  <td className="col-md-1">
+                    <button type="button" className="btn btn-primary btn-xs" data-toggle="modal"
+                            onClick={(e) => openParallelismCalculator(e, index)}>
+                      Calculator
+                    </button>
+                  </td></tr>;
+            })}
+          </tbody>
+        </table>
+      </div>
+    );
+  }
+});
+
+var ComponentCounters = React.createClass({
+  capitalize: function(astr) {
+    if (astr) {
+        return astr.charAt(0).toUpperCase() + astr.slice(1);
+    }
+    return undefined;
+  },
+
+  getTitle: function () {
+    if (this.props.info.comp_name) {
+      var comp_type = this.capitalize(this.props.info.comp_type);
+      var title = " " + comp_type + " Counters - " + this.props.info.comp_name;
+      if (this.props.info.comp_spout_type !== undefined
+          && this.props.info.comp_spout_type !== "default") {
+        title += " - " + this.props.info.comp_spout_type + "/" + this.props.info.comp_spout_source;
+      }
+      return title;
+    }
+    return "";
+  },
+
+  getComponentMetricsRows: function () {
+    var metrics = {};
+    if (this.props.info.metrics.hasOwnProperty(this.props.info.comp_name)) {
+      metrics = this.props.info.metrics[this.props.info.comp_name];
+    }
+    var aggregatedMetrics = {};
+    var timeRanges = ["10 mins", "1 hr", "3 hrs", "All Time"];
+
+    for (var time in metrics) {
+      if (metrics.hasOwnProperty(time)) {
+        for (var metricname in metrics[time]) {
+          if (metrics[time].hasOwnProperty(metricname) &&
+              metricname !== "__interval" &&
+              metricname !== "Uptime (ddd:hh:mm:ss)") {
+            for (var stream in metrics[time][metricname]) {
+              if (metrics[time][metricname].hasOwnProperty(stream)) {
+                displayName = metricname + " (" + stream + ")";
+                var value = 0;
+                var allMetrics = metrics[time][metricname][stream].metrics;
+                var aggregationType = metrics[time][metricname][stream].aggregationType;
+                var count = 0;
+                for (var m in allMetrics) {
+                  if (allMetrics.hasOwnProperty(m)) {
+                    value += Number(allMetrics[m]);
+                    count++;
+                  }
+                }
+                if (aggregationType === AVG && count > 0) {
+                  value /= count;
+                }
+                if (!aggregatedMetrics.hasOwnProperty(displayName)) {
+                  aggregatedMetrics[displayName] = {};
+                }
+                value /= (metrics[time][metricname][stream].scaleDevisor || 1);
+                aggregatedMetrics[displayName][time] = value;
+              }
+            }
+          }
+        }
+      }
+    }
+
+    var rows = [];
+    for (var name in aggregatedMetrics) {
+      if (aggregatedMetrics.hasOwnProperty(name)) {
+        var row = [];
+        row.push(name);
+        for (var i = 0; i < timeRanges.length; i++) {
+          var time = timeRanges[i];
+          row.push(Number(Number(aggregatedMetrics[name][time] || 0).toFixed(2)));
+        }
+        rows.push(row);
+      }
+    }
+    return rows;
+  },
+
+  render: function () {
+    if (!this.props.info.comp_name) {
+      // No component is selected, return empty div.
+      return (<div id="componentcounters"></div>)
+    }
+
+    var title = this.getTitle();
+    var rows = this.getComponentMetricsRows();
+
+    var timeRanges = ["10 mins", "1 hr", "3 hrs", "All Time"];
+    var headings = ["Metrics"];
+    headings.push.apply(headings, timeRanges);
+
+    var extraLinks = [];
+    var spoutDetail = this.props.info.lplan.spouts[this.props.info.comp_name];
+    if (spoutDetail) {
+      extraLinks = spoutDetail.extra_links;
     }
 
     return (
-      <div>
+      <div id="componentcounters">
         <div className="widget-header">
           <div className="title">
             <h4 style={{
@@ -786,7 +1316,8 @@ var InstanceCounters = React.createClass({
 
   render: function () {
     if (!this.props.info.comp_name) {
-      return <div></div>;
+      // No component is selected, return empty div.
+      return <div id="instancecounters"></div>;
     }
     var self = this;
     var metrics = {};
@@ -935,8 +1466,8 @@ var InstanceCounters = React.createClass({
       if (this.props.info.comp_type === "bolt") {
         var capacity = (Number(tenMinAggregatedMetrics["Execute Count"][instance]));
         capacity *= (Number(tenMinAggregatedMetrics["Execute Latency (ms)"][instance]));
-        capacity /= (10 * 60 * 1000);
-        row.push(Number(capacity.toFixed(3)) || 0);
+        capacity = capacity * 100 / (10 * 60 * 1000);
+        row.push(Number((capacity.toFixed(2)) || 0) + "%");
       }
       if (pplan) {
         // Get Job url from pplan.

@@ -102,19 +102,10 @@ public class HealthManagerMetrics implements Runnable, AutoCloseable {
     int interval = (int) systemConfig.getHeronMetricsExportInterval().getSeconds();
 
 
-    looper.registerTimerEvent(Duration.ofSeconds(interval), new Runnable() {
+    looper.registerPeriodicEvent(Duration.ofSeconds(interval), new Runnable() {
       @Override
       public void run() {
         sendMetrics();
-        // next timer task
-        if (looper != null) {
-          looper.registerTimerEvent(Duration.ofSeconds(interval), new Runnable() {
-            @Override
-            public void run() {
-              sendMetrics();
-            }
-          });
-        }
       }
     });
   }

@@ -26,9 +26,9 @@ metadata:
 data:
   HERON_APISERVER_MEM_MIN: {{ $apiServerMemory | quote }}
   HERON_APISERVER_MEM_MAX: {{ $apiServerMemory | quote }}
----
 
-apiVersion: extensions/v1beta1
+---
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ .Release.Name }}-tools
@@ -38,6 +38,10 @@ metadata:
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
 spec:
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-tools
+      release: {{ .Release.Name }}
   template:
     metadata:
       labels:
@@ -80,8 +84,8 @@ spec:
               cpu: "100m"
               memory: "200M"
             limits:
-              cpu: "200m"
-              memory: "300M"
+              cpu: "400m"
+              memory: "512M"
           ports:
             - containerPort: 8888
               name: api-port
@@ -101,8 +105,8 @@ spec:
               cpu: "100m"
               memory: "200M"
             limits:
-              cpu: "200m"
-              memory: "300M"
+              cpu: "400m"
+              memory: "512M"
           ports:
             - containerPort: 8889
               name: app-port
@@ -133,7 +137,7 @@ spec:
               -D heron.statefulstorage.classname=org.apache.heron.statefulstorage.dlog.DlogStorage
               -D heron.statefulstorage.dlog.namespace.uri=distributedlog://{{ .Release.Name }}-zookeeper:{{ .Values.zookeeper.clientPort }}/heron
               {{- if eq .Values.uploader.class "dlog" }}
-              -D heron.class.uploader=com.twitter.heron.uploader.dlog.DLUploader
+              -D heron.class.uploader=org.apache.heron.uploader.dlog.DLUploader
               -D heron.uploader.dlog.topologies.num.replicas={{ $jobReplicas }}
               -D heron.uploader.dlog.topologies.namespace.uri=distributedlog://{{ .Release.Name }}-zookeeper:{{ .Values.zookeeper.clientPort }}/heron
               {{- else if eq .Values.uploader.class "s3" }}
@@ -145,8 +149,8 @@ spec:
               -D heron.uploader.s3.region={{ .Values.uploader.s3Region }}
               {{- end }}
               {{- if eq .Values.packing "RoundRobin" }}
-              -D heron.class.packing.algorithm=com.twitter.heron.packing.roundrobin.RoundRobinPacking
-              -D heron.class.repacking.algorithm=com.twitter.heron.packing.roundrobin.RoundRobinPacking
+              -D heron.class.packing.algorithm=org.apache.heron.packing.roundrobin.RoundRobinPacking
+              -D heron.class.repacking.algorithm=org.apache.heron.packing.roundrobin.RoundRobinPacking
               {{- else if eq .Values.packing "ResourceCompliantRR" }}
               -D heron.class.packing.algorithm=org.apache.heron.packing.roundrobin.ResourceCompliantRRPacking
               -D heron.class.repacking.algorithm=org.apache.heron.packing.roundrobin.ResourceCompliantRRPacking
@@ -157,12 +161,7 @@ spec:
           envFrom:
             - configMapRef:
                 name: {{ .Release.Name }}-tools-config
-        - name: kubectl-proxy
-          image: {{ .Values.kubectlImage }}
-          command: ["sh", "-c"]
-          args:
-            - >
-              kubectl proxy -p 8001
+
 ---
 ##
 ## Service to expose the heron-ui

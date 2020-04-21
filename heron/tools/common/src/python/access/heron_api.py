@@ -25,8 +25,8 @@ import logging
 import tornado.httpclient
 import tornado.gen
 from tornado.options import options
-from fetch import fetch_url_as_json
-from query import QueryHandler
+from .fetch import fetch_url_as_json
+from .query import QueryHandler
 
 # pylint: disable=bad-whitespace
 CLUSTER_URL_FMT             = "%s/clusters"
@@ -243,7 +243,7 @@ def get_comps(cluster, environ, topology, role=None):
   request_url = tornado.httputil.url_concat(
       create_url(LOGICALPLAN_URL_FMT), params)
   lplan = yield fetch_url_as_json(request_url)
-  comps = lplan['spouts'].keys() + lplan['bolts'].keys()
+  comps = list(lplan['spouts'].keys()) + list(lplan['bolts'].keys())
   raise tornado.gen.Return(comps)
 
 ################################################################################
@@ -263,7 +263,7 @@ def get_instances(cluster, environ, topology, role=None):
   request_url = tornado.httputil.url_concat(
       create_url(PHYSICALPLAN_URL_FMT), params)
   pplan = yield fetch_url_as_json(request_url)
-  instances = pplan['instances'].keys()
+  instances = list(pplan['instances'].keys())
   raise tornado.gen.Return(instances)
 
 
@@ -404,7 +404,7 @@ def get_comp_instance_metrics(cluster, environ, topology, component,
   all_instances = instances if isinstance(instances, list) else [instances]
 
   # append each metric to the url
-  for _, metric_name in metrics.items():
+  for _, metric_name in list(metrics.items()):
     request_url = tornado.httputil.url_concat(request_url, dict(metricname=metric_name[0]))
 
   # append each instance to the url
@@ -856,7 +856,7 @@ class HeronQueryHandler(QueryHandler):
         timelines.extend(result["timeline"])
       result = self.get_metric_response(timerange, timelines, is_max)
     else:
-      data = self.compute_max(res.values())
+      data = self.compute_max(list(res.values()))
       result = self.get_metric_response(timerange, data, is_max)
 
     raise tornado.gen.Return(result)
@@ -867,11 +867,14 @@ class HeronQueryHandler(QueryHandler):
     :param multi_ts:
     :return:
     '''
-    if len(multi_ts) > 0 and len(multi_ts[0]["timeline"]) > 0:
-      keys = multi_ts[0]["timeline"][0]["data"].keys()
-      timelines = ([res["timeline"][0]["data"][key] for key in keys] for res in multi_ts)
+    # Some components don't have specific metrics such as capacity hence the
+    # key set is empty. These components are filtered out first.
+    filtered_ts = [ts for ts in multi_ts if len(ts["timeline"][0]["data"]) > 0]
+    if len(filtered_ts) > 0 and len(filtered_ts[0]["timeline"]) > 0:
+      keys = list(filtered_ts[0]["timeline"][0]["data"].keys())
+      timelines = ([res["timeline"][0]["data"][key] for key in keys] for res in filtered_ts)
       values = (max(v) for v in zip(*timelines))
-      return dict(zip(keys, values))
+      return dict(list(zip(keys, values)))
     return {}
 
   # pylint: disable=no-self-use

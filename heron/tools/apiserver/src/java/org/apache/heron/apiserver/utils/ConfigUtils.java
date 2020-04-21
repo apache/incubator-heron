@@ -30,6 +30,7 @@ import java.util.Properties;
 
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.constructor.SafeConstructor;
 
 import org.apache.heron.api.exception.InvalidTopologyException;
 import org.apache.heron.api.generated.TopologyAPI;
@@ -110,7 +111,7 @@ public final class ConfigUtils {
     try (Writer writer = Files.newBufferedWriter(tempOverridesPath)) {
       overrideReader = Files.newBufferedReader(overridesPath);
       final Map<String, Object> currentOverrides =
-          (Map<String, Object>) new Yaml().load(overrideReader);
+          (Map<String, Object>) new Yaml(new SafeConstructor()).load(overrideReader);
       currentOverrides.putAll(overrides);
 
       // write updated overrides
@@ -138,9 +139,10 @@ public final class ConfigUtils {
     ) {
       stateManagerReader = Files.newBufferedReader(stateManagerPath);
 
-      final Map<String, Object> overrides = (Map<String, Object>) new Yaml().load(overrideReader);
+      final Map<String, Object> overrides =
+          (Map<String, Object>) new Yaml(new SafeConstructor()).load(overrideReader);
       final Map<String, Object> stateMangerConfig =
-          (Map<String, Object>) new Yaml().load(stateManagerReader);
+          (Map<String, Object>) new Yaml(new SafeConstructor()).load(stateManagerReader);
       // update the state manager config with the overrides
       for (Map.Entry<String, Object> entry : overrides.entrySet()) {
         // does this key have an override?

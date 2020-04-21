@@ -79,11 +79,11 @@ class StMgrClientMgr {
   virtual bool AllStMgrClientsRegistered();
 
  private:
-  shared_ptr<StMgrClient> CreateClient(const sp_string& _other_stmgr_id,
+  StMgrClient* CreateClient(const sp_string& _other_stmgr_id,
                             const sp_string& _host_name, sp_int32 _port);
 
   // map of stmgrid to its client
-  std::unordered_map<sp_string, shared_ptr<StMgrClient>> clients_;
+  std::unordered_map<sp_string, StMgrClient*> clients_;
 
   sp_string topology_name_;
   sp_string topology_id_;

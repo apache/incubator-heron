@@ -22,6 +22,7 @@
 
 from itertools import cycle
 from collections import Counter
+
 from heronpy.api.spout.spout import Spout
 from heronpy.api.state.stateful_component import StatefulComponent
 
@@ -37,7 +38,7 @@ class StatefulWordSpout(Spout, StatefulComponent):
 
   def pre_save(self, checkpoint_id):
     # Purely for debugging purposes
-    for (k, v) in self.counter.items():
+    for (k, v) in list(self.counter.items()):
       self.recovered_state.put(k, v)
     self.logger.info("Checkpoint Snapshot %s : %s" % (checkpoint_id, str(self.recovered_state)))
 

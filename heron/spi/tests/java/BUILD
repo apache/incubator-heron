@@ -1,3 +1,5 @@
+load("@rules_java//java:defs.bzl", "java_library", "java_test")
+
 common_deps_files = [
     "//heron/common/src/java:basics-java",
     "//heron/common/src/java:config-java",
@@ -9,7 +11,7 @@ common_deps_files = [
 
 util_deps_files = \
     common_deps_files + [
-        "//heron/spi/src/java:utils-spi-java", 
+        "//heron/spi/src/java:utils-spi-java",
     ]
 
 packing_deps_files = \
@@ -23,42 +25,41 @@ proto_deps_files = \
     util_deps_files
 
 api_deps_files = proto_deps_files + [
-    "//heron/api/src/java:api-java", 
+    "//heron/api/src/java:api-java",
 ]
 
 java_library(
     name = "utils-tests",
     srcs = glob(["**/utils/*.java"]),
-    deps = api_deps_files + [ 
+    deps = api_deps_files + [
         "//heron/spi/src/java:packing-spi-java",
         "//heron/spi/src/java:statemgr-spi-java",
-    ]
+    ],
 )
 
 java_tests(
+    size = "small",
     test_classes = [
         "org.apache.heron.spi.utils.ShellUtilsTest",
         "org.apache.heron.spi.utils.NetworkUtilsTest",
         "org.apache.heron.spi.utils.UploaderUtilsTest",
     ],
-    runtime_deps = [ ":utils-tests" ],
-    size = "small",
+    runtime_deps = [":utils-tests"],
 )
 
 java_test(
     name = "PackingPlanTest",
+    size = "small",
     srcs = glob(["**/packing/PackingPlanTest.java"]),
     deps = packing_deps_files,
-    size = "small",
 )
 
 java_test(
     name = "ResourceTest",
+    size = "small",
     srcs = glob(["**/packing/ResourceTest.java"]),
     deps = packing_deps_files,
-    size = "small",
 )
-
 
 java_library(
     name = "metrics-tests",
@@ -70,13 +71,13 @@ java_library(
 )
 
 java_tests(
+    size = "small",
     test_classes = [
         "org.apache.heron.spi.metricsmgr.metrics.ExceptionInfoTest",
         "org.apache.heron.spi.metricsmgr.metrics.MetricsInfoTest",
         "org.apache.heron.spi.metricsmgr.metrics.MetricsRecordTest",
     ],
-    runtime_deps = [ ":metrics-tests" ],
-    size = "small",
+    runtime_deps = [":metrics-tests"],
 )
 
 java_library(
@@ -86,6 +87,8 @@ java_library(
 )
 
 java_tests(
+    size = "small",
+    data = glob(["**/testdata/**/*.yaml"]),
     test_classes = [
         "org.apache.heron.spi.common.ConfigLoaderTest",
         "org.apache.heron.spi.common.ConfigTest",
@@ -93,7 +96,5 @@ java_tests(
         "org.apache.heron.spi.common.KeysTest",
         "org.apache.heron.spi.common.TokenSubTest",
     ],
-    runtime_deps = [ ":common-tests" ],
-    data = glob(["**/testdata/**/*.yaml"]),
-    size = "small",
+    runtime_deps = [":common-tests"],
 )

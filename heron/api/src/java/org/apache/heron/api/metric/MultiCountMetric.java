@@ -21,9 +21,10 @@ package org.apache.heron.api.metric;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class MultiCountMetric implements IMetric<Map<String, Long>> {
-  private Map<String, CountMetric> value = new HashMap<>();
+  private Map<String, CountMetric> value = new ConcurrentHashMap<>();
 
   public MultiCountMetric() {
   }

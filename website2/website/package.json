@@ -10,9 +10,11 @@
   },
   "devDependencies": {
     "docusaurus": "^1.10.0",
+    "redoc": "^2.0.0-rc.23",
     "remarkable-embed": "^0.4.1",
-    "replace-in-file": "^3.4.0",
-    "redoc": "^2.0.0-alpha.30"
+    "replace-in-file": "^3.4.0"
   },
-  "dependencies": {}
+  "dependencies": {
+    "yarn": "^1.22.4"
+  }
 }
