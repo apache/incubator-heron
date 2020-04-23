@@ -19,7 +19,7 @@ FROM centos:centos7
 
 # This is passed to the heron build command via the --config flag
 ENV TARGET_PLATFORM centos
-ENV bazelVersion 0.26.0
+ENV bazelVersion 3.0.0
 
 RUN yum -y upgrade
 RUN yum -y install \
@@ -33,6 +33,7 @@ RUN yum -y install \
       git \
       kernel-devel \
       libtool \
+      cppunit-devel \
       make \
       patch \
       python-devel \
