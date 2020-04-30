@@ -191,36 +191,42 @@ WHEEL_SRC = "https://pypi.python.org/packages/c9/1d/bd19e691fd4cfe908c76c429fe6e
 http_file(
     name = "pytest_whl",
     downloaded_file_path = "pytest-3.1.3-py2.py3-none-any.whl",
+    sha256 = "2a4f483468954621fcc8f74784f3b42531e5b5008d49fc609b37bc4dbc6dead1",
     urls = [PYTEST_WHEEL],
 )
 
 http_file(
     name = "py_whl",
     downloaded_file_path = "py-1.4.34-py2.py3-none-any.whl",
+    sha256 = "2ccb79b01769d99115aa600d7eed99f524bf752bba8f041dc1c184853514655a",
     urls = [PY_WHEEL],
 )
 
 http_file(
     name = "wheel_src",
     downloaded_file_path = "wheel-0.29.0.tar.gz",
+    sha256 = "1ebb8ad7e26b448e9caa4773d2357849bf80ff9e313964bcaf79cbf0201a1648",
     urls = [WHEEL_SRC],
 )
 
 http_file(
     name = "pex_src",
     downloaded_file_path = "pex-1.2.15.tar.gz",
+    sha256 = "0147d19123340677b9793b00ec86fe65b6697db3ec99afb796da2300ae5fec14",
     urls = [PEX_SRC],
 )
 
 http_file(
     name = "requests_src",
     downloaded_file_path = "requests-2.12.3.tar.gz",
+    sha256 = "de5d266953875e9647e37ef7bfe6ef1a46ff8ddfe61b5b3652edf7ea717ee2b2",
     urls = [REQUESTS_SRC],
 )
 
 http_file(
     name = "setuptools_src",
     downloaded_file_path = "setuptools-31.0.0.tar.gz",
+    sha256 = "0818cc0de692c3a5c83ca83aa7ec7ba6bc206f278735f1e0267b8d0e095cfe7a",
     urls = [SETUPTOOLS_SRC],
 )
 
@@ -412,6 +418,7 @@ rules_scala_version = "358ab829626c6c2d34ec27f856485d3121e299c7"  # Jan 15 2020 
 http_archive(
     name = "io_bazel_rules_scala",
     strip_prefix = "rules_scala-%s" % rules_scala_version,
+    sha256 = "5abd638278de10ccccb0b4d614158f394278b828708ba990461334ecc01529a6",
     type = "zip",
     url = "https://github.com/bazelbuild/rules_scala/archive/%s.zip" % rules_scala_version,
 )
