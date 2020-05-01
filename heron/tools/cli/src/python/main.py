@@ -149,9 +149,6 @@ def check_environment():
   Check whether the environment variables are set
   :return:
   '''
-  if not config.check_java_home_set():
-    sys.exit(1)
-
   if not config.check_release_file_exists():
     sys.exit(1)
 

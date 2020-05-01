@@ -424,24 +424,14 @@ def parse_override_config(namespace):
 
 def get_java_path():
   """Get the path of java executable"""
+  java_bin = os.environ.get("JAVA_BIN")
+  if java_bin:
+    return java_bin
   java_home = os.environ.get("JAVA_HOME")
-  return os.path.join(java_home, BIN_DIR, "java")
-
-
-def check_java_home_set():
-  """Check if the java home set"""
-  # check if environ variable is set
-  if "JAVA_HOME" not in os.environ:
-    Log.error("JAVA_HOME not set")
-    return False
-
-  # check if the value set is correct
-  java_path = get_java_path()
-  if os.path.isfile(java_path) and os.access(java_path, os.X_OK):
-    return True
-
-  Log.error("JAVA_HOME/bin/java either does not exist or not an executable")
-  return False
+  if java_home:
+    return os.path.join(java_home, BIN_DIR, "java")
+  # this could use shutil.which("java") when python2 support is dropped
+  return None
 
 
 def check_release_file_exists():
