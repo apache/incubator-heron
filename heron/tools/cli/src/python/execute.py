@@ -59,10 +59,15 @@ def heron_class(class_name, lib_jars, extra_jars=None, args=None, java_defines=N
   # the class locally.
   java_opts = ['-D' + opt for opt in java_defines]
 
+  java_path = config.get_java_path()
+  if java_path is None:
+    err_context = "Neither JAVA_BIN or JAVA_HOME are set"
+    return SimpleResult(Status.InvocationError, err_context)
+
   # Construct the command line for the sub process to run
   # Because of the way Python execute works,
   # the java opts must be passed as part of the list
-  all_args = [config.get_java_path(), "-client", "-Xmx1g"] + \
+  all_args = [java_path, "-client", "-Xmx1g"] + \
              java_opts + \
              ["-cp", config.get_classpath(extra_jars + lib_jars)]
 
