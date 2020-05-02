@@ -19,8 +19,8 @@ FROM openjdk:11-jdk-slim-stretch
 
 RUN apt-get -y update && apt-get -y install \
     netcat-openbsd \
-    python \
-    python-dev \
+    python3 \
+    python3-dev \
     unzip \
     curl \
     vim \

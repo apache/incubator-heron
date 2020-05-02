@@ -52,29 +52,19 @@ def parse_manifest(manifest_text):
 
 
 def main():
-    pparser, resolver_options_builder = pexbin.configure_clp()
+    pparser = pexbin.configure_clp()
     poptions, args = pparser.parse_args(sys.argv)
 
     manifest_file = args[1]
     manifest_text = open(manifest_file, 'r').read()
     manifest = parse_manifest(manifest_text)
 
-    if poptions.pex_root:
-        ENV.set('PEX_ROOT', poptions.pex_root)
-    else:
-        poptions.pex_root = ENV.PEX_ROOT
-
-    if poptions.cache_dir:
-        poptions.cache_dir = pexbin.make_relative_to_root(poptions.cache_dir)
-    poptions.interpreter_cache_dir = pexbin.make_relative_to_root(
-        poptions.interpreter_cache_dir)
-
     reqs = manifest.get('requirements', [])
 
-    with ENV.patch(PEX_VERBOSE=str(poptions.verbosity)):
+    with ENV.patch(PEX_VERBOSE=str(poptions.verbosity),
+                   PEX_ROOT=poptions.pex_root or ENV.PEX_ROOT):
         with TRACER.timed('Building pex'):
-            pex_builder = pexbin.build_pex(reqs, poptions,
-                                           resolver_options_builder)
+            pex_builder = pexbin.build_pex(reqs, poptions)
 
         # Add source files from the manifest
         for modmap in manifest.get('modules', []):
@@ -112,7 +102,7 @@ def main():
         # TODO(mikekap): Do something about manifest['nativeLibraries'].
 
         pexbin.log('Saving PEX file to %s' % poptions.pex_name,
-                   v=poptions.verbosity)
+                   V=poptions.verbosity)
         tmp_name = poptions.pex_name + '~'
         safe_delete(tmp_name)
         pex_builder.build(tmp_name)

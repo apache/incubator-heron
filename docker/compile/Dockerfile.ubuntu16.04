@@ -21,23 +21,26 @@ FROM ubuntu:16.04
 ENV TARGET_PLATFORM ubuntu
 ENV bazelVersion 3.0.0
 
-RUN apt-get update && apt-get -y install \
+
+RUN apt-get -y update && apt-get -y install \
       automake \
       build-essential \
       cmake \
       curl \
-      libssl-dev \
       git \
+      libssl-dev \
       libtool-bin \
-      libunwind8 \
       libunwind-setjmp0-dev \
-      python-dev \
+      python3-dev \
       libcppunit-dev \
+      software-properties-common \
       tree \
-      zip \
       unzip \
-      wget \
-      openjdk-11-jdk-headless
+      zip \
+      wget
+
+RUN add-apt-repository ppa:openjdk-r/ppa && apt-get -y update && \
+    apt-get -y install openjdk-11-jdk-headless
 
 ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk-amd64
 

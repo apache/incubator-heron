@@ -33,7 +33,7 @@ RUN apt-get update && apt-get -y install \
       libssl-dev \
       git \
       libtool \
-      python-dev \
+      python3-dev \
       libcppunit-dev \
       zip \
       unzip \

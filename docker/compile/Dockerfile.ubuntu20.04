@@ -31,7 +31,7 @@ RUN apt-get update && apt-get -y install \
       libunwind8 \
       libcppunit-dev \
       patch \
-      python-dev \
+      python3-dev \
       pkg-config \
       wget \
       zip \

@@ -20,7 +20,7 @@
 
 ''' config.py '''
 
-class Config(object):
+class Config:
   """
   Responsible for reading the yaml config files and
   exposing state locations through python methods.

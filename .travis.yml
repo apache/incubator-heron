@@ -19,7 +19,7 @@ addons:
       - python3
       - pkg-config
       - python-dev
-      - python-wheel
+      - python3-wheel
       - wget
       - zip
       - zlib1g-dev

@@ -18,14 +18,16 @@
 FROM centos:centos7
 
 RUN yum -y upgrade
-RUN yum -y install python; yum clean all
 RUN yum -y install unzip; yum clean all
 RUN yum -y install which; yum clean all
 RUN yum -y install curl; yum clean all
 RUN yum -y install nmap-ncat; yum clean all
-RUN yum -y install python python3-setuptools; yum clean all
-RUN easy_install supervisor
-RUN echo_supervisord_conf > /etc/supervisord.conf
+RUN yum -y install python3 python3-setuptools; yum clean all
+RUN yum -y install epel-release \
+    && yum -y update \
+    && yum -y install supervisor \
+    && yum clean all \
+    && echo_supervisord_conf > /etc/supervisord.conf
 
 RUN yum -y install java-11-openjdk java-11-openjdk-devel; yum clean all
 

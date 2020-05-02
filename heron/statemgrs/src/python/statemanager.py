@@ -127,12 +127,10 @@ class StateManager(six.with_metaclass(abc.ABCMeta)):
   @abc.abstractmethod
   def start(self):
     """ If the state manager needs to connect to a remote host. """
-    pass
 
   @abc.abstractmethod
   def stop(self):
     """ If the state manager had connected to a remote server, it would need to stop as well. """
-    pass
 
   def get_topologies_path(self):
     return HERON_TOPOLOGIES_KEY.format(self.rootpath)
@@ -179,7 +177,6 @@ class StateManager(six.with_metaclass(abc.ABCMeta)):
     sets watch on the path and calls the callback
     with the new packing_plan.
     """
-    pass
 
   @abc.abstractmethod
   def get_pplan(self, topologyName, callback=None):

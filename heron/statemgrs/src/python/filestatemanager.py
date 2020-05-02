@@ -167,6 +167,7 @@ class FileStateManager(StateManager):
       topologies_path = self.get_topologies_path()
       return [f for f in os.listdir(topologies_path)
               if os.path.isfile(os.path.join(topologies_path, f))]
+    return None
 
   def get_topology(self, topologyName, callback=None):
     """get topology"""
@@ -179,18 +180,17 @@ class FileStateManager(StateManager):
         topology = Topology()
         topology.ParseFromString(data)
         return topology
+    return None
 
   def create_topology(self, topologyName, topology):
     """
     Create path is currently not supported in file based state manager.
     """
-    pass
 
   def delete_topology(self, topologyName):
     """
     Delete path is currently not supported in file based state manager.
     """
-    pass
 
   def get_packing_plan(self, topologyName, callback=None):
     """ get packing plan """
@@ -216,18 +216,17 @@ class FileStateManager(StateManager):
         pplan = PhysicalPlan()
         pplan.ParseFromString(data)
         return pplan
+    return None
 
   def create_pplan(self, topologyName, pplan):
     """
     Create path is currently not supported in file based state manager.
     """
-    pass
 
   def delete_pplan(self, topologyName):
     """
     Delete path is currently not supported in file based state manager.
     """
-    pass
 
   def get_execution_state(self, topologyName, callback=None):
     """
@@ -242,18 +241,17 @@ class FileStateManager(StateManager):
         executionState = ExecutionState()
         executionState.ParseFromString(data)
         return executionState
+    return None
 
   def create_execution_state(self, topologyName, executionState):
     """
     Create path is currently not supported in file based state manager.
     """
-    pass
 
   def delete_execution_state(self, topologyName):
     """
     Delete path is currently not supported in file based state manager.
     """
-    pass
 
   def get_tmaster(self, topologyName, callback=None):
     """
@@ -268,6 +266,7 @@ class FileStateManager(StateManager):
         tmaster = TMasterLocation()
         tmaster.ParseFromString(data)
         return tmaster
+    return None
 
   def get_scheduler_location(self, topologyName, callback=None):
     """
@@ -282,3 +281,4 @@ class FileStateManager(StateManager):
         scheduler_location = SchedulerLocation()
         scheduler_location.ParseFromString(data)
         return scheduler_location
+    return None

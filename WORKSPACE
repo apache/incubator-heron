@@ -172,7 +172,7 @@ py_repositories()
 # pip_repositories()
 
 # for pex repos
-PEX_SRC = "https://pypi.python.org/packages/3a/1d/cd41cd3765b78a4353bbf27d18b099f7afbcd13e7f2dc9520f304ec8981c/pex-1.2.15.tar.gz"
+PEX_WHEEL = "https://pypi.python.org/packages/18/92/99270775cfc5ddb60c19588de1c475f9ff2837a6e0bbd5eaa5286a6a472b/pex-2.1.9-py2.py3-none-any.whl"
 
 PY_WHEEL = "https://pypi.python.org/packages/53/67/9620edf7803ab867b175e4fd23c7b8bd8eba11cb761514dcd2e726ef07da/py-1.4.34-py2.py3-none-any.whl"
 
@@ -211,9 +211,9 @@ http_file(
 
 http_file(
     name = "pex_src",
-    downloaded_file_path = "pex-1.2.15.tar.gz",
-    sha256 = "0147d19123340677b9793b00ec86fe65b6697db3ec99afb796da2300ae5fec14",
-    urls = [PEX_SRC],
+    downloaded_file_path = "pex-2.1.9-py2.py3-none-any.whl",
+    sha256 = "5cad8d960c187541f71682fc938a843ef9092aab46f27b33ace7e570325e2626",
+    urls = [PEX_WHEEL],
 )
 
 http_file(

@@ -18,7 +18,6 @@
 FROM ubuntu:14.04
 
 RUN apt-get -y update && apt-get -y install \
-    python \
     python3 \
     unzip \
     software-properties-common \
