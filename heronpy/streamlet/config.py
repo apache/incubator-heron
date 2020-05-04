@@ -23,7 +23,7 @@
 import heronpy.api.api_constants as api_constants
 from heronpy.streamlet.resources import Resources
 
-class Config(object):
+class Config:
   """Config is the way users configure the execution of the topology.
      Things like tuple delivery semantics, resources used, as well as
      user defined key/value pairs are passed on to the runner via

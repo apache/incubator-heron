@@ -20,10 +20,10 @@
 
 ''' query.py '''
 
-class QueryHandler(object):
+class QueryHandler:
   ''' QueryHandler '''
 
-  def fetch(self, cluster, metric, topology, component, instance, timerange, envirn=None):
+  def fetch(self, cluster, metric, topology, component, instance, timerange, environ=None):
     '''
     :param cluster:
     :param metric:
@@ -31,12 +31,11 @@ class QueryHandler(object):
     :param component:
     :param instance:
     :param timerange:
-    :param envirn:
+    :param environ:
     :return:
     '''
-    pass
 
-  def fetch_max(self, cluster, metric, topology, component, instance, timerange, envirn=None):
+  def fetch_max(self, cluster, metric, topology, component, instance, timerange, environ=None):
     '''
     :param cluster:
     :param metric:
@@ -44,10 +43,9 @@ class QueryHandler(object):
     :param component:
     :param instance:
     :param timerange:
-    :param envirn:
+    :param environ:
     :return:
     '''
-    pass
 
   def fetch_backpressure(self, cluster, metric, topology, component, instance, \
     timerange, is_max, environ=None):
@@ -62,4 +60,3 @@ class QueryHandler(object):
     :param environ:
     :return:
     '''
-    pass

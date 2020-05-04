@@ -29,7 +29,7 @@ from heron.proto import metrics_pb2
 from heronpy.api.metrics import (CountMetric, MultiCountMetric, MeanReducedMetric,
                                  ReducedMetric, MultiMeanReducedMetric, MultiReducedMetric)
 
-class BaseMetricsHelper(object):
+class BaseMetricsHelper:
   """Helper class for metrics management
 
   It registers metrics to the metrics collector and provides methods for
@@ -325,7 +325,7 @@ class BoltMetrics(ComponentMetrics):
     self.update_count(self.FAIL_COUNT, key=global_stream_id)
     self.update_reduced_metric(self.FAIL_LATENCY, latency_in_ns, global_stream_id)
 
-class MetricsCollector(object):
+class MetricsCollector:
   """Helper class for pushing metrics to Out-Metrics queue"""
   def __init__(self, looper, out_metrics):
     self.looper = looper
@@ -378,7 +378,7 @@ class MetricsCollector(object):
 
     if metric_value is None:
       return
-    elif isinstance(metric_value, dict):
+    if isinstance(metric_value, dict):
       for key, value in list(metric_value.items()):
         if key is not None and value is not None:
           self._add_data_to_message(message, name + "/" + str(key), value)

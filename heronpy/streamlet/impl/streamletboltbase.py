@@ -21,7 +21,7 @@
 """module for base streamlet bolt: StreamletBoltBase"""
 from heronpy.api.stream import Stream
 
-class StreamletBoltBase(object):
+class StreamletBoltBase:
   """StreamletBoltBase"""
   # output declarer
   outputs = [Stream(fields=['_output_'], name='output')]

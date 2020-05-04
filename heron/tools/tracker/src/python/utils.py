@@ -76,8 +76,7 @@ def make_shell_logfiles_url(host, shell_port, _, instance_id=None):
     return None
   if not instance_id:
     return "http://%s:%d/browse/log-files" % (host, shell_port)
-  else:
-    return "http://%s:%d/file/log-files/%s.log.0" % (host, shell_port, instance_id)
+  return "http://%s:%d/file/log-files/%s.log.0" % (host, shell_port, instance_id)
 
 def make_shell_logfile_data_url(host, shell_port, instance_id, offset, length):
   """

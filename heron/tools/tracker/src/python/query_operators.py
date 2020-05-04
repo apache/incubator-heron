@@ -32,13 +32,12 @@ isPY3 = sys.version_info >= (3, 0, 0)
 def is_str_instance(obj):
   if isPY3:
     return isinstance(obj, str)
-  else:
-    return str(type(obj)) == "<type 'unicode'>" or str(type(obj)) == "<type 'str'>"
+  return str(type(obj)) == "<type 'unicode'>" or str(type(obj)) == "<type 'str'>"
 
 #####################################################################
 # Data Structure for fetched Metrics
 #####################################################################
-class Metrics(object):
+class Metrics:
   """Represents a univariate timeseries.
   Multivariate timeseries is simply a list of this."""
   def __init__(self, componentName, metricName, instance, start, end, timeline):
@@ -81,7 +80,7 @@ class Metrics(object):
 ################################################################
 
 # pylint: disable=no-self-use
-class Operator(object):
+class Operator:
   """Base class for all operators"""
   def __init__(self, _):
     raise Exception("Not implemented exception")
@@ -438,7 +437,7 @@ class Divide(Operator):
         allMetrics.append(met)
       raise tornado.gen.Return(allMetrics)
     # If first is univariate
-    elif len(metrics) == 1 and "" in metrics:
+    if len(metrics) == 1 and "" in metrics:
       allMetrics = []
       for key, metric in list(metrics2.items()):
         # Initialize with first metrics timeline, but second metric's instance
@@ -452,19 +451,17 @@ class Divide(Operator):
         allMetrics.append(met)
       raise tornado.gen.Return(allMetrics)
     # If second is univariate
-    else:
-      allMetrics = []
-      for key, metric in list(metrics.items()):
-        # Initialize with first metrics timeline and its instance
-        met = Metrics(None, None, metric.instance, start, end, dict(metric.timeline))
-        for timestamp in list(met.timeline.keys()):
-          if timestamp not in metrics2[""].timeline or metrics2[""].timeline[timestamp] == 0:
-            met.timeline.pop(timestamp)
-          else:
-            met.timeline[timestamp] /= metrics2[""].timeline[timestamp]
-        allMetrics.append(met)
-      raise tornado.gen.Return(allMetrics)
-    raise Exception("This should not be generated.")
+    allMetrics = []
+    for key, metric in list(metrics.items()):
+      # Initialize with first metrics timeline and its instance
+      met = Metrics(None, None, metric.instance, start, end, dict(metric.timeline))
+      for timestamp in list(met.timeline.keys()):
+        if timestamp not in metrics2[""].timeline or metrics2[""].timeline[timestamp] == 0:
+          met.timeline.pop(timestamp)
+        else:
+          met.timeline[timestamp] /= metrics2[""].timeline[timestamp]
+      allMetrics.append(met)
+    raise tornado.gen.Return(allMetrics)
 
 class Multiply(Operator):
   """Multiply Operator. Has same conditions as division operator.
@@ -563,7 +560,7 @@ class Multiply(Operator):
         allMetrics.append(met)
       raise tornado.gen.Return(allMetrics)
     # If first is univariate
-    elif len(metrics) == 1 and "" in metrics:
+    if len(metrics) == 1 and "" in metrics:
       allMetrics = []
       for key, metric in list(metrics2.items()):
         # Initialize with first metrics timeline, but second metric's instance
@@ -577,19 +574,17 @@ class Multiply(Operator):
         allMetrics.append(met)
       raise tornado.gen.Return(allMetrics)
     # If second is univariate
-    else:
-      allMetrics = []
-      for key, metric in list(metrics.items()):
-        # Initialize with first metrics timeline and its instance
-        met = Metrics(None, None, metric.instance, start, end, dict(metric.timeline))
-        for timestamp in list(met.timeline.keys()):
-          if timestamp not in metrics2[""].timeline:
-            met.timeline.pop(timestamp)
-          else:
-            met.timeline[timestamp] *= metrics2[""].timeline[timestamp]
-        allMetrics.append(met)
-      raise tornado.gen.Return(allMetrics)
-    raise Exception("This should not be generated.")
+    allMetrics = []
+    for key, metric in list(metrics.items()):
+      # Initialize with first metrics timeline and its instance
+      met = Metrics(None, None, metric.instance, start, end, dict(metric.timeline))
+      for timestamp in list(met.timeline.keys()):
+        if timestamp not in metrics2[""].timeline:
+          met.timeline.pop(timestamp)
+        else:
+          met.timeline[timestamp] *= metrics2[""].timeline[timestamp]
+      allMetrics.append(met)
+    raise tornado.gen.Return(allMetrics)
 
 class Subtract(Operator):
   """Subtract Operator. Has same conditions as division operator.
@@ -686,7 +681,7 @@ class Subtract(Operator):
         allMetrics.append(met)
       raise tornado.gen.Return(allMetrics)
     # If first is univariate
-    elif len(metrics) == 1 and "" in metrics:
+    if len(metrics) == 1 and "" in metrics:
       allMetrics = []
       for key, metric in list(metrics2.items()):
         # Initialize with first metrics timeline, but second metric's instance
@@ -700,19 +695,17 @@ class Subtract(Operator):
         allMetrics.append(met)
       raise tornado.gen.Return(allMetrics)
     # If second is univariate
-    else:
-      allMetrics = []
-      for key, metric in list(metrics.items()):
-        # Initialize with first metrics timeline and its instance
-        met = Metrics(None, None, metric.instance, start, end, dict(metric.timeline))
-        for timestamp in list(met.timeline.keys()):
-          if timestamp not in metrics2[""].timeline:
-            met.timeline.pop(timestamp)
-          else:
-            met.timeline[timestamp] -= metrics2[""].timeline[timestamp]
-        allMetrics.append(met)
-      raise tornado.gen.Return(allMetrics)
-    raise Exception("This should not be generated.")
+    allMetrics = []
+    for key, metric in list(metrics.items()):
+      # Initialize with first metrics timeline and its instance
+      met = Metrics(None, None, metric.instance, start, end, dict(metric.timeline))
+      for timestamp in list(met.timeline.keys()):
+        if timestamp not in metrics2[""].timeline:
+          met.timeline.pop(timestamp)
+        else:
+          met.timeline[timestamp] -= metrics2[""].timeline[timestamp]
+      allMetrics.append(met)
+    raise tornado.gen.Return(allMetrics)
 
 class Rate(Operator):
   """Rate Operator. This operator is used to find rate of change for all timeseries.

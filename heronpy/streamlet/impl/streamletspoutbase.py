@@ -21,7 +21,7 @@
 """module for base streamlet API spout: StreamletSpoutBase"""
 from heronpy.api.stream import Stream
 
-class StreamletSpoutBase(object):
+class StreamletSpoutBase:
   """StreamletSpoutBase"""
   # output declarer
   outputs = [Stream(fields=['_output_'], name='output')]

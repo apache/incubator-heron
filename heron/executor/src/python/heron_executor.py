@@ -148,7 +148,7 @@ def stdout_log_fn(cmd):
   # Log the messages to stdout and strip off the newline because Log.info adds one automatically
   return lambda line: Log.info("%s stdout: %s", cmd, line.rstrip('\n'))
 
-class Command(object):
+class Command:
   """
   Command to run as a separate process using subprocess.POpen
   :param cmd: command to run (as a list)
@@ -179,7 +179,7 @@ class Command(object):
   def __eq__(self, other):
     return self.cmd == other.cmd
 
-class ProcessInfo(object):
+class ProcessInfo:
   def __init__(self, process, name, command, attempts=1):
     """
     Container for info related to a running process
@@ -200,7 +200,7 @@ class ProcessInfo(object):
     return self
 
 # pylint: disable=too-many-instance-attributes,too-many-statements
-class HeronExecutor(object):
+class HeronExecutor:
   """ Heron executor is a class that is responsible for running each of the process on a given
   container. Based on the container id and the instance distribution, it determines if the container
   is a master node or a worker node and it starts processes accordingly."""

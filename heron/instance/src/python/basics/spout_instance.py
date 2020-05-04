@@ -173,6 +173,7 @@ class SpoutInstance(BaseInstance):
       if direct_task is not None:
         sent_task_ids.append(direct_task)
       return sent_task_ids
+    return None
 
   # pylint: disable=no-self-use
   def process_incoming_tuples(self):
@@ -191,7 +192,7 @@ class SpoutInstance(BaseInstance):
       if isinstance(tuples, tuple_pb2.HeronTupleSet):
         if tuples.HasField("data"):
           raise RuntimeError("Spout cannot get incoming data tuples from other components")
-        elif tuples.HasField("control"):
+        if tuples.HasField("control"):
           for ack_tuple in tuples.control.acks:
             self._handle_ack_tuple(ack_tuple, True)
           for fail_tuple in tuples.control.fails:
@@ -291,13 +292,12 @@ class SpoutInstance(BaseInstance):
 
     if not self.acking_enabled and self.output_helper.is_out_queue_available():
       return True
-    elif self.acking_enabled and self.output_helper.is_out_queue_available() and \
+    if self.acking_enabled and self.output_helper.is_out_queue_available() and \
         len(self.in_flight_tuples) < max_spout_pending:
       return True
-    elif self.acking_enabled and not self.in_stream.is_empty():
+    if self.acking_enabled and not self.in_stream.is_empty():
       return True
-    else:
-      return False
+    return False
 
   def _look_for_timeouts(self):
     spout_config = self.pplan_helper.context.get_cluster_config()

@@ -105,8 +105,7 @@ class GatewayLooper(EventLooper):
       Log.debug("Trivial error: " + str(err))
       if err.args[0] != errno.EINTR:
         raise
-      else:
-        return
+      return
     Log.debug("Selected [r]: " + str(readable_lst) +
               " [w]: " + str(writable_lst) + " [e]: " + str(error_lst))
 

@@ -54,3 +54,4 @@ class FileHandler(tornado.web.RequestHandler):
     )
     self.write(t.generate(**args))
     self.finish()
+    return

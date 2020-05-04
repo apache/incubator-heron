@@ -26,7 +26,7 @@ from heronpy.streamlet.generator import Generator
 from heronpy.streamlet.impl.supplierspout import SupplierStreamlet
 from heronpy.streamlet.impl.generatorspout import GeneratorStreamlet
 
-class Builder(object):
+class Builder:
   """A Builder object is used to build the functional API DAG in Heron."""
   def __init__(self):
     """

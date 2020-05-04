@@ -24,7 +24,7 @@
 ###########################  Constants for topology configuration ##################################
 ####################################################################################################
 
-class TopologyReliabilityMode(object):
+class TopologyReliabilityMode:
   ATMOST_ONCE = "ATMOST_ONCE"
   ATLEAST_ONCE = "ATLEAST_ONCE"
   EFFECTIVELY_ONCE = "EFFECTIVELY_ONCE"

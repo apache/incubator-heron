@@ -19,7 +19,7 @@ from heronpy.api.serializer import default_serializer
 from heronpy.api.custom_grouping import ICustomGrouping
 from heronpy.proto import topology_pb2
 
-class Stream(object):
+class Stream:
   """Heron output stream
 
   It is compatible with StreamParse API.
@@ -50,7 +50,7 @@ class Stream(object):
 
     if name is None:
       raise TypeError("Stream's name cannot be None")
-    elif isinstance(name, str):
+    if isinstance(name, str):
       self.stream_id = name
     else:
       raise TypeError("Stream name must be a string, given: %s" % str(name))
@@ -62,7 +62,7 @@ class Stream(object):
     else:
       raise TypeError("'direct' must be either True or False, given: %s" % str(direct))
 
-class Grouping(object):
+class Grouping:
   """Helper class for defining Grouping for Python topology"""
   SHUFFLE = topology_pb2.Grouping.Value("SHUFFLE")
   ALL = topology_pb2.Grouping.Value("ALL")
@@ -83,18 +83,17 @@ class Grouping(object):
   @classmethod
   def is_grouping_sane(cls, gtype):
     """Checks if a given gtype is sane"""
-    if gtype == cls.SHUFFLE or gtype == cls.ALL or gtype == cls.LOWEST or gtype == cls.NONE:
+    if gtype in (cls.SHUFFLE, cls.ALL, cls.LOWEST, cls.NONE):
       return True
-    elif isinstance(gtype, cls.FIELDS):
+    if isinstance(gtype, cls.FIELDS):
       return gtype.gtype == topology_pb2.Grouping.Value("FIELDS") and \
              gtype.fields is not None
-    elif isinstance(gtype, cls.CUSTOM):
+    if isinstance(gtype, cls.CUSTOM):
       return gtype.gtype == topology_pb2.Grouping.Value("CUSTOM") and \
              gtype.python_serialized is not None
-    else:
-      #pylint: disable=fixme
-      #TODO: DIRECT are not supported yet
-      return False
+    #pylint: disable=fixme
+    #TODO: DIRECT are not supported yet
+    return False
 
   @classmethod
   def fields(cls, *fields):
@@ -148,9 +147,8 @@ class Grouping(object):
     if not is_java:
       return cls.CUSTOM(gtype=topology_pb2.Grouping.Value("CUSTOM"),
                         python_serialized=serialized)
-    else:
-      raise NotImplementedError("Custom grouping implemented in Java for Python topology"
-                                "is not yet supported.")
+    raise NotImplementedError("Custom grouping implemented in Java for Python topology"
+                              "is not yet supported.")
 
   @classmethod
   def custom_object(cls, java_class_name, arg_list):

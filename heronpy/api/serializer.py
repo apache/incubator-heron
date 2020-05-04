@@ -28,12 +28,11 @@ except:
 
 import heronpy.api.cloudpickle as cloudpickle
 
-class IHeronSerializer(object):
+class IHeronSerializer:
   """Serializer interface for Heron"""
   @abstractmethod
   def initialize(self, config):
     """Initializes the serializer"""
-    pass
 
   @abstractmethod
   def serialize(self, obj):
@@ -42,7 +41,6 @@ class IHeronSerializer(object):
     :param obj: The object to be serialized
     :returns: Serialized object as byte string
     """
-    pass
 
   @abstractmethod
   def deserialize(self, input_str):
@@ -51,7 +49,6 @@ class IHeronSerializer(object):
     :param input_str: Serialized object as byte string
     :returns: Deserialized object
     """
-    pass
 
 class PythonSerializer(IHeronSerializer):
   """Default serializer"""

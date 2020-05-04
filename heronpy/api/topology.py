@@ -80,8 +80,7 @@ class TopologyType(type):
           spec.name = name
         if spec.name in specs:
           raise ValueError("Duplicate component name: %s" % spec.name)
-        else:
-          specs[spec.name] = spec
+        specs[spec.name] = spec
     return specs
 
   @classmethod
@@ -258,7 +257,7 @@ class TopologyType(type):
     return sanitized
 
 @six.add_metaclass(TopologyType)
-class Topology(object):
+class Topology:
   """Topology is an abstract class for defining a topology
 
   Topology writers can define their custom topology by inheriting this class.
@@ -304,7 +303,7 @@ class Topology(object):
     with open(path, 'wb') as f:
       f.write(cls.protobuf_topology.SerializeToString())
 
-class TopologyBuilder(object):
+class TopologyBuilder:
   """Builder for heronpy.api.src.python topology
 
   This class dynamically creates a subclass of `Topology` with given spouts and

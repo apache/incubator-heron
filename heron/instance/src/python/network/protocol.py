@@ -25,7 +25,7 @@ import struct
 
 from heron.common.src.python.utils.log import Log
 
-class HeronProtocol(object):
+class HeronProtocol:
   """Heron's application level network protocol"""
   INT_PACK_FMT = ">I"
   HEADER_SIZE = 4
@@ -84,7 +84,7 @@ class HeronProtocol(object):
 
     return typename, reqid, serialized_msg
 
-class OutgoingPacket(object):
+class OutgoingPacket:
   """Wrapper class for outgoing packet"""
   def __init__(self, raw_data):
     self.raw = str(raw_data)
@@ -137,7 +137,7 @@ class OutgoingPacket(object):
     sent = dispatcher.send(self.to_send)
     self.to_send = self.to_send[sent:]
 
-class IncomingPacket(object):
+class IncomingPacket:
   """Helper class for incoming packet"""
   def __init__(self):
     """Initializes IncomingPacket object"""
@@ -218,7 +218,7 @@ class IncomingPacket(object):
            (str(self.id), self.is_header_read, self.is_complete)
 
 
-class REQID(object):
+class REQID:
   """Helper class for REQID"""
   REQID_SIZE = 32
 
@@ -259,10 +259,9 @@ class REQID(object):
   def __str__(self):
     if self.is_zero():
       return "ZERO"
-    else:
-      return ''.join([str(i) for i in list(self.bytes)])
+    return ''.join([str(i) for i in list(self.bytes)])
 
-class StatusCode(object):
+class StatusCode:
   """StatusCode for Response"""
   OK = 0
   WRITE_ERROR = 1

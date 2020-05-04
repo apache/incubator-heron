@@ -95,7 +95,7 @@ def get_fail_packet():
   packet.is_complete = False
   return packet
 
-class MockDispatcher(object):
+class MockDispatcher:
   """Mock asyncore.dispatcher class, supporting only recv() and send() method
 
   This dispatcher provides several options as to how to prepare its receive buffer.

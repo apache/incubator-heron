@@ -29,7 +29,7 @@ from heron.instance.src.python.utils import system_config
 
 # pylint: disable=too-many-instance-attributes
 # pylint: disable=no-value-for-parameter
-class OutgoingTupleHelper(object):
+class OutgoingTupleHelper:
   """Helper class for preparing and pushing tuples to Out-Stream
 
   This is a Python implementation of OutgoingTupleCollection.java

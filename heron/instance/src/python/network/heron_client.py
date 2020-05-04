@@ -158,6 +158,7 @@ class HeronClient(asyncore.dispatcher):
     write_batch_time_sec = self.socket_options.nw_write_batch_time_ms * constants.MS_TO_SEC
     write_batch_size_bytes = self.socket_options.nw_write_batch_size_bytes
 
+    # pylint: disable=chained-comparison
     while (time.time() - start_cycle_time - write_batch_time_sec) < 0 and \
             bytes_written < write_batch_size_bytes and len(self.out_buffer) > 0:
       outgoing_pkt = self.out_buffer[0]
@@ -320,7 +321,6 @@ class HeronClient(asyncore.dispatcher):
 
     Should be implemented by a subclass.
     """
-    pass
 
   @abstractmethod
   def on_response(self, status, context, response):
@@ -328,7 +328,6 @@ class HeronClient(asyncore.dispatcher):
 
     Should be implemented by a subclass.
     """
-    pass
 
   @abstractmethod
   def on_incoming_message(self, message):
@@ -336,7 +335,6 @@ class HeronClient(asyncore.dispatcher):
 
     Should be implemented by a subclass.
     """
-    pass
 
   @abstractmethod
   def on_error(self):
@@ -345,4 +343,3 @@ class HeronClient(asyncore.dispatcher):
     Note that this method is not called when a connection is not yet established.
     In such a case, ``on_connect()`` with status == StatusCode.CONNECT_ERROR is called.
     """
-    pass

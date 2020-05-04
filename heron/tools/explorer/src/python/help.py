@@ -60,6 +60,5 @@ def run(command, parser, args, unknown_args):
   if subparser:
     print(subparser.format_help())
     return True
-  else:
-    Log.error("Unknown subcommand \'%s\'" % command_help)
-    return False
+  Log.error("Unknown subcommand \'%s\'" % command_help)
+  return False

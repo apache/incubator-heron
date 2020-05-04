@@ -103,6 +103,7 @@ class ContainerFileDownloadHandler(BaseHandler):
 
   @tornado.gen.coroutine
   def get(self):
+    """Serve a GET request."""
     try:
       cluster = self.get_argument_cluster()
       role = self.get_argument_role()

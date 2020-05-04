@@ -46,10 +46,9 @@ def format_mode(sres):
     ''' stat type'''
     if stat.S_ISDIR(md):
       return 'd'
-    elif stat.S_ISSOCK(md):
+    if stat.S_ISSOCK(md):
       return 's'
-    else:
-      return '-'
+    return '-'
 
   def triple(md):
     ''' triple '''

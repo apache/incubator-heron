@@ -52,7 +52,7 @@ class CommandEncoder(json.JSONEncoder):
   def default(self, o):
     return o.cmd
 
-class MockPOpen(object):
+class MockPOpen:
   """fake subprocess.Popen object that we can use to mock processes and pids"""
   next_pid = 0
 

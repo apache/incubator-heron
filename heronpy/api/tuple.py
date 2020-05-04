@@ -37,7 +37,7 @@ Tuple = namedtuple('Tuple', 'id component stream task values')
 :type values: tuple
 """
 
-class TupleHelper(object):
+class TupleHelper:
   """Tuple generator, returns StreamParse compatible tuple"""
   TICK_TUPLE_ID = "__tick"
   TICK_SOURCE_COMPONENT = "__system"

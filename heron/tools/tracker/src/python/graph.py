@@ -22,7 +22,7 @@
 
 
 ################################################################################
-class Graph(object):
+class Graph:
   '''
   Adjacency list of edges in graph. This will correspond to the streams in a topology DAG.
   '''

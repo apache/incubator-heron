@@ -44,7 +44,7 @@ WAIT_FOR_DEACTIVATION = 5
 successes = []
 failures = []
 
-class TopologyStructureResultChecker(object):
+class TopologyStructureResultChecker:
   """
   Validate topology graph structure
   """
@@ -224,7 +224,7 @@ class InstanceStateResultChecker(TopologyStructureResultChecker):
     return output
 
 
-class FileBasedExpectedResultsHandler(object):
+class FileBasedExpectedResultsHandler:
   """
   Get expected topology graph structure result from local file
   """
@@ -245,7 +245,7 @@ class FileBasedExpectedResultsHandler(object):
       raise status.TestFailure("Failed to read expected result file %s" % self.file_path, e)
 
 
-class ZkFileBasedActualResultsHandler(object):
+class ZkFileBasedActualResultsHandler:
   """
   Get actual topology graph structure result from zk
   """
@@ -294,7 +294,7 @@ class ZkFileBasedActualResultsHandler(object):
     self.state_mgr.stop()
 
 
-class HttpBasedActualResultsHandler(object):
+class HttpBasedActualResultsHandler:
   """
   Get actually loaded instance states
   TODO(yaoli): complete this class when stateful processing is ready

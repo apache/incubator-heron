@@ -42,7 +42,7 @@ VERBOSE = False               # Disable verbose by default
 successes = []
 failures = []
 
-class FileBasedExpectedResultsHandler(object):
+class FileBasedExpectedResultsHandler:
   def __init__(self, file_path):
     self.file_path = file_path
 
@@ -57,7 +57,7 @@ class FileBasedExpectedResultsHandler(object):
     except Exception as e:
       raise status.TestFailure("Failed to read expected result file %s" % self.file_path, e)
 
-class HttpBasedExpectedResultsHandler(object):
+class HttpBasedExpectedResultsHandler:
   def __init__(self, server_host_port, topology_name, task_count):
     self.server_host_port = server_host_port
     self.topology_name = topology_name
@@ -87,7 +87,7 @@ class HttpBasedExpectedResultsHandler(object):
       raise status.TestFailure(
           "Fetching expected result failed for %s topology" % self.topology_name, e)
 
-class HttpBasedActualResultsHandler(object):
+class HttpBasedActualResultsHandler:
   def __init__(self, server_host_port, topology_name):
     self.server_host_port = server_host_port
     self.topology_name = topology_name
@@ -100,7 +100,7 @@ class HttpBasedActualResultsHandler(object):
       raise status.TestFailure("Fetching result failed for %s topology" % self.topology_name, e)
 
 # pylint: disable=unnecessary-lambda
-class ExactlyOnceResultsChecker(object):
+class ExactlyOnceResultsChecker:
   """Compares what results we found against what was expected. Verifies and exact match"""
 
   def __init__(self, topology_name, expected_results_handler, actual_results_handler):

@@ -28,7 +28,7 @@ from heapq import heappush, heappop
 
 from heron.common.src.python.utils.log import Log
 
-class EventLooper(object):
+class EventLooper:
   """EventLooper is a Python implementation of WakeableLooper.java
 
   EventLooper is a class for scheduling recurring tasks that could:
@@ -85,7 +85,6 @@ class EventLooper(object):
   @abstractmethod
   def do_wait(self):
     """Blocking operation, should be implemented by a subclass"""
-    pass
 
   @abstractmethod
   def wake_up(self):
@@ -93,7 +92,6 @@ class EventLooper(object):
 
     Note that this method should be implemented in a thread-safe way.
     """
-    pass
 
   def add_wakeup_task(self, task):
     """Add a wakeup task
@@ -135,9 +133,8 @@ class EventLooper(object):
     """
     if len(self.timer_tasks) == 0:
       return sys.maxsize
-    else:
-      next_timeout_interval = self.timer_tasks[0][0] - time.time()
-      return next_timeout_interval
+    next_timeout_interval = self.timer_tasks[0][0] - time.time()
+    return next_timeout_interval
 
   def _execute_wakeup_tasks(self):
     """Executes wakeup tasks, should only be called from loop()"""
@@ -149,6 +146,7 @@ class EventLooper(object):
   def _trigger_timers(self):
     """Triggers expired timers"""
     current = time.time()
-    while len(self.timer_tasks) > 0 and (self.timer_tasks[0][0] - current <= 0):
+    # pylint: disable=chained-comparison
+    while self.timer_tasks and (self.timer_tasks[0][0] - current <= 0):
       task = heappop(self.timer_tasks)[1]
       task()

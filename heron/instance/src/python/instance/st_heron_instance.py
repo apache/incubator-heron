@@ -26,11 +26,10 @@ import os
 import resource
 import signal
 import traceback
-from heron.common.src.python.utils import log
 import yaml
 
+from heron.common.src.python.utils import log
 from heron.proto import physical_plan_pb2, tuple_pb2, ckptmgr_pb2, common_pb2
-
 from heron.instance.src.python.utils.misc import HeronCommunicator
 from heron.instance.src.python.utils.misc import SerializerHelper
 from heron.instance.src.python.utils.misc import PhysicalPlanHelper
@@ -52,7 +51,7 @@ def set_resource_limit(max_ram):
   resource.setrlimit(resource.RLIMIT_RSS, (max_ram, max_ram))
 
 # pylint: disable=too-many-instance-attributes
-class SingleThreadHeronInstance(object):
+class SingleThreadHeronInstance:
   """SingleThreadHeronInstance is an implementation of Heron Instance in python"""
   STREAM_MGR_HOST = "127.0.0.1"
   METRICS_MGR_HOST = "127.0.0.1"

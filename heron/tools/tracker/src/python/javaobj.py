@@ -78,7 +78,7 @@ _java_primitives = set([
     "java.lang.Integer",
     "java.lang.Long"])
 
-class JavaClass(object):
+class JavaClass:
   """Java class representation"""
   def __init__(self):
     self.name = None
@@ -95,7 +95,7 @@ class JavaClass(object):
     return "[%s:0x%X]" % (self.name, self.serialVersionUID)
 
 
-class JavaObject(object):
+class JavaObject:
   """Java object representation"""
   def __init__(self):
     self.classdesc = None
@@ -132,7 +132,7 @@ class JavaObject(object):
     for name in self.classdesc.fields_names:
       new_object.__setattr__(name, getattr(self, name))
 
-class JavaObjectConstants(object):
+class JavaObjectConstants:
   """class about Java object constants"""
 
   STREAM_MAGIC = 0xaced
@@ -222,7 +222,7 @@ class JavaObjectUnmarshaller(JavaObjectConstants):
 
       position_bak = self.object_stream.tell()
       the_rest = self.object_stream.read()
-      if len(the_rest):
+      if the_rest:
         log_error("Warning!!!!: Stream still has %s bytes left.\
 Enable debug mode of logging to see the hexdump." % len(the_rest))
         log_debug(self._create_hexdump(the_rest))
@@ -457,7 +457,7 @@ classDescFlags: 0x%X" % (serialVersionUID, newHandle, classDescFlags), ident)
     assert type_char == self.TYPE_ARRAY
     type_char = classdesc.name[1]
 
-    if type_char == self.TYPE_OBJECT or type_char == self.TYPE_ARRAY:
+    if type_char in (self.TYPE_OBJECT, self.TYPE_ARRAY):
       for _ in range(size):
         _, res = self._read_and_exec_opcode(ident=ident+1)
         log_debug("Object value: %s" % str(res), ident)
@@ -519,7 +519,7 @@ classDescFlags: 0x%X" % (serialVersionUID, newHandle, classDescFlags), ident)
       (res, ) = self._readStruct(">f")
     elif field_type == self.TYPE_DOUBLE:
       (res, ) = self._readStruct(">d")
-    elif field_type == self.TYPE_OBJECT or field_type == self.TYPE_ARRAY:
+    elif field_type in (self.TYPE_OBJECT, self.TYPE_ARRAY):
       _, res = self._read_and_exec_opcode(ident=ident+1)
     else:
       raise RuntimeError("Unknown typecode: %s" % field_type)
@@ -533,8 +533,7 @@ classDescFlags: 0x%X" % (serialVersionUID, newHandle, classDescFlags), ident)
 
     if typecode in self.TYPECODES_LIST:
       return typecode
-    else:
-      raise RuntimeError("Typecode %s (%s) isn't supported." % (type_char, typecode))
+    raise RuntimeError("Typecode %s (%s) isn't supported." % (type_char, typecode))
 
   def _add_reference(self, obj):
     self.references.append(obj)
@@ -545,7 +544,7 @@ classDescFlags: 0x%X" % (serialVersionUID, newHandle, classDescFlags), ident)
     log_error("Stream seeking back at -16 byte (2nd line is an actual position!):")
     self.object_stream.seek(-16, mode=1)
     the_rest = self.object_stream.read()
-    if len(the_rest):
+    if the_rest:
       log_error("Warning!!!!: Stream still has %s bytes left." % len(the_rest))
       log_error(self._create_hexdump(the_rest))
     log_error("=" * 30)
@@ -597,7 +596,7 @@ class JavaObjectMarshaller(JavaObjectConstants):
     self._writeStruct(">B", 1, (self.TC_OBJECT, ))
     self._writeStruct(">B", 1, (self.TC_CLASSDESC, ))
 
-class DefaultObjectTransformer(object):
+class DefaultObjectTransformer:
 
   class JavaList(list, JavaObject):
     pass
@@ -619,7 +618,6 @@ class DefaultObjectTransformer(object):
       obj.copy(new_object)
       new_object.extend(obj.annotations[1:])
       return new_object
-    # pylint: disable=redefined-variable-type
     if obj.get_class().name == "java.util.HashMap":
       new_object = self.JavaMap()
       obj.copy(new_object)

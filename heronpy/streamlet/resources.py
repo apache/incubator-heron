@@ -20,7 +20,7 @@
 
 '''resources.py: module for defining resources'''
 
-class Resources(object):
+class Resources:
   """Resources needed by the topology are encapsulated in this class.
      Currently we deal with CPU and RAM. Others can be added later.
   """

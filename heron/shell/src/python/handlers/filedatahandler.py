@@ -41,7 +41,7 @@ class FileDataHandler(tornado.web.RequestHandler):
       self.write("Only relative paths are allowed")
       self.set_status(403)
       self.finish()
-      return
+      return None
 
     offset = self.get_argument("offset", default=-1)
     length = self.get_argument("length", default=-1)
@@ -50,3 +50,4 @@ class FileDataHandler(tornado.web.RequestHandler):
     data = utils.read_chunk(path, offset=offset, length=length, escape_data=True)
     self.write(json.dumps(data))
     self.finish()
+    return None

@@ -31,7 +31,7 @@ class TestFailure(Exception):
     else:
       logging.error(message)
 
-class TestSuccess(object):
+class TestSuccess:
   def __init__(self, message=None):
     if message:
       logging.info(message)

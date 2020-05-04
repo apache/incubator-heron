@@ -127,9 +127,8 @@ def run(handlers, command, parser, command_args, unknown_args):
 
   if command in handlers:
     return handlers[command].run(command, parser, command_args, unknown_args)
-  else:
-    err_context = 'Unknown subcommand: %s' % command
-    return result.SimpleResult(result.Status.InvocationError, err_context)
+  err_context = 'Unknown subcommand: %s' % command
+  return result.SimpleResult(result.Status.InvocationError, err_context)
 
 def cleanup(files):
   '''

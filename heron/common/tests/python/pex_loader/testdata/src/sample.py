@@ -20,7 +20,7 @@
 
 '''sample.py: sample module as testdata for pex_loader unittest'''
 
-class SampleClass(object):
+class SampleClass:
   """Sample class"""
   name = "sample class"
   age = 100

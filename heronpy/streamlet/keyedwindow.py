@@ -22,7 +22,7 @@
 
 from heronpy.streamlet.window import Window
 
-class KeyedWindow(object):
+class KeyedWindow:
   """Transformation depending on Windowing pass on the window/key information
      using this class
   """

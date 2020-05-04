@@ -289,16 +289,14 @@ def parse_cluster_role_env(cluster_role_env, config_path):
         if (ROLE_REQUIRED in cli_confs) and (cli_confs[ROLE_REQUIRED] is True):
           raise Exception("role required but not provided (cluster/role/env = %s). See %s in %s"
                           % (cluster_role_env, ROLE_REQUIRED, cli_conf_file))
-        else:
-          parts.append(getpass.getuser())
+        parts.append(getpass.getuser())
 
       # if environ is required but not provided, raise exception
       if len(parts) == 2:
         if (ENV_REQUIRED in cli_confs) and (cli_confs[ENV_REQUIRED] is True):
           raise Exception("environ required but not provided (cluster/role/env = %s). See %s in %s"
                           % (cluster_role_env, ENV_REQUIRED, cli_conf_file))
-        else:
-          parts.append(ENVIRON)
+        parts.append(ENVIRON)
 
   # if cluster or role or environ is empty, print
   if len(parts[0]) == 0 or len(parts[1]) == 0 or len(parts[2]) == 0:
@@ -342,12 +340,14 @@ def direct_mode_cluster_role_env(cluster_role_env, config_path):
       return True
 
     # if role is required but not provided, raise exception
-    role_present = True if len(cluster_role_env[1]) > 0 else False
+    role_present = bool(cluster_role_env[1])
+    # pylint: disable=simplifiable-if-expression
     if ROLE_REQUIRED in client_confs and client_confs[ROLE_REQUIRED] and not role_present:
       raise Exception("role required but not provided (cluster/role/env = %s). See %s in %s"
                       % (cluster_role_env, ROLE_REQUIRED, cli_conf_file))
 
     # if environ is required but not provided, raise exception
+    # pylint: disable=simplifiable-if-expression
     environ_present = True if len(cluster_role_env[2]) > 0 else False
     if ENV_REQUIRED in client_confs and client_confs[ENV_REQUIRED] and not environ_present:
       raise Exception("environ required but not provided (cluster/role/env = %s). See %s in %s"
@@ -362,13 +362,15 @@ def server_mode_cluster_role_env(cluster_role_env, config_map):
   cmap = config_map[cluster_role_env[0]]
 
   # if role is required but not provided, raise exception
-  role_present = True if len(cluster_role_env[1]) > 0 else False
+  role_present = bool(cluster_role_env[1])
+  # pylint: disable=simplifiable-if-expression
   if ROLE_KEY in cmap and cmap[ROLE_KEY] and not role_present:
     raise Exception("role required but not provided (cluster/role/env = %s)."\
         % (cluster_role_env))
 
   # if environ is required but not provided, raise exception
   environ_present = True if len(cluster_role_env[2]) > 0 else False
+  # pylint: disable=simplifiable-if-expression
   if ENVIRON_KEY in cmap and cmap[ENVIRON_KEY] and not environ_present:
     raise Exception("environ required but not provided (cluster/role/env = %s)."\
         % (cluster_role_env))

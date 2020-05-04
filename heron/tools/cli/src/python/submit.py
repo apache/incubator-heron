@@ -19,6 +19,7 @@
 #  under the License.
 
 ''' submit.py '''
+# pylint: disable=wrong-import-order
 from future.standard_library import install_aliases
 install_aliases()
 
@@ -399,6 +400,7 @@ def download(uri, cluster):
   for f in os.listdir(tmp_dir):
     if f.endswith(suffix):
       return os.path.join(tmp_dir, f)
+  return None
 
 ################################################################################
 # pylint: disable=unused-argument
@@ -478,9 +480,8 @@ def run(command, parser, cl_args, unknown_args):
   # check the extension of the file name to see if it is tar/jar file.
   if jar_type:
     return submit_fatjar(cl_args, unknown_args, tmp_dir)
-  elif tar_type:
+  if tar_type:
     return submit_tar(cl_args, unknown_args, tmp_dir)
-  elif cpp_type:
+  if cpp_type:
     return submit_cpp(cl_args, unknown_args, tmp_dir)
-  else:
-    return submit_pex(cl_args, unknown_args, tmp_dir)
+  return submit_pex(cl_args, unknown_args, tmp_dir)

@@ -27,7 +27,7 @@ from heron.common.src.python.utils.log import Log
 from heronpy.api import api_constants
 
 # pylint: disable=too-many-instance-attributes
-class Topology(object):
+class Topology:
   """
   Class Topology
     Contains all the relevant information about
@@ -242,9 +242,8 @@ class Topology(object):
 
     if status == 1:
       return "Running"
-    elif status == 2:
+    if status == 2:
       return "Paused"
-    elif status == 3:
+    if status == 3:
       return "Killed"
-    else:
-      return "Unknown"
+    return "Unknown"

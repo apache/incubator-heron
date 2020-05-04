@@ -39,11 +39,10 @@ def valid_path(path):
   Log.debug('Checking classpath entry as directory: %s', path)
   if os.path.isdir(path):
     return True
-  else:
-    # check if the classpath entry is a file
-    Log.debug('Checking classpath entry as file: %s', path)
-    if os.path.isfile(path):
-      return True
+  # check if the classpath entry is a file
+  Log.debug('Checking classpath entry as file: %s', path)
+  if os.path.isfile(path):
+    return True
 
   return False
 

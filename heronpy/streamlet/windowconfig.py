@@ -22,7 +22,7 @@
 
 import datetime
 
-class WindowConfig(object):
+class WindowConfig:
   """WindowConfig allows streamlet API users to program window configuration for operations
      that rely on windowing. Currently we only support time/count based
      sliding/tumbling windows.

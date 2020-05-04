@@ -511,7 +511,7 @@ class CloudPickler(Pickler): # pylint: disable=too-many-public-methods
 
   def save_attrgetter(self, obj):
     """attrgetter serializer"""
-    class Dummy(object):
+    class Dummy:
       def __init__(self, attrs, index=None):
         self.attrs = attrs
         self.index = index
@@ -795,7 +795,7 @@ def _load_class(cls, d):
       if typ == 'property':
         v = property(*v)
       elif typ == 'staticmethod':
-        v = staticmethod(v) # pylint: disable=redefined-variable-type
+        v = staticmethod(v)
       elif typ == 'classmethod':
         v = classmethod(v)
     setattr(cls, k, v)

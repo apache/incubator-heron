@@ -23,12 +23,11 @@ from abc import abstractmethod
 
 # pylint: disable=attribute-defined-outside-init
 
-class IMetric(object):
+class IMetric:
   """Interface for Heron Metric"""
   @abstractmethod
   def get_value_and_reset(self):
     """Returns the current value and reset"""
-    pass
 
 class CountMetric(IMetric):
   """Counter for a single value"""
@@ -68,22 +67,19 @@ class MultiCountMetric(IMetric):
     return ret
 
 # Reducer metric
-class IReducer(object):
+class IReducer:
   """Interface for Reducer"""
   @abstractmethod
   def init(self):
     """Called when this reducer is initialized/reinitialized"""
-    pass
 
   @abstractmethod
   def reduce(self, value):
     """Called to reduce the value"""
-    pass
 
   @abstractmethod
   def extract(self):
     """Called to extract the current value"""
-    pass
 
 class MeanReducer(IReducer):
   """Mean Reducer"""
@@ -98,8 +94,7 @@ class MeanReducer(IReducer):
   def extract(self):
     if self.count > 0:
       return float(self.sum)/self.count
-    else:
-      return None
+    return None
 
 class ReducedMetric(IMetric):
   """Reduced Metric"""

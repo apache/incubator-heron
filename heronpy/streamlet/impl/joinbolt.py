@@ -73,6 +73,7 @@ class JoinBolt(SlidingWindowBolt, StreamletBoltBase):
     self._join_type = config[JoinBolt.JOINTYPE]
 
   def processWindow(self, window_config, tuples):
+    """Process a window"""
     # our temporary map
     mymap = {}
     for tup in tuples:

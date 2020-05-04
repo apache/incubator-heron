@@ -81,7 +81,7 @@ def async_stream_process_stderr(process, handler):
   """
   return _async_stream_process_output(process, stream_process_stderr, handler)
 
-class StringBuilder(object):
+class StringBuilder:
   def __init__(self):
     self.end = False
     self.strs = []
@@ -96,8 +96,6 @@ class StringBuilder(object):
     while True:
       if self.end:
         return ''.join(self.strs)
-      else:
-        continue
 
 def async_stdout_builder(proc):
   """ Save stdout into string builder

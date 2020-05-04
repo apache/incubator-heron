@@ -175,7 +175,6 @@ class ComponentSpecTest(unittest.TestCase):
     with self.assertRaises(ValueError):
       spec._sanitize_inputs()
 
-  # pylint: disable=redefined-variable-type
   # pylint: disable=pointless-statement
   def test_sanitize_outputs(self):
     # outputs is None (no argument to outputs)

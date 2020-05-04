@@ -54,7 +54,7 @@ HERON_STMGR = "heron-stmgr"
 HERON_STMGR_CMD = os.path.join(HERON_SANDBOX_HOME, HERON_CORE, HERON_BIN, HERON_STMGR)
 ProcessTuple = namedtuple('ProcessTuple', 'pid cmd')
 
-class TestTemplate(object):
+class TestTemplate:
   """ Class that encapsulates the template used for integration tests. Intended to be abstract and
   subclassed for specific tests. """
 

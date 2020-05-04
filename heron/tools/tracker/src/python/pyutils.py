@@ -27,5 +27,4 @@ isPY3 = sys.version_info >= (3, 0, 0)
 def is_str_instance(obj):
   if isPY3:
     return isinstance(obj, str)
-  else:
-    return str(type(obj)) == "<type 'unicode'>" or str(type(obj)) == "<type 'str'>"
+  return str(type(obj)) == "<type 'unicode'>" or str(type(obj)) == "<type 'str'>"
