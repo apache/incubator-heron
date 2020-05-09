@@ -34,7 +34,7 @@ POST_EXECUTE = [
             --quiet --no-cache-dir --no-index --build $(@D)/pexbuild \
             --find-links $$(dirname $(location @pex_src//file)) \
             --find-links $$(dirname $(location @wheel_src//file)) \
-            --find-links $$(dirname $(location @setuptools_src//file))',
+            --find-links $$(dirname $(location @setuptools_wheel//file))',
 
     '# Work around setuptools insistance on writing to the source directory,',
     '# which is discouraged by Bazel (and annoying)',
@@ -46,7 +46,7 @@ POST_EXECUTE = [
             --entry-point=pex_wrapper \
             --output-file=$@ \
             --find-links $$(dirname $(location @pex_src//file)) \
-            --find-links $$(dirname $(location @setuptools_src//file)) \
+            --find-links $$(dirname $(location @setuptools_wheel//file)) \
             --find-links $$(dirname $(location @requests_src//file)) \
             --find-links $$(dirname $(location @wheel_src//file))',
    ]
@@ -57,7 +57,7 @@ genrule(
         "wrapper/setup.py",
         "wrapper/pex_wrapper.py",
         "wrapper/README",
-        "@setuptools_src//file",
+        "@setuptools_wheel//file",
         "@wheel_src//file",
         "@pex_src//file",
         "@requests_src//file",

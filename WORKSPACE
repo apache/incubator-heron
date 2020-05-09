@@ -180,7 +180,7 @@ PYTEST_WHEEL = "https://pypi.python.org/packages/fd/3e/d326a05d083481746a769fc05
 
 REQUESTS_SRC = "https://pypi.python.org/packages/d9/03/155b3e67fe35fe5b6f4227a8d9e96a14fda828b18199800d161bcefc1359/requests-2.12.3.tar.gz"
 
-SETUPTOOLS_SRC = "https://pypi.python.org/packages/68/13/1bfbfbd86560e61fa9803d241084fff41a775bf56ee8b3ad72fc9e550dad/setuptools-31.0.0.tar.gz"
+SETUPTOOLS_WHEEL = "https://pypi.python.org/packages/a0/df/635cdb901ee4a8a42ec68e480c49f85f4c59e8816effbf57d9e6ee8b3588/setuptools-46.1.3-py3-none-any.whl"
 
 VIRTUALENV_SRC = "https://pypi.python.org/packages/d4/0c/9840c08189e030873387a73b90ada981885010dd9aea134d6de30cd24cb8/virtualenv-15.1.0.tar.gz"
 
@@ -224,10 +224,10 @@ http_file(
 )
 
 http_file(
-    name = "setuptools_src",
-    downloaded_file_path = "setuptools-31.0.0.tar.gz",
-    sha256 = "0818cc0de692c3a5c83ca83aa7ec7ba6bc206f278735f1e0267b8d0e095cfe7a",
-    urls = [SETUPTOOLS_SRC],
+    name = "setuptools_wheel",
+    downloaded_file_path = "setuptools-46.1.3-py3-none-any.whl",
+    sha256 = "4fe404eec2738c20ab5841fa2d791902d2a645f32318a7850ef26f8d7215a8ee",
+    urls = [SETUPTOOLS_WHEEL],
 )
 
 http_archive(

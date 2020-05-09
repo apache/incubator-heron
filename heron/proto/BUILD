@@ -182,7 +182,7 @@ pex_library(
     name = "proto-py",
     reqs = [
         "protobuf==3.8.0",
-        "setuptools==18.8.1",
+        "setuptools==46.1.3",
     ],
     deps = [
         ":proto_ckptmgr_py",
