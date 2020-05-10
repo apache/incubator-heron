@@ -24,8 +24,10 @@ RUN yum -y install which; yum clean all
 RUN yum -y install curl; yum clean all
 RUN yum -y install nmap-ncat; yum clean all
 RUN yum -y install python python3-setuptools; yum clean all
-RUN easy_install supervisor
-RUN echo_supervisord_conf > /etc/supervisord.conf
+
+RUN yum install epel-release; yum clean all
+RUN yum update -y
+RUN yum install -y supervisor; yum clean all
 
 RUN yum -y install java-11-openjdk java-11-openjdk-devel; yum clean all
 
