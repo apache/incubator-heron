@@ -30,7 +30,7 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.tools.Diagnostic.Kind;
 
-import static javax.lang.model.SourceVersion.RELEASE_8;
+import static javax.lang.model.SourceVersion.RELEASE_11;
 
 /**
  * Class that processes usage of {@link InterfaceAudience} and {@link InterfaceStability} at compile
@@ -39,7 +39,7 @@ import static javax.lang.model.SourceVersion.RELEASE_8;
 @SupportedAnnotationTypes({"org.apache.heron.classification.InterfaceStability.Unstable",
                            "org.apache.heron.classification.InterfaceAudience.Private",
                            "org.apache.heron.classification.InterfaceAudience.LimitedPrivate"})
-@SupportedSourceVersion(RELEASE_8)
+@SupportedSourceVersion(RELEASE_11)
 public class HeronAnnotationProcessor extends AbstractProcessor {
   private ProcessingEnvironment env;
 
