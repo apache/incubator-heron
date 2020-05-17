@@ -17,7 +17,9 @@
 
 FROM ubuntu:16.04
 
-RUN apt-get update
+RUN apt-get update && apt-get install -y software-properties-common
+
+RUN add-apt-repository ppa:openjdk-r/ppa
 
 RUN apt-get -y install \
     python \
@@ -25,7 +27,9 @@ RUN apt-get -y install \
     unzip \
     software-properties-common \
     curl \
-    supervisor \
+    supervisor
+
+RUN apt-get update && apt-get -y install \
     openjdk-11-jdk-headless
 
 ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk-amd64
