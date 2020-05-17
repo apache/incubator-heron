@@ -1,0 +1,104 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: drupal-mysql-pv
+  labels:
+    type: local
+spec:
+  storageClassName: mysql-pv
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/drupal-mysql-data"
+
+
+
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: drupal-pv
+  labels:
+    type: local
+spec:
+  storageClassName: pv
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/drupal-data"
+
+
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: drupal-mysql-pvc
+spec:
+  storageClassName: mysql-pv
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: drupal-pvc
+spec:
+  storageClassName: pv
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: drupal-mysql
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: drupal-mysql
+  template:
+    metadata:
+      labels:
+        app: drupal-mysql
+    spec:
+      containers:
+        - name: drupal-mysql-container
+          image: mysql:5.7
+          env:
+          - name: MYSQL_ROOT_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: mysql-pass
+                key: password
+          ports:
+          - containerPort: 3306
+            name: mysql
+          volumeMounts:
+          - name: mysql-persistent-storage
+            mountPath: /var/lib/mysql
+            subPath: dbdata
+      volumes:
+        - name: mysql-persistent-storage
+          persistentVolumeClaim:
+            claimName: drupal-mysql-pvc
+
+
+
+
+$ kubectl get pvc
+Error from server (Forbidden): persistentvolumeclaims is forbidden: User "ning" cannot list resource "persistentvolumeclaims" in API group "" in the namespace "default"
+
+$ kubectl get pv
+Error from server (Forbidden): persistentvolumes is forbidden: User "ning" cannot list resource "persistentvolumes" in API group "" at the cluster scope
+
