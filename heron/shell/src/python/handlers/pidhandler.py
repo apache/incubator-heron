@@ -39,5 +39,5 @@ class PidHandler(tornado.web.RequestHandler):
         ['ps', 'auxwwww'],
         ['grep', instance_id],
         ['grep', 'java'],
-        ['awk', '\'{print $2}\'']])).strip())
+        ['awk', '{print $2}']])).strip())
     self.finish()
