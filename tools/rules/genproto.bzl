@@ -165,6 +165,11 @@ def proto_library(
             proto_cmd = "$(location %s) --python_out=$(@D) %s" % (protoc, proto_path)
         else:
             proto_cmd = "$(location %s) %s --python_out=$(@D) %s" % (protoc, proto_include_paths, proto_path)
+        # hack to work around not having import_prefix from the official proto rules which is needed to sort out imports
+        # and without having https://github.com/protocolbuffers/protobuf/pull/7470
+        # import common_pb2 as common__pb2 -> import .common_pb2 as common__pb2
+        proto_cmd += "\nfind $(@D) -type f -name '*_pb2.py' -exec sed -i.bak -E 's/^(import )([^ .]+_pb2)/from . import \\2/' {} \\;"
+
         py_deps = []
         proto_deps = [src, protoc]
         for dep in deps:
