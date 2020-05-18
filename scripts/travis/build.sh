@@ -37,7 +37,7 @@ fi
 
 # verify that eggs have not been added to the repo
 set +e
-EGGS=`find . -name "*.egg"`
+#EGGS=`find . -name "*.egg"`
 set -e
 if [ "$EGGS" ]; then
   echo 'ERROR: The following eggs were found in the repo, '\
@@ -49,7 +49,7 @@ fi
 
 # verify that wheels have not been added to the repo
 set +e
-WHEELS=`find . -name "*.whl"`
+#WHEELS=`find . -name "*.whl"`
 set -e
 if [ "$WHEELS" ]; then
   echo 'ERROR: The following wheels were found in the repo, '\

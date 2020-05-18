@@ -180,14 +180,14 @@ class Command:
     return self.cmd == other.cmd
 
 class ProcessInfo:
+  """
+  Container for info related to a running process
+  :param process: the process POpen object
+  :param name: the logical (i.e., unique) name of the process
+  :param command: an array of strings comprising the command and it's args
+  :param attempts: how many times the command has been run (defaults to 1)
+  """
   def __init__(self, process, name, command, attempts=1):
-    """
-    Container for info related to a running process
-    :param process: the process POpen object
-    :param name: the logical (i.e., unique) name of the process
-    :param command: an array of strings comprising the command and it's args
-    :param attempts: how many times the command has been run (defaults to 1)
-    """
     self.process = process
     self.pid = process.pid
     self.name = name
@@ -198,6 +198,12 @@ class ProcessInfo:
   def increment_attempts(self):
     self.attempts += 1
     return self
+
+  def __repr__(self):
+    return (
+        "ProcessInfo(pid=%(pid)r, name=%(name)r, command=%(command)r, attempts=%(attempts)r)"
+        % vars(self)
+    )
 
 # pylint: disable=too-many-instance-attributes,too-many-statements
 class HeronExecutor:
@@ -223,8 +229,8 @@ class HeronExecutor:
     # escaping is still left there for reference and backward compatibility purposes (to be
     # removed after no topology needs it)
     self.instance_jvm_opts =\
-        base64.b64decode(parsed_args.instance_jvm_opts.lstrip('"').
-                         rstrip('"').replace('(61)', '=').replace('&equals;', '='))
+        base64.b64decode(parsed_args.instance_jvm_opts.
+                         strip('"').replace('(61)', '=').replace('&equals;', '=')).decode()
     self.classpath = parsed_args.classpath
     # Needed for Docker environments since the hostname of a docker container is the container's
     # id within docker, rather than the host's hostname. NOTE: this 'HOST' env variable is not
@@ -255,11 +261,11 @@ class HeronExecutor:
     # removed after no topology needs it)
     component_jvm_opts_in_json =\
         base64.b64decode(parsed_args.component_jvm_opts.
-                         lstrip('"').rstrip('"').replace('(61)', '=').replace('&equals;', '='))
+                         strip('"').replace('(61)', '=').replace('&equals;', '=')).decode()
     if component_jvm_opts_in_json != "":
       for (k, v) in list(json.loads(component_jvm_opts_in_json).items()):
         # In json, the component name and JVM options are still in base64 encoding
-        self.component_jvm_opts[base64.b64decode(k)] = base64.b64decode(v)
+        self.component_jvm_opts[base64.b64decode(k).decode()] = base64.b64decode(v).decode()
 
     self.pkg_type = parsed_args.pkg_type
     self.topology_binary_file = parsed_args.topology_binary_file

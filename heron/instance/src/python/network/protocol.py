@@ -71,7 +71,7 @@ class HeronProtocol:
     len_typename = HeronProtocol.unpack_int(data[:4])
     data = data[4:]
 
-    typename = data[:len_typename]
+    typename = data[:len_typename].decode()
     data = data[len_typename:]
 
     reqid = REQID.unpack(data[:REQID.REQID_SIZE])
@@ -87,8 +87,8 @@ class HeronProtocol:
 class OutgoingPacket:
   """Wrapper class for outgoing packet"""
   def __init__(self, raw_data):
-    self.raw = str(raw_data)
-    self.to_send = str(raw_data)
+    self.raw = bytes(raw_data)
+    self.to_send = bytes(raw_data)
 
   def __len__(self):
     return len(self.raw)
@@ -101,7 +101,7 @@ class OutgoingPacket:
     :param message: protocol buffer object
     """
     assert message.IsInitialized()
-    packet = ''
+    packet = b''
 
     # calculate the totla size of the packet incl. header
     typename = message.DESCRIPTOR.full_name
@@ -114,7 +114,7 @@ class OutgoingPacket:
 
     # next write the type string
     packet += HeronProtocol.pack_int(len(typename))
-    packet += typename
+    packet += typename.encode()
 
     # reqid
     packet += reqid.pack()
@@ -141,8 +141,8 @@ class IncomingPacket:
   """Helper class for incoming packet"""
   def __init__(self):
     """Initializes IncomingPacket object"""
-    self.header = ''
-    self.data = ''
+    self.header = b''
+    self.data = b''
     self.is_header_read = False
     self.is_complete = False
     # for debugging identification purposes

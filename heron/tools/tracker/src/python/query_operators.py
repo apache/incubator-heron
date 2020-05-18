@@ -54,17 +54,17 @@ class Metrics:
     """ floor timestamp """
     ret = {}
     for timestamp, value in list(timeline.items()):
-      ts = timestamp / 60 * 60
+      ts = timestamp // 60 * 60
       if start <= ts <= end:
         ret[ts] = value
     return ret
 
   def setDefault(self, constant, start, end):
     """ set default time """
-    starttime = start / 60 * 60
+    starttime = start // 60 * 60
     if starttime < start:
       starttime += 60
-    endtime = end / 60 * 60
+    endtime = end // 60 * 60
     while starttime <= endtime:
       # STREAMCOMP-1559
       # Second check is a work around, because the response from tmaster

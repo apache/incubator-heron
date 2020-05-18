@@ -102,7 +102,7 @@ class MockDispatcher:
   """
   PARTIAL_DATA_SIZE = 4
   def __init__(self):
-    self.to_be_received = ""
+    self.to_be_received = b""
     self.eagain_test = False
     self.fatal_error_test = False
 

@@ -73,7 +73,7 @@ class ProtocolTest(unittest.TestCase):
     pkt.read(header_dispatcher)
     self.assertTrue(pkt.is_header_read)
     self.assertFalse(pkt.is_complete)
-    self.assertEqual(pkt.data, "")
+    self.assertEqual(pkt.data, b"")
 
     # an incomplete data packet is prepared
     partial_data_dispatcher = mock_generator.MockDispatcher()

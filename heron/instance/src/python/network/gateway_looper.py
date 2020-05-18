@@ -66,7 +66,7 @@ class GatewayLooper(EventLooper):
       self.poll(timeout=0.0)
 
   def wake_up(self):
-    os.write(self.pipe_w, "\n")
+    os.write(self.pipe_w, b"\n")
     Log.debug("Wake up called")
 
   def on_exit(self):
