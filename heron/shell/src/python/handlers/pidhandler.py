@@ -35,9 +35,5 @@ class PidHandler(tornado.web.RequestHandler):
   def get(self, instance_id):
     ''' get method '''
     self.content_type = 'application/json'
-    self.write(json.dumps(utils.chain([
-        ['ps', 'auxwwww'],
-        ['grep', instance_id],
-        ['grep', 'java'],
-        ['awk', '{print $2}']])).strip())
+    self.write(json.dumps(utils.chain([['cat', "%s.pid" % instance_id]])).strip())
     self.finish()
