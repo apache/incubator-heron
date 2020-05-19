@@ -21,8 +21,11 @@ FROM ubuntu:16.04
 ENV TARGET_PLATFORM ubuntu
 ENV bazelVersion 3.0.0
 
+RUN apt-get update && apt-get install -y software-properties-common
 
-RUN apt-get -y update && apt-get -y install \
+RUN add-apt-repository ppa:openjdk-r/ppa
+
+RUN apt-get update && apt-get -y install \
       automake \
       build-essential \
       cmake \
@@ -32,6 +35,7 @@ RUN apt-get -y update && apt-get -y install \
       libtool-bin \
       libunwind-setjmp0-dev \
       python3-dev \
+      pkg-config \
       libcppunit-dev \
       software-properties-common \
       tree \
@@ -39,8 +43,8 @@ RUN apt-get -y update && apt-get -y install \
       zip \
       wget
 
-RUN add-apt-repository ppa:openjdk-r/ppa && apt-get -y update && \
-    apt-get -y install openjdk-11-jdk-headless
+RUN apt-get update && apt-get -y install \
+      openjdk-11-jdk-headless
 
 ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk-amd64
 
