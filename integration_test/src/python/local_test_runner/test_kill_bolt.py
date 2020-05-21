@@ -21,7 +21,7 @@
 
 """test_kill_bolt.py"""
 import logging
-import test_template
+from . import test_template
 
 NON_TMASTER_SHARD = 1
 HERON_BOLT = 'identity-bolt_3'

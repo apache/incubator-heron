@@ -20,7 +20,7 @@
 
 
 """test_kill_stmgr.py"""
-import test_template
+from . import test_template
 
 class TestKillStmgr(test_template.TestTemplate):
 

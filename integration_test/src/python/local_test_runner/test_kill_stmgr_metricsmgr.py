@@ -20,7 +20,7 @@
 
 
 """test_kill_stmgr_metricsmgr.py"""
-import test_template
+from . import test_template
 
 class TestKillStmgrMetricsMgr(test_template.TestTemplate):
 

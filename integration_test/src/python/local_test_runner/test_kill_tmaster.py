@@ -22,7 +22,7 @@
 """test_kill_tmaster.py"""
 import logging
 import subprocess
-import test_template
+from . import test_template
 
 TMASTER_SHARD = 0
 

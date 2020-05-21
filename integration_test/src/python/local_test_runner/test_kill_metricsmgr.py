@@ -20,7 +20,7 @@
 
 
 """test_kill_metricsmgr.py"""
-import test_template
+from . import test_template
 
 class TestKillMetricsMgr(test_template.TestTemplate):
 
