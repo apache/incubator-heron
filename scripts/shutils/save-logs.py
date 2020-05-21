@@ -58,7 +58,7 @@ def main(file, cmd):
           sys.stdout.write("\r%d seconds %d log lines"%(diff.seconds, count))
           sys.stdout.flush()
           nextPrint = datetime.now() + timedelta(seconds=10)
-       out.write(line)
+       out.write(line.decode())
        line = pout.readline()
    out.close()
    errcode = process.wait()
@@ -72,9 +72,10 @@ def main(file, cmd):
   return errcode
 
 if __name__ == "__main__":
-  if sys.argv < 1:
-      print("Usage: %s [file info]" % sys.argv[0])
-      sys.exit(1)
-  file = sys.argv[1]
-  cmd = sys.argv[2:]
+  try:
+    _, file, *cmd = sys.argv
+  except ValueError:
+    print("Usage: %s [file info]" % sys.argv[0])
+    sys.exit(1)
+
   main(file, cmd)

@@ -77,7 +77,7 @@ echo "Using $PLATFORM platform"
 # build heron
 T="heron build"
 start_timer "$T"
-python ${UTILS}/save-logs.py "heron_build.txt" bazel\
+${UTILS}/save-logs.py "heron_build.txt" bazel\
   --bazelrc=tools/travis/bazel.rc build --config=$PLATFORM heron/... \
   heronpy/... examples/... storm-compatibility-examples/... \
   eco-storm-examples/... eco-heron-examples/... contrib/...
@@ -86,7 +86,7 @@ end_timer "$T"
 # run heron unit tests
 T="heron test non-flaky"
 start_timer "$T"
-python ${UTILS}/save-logs.py "heron_test_non_flaky.txt" bazel\
+${UTILS}/save-logs.py "heron_test_non_flaky.txt" bazel\
   --bazelrc=tools/travis/bazel.rc test\
   --test_summary=detailed --test_output=errors\
   --config=$PLATFORM --test_tag_filters=-flaky heron/... \
@@ -98,7 +98,7 @@ end_timer "$T"
 # which should be fixed. For now, run them serially
 T="heron test flaky"
 start_timer "$T"
-python ${UTILS}/save-logs.py "heron_test_flaky.txt" bazel\
+${UTILS}/save-logs.py "heron_test_flaky.txt" bazel\
   --bazelrc=tools/travis/bazel.rc test\
   --test_summary=detailed --test_output=errors\
   --config=$PLATFORM --test_tag_filters=flaky --jobs=1 heron/... \
@@ -109,21 +109,21 @@ end_timer "$T"
 # build packages
 T="heron build tarpkgs"
 start_timer "$T"
-python ${UTILS}/save-logs.py "heron_build_tarpkgs.txt" bazel\
+${UTILS}/save-logs.py "heron_build_tarpkgs.txt" bazel\
   --bazelrc=tools/travis/bazel.rc build\
   --config=$PLATFORM scripts/packages:tarpkgs
 end_timer "$T"
 
 T="heron build binpkgs"
 start_timer "$T"
-python ${UTILS}/save-logs.py "heron_build_binpkgs.txt" bazel\
+${UTILS}/save-logs.py "heron_build_binpkgs.txt" bazel\
   --bazelrc=tools/travis/bazel.rc build\
   --config=$PLATFORM scripts/packages:binpkgs
 end_timer "$T"
 
 T="heron build docker images"
 start_timer "$T"
-python ${UTILS}/save-logs.py "heron_build_binpkgs.txt" bazel\
+${UTILS}/save-logs.py "heron_build_binpkgs.txt" bazel\
   --bazelrc=tools/travis/bazel.rc build\
   --config=$PLATFORM scripts/images:heron.tar
 end_timer "$T"
