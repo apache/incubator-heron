@@ -423,6 +423,7 @@ def stop_cluster(cl_args):
     Log.debug(cmd)
     pid = subprocess.Popen(cmd,
                            shell=True,
+                           text=True,
                            stdout=subprocess.PIPE,
                            stderr=subprocess.PIPE)
 
@@ -437,6 +438,7 @@ def stop_cluster(cl_args):
     Log.debug(cmd)
     pid = subprocess.Popen(cmd,
                            shell=True,
+                           text=True,
                            stdout=subprocess.PIPE,
                            stderr=subprocess.PIPE)
 
@@ -495,6 +497,7 @@ def start_api_server(masters, cl_args):
   Log.debug(cmd)
   pid = subprocess.Popen(cmd,
                          shell=True,
+                         text=True,
                          stdout=subprocess.PIPE,
                          stderr=subprocess.PIPE)
 
@@ -524,6 +527,7 @@ def start_heron_tools(masters, cl_args):
   Log.debug(cmd)
   pid = subprocess.Popen(cmd,
                          shell=True,
+                         text=True,
                          stdout=subprocess.PIPE,
                          stderr=subprocess.PIPE)
 
@@ -611,6 +615,7 @@ def scp_package(package_file, destinations, cl_args):
     Log.debug(cmd)
     pid = subprocess.Popen(cmd,
                            shell=True,
+                           text=True,
                            stdout=subprocess.PIPE,
                            stderr=subprocess.PIPE)
     pids.append({"pid": pid, "dest": dest})
@@ -652,6 +657,7 @@ def start_master_nodes(masters, cl_args):
     Log.debug(cmd)
     pid = subprocess.Popen(cmd,
                            shell=True,
+                           text=True,
                            stdout=subprocess.PIPE,
                            stderr=subprocess.PIPE)
     pids.append({"pid": pid, "dest": master})
@@ -686,6 +692,7 @@ def start_slave_nodes(slaves, cl_args):
     Log.debug(cmd)
     pid = subprocess.Popen(cmd,
                            shell=True,
+                           text=True,
                            stdout=subprocess.PIPE,
                            stderr=subprocess.PIPE)
     pids.append({"pid": pid, "dest": slave})

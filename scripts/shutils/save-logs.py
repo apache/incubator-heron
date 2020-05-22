@@ -21,6 +21,7 @@ import mmap
 import os
 import subprocess
 import sys
+import shlex
 from datetime import datetime, timedelta
 
 
@@ -35,12 +36,15 @@ def tail(filename, n):
              n -= 1
              if n == -1:
                 break
-      return fm[i + 1 if i else 0:].splitlines()
+      return fm[i + 1 if i else 0:].decode().splitlines()
    finally:
         fm.close()
 
+def shell_cmd(cmd):
+    return " ".join(shlex.quote(c) for c in cmd)
+
 def main(file, cmd):
-  print("%s writing to: %s" % (cmd, file))
+  print("%s > %s" % (shell_cmd(cmd),file))
   with open(file, "w") as out:
    count = 0
    process = subprocess.Popen(cmd,
@@ -64,7 +68,7 @@ def main(file, cmd):
    errcode = process.wait()
    diff = datetime.now() - start
    sys.stdout.write("\r%d seconds %d log lines"%(diff.seconds, count))
-  print("\n %s finished with errcode: %d" % (cmd, errcode))
+  print("\n `%s` finished with errcode: %d" % (shell_cmd(cmd), errcode))
   if errcode != 0:
      lines = tail(file, 1000)
      print('\n'.join(lines))

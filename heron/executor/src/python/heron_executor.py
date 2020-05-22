@@ -697,7 +697,7 @@ class HeronExecutor:
     if not self.jvm_version:
       cmd = [os.path.join(self.heron_java_home, 'bin/java'),
              '-cp', self.instance_classpath, 'org.apache.heron.instance.util.JvmVersion']
-      process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+      process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
       (process_stdout, process_stderr) = process.communicate()
       if process.returncode != 0:
         Log.error("Failed to determine JVM version. Exiting. Output of %s: %s",
@@ -911,7 +911,7 @@ class HeronExecutor:
       # stderr is redirected to stdout so that it can more easily be logged. stderr has a max buffer
       # size and can cause the child process to deadlock if it fills up
       process = subprocess.Popen(cmd.cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-                                 env=cmd.env, bufsize=1)
+                                 env=cmd.env, text=True, bufsize=1)
       proc.async_stream_process_stdout(process, stdout_log_fn(name))
     except Exception:
       Log.info("Exception running command %s", cmd)
@@ -925,7 +925,7 @@ class HeronExecutor:
       # stderr is redirected to stdout so that it can more easily be logged. stderr has a max buffer
       # size and can cause the child process to deadlock if it fills up
       process = subprocess.Popen(cmd.cmd, shell=is_shell, stdout=subprocess.PIPE,
-                                 stderr=subprocess.STDOUT, env=cmd.env)
+                                 stderr=subprocess.STDOUT, text=True, env=cmd.env)
 
       # wait for termination
       self._wait_process_std_out_err(cmd.cmd, process)

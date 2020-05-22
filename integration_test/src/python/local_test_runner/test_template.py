@@ -92,9 +92,9 @@ class TestTemplate:
       return result
 
     except status.TestFailure as e:
-      raise e
+      raise
     except Exception as e:
-      raise status.TestFailure("Exception thrown during test", e)
+      raise status.TestFailure("Exception thrown during test", e) from e
     finally:
       if topology_submitted:
         self.cleanup_test()
@@ -329,7 +329,7 @@ def _get_processes():
   """
   # pylint: disable=fixme
   # TODO: if the submit fails before we get here (e.g., Topology already exists), this hangs
-  processes = subprocess.check_output(['ps', '-o', 'pid,args'])
+  processes = subprocess.check_output(['ps', '-o', 'pid,args'], text=True)
   processes = processes.split('\n')
   processes = processes[1:] # remove first line, which is name of columns
   process_list = []

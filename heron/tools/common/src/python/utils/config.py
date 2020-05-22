@@ -25,9 +25,11 @@ import contextlib
 import getpass
 import os
 import sys
+import shutil
 import subprocess
 import tarfile
 import tempfile
+from pathlib import Path
 import yaml
 
 from heron.common.src.python.utils.log import Log
@@ -112,7 +114,7 @@ def cygpath(x):
   normalized class path on cygwin
   '''
   command = ['cygpath', '-wp', x]
-  p = subprocess.Popen(command, stdout=subprocess.PIPE)
+  p = subprocess.Popen(command, stdout=subprocess.PIPE, text=True)
   result = p.communicate()
   output = result[0]
   lines = output.split("\n")
@@ -141,6 +143,9 @@ def get_classpath(jars):
   '''
   return ':'.join(map(normalized_class_path, jars))
 
+def _get_heron_dir():
+  # assuming the tool runs from $HERON_ROOT/bin/<binary>
+  return normalized_class_path(str(Path(sys.argv[0]).resolve(strict=True).parent.parent))
 
 def get_heron_dir():
   """
@@ -155,9 +160,7 @@ def get_heron_dir():
 
   :return: root location of the .pex file
   """
-  go_above_dirs = 9
-  path = "/".join(os.path.realpath(__file__).split('/')[:-go_above_dirs])
-  return normalized_class_path(path)
+  return _get_heron_dir()
 
 def get_zipped_heron_dir():
   """
@@ -174,9 +177,7 @@ def get_zipped_heron_dir():
 
   :return: root location of the .pex file.
   """
-  go_above_dirs = 7
-  path = "/".join(os.path.realpath(__file__).split('/')[:-go_above_dirs])
-  return normalized_class_path(path)
+  return _get_heron_dir()
 
 ################################################################################
 # Get the root of heron dir and various sub directories depending on platform
@@ -432,8 +433,8 @@ def get_java_path():
   java_home = os.environ.get("JAVA_HOME")
   if java_home:
     return os.path.join(java_home, BIN_DIR, "java")
-  # this could use shutil.which("java") when python2 support is dropped
-  return None
+
+  return shutil.which("java")
 
 
 def check_release_file_exists():

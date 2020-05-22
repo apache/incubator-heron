@@ -19,7 +19,6 @@
 # Script to kick off the travis CI build. We want the build to fail-fast if any
 # of the below commands fail so we need to chain them in this script.
 #
-
 set -e
 
 DIR=`dirname $0`

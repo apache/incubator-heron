@@ -27,7 +27,9 @@ import os
 import string
 import sys
 import subprocess
+from pathlib import Path
 import yaml
+
 
 # directories for heron tools distribution
 BIN_DIR = "bin"
@@ -116,7 +118,7 @@ def cygpath(x):
   :return: the path in windows
   """
   command = ['cygpath', '-wp', x]
-  p = subprocess.Popen(command, stdout=subprocess.PIPE)
+  p = subprocess.Popen(command, stdout=subprocess.PIPE, text=True)
   output, _ = p.communicate()
   lines = output.split("\n")
   return lines[0]
@@ -138,8 +140,9 @@ def get_heron_tracker_dir():
   This will extract heron tracker directory from .pex file.
   :return: root location for heron-tools.
   """
-  path = "/".join(os.path.realpath(__file__).split('/')[:-8])
-  return normalized_class_path(path)
+  # assuming the tracker runs from $HERON_ROOT/bin/heron-tracker
+  root = Path(sys.argv[0]).resolve(strict=True).parent.parent
+  return normalized_class_path(str(root))
 
 def get_heron_tracker_bin_dir():
   """

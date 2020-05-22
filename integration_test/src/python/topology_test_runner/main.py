@@ -240,7 +240,7 @@ class FileBasedExpectedResultsHandler:
         raise status.TestFailure("Expected results file %s does not exist" % self.file_path)
       else:
         with open(self.file_path, "r") as expected_result_file:
-          return expected_result_file.read().rstrip()
+          return expected_result_file.read().decode().rstrip()
     except Exception as e:
       raise status.TestFailure("Failed to read expected result file %s" % self.file_path, e)
 
@@ -316,10 +316,10 @@ class HttpBasedActualResultsHandler:
       logging.info("Fetching %s for topology %s, retry count: %d", data_name, topology_name, i)
       response = self.get_http_response(server_host_port, path)
       if response.status == 200:
-        return response.read()
+        return response.read().decode()
       elif i != RETRY_ATTEMPTS:
         logging.info("Fetching %s failed with status: %s; reason: %s; body: %s",
-          data_name, response.status, response.reason, response.read())
+          data_name, response.status, response.reason, response.read().decode())
         time.sleep(RETRY_INTERVAL)
 
     raise status.TestFailure("Failed to fetch %s after %d attempts" % (data_name, RETRY_ATTEMPTS))

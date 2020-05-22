@@ -86,7 +86,7 @@ class StringBuilder:
     self.end = False
     self.strs = []
 
-  def add(self, line):
+  def add(self, line: bytes):
     if not line:
       self.end = True
     else:

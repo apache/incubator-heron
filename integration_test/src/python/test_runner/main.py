@@ -425,7 +425,7 @@ def main():
   log.configure(level=logging.DEBUG)
   conf_file = DEFAULT_TEST_CONF_FILE
   # Read the configuration file from package
-  conf_string = pkgutil.get_data(__name__, conf_file)
+  conf_string = pkgutil.get_data(__name__, conf_file).decode()
   decoder = json.JSONDecoder(strict=False)
   # Convert the conf file to a json format
   conf = decoder.decode(conf_string)

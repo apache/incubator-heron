@@ -82,7 +82,7 @@ def run_tests(test_classes, args):
         failures += [testname]
 
   except Exception as e:
-    logging.error("Exception thrown while running tests: %s", str(e))
+    logging.error("Exception thrown while running tests: %s", str(e), exc_info=True)
   finally:
     tracker_process.kill()
 
