@@ -29,8 +29,8 @@ File.open('.vagrant/hosts', 'w') do |file|
 end
 
 Vagrant.configure(2) do |config|
-  config.vm.box = "ubuntu/focal64"
-  # config.vm.box = "bento/ubuntu-20.04"
+  # config.vm.box = "ubuntu/focal64"
+  config.vm.box = "bento/ubuntu-20.04"
   config.vm.synced_folder "../", "/vagrant"
   config.vm.boot_timeout = 600
 
@@ -43,7 +43,7 @@ Vagrant.configure(2) do |config|
       if host =~ /darwin/
         cpus = `sysctl -n hw.ncpu`.to_i
         # sysctl returns Bytes and we need to convert to MB
-        mem = `sysctl -n hw.memsize`.to_i / 1024^2 * mem_ratio
+        mem = `sysctl -n hw.memsize`.to_f / 1024**2 * mem_ratio
       elsif host =~ /linux/
         cpus = `nproc`.to_i
         # meminfo shows KB and we need to convert to MB
