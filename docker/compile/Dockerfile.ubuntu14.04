@@ -34,12 +34,15 @@ RUN apt-get update && apt-get -y install \
       git \
       libtool \
       python3-dev \
+      pkg-config \
       libcppunit-dev \
       zip \
       unzip \
       wget \
       cmake \
-      tree \
+      tree
+
+RUN apt-get update && apt-get -y install \
       openjdk-11-jdk-headless
 
 ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk-amd64
