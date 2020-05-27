@@ -46,7 +46,7 @@ class FileBasedExpectedResultsHandler:
   def __init__(self, file_path):
     self.file_path = file_path
 
-  def fetch_results(self):
+  def fetch_results(self) -> str:
     # Read expected result from the expected result file
     try:
       if not os.path.exists(self.file_path):
@@ -64,7 +64,7 @@ class HttpBasedExpectedResultsHandler:
     self.task_count = task_count
 
   # pylint: disable=unnecessary-lambda
-  def fetch_results(self):
+  def fetch_results(self) -> str:
     try:
       result = []
       decoder = json.JSONDecoder(strict=False)
@@ -92,7 +92,7 @@ class HttpBasedActualResultsHandler:
     self.server_host_port = server_host_port
     self.topology_name = topology_name
 
-  def fetch_results(self):
+  def fetch_results(self) -> str:
     try:
       return fetch_from_server(self.server_host_port, self.topology_name,
                                'results', '/results/%s' % self.topology_name)
@@ -221,13 +221,13 @@ def update_state_server(http_server_host_port, topology_name, key, value):
   response = connection.getresponse()
   return response.status == 200
 
-def fetch_from_server(server_host_port, topology_name, data_name, path):
+def fetch_from_server(server_host_port, topology_name, data_name, path) -> str:
   ''' Make a http get request to fetch actual results from http server '''
   for i in range(0, RETRY_ATTEMPTS):
     logging.info("Fetching %s for topology %s, retry count: %d", data_name, topology_name, i)
     response = get_http_response(server_host_port, path)
     if response.status == 200:
-      return response.read()
+      return response.read().decode()
     elif i != RETRY_ATTEMPTS:
       logging.info("Fetching %s failed with status: %s; reason: %s; body: %s",
                    data_name, response.status, response.reason, response.read())

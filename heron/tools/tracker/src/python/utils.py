@@ -118,7 +118,7 @@ def cygpath(x):
   :return: the path in windows
   """
   command = ['cygpath', '-wp', x]
-  p = subprocess.Popen(command, stdout=subprocess.PIPE, text=True)
+  p = subprocess.Popen(command, stdout=subprocess.PIPE, universal_newlines=True)
   output, _ = p.communicate()
   lines = output.split("\n")
   return lines[0]

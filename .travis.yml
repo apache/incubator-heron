@@ -16,9 +16,9 @@ addons:
     packages:
       - libtool-bin
       - libcppunit-dev
-      - python3.7
+      - python3
       - pkg-config
-      - python-dev
+      - python3-dev
       - python3-wheel
       - wget
       - zip
@@ -37,11 +37,9 @@ before_install:
 
 install:
   - sudo apt-get install python3-pip python3-setuptools
-  - pip3 install travis-wait-improved virtualenv
+  - pip3 install travis-wait-improved
 
 script:
-  - python3 -m virtualenv --python=python3.7 /tmp/venv
-  - source /tmp/venv/bin/activate
   - which gcc
   - gcc --version
   - which g++

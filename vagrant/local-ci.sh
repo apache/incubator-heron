@@ -27,5 +27,5 @@ fi
 script="${1-ci}"
 env="PLATFORM=Ubuntu JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64/"
 # run the CI, if it fails drop into a shell
-vagrant ssh --command "cd /vagrant && $env ./scripts/travis/$script.sh" \
-    || vagrant ssh --command "cd /vagrant && $env exec bash"
+vagrant ssh master --command "cd /vagrant && $env ./scripts/travis/$script.sh" \
+    || vagrant ssh master --command "cd /vagrant && $env exec bash"

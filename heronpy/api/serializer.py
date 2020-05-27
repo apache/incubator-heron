@@ -35,7 +35,7 @@ class IHeronSerializer:
     """Initializes the serializer"""
 
   @abstractmethod
-  def serialize(self, obj):
+  def serialize(self, obj) -> bytes:
     """Serialize an object
 
     :param obj: The object to be serialized
@@ -43,7 +43,7 @@ class IHeronSerializer:
     """
 
   @abstractmethod
-  def deserialize(self, input_str):
+  def deserialize(self, input_str: bytes):
     """Deserialize an object
 
     :param input_str: Serialized object as byte string
@@ -55,10 +55,10 @@ class PythonSerializer(IHeronSerializer):
   def initialize(self, config=None):
     pass
 
-  def serialize(self, obj):
+  def serialize(self, obj) -> bytes:
     return cloudpickle.dumps(obj)
 
-  def deserialize(self, input_str):
+  def deserialize(self, input_str: bytes):
     return pickle.loads(input_str)
 
 default_serializer = PythonSerializer()

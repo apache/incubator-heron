@@ -215,7 +215,7 @@ class TestTemplate:
     try:
       with open(process_pid_file, 'r') as f:
         pid = f.readline()
-        return pid
+        return int(pid)
     except Exception:
       logging.error("Unable to open file %s", process_pid_file)
       return -1
@@ -230,7 +230,7 @@ class TestTemplate:
     logging.info("Killing process number %s", process_number)
 
     try:
-      os.kill(int(process_number), signal.SIGTERM)
+      os.kill(process_number, signal.SIGTERM)
     except OSError as ex:
       if "No such process" in str(ex): # killing a non-existing process condsidered as success
         logging.info(str(ex))
@@ -329,7 +329,7 @@ def _get_processes():
   """
   # pylint: disable=fixme
   # TODO: if the submit fails before we get here (e.g., Topology already exists), this hangs
-  processes = subprocess.check_output(['ps', '-o', 'pid,args'], text=True)
+  processes = subprocess.check_output(['ps', '-o', 'pid,args'], universal_newlines=True)
   processes = processes.split('\n')
   processes = processes[1:] # remove first line, which is name of columns
   process_list = []

@@ -231,7 +231,7 @@ class FileBasedExpectedResultsHandler:
   def __init__(self, file_path):
     self.file_path = file_path
 
-  def fetch_results(self):
+  def fetch_results(self) -> str:
     """
     Read expected result from the expected result file
     """
@@ -240,7 +240,7 @@ class FileBasedExpectedResultsHandler:
         raise status.TestFailure("Expected results file %s does not exist" % self.file_path)
       else:
         with open(self.file_path, "r") as expected_result_file:
-          return expected_result_file.read().decode().rstrip()
+          return expected_result_file.read().rstrip()
     except Exception as e:
       raise status.TestFailure("Failed to read expected result file %s" % self.file_path, e)
 
@@ -303,14 +303,14 @@ class HttpBasedActualResultsHandler:
     self.server_host_port = server_host_port
     self.topology_name = topology_name
 
-  def fetch_results(self):
+  def fetch_results(self) -> str:
     try:
       return self.fetch_from_server(self.server_host_port, self.topology_name,
         'instance_state', '/stateResults/%s' % self.topology_name)
     except Exception as e:
       raise status.TestFailure("Fetching instance state failed for %s topology" % self.topology_name, e)
 
-  def fetch_from_server(self, server_host_port, topology_name, data_name, path):
+  def fetch_from_server(self, server_host_port, topology_name, data_name, path) -> str:
     ''' Make a http get request to fetch actual results from http server '''
     for i in range(0, RETRY_ATTEMPTS):
       logging.info("Fetching %s for topology %s, retry count: %d", data_name, topology_name, i)
@@ -632,7 +632,7 @@ def main():
   log.configure(level=logging.DEBUG)
   conf_file = DEFAULT_TEST_CONF_FILE
   # Read the configuration file from package
-  conf_string = pkgutil.get_data(__name__, conf_file)
+  conf_string = pkgutil.get_data(__name__, conf_file).decode()
   decoder = json.JSONDecoder(strict=False)
   # Convert the conf file to a json format
   conf = decoder.decode(conf_string)

@@ -170,7 +170,7 @@ def str_cmd(cmd, cwd, env):
   """
   process = subprocess.Popen(cmd, stdout=subprocess.PIPE,
                              stderr=subprocess.PIPE, cwd=cwd,
-                             env=env, text=True)
+                             env=env, universal_newlines=True)
   stdout_builder, stderr_builder = proc.async_stdout_stderr_builder(process)
   process.wait()
   stdout, stderr = stdout_builder.result(), stderr_builder.result()
@@ -197,7 +197,7 @@ def get_container_id(instance_id):
 
 def get_asset(asset_name):
   ''' get assset '''
-  return pkgutil.get_data("heron.shell", os.path.join("assets", asset_name))
+  return pkgutil.get_data("heron.shell", os.path.join("assets", asset_name)).decode()
 
 def check_path(path):
   """

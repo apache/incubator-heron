@@ -124,6 +124,6 @@ def import_and_get_class(path_to_pex, python_class_name):
     except:
       Log.error("Could not resolve class %s with special handling" % python_class_name)
 
-  mod = __import__(from_path, fromlist=[import_name], level=-1)
+  mod = __import__(from_path, fromlist=[import_name], level=0)
   Log.debug("Imported module: %s" % str(mod))
   return getattr(mod, import_name)

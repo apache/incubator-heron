@@ -101,9 +101,9 @@ class FileStateManager(StateManager):
       """
       for topology, callbacks in list(watchers.items()):
         file_path = os.path.join(path, topology)
-        data = ""
+        data = b""
         if os.path.exists(file_path):
-          with open(os.path.join(path, topology)) as f:
+          with open(os.path.join(path, topology), "rb") as f:
             data = f.read()
         if topology not in directory or data != directory[topology]:
           proto_object = ProtoClass()
@@ -175,7 +175,7 @@ class FileStateManager(StateManager):
       self.topology_watchers[topologyName].append(callback)
     else:
       topology_path = self.get_topology_path(topologyName)
-      with open(topology_path) as f:
+      with open(topology_path, "rb") as f:
         data = f.read()
         topology = Topology()
         topology.ParseFromString(data)
@@ -198,7 +198,7 @@ class FileStateManager(StateManager):
       self.packing_plan_watchers[topologyName].append(callback)
     else:
       packing_plan_path = self.get_packing_plan_path(topologyName)
-      with open(packing_plan_path) as f:
+      with open(packing_plan_path, "rb") as f:
         data = f.read()
         packing_plan = PackingPlan()
         packing_plan.ParseFromString(data)
@@ -211,7 +211,7 @@ class FileStateManager(StateManager):
       self.pplan_watchers[topologyName].append(callback)
     else:
       pplan_path = self.get_pplan_path(topologyName)
-      with open(pplan_path) as f:
+      with open(pplan_path, "rb") as f:
         data = f.read()
         pplan = PhysicalPlan()
         pplan.ParseFromString(data)
@@ -236,7 +236,7 @@ class FileStateManager(StateManager):
       self.execution_state_watchers[topologyName].append(callback)
     else:
       execution_state_path = self.get_execution_state_path(topologyName)
-      with open(execution_state_path) as f:
+      with open(execution_state_path, "rb") as f:
         data = f.read()
         executionState = ExecutionState()
         executionState.ParseFromString(data)
@@ -261,7 +261,7 @@ class FileStateManager(StateManager):
       self.tmaster_watchers[topologyName].append(callback)
     else:
       tmaster_path = self.get_tmaster_path(topologyName)
-      with open(tmaster_path) as f:
+      with open(tmaster_path, "rb") as f:
         data = f.read()
         tmaster = TMasterLocation()
         tmaster.ParseFromString(data)
@@ -276,7 +276,7 @@ class FileStateManager(StateManager):
       self.scheduler_location_watchers[topologyName].append(callback)
     else:
       scheduler_location_path = self.get_scheduler_location_path(topologyName)
-      with open(scheduler_location_path) as f:
+      with open(scheduler_location_path, "rb") as f:
         data = f.read()
         scheduler_location = SchedulerLocation()
         scheduler_location.ParseFromString(data)

@@ -114,7 +114,7 @@ def cygpath(x):
   normalized class path on cygwin
   '''
   command = ['cygpath', '-wp', x]
-  p = subprocess.Popen(command, stdout=subprocess.PIPE, text=True)
+  p = subprocess.Popen(command, stdout=subprocess.PIPE, universal_newlines=True)
   result = p.communicate()
   output = result[0]
   lines = output.split("\n")
