@@ -110,7 +110,8 @@ const siteConfig = {
   // Add custom scripts here that would be placed in <script> tags.
   scripts: [
     'https://buttons.github.io/buttons.js',
-    `${baseUrl}js/custom.js`
+    `${baseUrl}js/custom.js`,
+    `${baseUrl}js/fix-location.js`
   ],
 
   // On page navigation for the current documentation page.
