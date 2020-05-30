@@ -19,7 +19,7 @@ cd "$HERE"
 
 state="$(vagrant status master --machine-readable | grep master,state, | cut -d, -f4)"
 if [ "$state" != "running" ]; then
-    vagrant resume master
+    vagrant up master
 fi
 
 
