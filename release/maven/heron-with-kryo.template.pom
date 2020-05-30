@@ -24,7 +24,7 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/ma
   <packaging>jar</packaging>
   <name>NAME</name>
   <description>DESCRIPTION</description>
-  <url>http://www.heronstreaming.io</url>
+  <url>https://heron.incubator.apache.org</url>
   <licenses>
     <license>
       <name>The Apache License, Version 2.0</name>

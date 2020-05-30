@@ -54,8 +54,8 @@ class SubcommandHelpFormatter(argparse.RawDescriptionHelpFormatter):
 def create_parser():
   """ create parser """
   help_epilog = '''Getting more help:
-  heron-explorer help <command>     Disply help and options for <command>\n
-  For detailed documentation, go to http://heronstreaming.io'''
+  heron-explorer help <command>     Display help and options for <command>\n
+  For detailed documentation, go to https://heron.incubator.apache.org'''
 
   parser = argparse.ArgumentParser(
       prog='heron-explorer',
