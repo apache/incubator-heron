@@ -32,6 +32,7 @@ RUN apt-get update && apt-get -y install \
       libcppunit-dev \
       patch \
       python3-dev \
+      python \
       pkg-config \
       wget \
       zip \

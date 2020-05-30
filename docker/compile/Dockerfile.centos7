@@ -35,6 +35,7 @@ RUN yum -y install \
       libtool \
       make \
       patch \
+      python \
       python3-devel \
       zip \
       unzip \

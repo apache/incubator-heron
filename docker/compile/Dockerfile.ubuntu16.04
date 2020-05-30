@@ -34,6 +34,7 @@ RUN apt-get update && apt-get -y install \
       libssl-dev \
       libtool-bin \
       libunwind-setjmp0-dev \
+      python \
       python3-dev \
       pkg-config \
       libcppunit-dev \

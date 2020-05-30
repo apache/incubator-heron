@@ -1,5 +1,4 @@
-# load("@bazel_tools//tools/build_defs/pkg:pkg.bzl", "pkg_deb", "pkg_tar")
-load("@bazel_tools//tools/build_defs/pkg:pkg.bzl", "pkg_tar")
+load("@rules_pkg//:pkg.bzl", "pkg_tar")
 load("//scripts/packages:self_extract_binary.bzl", "self_extract_binary")
 
 package(default_visibility = ["//visibility:public"])
