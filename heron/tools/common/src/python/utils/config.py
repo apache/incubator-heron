@@ -46,7 +46,6 @@ ETC_DIR = "etc"
 LIB_DIR = "lib"
 CLI_DIR = ".heron"
 RELEASE_YAML = "release.yaml"
-ZIPPED_RELEASE_YAML = "scripts/packages/release.yaml"
 OVERRIDE_YAML = "override.yaml"
 
 # mode of deployment
@@ -215,17 +214,6 @@ def get_heron_release_file():
   :return: absolute path of heron release.yaml file in CLI
   """
   return os.path.join(get_heron_dir(), RELEASE_YAML)
-
-
-def get_zipped_heron_release_file():
-  """
-  This will provide the path to heron release.yaml file.
-  To be used for .pex file built with `zip_safe = False` flag.
-  For example, `heron-ui'.
-
-  :return: absolute path of heron release.yaml file
-  """
-  return os.path.join(get_zipped_heron_dir(), ZIPPED_RELEASE_YAML)
 
 
 def get_heron_cluster_conf_dir(cluster, default_config_path):
@@ -448,15 +436,9 @@ def check_release_file_exists():
 
   return True
 
-def print_build_info(zipped_pex=False):
-  """Print build_info from release.yaml
-
-  :param zipped_pex: True if the PEX file is built with flag `zip_safe=False'.
-  """
-  if zipped_pex:
-    release_file = get_zipped_heron_release_file()
-  else:
-    release_file = get_heron_release_file()
+def print_build_info():
+  """Print build_info from release.yaml"""
+  release_file = get_heron_release_file()
 
   with open(release_file) as release_info:
     release_map = yaml.load(release_info)
@@ -464,15 +446,9 @@ def print_build_info(zipped_pex=False):
     for key, value in release_items:
       print("%s : %s" % (key, value))
 
-def get_version_number(zipped_pex=False):
-  """Print version from release.yaml
-
-  :param zipped_pex: True if the PEX file is built with flag `zip_safe=False'.
-  """
-  if zipped_pex:
-    release_file = get_zipped_heron_release_file()
-  else:
-    release_file = get_heron_release_file()
+def get_version_number():
+  """Print version from release.yaml"""
+  release_file = get_heron_release_file()
   with open(release_file) as release_info:
     for line in release_info:
       trunks = line[:-1].split(' ')

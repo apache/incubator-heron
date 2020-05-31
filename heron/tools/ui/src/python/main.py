@@ -163,7 +163,7 @@ def main():
     r = child_parser.parse_args(args=remaining, namespace=parsed_args)
     namespace = vars(r)
     if 'version' in namespace:
-      common_config.print_build_info(zipped_pex=True)
+      common_config.print_build_info()
     else:
       parser.print_help()
     parser.exit()

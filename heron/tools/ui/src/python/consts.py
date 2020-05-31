@@ -32,4 +32,4 @@ DEFAULT_TRACKER_URL = "http://127.0.0.1:8888"
 
 DEFAULT_BASE_URL = ""
 
-VERSION = common_config.get_version_number(zipped_pex=True)
+VERSION = common_config.get_version_number()
