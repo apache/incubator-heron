@@ -42,7 +42,7 @@ fi
   `bazel query 'kind("java_test", "heron/...")'` \
   `bazel query 'kind("java_library", "integration_test/...")'`)
 
-HERON_SRC_FILES=`find $HERON_ROOT_DIR -path "*/org/apache/*" -name "*.java"`
+HERON_SRC_FILES=`find $HERON_ROOT_DIR -path "*/org/apache/*" -name "*.java" -not -path "$HERON_ROOT_DIR/tools/*"`
 BACKTYPE_SRC_FILES=`find $HERON_ROOT_DIR -path "*/backtype/storm/*" -name "*.java"`
 APACHE_SRC_FILES=`find $HERON_ROOT_DIR -path "*/org/apache/storm/*" -name "*.java"`
 GEN_FILES=`find $GEN_PROTO_DIR -name "*.java"`
@@ -55,8 +55,9 @@ GEN_JARS=`find $HERON_ROOT_DIR/bazel-bin/external/. -name "*\.jar" | tr '\n' ':'
 SCRIBE_JARS=`find $HERON_ROOT_DIR/bazel-bin/. -name "libthrift_scribe_java.jar" | tr '\n' ':'`
 PROTO_JARS=`find $HERON_ROOT_DIR/bazel-bin/heron/proto/. -name "*\.jar" | tr '\n' ':'`
 CLOSURE_CLASSES="$HERON_ROOT_DIR/bazel-bin/storm-compatibility/src/java/_javac/storm-compatibility-java/libstorm-compatibility-java_classes/."
+CONTRIB_JARS=`find $HERON_ROOT_DIR/bazel-bin/contrib/. -name "*\.jar" | tr '\n' ':'`
 
-export CLASSPATH=$BIN_JARS:$GEN_JARS:$SCRIBE_JARS:$PROTO_JARS:$CLOSURE_CLASSES
+export CLASSPATH=$BIN_JARS:$GEN_JARS:$SCRIBE_JARS:$PROTO_JARS:$CLOSURE_CLASSES:$CONTRIB_JARS
 
 $JAVADOC $FLAGS \
   -encoding "UTF-8" \
