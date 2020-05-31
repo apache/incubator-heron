@@ -43,7 +43,7 @@ Heron is now installed!
 
 Make sure you have "/Users/$USER/bin" in your path.
 
-See http://heronstreaming.io/docs/getting-started.html on how to use Heron!
+See https://heron.incubator.apache.org/docs/getting-started-local-single-node/ on how to use Heron!
 
 ....
 ```

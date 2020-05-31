@@ -51,7 +51,7 @@ Log = log.Log
 HELP_EPILOG = '''Getting more help:
   heron help <command> Prints help and options for <command>
 
-For detailed documentation, go to http://heronstreaming.io'''
+For detailed documentation, go to https://heron.incubator.apache.org'''
 
 
 # pylint: disable=protected-access,superfluous-parens
