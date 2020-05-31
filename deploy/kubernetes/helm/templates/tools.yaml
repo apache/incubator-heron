@@ -17,6 +17,7 @@
 
 {{- $platform := .Values.platform -}}
 {{- $jobReplicas := .Values.jobReplicas -}}
+{{- $defaultUrl := (printf "/api/v1/namespaces/%s/services/%s-ui:8889/proxy" .Release.Namespace .Release.Name) -}}
 {{- $apiServerMemory := .Values.apiServerMemory }}
 
 apiVersion: v1
@@ -115,7 +116,7 @@ spec:
             - >-
               heron-ui
               --port=8889
-              --base_url={{ .Values.heron.url }}
+              --base_url={{ $defaultUrl }}
         - name: heron-apiserver
           image: {{ .Values.image }}
           imagePullPolicy: {{ .Values.imagePullPolicy }}
