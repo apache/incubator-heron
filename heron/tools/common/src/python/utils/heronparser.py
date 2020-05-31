@@ -44,7 +44,7 @@ expressions = [re.compile(x) for x in filters]
 help_epilog = '''Getting more help:
   heron help <command> Prints help and options for <command>
 
-For detailed documentation, go to http://heronstreaming.io'''
+For detailed documentation, go to https://heron.incubator.apache.org'''
 
 class HeronArgumentParser(argparse.ArgumentParser):
   """
