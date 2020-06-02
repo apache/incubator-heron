@@ -116,7 +116,7 @@ spec:
             - >-
               heron-ui
               --port=8889
-              --base_url={{ $defaultUrl }}
+              --base_url={{ .Values.heron.url | default $defaultUrl }}
         - name: heron-apiserver
           image: {{ .Values.image }}
           imagePullPolicy: {{ .Values.imagePullPolicy }}
