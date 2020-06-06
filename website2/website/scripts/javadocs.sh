@@ -45,7 +45,7 @@ fi
 
 
 
-HERON_SRC_FILES=`find $HERON_ROOT_DIR -path "*/org/apache/*" -name "*.java" -not -path "$HERON_ROOT_DIR/tools/*"`
+HERON_SRC_FILES=`find $HERON_ROOT_DIR -path "*/org/apache/*" -name "*.java" -not -path "$HERON_ROOT_DIR/tools/*" -not -path "$HERON_ROOT_DIR/examples/*"`
 BACKTYPE_SRC_FILES=`find $HERON_ROOT_DIR -path "*/backtype/storm/*" -name "*.java"`
 APACHE_SRC_FILES=`find $HERON_ROOT_DIR -path "*/org/apache/storm/*" -name "*.java"`
 GEN_FILES=`find $GEN_PROTO_DIR -name "*.java"`
