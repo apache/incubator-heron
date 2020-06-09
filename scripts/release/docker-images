@@ -66,7 +66,8 @@ def build_dockerfile(
     log_run([str(BUILD_IMAGE), dist, tag, scratch], log)
     tar = Path(scratch) / f"heron-docker-{tag}-{dist}.tar.gz"
     tar_out = out_dir / tar.name
-    tar.replace(tar_out)
+    # using this rather than replace as it works if moving between devices
+    shutil.move(tar, tar_out)
     logging.info("docker image complete: %s", tar_out)
     return tar_out
 
@@ -107,7 +108,6 @@ def build_target(tag: str, target: str) -> typing.List[Path]:
         scratch = Path(tempfile.mkdtemp(prefix=f"build-{target}-"))
         log_path = scratch / "log.txt"
         log = log_path.open("w")
-        logging.debug("building %s", target)
 
         try:
             tar = build_dockerfile(scratch, target, tag, out_dir, log)

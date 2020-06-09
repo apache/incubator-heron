@@ -20,10 +20,10 @@ import json
 import logging
 import os
 import pkgutil
+import random
 import re
 import sys
 import time
-import uuid
 from http.client import HTTPConnection
 from threading import Lock, Thread
 
@@ -313,6 +313,7 @@ def run_tests(conf, test_args):
   ''' Run the test for each topology specified in the conf file '''
   lock = Lock()
   timestamp = time.strftime('%Y%m%d%H%M%S')
+  run_fingerprint = f"{timestamp}-{random.randint(0, 2**16):04x}"
 
   http_server_host_port = "%s:%d" % (test_args.http_server_hostname, test_args.http_server_port)
 
@@ -361,8 +362,11 @@ def run_tests(conf, test_args):
       lock.release()
 
   test_threads = []
-  for topology_conf in test_topologies:
-    topology_name = ("%s_%s_%s") % (timestamp, topology_conf["topologyName"], str(uuid.uuid4()))
+  for i, topology_conf in enumerate(test_topologies, 1):
+    # this name has to be valid for all tested schedullers, state managers, etc.
+    topology_name = f"run-{run_fingerprint}-test-{i:03}"
+    # TODO: make sure logs describe the test/topology that fails, as now topology_name is opaque
+    # topology_conf["topologyName"]
     classpath = topology_classpath_prefix + topology_conf["classPath"]
 
     # if the test includes an update we need to pass that info to the topology so it can send
