@@ -40,7 +40,7 @@ class Contact extends React.Component {
 
     return (
       <div className="docMainWrapper wrapper">
-        <Container className="mainContainer documentContainer postContainer">
+        <Container className="main-container documentContainer postContainer">
           <div className="post">
             <header className="postHeader">
               <h1><translate>Contact</translate></h1>

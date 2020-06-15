@@ -26,7 +26,7 @@ class Users extends React.Component {
     ));
 
     return (
-      <div className="mainContainer">
+      <div className="main-container">
         <Container padding={['bottom', 'top']}>
           <div className="showcaseSection">
             <div className="prose">

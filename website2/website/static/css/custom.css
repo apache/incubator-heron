@@ -69,7 +69,8 @@ a {
   float: left;
 }
 
-.feature-container {
+.main-container {
+    !important
     margin: 0 auto;
     padding: 0;
     height: 100%;

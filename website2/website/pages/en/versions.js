@@ -26,7 +26,7 @@ function Versions(props) {
   }`;
   return (
     <div className="docMainWrapper wrapper">
-      <Container className="mainContainer versionsContainer">
+      <Container className="main-container versionsContainer">
         <div className="post">
           <header className="postHeader">
             <h1>{siteConfig.title} Versions</h1>

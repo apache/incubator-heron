@@ -18,7 +18,7 @@ class ReleaseNotes extends React.Component {
             < div
         className = "pageContainer" >
             < Container
-        className = "mainContainer documentContainer postContainer" >
+        className = "main-container documentContainer postContainer" >
             < div
         className = "post" >
             < header
