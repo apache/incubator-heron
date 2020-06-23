@@ -67,6 +67,8 @@ TOPOLOGY_CONTAINER_RAM_REQUESTED = "topology.container.ram"
 # Amount of disk per container to be reserved for this topology, in bytes.
 TOPOLOGY_CONTAINER_DISK_REQUESTED = "topology.container.disk"
 # Hint for max amount of RAM per container to be reserved for this topology, in bytes.
+TOPOLOGY_CONTAINER_MAX_RAM_HINT = "topology.container.max.ram.hint"
+# Hint for max amount of CPU per container to be reserved for this topology, in bytes.
 TOPOLOGY_CONTAINER_MAX_CPU_HINT = "topology.container.max.cpu.hint"
 # Hint for max amount of disk per container to be reserved for this topology, in bytes.
 TOPOLOGY_CONTAINER_MAX_DISK_HINT = "topology.container.max.disk.hint"
