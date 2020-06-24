@@ -28,6 +28,7 @@ npm run-script build
 
 node ./scripts/replace.js
 
-rm -rf ${ROOT_DIR}/generated-site/content/*
 ## copy generated site
+rm -rf ${ROOT_DIR}/generated-site/content/*
+mkdir -p ${ROOT_DIR}/generated-site/content/
 cp -R build/incubator-heron/* ${ROOT_DIR}/generated-site/content
