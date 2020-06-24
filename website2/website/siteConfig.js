@@ -107,6 +107,11 @@ const siteConfig = {
     theme: 'default',
   },
 
+  separateCss: [
+      `${baseUrl}public/api/java/stylesheet.css`,
+      `${baseUrl}static/api/stylesheet.css`,
+  ],
+
   // Add custom scripts here that would be placed in <script> tags.
   scripts: [
     'https://buttons.github.io/buttons.js',
