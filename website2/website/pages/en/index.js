@@ -33,7 +33,7 @@ class HomeSplash extends React.Component {
     );
 
     const Logo = props => (
-      <div className="" style={{width: '750px', alignItems: 'center', margin: 'auto'}}>
+      <div className="" style={{width: '100%', alignItems: 'center', margin: 'auto'}}>
         <img src={props.img_src} />
       </div>
     );
