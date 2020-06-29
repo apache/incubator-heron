@@ -32,6 +32,9 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import com.sun.tools.javac.util.Log;
+import io.kubernetes.client.openapi.apis.CoreV1Api;
+import io.kubernetes.client.openapi.models.*;
 import org.apache.heron.api.utils.TopologyUtils;
 import org.apache.heron.scheduler.TopologyRuntimeManagementException;
 import org.apache.heron.scheduler.TopologySubmissionException;
@@ -48,39 +51,26 @@ import io.kubernetes.client.openapi.ApiClient;
 import io.kubernetes.client.openapi.ApiException;
 import io.kubernetes.client.openapi.Configuration;
 import io.kubernetes.client.openapi.apis.AppsV1Api;
-import io.kubernetes.client.openapi.models.V1Container;
-import io.kubernetes.client.openapi.models.V1ContainerPort;
-import io.kubernetes.client.openapi.models.V1EnvVar;
-import io.kubernetes.client.openapi.models.V1EnvVarSource;
-import io.kubernetes.client.openapi.models.V1LabelSelector;
-import io.kubernetes.client.openapi.models.V1ObjectFieldSelector;
-import io.kubernetes.client.openapi.models.V1ObjectMeta;
-import io.kubernetes.client.openapi.models.V1PodSpec;
-import io.kubernetes.client.openapi.models.V1PodTemplateSpec;
-import io.kubernetes.client.openapi.models.V1ResourceRequirements;
-import io.kubernetes.client.openapi.models.V1StatefulSet;
-import io.kubernetes.client.openapi.models.V1StatefulSetSpec;
-import io.kubernetes.client.openapi.models.V1Toleration;
-import io.kubernetes.client.openapi.models.V1Volume;
-import io.kubernetes.client.openapi.models.V1VolumeMount;
 
 import okhttp3.Response;
 
-public class AppsV1Controller extends KubernetesController {
+public class V1Controller extends KubernetesController {
 
   private static final Logger LOG =
-      Logger.getLogger(AppsV1Controller.class.getName());
+      Logger.getLogger(V1Controller.class.getName());
 
   private static final String ENV_SHARD_ID = "SHARD_ID";
 
   private final AppsV1Api appsClient;
+  private final CoreV1Api coreClient;
 
-  AppsV1Controller(Config configuration, Config runtimeConfiguration) {
+  V1Controller(Config configuration, Config runtimeConfiguration) {
     super(configuration, runtimeConfiguration);
     try {
       final ApiClient apiClient = io.kubernetes.client.util.Config.defaultClient();
       Configuration.setDefaultApiClient(apiClient);
       appsClient = new AppsV1Api(apiClient);
+      coreClient = new CoreV1Api(apiClient);
     } catch (IOException e) {
       LOG.log(Level.SEVERE, "Failed to setup Kubernetes client" + e);
       throw new RuntimeException(e);
@@ -95,6 +85,16 @@ public class AppsV1Controller extends KubernetesController {
     }
 
     final Resource containerResource = getContainerResource(packingPlan);
+
+    final V1Service topologyService = createTopologyyService();
+    try {
+      final V1Service response =
+          coreClient.createNamespacedService(getNamespace(), topologyService, null,
+              null, null);
+    } catch (ApiException e) {
+      KubernetesUtils.logExceptionWithDetails(LOG, "Error creating topology service", e);
+      throw new TopologySubmissionException(e.getMessage());
+    }
 
     // find the max number of instances in a container so we can open
     // enough ports if remote debugging is enabled.
@@ -118,11 +118,9 @@ public class AppsV1Controller extends KubernetesController {
 
   @Override
   boolean killTopology() {
-    return
-        isStatefulSet()
-        ? deleteStatefulSet()
-        :
-        new KubernetesCompat().killTopology(getKubernetesUri(), getTopologyName(), getNamespace());
+    deleteStatefulSet();
+    deleteService();
+    return true;
   }
 
   @Override
@@ -199,6 +197,31 @@ public class AppsV1Controller extends KubernetesController {
         null, null, null);
   }
 
+  boolean deleteService() {
+    try {
+      final Response response = coreClient.deleteNamespacedServiceCall(getTopologyName(),
+          getNamespace(), null, null, 0, null,
+          KubernetesConstants.DELETE_OPTIONS_PROPAGATION_POLICY, null, null).execute();
+
+      if (response.isSuccessful()) {
+        LOG.log(Level.INFO, "Headless Service for the Job [" + getTopologyName()
+            + "] in namespace [" + getNamespace() + "] is deleted.");
+        return true;
+      } else {
+        LOG.log(Level.SEVERE, "Error when deleting the Service of the job ["
+            + getTopologyName() + "] in namespace [" + getNamespace() + "]");
+        LOG.log(Level.SEVERE, "Error killing topoogy message:" + response.message());
+        KubernetesUtils.logResponseBodyIfPresent(LOG, response);
+
+        throw new TopologyRuntimeManagementException(
+            KubernetesUtils.errorMessageFromResponse(response));
+      }
+    } catch (IOException | ApiException e) {
+      KubernetesUtils.logExceptionWithDetails(LOG, "Error deleting topology service", e);
+      return false;
+    }
+  }
+
   boolean deleteStatefulSet() {
     try {
       final Response response = appsClient.deleteNamespacedStatefulSetCall(getTopologyName(),
@@ -211,7 +234,7 @@ public class AppsV1Controller extends KubernetesController {
         return true;
       } else {
         LOG.log(Level.SEVERE, "Error when deleting the StatefulSet of the job ["
-            + getTopologyName() + "]: in namespace [" + getNamespace() + "]");
+            + getTopologyName() + "] in namespace [" + getNamespace() + "]");
         LOG.log(Level.SEVERE, "Error killing topology message: " + response.message());
         KubernetesUtils.logResponseBodyIfPresent(LOG, response);
 
@@ -222,18 +245,6 @@ public class AppsV1Controller extends KubernetesController {
       KubernetesUtils.logExceptionWithDetails(LOG, "Error deleting topology", e);
       return false;
     }
-  }
-
-  boolean isStatefulSet() {
-    try {
-      final V1StatefulSet response =
-          appsClient.readNamespacedStatefulSet(getTopologyName(), getNamespace(),
-              null, null, null);
-      return response.getKind().equals("StatefulSet");
-    } catch (ApiException e) {
-      LOG.warning("isStatefulSet check " +  e.getMessage());
-    }
-    return false;
   }
 
   protected List<String> getExecutorCommand(String containerId) {
@@ -262,6 +273,26 @@ public class AppsV1Controller extends KubernetesController {
     return String.format("%s=${POD_NAME##*-} && echo shardId=${%s}", ENV_SHARD_ID, ENV_SHARD_ID);
   }
 
+  private V1Service createTopologyyService() {
+    final String topologyName = getTopologyName();
+    final Config runtimeConfiguration = getRuntimeConfiguration();
+
+    final V1Service service = new V1Service();
+
+    // setup service metadata
+    final V1ObjectMeta objectMeta = new V1ObjectMeta();
+    objectMeta.name(topologyName);
+    service.setMetadata(objectMeta);
+
+    // create the headless service
+    final V1ServiceSpec serviceSpec = new V1ServiceSpec();
+    serviceSpec.clusterIP("None");
+    serviceSpec.setSelector(getMatchLabels(topologyName));
+
+    service.setSpec(serviceSpec);
+
+    return service;
+  }
 
   private V1StatefulSet createStatefulSet(Resource containerResource, int numberOfInstances) {
     final String topologyName = getTopologyName();

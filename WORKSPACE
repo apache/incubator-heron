@@ -54,7 +54,7 @@ jetty_version = "9.4.6.v20170531"
 
 jersey_version = "2.25.1"
 
-kubernetes_client_version = "7.0.0"
+kubernetes_client_version = "8.0.0"
 
 load("@rules_jvm_external//:defs.bzl", "maven_install")
 load("@rules_jvm_external//:specs.bzl", "maven")
@@ -81,7 +81,6 @@ maven_install(
         "org.apache.httpcomponents:httpclient:" + http_client_version,
         "org.apache.httpcomponents:httpmime:" + http_client_version,
         "com.google.apis:google-api-services-storage:v1-rev108-1.22.0",
-        "io.kubernetes:client-java:7.0.0",
         "com.microsoft.dhalion:dhalion:0.2.3",
         "org.objenesis:objenesis:2.1",
         "org.ow2.asm:asm-all:5.1",

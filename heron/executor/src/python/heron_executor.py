@@ -140,6 +140,9 @@ def log_pid_for_process(process_name, pid):
 def is_docker_environment():
   return os.path.isfile('/.dockerenv')
 
+def is_kubernetes_environment():
+  return 'POD_NAME' in os.environ
+
 def stdout_log_fn(cmd):
   """Simple function callback that is used to log the streaming output of a subprocess command
   :param cmd: the name of the command which will be added to the log line
@@ -229,7 +232,9 @@ class HeronExecutor(object):
     # Needed for Docker environments since the hostname of a docker container is the container's
     # id within docker, rather than the host's hostname. NOTE: this 'HOST' env variable is not
     # guaranteed to be set in all Docker executor environments (outside of Marathon)
-    if is_docker_environment():
+    if is_kubernetes_environment():
+        self.master_host = socket.getfqdn()
+    elif is_docker_environment():
       self.master_host = os.environ.get('HOST') if 'HOST' in os.environ else socket.gethostname()
     else:
       self.master_host = socket.gethostname()
