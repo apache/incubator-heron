@@ -17,19 +17,17 @@
 
 FROM centos:centos7
 
-RUN yum -y upgrade
-RUN yum -y install python; yum clean all
-RUN yum -y install unzip; yum clean all
-RUN yum -y install which; yum clean all
-RUN yum -y install curl; yum clean all
-RUN yum -y install nmap-ncat; yum clean all
-RUN yum -y install python python3-setuptools; yum clean all
-
-RUN yum install epel-release; yum clean all
-RUN yum update -y
-RUN yum install -y supervisor; yum clean all
-
-RUN yum -y install java-11-openjdk java-11-openjdk-devel; yum clean all
+RUN yum install epel-release \
+    && yum -y update \
+    && yum -y install \
+    curl \
+    java-11-openjdk \
+    supervisor \
+    nmap-ncat \
+    python \
+    unzip \
+    which \
+    && yum clean all
 
 ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk
 

@@ -15,18 +15,17 @@
 #  specific language governing permissions and limitations
 #  under the License.
 
-FROM openjdk:11-jdk-slim-stretch
+FROM openjdk:11-jre-slim-stretch
 
-RUN apt-get -y update && apt-get -y install \
+RUN apt-get -y update \
+    && apt-get -y install \
+    curl \
     netcat-openbsd \
     python \
-    python-dev \
+    supervisor \
     unzip \
-    curl \
-    vim \
-    supervisor && \
-    apt-get clean all && \
-    rm -rf /var/lib/apt/lists/*
+    && apt-get clean all \
+    && rm -rf /var/lib/apt/lists/*
 
 ADD artifacts /heron
 
