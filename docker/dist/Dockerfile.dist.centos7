@@ -17,19 +17,17 @@
 
 FROM centos:centos7
 
-RUN yum install epel-release \
+RUN yum -y install epel-release \
     && yum -y update \
     && yum -y install \
     curl \
-    java-11-openjdk \
+    java-11-openjdk-headless \
     supervisor \
     nmap-ncat \
     python \
     unzip \
     which \
     && yum clean all
-
-ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk
 
 ADD artifacts /heron
 
