@@ -23,7 +23,6 @@ RUN apt-get -y update \
     netcat-openbsd \
     openjdk-11-jre-headless \
     python \
-    software-properties-common \
     supervisor \
     unzip \
     && apt-get clean
