@@ -233,7 +233,7 @@ class HeronExecutor(object):
     # id within docker, rather than the host's hostname. NOTE: this 'HOST' env variable is not
     # guaranteed to be set in all Docker executor environments (outside of Marathon)
     if is_kubernetes_environment():
-        self.master_host = socket.getfqdn()
+      self.master_host = socket.getfqdn()
     elif is_docker_environment():
       self.master_host = os.environ.get('HOST') if 'HOST' in os.environ else socket.gethostname()
     else:
