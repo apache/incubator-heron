@@ -17,9 +17,15 @@
 
 FROM ubuntu:18.04
 
-RUN apt-get update
-RUN apt-get -y install \
-    unzip software-properties-common curl python python3 supervisor openjdk-11-jdk-headless
+RUN apt-get -y update \
+    && apt-get -y install \
+    curl \
+    netcat-openbsd \
+    openjdk-11-jre-headless \
+    python \
+    supervisor \
+    unzip \
+    && apt-get clean
 
 ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk-amd64
 RUN update-ca-certificates -f

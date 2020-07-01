@@ -17,20 +17,22 @@
 
 FROM ubuntu:16.04
 
-RUN apt-get update && apt-get install -y software-properties-common
+RUN apt-get -y update \
+    && apt-get install -y \
+    curl \
+    netcat-openbsd \
+    python \
+    software-properties-common \
+    supervisor \
+    unzip \
+    && apt-get clean
 
 RUN add-apt-repository ppa:openjdk-r/ppa
 
-RUN apt-get -y install \
-    python \
-    python3 \
-    unzip \
-    software-properties-common \
-    curl \
-    supervisor
-
-RUN apt-get update && apt-get -y install \
-    openjdk-11-jdk-headless
+RUN apt-get update \
+    && apt-get -y install \
+    openjdk-11-jre-headless \
+    && apt-get clean
 
 ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk-amd64
 RUN update-ca-certificates -f
