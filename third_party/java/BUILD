@@ -227,10 +227,10 @@ java_library(
     name = "apache-pulsar-client",
     srcs = ["Empty.java"],
     exports = [
-        "@maven//:org_apache_pulsar_pulsar_client",
+        "@maven//:org_apache_pulsar_pulsar_client_shaded",
     ],
     deps = [
-        "@maven//:org_apache_pulsar_pulsar_client",
+        "@maven//:org_apache_pulsar_pulsar_client_shaded",
     ],
 )
 

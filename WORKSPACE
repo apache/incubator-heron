@@ -73,7 +73,7 @@ maven_install(
         "org.apache.mesos:mesos:0.22.0",
         "com.hashicorp.nomad:nomad-sdk:0.7.0",
         "org.apache.hadoop:hadoop-core:0.20.2",
-        "org.apache.pulsar:pulsar-client:1.19.0-incubating",
+        "org.apache.pulsar:pulsar-client:jar:shaded:1.19.0-incubating",
         "org.apache.kafka:kafka-clients:2.2.0",
         "com.google.apis:google-api-services-storage:v1-rev108-" + google_client_version,
         "org.apache.reef:reef-runtime-yarn:" + reef_version,
