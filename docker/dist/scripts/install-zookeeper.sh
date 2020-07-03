@@ -26,16 +26,15 @@ fi
 ZK_DIST=$1
 
 curl -O "https://archive.apache.org/dist/zookeeper/$ZK_DIST/apache-$ZK_DIST.tar.gz"
-tar -xzf ./$ZK_DIST.tar.gz -C /opt
-rm ./$ZK_DIST.tar.gz
+tar -xzf ./apache-$ZK_DIST.tar.gz -C /opt
+rm ./apache-$ZK_DIST.tar.gz
 
-mv /opt/$ZK_DIST /opt/zookeeper
+mv /opt/apache-$ZK_DIST /opt/zookeeper
 rm -rf /opt/zookeeper/CHANGES.txt \
     /opt/zookeeper/README.txt \
     /opt/zookeeper/NOTICE.txt \
     /opt/zookeeper/CHANGES.txt \
     /opt/zookeeper/README_packaging.txt \
-    /opt/zookeeper/build.xml \
     /opt/zookeeper/config \
     /opt/zookeeper/contrib \
     /opt/zookeeper/dist-maven \
