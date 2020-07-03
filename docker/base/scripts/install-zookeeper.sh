@@ -19,13 +19,13 @@
 if [ "$#" -ne 1 ]; then
   echo "Usage: $0 zookeeper-<version-number>"
   echo "Example:"
-  echo "$ $0 zookeeper-3.4.14"
+  echo "$ $0 zookeeper-3.5.8"
   exit 1
 fi
 
 ZK_DIST=$1
 
-curl -O "https://archive.apache.org/dist/zookeeper/$ZK_DIST/$ZK_DIST.tar.gz"
+curl -O "https://archive.apache.org/dist/zookeeper/$ZK_DIST/apache-$ZK_DIST.tar.gz"
 tar -xzf ./$ZK_DIST.tar.gz -C /opt
 rm ./$ZK_DIST.tar.gz
 
