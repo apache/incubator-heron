@@ -34,10 +34,8 @@ java_doc(
     name = "heron-storm-javadoc",
     libs = [":storm-compatibility-java"],
     pkgs = [
-        "backtype",
-        "clojure",
+        "java",
         "org",
-        "storm",
     ],
     title = "Heron Storm Compatibility Api Documentation",
 )

@@ -17,15 +17,20 @@
 
 FROM ubuntu:14.04
 
-RUN apt-get -y update && apt-get -y install \
+RUN apt-get -y update \
+    && apt-get -y install \
+    curl \
+    netcat-openbsd \
     python3 \
-    unzip \
     software-properties-common \
     supervisor \
-    curl
+    unzip \
+    && apt-get clean
 
-RUN add-apt-repository ppa:openjdk-r/ppa && apt-get -y update && \
-    apt-get -y install openjdk-11-jdk-headless
+RUN add-apt-repository ppa:openjdk-r/ppa \
+    && apt-get -y update \
+    && apt-get -y install openjdk-11-jre-headless \
+    && apt-get clean
 
 ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk-amd64
 RUN update-ca-certificates -f

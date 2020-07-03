@@ -15,15 +15,17 @@
 #  specific language governing permissions and limitations
 #  under the License.
 
-FROM openjdk:11.0.6-slim-buster
+FROM openjdk:11.0.6-jre-slim-buster
 
-RUN apt-get update && apt-get -y install \
-      netcat-openbsd \
-      curl \
-      python3 \
-      python3-dev \
-      supervisor \
-      unzip
+RUN apt-get update \
+    && apt-get -y install \
+    curl \
+    netcat-openbsd \
+    python3 \
+    python3-dev \
+    supervisor \
+    unzip \
+    && apt-get clean
 
 ADD artifacts /heron
 

@@ -863,7 +863,7 @@ std::unique_ptr<proto::tmaster::StmgrsRegistrationSummaryResponse> TMaster::GetS
     response->add_absent_stmgrs(*it);
   }
 
-  return std::move(response);
+  return response;
 }
 
 shared_ptr<proto::system::PhysicalPlan> TMaster::MakePhysicalPlan() {

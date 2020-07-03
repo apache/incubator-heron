@@ -102,7 +102,7 @@ def create_parsers():
   :return:
   '''
   parser = argparse.ArgumentParser(
-      epilog='For detailed documentation, go to http://heronstreaming.io',
+      epilog='For detailed documentation, go to https://heron.incubator.apache.org',
       usage="%(prog)s [options] [help]",
       add_help=False)
 
