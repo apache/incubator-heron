@@ -18,6 +18,7 @@
 FROM openjdk:11-jdk-slim-stretch
 
 RUN apt-get -y update && apt-get -y install \
+    ant \
     netcat-openbsd \
     python \
     unzip \

@@ -21,6 +21,7 @@ ARG DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get -y update \
     && apt-get -y install \
+    ant \
     curl \
     openjdk-11-jre-headless \
     netcat-openbsd \

@@ -19,6 +19,7 @@ FROM ubuntu:18.04
 
 RUN apt-get -y update \
     && apt-get -y install \
+    ant \
     curl \
     netcat-openbsd \
     openjdk-11-jre-headless \
