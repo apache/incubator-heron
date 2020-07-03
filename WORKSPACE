@@ -283,7 +283,7 @@ http_archive(
     name = "org_apache_zookeeper",
     build_file = "@//:third_party/zookeeper/BUILD",
     strip_prefix = "apache-zookeeper-3.5.8",
-    urls = ["https://archive.apache.org/dist/zookeeper/stable/apache-zookeeper-3.5.8.tar.gz"],
+    urls = ["https://archive.apache.org/dist/zookeeper/zookeeper-3.5.8/apache-zookeeper-3.5.8.tar.gz"],
 )
 
 http_archive(
