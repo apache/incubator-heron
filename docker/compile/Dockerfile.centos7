@@ -23,6 +23,7 @@ ENV bazelVersion 3.0.0
 
 RUN yum -y upgrade
 RUN yum -y install \
+      ant \
       automake \
       curl \
       cmake \

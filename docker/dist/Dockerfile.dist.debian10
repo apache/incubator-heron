@@ -19,7 +19,6 @@ FROM openjdk:11.0.6-jre-slim-buster
 
 RUN apt-get update \
     && apt-get -y install \
-    ant \
     curl \
     netcat-openbsd \
     python \
