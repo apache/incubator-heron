@@ -65,6 +65,12 @@ spec:
           envFrom:
             - configMapRef:
                 name: bookie-config
+
+          volumeMounts:
+            - name: journal-disk
+              mountPath: /bookkeeper/data/journal
+            - name: ledgers-disk
+              mountPath: /bookkeeper/data/ledgers
       containers:
         - name: bookie
           image: apache/bookkeeper:4.7.3
@@ -91,13 +97,11 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: status.hostIP
-    
           volumeMounts:
             - name: journal-disk
               mountPath: /bookkeeper/data/journal
             - name: ledgers-disk
               mountPath: /bookkeeper/data/ledgers
-
       volumes:
           # Mount local disks
         - name: journal-disk
