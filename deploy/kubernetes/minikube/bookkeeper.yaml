@@ -65,7 +65,6 @@ spec:
           envFrom:
             - configMapRef:
                 name: bookie-config
-
           volumeMounts:
             - name: journal-disk
               mountPath: /bookkeeper/data/journal
