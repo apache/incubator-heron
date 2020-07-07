@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 
 #  Licensed to the Apache Software Foundation (ASF) under one
@@ -30,7 +30,7 @@ from heron.tools.tracker.src.python.query_operators import *
 ####################################################################
 
 # pylint: disable=no-self-use
-class Query(object):
+class Query:
   """Execute the query for metrics. Uses Tracker to get
      individual metrics that are part of the query.
      Example usage:
@@ -109,8 +109,7 @@ class Query(object):
       # This must be the last index, since this was an NOP starting brace
       if index != len(query) - 1:
         raise Exception("Invalid syntax")
-      else:
-        return self.parse_query_string(query[1:-1])
+      return self.parse_query_string(query[1:-1])
     start_index = query.find("(")
     # There must be a ( in the query
     if start_index < 0:

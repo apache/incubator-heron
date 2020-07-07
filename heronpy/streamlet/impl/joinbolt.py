@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 
 #  Licensed to the Apache Software Foundation (ASF) under one
@@ -73,6 +73,7 @@ class JoinBolt(SlidingWindowBolt, StreamletBoltBase):
     self._join_type = config[JoinBolt.JOINTYPE]
 
   def processWindow(self, window_config, tuples):
+    """Process a window"""
     # our temporary map
     mymap = {}
     for tup in tuples:

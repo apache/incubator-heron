@@ -19,7 +19,7 @@ FROM openjdk:11-jdk-slim-stretch
 
 RUN apt-get -y update && apt-get -y install \
     netcat-openbsd \
-    python \
+    python3 \
     unzip \
     curl \
     supervisor && \

@@ -5,7 +5,7 @@ pex_library(
     srcs = glob(["**/*.py"]),
     reqs = [
         "PyYAML==3.13",
-        "kazoo==1.3.1",
+        "kazoo==2.7.0",
         "zope.interface==4.0.5",
     ],
     deps = [

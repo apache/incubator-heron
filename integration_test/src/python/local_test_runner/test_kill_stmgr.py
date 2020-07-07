@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 
 #  Licensed to the Apache Software Foundation (ASF) under one
@@ -20,7 +20,7 @@
 
 
 """test_kill_stmgr.py"""
-import test_template
+from . import test_template
 
 class TestKillStmgr(test_template.TestTemplate):
 

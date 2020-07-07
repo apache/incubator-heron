@@ -14,7 +14,7 @@
 '''transformoperator.py: API for defining generic transformer in python'''
 from abc import abstractmethod
 
-class TransformOperator(object):
+class TransformOperator:
   """API for defining a generic transformer for Heron in the Python Streamlet API
   """
 

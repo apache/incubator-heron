@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 
 #  Licensed to the Apache Software Foundation (ASF) under one
@@ -78,8 +78,8 @@ class HeronArgumentParser(argparse.ArgumentParser):
       # it means we have captured a non-quoted (real) comment string.
       if match.group(1) is not None:
         return ""  # so we will return empty to remove the comment
-      else:  # otherwise, we will return the 1st group
-        return match.group(1)  # captured quoted-string
+      # otherwise, we will return the 1st group
+      return match.group(1)  # captured quoted-string
     return regex.sub(_replacer, string)
 
   @classmethod
@@ -101,6 +101,7 @@ class HeronArgumentParser(argparse.ArgumentParser):
 
   @classmethod
   def initializeFromRC(cls, rcfile):
+    """Initialise."""
     if len(cls.cmdmap) > 0:
       return
     effective_rc = (rcfile, HERON_RC)[rcfile is None]

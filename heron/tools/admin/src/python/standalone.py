@@ -41,7 +41,7 @@ import heron.tools.common.src.python.utils.config as config
 # pylint: disable=unused-argument
 # pylint: disable=too-many-branches
 
-class Action(object):
+class Action:
   SET = "set"
   CLUSTER = "cluster"
   TEMPLATE = "template"
@@ -50,17 +50,17 @@ class Action(object):
 
 TYPE = "type"
 
-class Role(object):
+class Role:
   ZOOKEEPERS = "zookeepers"
   MASTERS = "masters"
   SLAVES = "slaves"
   CLUSTER = "cluster"
 
-class Cluster(object):
+class Cluster:
   START = "start"
   STOP = "stop"
 
-class Get(object):
+class Get:
   SERVICE_URL = "service-url"
   HERON_TRACKER_URL = "heron-tracker-url"
   HERON_UI_URL = "heron-ui-url"
@@ -423,6 +423,7 @@ def stop_cluster(cl_args):
     Log.debug(cmd)
     pid = subprocess.Popen(cmd,
                            shell=True,
+                           universal_newlines=True,
                            stdout=subprocess.PIPE,
                            stderr=subprocess.PIPE)
 
@@ -437,6 +438,7 @@ def stop_cluster(cl_args):
     Log.debug(cmd)
     pid = subprocess.Popen(cmd,
                            shell=True,
+                           universal_newlines=True,
                            stdout=subprocess.PIPE,
                            stderr=subprocess.PIPE)
 
@@ -495,6 +497,7 @@ def start_api_server(masters, cl_args):
   Log.debug(cmd)
   pid = subprocess.Popen(cmd,
                          shell=True,
+                         universal_newlines=True,
                          stdout=subprocess.PIPE,
                          stderr=subprocess.PIPE)
 
@@ -524,6 +527,7 @@ def start_heron_tools(masters, cl_args):
   Log.debug(cmd)
   pid = subprocess.Popen(cmd,
                          shell=True,
+                         universal_newlines=True,
                          stdout=subprocess.PIPE,
                          stderr=subprocess.PIPE)
 
@@ -581,8 +585,7 @@ def wait_for_job_to_start(single_master, job):
       r = requests.get("http://%s:4646/v1/job/%s" % (single_master, job))
       if r.status_code == 200 and r.json()["Status"] == "running":
         break
-      else:
-        raise RuntimeError()
+      raise RuntimeError()
     except:
       Log.debug(sys.exc_info()[0])
       Log.info("Waiting for %s to come up... %s" % (job, i))
@@ -612,6 +615,7 @@ def scp_package(package_file, destinations, cl_args):
     Log.debug(cmd)
     pid = subprocess.Popen(cmd,
                            shell=True,
+                           universal_newlines=True,
                            stdout=subprocess.PIPE,
                            stderr=subprocess.PIPE)
     pids.append({"pid": pid, "dest": dest})
@@ -653,6 +657,7 @@ def start_master_nodes(masters, cl_args):
     Log.debug(cmd)
     pid = subprocess.Popen(cmd,
                            shell=True,
+                           universal_newlines=True,
                            stdout=subprocess.PIPE,
                            stderr=subprocess.PIPE)
     pids.append({"pid": pid, "dest": master})
@@ -687,6 +692,7 @@ def start_slave_nodes(slaves, cl_args):
     Log.debug(cmd)
     pid = subprocess.Popen(cmd,
                            shell=True,
+                           universal_newlines=True,
                            stdout=subprocess.PIPE,
                            stderr=subprocess.PIPE)
     pids.append({"pid": pid, "dest": slave})
@@ -860,12 +866,12 @@ def get_hostname(ip_addr, cl_args):
 
 def check_sure(cl_args, prompt):
   yes = input("%s" % prompt + ' (yes/no): ')
-  if yes == "y" or yes == "yes":
+  if yes in ("y", "yes"):
     return True
-  elif yes == "n" or yes == "no":
+  if yes in ("n", "no"):
     return False
-  else:
-    print('Invalid input.  Please input "yes" or "no"')
+  print('Invalid input.  Please input "yes" or "no"')
+  return None
 
 def get_jobs(cl_args, nomad_addr):
   r = requests.get("http://%s:4646/v1/jobs" % nomad_addr)

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 
 #  Licensed to the Apache Software Foundation (ASF) under one
@@ -25,9 +25,11 @@ import contextlib
 import getpass
 import os
 import sys
+import shutil
 import subprocess
 import tarfile
 import tempfile
+from pathlib import Path
 import yaml
 
 from heron.common.src.python.utils.log import Log
@@ -44,7 +46,6 @@ ETC_DIR = "etc"
 LIB_DIR = "lib"
 CLI_DIR = ".heron"
 RELEASE_YAML = "release.yaml"
-ZIPPED_RELEASE_YAML = "scripts/packages/release.yaml"
 OVERRIDE_YAML = "override.yaml"
 
 # mode of deployment
@@ -112,7 +113,7 @@ def cygpath(x):
   normalized class path on cygwin
   '''
   command = ['cygpath', '-wp', x]
-  p = subprocess.Popen(command, stdout=subprocess.PIPE)
+  p = subprocess.Popen(command, stdout=subprocess.PIPE, universal_newlines=True)
   result = p.communicate()
   output = result[0]
   lines = output.split("\n")
@@ -141,6 +142,9 @@ def get_classpath(jars):
   '''
   return ':'.join(map(normalized_class_path, jars))
 
+def _get_heron_dir():
+  # assuming the tool runs from $HERON_ROOT/bin/<binary>
+  return normalized_class_path(str(Path(sys.argv[0]).resolve(strict=True).parent.parent))
 
 def get_heron_dir():
   """
@@ -155,9 +159,7 @@ def get_heron_dir():
 
   :return: root location of the .pex file
   """
-  go_above_dirs = 9
-  path = "/".join(os.path.realpath(__file__).split('/')[:-go_above_dirs])
-  return normalized_class_path(path)
+  return _get_heron_dir()
 
 def get_zipped_heron_dir():
   """
@@ -174,9 +176,7 @@ def get_zipped_heron_dir():
 
   :return: root location of the .pex file.
   """
-  go_above_dirs = 7
-  path = "/".join(os.path.realpath(__file__).split('/')[:-go_above_dirs])
-  return normalized_class_path(path)
+  return _get_heron_dir()
 
 ################################################################################
 # Get the root of heron dir and various sub directories depending on platform
@@ -214,17 +214,6 @@ def get_heron_release_file():
   :return: absolute path of heron release.yaml file in CLI
   """
   return os.path.join(get_heron_dir(), RELEASE_YAML)
-
-
-def get_zipped_heron_release_file():
-  """
-  This will provide the path to heron release.yaml file.
-  To be used for .pex file built with `zip_safe = False` flag.
-  For example, `heron-ui'.
-
-  :return: absolute path of heron release.yaml file
-  """
-  return os.path.join(get_zipped_heron_dir(), ZIPPED_RELEASE_YAML)
 
 
 def get_heron_cluster_conf_dir(cluster, default_config_path):
@@ -289,16 +278,14 @@ def parse_cluster_role_env(cluster_role_env, config_path):
         if (ROLE_REQUIRED in cli_confs) and (cli_confs[ROLE_REQUIRED] is True):
           raise Exception("role required but not provided (cluster/role/env = %s). See %s in %s"
                           % (cluster_role_env, ROLE_REQUIRED, cli_conf_file))
-        else:
-          parts.append(getpass.getuser())
+        parts.append(getpass.getuser())
 
       # if environ is required but not provided, raise exception
       if len(parts) == 2:
         if (ENV_REQUIRED in cli_confs) and (cli_confs[ENV_REQUIRED] is True):
           raise Exception("environ required but not provided (cluster/role/env = %s). See %s in %s"
                           % (cluster_role_env, ENV_REQUIRED, cli_conf_file))
-        else:
-          parts.append(ENVIRON)
+        parts.append(ENVIRON)
 
   # if cluster or role or environ is empty, print
   if len(parts[0]) == 0 or len(parts[1]) == 0 or len(parts[2]) == 0:
@@ -342,12 +329,14 @@ def direct_mode_cluster_role_env(cluster_role_env, config_path):
       return True
 
     # if role is required but not provided, raise exception
-    role_present = True if len(cluster_role_env[1]) > 0 else False
+    role_present = bool(cluster_role_env[1])
+    # pylint: disable=simplifiable-if-expression
     if ROLE_REQUIRED in client_confs and client_confs[ROLE_REQUIRED] and not role_present:
       raise Exception("role required but not provided (cluster/role/env = %s). See %s in %s"
                       % (cluster_role_env, ROLE_REQUIRED, cli_conf_file))
 
     # if environ is required but not provided, raise exception
+    # pylint: disable=simplifiable-if-expression
     environ_present = True if len(cluster_role_env[2]) > 0 else False
     if ENV_REQUIRED in client_confs and client_confs[ENV_REQUIRED] and not environ_present:
       raise Exception("environ required but not provided (cluster/role/env = %s). See %s in %s"
@@ -362,13 +351,15 @@ def server_mode_cluster_role_env(cluster_role_env, config_map):
   cmap = config_map[cluster_role_env[0]]
 
   # if role is required but not provided, raise exception
-  role_present = True if len(cluster_role_env[1]) > 0 else False
+  role_present = bool(cluster_role_env[1])
+  # pylint: disable=simplifiable-if-expression
   if ROLE_KEY in cmap and cmap[ROLE_KEY] and not role_present:
     raise Exception("role required but not provided (cluster/role/env = %s)."\
         % (cluster_role_env))
 
   # if environ is required but not provided, raise exception
   environ_present = True if len(cluster_role_env[2]) > 0 else False
+  # pylint: disable=simplifiable-if-expression
   if ENVIRON_KEY in cmap and cmap[ENVIRON_KEY] and not environ_present:
     raise Exception("environ required but not provided (cluster/role/env = %s)."\
         % (cluster_role_env))
@@ -430,8 +421,8 @@ def get_java_path():
   java_home = os.environ.get("JAVA_HOME")
   if java_home:
     return os.path.join(java_home, BIN_DIR, "java")
-  # this could use shutil.which("java") when python2 support is dropped
-  return None
+
+  return shutil.which("java")
 
 
 def check_release_file_exists():
@@ -445,15 +436,9 @@ def check_release_file_exists():
 
   return True
 
-def print_build_info(zipped_pex=False):
-  """Print build_info from release.yaml
-
-  :param zipped_pex: True if the PEX file is built with flag `zip_safe=False'.
-  """
-  if zipped_pex:
-    release_file = get_zipped_heron_release_file()
-  else:
-    release_file = get_heron_release_file()
+def print_build_info():
+  """Print build_info from release.yaml"""
+  release_file = get_heron_release_file()
 
   with open(release_file) as release_info:
     release_map = yaml.load(release_info)
@@ -461,15 +446,9 @@ def print_build_info(zipped_pex=False):
     for key, value in release_items:
       print("%s : %s" % (key, value))
 
-def get_version_number(zipped_pex=False):
-  """Print version from release.yaml
-
-  :param zipped_pex: True if the PEX file is built with flag `zip_safe=False'.
-  """
-  if zipped_pex:
-    release_file = get_zipped_heron_release_file()
-  else:
-    release_file = get_heron_release_file()
+def get_version_number():
+  """Print version from release.yaml"""
+  release_file = get_heron_release_file()
   with open(release_file) as release_info:
     for line in release_info:
       trunks = line[:-1].split(' ')

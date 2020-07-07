@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 
 #  Licensed to the Apache Software Foundation (ASF) under one
@@ -21,7 +21,7 @@
 '''topology_context.py'''
 from abc import abstractmethod
 
-class TopologyContext(object):
+class TopologyContext:
   """Topology Context is the means for spouts/bolts to get information about
      the running topology. This file just is the interface to be used by spouts/bolts
 
@@ -33,14 +33,12 @@ class TopologyContext(object):
     """Gets the task id of this component
     :return: the task_id of this component
     """
-    pass
 
   @abstractmethod
   def get_component_id(self):
     """Gets the component id of this component
     :return: the component_id of this component
     """
-    pass
 
   @abstractmethod
   def get_cluster_config(self):
@@ -48,14 +46,12 @@ class TopologyContext(object):
     Note that the returned config is auto-typed map: <str -> any Python object>.
     :return: the dict of key -> value
     """
-    pass
 
   @abstractmethod
   def get_topology_name(self):
     """Returns the name of the topology
     :return: the name of the topology
     """
-    pass
 
   @abstractmethod
   def register_metric(self, name, metric, time_bucket_in_sec):
@@ -64,7 +60,6 @@ class TopologyContext(object):
     :param metric: The IMetric that needs to be registered
     :param time_bucket_in_sec: The interval in seconds to do getValueAndReset
     """
-    pass
 
   @abstractmethod
   def get_sources(self, component_id):
@@ -74,7 +69,6 @@ class TopologyContext(object):
     :return: map <streamId namedtuple (same structure as protobuf msg) -> gtype>, or
              None if not found
     """
-    pass
 
   def get_this_sources(self):
     """Returns the declared inputs to this component
@@ -90,7 +84,6 @@ class TopologyContext(object):
 
     :return: list of task_ids or None if not found
     """
-    pass
 
   @abstractmethod
   def add_task_hook(self, task_hook):
@@ -99,4 +92,3 @@ class TopologyContext(object):
     :type task_hook: ITaskHook
     :param task_hook: Implementation of ITaskHook
     """
-    pass

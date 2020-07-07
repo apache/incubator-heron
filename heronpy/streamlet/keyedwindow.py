@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 
 #  Licensed to the Apache Software Foundation (ASF) under one
@@ -22,7 +22,7 @@
 
 from heronpy.streamlet.window import Window
 
-class KeyedWindow(object):
+class KeyedWindow:
   """Transformation depending on Windowing pass on the window/key information
      using this class
   """

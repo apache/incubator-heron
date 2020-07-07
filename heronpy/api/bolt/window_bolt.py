@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 
 #  Licensed to the Apache Software Foundation (ASF) under one
@@ -59,7 +59,6 @@ class SlidingWindowBolt(Bolt, StatefulComponent):
     :type tuples: :class:`list of Tuples`
     :param tuples: The list of tuples in this window
     """
-    pass
 
   # pylint: disable=unused-argument
   def initialize(self, config, context):
@@ -109,8 +108,8 @@ class SlidingWindowBolt(Bolt, StatefulComponent):
     curtime = int(time.time())
     window_info = WindowContext(curtime - self.window_duration, curtime)
     tuple_batch = []
-    for (tup, tm) in self.current_tuples:
-      tuple_batch.append(tup)
+    for (tuple_, tm) in self.current_tuples:
+      tuple_batch.append(tuple_)
     self.processWindow(window_info, tuple_batch)
     self._expire(curtime)
 
@@ -145,7 +144,6 @@ class TumblingWindowBolt(Bolt, StatefulComponent):
     :type tuples: :class:`list of Tuples`
     :param tuples: The list of tuples in this window
     """
-    pass
 
   # pylint: disable=unused-argument
   def initialize(self, config, context):
@@ -178,6 +176,6 @@ class TumblingWindowBolt(Bolt, StatefulComponent):
     curtime = int(time.time())
     window_info = WindowContext(curtime - self.window_duration, curtime)
     self.processWindow(window_info, list(self.current_tuples))
-    for tup in self.current_tuples:
-      self.ack(tup)
+    for tuple_ in self.current_tuples:
+      self.ack(tuple_)
     self.current_tuples.clear()

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 
 #  Licensed to the Apache Software Foundation (ASF) under one
@@ -21,7 +21,7 @@
 '''custom_grouping_helper.py'''
 from collections import namedtuple
 
-class CustomGroupingHelper(object):
+class CustomGroupingHelper:
   """Helper class for managing custom grouping"""
   def __init__(self):
     # map <stream_id -> list(targets)>
@@ -72,12 +72,11 @@ class Target(namedtuple('Target', 'task_ids, grouping, source_comp_name')):
     if not isinstance(ret, list):
       raise TypeError("Returned object after custom grouping's choose_tasks() "
                       "needs to be a list, given: %s" % str(type(ret)))
-    else:
-      for i in ret:
-        if not isinstance(i, int):
-          raise TypeError("Returned object after custom grouping's choose_tasks() "
-                          "contained non-integer: %s" % str(i))
-        if i not in self.task_ids:
-          raise ValueError("Returned object after custom grouping's choose_tasks() contained "
-                           "a task id that is not registered: %d" % i)
-      return ret
+    for i in ret:
+      if not isinstance(i, int):
+        raise TypeError("Returned object after custom grouping's choose_tasks() "
+                        "contained non-integer: %s" % str(i))
+      if i not in self.task_ids:
+        raise ValueError("Returned object after custom grouping's choose_tasks() contained "
+                         "a task id that is not registered: %d" % i)
+    return ret

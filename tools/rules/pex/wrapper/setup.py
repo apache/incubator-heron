@@ -27,6 +27,7 @@ setuptools.setup(
     version="0.1",
     install_requires=[
         "pex",
+        "setuptools",
         "wheel",
         # Not strictly required, but requests makes SSL more likely to work
         "requests",

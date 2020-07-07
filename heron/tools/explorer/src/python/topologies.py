@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 
 #  Licensed to the Apache Software Foundation (ASF) under one
@@ -50,8 +50,7 @@ def to_table(result):
         count += 1
         if count > max_count:
           continue
-        else:
-          table.append([role, env, topo])
+        table.append([role, env, topo])
   header = ['role', 'env', 'topology']
   rest_count = 0 if count <= max_count else count - max_count
   return table, header, rest_count
@@ -123,10 +122,9 @@ def run(command, parser, cl_args, unknown_args):
   location = cl_args['cluster/[role]/[env]'].split('/')
   if len(location) == 1:
     return show_cluster(cl_args, *location)
-  elif len(location) == 2:
+  if len(location) == 2:
     return show_cluster_role(cl_args, *location)
-  elif len(location) == 3:
+  if len(location) == 3:
     return show_cluster_role_env(cl_args, *location)
-  else:
-    Log.error('Invalid topologies selection')
-    return False
+  Log.error('Invalid topologies selection')
+  return False

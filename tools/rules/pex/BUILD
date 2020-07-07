@@ -26,23 +26,27 @@ POST_EXECUTE = [
     'ln -sf "$$OUTDIR" "$$TMPF"',
     'VENV="$${TMPF}/venv"',
     '$(location @virtualenv//:virtualenv) --no-download --quiet --clear "$$VENV"',
-    'PYTHON="$$VENV/bin/python"',
+    '# this is just to keep the activate script happy',
+    'PS1=',
+    'source "$$VENV/bin/activate"',
 
-    '$$VENV/bin/pip install pex \
+    'pip install pex \
             --quiet --no-cache-dir --no-index --build $(@D)/pexbuild \
             --find-links $$(dirname $(location @pex_src//file)) \
             --find-links $$(dirname $(location @wheel_src//file)) \
-            --find-links $$(dirname $(location @setuptools_src//file))',
+            --find-links $$(dirname $(location @setuptools_wheel//file))',
 
     '# Work around setuptools insistance on writing to the source directory,',
     '# which is discouraged by Bazel (and annoying)',
     'cp -r $$(dirname $(location wrapper/setup.py)) $(@D)/.pex_wrapper',
 
     '# Use the bootstrapped pex to build pex_wrapper.pex',
-    '$$VENV/bin/pex $(@D)/.pex_wrapper \
-            --disable-cache --no-index -m pex_wrapper -o $@ \
+    'pex $(@D)/.pex_wrapper \
+            --disable-cache --no-index \
+            --entry-point=pex_wrapper \
+            --output-file=$@ \
             --find-links $$(dirname $(location @pex_src//file)) \
-            --find-links $$(dirname $(location @setuptools_src//file)) \
+            --find-links $$(dirname $(location @setuptools_wheel//file)) \
             --find-links $$(dirname $(location @requests_src//file)) \
             --find-links $$(dirname $(location @wheel_src//file))',
    ]
@@ -53,7 +57,7 @@ genrule(
         "wrapper/setup.py",
         "wrapper/pex_wrapper.py",
         "wrapper/README",
-        "@setuptools_src//file",
+        "@setuptools_wheel//file",
         "@wheel_src//file",
         "@pex_src//file",
         "@requests_src//file",

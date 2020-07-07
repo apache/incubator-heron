@@ -171,7 +171,7 @@ py_repositories()
 # pip_repositories()
 
 # for pex repos
-PEX_SRC = "https://pypi.python.org/packages/3a/1d/cd41cd3765b78a4353bbf27d18b099f7afbcd13e7f2dc9520f304ec8981c/pex-1.2.15.tar.gz"
+PEX_WHEEL = "https://pypi.python.org/packages/18/92/99270775cfc5ddb60c19588de1c475f9ff2837a6e0bbd5eaa5286a6a472b/pex-2.1.9-py2.py3-none-any.whl"
 
 PY_WHEEL = "https://pypi.python.org/packages/53/67/9620edf7803ab867b175e4fd23c7b8bd8eba11cb761514dcd2e726ef07da/py-1.4.34-py2.py3-none-any.whl"
 
@@ -179,7 +179,7 @@ PYTEST_WHEEL = "https://pypi.python.org/packages/fd/3e/d326a05d083481746a769fc05
 
 REQUESTS_SRC = "https://pypi.python.org/packages/d9/03/155b3e67fe35fe5b6f4227a8d9e96a14fda828b18199800d161bcefc1359/requests-2.12.3.tar.gz"
 
-SETUPTOOLS_SRC = "https://pypi.python.org/packages/68/13/1bfbfbd86560e61fa9803d241084fff41a775bf56ee8b3ad72fc9e550dad/setuptools-31.0.0.tar.gz"
+SETUPTOOLS_WHEEL = "https://pypi.python.org/packages/a0/df/635cdb901ee4a8a42ec68e480c49f85f4c59e8816effbf57d9e6ee8b3588/setuptools-46.1.3-py3-none-any.whl"
 
 VIRTUALENV_SRC = "https://pypi.python.org/packages/d4/0c/9840c08189e030873387a73b90ada981885010dd9aea134d6de30cd24cb8/virtualenv-15.1.0.tar.gz"
 
@@ -210,9 +210,9 @@ http_file(
 
 http_file(
     name = "pex_src",
-    downloaded_file_path = "pex-1.2.15.tar.gz",
-    sha256 = "0147d19123340677b9793b00ec86fe65b6697db3ec99afb796da2300ae5fec14",
-    urls = [PEX_SRC],
+    downloaded_file_path = "pex-2.1.9-py2.py3-none-any.whl",
+    sha256 = "5cad8d960c187541f71682fc938a843ef9092aab46f27b33ace7e570325e2626",
+    urls = [PEX_WHEEL],
 )
 
 http_file(
@@ -223,10 +223,10 @@ http_file(
 )
 
 http_file(
-    name = "setuptools_src",
-    downloaded_file_path = "setuptools-31.0.0.tar.gz",
-    sha256 = "0818cc0de692c3a5c83ca83aa7ec7ba6bc206f278735f1e0267b8d0e095cfe7a",
-    urls = [SETUPTOOLS_SRC],
+    name = "setuptools_wheel",
+    downloaded_file_path = "setuptools-46.1.3-py3-none-any.whl",
+    sha256 = "4fe404eec2738c20ab5841fa2d791902d2a645f32318a7850ef26f8d7215a8ee",
+    urls = [SETUPTOOLS_WHEEL],
 )
 
 http_archive(
@@ -367,11 +367,12 @@ http_archive(
 # end helm
 
 # for docker image building
+DOCKER_RULES_VERSION = "0.14.1"
 http_archive(
     name = "io_bazel_rules_docker",
-    sha256 = "aed1c249d4ec8f703edddf35cbe9dfaca0b5f5ea6e4cd9e83e99f3b0d1136c3d",
-    strip_prefix = "rules_docker-0.7.0",
-    urls = ["https://github.com/bazelbuild/rules_docker/archive/v0.7.0.tar.gz"],
+    sha256 = "dc97fccceacd4c6be14e800b2a00693d5e8d07f69ee187babfd04a80a9f8e250",
+    strip_prefix = "rules_docker-%s" % DOCKER_RULES_VERSION,
+    urls = ["https://github.com/bazelbuild/rules_docker/archive/v%s.tar.gz" % DOCKER_RULES_VERSION],
 )
 
 load(
@@ -380,6 +381,10 @@ load(
 )
 
 container_repositories()
+
+load("@io_bazel_rules_docker//repositories:deps.bzl", container_deps = "deps")
+
+container_deps()
 
 load(
     "@io_bazel_rules_docker//container:container.bzl",
@@ -391,10 +396,18 @@ container_pull(
     digest = "sha256:495800e9eb001dfd2fb41d1941155203bb9be06b716b0f8b1b0133eb12ea813c",
     registry = "index.docker.io",
     repository = "heron/base",
-    tag = "0.4.0",
+    tag = "0.5.0",
 )
 
 # end docker image building
+
+http_archive(
+    name = "rules_pkg",
+    url = "https://github.com/bazelbuild/rules_pkg/releases/download/0.2.5/rules_pkg-0.2.5.tar.gz",
+    sha256 = "352c090cc3d3f9a6b4e676cf42a6047c16824959b438895a76c2989c6d7c246a",
+)
+load("@rules_pkg//:deps.bzl", "rules_pkg_dependencies")
+rules_pkg_dependencies()
 
 # for nomad repear
 http_archive(

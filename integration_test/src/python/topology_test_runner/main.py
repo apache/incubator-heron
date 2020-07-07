@@ -44,7 +44,7 @@ WAIT_FOR_DEACTIVATION = 5
 successes = []
 failures = []
 
-class TopologyStructureResultChecker(object):
+class TopologyStructureResultChecker:
   """
   Validate topology graph structure
   """
@@ -224,14 +224,14 @@ class InstanceStateResultChecker(TopologyStructureResultChecker):
     return output
 
 
-class FileBasedExpectedResultsHandler(object):
+class FileBasedExpectedResultsHandler:
   """
   Get expected topology graph structure result from local file
   """
   def __init__(self, file_path):
     self.file_path = file_path
 
-  def fetch_results(self):
+  def fetch_results(self) -> str:
     """
     Read expected result from the expected result file
     """
@@ -245,7 +245,7 @@ class FileBasedExpectedResultsHandler(object):
       raise status.TestFailure("Failed to read expected result file %s" % self.file_path, e)
 
 
-class ZkFileBasedActualResultsHandler(object):
+class ZkFileBasedActualResultsHandler:
   """
   Get actual topology graph structure result from zk
   """
@@ -294,7 +294,7 @@ class ZkFileBasedActualResultsHandler(object):
     self.state_mgr.stop()
 
 
-class HttpBasedActualResultsHandler(object):
+class HttpBasedActualResultsHandler:
   """
   Get actually loaded instance states
   TODO(yaoli): complete this class when stateful processing is ready
@@ -303,23 +303,23 @@ class HttpBasedActualResultsHandler(object):
     self.server_host_port = server_host_port
     self.topology_name = topology_name
 
-  def fetch_results(self):
+  def fetch_results(self) -> str:
     try:
       return self.fetch_from_server(self.server_host_port, self.topology_name,
         'instance_state', '/stateResults/%s' % self.topology_name)
     except Exception as e:
       raise status.TestFailure("Fetching instance state failed for %s topology" % self.topology_name, e)
 
-  def fetch_from_server(self, server_host_port, topology_name, data_name, path):
+  def fetch_from_server(self, server_host_port, topology_name, data_name, path) -> str:
     ''' Make a http get request to fetch actual results from http server '''
     for i in range(0, RETRY_ATTEMPTS):
       logging.info("Fetching %s for topology %s, retry count: %d", data_name, topology_name, i)
       response = self.get_http_response(server_host_port, path)
       if response.status == 200:
-        return response.read()
+        return response.read().decode()
       elif i != RETRY_ATTEMPTS:
         logging.info("Fetching %s failed with status: %s; reason: %s; body: %s",
-          data_name, response.status, response.reason, response.read())
+          data_name, response.status, response.reason, response.read().decode())
         time.sleep(RETRY_INTERVAL)
 
     raise status.TestFailure("Failed to fetch %s after %d attempts" % (data_name, RETRY_ATTEMPTS))
@@ -632,7 +632,7 @@ def main():
   log.configure(level=logging.DEBUG)
   conf_file = DEFAULT_TEST_CONF_FILE
   # Read the configuration file from package
-  conf_string = pkgutil.get_data(__name__, conf_file)
+  conf_string = pkgutil.get_data(__name__, conf_file).decode()
   decoder = json.JSONDecoder(strict=False)
   # Convert the conf file to a json format
   conf = decoder.decode(conf_string)

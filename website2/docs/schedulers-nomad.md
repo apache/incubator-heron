@@ -39,7 +39,7 @@ The advantages of this mode is that it is incredibly lightweight and likely do n
 When setting up your Nomad cluster, the following are required:
 
 * The [Heron CLI tool](user-manuals-heron-cli) must be installed on each machine used to deploy Heron topologies
-* Python 2.7, Java 7 or 8, and [curl](https://curl.haxx.se/) must be installed on every machine in the cluster
+* Python 3, Java 7 or 8, and [curl](https://curl.haxx.se/) must be installed on every machine in the cluster
 * A [ZooKeeper cluster](https://zookeeper.apache.org)
 
 ## Configuring Heron settings
