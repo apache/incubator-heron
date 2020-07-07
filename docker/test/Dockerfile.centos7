@@ -36,7 +36,7 @@ RUN yum -y install \
       cppunit-devel \
       make \
       patch \
-      python-devel \
+      python3-devel \
       python3-devel \
       python3-setuptools \
       zip \

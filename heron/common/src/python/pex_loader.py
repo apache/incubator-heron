@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 
 #  Licensed to the Apache Software Foundation (ASF) under one
@@ -36,8 +36,8 @@ def _get_deps_list(abs_path_to_pex):
   Note that dependencies are located under `.deps` directory
   """
   pex = zipfile.ZipFile(abs_path_to_pex, mode='r')
-  deps = list(set([re.match(egg_regex, i).group(1) for i in pex.namelist()
-                   if re.match(egg_regex, i) is not None]))
+  deps = list({re.match(egg_regex, i).group(1) for i in pex.namelist()
+               if re.match(egg_regex, i) is not None})
   return deps
 
 def load_pex(path_to_pex, include_deps=True):
@@ -81,6 +81,7 @@ def resolve_heron_suffix_issue(abs_pex_path, class_path):
   tests have to have a pex with its top level package name of ``heron``.
   """
   # import top-level package named `heron` of a given pex file
+  # pylint: disable=no-member
   importer = zipimport.zipimporter(abs_pex_path)
   importer.load_module("heron")
 
@@ -89,6 +90,7 @@ def resolve_heron_suffix_issue(abs_pex_path, class_path):
   loaded = ['heron']
   loaded_mod = None
   for to_load in to_load_lst:
+    # pylint: disable=no-member
     sub_importer = zipimport.zipimporter(os.path.join(abs_pex_path, '/'.join(loaded)))
     loaded_mod = sub_importer.load_module(to_load)
     loaded.append(to_load)
@@ -122,6 +124,6 @@ def import_and_get_class(path_to_pex, python_class_name):
     except:
       Log.error("Could not resolve class %s with special handling" % python_class_name)
 
-  mod = __import__(from_path, fromlist=[import_name], level=-1)
+  mod = __import__(from_path, fromlist=[import_name], level=0)
   Log.debug("Imported module: %s" % str(mod))
   return getattr(mod, import_name)

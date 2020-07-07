@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 
 #  Licensed to the Apache Software Foundation (ASF) under one
@@ -73,6 +73,5 @@ def run(command, parser, cl_args, unknown_args):
   if cl_args['deploy_mode'] == config.SERVER_MODE:
     dict_extra_args = {"container_id": str(container_id)}
     return cli_helper.run_server(command, cl_args, message, extra_args=dict_extra_args)
-  else:
-    list_extra_args = ["--container_id", str(container_id)]
-    return cli_helper.run_direct(command, cl_args, message, extra_args=list_extra_args)
+  list_extra_args = ["--container_id", str(container_id)]
+  return cli_helper.run_direct(command, cl_args, message, extra_args=list_extra_args)

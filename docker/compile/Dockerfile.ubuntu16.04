@@ -30,17 +30,18 @@ RUN apt-get update && apt-get -y install \
       build-essential \
       cmake \
       curl \
-      libssl-dev \
       git \
+      libssl-dev \
       libtool-bin \
-      libunwind8 \
       libunwind-setjmp0-dev \
+      python \
+      python3-dev \
       pkg-config \
-      python-dev \
       libcppunit-dev \
+      software-properties-common \
       tree \
-      zip \
       unzip \
+      zip \
       wget
 
 RUN apt-get update && apt-get -y install \

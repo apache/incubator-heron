@@ -15,7 +15,7 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
-SLAVES=1
+SLAVES=0
 NET_PREFIX="192.168.25."
 
 NODES={"master" => NET_PREFIX + "5"}
@@ -29,12 +29,33 @@ File.open('.vagrant/hosts', 'w') do |file|
 end
 
 Vagrant.configure(2) do |config|
-  config.vm.box = "ubuntu/trusty64"
+  # config.vm.box = "ubuntu/focal64"
+  config.vm.box = "bento/ubuntu-20.04"
   config.vm.synced_folder "../", "/vagrant"
+  config.vm.boot_timeout = 600
 
   config.vm.define "master" do |master|
     master.vm.provider "virtualbox" do |v|
-      v.memory = 4096
+      host = RbConfig::CONFIG['host_os']
+      mem_ratio = 1.0/2
+      cpu_exec_cap = 75
+      # Give VM 1/2 system memory & access to all cpu cores on the host
+      if host =~ /darwin/
+        cpus = `sysctl -n hw.ncpu`.to_i
+        # sysctl returns Bytes and we need to convert to MB
+        mem = `sysctl -n hw.memsize`.to_f / 1024**2 * mem_ratio
+      elsif host =~ /linux/
+        cpus = `nproc`.to_i
+        # meminfo shows KB and we need to convert to MB
+        mem = `grep 'MemTotal' /proc/meminfo | sed -E -e 's/MemTotal:\\s+//' -e 's/ kB//'`.to_i / 1024 * mem_ratio
+      else # Windows folks
+        cpus = `wmic cpu get NumberOfCores`.split("\n")[2].to_i
+        mem = `wmic OS get TotalVisibleMemorySize`.split("\n")[2].to_i / 1024 * mem_ratio
+      end
+      mem = mem.to_i
+      v.customize ["modifyvm", :id, "--cpuexecutioncap", cpu_exec_cap]
+      v.memory = mem
+      v.cpus = cpus
     end
 
     master.vm.hostname = "master"

@@ -195,6 +195,8 @@ def _pex_binary_impl(ctx):
         "--output-file",
         deploy_pex.path,
         "--disable-cache",
+        "--python-shebang", "#!/usr/bin/env python3",
+        "--no-compile",
         manifest_file.path,
     ]
     #EXTRA_PEX_ARGS#
@@ -321,7 +323,7 @@ pex_bin_attrs = _dmerge(pex_attrs, {
     "pex_verbosity": attr.int(default = 0),
     "resources": attr.label_list(allow_files = True),
     "zip_safe": attr.bool(
-        default = True,
+        default = False,
         mandatory = False,
     ),
 })

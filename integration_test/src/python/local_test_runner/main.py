@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 
 #  Licensed to the Apache Software Foundation (ASF) under one
@@ -34,12 +34,12 @@ from ..common import status
 from heron.common.src.python.utils import log
 
 # import test_kill_bolt
-import test_kill_metricsmgr
-import test_kill_stmgr
-import test_kill_stmgr_metricsmgr
-import test_kill_tmaster
-import test_scale_up
-import test_template
+from . import test_kill_metricsmgr
+from . import test_kill_stmgr
+from . import test_kill_stmgr_metricsmgr
+from . import test_kill_tmaster
+from . import test_scale_up
+from . import test_template
 
 TEST_CLASSES = [
     test_template.TestTemplate,
@@ -82,7 +82,7 @@ def run_tests(test_classes, args):
         failures += [testname]
 
   except Exception as e:
-    logging.error("Exception thrown while running tests: %s", str(e))
+    logging.error("Exception thrown while running tests: %s", str(e), exc_info=True)
   finally:
     tracker_process.kill()
 
@@ -110,7 +110,7 @@ def main():
 
   # Read the configuration file from package
   conf_file = DEFAULT_TEST_CONF_FILE
-  conf_string = pkgutil.get_data(__name__, conf_file)
+  conf_string = pkgutil.get_data(__name__, conf_file).decode()
   decoder = json.JSONDecoder(strict=False)
 
   # Convert the conf file to a json format

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 
 #  Licensed to the Apache Software Foundation (ASF) under one
@@ -22,7 +22,7 @@
 from collections import namedtuple
 from abc import abstractmethod
 
-class ITaskHook(object):
+class ITaskHook:
   """ITaskHook is an interface for defining task hooks for a topology"""
 
   @abstractmethod
@@ -32,12 +32,10 @@ class ITaskHook(object):
     :param conf: component-specific configuration passed to the topology
     :param context: topology context
     """
-    pass
 
   @abstractmethod
   def clean_up(self):
     """Called just before the spout/bolt's cleanup method is called"""
-    pass
 
   @abstractmethod
   def emit(self, emit_info):
@@ -45,7 +43,6 @@ class ITaskHook(object):
 
     :param emit_info: EmitInfo object
     """
-    pass
 
   @abstractmethod
   def spout_ack(self, spout_ack_info):
@@ -53,7 +50,6 @@ class ITaskHook(object):
 
     :param spout_ack_info: SpoutAckInfo object
     """
-    pass
 
   @abstractmethod
   def spout_fail(self, spout_fail_info):
@@ -61,7 +57,6 @@ class ITaskHook(object):
 
     :param spout_fail_info: SpoutFailInfo object
     """
-    pass
 
   @abstractmethod
   def bolt_execute(self, bolt_execute_info):
@@ -69,7 +64,6 @@ class ITaskHook(object):
 
     :param bolt_execute_info: BoltExecuteInfo object
     """
-    pass
 
   @abstractmethod
   def bolt_ack(self, bolt_ack_info):
@@ -77,7 +71,6 @@ class ITaskHook(object):
 
     :param bolt_ack_info: BoltAckInfo object
     """
-    pass
 
   @abstractmethod
   def bolt_fail(self, bolt_fail_info):
@@ -85,7 +78,6 @@ class ITaskHook(object):
 
     :param bolt_fail_info: BoltFailInfo object
     """
-    pass
 
 
 ##################################################################################

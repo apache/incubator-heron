@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 
 #  Licensed to the Apache Software Foundation (ASF) under one
@@ -21,7 +21,7 @@
 """module for base streamlet API spout: StreamletSpoutBase"""
 from heronpy.api.stream import Stream
 
-class StreamletSpoutBase(object):
+class StreamletSpoutBase:
   """StreamletSpoutBase"""
   # output declarer
   outputs = [Stream(fields=['_output_'], name='output')]

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 
 #  Licensed to the Apache Software Foundation (ASF) under one
@@ -32,4 +32,4 @@ DEFAULT_TRACKER_URL = "http://127.0.0.1:8888"
 
 DEFAULT_BASE_URL = ""
 
-VERSION = common_config.get_version_number(zipped_pex=True)
+VERSION = common_config.get_version_number()

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 
 #  Licensed to the Apache Software Foundation (ASF) under one
@@ -20,7 +20,7 @@
 
 ''' config.py '''
 
-class Config(object):
+class Config:
   """
   Responsible for reading the yaml config files and
   exposing state locations through python methods.

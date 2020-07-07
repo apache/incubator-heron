@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 
 #  Licensed to the Apache Software Foundation (ASF) under one
@@ -28,7 +28,7 @@ EXTRA_LINK_NAME_KEY = "name"
 EXTRA_LINK_FORMATTER_KEY = "formatter"
 EXTRA_LINK_URL_KEY = "url"
 
-class Config(object):
+class Config:
   """
   Responsible for reading the yaml config file and
   exposing various tracker configs.

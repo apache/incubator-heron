@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 
 #  Licensed to the Apache Software Foundation (ASF) under one
@@ -22,7 +22,7 @@
 
 
 ################################################################################
-class Graph(object):
+class Graph:
   '''
   Adjacency list of edges in graph. This will correspond to the streams in a topology DAG.
   '''

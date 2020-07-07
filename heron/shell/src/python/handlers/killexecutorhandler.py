@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 
 #  Licensed to the Apache Software Foundation (ASF) under one
@@ -20,6 +20,7 @@
 
 
 ''' killexecutorhandler.py '''
+# pylint: disable=wrong-import-order
 from future.standard_library import install_aliases
 install_aliases()
 
@@ -67,11 +68,11 @@ class KillExecutorHandler(tornado.web.RequestHandler):
           fh = open(filepath)
           firstLine = int(fh.readline())
           fh.close()
-          logger.info("Killing process " + instanceId + " " + str(firstLine))
+          logger.info("Killing process %s %s", instanceId, firstLine)
           os.kill(firstLine, signal.SIGTERM)
           status_finish(200)
       else: # instance_id not found
-        logger.info(filepath + " not found")
+        logger.info("%s not found", filepath)
         status_finish(422)
     else: # instance_id not given, which means kill the container
       kill_parent()

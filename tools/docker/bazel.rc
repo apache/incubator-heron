@@ -17,6 +17,7 @@
 
 # This is so we understand failures better
 build --verbose_failures
+build --host_force_python=PY3
 
 # This is so we don't use sandboxed execution. Sandboxed execution
 # runs stuff in a container, and since Travis already runs its script

@@ -100,8 +100,8 @@ AM_CONDITIONAL([SYSLINUX], [test x$sys_os = xlinux])
 ACX_PTHREAD
 
 # Check the python version required
-AM_PATH_PYTHON([2.4.3])
-AC_PATH_PROG([PYTHON], [python], [],[])
+AM_PATH_PYTHON([3.4])
+AC_PATH_PROG([PYTHON3], [python3], [],[])
 
 abs_top_builddir=`pwd`
 AC_SUBST(abs_top_builddir)

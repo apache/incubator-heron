@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 
 #  Licensed to the Apache Software Foundation (ASF) under one
@@ -20,13 +20,11 @@
 
 '''builder.py: module for creating streamlets'''
 
-import sets
-
 from heronpy.streamlet.generator import Generator
 from heronpy.streamlet.impl.supplierspout import SupplierStreamlet
 from heronpy.streamlet.impl.generatorspout import GeneratorStreamlet
 
-class Builder(object):
+class Builder:
   """A Builder object is used to build the functional API DAG in Heron."""
   def __init__(self):
     """
@@ -50,7 +48,7 @@ class Builder(object):
   # pylint: disable=protected-access
   def build(self, bldr):
     """Builds the topology and returns the builder"""
-    stage_names = sets.Set()
+    stage_names = set()
     for source in self._sources:
       source._build(bldr, stage_names)
     for source in self._sources:

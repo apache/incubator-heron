@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 
 #  Licensed to the Apache Software Foundation (ASF) under one
@@ -20,7 +20,7 @@
 
 '''window.py: module for defining Window'''
 
-class Window(object):
+class Window:
   """Window is a container containing information about a particular window.
      Transformations that depend on Windowing, pass the window information
      inside their streamlets using this container.

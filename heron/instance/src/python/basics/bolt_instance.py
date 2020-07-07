@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 
 #  Licensed to the Apache Software Foundation (ASF) under one
@@ -128,8 +128,8 @@ class BoltInstance(BaseInstance):
     # Set the anchors for a tuple
     if anchors is not None:
       merged_roots = set()
-      for tup in [t for t in anchors if isinstance(t, HeronTuple) and t.roots is not None]:
-        merged_roots.update(tup.roots)
+      for tuple_ in [t for t in anchors if isinstance(t, HeronTuple) and t.roots is not None]:
+        merged_roots.update(tuple_.roots)
       for rt in merged_roots:
         to_add = data_tuple.roots.add()
         to_add.CopyFrom(rt)
@@ -154,6 +154,7 @@ class BoltInstance(BaseInstance):
       if direct_task is not None:
         sent_task_ids.append(direct_task)
       return sent_task_ids
+    return None
 
   def process_incoming_tuples(self):
     """Should be called when tuple was buffered into in_stream
@@ -184,7 +185,7 @@ class BoltInstance(BaseInstance):
       if isinstance(tuples, tuple_pb2.HeronTupleSet):
         if tuples.HasField("control"):
           raise RuntimeError("Bolt cannot get acks/fails from other components")
-        elif tuples.HasField("data"):
+        if tuples.HasField("data"):
           stream = tuples.data.stream
 
           for data_tuple in tuples.data.tuples:

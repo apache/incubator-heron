@@ -16,9 +16,10 @@ addons:
     packages:
       - libtool-bin
       - libcppunit-dev
+      - python3
       - pkg-config
-      - python-dev
-      - python-wheel
+      - python3-dev
+      - python3-wheel
       - wget
       - zip
       - zlib1g-dev
@@ -34,6 +35,10 @@ before_install:
   - chmod +x bazel-${BAZEL_VERSION}-installer-linux-x86_64.sh
   - ./bazel-${BAZEL_VERSION}-installer-linux-x86_64.sh --user
 
+install:
+  - sudo apt-get install python3-pip python3-setuptools
+  - pip3 install travis-wait-improved
+
 script:
   - which gcc
   - gcc --version
@@ -41,6 +46,6 @@ script:
   - g++ --version
   - which python
   - python -V
-  - which python2.7
-  - python2.7 -V
-  - scripts/travis/ci.sh
+  - which python3
+  - python3 -V
+  - travis-wait-improved --timeout=180m scripts/travis/ci.sh
