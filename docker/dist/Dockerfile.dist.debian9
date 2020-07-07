@@ -21,7 +21,8 @@ RUN apt-get -y update \
     && apt-get -y install \
     curl \
     netcat-openbsd \
-    python \
+    python3 \
+    python3-dev \
     supervisor \
     unzip \
     && apt-get clean all \

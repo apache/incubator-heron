@@ -13,7 +13,7 @@
 # limitations under the License.
 '''base_component.py'''
 
-class BaseComponent(object):
+class BaseComponent:
   """Base component for Heron spout and bolt"""
   def __init__(self, delegate):
     """Initializes BaseComponent

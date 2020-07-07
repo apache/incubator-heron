@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 
 #  Licensed to the Apache Software Foundation (ASF) under one
@@ -27,7 +27,9 @@ import os
 import string
 import sys
 import subprocess
+from pathlib import Path
 import yaml
+
 
 # directories for heron tools distribution
 BIN_DIR = "bin"
@@ -76,8 +78,7 @@ def make_shell_logfiles_url(host, shell_port, _, instance_id=None):
     return None
   if not instance_id:
     return "http://%s:%d/browse/log-files" % (host, shell_port)
-  else:
-    return "http://%s:%d/file/log-files/%s.log.0" % (host, shell_port, instance_id)
+  return "http://%s:%d/file/log-files/%s.log.0" % (host, shell_port, instance_id)
 
 def make_shell_logfile_data_url(host, shell_port, instance_id, offset, length):
   """
@@ -117,7 +118,7 @@ def cygpath(x):
   :return: the path in windows
   """
   command = ['cygpath', '-wp', x]
-  p = subprocess.Popen(command, stdout=subprocess.PIPE)
+  p = subprocess.Popen(command, stdout=subprocess.PIPE, universal_newlines=True)
   output, _ = p.communicate()
   lines = output.split("\n")
   return lines[0]
@@ -139,8 +140,9 @@ def get_heron_tracker_dir():
   This will extract heron tracker directory from .pex file.
   :return: root location for heron-tools.
   """
-  path = "/".join(os.path.realpath(__file__).split('/')[:-8])
-  return normalized_class_path(path)
+  # assuming the tracker runs from $HERON_ROOT/bin/heron-tracker
+  root = Path(sys.argv[0]).resolve(strict=True).parent.parent
+  return normalized_class_path(str(root))
 
 def get_heron_tracker_bin_dir():
   """

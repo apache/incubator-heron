@@ -79,7 +79,7 @@ def _save_or_remove(config, cluster):
     config_directory = get_config_directory(cluster)
     if not os.path.isdir(config_directory):
       os.makedirs(config_directory)
-    with open(cluster_config_file, 'wb') as cf:
+    with open(cluster_config_file, 'w') as cf:
       yaml.dump(config, cf, default_flow_style=False)
   else:
     if os.path.isfile(cluster_config_file):

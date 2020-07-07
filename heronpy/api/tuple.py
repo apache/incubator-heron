@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 
 #  Licensed to the Apache Software Foundation (ASF) under one
@@ -37,7 +37,7 @@ Tuple = namedtuple('Tuple', 'id component stream task values')
 :type values: tuple
 """
 
-class TupleHelper(object):
+class TupleHelper:
   """Tuple generator, returns StreamParse compatible tuple"""
   TICK_TUPLE_ID = "__tick"
   TICK_SOURCE_COMPONENT = "__system"

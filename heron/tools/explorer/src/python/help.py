@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 
 #  Licensed to the Apache Software Foundation (ASF) under one
@@ -60,6 +60,5 @@ def run(command, parser, args, unknown_args):
   if subparser:
     print(subparser.format_help())
     return True
-  else:
-    Log.error("Unknown subcommand \'%s\'" % command_help)
-    return False
+  Log.error("Unknown subcommand \'%s\'" % command_help)
+  return False

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 
 #  Licensed to the Apache Software Foundation (ASF) under one
@@ -175,7 +175,6 @@ class ComponentSpecTest(unittest.TestCase):
     with self.assertRaises(ValueError):
       spec._sanitize_inputs()
 
-  # pylint: disable=redefined-variable-type
   # pylint: disable=pointless-statement
   def test_sanitize_outputs(self):
     # outputs is None (no argument to outputs)

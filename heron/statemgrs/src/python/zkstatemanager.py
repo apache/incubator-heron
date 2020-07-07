@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 
 #  Licensed to the Apache Software Foundation (ASF) under one
@@ -206,9 +206,6 @@ class ZkStateManager(StateManager):
     except ZookeeperError:
       raise_(StateException("Zookeeper while creating topology",
                             StateException.EX_TYPE_ZOOKEEPER_ERROR), sys.exc_info()[2])
-    except Exception:
-      # Just re raise the exception.
-      raise
 
   def delete_topology(self, topologyName):
     """ delete topology """
@@ -227,9 +224,6 @@ class ZkStateManager(StateManager):
     except ZookeeperError:
       raise_(StateException("Zookeeper while deleting topology",
                             StateException.EX_TYPE_ZOOKEEPER_ERROR), sys.exc_info()[2])
-    except Exception:
-      # Just re raise the exception.
-      raise
 
   def get_packing_plan(self, topologyName, callback=None):
     """ get packing plan """
@@ -349,9 +343,6 @@ class ZkStateManager(StateManager):
     except ZookeeperError:
       raise_(StateException("Zookeeper while creating pplan",
                             StateException.EX_TYPE_ZOOKEEPER_ERROR), sys.exc_info()[2])
-    except Exception:
-      # Just re raise the exception.
-      raise
 
   def delete_pplan(self, topologyName):
     """ delete physical plan info """
@@ -370,9 +361,6 @@ class ZkStateManager(StateManager):
     except ZookeeperError:
       raise_(StateException("Zookeeper while deleting pplan",
                             StateException.EX_TYPE_ZOOKEEPER_ERROR), sys.exc_info()[2])
-    except Exception:
-      # Just re raise the exception.
-      raise
 
   def get_execution_state(self, topologyName, callback=None):
     """ get execution state """
@@ -445,9 +433,6 @@ class ZkStateManager(StateManager):
     except ZookeeperError:
       raise_(StateException("Zookeeper while creating execution state",
                             StateException.EX_TYPE_ZOOKEEPER_ERROR), sys.exc_info()[2])
-    except Exception:
-      # Just re raise the exception.
-      raise
 
   def delete_execution_state(self, topologyName):
     """ delete execution state """
@@ -466,9 +451,6 @@ class ZkStateManager(StateManager):
     except ZookeeperError:
       raise_(StateException("Zookeeper while deleting execution state",
                             StateException.EX_TYPE_ZOOKEEPER_ERROR), sys.exc_info()[2])
-    except Exception:
-      # Just re raise the exception.
-      raise
 
   def get_tmaster(self, topologyName, callback=None):
     """ get tmaster """

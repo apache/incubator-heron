@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 
 #  Licensed to the Apache Software Foundation (ASF) under one
@@ -58,13 +58,13 @@ class TopologyExceptionSummaryHandler(base.BaseHandler):
     else:
       comp_names = [comp_name]
     exception_infos = dict()
-    for comp_name in comp_names:
-      exception_infos[comp_name] = yield access.get_component_exceptionsummary(
-          cluster, environ, topology, comp_name)
+    for comp_name_ in comp_names:
+      exception_infos[comp_name_] = yield access.get_component_exceptionsummary(
+          cluster, environ, topology, comp_name_)
 
     # Combine exceptions from multiple component
     aggregate_exceptions = dict()
-    for comp_name, exception_logs in list(exception_infos.items()):
+    for comp_name_, exception_logs in list(exception_infos.items()):
       for exception_log in exception_logs:
         class_name = exception_log['class_name']
         if class_name != '':

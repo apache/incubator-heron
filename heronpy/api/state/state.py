@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 
 #  Licensed to the Apache Software Foundation (ASF) under one
@@ -21,7 +21,7 @@
 '''state.py'''
 from abc import abstractmethod
 
-class State(object):
+class State:
   """State represents the state interface as seen by stateful bolts and spouts.
   In Heron, state gives a notional Key/Value interface along with the
   ability to iterate over the key/values
@@ -32,7 +32,6 @@ class State(object):
     :param key: The key to get back the value
     :param value: The value associated with the key
     """
-    pass
 
   @abstractmethod
   def get(self, key):
@@ -40,20 +39,17 @@ class State(object):
     :param key: The key whose value we want back
     :return: The value associated with the key
     """
-    pass
 
   @abstractmethod
   def enumerate(self):
     """Allows one to enumerate over the state.
     :return: The enumerate object
     """
-    pass
 
   @abstractmethod
   def clear(self):
     """Clears the state to empty state
     """
-    pass
 
 class HashMapState(State):
   """HashMapState represents default implementation of the State interface
@@ -61,14 +57,11 @@ class HashMapState(State):
   def __init__(self):
     self._dict = {}
 
-  def put(self, k, v):
-    self._dict[k] = v
+  def put(self, key, value):
+    self._dict[key] = value
 
-  def get(self, k):
-    if k in self._dict:
-      return self._dict[k]
-    else:
-      return None
+  def get(self, key):
+    return self._dict.get(key)
 
   def enumerate(self):
     return enumerate(self._dict)

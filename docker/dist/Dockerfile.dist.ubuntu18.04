@@ -22,7 +22,8 @@ RUN apt-get -y update \
     curl \
     netcat-openbsd \
     openjdk-11-jre-headless \
-    python \
+    python3 \
+    python3-distutils \
     supervisor \
     unzip \
     && apt-get clean

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 
 #  Licensed to the Apache Software Foundation (ASF) under one
@@ -81,8 +81,7 @@ def _convert_java_value(kv, include_non_primitives=True):
     Log.exception("Failed to parse data as java object")
     if include_non_primitives:
       return _raw_value(kv)
-    else:
-      return None
+    return None
 
 def _raw_value(kv):
   return {
@@ -91,7 +90,7 @@ def _raw_value(kv):
       'raw' : utils.hex_escape(kv.serialized_value)}
 
 
-class Tracker(object):
+class Tracker:
   """
   Tracker is a stateless cache of all the topologies
   for the given state managers. It watches for
@@ -129,7 +128,6 @@ class Tracker(object):
       traceback.print_exc()
       sys.exit(1)
 
-    # pylint: disable=deprecated-lambda
     def on_topologies_watch(state_manager, topologies):
       """watch topologies"""
       Log.info("State watch triggered for topologies.")
@@ -157,7 +155,6 @@ class Tracker(object):
     for state_manager in self.state_managers:
       state_manager.stop()
 
-  # pylint: disable=deprecated-lambda
   def getTopologyByClusterRoleEnvironAndName(self, cluster, role, environ, topologyName):
     """
     Find and return the topology given its cluster, environ, topology name, and
@@ -172,9 +169,8 @@ class Tracker(object):
       if role is not None:
         raise Exception("Topology not found for {0}, {1}, {2}, {3}".format(
             cluster, role, environ, topologyName))
-      else:
-        raise Exception("Topology not found for {0}, {1}, {2}".format(
-            cluster, environ, topologyName))
+      raise Exception("Topology not found for {0}, {1}, {2}".format(
+          cluster, environ, topologyName))
 
     # There is only one topology which is returned.
     return topologies[0]
@@ -316,14 +312,10 @@ class Tracker(object):
   @staticmethod
   def extract_runtime_state(topology):
     runtime_state = {}
-    runtime_state["has_physical_plan"] = \
-      True if topology.physical_plan else False
-    runtime_state["has_packing_plan"] = \
-      True if topology.packing_plan else False
-    runtime_state["has_tmaster_location"] = \
-      True if topology.tmaster else False
-    runtime_state["has_scheduler_location"] = \
-      True if topology.scheduler_location else False
+    runtime_state["has_physical_plan"] = bool(topology.physical_plan)
+    runtime_state["has_packing_plan"] = bool(topology.packing_plan)
+    runtime_state["has_tmaster_location"] = bool(topology.tmaster)
+    runtime_state["has_scheduler_location"] = bool(topology.scheduler_location)
     # "stmgrs" listed runtime state for each stream manager
     # however it is possible that physical plan is not complete
     # yet and we do not know how many stmgrs there are. That said,

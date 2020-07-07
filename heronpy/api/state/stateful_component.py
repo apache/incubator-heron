@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 
 #  Licensed to the Apache Software Foundation (ASF) under one
@@ -21,7 +21,7 @@
 '''stateful_component.py'''
 from abc import abstractmethod
 
-class StatefulComponent(object):
+class StatefulComponent:
   """Defines a component that saves its internal state using the State interface
   When running under effectively once semantics, the state is periodically checkpointed
   and is replayed when errors occur to a globally consistent checkpoint.
@@ -36,11 +36,9 @@ class StatefulComponent(object):
     Note that init_state() is called before initialize()
     :param state: the previously saved state of the component.
     """
-    pass
 
   @abstractmethod
   def pre_save(self):
     """This is a hook for the component to perform some actions just before the
     framework saves its state.
     """
-    pass

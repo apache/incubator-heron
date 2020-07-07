@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 
 #  Licensed to the Apache Software Foundation (ASF) under one
@@ -24,13 +24,12 @@ from heronpy.api.topology import TopologyBuilder
 from heronpy.streamlet.builder import Builder
 from heronpy.streamlet.config import Config
 
-class Runner(object):
+class Runner:
   """Runner is used to run a topology that is built by the builder.
      It exports a sole function called run that takes care of constructing the topology
   """
   def __init__(self):
     """Nothing really"""
-    pass
 
   # pylint: disable=protected-access, no-self-use
   def run(self, name, config, builder):

@@ -34,13 +34,13 @@ export PATH=${HOME}/bin:$PATH
 # install clients and tools
 T="heron clients/tools install"
 start_timer "$T"
-python ${UTILS}/save-logs.py "heron_install.txt" ./heron-install.sh --user
+${UTILS}/save-logs.py "heron_install.txt" ./heron-install.sh --user
 end_timer "$T"
 
 # install tests
 T="heron tests install"
 start_timer "$T"
-python ${UTILS}/save-logs.py "heron_tests_install.txt" ./heron-tests-install.sh --user
+${UTILS}/save-logs.py "heron_tests_install.txt" ./heron-tests-install.sh --user
 end_timer "$T"
 
 print_timer_summary

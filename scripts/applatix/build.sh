@@ -79,14 +79,14 @@ echo "Using $PLATFORM platform"
 # build heron
 T="heron build"
 start_timer "$T"
-python ${UTILS}/save-logs.py "heron_build.txt" bazel\
+${UTILS}/save-logs.py "heron_build.txt" bazel\
   --bazelrc=tools/applatix/bazel.rc build --config=$PLATFORM heron/...
 end_timer "$T"
 
 # run heron unit tests
 T="heron test non-flaky"
 start_timer "$T"
-python ${UTILS}/save-logs.py "heron_test_non_flaky.txt" bazel\
+${UTILS}/save-logs.py "heron_test_non_flaky.txt" bazel\
   --bazelrc=tools/applatix/bazel.rc test\
   --test_summary=detailed --test_output=errors\
   --config=$PLATFORM --test_tag_filters=-flaky heron/...
@@ -96,7 +96,7 @@ end_timer "$T"
 # which should be fixed. For now, run them serially
 T="heron test flaky"
 start_timer "$T"
-python ${UTILS}/save-logs.py "heron_test_flaky.txt" bazel\
+${UTILS}/save-logs.py "heron_test_flaky.txt" bazel\
   --bazelrc=tools/applatix/bazel.rc test\
   --test_summary=detailed --test_output=errors\
   --config=$PLATFORM --test_tag_filters=flaky --jobs=1 heron/...
@@ -104,14 +104,14 @@ end_timer "$T"
 
 T="heron build binpkgs"
 start_timer "$T"
-python ${UTILS}/save-logs.py "heron_build_binpkgs.txt" bazel\
+${UTILS}/save-logs.py "heron_build_binpkgs.txt" bazel\
   --bazelrc=tools/applatix/bazel.rc build\
   --config=$PLATFORM scripts/packages:binpkgs
 end_timer "$T"
 
 T="heron build testpkgs"
 start_timer "$T"
-python ${UTILS}/save-logs.py "heron_build_binpkgs.txt" bazel\
+${UTILS}/save-logs.py "heron_build_binpkgs.txt" bazel\
   --bazelrc=tools/applatix/bazel.rc build\
   --config=$PLATFORM scripts/packages:testpkgs
 end_timer "$T"

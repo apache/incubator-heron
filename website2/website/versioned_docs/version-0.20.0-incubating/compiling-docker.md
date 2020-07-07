@@ -205,7 +205,7 @@ RUN apt-get update && apt-get -y install \
          libunwind8 \
          libunwind-setjmp0-dev \
          python \
-         python2.7-dev \
+         python3-dev \
          python-software-properties \
          software-properties-common \
          python-setuptools \

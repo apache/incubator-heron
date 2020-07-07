@@ -17,7 +17,7 @@
 
 
 build --genrule_strategy=standalone
-build --host_force_python=PY2
+build --host_force_python=PY3
 build --ignore_unsupported_sandboxing
 build --spawn_strategy=standalone
 build --workspace_status_command scripts/release/status.sh

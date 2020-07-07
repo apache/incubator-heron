@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 
 #  Licensed to the Apache Software Foundation (ASF) under one
@@ -24,7 +24,7 @@ from abc import abstractmethod
 from heronpy.streamlet.impl.streamletboltbase import StreamletBoltBase
 
 # pylint: disable=too-many-instance-attributes, protected-access
-class Streamlet(object):
+class Streamlet:
   """A Streamlet is a (potentially unbounded) ordered collection of tuples
      Streamlets originate from pub/sub systems(such Pulsar/Kafka), or from static data(such as
      csv files, HDFS files), or for that matter any other source. They are also created by
@@ -59,6 +59,7 @@ class Streamlet(object):
   def map(self, map_function):
     """Return a new Streamlet by applying map_function to each element of this Streamlet.
     """
+    # pylint: disable=import-outside-toplevel
     from heronpy.streamlet.impl.mapbolt import MapStreamlet
     map_streamlet = MapStreamlet(map_function, self)
     self._add_child(map_streamlet)
@@ -68,6 +69,7 @@ class Streamlet(object):
     """Return a new Streamlet by applying map_function to each element of this Streamlet
        and flattening the result
     """
+    # pylint: disable=import-outside-toplevel
     from heronpy.streamlet.impl.flatmapbolt import FlatMapStreamlet
     fm_streamlet = FlatMapStreamlet(flatmap_function, self)
     self._add_child(fm_streamlet)
@@ -76,6 +78,7 @@ class Streamlet(object):
   def filter(self, filter_function):
     """Return a new Streamlet containing only the elements that satisfy filter_function
     """
+    # pylint: disable=import-outside-toplevel
     from heronpy.streamlet.impl.filterbolt import FilterStreamlet
     filter_streamlet = FilterStreamlet(filter_function, self)
     self._add_child(filter_streamlet)
@@ -90,6 +93,7 @@ class Streamlet(object):
     It could also return a list of partitions if it wants to send it to multiple
     partitions.
     """
+    # pylint: disable=import-outside-toplevel
     from heronpy.streamlet.impl.repartitionbolt import RepartitionStreamlet
     if repartition_function is None:
       repartition_function = lambda x: x
@@ -113,6 +117,7 @@ class Streamlet(object):
       reduce_function takes two element at one time and reduces them to one element that
       is used in the subsequent operations.
     """
+    # pylint: disable=import-outside-toplevel
     from heronpy.streamlet.impl.reducebywindowbolt import ReduceByWindowStreamlet
     reduce_streamlet = ReduceByWindowStreamlet(window_config, reduce_function, self)
     self._add_child(reduce_streamlet)
@@ -122,6 +127,7 @@ class Streamlet(object):
   def union(self, other_streamlet):
     """Returns a new Streamlet that consists of elements of both this and other_streamlet
     """
+    # pylint: disable=import-outside-toplevel
     from heronpy.streamlet.impl.unionbolt import UnionStreamlet
     union_streamlet = UnionStreamlet(self, other_streamlet)
     self._add_child(union_streamlet)
@@ -134,6 +140,7 @@ class Streamlet(object):
     Before starting to cycle over the Streamlet, the open function of the transform_operator is
     called. This allows the transform_operator to do any kind of initialization/loading, etc.
     """
+    # pylint: disable=import-outside-toplevel
     from heronpy.streamlet.impl.transformbolt import TransformStreamlet
     transform_streamlet = TransformStreamlet(transform_operator, self)
     self._add_child(transform_streamlet)
@@ -142,22 +149,23 @@ class Streamlet(object):
   def log(self):
     """Logs all elements of this streamlet. This returns nothing
     """
+    # pylint: disable=import-outside-toplevel
     from heronpy.streamlet.impl.logbolt import LogStreamlet
     log_streamlet = LogStreamlet(self)
     self._add_child(log_streamlet)
-    return
 
   def consume(self, consume_function):
     """Calls consume_function for each element of this streamlet. This function returns nothing
     """
+    # pylint: disable=import-outside-toplevel
     from heronpy.streamlet.impl.consumebolt import ConsumeStreamlet
     consume_streamlet = ConsumeStreamlet(consume_function, self)
     self._add_child(consume_streamlet)
-    return
 
   def join(self, join_streamlet, window_config, join_function):
     """Return a new Streamlet by joining join_streamlet with this streamlet
     """
+    # pylint: disable=import-outside-toplevel
     from heronpy.streamlet.impl.joinbolt import JoinStreamlet, JoinBolt
     join_streamlet_result = JoinStreamlet(JoinBolt.INNER, window_config,
                                           join_function, self, join_streamlet)
@@ -168,6 +176,7 @@ class Streamlet(object):
   def outer_right_join(self, join_streamlet, window_config, join_function):
     """Return a new Streamlet by outer right join_streamlet with this streamlet
     """
+    # pylint: disable=import-outside-toplevel
     from heronpy.streamlet.impl.joinbolt import JoinStreamlet, JoinBolt
     join_streamlet_result = JoinStreamlet(JoinBolt.OUTER_RIGHT, window_config,
                                           join_function, self, join_streamlet)
@@ -178,6 +187,7 @@ class Streamlet(object):
   def outer_left_join(self, join_streamlet, window_config, join_function):
     """Return a new Streamlet by left join_streamlet with this streamlet
     """
+    # pylint: disable=import-outside-toplevel
     from heronpy.streamlet.impl.joinbolt import JoinStreamlet, JoinBolt
     join_streamlet_result = JoinStreamlet(JoinBolt.OUTER_LEFT, window_config,
                                           join_function, self, join_streamlet)
@@ -188,6 +198,7 @@ class Streamlet(object):
   def outer_join(self, join_streamlet, window_config, join_function):
     """Return a new Streamlet by outer join_streamlet with this streamlet
     """
+    # pylint: disable=import-outside-toplevel
     from heronpy.streamlet.impl.joinbolt import JoinStreamlet, JoinBolt
 
     join_streamlet_result = JoinStreamlet(JoinBolt.OUTER, window_config,
@@ -200,6 +211,7 @@ class Streamlet(object):
     """Return a new Streamlet in which each (key, value) pair of this Streamlet are collected
        over the time_window and then reduced using the reduce_function
     """
+    # pylint: disable=import-outside-toplevel
     from heronpy.streamlet.impl.reducebykeyandwindowbolt import ReduceByKeyAndWindowStreamlet
     reduce_streamlet = ReduceByKeyAndWindowStreamlet(window_config, reduce_function, self)
     self._add_child(reduce_streamlet)

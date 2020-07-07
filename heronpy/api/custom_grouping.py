@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 
 #  Licensed to the Apache Software Foundation (ASF) under one
@@ -21,7 +21,7 @@
 '''custom_grouping.py: interface module for custom grouping'''
 from abc import abstractmethod
 
-class ICustomGrouping(object):
+class ICustomGrouping:
   '''Interface for custom grouping class'''
 
   @abstractmethod
@@ -36,7 +36,6 @@ class ICustomGrouping(object):
     :type target_tasks: list of int
     :param target_tasks: list of target task ids
     """
-    pass
 
   @abstractmethod
   def choose_tasks(self, values):
@@ -46,4 +45,3 @@ class ICustomGrouping(object):
     :rtype: list of int
     :return: list of task ids to which these values are emitted
     """
-    pass

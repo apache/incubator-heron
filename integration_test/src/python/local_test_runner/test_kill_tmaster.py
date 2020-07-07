@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 
 #  Licensed to the Apache Software Foundation (ASF) under one
@@ -22,7 +22,7 @@
 """test_kill_tmaster.py"""
 import logging
 import subprocess
-import test_template
+from . import test_template
 
 TMASTER_SHARD = 0
 
