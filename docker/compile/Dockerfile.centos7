@@ -26,6 +26,7 @@ RUN yum -y install \
       ant \
       automake \
       curl \
+      cppunit-devel \
       cmake \
       openssl-devel \
       file \
