@@ -20,10 +20,10 @@ import json
 import logging
 import os
 import pkgutil
+import random
 import re
 import sys
 import time
-import uuid
 from http.client import HTTPConnection
 from threading import Lock, Thread
 
@@ -255,6 +255,8 @@ class ZkFileBasedActualResultsHandler:
     self.state_mgr.start()
 
   def _load_state_mgr(self, cluster):
+    # this should use cli_config_path (after expanding HOME, or changing default to use ~ instead of $HOME)
+    # that way can have test copy of config
     state_mgr_config = configloader.load_state_manager_locations(cluster, os.getenv("HOME")
                                                                  +'/.heron/conf/'+cluster
                                                                  + '/statemgr.yaml')
@@ -496,6 +498,7 @@ def run_topology_tests(conf, test_args):
   """
   lock = Lock()
   timestamp = time.strftime('%Y%m%d%H%M%S')
+  run_fingerprint = f"{timestamp}-{random.randint(0, 2**16):04x}"
 
   http_server_host_port = "%s:%d" % (test_args.http_hostname, test_args.http_port)
 
@@ -562,8 +565,11 @@ def run_topology_tests(conf, test_args):
       lock.release()
 
   test_threads = []
-  for topology_conf in test_topologies:
-    topology_name = ("%s_%s_%s") % (timestamp, topology_conf["topologyName"], str(uuid.uuid4()))
+  for i, topology_conf in enumerate(test_topologies, 1):
+    # this name has to be valid for all tested schedullers, state managers, etc.
+    topology_name = f"run-{run_fingerprint}-test-{i:03}"
+    # TODO: make sure logs describe the test/topology that fails, as now topology_name is opaque
+    # topology_conf["topologyName"]
     classpath = topology_classpath_prefix + topology_conf["classPath"]
 
     update_args = ""

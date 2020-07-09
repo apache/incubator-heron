@@ -1,12 +1,21 @@
 #!/usr/bin/env bash
 :<<'DOC'
 set NO_CACHE=1 to always rebuild images.
+set DEBUG=1 to not clean up
+
+This requires kubectl, and kind.
 
 DOC
 set -o errexit -o nounset -o pipefail
 TAG=test
 HERE="$(cd "$(dirname "$0")"; pwd -P)"
-ROOT="$(cd "$HERE/../.."; pwd -P)"
+ROOT="$(git rev-parse --show-toplevel)"
+
+CLUSTER_NAME="kubernetes"
+
+API_URL="http://localhost:8001/api/v1/namespaces/default/services/heron-apiserver:9000/proxy"
+TRACKER_URL="http://localhost:8001/api/v1/namespaces/default/services/heron-tracker:8888/proxy"
+UI_URL="http://localhost:8001/api/v1/namespaces/default/services/heron-ui:8889/proxy"
 
 function bazel_file {
     # bazel_file VAR_NAME //some/build:target
@@ -23,14 +32,6 @@ function kind_images {
     docker exec -it kind-control-plane crictl images
 }
 
-function install_helm3 {
-    pushd /tmp
-        curl --location https://get.helm.sh/helm-v3.2.1-linux-amd64.tar.gz --output helm.tar.gz
-        tar --extract --file=helm.tar.gz --strip-components=1 linux-amd64/helm
-        mv helm ~/.local/bin/
-    popd
-}
-
 function action {
     (
         tput setaf 4;
@@ -39,12 +40,23 @@ function action {
     ) > /dev/stderr
 }
 
+function clean {
+    if [ -z "${DEBUG-}" ]; then
+        action "Cleaning up"
+        kind delete cluster
+        kill -TERM -$$
+    else
+        action "Not cleaning up due to DEBUG flag being set"
+    fi
+}
 
 function create_cluster {
     # trap "kind delete cluster" EXIT
     if [ -z "$(kind get clusters)" ]; then
         action "Creating kind cluster"
         kind create cluster --config="$0.kind.yaml"
+    else
+        action "Using existing kind cluster"
     fi
 }
 
@@ -59,7 +71,7 @@ function get_image {
         out="$expected"
     else
         action "Creating heron image"
-        local gz="$(scripts/release/docker-images build test debian10)"
+        local gz="$(scripts/release/docker-images build test "$distro")"
         # XXX: must un .gz https://github.com/kubernetes-sigs/kind/issues/1636
         gzip --decompress "$gz"
         out="${gz%%.gz}"
@@ -67,14 +79,34 @@ function get_image {
     archive="$out"
 }
 
+function url_wait {
+    local seconds="$1"
+    local url="$2"
+    local retries=0
+    tput sc
+    while ! curl "$url" --location --fail --silent --output /dev/null --write-out "attempt $retries: %{http_code}"
+    do
+        retries=$((retries + 1))
+        if [ $retries -eq 60 ]; then
+            echo
+            return 1
+        fi
+        sleep 1
+        tput el1
+        tput rc
+        tput sc
+    done
+    echo
+}
+
+trap clean EXIT
 create_cluster
 
-get_image debian10
+#get_image debian10
+get_image ubuntu20.04
 heron_archive="$archive"
 action "Loading heron docker image"
 kind load image-archive "$heron_archive"
-#image_heron="docker.io/bazel/scripts/images:heron"
-#image_heron="$heron_image"
 image_heron="heron/heron:$TAG"
 
 action "Loading bookkeeper image"
@@ -82,11 +114,36 @@ image_bookkeeper="docker.io/apache/bookkeeper:4.7.3"
 docker pull "$image_bookkeeper"
 kind load docker-image "$image_bookkeeper"
 
-action "Deploying heron with helm"
-# install heron in kind using helm
-bazel_file helm_yaml //scripts/packages:index.yaml
-helm install heron "$(dirname "$helm_yaml")/heron-0.0.0.tgz" \
-    --set image="$image_heron" \
-    --set imagePullPolicy=IfNotPresent \
-    --set bookieReplicas=1 \
-    --set zkReplicas=1
+action "Deploying to kubernetes"
+#kubectl create namespace default
+kubectl config set-context kind-kind --namespace=default
+
+# deploy
+DIR=./deploy/kubernetes/minikube
+sed "s#heron/heron:latest#$image_heron#g" ${DIR}/zookeeper.yaml > /tmp/zookeeper.yaml
+sed "s#heron/heron:latest#$image_heron#g" ${DIR}/tools.yaml > /tmp/tools.yaml
+sed "s#heron/heron:latest#$image_heron#g" ${DIR}/apiserver.yaml > /tmp/apiserver.yaml
+
+kubectl proxy -p 8001 &
+
+kubectl create -f /tmp/zookeeper.yaml
+kubectl get pods
+kubectl create -f ${DIR}/bookkeeper.yaml
+kubectl create -f /tmp/tools.yaml
+kubectl create -f /tmp/apiserver.yaml
+
+action "waiting for API server"
+url_wait 120 "$API_URL/api/v1/version"
+action "waiting for UI"
+url_wait 120 "$UI_URL/proxy"
+
+kubectl port-forward service/zookeeper 2181:2181 &
+
+action "API:       $API_URL"
+action "Tracker:   $TRACKER_URL"
+action "UI:        $UI_URL"
+action "Zookeeper: 127.0.0.1:2181"
+
+heron config "$CLUSTER_NAME" set service_url "$API_URL"
+
+"$HERE/test.sh"

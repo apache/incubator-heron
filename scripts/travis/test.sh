@@ -40,11 +40,13 @@ start_timer "$T"
 ${UTILS}/save-logs.py "heron_build_integration_test.txt" bazel --bazelrc=tools/travis/bazel.rc build --config=$PLATFORM integration_test/src/...
 end_timer "$T"
 
+:<<'SKIPPING-FOR-NOW'
 # install heron 
 T="heron install"
 start_timer "$T"
-${UTILS}/save-logs.py "heron_install.txt" bazel --bazelrc=tools/travis/bazel.rc run --config=$PLATFORM -- scripts/packages:heron-install.sh --user
+${UTILS}/save-logs.py "heron_install.txt" "$DIR/install.sh"
 end_timer "$T"
+SKIPPING-FOR-NOW
 
 # install tests
 T="heron tests install"
@@ -54,11 +56,13 @@ end_timer "$T"
 
 pathadd ${HOME}/bin/
 
+:<<'SKIPPING-FOR-NOW'
 # run local integration test
 T="heron integration_test local"
 start_timer "$T"
 ./bazel-bin/integration_test/src/python/local_test_runner/local-test-runner
 end_timer "$T"
+SKIPPING-FOR-NOW
 
 # initialize http-server for integration tests
 T="heron integration_test http-server initialization"
@@ -68,45 +72,68 @@ http_server_id=$!
 trap "kill -9 $http_server_id" SIGINT SIGTERM EXIT
 end_timer "$T"
 
-# run the scala integration test
-T="heron integration_test scala"
-start_timer "$T"
-${HOME}/bin/test-runner \
-  -hc heron -tb ${SCALA_INTEGRATION_TESTS_BIN} \
-  -rh localhost -rp 8080\
-  -tp ${HOME}/.herontests/data/scala \
-  -cl local -rl heron-staging -ev devel
-end_timer "$T"
+function integration_test {
+    # integration_test $cluster $test_bin
+    local cluster="$1"
+    local language="$2"
+    local test_bin="$3"
+    local host port
+    if [ "$cluster" == "local" ]; then
+        host=localhost
+        port=8080
+    else
+        #host="$(docker inspect kind-control-plane --format '{{ .NetworkSettings.Networks.kind.IPAddress }}')"
+        host="host.docker.internal"
+        host="$(docker inspect --format='{{range .NetworkSettings.Networks}}{{.Gateway}}{{end}}' kind-control-plane)"
+        #host=172.17.0.1
+        port=8080
+    fi
 
-# run the java integration test
-T="heron integration_test java"
-start_timer "$T"
-${HOME}/bin/test-runner \
-  -hc heron -tb ${JAVA_INTEGRATION_TESTS_BIN} \
-  -rh localhost -rp 8080\
-  -tp ${HOME}/.herontests/data/java \
-  -cl local -rl heron-staging -ev devel
-end_timer "$T"
+    local T="$language integration test on $cluster"
+    start_timer "$T"
+    "${HOME}/bin/test-runner" \
+        --heron-cli-path=heron \
+        --tests-bin-path="$test_bin" \
+        --http-server-hostname="$host" \
+        --http-server-port="$port" \
+        --topologies-path="${HOME}/.herontests/data/$language" \
+        --cluster="$cluster" \
+        --role=heron-staging \
+        --env=devel \
+        #--cli-config-path="$cluster"
+    end_timer "$T"
+}
 
-# run the python integration test
-T="heron integration_test python"
-start_timer "$T"
-${HOME}/bin/test-runner \
-  -hc heron -tb ${PYTHON_INTEGRATION_TESTS_BIN} \
-  -rh localhost -rp 8080\
-  -tp ${HOME}/.herontests/data/python \
-  -cl local -rl heron-staging -ev devel
-end_timer "$T"
+# look at making the whole test script a function, e.g.
+#   ./test.sh heron-k8s
+#   ./test.sh local
+# concurrent runs from different clusters are fine?
+for cluster in kubernetes local; do
+    if [ "$cluster" == "local" ]; then
+        host=localhost
+        port=8080
+    else
+        host="$(docker inspect kind-control-plane --format='{{range .NetworkSettings.Networks}}{{.Gateway}}{{end}}')"
+        #host=172.18.0.1
+        port=8080
+    fi
+    integration_test "$cluster" scala "${SCALA_INTEGRATION_TESTS_BIN}"
+    integration_test "$cluster" java "${JAVA_INTEGRATION_TESTS_BIN}"
+    integration_test "$cluster" python ${PYTHON_INTEGRATION_TESTS_BIN} \
 
-# run the java integration topology test
-T="heron integration_topology_test java"
-start_timer "$T"
-${HOME}/bin/topology-test-runner \
-  -hc heron -tb ${JAVA_INTEGRATION_TOPOLOGY_TESTS_BIN} \
-  -rh localhost -rp 8080\
-  -tp ${HOME}/.herontests/data/java/topology_test \
-  -cl local -rl heron-staging -ev devel
-end_timer "$T"
+    T="heron integration_topology_test java"
+    start_timer "$T"
+    "${HOME}/bin/topology-test-runner" \
+      --heron-cli-path=heron \
+      --tests-bin-path="${JAVA_INTEGRATION_TOPOLOGY_TESTS_BIN}" \
+      --http-hostname="$host" \
+      --http-port="$port" \
+      --topologies-path="${HOME}/.herontests/data/java/topology_test" \
+      --cluster="$cluster" \
+      --role=heron-staging \
+      --env=devel
+      #--cli-config-path="$cluster"
+    end_timer "$T"
+done
 
 print_timer_summary
-

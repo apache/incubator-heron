@@ -60,21 +60,9 @@ Vagrant.configure(2) do |config|
 
     master.vm.hostname = "master"
     master.vm.network :private_network, ip: NODES["master"]
+    # this port is used in ./scripts/travis/k8s.sh to expose the kubectl proxy
+    master.vm.network :forwarded_port, guest: 8001, host: 8001
 
-    master.vm.provision "shell", path: "init.sh", args: "master"
-  end
-
-  (0..SLAVES-1).each do |i|
-    config.vm.define "slave#{i}" do |slave|
-      slave.vm.provider "virtualbox" do |v|
-        v.memory = 2048
-        v.cpus = 2
-      end
-
-      slave.vm.hostname = "slave#{i}"
-      slave.vm.network :private_network, ip: NODES[slave.vm.hostname]
-
-      slave.vm.provision "shell", path: "init.sh", args: "slave"
-    end
+    master.vm.provision "shell", path: "init.sh"
   end
 end

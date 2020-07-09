@@ -16,34 +16,31 @@ set -o errexit -o nounset -o pipefail
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-install_mesos() {
-    mode=$1 # master | slave
-    apt-get -qy install mesos=0.25.0*
-
-    echo "zk://master:2181/mesos" > /etc/mesos/zk
-    echo '5mins' > /etc/mesos-slave/executor_registration_timeout
-
-    ip=$(cat /etc/hosts | grep `hostname` | grep -E -o "([0-9]{1,3}[\.]){3}[0-9]{1,3}")
-    echo $ip > "/etc/mesos-$mode/ip"
-
-    if [ "$mode" == "master" ]; then
-        ln -s /lib/init/upstart-job /etc/init.d/mesos-master
-        service mesos-master start
-    else
-        apt-get -qy remove zookeeper
-    fi
-
-    ln -s /lib/init/upstart-job /etc/init.d/mesos-slave
-    echo 'docker,mesos' > /etc/mesos-slave/containerizers
-    service mesos-slave start
-}
-
-install_marathon() {
-    apt-get install -qy marathon=0.10.0*
-    service marathon start
-}
-
 bazelVersion=3.0.0
+
+install_docker() {
+    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
+    add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+    apt-get update
+    apt-get install -qy docker-ce docker-ce-cli containerd.io
+    usermod -aG docker vagrant
+}
+
+install_k8s_stack() {
+    install_docker
+    # install kubectl
+    curl -Lo /usr/local/bin/kubectl https://storage.googleapis.com/kubernetes-release/release/v1.18.3/bin/linux/amd64/kubectl
+    chmod +x /usr/local/bin/kubectl
+    # install kind
+    curl -Lo /usr/local/bin/kind "https://kind.sigs.k8s.io/dl/v0.8.1/kind-$(uname)-amd64"
+    chmod +x /usr/local/bin/kind
+    # helm
+    curl --location https://get.helm.sh/helm-v3.2.1-linux-amd64.tar.gz \
+        | tar --extract --gzip linux-amd64/helm --to-stdout \
+        > /usr/local/bin/helm
+    chmod +x /usr/local/bin/helm
+}
+
 bazel_install() {
     apt-get install -y automake cmake gcc g++ zlib1g-dev zip pkg-config wget libssl-dev libunwind-dev
     mkdir -p /opt/bazel
@@ -62,23 +59,10 @@ build_heron() {
     popd
 }
 
-if [[ "$1" != "master" && $1 != "slave" ]]; then
-    echo "Usage: $0 master|slave"
-    exit 1
-fi
-mode="$1"
-
 cd /vagrant/vagrant
 
 # name resolution
 cp .vagrant/hosts /etc/hosts
-
-# XXX: not needed?
-# ssh key
-key=".vagrant/ssh_key.pub"
-if [ -f "$key" ]; then
-    cat $key >> /home/vagrant/.ssh/authorized_keys
-fi
 
 # disable ipv6
 echo -e "\nnet.ipv6.conf.all.disable_ipv6 = 1\n" >> /etc/sysctl.conf
@@ -91,23 +75,20 @@ if [ -f ".vagrant/apt-proxy" ]; then
     echo "Acquire::http::Proxy \"$apt_proxy\";" > /etc/apt/apt.conf.d/90-apt-proxy.conf
 fi
 
-:<<'REMOVED'
-# add mesosphere repo
-apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv E56151BF
-DISTRO=$(lsb_release -is | tr '[:upper:]' '[:lower:]')
-CODENAME=$(lsb_release -cs)
-echo "deb http://repos.mesosphere.io/${DISTRO} cosmic main" | tee /etc/apt/sources.list.d/mesosphere.list
-REMOVED
-
 apt-get -qy update
 
 # install deps
-apt-get install -qy vim zip mc curl wget openjdk-11-jdk scala git python3-setuptools python3-dev libtool-bin libcppunit-dev python-is-python3
+apt-get install -qy vim zip mc curl wget openjdk-11-jdk scala git python3-setuptools python3-dev libtool-bin libcppunit-dev python-is-python3 tree
 
-# install_mesos $mode
-if [ $mode == "master" ]; then 
-    # install_marathon
-    bazel_install
-    # switch to non-root so bazel cache can be reused when SSHing in
-    # su --login vagrant /vagrant/scripts/travis/ci.sh
-fi
+install_k8s_stack
+bazel_install
+
+# configure environment variables required
+{
+    ## the install script with the --user flag will install binaries here
+    #echo 'export PATH=$HOME/bin:$PATH' >> ~vagrant/.bashrc
+    # the discover_platform helper uses this as `python -mplatform` does not put out expected info in this image
+    echo 'export PLATFORM=Ubuntu' >> ~vagrant/.bashrc
+    # set JAVA_HOME as plenty of places in heron use it to find java
+    echo 'export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64/' >> ~vagrant/.bashrc
+}
