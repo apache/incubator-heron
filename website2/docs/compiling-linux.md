@@ -40,7 +40,7 @@ $ sudo apt-get upgrade -y
 
 ```bash
 $ sudo apt-get install git build-essential automake cmake libtool-bin zip ant \
-  libunwind-setjmp0-dev zlib1g-dev unzip pkg-config python-setuptools libcppunit-dev -y
+  libunwind-setjmp0-dev zlib1g-dev unzip pkg-config python3-setuptools libcppunit-dev -y
 ```
 
 #### Step 3 --- Set the following environment variables
@@ -72,7 +72,7 @@ bazelVersion %}}).
 
 ### Step 6 --- Install python development tools
 ```bash
-$ sudo apt-get install  python-dev python-pip
+$ sudo apt-get install  python3-dev python3-pip
 ```
 
 ### Step 7 --- Make sure the Bazel executable is in your `PATH`
