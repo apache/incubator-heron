@@ -22,6 +22,7 @@ ENV TARGET_PLATFORM debian
 ENV bazelVersion 3.0.0
 
 RUN apt-get update && apt-get -y install \
+      ant \
       automake \
       build-essential \
       cmake \

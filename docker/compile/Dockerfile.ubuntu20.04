@@ -24,6 +24,7 @@ ENV bazelVersion 3.0.0
 ARG DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && apt-get -y install \
+      ant \
       g++ \
       cmake \
       automake \

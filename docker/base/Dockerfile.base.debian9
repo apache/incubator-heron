@@ -18,6 +18,7 @@
 FROM openjdk:11-jdk-slim-stretch
 
 RUN apt-get -y update && apt-get -y install \
+    ant \
     netcat-openbsd \
     python3 \
     unzip \
@@ -27,7 +28,7 @@ RUN apt-get -y update && apt-get -y install \
     rm -rf /var/lib/apt/lists/*
 
 # install zookeeper
-ARG ZK_DIST=zookeeper-3.4.14
+ARG ZK_DIST=zookeeper-3.5.8
 ADD base/scripts /opt/heron-docker/scripts
 
 RUN sh /opt/heron-docker/scripts/install-zookeeper.sh $ZK_DIST

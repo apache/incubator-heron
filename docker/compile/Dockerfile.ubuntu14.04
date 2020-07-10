@@ -27,6 +27,7 @@ RUN add-apt-repository ppa:george-edison55/cmake-3.x
 RUN add-apt-repository ppa:openjdk-r/ppa
 
 RUN apt-get update && apt-get -y install \
+      ant \
       automake \
       build-essential \
       curl \
