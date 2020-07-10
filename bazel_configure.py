@@ -422,6 +422,7 @@ def main():
 
   env_map['AR'] = discover_tool('ar', 'archiver', 'AR')
   env_map['GCOV']= discover_tool('gcov','coverage tool', 'GCOV')
+  env_map['ANT'] = discover_tool('ant', "ant", 'ANT')
   env_map['DWP'] = discover_tool_default('dwp', 'dwp', 'DWP', '/usr/bin/dwp')
   env_map['NM'] = discover_tool_default('nm', 'nm', 'NM', '/usr/bin/nm')
   env_map['OBJCOPY'] = discover_tool_default('objcopy', 'objcopy', 'OBJCOPY', '/usr/bin/objcopy')
