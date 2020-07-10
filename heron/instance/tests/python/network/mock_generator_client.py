@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 
 #  Licensed to the Apache Software Foundation (ASF) under one
@@ -95,14 +95,14 @@ def get_fail_packet():
   packet.is_complete = False
   return packet
 
-class MockDispatcher(object):
+class MockDispatcher:
   """Mock asyncore.dispatcher class, supporting only recv() and send() method
 
   This dispatcher provides several options as to how to prepare its receive buffer.
   """
   PARTIAL_DATA_SIZE = 4
   def __init__(self):
-    self.to_be_received = ""
+    self.to_be_received = b""
     self.eagain_test = False
     self.fatal_error_test = False
 

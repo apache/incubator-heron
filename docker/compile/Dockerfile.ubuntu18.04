@@ -22,6 +22,7 @@ ENV TARGET_PLATFORM ubuntu
 ENV bazelVersion 3.0.0
 
 RUN apt-get update && apt-get -y install \
+      ant \
       g++ \
       cmake \
       automake \
@@ -29,7 +30,8 @@ RUN apt-get update && apt-get -y install \
       libunwind8 \
       libcppunit-dev \
       patch \
-      python-dev \
+      python \
+      python3-dev \
       pkg-config \
       wget \
       zip \

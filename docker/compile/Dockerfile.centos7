@@ -23,8 +23,10 @@ ENV bazelVersion 3.0.0
 
 RUN yum -y upgrade
 RUN yum -y install \
+      ant \
       automake \
       curl \
+      cppunit-devel \
       cmake \
       openssl-devel \
       file \
@@ -35,8 +37,8 @@ RUN yum -y install \
       libtool \
       make \
       patch \
-      python-devel \
-      cppunit-devel \
+      python \
+      python3-devel \
       zip \
       unzip \
       wget \

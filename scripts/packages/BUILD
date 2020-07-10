@@ -1,5 +1,4 @@
-# load("@bazel_tools//tools/build_defs/pkg:pkg.bzl", "pkg_deb", "pkg_tar")
-load("@bazel_tools//tools/build_defs/pkg:pkg.bzl", "pkg_tar")
+load("@rules_pkg//:pkg.bzl", "pkg_tar")
 load("//scripts/packages:self_extract_binary.bzl", "self_extract_binary")
 
 package(default_visibility = ["//visibility:public"])
@@ -646,12 +645,12 @@ genrule(
         'find heronpy -type f -name "*.bak" -delete',
         "rm setup.py.template",
         "tree $$HERONPY_DIR",
-        "/usr/bin/env python2.7 setup.py sdist",
-        "/usr/bin/env python2.7 setup.py bdist_wheel --universal",
+        "/usr/bin/env python3 setup.py sdist",
+        "/usr/bin/env python3 setup.py bdist_wheel",
         "cd -",
         "ls -l $$HERONPY_DIR/dist",
-        "cp $$HERONPY_DIR/dist/heronpy-*-py2.py3-*.whl $$OUTPUT_DIR",
-        'cp $$HERONPY_DIR/dist/heronpy-*-py2.py3-*.whl "$@"',
+        "cp $$HERONPY_DIR/dist/heronpy-*-py3-*.whl $$OUTPUT_DIR",
+        'cp $$HERONPY_DIR/dist/heronpy-*-py3-*.whl "$@"',
         "cp $$HERONPY_DIR/dist/heronpy-*.tar.gz $$OUTPUT_DIR",
         "touch $$OUTPUT_DIR/heronpy.whl",
         "rm -rf $$TMP_DIR",

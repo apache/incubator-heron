@@ -111,6 +111,21 @@ spec:
 {{- end }}
       terminationGracePeriodSeconds: 0
       initContainers:
+{{- if eq .Values.platform "minikube" }}
+        # The first time, initialize BK to wipe data for minikube
+        - name: bookie-format
+          image: {{ .Values.bookkeeper.image }}
+          args: ["/opt/bookkeeper/bin/bookkeeper", "shell", "bookieformat", "--nonInteractive", "-f", "-deleteCookie"]
+          command: [ "/bin/bash", "/opt/bookkeeper/scripts/entrypoint.sh" ]
+          envFrom:
+            - configMapRef:
+                name: {{ .Release.Name }}-bookie-config
+          volumeMounts:
+            - name: journal-disk
+              mountPath: /bookkeeper/data/journal
+            - name: ledgers-disk
+              mountPath: /bookkeeper/data/ledgers
+{{- end }}
         # Wait until the zookeeper pods are up and running
         - name: bookie-init-container
           image: {{ .Values.image }} # use heron image until bookkeeper has nc

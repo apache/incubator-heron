@@ -23,7 +23,7 @@ import heron.proto.tmaster_pb2 as protoTmaster
 import heron.proto.topology_pb2 as protoTopology
 
 # pylint: disable=no-self-use, missing-docstring
-class MockProto(object):
+class MockProto:
   ''' Mocking Proto'''
   topology_name = "mock_topology_name"
   topology_id = "mock_topology_id"

@@ -19,34 +19,23 @@
 if [ "$#" -ne 1 ]; then
   echo "Usage: $0 zookeeper-<version-number>"
   echo "Example:"
-  echo "$ $0 zookeeper-3.4.14"
+  echo "$ $0 zookeeper-3.5.8"
   exit 1
 fi
 
 ZK_DIST=$1
 
-curl -O "https://archive.apache.org/dist/zookeeper/$ZK_DIST/$ZK_DIST.tar.gz"
-tar -xzf ./$ZK_DIST.tar.gz -C /opt
-rm ./$ZK_DIST.tar.gz
+curl -O "https://archive.apache.org/dist/zookeeper/$ZK_DIST/apache-$ZK_DIST-bin.tar.gz"
+tar -xzf ./apache-$ZK_DIST-bin.tar.gz -C /opt
+rm ./apache-$ZK_DIST-bin.tar.gz
 
-mv /opt/$ZK_DIST /opt/zookeeper
-rm -rf /opt/zookeeper/CHANGES.txt \
-    /opt/zookeeper/README.txt \
-    /opt/zookeeper/NOTICE.txt \
-    /opt/zookeeper/CHANGES.txt \
-    /opt/zookeeper/README_packaging.txt \
-    /opt/zookeeper/build.xml \
-    /opt/zookeeper/config \
-    /opt/zookeeper/contrib \
-    /opt/zookeeper/dist-maven \
-    /opt/zookeeper/docs \
-    /opt/zookeeper/ivy.xml \
-    /opt/zookeeper/ivysettings.xml \
-    /opt/zookeeper/recipes \
-    /opt/zookeeper/src \
-    /opt/zookeeper/$ZK_DIST.jar.asc \
-    /opt/zookeeper/$ZK_DIST.jar.md5 \
-    /opt/zookeeper/$ZK_DIST.jar.sha1
+mv /opt/apache-$ZK_DIST-bin /opt/zookeeper
+rm -rf \
+  /opt/zookeeper/README.txt \
+  /opt/zookeeper/NOTICE.txt \
+  /opt/zookeeper/README_packaging.txt \
+  /opt/zookeeper/docs \
+
 
 # copy zk scripts
 mkdir -p /opt/zookeeper/scripts
@@ -55,6 +44,6 @@ chmod +x /opt/heron-docker/scripts/generate-zookeeper-config.sh
 cp /opt/heron-docker/scripts/zookeeper-ruok.sh /opt/zookeeper/scripts/
 chmod +x /opt/heron-docker/scripts/zookeeper-ruok.sh
 cp /opt/heron-docker/scripts/start-zookeeper.sh /opt/zookeeper/scripts/
-chmod +x /opt/heron-docker/scripts/
+chmod +x /opt/heron-docker/scripts/start-zookeeper.sh
 cp /opt/heron-docker/scripts/wait-for-zookeeper.sh /opt/zookeeper/scripts/
 chmod +x /opt/heron-docker/scripts/wait-for-zookeeper.sh

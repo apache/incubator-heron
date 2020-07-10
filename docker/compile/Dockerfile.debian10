@@ -22,6 +22,7 @@ ENV TARGET_PLATFORM debian
 ENV bazelVersion 3.0.0
 
 RUN apt-get update && apt-get -y install \
+      ant \
       automake \
       build-essential \
       cmake \
@@ -33,9 +34,10 @@ RUN apt-get update && apt-get -y install \
       libcppunit-dev \
       pkg-config \
       python \
-      python-dev \
+      python3 \
+      python3-dev \
       software-properties-common \
-      python-setuptools \
+      python3-setuptools \
       tree \
       zip \
       unzip \

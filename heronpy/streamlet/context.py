@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 
 #  Licensed to the Apache Software Foundation (ASF) under one
@@ -22,7 +22,7 @@
 
 from abc import abstractmethod
 
-class Context(object):
+class Context:
   """Context is the information available at runtime for operators like transform.
      It contains basic things like config, runtime information like task,
      the stream that it is operating on, ProcessState, etc.
@@ -32,39 +32,32 @@ class Context(object):
   def get_task_id(self):
     """Fetches the task id of the current instance of the operator
     """
-    pass
 
   @abstractmethod
   def get_config(self):
     """Fetches the config of the computation
     """
-    pass
 
   @abstractmethod
   def get_stream_name(self):
     """Fetches the stream name that we are operating on
     """
-    pass
 
   @abstractmethod
   def get_num_partitions(self):
     """Fetches the number of partitions of the stream we are operating on
     """
-    pass
 
   def get_partition_index(self):
     """Fetches the partition of the stream that we are operating on
     """
-    pass
 
   @abstractmethod
   def get_state(self):
     """The state where components can store any of their local state
     """
-    pass
 
   @abstractmethod
   def emit(self, values):
     """Emits the values in the output stream
     """
-    pass

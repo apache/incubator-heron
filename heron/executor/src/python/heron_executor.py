@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 
 #  Licensed to the Apache Software Foundation (ASF) under one
@@ -151,7 +151,7 @@ def stdout_log_fn(cmd):
   # Log the messages to stdout and strip off the newline because Log.info adds one automatically
   return lambda line: Log.info("%s stdout: %s", cmd, line.rstrip('\n'))
 
-class Command(object):
+class Command:
   """
   Command to run as a separate process using subprocess.POpen
   :param cmd: command to run (as a list)
@@ -182,15 +182,15 @@ class Command(object):
   def __eq__(self, other):
     return self.cmd == other.cmd
 
-class ProcessInfo(object):
+class ProcessInfo:
+  """
+  Container for info related to a running process
+  :param process: the process POpen object
+  :param name: the logical (i.e., unique) name of the process
+  :param command: an array of strings comprising the command and it's args
+  :param attempts: how many times the command has been run (defaults to 1)
+  """
   def __init__(self, process, name, command, attempts=1):
-    """
-    Container for info related to a running process
-    :param process: the process POpen object
-    :param name: the logical (i.e., unique) name of the process
-    :param command: an array of strings comprising the command and it's args
-    :param attempts: how many times the command has been run (defaults to 1)
-    """
     self.process = process
     self.pid = process.pid
     self.name = name
@@ -202,8 +202,14 @@ class ProcessInfo(object):
     self.attempts += 1
     return self
 
+  def __repr__(self):
+    return (
+        "ProcessInfo(pid=%(pid)r, name=%(name)r, command=%(command)r, attempts=%(attempts)r)"
+        % vars(self)
+    )
+
 # pylint: disable=too-many-instance-attributes,too-many-statements
-class HeronExecutor(object):
+class HeronExecutor:
   """ Heron executor is a class that is responsible for running each of the process on a given
   container. Based on the container id and the instance distribution, it determines if the container
   is a master node or a worker node and it starts processes accordingly."""
@@ -226,8 +232,8 @@ class HeronExecutor(object):
     # escaping is still left there for reference and backward compatibility purposes (to be
     # removed after no topology needs it)
     self.instance_jvm_opts =\
-        base64.b64decode(parsed_args.instance_jvm_opts.lstrip('"').
-                         rstrip('"').replace('(61)', '=').replace('&equals;', '='))
+        base64.b64decode(parsed_args.instance_jvm_opts.
+                         strip('"').replace('(61)', '=').replace('&equals;', '=')).decode()
     self.classpath = parsed_args.classpath
     # Needed for Docker environments since the hostname of a docker container is the container's
     # id within docker, rather than the host's hostname. NOTE: this 'HOST' env variable is not
@@ -260,11 +266,11 @@ class HeronExecutor(object):
     # removed after no topology needs it)
     component_jvm_opts_in_json =\
         base64.b64decode(parsed_args.component_jvm_opts.
-                         lstrip('"').rstrip('"').replace('(61)', '=').replace('&equals;', '='))
+                         strip('"').replace('(61)', '=').replace('&equals;', '=')).decode()
     if component_jvm_opts_in_json != "":
       for (k, v) in list(json.loads(component_jvm_opts_in_json).items()):
         # In json, the component name and JVM options are still in base64 encoding
-        self.component_jvm_opts[base64.b64decode(k)] = base64.b64decode(v)
+        self.component_jvm_opts[base64.b64decode(k).decode()] = base64.b64decode(v).decode()
 
     self.pkg_type = parsed_args.pkg_type
     self.topology_binary_file = parsed_args.topology_binary_file
@@ -696,7 +702,8 @@ class HeronExecutor(object):
     if not self.jvm_version:
       cmd = [os.path.join(self.heron_java_home, 'bin/java'),
              '-cp', self.instance_classpath, 'org.apache.heron.instance.util.JvmVersion']
-      process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+      process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                                 universal_newlines=True)
       (process_stdout, process_stderr) = process.communicate()
       if process.returncode != 0:
         Log.error("Failed to determine JVM version. Exiting. Output of %s: %s",
@@ -910,7 +917,7 @@ class HeronExecutor(object):
       # stderr is redirected to stdout so that it can more easily be logged. stderr has a max buffer
       # size and can cause the child process to deadlock if it fills up
       process = subprocess.Popen(cmd.cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-                                 env=cmd.env, bufsize=1)
+                                 env=cmd.env, universal_newlines=True, bufsize=1)
       proc.async_stream_process_stdout(process, stdout_log_fn(name))
     except Exception:
       Log.info("Exception running command %s", cmd)
@@ -924,7 +931,7 @@ class HeronExecutor(object):
       # stderr is redirected to stdout so that it can more easily be logged. stderr has a max buffer
       # size and can cause the child process to deadlock if it fills up
       process = subprocess.Popen(cmd.cmd, shell=is_shell, stdout=subprocess.PIPE,
-                                 stderr=subprocess.STDOUT, env=cmd.env)
+                                 stderr=subprocess.STDOUT, universal_newlines=True, env=cmd.env)
 
       # wait for termination
       self._wait_process_std_out_err(cmd.cmd, process)

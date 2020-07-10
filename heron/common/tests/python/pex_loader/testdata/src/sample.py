@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 
 #  Licensed to the Apache Software Foundation (ASF) under one
@@ -20,7 +20,7 @@
 
 '''sample.py: sample module as testdata for pex_loader unittest'''
 
-class SampleClass(object):
+class SampleClass:
   """Sample class"""
   name = "sample class"
   age = 100

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 
 #  Licensed to the Apache Software Foundation (ASF) under one
@@ -23,6 +23,8 @@ import os
 import socket
 import unittest2 as unittest
 import json
+
+from pprint import pprint
 
 from heron.executor.src.python.heron_executor import ProcessInfo
 from heron.executor.src.python.heron_executor import HeronExecutor
@@ -52,7 +54,7 @@ class CommandEncoder(json.JSONEncoder):
   def default(self, o):
     return o.cmd
 
-class MockPOpen(object):
+class MockPOpen:
   """fake subprocess.Popen object that we can use to mock processes and pids"""
   next_pid = 0
 
@@ -180,10 +182,10 @@ class HeronExecutorTest(unittest.TestCase):
                   '--metrics_sinks_yaml=metrics_sinks_config_file '
                   '--metricsmgr_port=metricsmgr_port '
                   '--ckptmgr_port=ckptmgr-port' % (HOSTNAME, INTERNAL_CONF_PATH, OVERRIDE_PATH)),
-      ProcessInfo(MockPOpen(), 'heron-shell-0', get_expected_shell_command(0)),
-      ProcessInfo(MockPOpen(), 'metricsmgr-0', get_expected_metricsmgr_command(0)),
       ProcessInfo(MockPOpen(), 'heron-metricscache', get_expected_metricscachemgr_command()),
       ProcessInfo(MockPOpen(), 'heron-healthmgr', get_expected_healthmgr_command()),
+      ProcessInfo(MockPOpen(), 'metricsmgr-0', get_expected_metricsmgr_command(0)),
+      ProcessInfo(MockPOpen(), 'heron-shell-0', get_expected_shell_command(0)),
   ]
 
   MockPOpen.set_next_pid(37)
@@ -199,20 +201,17 @@ class HeronExecutorTest(unittest.TestCase):
                   '--ckptmgr_port=ckptmgr-port --ckptmgr_id=ckptmgr-1 '
                   '--metricscachemgr_mode=cluster'
                   % (HOSTNAME, INTERNAL_CONF_PATH, OVERRIDE_PATH)),
+      ProcessInfo(MockPOpen(), 'metricsmgr-1', get_expected_metricsmgr_command(1)),
       ProcessInfo(MockPOpen(), 'container_1_word_3', get_expected_instance_command('word', 3, 1)),
-      ProcessInfo(MockPOpen(), 'container_1_exclaim1_1',
-                  get_expected_instance_command('exclaim1', 1, 1)),
       ProcessInfo(MockPOpen(), 'container_1_exclaim1_2',
                   get_expected_instance_command('exclaim1', 2, 1)),
+      ProcessInfo(MockPOpen(), 'container_1_exclaim1_1',
+                  get_expected_instance_command('exclaim1', 1, 1)),
       ProcessInfo(MockPOpen(), 'heron-shell-1', get_expected_shell_command(1)),
-      ProcessInfo(MockPOpen(), 'metricsmgr-1', get_expected_metricsmgr_command(1)),
   ]
 
   MockPOpen.set_next_pid(37)
   expected_processes_container_7 = [
-      ProcessInfo(MockPOpen(), 'container_7_word_11', get_expected_instance_command('word', 11, 7)),
-      ProcessInfo(MockPOpen(), 'container_7_exclaim1_210',
-                  get_expected_instance_command('exclaim1', 210, 7)),
       ProcessInfo(MockPOpen(), 'stmgr-7',
                   'stmgr_binary --topology_name=topname --topology_id=topid '
                   '--topologydefn_file=topdefnfile --zkhostportlist=zknode --zkroot=zkroot '
@@ -225,6 +224,9 @@ class HeronExecutorTest(unittest.TestCase):
                   '--metricscachemgr_mode=cluster'
                   % (HOSTNAME, INTERNAL_CONF_PATH, OVERRIDE_PATH)),
       ProcessInfo(MockPOpen(), 'metricsmgr-7', get_expected_metricsmgr_command(7)),
+      ProcessInfo(MockPOpen(), 'container_7_word_11', get_expected_instance_command('word', 11, 7)),
+      ProcessInfo(MockPOpen(), 'container_7_exclaim1_210',
+                  get_expected_instance_command('exclaim1', 210, 7)),
       ProcessInfo(MockPOpen(), 'heron-shell-7', get_expected_shell_command(7)),
   ]
 
@@ -330,12 +332,16 @@ class HeronExecutorTest(unittest.TestCase):
     found_monitored = list([(pinfo[0], pinfo[1].name, pinfo[1].command_str) for pinfo in list(monitored_processes.items())])
     found_processes.sort(key=lambda tuple: tuple[0])
     found_monitored.sort(key=lambda tuple: tuple[0])
-    print("do_test_commands - found_processes: %s found_monitored: %s" \
-          % (found_processes, found_monitored))
+    print("found_processes:")
+    pprint(found_processes)
+    print("found_monitored:")
+    pprint(found_monitored)
     self.assertEqual(found_processes, found_monitored)
 
-    print("do_test_commands - expected_processes: %s monitored_processes: %s" \
-          % (expected_processes, monitored_processes))
+    print("expected_processes:")
+    pprint(expected_processes)
+    print("monitored_processes:")
+    pprint(monitored_processes)
     self.assert_processes(expected_processes, monitored_processes)
 
   def test_change_instance_dist_container_1(self):

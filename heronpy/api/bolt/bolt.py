@@ -42,7 +42,6 @@ class Bolt(BaseBolt):
                     topology, including the task id and component id of this task, input and output
                     information, etc.
     """
-    pass
 
   @abstractmethod
   def process(self, tup):
@@ -77,4 +76,3 @@ class Bolt(BaseBolt):
     :type tup: :class:`Tuple`
     :param tup: the tick tuple to be processed
     """
-    pass

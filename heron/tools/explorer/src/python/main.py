@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 
 #  Licensed to the Apache Software Foundation (ASF) under one
@@ -100,29 +100,29 @@ def run(command, *args):
     return clusters.run(command, *args)
 
   # show topologies
-  elif command == 'topologies':
+  if command == 'topologies':
     return topologies.run(command, *args)
 
   # physical plan
-  elif command == 'containers':
+  if command == 'containers':
     return physicalplan.run_containers(command, *args)
-  elif command == 'metrics':
+  if command == 'metrics':
     return physicalplan.run_metrics(command, *args)
 
   # logical plan
-  elif command == 'components':
+  if command == 'components':
     return logicalplan.run_components(command, *args)
-  elif command == 'spouts':
+  if command == 'spouts':
     return logicalplan.run_spouts(command, *args)
-  elif command == 'bolts':
+  if command == 'bolts':
     return logicalplan.run_bolts(command, *args)
 
   # help
-  elif command == 'help':
+  if command == 'help':
     return help.run(command, *args)
 
   # version
-  elif command == 'version':
+  if command == 'version':
     return version.run(command, *args)
 
   return 1

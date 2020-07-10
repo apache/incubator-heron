@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 
 #  Licensed to the Apache Software Foundation (ASF) under one
@@ -27,11 +27,11 @@ class TestFailure(Exception):
   def __init__(self, message, error=None):
     Exception.__init__(self, message, error)
     if error:
-      logging.error("%s :: %s", message, traceback.format_exc(error))
+      logging.error("%s :: %s", message, error, exc_info=True)
     else:
       logging.error(message)
 
-class TestSuccess(object):
+class TestSuccess:
   def __init__(self, message=None):
     if message:
       logging.info(message)

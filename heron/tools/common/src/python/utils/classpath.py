@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 
 #  Licensed to the Apache Software Foundation (ASF) under one
@@ -39,11 +39,10 @@ def valid_path(path):
   Log.debug('Checking classpath entry as directory: %s', path)
   if os.path.isdir(path):
     return True
-  else:
-    # check if the classpath entry is a file
-    Log.debug('Checking classpath entry as file: %s', path)
-    if os.path.isfile(path):
-      return True
+  # check if the classpath entry is a file
+  Log.debug('Checking classpath entry as file: %s', path)
+  if os.path.isfile(path):
+    return True
 
   return False
 
