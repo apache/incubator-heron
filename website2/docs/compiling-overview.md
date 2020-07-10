@@ -50,8 +50,11 @@ You must have the following installed to compile Heron:
 * [GNU Libtool](http://www.gnu.org/software/libtool/) >= 2.4.6
 * [gcc/g++](https://gcc.gnu.org/) >= 4.8.1 (Linux platforms)
 * [CMake](https://cmake.org/) >= 2.6.4
-* [Python](https://www.python.org/) >= 2.7 (not including Python 3.x)
+* [Python](https://www.python.org/) >= 3.4
 * [Perl](https://www.perl.org/) >= 5.8.8
+* [Ant] (https://ant.apache.org/) >= 1.10.0
+* [CppUnit] (https://freedesktop.org/wiki/Software/cppunit/) >= 1.10.1
+* [Pkg-Config] (https://www.freedesktop.org/wiki/Software/pkg-config/) >= 0.29.2
 
 Export the `CC` and `CXX` environment variables with a path specific to your
 machine:
