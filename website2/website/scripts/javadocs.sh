@@ -51,7 +51,7 @@ mkdir -p $JAVADOC_OUTPUT_DIR
 GEN_JARS=`find $HERON_ROOT_DIR/bazel-bin/external/. -name "*\.jar" | tr '\n' ':'`
 SCRIBE_JARS=`find $HERON_ROOT_DIR/bazel-bin/. -name "libthrift_scribe_java.jar" | tr '\n' ':'`
 PROTO_JARS=`find $HERON_ROOT_DIR/bazel-bin/heron/proto/. -name "*\.jar" | tr '\n' ':'`
-CLOSURE_CLASSES="$HERON_ROOT_DIR/bazel-bin/storm-compatibility/src/java/_javac/storm-compatibility-java/libstorm-compatibility-java_classes/."
+CLOSURE_CLASSES="$HERON_ROOT_DIR/bazel-bin/storm-compatibility/v0.10.2/src/java/_javac/storm-compatibility-java/libstorm-compatibility-java_classes/."
 CONTRIB_JARS=`find $HERON_ROOT_DIR/bazel-bin/contrib/. -name "*\.jar" | tr '\n' ':'`
 
 export CLASSPATH=$GEN_JARS:$SCRIBE_JARS:$PROTO_JARS:$CLOSURE_CLASSES:$CONTRIB_JARS

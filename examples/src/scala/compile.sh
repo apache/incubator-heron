@@ -35,5 +35,5 @@ rm -f heron-storm.jar
 (cd $root && bazel build --config=darwin scripts/packages:tarpkgs)
 
 # Verify storm and heron bolts compile with heron-storm.jar
-scalac -cp bazel-bin/./storm-compatibility/src/java/heron-storm.jar \
+scalac -cp bazel-bin/./storm-compatibility/v0.10.2/src/java/heron-storm.jar \
   $dir/org/apache/heron/examples/*.scala
