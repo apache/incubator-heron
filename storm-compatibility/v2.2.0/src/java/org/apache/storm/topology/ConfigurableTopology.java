@@ -29,11 +29,15 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import org.apache.storm.Config;
-import org.apache.storm.StormSubmitter;
-import org.apache.commons.lang3.StringUtils;
+
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.SafeConstructor;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.storm.Config;
+import org.apache.storm.StormSubmitter;
+import org.apache.storm.generated.AlreadyAliveException;
+import org.apache.storm.generated.InvalidTopologyException;
 import org.apache.storm.utils.Utils;
 
 /**
@@ -61,94 +65,95 @@ import org.apache.storm.utils.Utils;
  **/
 public abstract class ConfigurableTopology {
 
-    protected Config conf = new Config();
+  protected Config conf = new Config();
 
-    public static void start(ConfigurableTopology topology, String[] args) {
-        String[] remainingArgs = topology.parse(args);
+  @SuppressWarnings("illegalcatch")
+  public static void start(ConfigurableTopology topology, String[] args) {
+    String[] remainingArgs = topology.parse(args);
+    try {
+      topology.run(remainingArgs);
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  public static Config loadConf(String resource, Config conf)
+      throws FileNotFoundException {
+    Yaml yaml = new Yaml(new SafeConstructor());
+    Map<String, Object> ret = (Map<String, Object>) yaml.load(new InputStreamReader(
+        new FileInputStream(resource), Charset.defaultCharset()));
+    if (ret == null) {
+      ret = new HashMap<>();
+    } else {
+      // If the config consists of a single key 'config', its values are used
+      // instead. This means that the same config files can be used with Flux
+      // and the ConfigurableTopology.
+      if (ret.size() == 1) {
+        Object confNode = ret.get("config");
+        if (confNode != null && confNode instanceof Map) {
+          ret = (Map<String, Object>) confNode;
+        }
+      }
+    }
+    conf.putAll(ret);
+    return conf;
+  }
+
+  protected Config getConf() {
+    return conf;
+  }
+
+  protected abstract int run(String[] args) throws Exception;
+
+  /**
+   * Submits the topology with the name taken from the configuration.
+   **/
+  protected int submit(Config config, TopologyBuilder builder) {
+    String name = (String) Utils.get(config, Config.TOPOLOGY_NAME, null);
+    if (StringUtils.isBlank(name)) {
+      throw new RuntimeException(
+          "No value found for " + Config.TOPOLOGY_NAME);
+    }
+    return submit(name, config, builder);
+  }
+
+  /**
+   * Submits the topology under a specific name.
+   **/
+  protected int submit(String name, Config config, TopologyBuilder builder) {
+    try {
+      StormSubmitter.submitTopology(name, config,
+          builder.createTopology());
+    } catch (AlreadyAliveException | InvalidTopologyException e) {
+      e.printStackTrace();
+      return -1;
+    }
+    return 0;
+  }
+
+  private String[] parse(String[] args) {
+
+    List<String> newArgs = new ArrayList<>();
+    Collections.addAll(newArgs, args);
+
+    Iterator<String> iter = newArgs.iterator();
+    while (iter.hasNext()) {
+      String param = iter.next();
+      if ("-conf".equals(param)) {
+        if (!iter.hasNext()) {
+          throw new RuntimeException("Conf file not specified");
+        }
+        iter.remove();
+        String resource = iter.next();
         try {
-            topology.run(remainingArgs);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+          loadConf(resource, conf);
+        } catch (FileNotFoundException e) {
+          throw new RuntimeException("File not found : " + resource);
         }
+        iter.remove();
+      }
     }
 
-    public static Config loadConf(String resource, Config conf)
-        throws FileNotFoundException {
-        Yaml yaml = new Yaml(new SafeConstructor());
-        Map<String, Object> ret = (Map<String, Object>) yaml.load(new InputStreamReader(
-            new FileInputStream(resource), Charset.defaultCharset()));
-        if (ret == null) {
-            ret = new HashMap<>();
-        } else {
-            // If the config consists of a single key 'config', its values are used
-            // instead. This means that the same config files can be used with Flux
-            // and the ConfigurableTopology.
-            if (ret.size() == 1) {
-                Object confNode = ret.get("config");
-                if (confNode != null && confNode instanceof Map) {
-                    ret = (Map<String, Object>) confNode;
-                }
-            }
-        }
-        conf.putAll(ret);
-        return conf;
-    }
-
-    protected Config getConf() {
-        return conf;
-    }
-
-    protected abstract int run(String[] args) throws Exception;
-
-    /**
-     * Submits the topology with the name taken from the configuration.
-     **/
-    protected int submit(Config conf, TopologyBuilder builder) {
-        String name = (String) Utils.get(conf, Config.TOPOLOGY_NAME, null);
-        if (StringUtils.isBlank(name)) {
-            throw new RuntimeException(
-                "No value found for " + Config.TOPOLOGY_NAME);
-        }
-        return submit(name, conf, builder);
-    }
-
-    /**
-     * Submits the topology under a specific name.
-     **/
-    protected int submit(String name, Config conf, TopologyBuilder builder) {
-        try {
-            StormSubmitter.submitTopology(name, conf,
-                                          builder.createTopology());
-        } catch (Exception e) {
-            e.printStackTrace();
-            return -1;
-        }
-        return 0;
-    }
-
-    private String[] parse(String[] args) {
-
-        List<String> newArgs = new ArrayList<>();
-        Collections.addAll(newArgs, args);
-
-        Iterator<String> iter = newArgs.iterator();
-        while (iter.hasNext()) {
-            String param = iter.next();
-            if (param.equals("-conf")) {
-                if (!iter.hasNext()) {
-                    throw new RuntimeException("Conf file not specified");
-                }
-                iter.remove();
-                String resource = iter.next();
-                try {
-                    loadConf(resource, conf);
-                } catch (FileNotFoundException e) {
-                    throw new RuntimeException("File not found : " + resource);
-                }
-                iter.remove();
-            }
-        }
-
-        return newArgs.toArray(new String[newArgs.size()]);
-    }
+    return newArgs.toArray(new String[newArgs.size()]);
+  }
 }
