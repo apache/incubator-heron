@@ -42,7 +42,7 @@ echo "Make jar components"
 $HOME/bin/bazel build heron/api/src/java:all
 $HOME/bin/bazel build heron/spi/src/java:all
 $HOME/bin/bazel build heron/simulator/src/java:all
-$HOME/bin/bazel build storm-compatibility/src/java:all
+$HOME/bin/bazel build storm-compatibility/v0.10.2/src/java:all
 $HOME/bin/bazel build contrib/spouts/kafka/src/java:all
 $HOME/bin/bazel build contrib/bolts/kafka/src/java:all
 
@@ -87,9 +87,9 @@ cp -p -f ./bazel-bin/heron/simulator/src/java/libsimulator-java-src.jar $OUTPUT_
 
 echo "Copy heron-storm artifacts ... "
 cp -p -f ./release/heron-storm-$VERSION_TAG.pom $OUTPUT_DIR/$VERSION_TAG/heron-storm/
-cp -p -f ./bazel-bin/storm-compatibility/src/java/heron-storm.jar $OUTPUT_DIR/$VERSION_TAG/heron-storm/heron-storm-$VERSION_TAG.jar
-cp -p -f ./bazel-bin/storm-compatibility/src/java/heron-storm-javadoc.zip $OUTPUT_DIR/$VERSION_TAG/heron-storm/heron-storm-$VERSION_TAG-javadoc.jar
-cp -p -f ./bazel-bin/storm-compatibility/src/java/libstorm-compatibility-java-src.jar $OUTPUT_DIR/$VERSION_TAG/heron-storm/heron-storm-$VERSION_TAG-sources.jar
+cp -p -f ./bazel-bin/storm-compatibility/v0.10.2/src/java/heron-storm.jar $OUTPUT_DIR/$VERSION_TAG/heron-storm/heron-storm-$VERSION_TAG.jar
+cp -p -f ./bazel-bin/storm-compatibility/v0.10.2/src/java/heron-storm-javadoc.zip $OUTPUT_DIR/$VERSION_TAG/heron-storm/heron-storm-$VERSION_TAG-javadoc.jar
+cp -p -f ./bazel-bin/storm-compatibility/v0.10.2/src/java/libstorm-compatibility-java-src.jar $OUTPUT_DIR/$VERSION_TAG/heron-storm/heron-storm-$VERSION_TAG-sources.jar
 
 echo "Copy heron-kafka-spout artifacts ... "
 cp -p -f ./release/heron-kafka-spout-$VERSION_TAG.pom $OUTPUT_DIR/$VERSION_TAG/heron-kafka-spout/

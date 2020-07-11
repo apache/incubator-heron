@@ -69,7 +69,7 @@ bazel test -c opt --jobs 25 \
     heron/... \
     heronpy/... \
     examples/... \
-    storm-compatibility-examples/... \
+    storm-compatibility-examples/v0.10.2/... \
     eco-storm-examples/... \
     eco-heron-examples/... \
     contrib/...
