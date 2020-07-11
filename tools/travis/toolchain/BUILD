@@ -1,4 +1,5 @@
 load("@rules_cc//cc:defs.bzl", "cc_toolchain")
+load(":cc_toolchain_config.bzl", "cc_toolchain_config")
 
 licenses(["restricted"])
 
@@ -27,32 +28,30 @@ filegroup(
     ],
 )
 
+cc_toolchain_config(name = "k8_toolchain_config")
+
 cc_toolchain(
     name = "cc-compiler-local",
     all_files = ":empty",
     compiler_files = ":empty",
-    cpu = "local",
     dwp_files = ":empty",
-    dynamic_runtime_libs = [":empty"],
     linker_files = ":empty",
     objcopy_files = ":empty",
-    static_runtime_libs = [":empty"],
     strip_files = ":empty",
     supports_param_files = 0,
+    toolchain_config = ":k8_toolchain_config",
 )
 
 cc_toolchain(
     name = "cc-compiler-k8",
     all_files = ":empty",
     compiler_files = ":empty",
-    cpu = "local",
     dwp_files = ":empty",
-    dynamic_runtime_libs = [":empty"],
     linker_files = ":empty",
     objcopy_files = ":empty",
-    static_runtime_libs = [":empty"],
     strip_files = ":empty",
     supports_param_files = 0,
+    toolchain_config = ":k8_toolchain_config",
 )
 
 filegroup(
