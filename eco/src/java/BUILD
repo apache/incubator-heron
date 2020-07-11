@@ -8,7 +8,7 @@ eco_deps = [
     "@maven//:commons_cli_commons_cli",
     "@maven//:org_yaml_snakeyaml",
     "//third_party/java:logging",
-    "//storm-compatibility/src/java:storm-compatibility-java-neverlink",
+    "//storm-compatibility/v0.10.2/src/java:storm-compatibility-java-neverlink",
     "//heron/api/src/java:api-java-low-level",
     "//heron/common/src/java:basics-java",
 ]

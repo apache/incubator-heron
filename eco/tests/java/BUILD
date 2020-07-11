@@ -16,7 +16,7 @@ heron_local_deps = [
     "//eco/src/java:eco-storm-builder-java",
     "//eco/src/java:eco-heron-builder-java",
     "//heron/api/src/java:api-java-low-level",
-    "//storm-compatibility/src/java:storm-compatibility-java",
+    "//storm-compatibility/v0.10.2/src/java:storm-compatibility-java",
 ]
 
 eco_test_deps = heron_local_deps + test_deps_files

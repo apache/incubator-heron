@@ -78,7 +78,7 @@ T="heron build"
 start_timer "$T"
 ${UTILS}/save-logs.py "heron_build.txt" bazel\
   --bazelrc=tools/travis/bazel.rc build --config=$PLATFORM heron/... \
-  heronpy/... examples/... storm-compatibility-examples/... \
+  heronpy/... examples/... storm-compatibility-examples/v0.10.2/... \
   eco-storm-examples/... eco-heron-examples/... contrib/...
 end_timer "$T"
 
@@ -89,7 +89,7 @@ ${UTILS}/save-logs.py "heron_test_non_flaky.txt" bazel\
   --bazelrc=tools/travis/bazel.rc test\
   --test_summary=detailed --test_output=errors\
   --config=$PLATFORM --test_tag_filters=-flaky heron/... \
-  heronpy/... examples/... storm-compatibility-examples/... \
+  heronpy/... examples/... storm-compatibility-examples/v0.10.2/... \
   eco-storm-examples/... eco-heron-examples/... contrib/... 
 end_timer "$T"
 
@@ -101,7 +101,7 @@ ${UTILS}/save-logs.py "heron_test_flaky.txt" bazel\
   --bazelrc=tools/travis/bazel.rc test\
   --test_summary=detailed --test_output=errors\
   --config=$PLATFORM --test_tag_filters=flaky --jobs=1 heron/... \
-  heronpy/... examples/... storm-compatibility-examples/... \
+  heronpy/... examples/... storm-compatibility-examples/v0.10.2/... \
   eco-storm-examples/... eco-heron-examples/...
 end_timer "$T"
 

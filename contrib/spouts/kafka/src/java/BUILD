@@ -14,7 +14,7 @@ java_doc(
 )
 
 kafka_spout_deps = [
-    "//storm-compatibility/src/java:storm-compatibility-java-neverlink",
+    "//storm-compatibility/v0.10.2/src/java:storm-compatibility-java-neverlink",
     "//heron/api/src/java:api-java-low-level",
     "//heron/common/src/java:basics-java",
     "//heron/common/src/java:config-java",
