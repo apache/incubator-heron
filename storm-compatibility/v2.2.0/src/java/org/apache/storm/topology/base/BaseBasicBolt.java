@@ -29,8 +29,7 @@ public abstract class BaseBasicBolt extends BaseComponent implements IBasicBolt 
   private static final long serialVersionUID = 1464223135325402830L;
 
   @Override
-  @SuppressWarnings("rawtypes")
-  public void prepare(Map stormConf, TopologyContext context) {
+  public void prepare(Map<String, Object> topoConf, TopologyContext context) {
   }
 
   @Override
