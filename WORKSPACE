@@ -45,7 +45,7 @@ reef_version = "0.14.0"
 
 slf4j_version = "1.7.30"
 
-distributedlog_version = "4.7.3"
+distributedlog_version = "4.11.0"
 
 http_client_version = "4.5.2"
 
