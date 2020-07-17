@@ -24,7 +24,7 @@
 # pylint: disable=unused-argument
 # pylint: disable=missing-docstring
 import random
-from mock import patch
+from unittest.mock import patch
 
 from heronpy.api.task_hook import ITaskHook
 from heronpy.api.custom_grouping import ICustomGrouping

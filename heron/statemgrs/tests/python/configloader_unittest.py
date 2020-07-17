@@ -20,7 +20,7 @@
 
 '''heron executor unittest'''
 import os
-import unittest2 as unittest
+import unittest
 
 from heron.statemgrs.src.python import configloader
 

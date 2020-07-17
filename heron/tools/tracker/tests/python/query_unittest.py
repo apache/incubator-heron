@@ -16,8 +16,8 @@
 # under the License.
 ''' query_unittest.py '''
 # pylint: disable=missing-docstring, undefined-variable
-import unittest2 as unittest
-from mock import Mock
+import unittest
+from unittest.mock import Mock
 
 from heron.tools.tracker.src.python.query import *
 
