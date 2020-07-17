@@ -26,7 +26,6 @@ import os
 import uuid
 
 import heronpy.api.api_constants as api_constants
-import six
 from heronpy.api.component.component_spec import HeronComponentSpec
 from heronpy.api.serializer import default_serializer
 from heronpy.proto import topology_pb2
@@ -256,8 +255,7 @@ class TopologyType(type):
 
     return sanitized
 
-@six.add_metaclass(TopologyType)
-class Topology:
+class Topology(metaclass=TopologyType):
   """Topology is an abstract class for defining a topology
 
   Topology writers can define their custom topology by inheriting this class.
