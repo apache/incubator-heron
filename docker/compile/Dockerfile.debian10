@@ -15,7 +15,7 @@
 #  specific language governing permissions and limitations
 #  under the License.
 
-FROM debian:buster-20200607
+FROM openjdk:11.0.6-jdk-buster
 
 # This is passed to the heron build command via the --config flag
 ENV TARGET_PLATFORM debian
@@ -32,7 +32,6 @@ RUN apt-get update && apt-get -y install \
       libtool \
       libtool-bin \
       libssl-dev \
-      openjdk-11-jdk-headless \
       pkg-config \
       python \
       python3 \
