@@ -43,7 +43,7 @@ pip install --ignore-installed six
 # Install the heronpy
 echo "list heronpy location"
 ls $PIP_LOCATION
-pip install $PIP_LOCATION/heronpy-*-py2.py3-none-any.whl
+pip install $PIP_LOCATION/heronpy-*-py3-none-any.whl
 
 
 mkdir -p static/api && rm -rf static/api/python
