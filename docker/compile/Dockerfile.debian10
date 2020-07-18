@@ -15,7 +15,7 @@
 #  specific language governing permissions and limitations
 #  under the License.
 
-FROM openjdk:11.0.6-slim-buster
+FROM openjdk:11.0.6-jdk-buster
 
 # This is passed to the heron build command via the --config flag
 ENV TARGET_PLATFORM debian
@@ -27,21 +27,21 @@ RUN apt-get update && apt-get -y install \
       build-essential \
       cmake \
       curl \
-      libssl-dev \
       git \
+      libcppunit-dev \
+      libssl-dev \
       libtool \
       libtool-bin \
-      libcppunit-dev \
       pkg-config \
       python \
       python3 \
       python3-dev \
-      software-properties-common \
       python3-setuptools \
+      software-properties-common \
       tree \
-      zip \
       unzip \
-      wget
+      wget \
+      zip
 
 RUN wget -O /tmp/bazel.sh https://github.com/bazelbuild/bazel/releases/download/$bazelVersion/bazel-$bazelVersion-installer-linux-x86_64.sh \
       && chmod +x /tmp/bazel.sh \
