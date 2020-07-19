@@ -116,7 +116,7 @@ spec:
         # The first time, initialize BK to wipe data for minikube
         - name: bookie-format
           image: {{ .Values.bookkeeper.image }}
-          args: ["/opt/bookkeeper/bin/bookkeeper", "shell", "bookieformat", "--nonInteractive", "-f", "-deleteCookie"]
+          args: ["/opt/bookkeeper/bin/bookkeeper", "shell", "bookieformat", "--nonInteractive", "-f"]
           command: [ "/bin/bash", "/opt/bookkeeper/scripts/entrypoint.sh" ]
           envFrom:
             - configMapRef:
