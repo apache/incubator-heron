@@ -31,10 +31,9 @@ from heron.proto import topology_pb2
 from heron.statemgrs.src.python import statemanagerfactory
 from heron.tools.tracker.src.python.config import EXTRA_LINK_FORMATTER_KEY, EXTRA_LINK_URL_KEY
 from heron.tools.tracker.src.python.topology import Topology
-from heron.tools.tracker.src.python import javaobj
-from heron.tools.tracker.src.python import pyutils
 from heron.tools.tracker.src.python import utils
 
+import javaobj.v1 as javaobj
 
 def convert_pb_kvs(kvs, include_non_primitives=True):
   """
@@ -60,10 +59,10 @@ def convert_pb_kvs(kvs, include_non_primitives=True):
 def _convert_java_value(kv, include_non_primitives=True):
   try:
     pobj = javaobj.loads(kv.serialized_value)
-    if pyutils.is_str_instance(pobj):
+    if isinstance(pobj, str):
       return pobj
 
-    if pobj.is_primitive():
+    if isinstance(pobj, javaobj.transformers.DefaultObjectTransformer.JavaPrimitiveClass):
       return pobj.value
 
     if include_non_primitives:
@@ -74,7 +73,7 @@ def _convert_java_value(kv, include_non_primitives=True):
                                default=lambda custom_field: custom_field.__dict__,
                                sort_keys=True,
                                indent=2),
-          'raw' : utils.hex_escape(kv.serialized_value)}
+          'raw' : kv.serialized_value.hex()}
 
     return None
   except Exception:
@@ -87,7 +86,7 @@ def _raw_value(kv):
   return {
       # The value should be a valid json object
       'value' : '{}',
-      'raw' : utils.hex_escape(kv.serialized_value)}
+      'raw' : kv.serialized_value.hex()}
 
 
 class Tracker:

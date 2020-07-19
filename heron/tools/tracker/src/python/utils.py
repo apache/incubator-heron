@@ -24,7 +24,6 @@ Contains utility functions used by tracker.
 '''
 
 import os
-import string
 import sys
 import subprocess
 from pathlib import Path
@@ -36,12 +35,6 @@ BIN_DIR = "bin"
 CONF_DIR = "conf"
 LIB_DIR = "lib"
 
-def hex_escape(bin_str):
-  """
-  Hex encode a binary string
-  """
-  printable = string.ascii_letters + string.digits + string.punctuation + ' '
-  return ''.join(ch if ch in printable else r'0x{0:02x}'.format(ord(ch)) for ch in bin_str)
 
 def make_shell_endpoint(topologyInfo, instance_id):
   """
