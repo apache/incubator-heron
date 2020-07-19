@@ -19,6 +19,8 @@
 #  under the License.
 
 ''' zkstatemanager.py '''
+import contextlib
+
 from heron.proto.execution_state_pb2 import ExecutionState
 from heron.proto.packing_plan_pb2 import PackingPlan
 from heron.proto.physical_plan_pb2 import PhysicalPlan
@@ -38,6 +40,25 @@ from kazoo.exceptions import ZookeeperError
 
 def _makehostportlist(hostportlist):
   return ','.join(["%s:%i" % hp for hp in hostportlist])
+
+@contextlib.contextmanager
+def reraise_from_zk_exceptions(action):
+  """Raise StateException from ZookeeperError if raised."""
+  try:
+    yield
+  except NoNodeError as e:
+    raise StateException(f"NoNodeError while {action}",
+                         StateException.EX_TYPE_NO_NODE_ERROR) from e
+  except NodeExistsError as e:
+    raise StateException(f"NodeExistsError while {action}",
+                         StateException.EX_TYPE_NODE_EXISTS_ERROR) from e
+  except NotEmptyError as e:
+    raise StateException(f"NotEmptyError while {action}",
+                         StateException.EX_TYPE_NOT_EMPTY_ERROR) from e
+  except ZookeeperError as e:
+    raise StateException(f"Zookeeper while {action}",
+                         StateException.EX_TYPE_ZOOKEEPER_ERROR) from e
+
 
 # pylint: disable=attribute-defined-outside-init
 class ZkStateManager(StateManager):
@@ -191,36 +212,18 @@ class ZkStateManager(StateManager):
     LOG.info("Adding topology: {0} to path: {1}".format(
         topologyName, path))
     topologyString = topology.SerializeToString()
-    try:
+    with reraise_from_zk_exceptions("creating topology"):
       self.client.create(path, value=topologyString, makepath=True)
-      return True
-    except NoNodeError as e:
-      raise StateException("NoNodeError while creating topology",
-                           StateException.EX_TYPE_NO_NODE_ERROR) from e
-    except NodeExistsError as e:
-      raise StateException("NodeExistsError while creating topology",
-                           StateException.EX_TYPE_NODE_EXISTS_ERROR) from e
-    except ZookeeperError as e:
-      raise StateException("Zookeeper while creating topology",
-                           StateException.EX_TYPE_ZOOKEEPER_ERROR) from e
+    return True
 
   def delete_topology(self, topologyName):
     """ delete topology """
     path = self.get_topology_path(topologyName)
     LOG.info("Removing topology: {0} from path: {1}".format(
         topologyName, path))
-    try:
+    with reraise_from_zk_exceptions("deleting topology"):
       self.client.delete(path)
-      return True
-    except NoNodeError as e:
-      raise StateException("NoNodeError while deteling topology",
-                           StateException.EX_TYPE_NO_NODE_ERROR) from e
-    except NotEmptyError as e:
-      raise StateException("NotEmptyError while deleting topology",
-                           StateException.EX_TYPE_NOT_EMPTY_ERROR) from e
-    except ZookeeperError as e:
-      raise StateException("Zookeeper while deleting topology",
-                           StateException.EX_TYPE_ZOOKEEPER_ERROR) from e
+    return True
 
   def get_packing_plan(self, topologyName, callback=None):
     """ get packing plan """
@@ -328,36 +331,18 @@ class ZkStateManager(StateManager):
     LOG.info("Adding topology: {0} to path: {1}".format(
         topologyName, path))
     pplanString = pplan.SerializeToString()
-    try:
+    with reraise_from_zk_exceptions("creating pplan"):
       self.client.create(path, value=pplanString, makepath=True)
-      return True
-    except NoNodeError as e:
-      raise StateException("NoNodeError while creating pplan",
-                           StateException.EX_TYPE_NO_NODE_ERROR) from e
-    except NodeExistsError as e:
-      raise StateException("NodeExistsError while creating pplan",
-                           StateException.EX_TYPE_NODE_EXISTS_ERROR) from e
-    except ZookeeperError as e:
-      raise StateException("Zookeeper while creating pplan",
-                           StateException.EX_TYPE_ZOOKEEPER_ERROR) from e
+    return True
 
   def delete_pplan(self, topologyName):
     """ delete physical plan info """
     path = self.get_pplan_path(topologyName)
     LOG.info("Removing topology: {0} from path: {1}".format(
         topologyName, path))
-    try:
+    with reraise_from_zk_exceptions("deleting pplan"):
       self.client.delete(path)
-      return True
-    except NoNodeError as e:
-      raise StateException("NoNodeError while deleting pplan",
-                           StateException.EX_TYPE_NO_NODE_ERROR) from e
-    except NotEmptyError as e:
-      raise StateException("NotEmptyError while deleting pplan",
-                           StateException.EX_TYPE_NOT_EMPTY_ERROR) from e
-    except ZookeeperError as e:
-      raise StateException("Zookeeper while deleting pplan",
-                           StateException.EX_TYPE_ZOOKEEPER_ERROR) from e
+    return True
 
   def get_execution_state(self, topologyName, callback=None):
     """ get execution state """
@@ -418,36 +403,18 @@ class ZkStateManager(StateManager):
     LOG.info("Adding topology: {0} to path: {1}".format(
         topologyName, path))
     executionStateString = executionState.SerializeToString()
-    try:
+    with reraise_from_zk_exceptions("creating execution state"):
       self.client.create(path, value=executionStateString, makepath=True)
-      return True
-    except NoNodeError as e:
-      raise StateException("NoNodeError while creating execution state",
-                           StateException.EX_TYPE_NO_NODE_ERROR) from e
-    except NodeExistsError as e:
-      raise StateException("NodeExistsError while creating execution state",
-                           StateException.EX_TYPE_NODE_EXISTS_ERROR) from e
-    except ZookeeperError as e:
-      raise StateException("Zookeeper while creating execution state",
-                           StateException.EX_TYPE_ZOOKEEPER_ERROR) from e
+    return True
 
   def delete_execution_state(self, topologyName):
     """ delete execution state """
     path = self.get_execution_state_path(topologyName)
     LOG.info("Removing topology: {0} from path: {1}".format(
         topologyName, path))
-    try:
+    with reraise_from_zk_exceptions("deleting execution state"):
       self.client.delete(path)
-      return True
-    except NoNodeError as e:
-      raise StateException("NoNodeError while deleting execution state",
-                           StateException.EX_TYPE_NO_NODE_ERROR) from e
-    except NotEmptyError as e:
-      raise StateException("NotEmptyError while deleting execution state",
-                           StateException.EX_TYPE_NOT_EMPTY_ERROR) from e
-    except ZookeeperError as e:
-      raise StateException("Zookeeper while deleting execution state",
-                           StateException.EX_TYPE_ZOOKEEPER_ERROR) from e
+    return True
 
   def get_tmaster(self, topologyName, callback=None):
     """ get tmaster """
