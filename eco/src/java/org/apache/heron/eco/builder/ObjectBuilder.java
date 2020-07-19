@@ -220,7 +220,7 @@ public class ObjectBuilder {
     }
     if (eligibleCount > 1) {
       LOG.warn("Found multiple invokable methods for class, method, given arguments {} "
-          + new Object[]{target, methodName, args});
+          + Arrays.toString(new Object[]{target, methodName, args}));
     }
     return retval;
   }
