@@ -19,9 +19,6 @@
 #  under the License.
 
 """ test_template.py """
-from future.standard_library import install_aliases
-install_aliases()
-
 import json
 import logging
 import os

@@ -9,7 +9,6 @@ pex_library(
     reqs = [
         "protobuf==3.8.0",
         "tornado==4.0.2",
-        "future==0.18.2",
     ],
     deps = [
         "//heron/common/src/python:common-py",

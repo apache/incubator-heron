@@ -21,7 +21,7 @@
 '''Unittest for GatewayLooper'''
 import threading
 import time
-import unittest2 as unittest
+import unittest
 
 from heron.instance.src.python.network.gateway_looper import GatewayLooper
 

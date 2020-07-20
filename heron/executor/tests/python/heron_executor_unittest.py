@@ -21,7 +21,7 @@
 '''heron executor unittest'''
 import os
 import socket
-import unittest2 as unittest
+import unittest
 import json
 
 from pprint import pprint

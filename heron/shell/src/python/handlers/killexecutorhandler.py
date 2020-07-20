@@ -20,10 +20,6 @@
 
 
 ''' killexecutorhandler.py '''
-# pylint: disable=wrong-import-order
-from future.standard_library import install_aliases
-install_aliases()
-
 import logging
 import os
 import signal

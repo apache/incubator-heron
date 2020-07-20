@@ -16,7 +16,7 @@
 # under the License.
 ''' topology_unittest.py '''
 # pylint: disable=missing-docstring
-import unittest2 as unittest
+import unittest
 
 from heron.tools.tracker.src.python.topology import Topology
 from mock_proto import MockProto

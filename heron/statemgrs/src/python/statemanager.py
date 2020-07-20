@@ -23,7 +23,6 @@ import abc
 
 import socket
 import subprocess
-import six
 
 from heron.statemgrs.src.python.log import Log as LOG
 
@@ -35,7 +34,7 @@ HERON_TMASTER_PREFIX = "{0}/tmasters/"
 HERON_TOPOLOGIES_KEY = "{0}/topologies"
 
 # pylint: disable=too-many-public-methods, attribute-defined-outside-init
-class StateManager(six.with_metaclass(abc.ABCMeta)):
+class StateManager(metaclass=abc.ABCMeta):
   """
   This is the abstract base class for state manager. It provides methods to get/set/delete various
   state from the state store. The getters accept an optional callback, which will watch for state

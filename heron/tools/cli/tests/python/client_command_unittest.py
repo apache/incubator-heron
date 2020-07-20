@@ -19,9 +19,8 @@
 #  under the License.
 
 ''' opts_unittest.py '''
-import unittest2 as unittest
-import mock
-from mock import call, patch, Mock, MagicMock
+import unittest
+from unittest.mock import call, patch, Mock, MagicMock
 import os
 import getpass
 import subprocess
