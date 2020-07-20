@@ -23,7 +23,7 @@ import tornado.concurrent
 import tornado.gen
 import tornado.testing
 
-from mock import patch, Mock
+from unittest.mock import patch, Mock
 
 from heron.tools.tracker.src.python.query_operators import *
 

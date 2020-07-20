@@ -19,7 +19,7 @@
 #  under the License.
 
 '''ZkStateManager unittest'''
-import unittest2 as unittest
+import unittest
 
 from heron.statemgrs.src.python.zkstatemanager import ZkStateManager
 

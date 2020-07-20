@@ -16,7 +16,6 @@
 #  under the License.
 
 ''' standalone.py '''
-from __future__ import print_function
 from collections import OrderedDict
 from subprocess import call
 import subprocess

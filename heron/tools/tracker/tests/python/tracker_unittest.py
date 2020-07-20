@@ -17,8 +17,8 @@
 ''' tracker_unittest.py '''
 
 # pylint: disable=missing-docstring, attribute-defined-outside-init
-import unittest2 as unittest
-from mock import call, patch, Mock
+import unittest
+from unittest.mock import call, patch, Mock
 
 import heron.proto.execution_state_pb2 as protoEState
 from heron.statemgrs.src.python import statemanagerfactory
@@ -191,25 +191,25 @@ class TrackerTest(unittest.TestCase):
 
   def test_get_topolies_for_state_location(self):
     self.fill_tracker_topologies()
-    self.assertItemsEqual(
+    self.assertCountEqual(
         [self.topology1, self.topology2, self.topology3],
         self.tracker.getTopologiesForStateLocation('mock_name1'))
-    self.assertItemsEqual(
+    self.assertCountEqual(
         [self.topology4, self.topology5],
         self.tracker.getTopologiesForStateLocation('mock_name2'))
 
   def test_add_new_topology(self):
-    self.assertItemsEqual([], self.tracker.topologies)
+    self.assertCountEqual([], self.tracker.topologies)
     mock_state_manager_1 = Mock()
     mock_state_manager_1.name = 'mock_name1'
 
     self.tracker.addNewTopology(mock_state_manager_1, 'top_name1')
-    self.assertItemsEqual(
+    self.assertCountEqual(
         ['top_name1'],
         [t.name for t in self.tracker.topologies])
 
     self.tracker.addNewTopology(mock_state_manager_1, 'top_name2')
-    self.assertItemsEqual(
+    self.assertCountEqual(
         ['top_name1', 'top_name2'],
         [t.name for t in self.tracker.topologies])
 
@@ -220,17 +220,17 @@ class TrackerTest(unittest.TestCase):
   def test_remove_topology(self):
     self.fill_tracker_topologies()
     self.tracker.removeTopology('top_name1', 'mock_name1')
-    self.assertItemsEqual([self.topology2, self.topology3, self.topology4, self.topology5],
+    self.assertCountEqual([self.topology2, self.topology3, self.topology4, self.topology5],
                           self.tracker.topologies)
     self.tracker.removeTopology('top_name2', 'mock_name1')
-    self.assertItemsEqual([self.topology3, self.topology4, self.topology5],
+    self.assertCountEqual([self.topology3, self.topology4, self.topology5],
                           self.tracker.topologies)
     # Removing one that is not there should not have any affect
     self.tracker.removeTopology('top_name8', 'mock_name1')
-    self.assertItemsEqual([self.topology3, self.topology4, self.topology5],
+    self.assertCountEqual([self.topology3, self.topology4, self.topology5],
                           self.tracker.topologies)
     self.tracker.removeTopology('top_name4', 'mock_name2')
-    self.assertItemsEqual([self.topology3, self.topology5],
+    self.assertCountEqual([self.topology3, self.topology5],
                           self.tracker.topologies)
 
   def test_extract_physical_plan(self):

@@ -21,8 +21,8 @@
 ''' explorer_unittest.py '''
 import json
 import os
-import unittest2 as unittest
-from mock import Mock
+import unittest
+from unittest.mock import Mock
 
 import heron.tools.common.src.python.access.tracker_access as tracker_access
 import heron.tools.explorer.src.python.topologies as topologies
