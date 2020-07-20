@@ -1,1 +1,2 @@
 protobuf==3.8.0
+cloudpickle~=1.5.0
