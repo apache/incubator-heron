@@ -77,7 +77,7 @@ spec:
           tolerationSeconds: 10
       initContainers:
         - name: init-heron-apiserver
-          image: apache/bookkeeper:4.7.3
+          image: apache/bookkeeper:4.11.0
           command: ['sh', '-c', '/opt/bookkeeper/bin/dlog admin bind -l /ledgers -s zookeeper:2181 -c distributedlog://zookeeper:2181/heron']
       containers:
         - name: heron-apiserver

@@ -67,7 +67,7 @@ bookieStorageCapacity: 15G
 zkReplicas: 3
 
 bookkeeper:
-  image: apache/bookkeeper:4.7.3
+  image: apache/bookkeeper:4.11.0
   imagePullPolicy: IfNotPresent
   
   # set storageClassName to "none" to not use storageClassName

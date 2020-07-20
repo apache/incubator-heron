@@ -78,7 +78,7 @@ kind load image-archive "$heron_archive"
 image_heron="heron/heron:$TAG"
 
 action "Loading bookkeeper image"
-image_bookkeeper="docker.io/apache/bookkeeper:4.7.3"
+image_bookkeeper="docker.io/apache/bookkeeper:4.11.0"
 docker pull "$image_bookkeeper"
 kind load docker-image "$image_bookkeeper"
 
