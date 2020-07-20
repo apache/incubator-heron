@@ -26,7 +26,7 @@ try:
 except:
   import pickle
 
-import heronpy.api.cloudpickle as cloudpickle
+import cloudpickle
 
 class IHeronSerializer:
   """Serializer interface for Heron"""
