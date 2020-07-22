@@ -188,7 +188,7 @@ class ZkStateManager(StateManager):
 
     # pylint: disable=unused-variable, unused-argument
     @self.client.DataWatch(path)
-    def watch_topology(data, stats):
+    def watch_topology(data, stats, event):
       """ watch topology """
       if data:
         topology = Topology()
@@ -258,7 +258,7 @@ class ZkStateManager(StateManager):
 
     # pylint: disable=unused-argument,unused-variable
     @self.client.DataWatch(path)
-    def watch_packing_plan(data, stats):
+    def watch_packing_plan(data, stats, event):
       """ watch the packing plan for updates """
       if data:
         packing_plan = PackingPlan()
@@ -307,7 +307,7 @@ class ZkStateManager(StateManager):
 
     # pylint: disable=unused-variable, unused-argument
     @self.client.DataWatch(path)
-    def watch_pplan(data, stats):
+    def watch_pplan(data, stats, event):
       """ invoke callback to watch physical plan """
       if data:
         pplan = PhysicalPlan()
@@ -379,7 +379,7 @@ class ZkStateManager(StateManager):
 
     # pylint: disable=unused-variable, unused-argument
     @self.client.DataWatch(path)
-    def watch_execution_state(data, stats):
+    def watch_execution_state(data, stats, event):
       """ invoke callback to watch execute state """
       if data:
         executionState = ExecutionState()
@@ -451,7 +451,7 @@ class ZkStateManager(StateManager):
 
     # pylint: disable=unused-variable, unused-argument
     @self.client.DataWatch(path)
-    def watch_tmaster(data, stats):
+    def watch_tmaster(data, stats, event):
       """ invoke callback to watch tmaster """
       if data:
         tmaster = TMasterLocation()
@@ -499,7 +499,7 @@ class ZkStateManager(StateManager):
 
     # pylint: disable=unused-variable, unused-argument
     @self.client.DataWatch(path)
-    def watch_scheduler_location(data, stats):
+    def watch_scheduler_location(data, stats, event):
       """ invoke callback to watch scheduler location """
       if data:
         scheduler_location = SchedulerLocation()
