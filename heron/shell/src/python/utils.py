@@ -150,7 +150,7 @@ def read_chunk(filename, offset=-1, length=-1, escape_data=False):
   return dict(offset=offset, length=0)
 
 def _escape_data(data):
-  return escape(data.decode())
+  return escape(data.decode('utf8', 'replace'))
 
 def pipe(prev_proc, to_cmd):
   """
