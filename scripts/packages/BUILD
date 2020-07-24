@@ -604,7 +604,7 @@ genrule(
         "export RELEASE_FILE_DIR=$$(pwd)",
         "export TMP_DIR=$$(mktemp -d -t heronpy.XXXXX)",
         "echo $$TMP_DIR",
-        "$(location @virtualenv//:virtualenv) --no-download --quiet --clear $$TMP_DIR/venv",
+        "virtualenv --python=3 --no-download --quiet --clear $$TMP_DIR/venv",
         "PS1= source $$TMP_DIR/venv/bin/activate",
         "export HERONPY_DIR=$$TMP_DIR/heronpy",
         "export HERONPYAPI_UNZIP=$$TMP_DIR/heronapiunzip",
@@ -661,7 +661,6 @@ genrule(
         "//heronpy/connectors:heron-pythonconnectors-package",
         "//heronpy/proto:proto-py-package",
         "//heronpy/streamlet:heron-python-streamlet-api-package",
-        "@virtualenv",
     ],
 )
 

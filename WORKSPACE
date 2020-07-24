@@ -181,10 +181,6 @@ REQUESTS_SRC = "https://pypi.python.org/packages/d9/03/155b3e67fe35fe5b6f4227a8d
 
 SETUPTOOLS_WHEEL = "https://pypi.python.org/packages/a0/df/635cdb901ee4a8a42ec68e480c49f85f4c59e8816effbf57d9e6ee8b3588/setuptools-46.1.3-py3-none-any.whl"
 
-VIRTUALENV_SRC = "https://pypi.python.org/packages/d4/0c/9840c08189e030873387a73b90ada981885010dd9aea134d6de30cd24cb8/virtualenv-15.1.0.tar.gz"
-
-VIRTUALENV_PREFIX = "virtualenv-15.1.0"
-
 WHEEL_SRC = "https://pypi.python.org/packages/c9/1d/bd19e691fd4cfe908c76c429fe6e4436c9e83583c4414b54f6c85471954a/wheel-0.29.0.tar.gz"
 
 http_file(
@@ -227,22 +223,6 @@ http_file(
     downloaded_file_path = "setuptools-46.1.3-py3-none-any.whl",
     sha256 = "4fe404eec2738c20ab5841fa2d791902d2a645f32318a7850ef26f8d7215a8ee",
     urls = [SETUPTOOLS_WHEEL],
-)
-
-http_archive(
-    name = "virtualenv",
-    build_file_content = "\n".join([
-        "load(\"@rules_python//python:defs.bzl\", \"py_binary\")",
-        "py_binary(",
-        "    name = 'virtualenv',",
-        "    srcs = ['virtualenv.py'],",
-        "    data = glob(['**/*']),",
-        "    visibility = ['//visibility:public'],",
-        ")",
-    ]),
-    sha256 = "02f8102c2436bb03b3ee6dede1919d1dac8a427541652e5ec95171ec8adbc93a",
-    strip_prefix = VIRTUALENV_PREFIX,
-    urls = [VIRTUALENV_SRC],
 )
 # end pex repos
 

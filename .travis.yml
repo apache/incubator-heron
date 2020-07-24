@@ -37,7 +37,7 @@ before_install:
 
 install:
   - sudo apt-get install python3-pip python3-setuptools
-  - pip3 install travis-wait-improved
+  - pip3 install travis-wait-improved virtualenv
 
 script:
   - which gcc

@@ -25,7 +25,7 @@ LINUX_EXECUTE = [
 POST_EXECUTE = [
     'ln -sf "$$OUTDIR" "$$TMPF"',
     'VENV="$${TMPF}/venv"',
-    '$(location @virtualenv//:virtualenv) --no-download --quiet --clear "$$VENV"',
+    'virtualenv --python=3 --no-download --quiet --clear "$$VENV"',
     '# this is just to keep the activate script happy',
     'PS1=',
     'source "$$VENV/bin/activate"',
@@ -70,6 +70,5 @@ genrule(
     executable = True,
     message = "Bootstrapping pex",
     output_to_bindir = True,
-    tools = ["@virtualenv"],
     visibility = ["//visibility:public"],
 )

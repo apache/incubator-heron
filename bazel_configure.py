@@ -214,6 +214,9 @@ def discover_version(path):
     if version:
       return version
 
+  virtualenv_match = re.match(r'^virtualenv\s+(\d+(?:\.\d+){0,2})', first_line)
+  if virtualenv_match:
+    return virtualenv_match.group(1)
 
   fail ("Could not determine the version of %s from the following output\n%s\n%s" % (path, command, version_output))
 
@@ -428,6 +431,7 @@ def main():
   env_map['OBJCOPY'] = discover_tool_default('objcopy', 'objcopy', 'OBJCOPY', '/usr/bin/objcopy')
   env_map['OBJDUMP'] = discover_tool_default('objdump', 'objdump', 'OBJDUMP', '/usr/bin/objdump')
   env_map['STRIP'] = discover_tool_default('strip', "strip", 'STRIP', '/usr/bin/strip')
+  env_map['VIRTUALENV'] = discover_tool('virtualenv', 'virtualenv', 'VIRTUALENV', '15.1.0')
 
   # write the environment executable file
   # write_env_exec_file(platform, env_map)
