@@ -106,7 +106,7 @@ public final class SimplePulsarSourceTopology {
      */
     Source<String> pulsarSource = new PulsarSource(
         "pulsar://localhost:6650", // Pulsar connection URL
-        "persistent://sample/standalone/ns1/heron-pulsar-test-topic", // Pulsar topic
+        "persistent://sample/nomad/ns1/heron-pulsar-test-topic", // Pulsar topic
         "subscription-1" // Subscription name for the Pulsar topic
     );
 

@@ -56,7 +56,6 @@
       "schedulers-aurora-cluster",
       "schedulers-aurora-local",
       "schedulers-local",
-      "schedulers-standalone",
       "schedulers-nomad",
       "schedulers-mesos-local-mac",
       "schedulers-slurm",
