@@ -6,6 +6,7 @@ pex_library(
         ["**/*.py"],
     ),
     reqs = [
+        "click==7.1.2",
         "PyYAML==3.13",
         "requests==2.12.3",
         "netifaces==0.10.6",
