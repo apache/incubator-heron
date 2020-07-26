@@ -135,7 +135,7 @@ def read_chunk(filename, offset=-1, length=-1, escape_data=False):
   if length == -1:
     length = fstat.st_size - offset
 
-  with open(filename, "r") as fp:
+  with open(filename, "rb") as fp:
     fp.seek(offset)
     try:
       data = fp.read(length)
