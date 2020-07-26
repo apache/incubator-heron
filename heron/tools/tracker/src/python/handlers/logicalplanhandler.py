@@ -18,14 +18,47 @@
 #  specific language governing permissions and limitations
 #  under the License.
 
-""" logicalplanhandler.py """
+"""
+Logical plan objects have the shape:
+  {
+   'spouts': {
+      spout_name: {
+        'outputs': [{'stream_name': stream_name}],
+      }
+   },
+   'bolts': {
+     bolt_name: {
+       'outputs': [{'stream_name': stream_name}],
+       'inputs': [{
+         'stream_name': stream_name,
+         'component_name': component_name,
+         'grouping': grouping_type,
+       }]
+     }
+   }
+  }
+
+"""
 import traceback
 import tornado.gen
 import tornado.web
 
 from heron.common.src.python.utils.log import Log
-from heron.tools.tracker.src.python import graph
 from heron.tools.tracker.src.python.handlers import BaseHandler
+
+import networkx
+
+
+def topology_stages(logical_plan):
+  """Return the number of stages in a logical plan."""
+  graph = networkx.DiGraph(
+      (input_info["component_name"], bolt_name)
+      for bolt_name, bolt_info in logical_plan.get("bolts", {}).items()
+      for input_info in bolt_info["inputs"]
+  )
+  # this is is the same as "diameter" if treating the topology as an undirected graph
+  return networkx.dag_longest_path_length(graph)
+
 
 
 class LogicalPlanHandler(BaseHandler):
@@ -75,10 +108,8 @@ class LogicalPlanHandler(BaseHandler):
             outputs=value["outputs"]
         )
 
-      diameter = graph.TopologyDAG(lplan).diameter()
-
       result = dict(
-          stages=diameter,
+          stages=topology_stages(lplan),
           spouts=spouts_map,
           bolts=bolts_map
       )
