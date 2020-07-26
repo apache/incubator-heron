@@ -41,6 +41,8 @@ default_handlers = [
     (r"^/filestats/(.*)", handlers.FileStatsHandler),
     (r"^/download/(.*)", handlers.DownloadHandler),
     (r"^/killexecutor", handlers.KillExecutorHandler),
+    (r"^/quitquitquit", handlers.KillExecutorHandler),
+    (r"^/abortabortabort", handlers.KillExecutorHandler),
     (r"^/health", handlers.HealthHandler),
 ]
 
