@@ -79,7 +79,7 @@ jobs = [
     service = True,
     task = heron_task,
     instances = '{{NUM_CONTAINERS}}',
-    announce = Announcer(primary_port = 'http', portmap = {'health': 'http'}),
+    announce = Announcer(primary_port = 'http', portmap = {'admin': 'http', 'health': 'http'}),
     health_check_config = HealthCheckConfig(
       health_checker = HealthCheckerConfig(
         http = HttpHealthChecker(endpoint='/health', expected_response='ok', expected_response_code=200)
