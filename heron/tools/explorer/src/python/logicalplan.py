@@ -19,44 +19,15 @@
 #  under the License.
 
 ''' logicalplan.py '''
+import sys
+
 from collections import defaultdict
+
 from heron.common.src.python.utils.log import Log
-import heron.tools.explorer.src.python.args as args
+
 import heron.tools.common.src.python.access.tracker_access as tracker_access
+
 from tabulate import tabulate
-
-
-def create_parser(subparsers):
-  """ create parser """
-  components_parser = subparsers.add_parser(
-      'components',
-      help='Display information of a topology\'s components',
-      usage="%(prog)s cluster/[role]/[env] topology-name [options]",
-      add_help=False)
-  args.add_cluster_role_env(components_parser)
-  args.add_topology_name(components_parser)
-  args.add_spouts(components_parser)
-  args.add_bolts(components_parser)
-  args.add_verbose(components_parser)
-  args.add_tracker_url(components_parser)
-  args.add_config(components_parser)
-  components_parser.set_defaults(subcommand='components')
-
-  return subparsers
-
-
-# pylint: disable=misplaced-bare-raise
-def parse_topo_loc(cl_args):
-  """ parse topology location """
-  try:
-    topo_loc = cl_args['cluster/[role]/[env]'].split('/')
-    topo_loc.append(cl_args['topology-name'])
-    if len(topo_loc) != 4:
-      raise
-    return topo_loc
-  except Exception:
-    Log.error('Error: invalid topology location')
-    raise
 
 
 def to_table(components, topo_info):
@@ -89,59 +60,16 @@ def to_table(components, topo_info):
   return info, header
 
 
-def filter_bolts(table, header):
-  """ filter to keep bolts """
-  bolts_info = []
-  for row in table:
-    if row[0] == 'bolt':
-      bolts_info.append(row)
-  return bolts_info, header
-
-
-def filter_spouts(table, header):
-  """ filter to keep spouts """
-  spouts_info = []
-  for row in table:
-    if row[0] == 'spout':
-      spouts_info.append(row)
-  return spouts_info, header
-
-
-# pylint: disable=unused-argument,superfluous-parens
-def run(cl_args, compo_type):
+def run(component_type: str, cluster: str, role: str, environment: str, topology: str):
   """ run command """
-  cluster, role, env = cl_args['cluster'], cl_args['role'], cl_args['environ']
-  topology = cl_args['topology-name']
-  spouts_only, bolts_only = cl_args['spout'], cl_args['bolt']
   try:
-    components = tracker_access.get_logical_plan(cluster, env, topology, role)
-    topo_info = tracker_access.get_topology_info(cluster, env, topology, role)
-    table, header = to_table(components, topo_info)
-    if spouts_only == bolts_only:
-      print(tabulate(table, headers=header))
-    elif spouts_only:
-      table, header = filter_spouts(table, header)
-      print(tabulate(table, headers=header))
-    else:
-      table, header = filter_bolts(table, header)
-      print(tabulate(table, headers=header))
-    return True
+    components = tracker_access.get_logical_plan(cluster, environment, topology, role)
+    topo_info = tracker_access.get_topology_info(cluster, environment, topology, role)
   except:
-    Log.error("Fail to connect to tracker: \'%s\'", cl_args["tracker_url"])
-    return False
+    Log.error("Fail to connect to tracker")
+    sys.exit(1)
 
-
-
-def run_components(command, parser, cl_args, unknown_args):
-  """ run components command """
-  return run(cl_args, 'all')
-
-
-def run_spouts(command, parser, cl_args, unknown_args):
-  """ run spouts command """
-  return run(cl_args, 'spouts')
-
-
-def run_bolts(command, parser, cl_args, unknown_args):
-  """ run bolts command """
-  return run(cl_args, 'bolts')
+  table, header = to_table(components, topo_info)
+  if component_type != "all":
+    components = [c for c in components if c[0] == component_type]
+  print(tabulate(table, headers=header))

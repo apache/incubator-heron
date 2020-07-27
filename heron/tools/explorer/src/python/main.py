@@ -19,191 +19,157 @@
 #  under the License.
 
 ''' main.py '''
-import argparse
+import logging
+import os
 import sys
-import time
 
 import heron.common.src.python.utils.log as log
+import heron.tools.common.src.python.access.tracker_access as tracker_access
 import heron.tools.common.src.python.utils.config as config
-import heron.tools.explorer.src.python.args as parse
-import heron.tools.explorer.src.python.clusters as clusters
-# pylint: disable=redefined-builtin
-import heron.tools.explorer.src.python.help as help
 import heron.tools.explorer.src.python.logicalplan as logicalplan
-import heron.tools.explorer.src.python.opts as opts
 import heron.tools.explorer.src.python.physicalplan as physicalplan
 import heron.tools.explorer.src.python.topologies as topologies
-import heron.tools.explorer.src.python.version as version
+
+import click
+
+from tornado.options import define
 
 Log = log.Log
 
-# pylint: disable=bad-super-call
-class SubcommandHelpFormatter(argparse.RawDescriptionHelpFormatter):
-  """ subcommand help message formatter """
-  def _format_action(self, action):
-    parts = super(argparse.RawDescriptionHelpFormatter,
-                  self)._format_action(action)
-    if action.nargs == argparse.PARSER:
-      parts = "\n".join(parts.split("\n")[1:])
-    return parts
+DEFAULT_TRACKER_URL = "http://127.0.0.1:8888"
 
+try:
+  click_extra = {"max_content_width": os.get_terminal_size().columns}
+except Exception:
+  click_extra = {}
 
-################################################################################
-# Main parser
-################################################################################
-def create_parser():
-  """ create parser """
-  help_epilog = '''Getting more help:
-  heron-explorer help <command>     Display help and options for <command>\n
-  For detailed documentation, go to https://heron.incubator.apache.org'''
+def show_version(_, __, value):
+  if value:
+    config.print_build_info()
+    sys.exit(0)
 
-  parser = argparse.ArgumentParser(
-      prog='heron-explorer',
-      epilog=help_epilog,
-      formatter_class=SubcommandHelpFormatter,
-      add_help=False)
+@click.group(context_settings=click_extra)
+@click.option(
+    "--version",
+    is_flag=True,
+    is_eager=True,
+    expose_value=False,
+    callback=show_version,
+)
+@click.option("--verbose", is_flag=True)
+def cli(verbose: bool):
+  log.configure(logging.INFO if verbose else logging.DEBUG)
 
-  # sub-commands
-  subparsers = parser.add_subparsers(
-      title="Available commands",
-      metavar='<command> <options>')
-
-  # subparser for subcommands related to clusters
-  clusters.create_parser(subparsers)
-
-  # subparser for subcommands related to logical plan
-  logicalplan.create_parser(subparsers)
-
-  # subparser for subcommands related to physical plan
-  physicalplan.create_parser(subparsers)
-
-  # subparser for subcommands related to displaying info
-  topologies.create_parser(subparsers)
-
-  # subparser for help subcommand
-  help.create_parser(subparsers)
-
-  # subparser for version subcommand
-  version.create_parser(subparsers)
-
-  return parser
-
-
-################################################################################
-# Run the command
-################################################################################
-# pylint: disable=too-many-return-statements
-def run(command, *args):
-  """ run command """
-  # show all clusters
-  if command == 'clusters':
-    return clusters.run(command, *args)
-
-  # show topologies
-  if command == 'topologies':
-    return topologies.run(command, *args)
-
-  # physical plan
-  if command == 'containers':
-    return physicalplan.run_containers(command, *args)
-  if command == 'metrics':
-    return physicalplan.run_metrics(command, *args)
-
-  # logical plan
-  if command == 'components':
-    return logicalplan.run_components(command, *args)
-  if command == 'spouts':
-    return logicalplan.run_spouts(command, *args)
-  if command == 'bolts':
-    return logicalplan.run_bolts(command, *args)
-
-  # help
-  if command == 'help':
-    return help.run(command, *args)
-
-  # version
-  if command == 'version':
-    return version.run(command, *args)
-
-  return 1
-
-
-# pylint: disable=superfluous-parens
-def extract_common_args(command, parser, cl_args):
-  """ extract common args """
+@cli.command("clusters")
+@click.option("--tracker-url", default=DEFAULT_TRACKER_URL)
+def cli_clusters(tracker_url: str):
+  define("tracker_url", tracker_url)
   try:
-    # do not pop like cli because ``topologies`` subcommand still needs it
-    cluster_role_env = cl_args['cluster/[role]/[env]']
-    config_path = cl_args['config_path']
-  except KeyError:
-    # if some of the arguments are not found, print error and exit
-    subparser = config.get_subparser(parser, command)
-    print(subparser.format_help())
-    return dict()
-  cluster = config.get_heron_cluster(cluster_role_env)
-  config_path = config.get_heron_cluster_conf_dir(cluster, config_path)
+    clusters = tracker_access.get_clusters()
+  except:
+    Log.error("Fail to connect to tracker")
+    sys.exit(1)
+  print("Available clusters:")
+  for cluster in clusters:
+    print(f"  {cluster}")
 
-  new_cl_args = dict()
-  try:
-    cluster_tuple = config.parse_cluster_role_env(cluster_role_env, config_path)
-    new_cl_args['cluster'] = cluster_tuple[0]
-    new_cl_args['role'] = cluster_tuple[1]
-    new_cl_args['environ'] = cluster_tuple[2]
-    new_cl_args['config_path'] = config_path
-  except Exception as e:
-    Log.error("Unable to get valid topology location: %s", str(e))
-    return dict()
+@cli.command("topologies")
+@click.option("--tracker-url", default=DEFAULT_TRACKER_URL)
+@click.argument("cre", metavar="CLUSTER[/ROLE[/ENV]]")
+def cli_topologies(tracker_url: str, cre: str):
+  define("tracker_url", tracker_url)
+  topologies.run(
+      cre=cre,
+  )
 
-  cl_args.update(new_cl_args)
-  return cl_args
+@cli.command()
+@click.option("--config-path", default=config.get_heron_conf_dir())
+@click.option("--tracker-url", default=DEFAULT_TRACKER_URL)
+@click.option("--component-type", type=click.Choice(["all", "spouts", "bolts"]), default="all")
+@click.argument("cre", metavar="CLUSTER[/ROLE[/ENV]]")
+@click.argument("topology")
+def logical_plan(
+    config_path: str,
+    cre: str,
+    topology: str,
+    component_type: str,
+    tracker_url: str,
+) -> None:
+  define("tracker_url", tracker_url)
+  cluster = config.get_heron_cluster(cre)
+  cluster_config_path = config.get_heron_cluster_conf_dir(cluster, config_path)
+  cluster, role, environment = config.parse_cluster_role_env(cre, cluster_config_path)
 
+  logicalplan.run(
+      component_type=component_type,
+      cluster=cluster,
+      role=role,
+      environment=environment,
+      topology=topology,
+  )
 
-################################################################################
-# Run the command
-################################################################################
-def main(args):
-  """ main """
-  # create the argument parser
-  parser = create_parser()
+@cli.group()
+def physical_plan():
+  pass
 
-  # if no argument is provided, print help and exit
-  if not args:
-    parser.print_help()
-    return 0
+@physical_plan.command()
+@click.option("--config-path", default=config.get_heron_conf_dir())
+@click.option("--tracker-url", default=DEFAULT_TRACKER_URL)
+@click.option("--component")
+@click.argument("cre", metavar="CLUSTER[/ROLE[/ENV]]")
+@click.argument("topology")
+def metrics(
+    config_path: str,
+    cre: str,
+    tracker_url: str,
+    topology: str,
+    component: str,
+) -> None:
+  define("tracker_url", tracker_url)
+  cluster = config.get_heron_cluster(cre)
+  cluster_config_path = config.get_heron_cluster_conf_dir(cluster, config_path)
+  cluster, role, environment = config.parse_cluster_role_env(cre, cluster_config_path)
 
-  # insert the boolean values for some of the options
-  all_args = parse.insert_bool_values(args)
+  physicalplan.run_metrics(
+      cluster=cluster,
+      role=role,
+      environment=environment,
+      component=component,
+      topology=topology,
+  )
 
-  # parse the args
-  args, unknown_args = parser.parse_known_args(args=all_args)
-  command_line_args = vars(args)
-  command = command_line_args['subcommand']
+def validate_container_id(_, __, value):
+  if value is None:
+    return None
+  if value <= 0:
+    raise click.BadParameter("container id must be greather than zero")
+  return value - 1
 
-  if unknown_args:
-    Log.error('Unknown argument: %s', unknown_args[0])
-    # show help message
-    command_line_args['help-command'] = command
-    command = 'help'
+@physical_plan.command()
+@click.option("--config-path", default=config.get_heron_conf_dir())
+@click.option("--tracker-url", default=DEFAULT_TRACKER_URL)
+@click.option("--id", "container_id", type=int, help="container id", callback=validate_container_id)
+@click.argument("cre", metavar="CLUSTER[/ROLE[/ENV]]")
+@click.argument("topology")
+def containers(
+    config_path: str,
+    cre: str,
+    tracker_url: str,
+    topology: str,
+    container_id: int,
+) -> None:
+  define("tracker_url", tracker_url)
+  cluster = config.get_heron_cluster(cre)
+  cluster_config_path = config.get_heron_cluster_conf_dir(cluster, config_path)
+  cluster, role, environment = config.parse_cluster_role_env(cre, cluster_config_path)
 
-  if command not in ['help', 'version']:
-    opts.set_tracker_url(command_line_args)
-    log.set_logging_level(command_line_args)
-    if command not in ['topologies', 'clusters']:
-      command_line_args = extract_common_args(command, parser, command_line_args)
-    if not command_line_args:
-      return 1
-    Log.info("Using tracker URL: %s", command_line_args["tracker_url"])
-
-  # timing command execution
-  start = time.time()
-  ret = run(command, parser, command_line_args, unknown_args)
-  end = time.time()
-
-  if command != 'help':
-    sys.stdout.flush()
-    Log.info('Elapsed time: %.3fs.', (end - start))
-
-  return 0 if ret else 1
+  physicalplan.run_containers(
+      cluster=cluster,
+      role=role,
+      environment=environment,
+      container_id=container_id,
+      topology=topology,
+  )
 
 if __name__ == "__main__":
-  sys.exit(main(sys.argv[1:]))
+  cli() # pylint: disable=no-value-for-parameter
