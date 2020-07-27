@@ -19,6 +19,7 @@
 #  under the License.
 
 '''heron executor unittest'''
+import argparse
 import os
 import socket
 import unittest
@@ -26,8 +27,7 @@ import json
 
 from pprint import pprint
 
-from heron.executor.src.python.heron_executor import ProcessInfo
-from heron.executor.src.python.heron_executor import HeronExecutor
+from heron.executor.src.python.heron_executor import cli, HeronExecutor, ProcessInfo
 from heron.proto.packing_plan_pb2 import PackingPlan
 
 # pylint: disable=unused-argument
@@ -299,9 +299,9 @@ class HeronExecutorTest(unittest.TestCase):
       ("--metricscache-manager-mode", "cluster")
     ]
 
-    args = ("%s=%s" % (arg[0], (str(arg[1]))) for arg in executor_args)
-    command = "./heron-executor %s" % (" ".join(args))
-    return command.split()
+    args = [f"{k}={v}" for k, v in executor_args]
+    ctx = cli.make_context('heron-executor', args)
+    return argparse.Namespace(**ctx.params)
 
   def test_update_packing_plan(self):
     self.executor_0.update_packing_plan(self.packing_plan_expected)
