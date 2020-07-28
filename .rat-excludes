@@ -8,6 +8,7 @@
 .*\.BUILD
 .*\.patch
 
+
 _helpers\.tpl
 autogen\.sh
 description
@@ -39,6 +40,8 @@ moment\.min.*\.js
 # MIT licenses
 underscore-min.*\.js
 underscore-min.*\.map
+# Open Font License
+trykker-v8-latin-ext_latin-regular\.svg
 
 
 # Thirdparty
