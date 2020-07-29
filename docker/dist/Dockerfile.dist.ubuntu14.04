@@ -30,7 +30,7 @@ RUN apt-get -y update \
 
 RUN add-apt-repository ppa:openjdk-r/ppa \
     && apt-get -y update \
-    && apt-get -y install openjdk-11-jre-headless \
+    && apt-get -y install openjdk-11-jdk-headless \
     && apt-get clean
 
 ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk-amd64
