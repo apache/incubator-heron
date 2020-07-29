@@ -95,7 +95,7 @@ trap cleanup EXIT
 
 generate_source() {
   echo "Generating source tarball"
-  tar --exclude-from=$DOCKER_DIR/.tarignore -C $PROJECT_DIR -czf $SRC_TAR .
+  tar --use-compress-program=pigz --exclude-from=$DOCKER_DIR/.tarignore -C $PROJECT_DIR -cf $SRC_TAR .
 }
 
 verify_source_exists() {
