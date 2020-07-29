@@ -34,7 +34,7 @@ mkdir -p $SCRATCH_DIR
 cd $SCRATCH_DIR
 
 echo "Extracting source"
-tar -C . -xzf $SOURCE_TARBALL
+tar -C . --use-compress-program=pigz -xf $SOURCE_TARBALL
 
 if [[ "$TARGET_PLATFORM" =~ "ubuntu" ]]; then
   CONFIG_PLATFORM=ubuntu_nostyle
