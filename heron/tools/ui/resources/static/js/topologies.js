@@ -1482,29 +1482,21 @@ var InstanceCounters = React.createClass({
         if (instanceInfo) {
           var stmgrId = instanceInfo.stmgrId;
           var container = stmgrId.split("-")[1]
-          var logfileUrl = this.props.info.baseUrl + '/topologies/' + this.props.info.cluster
-              + '/' + this.props.info.environ + '/' + this.props.info.topology
+          var topologyParams = this.props.info.cluster + '/' + this.props.info.environ
+              + '/' + this.props.info.topology
+          var instanceParams = topologyParams + '/' + instanceInfo.id
+          var logfileUrl = this.props.info.baseUrl + '/topologies/' + topologyParams
               + '/' + container + '/file?path=./log-files/' + instanceInfo.id + '.log.0'
-          var jobUrl = this.props.info.baseUrl + '/topologies/filestats/' + this.props.info.cluster
-              + '/' + this.props.info.environ + '/' + this.props.info.topology
-              + '/' + container;
-          var exceptionsUrl = this.props.info.baseUrl + '/topologies/' + this.props.info.cluster
-              + '/' + this.props.info.environ + '/' + this.props.info.topology
+          var jobUrl = this.props.info.baseUrl + '/topologies/filestats/' + topologyParams
+              + '/' + container + '/file';
+          var exceptionsUrl = this.props.info.baseUrl + '/topologies/' + topologyParams
               + '/' + this.props.info.comp_name + '/' + instance + '/exceptions';
-          var pidUrl = this.props.info.baseUrl + '/topologies/' + this.props.info.cluster
-              + '/' + this.props.info.environ + '/' + this.props.info.topology
-              + '/' + instanceInfo.id + '/pid'
-          var jstackUrl = this.props.info.baseUrl + '/topologies/' + this.props.info.cluster
-              + '/' + this.props.info.environ + '/' + this.props.info.topology
-              + '/' + instanceInfo.id + '/jstack'
-          var jmapUrl = this.props.info.baseUrl + '/topologies/' + this.props.info.cluster
-              + '/' + this.props.info.environ + '/' + this.props.info.topology
-              + '/' + instanceInfo.id + '/jmap'
-          var histoUrl = this.props.info.baseUrl + '/topologies/' + this.props.info.cluster
-              + '/' + this.props.info.environ + '/' + this.props.info.topology
-              + '/' + instanceInfo.id + '/histo'
+          var pidUrl = this.props.info.baseUrl + '/topologies/' + instanceParams + '/pid'
+          var jstackUrl = this.props.info.baseUrl + '/topologies/' + instanceParams + '/jstack'
+          var jmapUrl = this.props.info.baseUrl + '/topologies/' + instanceParams + '/jmap'
+          var histoUrl = this.props.info.baseUrl + '/topologies/' + instanceParams + '/histo'
           var links = [['Logs', logfileUrl, "_blank"],
-                       ['Job', jobUrl, "_blank"],
+                       ['Files', jobUrl, "_blank"],
                        ['Exceptions', exceptionsUrl, "_self"],
                        ['Pid', pidUrl, "_self"],
                        ['Stack', jstackUrl, "_self"],

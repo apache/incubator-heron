@@ -24,8 +24,8 @@ import os
 import unittest
 from unittest.mock import Mock
 
-import heron.tools.explorer.src.python.topologies as topologies
-from heron.tools.explorer.src.python.main import cli
+from heron.tools.common.src.python.clients import tracker
+from heron.tools.explorer.src.python import topologies
 
 
 # pylint: disable=missing-docstring, no-self-use

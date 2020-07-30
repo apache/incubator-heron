@@ -8,7 +8,11 @@ pex_library(
     ),
     reqs = [
         "requests==2.12.3",
-        "tornado==4.0.2",
+        "click==7.1.2",
+        "fastapi==0.60.1",
+        "jinja2==2.11.2",
+        "aiofiles==0.5.0",
+        "uvicorn==0.11.7",
     ],
     deps = [
         "//heron/common/src/python:common-py",

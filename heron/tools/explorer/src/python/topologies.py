@@ -22,9 +22,11 @@
 import sys
 
 from heron.common.src.python.utils.log import Log
-import heron.tools.common.src.python.access.tracker_access as tracker_access
+from heron.tools.common.src.python.clients import tracker
 
 from tabulate import tabulate
+
+import requests
 
 
 def to_table(result):
@@ -40,19 +42,13 @@ def to_table(result):
 def run(cre: str) -> None:
   """Print all topologies under the given CRE."""
   cluster, *role_env = cre.split('/')
-  if not role_env:
-    get_topologies = tracker_access.get_cluster_topologies
-  elif len(role_env) == 1:
-    get_topologies = tracker_access.get_cluster_role_topologies
-  elif len(role_env) == 2:
-    get_topologies = tracker_access.get_cluster_role_env_topologies
-  else:
+  if len(role_env) > 2:
     Log.error("Invalid topologies selection")
     sys.exit(1)
   try:
-    result = get_topologies(cluster, *role_env)
-  except Exception:
-    Log.error("Fail to connect to tracker")
+    result = tracker.get_topologies(cluster, *role_env)
+  except requests.ConnectionError as e:
+    Log.error(f"Fail to connect to tracker: {e}")
     sys.exit(1)
   topologies = result[cluster]
   table, header = to_table(topologies)

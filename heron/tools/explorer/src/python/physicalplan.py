@@ -20,16 +20,22 @@
 
 ''' physicalplan.py '''
 import sys
+
+from typing import Optional
+
 from heron.common.src.python.utils.log import Log
-import heron.tools.common.src.python.access.tracker_access as tracker_access
+from heron.tools.common.src.python.clients import tracker
+
 from tabulate import tabulate
+
+import requests
 
 
 def to_table(metrics):
   """ normalize raw metrics API result to table """
-  all_queries = tracker_access.metric_queries()
-  m = tracker_access.queries_map()
-  header = ['container id'] + [m[k] for k in all_queries if k in list(metrics.keys())]
+  all_queries = tracker.metric_queries()
+  m = tracker.queries_map()
+  header = ['container id'] + [m[k] for k in all_queries if k in metrics.keys()]
   stats = []
   if not metrics:
     return stats, header
@@ -50,36 +56,37 @@ def run_metrics(
     role: str,
     environment: str,
     topology: str,
-    component: str,
+    component: Optional[str],
 ) -> None:
   """Render a table of metrics."""
   try:
-    result = tracker_access.get_topology_info(cluster, environment, topology, role)
-  except Exception:
-    Log.error("Fail to connect to tracker")
+    result = tracker.get_topology_info(cluster, environment, topology, role)
+  except requests.ConnectionError as e:
+    Log.error(f"Fail to connect to tracker: {e}")
     sys.exit(1)
-  spouts = list(result['physical_plan']['spouts'].keys())
-  bolts = list(result['physical_plan']['bolts'].keys())
-  components = spouts + bolts
+
+  all_components = sorted(result['physical_plan']['components'].keys())
   if component:
-    if component in components:
-      components = [component]
-    else:
+    if component not in all_components:
       Log.error(f"Unknown component: {component!r}")
       sys.exit(1)
-  cresult = []
-  for comp in components:
+    components = [component]
+  else:
+    components = all_components
+  all_queries = tracker.metric_queries()
+
+  for i, comp in enumerate(components):
     try:
-      metrics = tracker_access.get_component_metrics(comp, cluster, environment, topology, role)
-    except:
-      Log.error("Fail to connect to tracker")
+      result = tracker.get_comp_metrics(
+          cluster, environment, topology, comp, [], all_queries, [0, -1], role,
+      )
+    except requests.ConnectionError as e:
+      Log.error(f"Fail to connect to tracker: {e}")
       sys.exit(1)
-    stat, header = to_table(metrics)
-    cresult.append((comp, stat, header))
-  for i, (c, stat, header) in enumerate(cresult):
+    stat, header = to_table(result["metrics"])
     if i != 0:
       print('')
-    print(f"{c!r} metrics:")
+    print(f"{comp!r} metrics:")
     print(tabulate(stat, headers=header))
 
 def run_containers(
@@ -91,9 +98,9 @@ def run_containers(
 ) -> None:
   """Render a table of container information."""
   try:
-    result = tracker_access.get_topology_info(cluster, environment, topology, role)
-  except:
-    Log.error("Fail to connect to tracker")
+    result = tracker.get_topology_info(cluster, environment, topology, role)
+  except requests.ConnectionError as e:
+    Log.error(f"Fail to connect to tracker: {e}")
     sys.exit(1)
   containers = result['physical_plan']['stmgrs']
   all_bolts, all_spouts = set(), set()

@@ -33,6 +33,8 @@ Vagrant.configure(2) do |config|
   config.vm.box = "bento/ubuntu-20.04"
   config.vm.synced_folder "../", "/vagrant"
   config.vm.boot_timeout = 600
+  # heron-ui
+  config.vm.network "forwarded_port", guest: 8889, host: 8889
 
   config.vm.define "primary" do |primary|
     primary.vm.provider "virtualbox" do |v|
