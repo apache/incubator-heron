@@ -43,6 +43,23 @@ try:
 except Exception:
   click_extra = {}
 
+
+def config_path_option():
+  return click.option(
+      "--config-path",
+      default=config.get_heron_conf_dir(),
+      show_default=True,
+      help="Path to heron's config clusters config directory"
+  )
+
+def tracker_url_option():
+  return click.option(
+      "--tracker-url",
+      default=DEFAULT_TRACKER_URL,
+      show_default=True,
+      help="URL to a heron-tracker instance"
+  )
+
 def show_version(_, __, value):
   if value:
     config.print_build_info()
@@ -56,12 +73,17 @@ def show_version(_, __, value):
     expose_value=False,
     callback=show_version,
 )
-@click.option("--verbose", is_flag=True)
-def cli(verbose: bool):
-  log.configure(logging.INFO if verbose else logging.DEBUG)
+@click.option("-v", "--verbose", count=True)
+def cli(verbose: int):
+  levels = {
+      0: logging.WARNING,
+      1: logging.INFO,
+      2: logging.DEBUG,
+  }
+  log.configure(levels.get(verbose, logging.DEBUG))
 
 @cli.command("clusters")
-@click.option("--tracker-url", default=DEFAULT_TRACKER_URL)
+@tracker_url_option()
 def cli_clusters(tracker_url: str):
   define("tracker_url", tracker_url)
   try:
@@ -74,18 +96,24 @@ def cli_clusters(tracker_url: str):
     print(f"  {cluster}")
 
 @cli.command("topologies")
-@click.option("--tracker-url", default=DEFAULT_TRACKER_URL)
+@tracker_url_option()
 @click.argument("cre", metavar="CLUSTER[/ROLE[/ENV]]")
 def cli_topologies(tracker_url: str, cre: str):
+  """Show the topologies under the given CLUSTER[/ROLE[/ENV]]."""
   define("tracker_url", tracker_url)
   topologies.run(
       cre=cre,
   )
 
 @cli.command()
-@click.option("--config-path", default=config.get_heron_conf_dir())
-@click.option("--tracker-url", default=DEFAULT_TRACKER_URL)
-@click.option("--component-type", type=click.Choice(["all", "spouts", "bolts"]), default="all")
+@config_path_option()
+@tracker_url_option()
+@click.option(
+    "--component-type",
+    type=click.Choice(["all", "spouts", "bolts"]),
+    default="all",
+    show_default=True,
+)
 @click.argument("cre", metavar="CLUSTER[/ROLE[/ENV]]")
 @click.argument("topology")
 def logical_plan(
@@ -95,6 +123,7 @@ def logical_plan(
     component_type: str,
     tracker_url: str,
 ) -> None:
+  """Show logical plan information for the given topology."""
   define("tracker_url", tracker_url)
   cluster = config.get_heron_cluster(cre)
   cluster_config_path = config.get_heron_cluster_conf_dir(cluster, config_path)
@@ -113,9 +142,9 @@ def physical_plan():
   pass
 
 @physical_plan.command()
-@click.option("--config-path", default=config.get_heron_conf_dir())
-@click.option("--tracker-url", default=DEFAULT_TRACKER_URL)
-@click.option("--component")
+@config_path_option()
+@tracker_url_option()
+@click.option("--component", help="name of component to limit metrics to")
 @click.argument("cre", metavar="CLUSTER[/ROLE[/ENV]]")
 @click.argument("topology")
 def metrics(
@@ -146,8 +175,8 @@ def validate_container_id(_, __, value):
   return value - 1
 
 @physical_plan.command()
-@click.option("--config-path", default=config.get_heron_conf_dir())
-@click.option("--tracker-url", default=DEFAULT_TRACKER_URL)
+@config_path_option()
+@tracker_url_option()
 @click.option("--id", "container_id", type=int, help="container id", callback=validate_container_id)
 @click.argument("cre", metavar="CLUSTER[/ROLE[/ENV]]")
 @click.argument("topology")

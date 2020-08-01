@@ -30,7 +30,7 @@ import heron.tools.common.src.python.access.tracker_access as tracker_access
 from tabulate import tabulate
 
 
-def to_table(components, topo_info):
+def to_table(components, topo_info, component_filter):
   """ normalize raw logical plan info to table """
   inputs, outputs = defaultdict(list), defaultdict(list)
   for ctype, component in list(components.items()):
@@ -46,6 +46,10 @@ def to_table(components, topo_info):
   for ctype, component in list(components.items()):
     # stages is an int so keep going
     if ctype == "stages":
+      continue
+    if component_filter == "spouts" and ctype != "spouts":
+      continue
+    if component_filter == "bolts" and ctype != "bolts":
       continue
     for component_name, component_info in list(component.items()):
       row = [ctype[:-1], component_name]
@@ -68,8 +72,5 @@ def run(component_type: str, cluster: str, role: str, environment: str, topology
   except:
     Log.error("Fail to connect to tracker")
     sys.exit(1)
-
-  table, header = to_table(components, topo_info)
-  if component_type != "all":
-    components = [c for c in components if c[0] == component_type]
+  table, header = to_table(components, topo_info, component_type)
   print(tabulate(table, headers=header))
