@@ -35,8 +35,6 @@ import com.esotericsoftware.kryo.Serializer;
 import com.esotericsoftware.kryo.serializers.DefaultSerializers.BigIntegerSerializer;
 
 import backtype.storm.Config;
-import backtype.storm.serialization.types.ArrayListSerializer;
-import backtype.storm.serialization.types.HashMapSerializer;
 import backtype.storm.serialization.types.HashSetSerializer;
 import backtype.storm.tuple.Values;
 import backtype.storm.utils.ListDelegate;
@@ -60,8 +58,8 @@ public final class SerializationFactory {
     Kryo k = kryoFactory.getKryo(conf);
     k.register(byte[].class);
     k.register(ListDelegate.class);
-    k.register(ArrayList.class, new ArrayListSerializer());
-    k.register(HashMap.class, new HashMapSerializer());
+    k.register(ArrayList.class);
+    k.register(HashMap.class);
     k.register(HashSet.class, new HashSetSerializer());
     k.register(BigInteger.class, new BigIntegerSerializer());
     // k.register(TransactionAttempt.class);
