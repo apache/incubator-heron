@@ -38,7 +38,6 @@ import com.esotericsoftware.kryo.io.Output;
 import com.esotericsoftware.kryo.serializers.CollectionSerializer;
 import com.esotericsoftware.kryo.serializers.DefaultSerializers;
 
-import com.esotericsoftware.kryo.serializers.MapSerializer;
 import org.apache.heron.api.Config;
 import org.apache.heron.api.tuple.Values;
 import org.apache.heron.api.utils.Utils;
