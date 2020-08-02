@@ -26,11 +26,9 @@ import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.serializers.CollectionSerializer;
 
-
-public class HashSetSerializer extends CollectionSerializer {
+public class HashSetSerializer extends CollectionSerializer<HashSet<?>> {
   @Override
-  @SuppressWarnings("rawtypes") // extending Kryo class that uses raw types
-  protected Collection create(Kryo kryo, Input input, Class type, int size) {
-    return new HashSet();
+  public HashSet<?> create(Kryo kryo, Input input, Class<? extends HashSet<?>> type, int size) {
+    return new HashSet<>(size);
   }
 }

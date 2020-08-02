@@ -217,11 +217,10 @@ public class KryoSerializer implements IPluggableSerializer {
             serializerClass.getName(), superClass.getName()));
   }
 
-  private static class HashSetSerializer extends CollectionSerializer {
+  private static class HashSetSerializer extends CollectionSerializer<HashSet<?>> {
     @Override
-    @SuppressWarnings("rawtypes") // extending Kryo class that uses raw types
-    public Collection create(Kryo kryo, Input input, Class type, int size) {
-      return new HashSet();
+    public HashSet<?> create(Kryo kryo, Input input, Class<? extends HashSet<?>> type, int size) {
+      return new HashSet<>(size);
     }
   }
 }
