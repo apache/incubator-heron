@@ -19,7 +19,6 @@
 
 package backtype.storm.serialization.types;
 
-import java.util.Collection;
 import java.util.HashSet;
 
 import com.esotericsoftware.kryo.Kryo;
