@@ -10,6 +10,7 @@ java_binary(
         "//heron/api/src/java:api-java-low-level",
         "//heron/common/src/java:basics-java",
         "//heron/simulator/src/java:simulator-java",
+        "//third_party/java:kryo",
     ],
 )
 
