@@ -327,6 +327,7 @@ def yaml_config_reader(config_path):
   return config
 
 
+# pylint: disable=too-many-arguments,too-many-locals
 @click.command()
 @click.option('--topology_name', required=True, help='Topology Name')
 @click.option('--topology_id', required=True, help='Topology Id')
@@ -337,11 +338,11 @@ def yaml_config_reader(config_path):
 @click.option('--stmgr_id', required=True, help='StMgr Id')
 @click.option('--stmgr_port', required=True, help='StMgr Port', type=int)
 @click.option('--metricsmgr_port', required=True, help='MetricsMgr Port', type=int)
-@click.option('--sys_config', required=True, help='System Config File')
-@click.option('--override_config', required=True, help='Override Config File')
+@click.option('--config_file', required=True, help='System Config File')
+@click.option('--override_config_file', required=True, help='Override Config File')
 @click.option('--topology_pex', required=True, help='Topology Pex File')
 @click.option('--max_ram', required=True, help='Maximum RAM to limit', type=int)
-def main(
+def cli(
     topology_name: str,
     topology_id: str,
     instance_id: str,
@@ -351,15 +352,15 @@ def main(
     stmgr_id: str,
     stmgr_port: int,
     metricsmgr_port: int,
-    sys_config: str,
-    override_config: str,
+    config_file: str,
+    override_config_file: str,
     topology_pex: str,
     max_ram: int,
 ) -> None:
   """Heron Python Instance."""
 
-  sys_config = yaml_config_reader(sys_config)
-  override_config = yaml_config_reader(override_config)
+  sys_config = yaml_config_reader(config_file)
+  override_config = yaml_config_reader(override_config_file)
   system_config.set_sys_config(sys_config, override_config)
 
   # get combined configuration
