@@ -162,7 +162,6 @@ def parse_config_file(config_file):
   if not os.path.lexists(expanded_config_file_path):
     return None
 
-  configs = {}
   # Read the configuration file
   with open(expanded_config_file_path, 'r') as f:
     configs = yaml.load(f)
