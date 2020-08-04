@@ -19,7 +19,6 @@
 #  under the License.
 
 '''module for single-thread Heron Instance in python'''
-import argparse
 import collections
 import logging
 import os
@@ -38,11 +37,14 @@ from heron.instance.src.python.network import MetricsManagerClient, SingleThread
 from heron.instance.src.python.network import create_socket_options
 from heron.instance.src.python.network import GatewayLooper
 from heron.instance.src.python.basics import SpoutInstance, BoltInstance
-import heron.instance.src.python.utils.system_constants as constants
+from heron.instance.src.python.utils import system_constants as constants
 from heron.instance.src.python.utils import system_config
 
-import heronpy.api.api_constants as api_constants
+from heronpy.api import api_constants
 from heronpy.api.state.state import HashMapState
+
+import click
+
 
 Log = log.Log
 AssignedInstance = collections.namedtuple('AssignedInstance', 'is_spout, protobuf, py_class')
@@ -324,44 +326,57 @@ def yaml_config_reader(config_path):
 
   return config
 
-# pylint: disable=missing-docstring
-def main():
-  parser = argparse.ArgumentParser(description='Heron Python Instance')
-  parser.add_argument('--topology_name', required=True, help='Topology Name')
-  parser.add_argument('--topology_id', required=True, help='Topology Id')
-  parser.add_argument('--instance_id', required=True, help='Instance Id')
-  parser.add_argument('--component_name', required=True, help='Component Name')
-  parser.add_argument('--task_id', required=True, help='Task Id', type=int)
-  parser.add_argument('--component_index', required=True, help='Component Index', type=int)
-  parser.add_argument('--stmgr_id', required=True, help='StMgr Id')
-  parser.add_argument('--stmgr_port', required=True, help='StMgr Port', type=int)
-  parser.add_argument('--metricsmgr_port', required=True, help='MetricsMgr Port', type=int)
-  parser.add_argument('--sys_config', required=True, help='System Config File')
-  parser.add_argument('--override_config', required=True, help='Override Config File')
-  parser.add_argument('--topology_pex', required=True, help='Topology Pex File')
-  parser.add_argument('--max_ram', required=True, help='Maximum RAM to limit', type=int)
 
-  args = parser.parse_args()
+@click.command()
+@click.option('--topology_name', required=True, help='Topology Name')
+@click.option('--topology_id', required=True, help='Topology Id')
+@click.option('--instance_id', required=True, help='Instance Id')
+@click.option('--component_name', required=True, help='Component Name')
+@click.option('--task_id', required=True, help='Task Id', type=int)
+@click.option('--component_index', required=True, help='Component Index', type=int)
+@click.option('--stmgr_id', required=True, help='StMgr Id')
+@click.option('--stmgr_port', required=True, help='StMgr Port', type=int)
+@click.option('--metricsmgr_port', required=True, help='MetricsMgr Port', type=int)
+@click.option('--sys_config', required=True, help='System Config File')
+@click.option('--override_config', required=True, help='Override Config File')
+@click.option('--topology_pex', required=True, help='Topology Pex File')
+@click.option('--max_ram', required=True, help='Maximum RAM to limit', type=int)
+def main(
+    topology_name: str,
+    topology_id: str,
+    instance_id: str,
+    component_name: str,
+    task_id: int,
+    component_index: int,
+    stmgr_id: str,
+    stmgr_port: int,
+    metricsmgr_port: int,
+    sys_config: str,
+    override_config: str,
+    topology_pex: str,
+    max_ram: int,
+) -> None:
+  """Heron Python Instance."""
 
-  sys_config = yaml_config_reader(args.sys_config)
-  override_config = yaml_config_reader(args.override_config)
+  sys_config = yaml_config_reader(sys_config)
+  override_config = yaml_config_reader(override_config)
   system_config.set_sys_config(sys_config, override_config)
 
   # get combined configuration
   sys_config = system_config.get_sys_config()
 
   # set resource limits
-  set_resource_limit(args.max_ram)
+  set_resource_limit(max_ram)
 
   # create the protobuf instance
   instance_info = physical_plan_pb2.InstanceInfo()
-  instance_info.task_id = args.task_id
-  instance_info.component_index = args.component_index
-  instance_info.component_name = args.component_name
+  instance_info.task_id = task_id
+  instance_info.component_index = component_index
+  instance_info.component_name = component_name
 
   instance = physical_plan_pb2.Instance()
-  instance.instance_id = args.instance_id
-  instance.stmgr_id = args.stmgr_id
+  instance.instance_id = instance_id
+  instance.stmgr_id = stmgr_id
   instance.info.MergeFrom(instance_info)
 
   # Logging init
@@ -369,25 +384,24 @@ def main():
   max_log_files = sys_config[constants.HERON_LOGGING_MAXIMUM_FILES]
   max_log_bytes = sys_config[constants.HERON_LOGGING_MAXIMUM_SIZE_MB] * constants.MB
 
-  log_file = os.path.join(log_dir, args.instance_id + ".log.0")
+  log_file = os.path.join(log_dir, instance_id + ".log.0")
   log.init_rotating_logger(level=logging.INFO, logfile=log_file,
                            max_files=max_log_files, max_bytes=max_log_bytes)
 
-  Log.info("\nStarting instance: " + args.instance_id + " for topology: " + args.topology_name +
-           " and topologyId: " + args.topology_id + " for component: " + args.component_name +
-           " with taskId: " + str(args.task_id) + " and componentIndex: " +
-           str(args.component_index) +
-           " and stmgrId: " + args.stmgr_id + " and stmgrPort: " + str(args.stmgr_port) +
-           " and metricsManagerPort: " + str(args.metricsmgr_port) +
-           "\n **Topology Pex file located at: " + args.topology_pex)
-  Log.debug("System config: " + str(sys_config))
-  Log.debug("Override config: " + str(override_config))
-  Log.debug("Maximum RAM: " + str(args.max_ram))
+  Log.info(f"\nStarting instance: {instance_id} for topology: {topology_name}"
+           f" and topologyId: {topology_id} for component: {component_name}"
+           f" with taskId: {task_id} and componentIndex: {component_index}"
+           f" and stmgrId: {stmgr_id} and stmgrPort: {stmgr_port}"
+           f" and metricsManagerPort: {metricsmgr_port}"
+           f"\n **Topology Pex file located at: {topology_pex}")
+  Log.debug(f"System config: {sys_config}")
+  Log.debug(f"Override config: {override_config}")
+  Log.debug(f"Maximum RAM: {max_ram}")
 
-  heron_instance = SingleThreadHeronInstance(args.topology_name, args.topology_id, instance,
-                                             args.stmgr_port, args.metricsmgr_port,
-                                             args.topology_pex)
+  heron_instance = SingleThreadHeronInstance(topology_name, topology_id, instance,
+                                             stmgr_port, metricsmgr_port,
+                                             topology_pex)
   heron_instance.start()
 
 if __name__ == '__main__':
-  main()
+  cli() # pylint: disable=no-value-for-parameter
