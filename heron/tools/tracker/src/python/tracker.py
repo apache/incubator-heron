@@ -21,10 +21,10 @@
 ''' tracker.py '''
 import json
 import sys
-import traceback
 import collections
 
 from functools import partial
+from typing import Any, Dict, List, Optional, Tuple
 
 from heron.common.src.python.utils.log import Log
 from heron.proto import topology_pb2
@@ -35,7 +35,7 @@ from heron.tools.tracker.src.python import utils
 
 import javaobj.v1 as javaobj
 
-def convert_pb_kvs(kvs, include_non_primitives=True):
+def convert_pb_kvs(kvs, include_non_primitives=True) -> dict:
   """
   converts pb kvs to dict
   """
@@ -106,15 +106,15 @@ class Tracker:
     self.state_managers = []
 
     # A map from a tuple of form
-    # (topologyName, state_manager_name) to its
+    # (topology_name, state_manager_name) to its
     # info, which is its representation
     # exposed through the APIs.
     # The state_manager_name help when we
     # want to remove the topology,
     # since other info can not be relied upon.
-    self.topologyInfos = {}
+    self.topology_infos: Dict[Tuple[str, str], Any] = {}
 
-  def synch_topologies(self):
+  def synch_topologies(self) -> None:
     """
     Sync the topologies with the statemgrs.
     """
@@ -122,27 +122,25 @@ class Tracker:
     try:
       for state_manager in self.state_managers:
         state_manager.start()
-    except Exception as ex:
-      Log.error("Found exception while initializing state managers: %s. Bailing out..." % ex)
-      traceback.print_exc()
+    except Exception as e:
+      Log.critical(f"Found exception while initializing state managers: {e}", exc_info=True)
       sys.exit(1)
 
-    def on_topologies_watch(state_manager, topologies):
+    def on_topologies_watch(state_manager, topologies) -> None:
       """watch topologies"""
       Log.info("State watch triggered for topologies.")
       Log.debug("Topologies: " + str(topologies))
-      existingTopologies = self.getTopologiesForStateLocation(state_manager.name)
-      existingTopNames = [t.name for t in existingTopologies]
-      Log.debug("Existing topologies: " + str(existingTopNames))
-      for name in existingTopNames:
+      cached_names = [t.name for t in self.get_stmgr_topologies(state_manager.name)]
+      Log.debug(f"Existing topologies: {cached_names}")
+      for name in cached_names:
         if name not in topologies:
           Log.info("Removing topology: %s in rootpath: %s",
                    name, state_manager.rootpath)
-          self.removeTopology(name, state_manager.name)
+          self.remove_topology(name, state_manager.name)
 
       for name in topologies:
-        if name not in existingTopNames:
-          self.addNewTopology(state_manager, name)
+        if name not in cached_names:
+          self.add_new_topology(state_manager, name)
 
     for state_manager in self.state_managers:
       # The callback function with the bound
@@ -150,93 +148,64 @@ class Tracker:
       onTopologiesWatch = partial(on_topologies_watch, state_manager)
       state_manager.get_topologies(onTopologiesWatch)
 
-  def stop_sync(self):
+  def stop_sync(self) -> None:
     for state_manager in self.state_managers:
       state_manager.stop()
 
-  def getTopologyByClusterRoleEnvironAndName(self, cluster, role, environ, topologyName):
+  def get_topology(
+      self,
+      cluster: str,
+      role: Optional[str],
+      environ: str,
+      topology_name: str,
+  ) -> Any:
     """
     Find and return the topology given its cluster, environ, topology name, and
     an optional role.
     Raises exception if topology is not found, or more than one are found.
     """
-    topologies = list([t for t in self.topologies if t.name == topologyName
-                       and t.cluster == cluster
-                       and (not role or t.execution_state.role == role)
-                       and t.environ == environ])
-    if not topologies or len(topologies) > 1:
+    topologies = [t for t in self.topologies if t.name == topology_name
+                  and t.cluster == cluster
+                  and (not role or t.execution_state.role == role)
+                  and t.environ == environ]
+    if len(topologies) != 1:
       if role is not None:
         raise Exception("Topology not found for {0}, {1}, {2}, {3}".format(
-            cluster, role, environ, topologyName))
+            cluster, role, environ, topology_name))
       raise Exception("Topology not found for {0}, {1}, {2}".format(
-          cluster, environ, topologyName))
+          cluster, environ, topology_name))
 
     # There is only one topology which is returned.
     return topologies[0]
 
-  def getTopologiesForStateLocation(self, name):
+  def get_stmgr_topologies(self, name: str) -> List[Any]:
     """
     Returns all the topologies for a given state manager.
     """
     return [t for t in self.topologies if t.state_manager_name == name]
 
-  def addNewTopology(self, state_manager, topologyName):
+  def add_new_topology(self, state_manager, topology_name: str) -> None:
     """
     Adds a topology in the local cache, and sets a watch
     on any changes on the topology.
     """
-    topology = Topology(topologyName, state_manager.name)
+    topology = Topology(topology_name, state_manager.name)
     Log.info("Adding new topology: %s, state_manager: %s",
-             topologyName, state_manager.name)
+             topology_name, state_manager.name)
     self.topologies.append(topology)
 
     # Register a watch on topology and change
-    # the topologyInfo on any new change.
-    topology.register_watch(self.setTopologyInfo)
-
-    def on_topology_pplan(data):
-      """watch physical plan"""
-      Log.info("Watch triggered for topology pplan: " + topologyName)
-      topology.set_physical_plan(data)
-      if not data:
-        Log.debug("No data to be set")
-
-    def on_topology_packing_plan(data):
-      """watch packing plan"""
-      Log.info("Watch triggered for topology packing plan: " + topologyName)
-      topology.set_packing_plan(data)
-      if not data:
-        Log.debug("No data to be set")
-
-    def on_topology_execution_state(data):
-      """watch execution state"""
-      Log.info("Watch triggered for topology execution state: " + topologyName)
-      topology.set_execution_state(data)
-      if not data:
-        Log.debug("No data to be set")
-
-    def on_topology_tmaster(data):
-      """set tmaster"""
-      Log.info("Watch triggered for topology tmaster: " + topologyName)
-      topology.set_tmaster(data)
-      if not data:
-        Log.debug("No data to be set")
-
-    def on_topology_scheduler_location(data):
-      """set scheduler location"""
-      Log.info("Watch triggered for topology scheduler location: " + topologyName)
-      topology.set_scheduler_location(data)
-      if not data:
-        Log.debug("No data to be set")
+    # the topology_info on any new change.
+    topology.register_watch(self.set_topology_info)
 
     # Set watches on the pplan, execution_state, tmaster and scheduler_location.
-    state_manager.get_pplan(topologyName, on_topology_pplan)
-    state_manager.get_packing_plan(topologyName, on_topology_packing_plan)
-    state_manager.get_execution_state(topologyName, on_topology_execution_state)
-    state_manager.get_tmaster(topologyName, on_topology_tmaster)
-    state_manager.get_scheduler_location(topologyName, on_topology_scheduler_location)
+    state_manager.get_pplan(topology_name, topology.set_physical_plan)
+    state_manager.get_packing_plan(topology_name, topology.set_packing_plan)
+    state_manager.get_execution_state(topology_name, topology.set_execution_state)
+    state_manager.get_tmaster(topology_name, topology.set_tmaster)
+    state_manager.get_scheduler_location(topology_name, topology.set_scheduler_location)
 
-  def removeTopology(self, topology_name, state_manager_name):
+  def remove_topology(self, topology_name: str, state_manager_name: str) -> None:
     """
     Removes the topology from the local cache.
     """
@@ -244,48 +213,34 @@ class Tracker:
     for top in self.topologies:
       if (top.name == topology_name and
           top.state_manager_name == state_manager_name):
-        # Remove topologyInfo
-        if (topology_name, state_manager_name) in self.topologyInfos:
-          self.topologyInfos.pop((topology_name, state_manager_name))
+        # Remove topology_info
+        if (topology_name, state_manager_name) in self.topology_infos:
+          self.topology_infos.pop((topology_name, state_manager_name))
       else:
         topologies.append(top)
 
     self.topologies = topologies
 
-  def extract_execution_state(self, topology):
+  def extract_execution_state(self, topology) -> dict:
     """
     Returns the repesentation of execution state that will
     be returned from Tracker.
-    """
-    execution_state = topology.execution_state
 
-    executionState = {
-        "cluster": execution_state.cluster,
-        "environ": execution_state.environ,
-        "role": execution_state.role,
-        "jobname": topology.name,
-        "submission_time": execution_state.submission_time,
-        "submission_user": execution_state.submission_user,
-        "release_username": execution_state.release_state.release_username,
-        "release_tag": execution_state.release_state.release_tag,
-        "release_version": execution_state.release_state.release_version,
+    It looks like this has been replaced with extract_metadata and
+    extract_runtime_state.
+
+    """
+    result = self.extract_metadata(topology)
+    result.update({
         "has_physical_plan": None,
         "has_tmaster_location": None,
         "has_scheduler_location": None,
-        "extra_links": [],
-    }
+    })
+    return result
 
-    for extra_link in self.config.extra_links:
-      link = extra_link.copy()
-      link[EXTRA_LINK_URL_KEY] = self.config.get_formatted_url(link[EXTRA_LINK_FORMATTER_KEY],
-                                                               executionState)
-      executionState["extra_links"].append(link)
-    return executionState
-
-  def extract_metadata(self, topology):
+  def extract_metadata(self, topology) -> dict:
     """
-    Returns metadata that will
-    be returned from Tracker.
+    Returns metadata that will be returned from Tracker.
     """
     execution_state = topology.execution_state
     metadata = {
@@ -310,20 +265,20 @@ class Tracker:
 
   @staticmethod
   def extract_runtime_state(topology):
-    runtime_state = {}
-    runtime_state["has_physical_plan"] = bool(topology.physical_plan)
-    runtime_state["has_packing_plan"] = bool(topology.packing_plan)
-    runtime_state["has_tmaster_location"] = bool(topology.tmaster)
-    runtime_state["has_scheduler_location"] = bool(topology.scheduler_location)
     # "stmgrs" listed runtime state for each stream manager
     # however it is possible that physical plan is not complete
     # yet and we do not know how many stmgrs there are. That said,
     # we should not set any key below (stream manager name)
-    runtime_state["stmgrs"] = {}
-    return runtime_state
+    return {
+        "has_physical_plan":  bool(topology.physical_plan),
+        "has_packing_plan":  bool(topology.packing_plan),
+        "has_tmaster_location":  bool(topology.tmaster),
+        "has_scheduler_location":  bool(topology.scheduler_location),
+        "stmgrs": {},
+    }
 
   # pylint: disable=no-self-use
-  def extract_scheduler_location(self, topology):
+  def extract_scheduler_location(self, topology) -> dict:
     """
     Returns the representation of scheduler location that will
     be returned from Tracker.
@@ -339,11 +294,11 @@ class Tracker:
       schedulerLocation["http_endpoint"] = topology.scheduler_location.http_endpoint
       schedulerLocation["job_page_link"] = \
           topology.scheduler_location.job_page_link[0] \
-          if len(topology.scheduler_location.job_page_link) > 0 else ""
+          if topology.scheduler_location.job_page_link else ""
 
     return schedulerLocation
 
-  def extract_tmaster(self, topology):
+  def extract_tmaster(self, topology) -> dict:
     """
     Returns the representation of tmaster that will
     be returned from Tracker.
@@ -379,7 +334,6 @@ class Tracker:
 
     # Add spouts.
     for spout in topology.spouts():
-      spoutName = spout.comp.name
       spoutType = "default"
       spoutSource = "NA"
       spoutVersion = "NA"
@@ -400,51 +354,46 @@ class Tracker:
           "type": spoutType,
           "source": spoutSource,
           "version": spoutVersion,
-          "outputs": [],
+          "outputs": [
+              {"stream_name": outputStream.stream.id}
+              for outputStream in spout.outputs
+          ],
           "extra_links": spoutExtraLinks,
       }
+      logicalPlan["spouts"][spout.comp.name] = spoutPlan
 
       # render component extra links with general params
-      execution_state = topology.execution_state
-      executionState = {
-          "cluster": execution_state.cluster,
-          "environ": execution_state.environ,
-          "role": execution_state.role,
+      execution_state = {
+          "cluster": topology.execution_state.cluster,
+          "environ": topology.execution_state.environ,
+          "role": topology.execution_state.role,
           "jobname": topology.name,
-          "submission_user": execution_state.submission_user,
+          "submission_user": topology.execution_state.submission_user,
       }
 
       for link in spoutPlan["extra_links"]:
         link[EXTRA_LINK_URL_KEY] = self.config.get_formatted_url(link[EXTRA_LINK_FORMATTER_KEY],
-                                                                 executionState)
-
-      for outputStream in list(spout.outputs):
-        spoutPlan["outputs"].append({
-            "stream_name": outputStream.stream.id
-        })
-
-      logicalPlan["spouts"][spoutName] = spoutPlan
+                                                                 execution_state)
 
     # Add bolts.
     for bolt in topology.bolts():
       boltName = bolt.comp.name
-      boltPlan = {
+      logicalPlan["bolts"][boltName] = {
           "config": convert_pb_kvs(bolt.comp.config.kvs, include_non_primitives=False),
-          "outputs": [],
-          "inputs": []
+          "outputs": [
+              {"stream_name": outputStream.stream.id}
+              for outputStream in bolt.outputs
+          ],
+          "inputs": [
+              {
+                  "stream_name": inputStream.stream.id,
+                  "component_name": inputStream.stream.component_name,
+                  "grouping": topology_pb2.Grouping.Name(inputStream.gtype),
+              }
+              for inputStream in bolt.inputs
+          ]
       }
-      for outputStream in list(bolt.outputs):
-        boltPlan["outputs"].append({
-            "stream_name": outputStream.stream.id
-        })
-      for inputStream in list(bolt.inputs):
-        boltPlan["inputs"].append({
-            "stream_name": inputStream.stream.id,
-            "component_name": inputStream.stream.component_name,
-            "grouping": topology_pb2.Grouping.Name(inputStream.gtype)
-        })
 
-      logicalPlan["bolts"][boltName] = boltPlan
 
     return logicalPlan
 
@@ -548,8 +497,8 @@ class Tracker:
   # pylint: disable=too-many-locals
   def extract_packing_plan(self, topology):
     """
-    Returns the representation of packing plan that will
-    be returned from Tracker.
+    Returns the representation of packing plan that will be returned from Tracker.
+
     """
     packingPlan = {
         "id": "",
@@ -559,39 +508,44 @@ class Tracker:
     if not topology.packing_plan:
       return packingPlan
 
-    container_plans = topology.packing_plan.container_plans
-
-    containers = []
-    for container_plan in container_plans:
-      instances = []
-      for instance_plan in container_plan.instance_plans:
-        instance_resources = {"cpu": instance_plan.resource.cpu,
-                              "ram": instance_plan.resource.ram,
-                              "disk": instance_plan.resource.disk}
-        instance = {"component_name" : instance_plan.component_name,
+    packingPlan["id"] = topology.packing_plan.id
+    packingPlan["container_plans"] = [
+        {
+            "id": container_plan.id,
+            "instances": [
+                {
+                    "component_name" : instance_plan.component_name,
                     "task_id" : instance_plan.task_id,
                     "component_index": instance_plan.component_index,
-                    "instance_resources": instance_resources}
-        instances.append(instance)
-      required_resource = {"cpu": container_plan.requiredResource.cpu,
-                           "ram": container_plan.requiredResource.ram,
-                           "disk": container_plan.requiredResource.disk}
-      scheduled_resource = {}
-      if container_plan.scheduledResource:
-        scheduled_resource = {"cpu": container_plan.scheduledResource.cpu,
-                              "ram": container_plan.scheduledResource.ram,
-                              "disk": container_plan.scheduledResource.disk}
-      container = {"id": container_plan.id,
-                   "instances": instances,
-                   "required_resources": required_resource,
-                   "scheduled_resources": scheduled_resource}
-      containers.append(container)
+                    "instance_resources": {
+                        "cpu": instance_plan.resource.cpu,
+                        "ram": instance_plan.resource.ram,
+                        "disk": instance_plan.resource.disk,
+                    },
+                }
+                for instance_plan in container_plan.instance_plans
+            ],
+            "required_resources": {
+                "cpu": container_plan.requiredResource.cpu,
+                "ram": container_plan.requiredResource.ram,
+                "disk": container_plan.requiredResource.disk,
+            },
+            "scheduled_resources": (
+                {}
+                if not container_plan else
+                {
+                    "cpu": container_plan.scheduledResource.cpu,
+                    "ram": container_plan.scheduledResource.ram,
+                    "disk": container_plan.scheduledResource.disk,
+                }
+            ),
+        }
+        for container_plan in topology.packing_plan.container_plans
+    ]
 
-    packingPlan["id"] = topology.packing_plan.id
-    packingPlan["container_plans"] = containers
     return packingPlan
 
-  def setTopologyInfo(self, topology):
+  def set_topology_info(self, topology) -> Optional[dict]:
     """
     Extracts info from the stored proto states and
     convert it into representation that is exposed using
@@ -626,7 +580,7 @@ class Tracker:
     if not topology.scheduler_location:
       has_scheduler_location = False
 
-    topologyInfo = {
+    topology_info = {
         "name": topology.name,
         "id": topology.id,
         "logical_plan": None,
@@ -637,46 +591,52 @@ class Tracker:
         "scheduler_location": None,
     }
 
-    executionState = self.extract_execution_state(topology)
-    executionState["has_physical_plan"] = has_physical_plan
-    executionState["has_packing_plan"] = has_packing_plan
-    executionState["has_tmaster_location"] = has_tmaster_location
-    executionState["has_scheduler_location"] = has_scheduler_location
-    executionState["status"] = topology.get_status()
+    execution_state = self.extract_execution_state(topology)
+    execution_state["has_physical_plan"] = has_physical_plan
+    execution_state["has_packing_plan"] = has_packing_plan
+    execution_state["has_tmaster_location"] = has_tmaster_location
+    execution_state["has_scheduler_location"] = has_scheduler_location
+    execution_state["status"] = topology.get_status()
 
-    topologyInfo["metadata"] = self.extract_metadata(topology)
-    topologyInfo["runtime_state"] = self.extract_runtime_state(topology)
+    topology_info["metadata"] = self.extract_metadata(topology)
+    topology_info["runtime_state"] = self.extract_runtime_state(topology)
 
-    topologyInfo["execution_state"] = executionState
-    topologyInfo["logical_plan"] = self.extract_logical_plan(topology)
-    topologyInfo["physical_plan"] = self.extract_physical_plan(topology)
-    topologyInfo["packing_plan"] = self.extract_packing_plan(topology)
-    topologyInfo["tmaster_location"] = self.extract_tmaster(topology)
-    topologyInfo["scheduler_location"] = self.extract_scheduler_location(topology)
+    topology_info["execution_state"] = execution_state
+    topology_info["logical_plan"] = self.extract_logical_plan(topology)
+    topology_info["physical_plan"] = self.extract_physical_plan(topology)
+    topology_info["packing_plan"] = self.extract_packing_plan(topology)
+    topology_info["tmaster_location"] = self.extract_tmaster(topology)
+    topology_info["scheduler_location"] = self.extract_scheduler_location(topology)
 
-    self.topologyInfos[(topology.name, topology.state_manager_name)] = topologyInfo
+    self.topology_infos[(topology.name, topology.state_manager_name)] = topology_info
 
-  def getTopologyInfo(self, topologyName, cluster, role, environ):
+  # topology_name should be at the end to follow the trend
+  def get_topology_info(
+      self,
+      topology_name: str,
+      cluster: str,
+      role: Optional[str],
+      environ: str,
+  ) -> str:
     """
     Returns the JSON representation of a topology
     by its name, cluster, environ, and an optional role parameter.
     Raises exception if no such topology is found.
+
     """
     # Iterate over the values to filter the desired topology.
-    for (topology_name, _), topologyInfo in list(self.topologyInfos.items()):
-      executionState = topologyInfo["execution_state"]
-      if (topologyName == topology_name and
-          cluster == executionState["cluster"] and
-          environ == executionState["environ"]):
-        # If role is specified, first try to match "role" field. If "role" field
-        # does not exist, try to match "submission_user" field.
-        if not role or executionState.get("role") == role:
-          return topologyInfo
-    if role is not None:
-      Log.info("Could not find topology info for topology: %s," \
-               "cluster: %s, role: %s, and environ: %s",
-               topologyName, cluster, role, environ)
-    else:
-      Log.info("Could not find topology info for topology: %s," \
-               "cluster: %s and environ: %s", topologyName, cluster, environ)
+    for (tn, _), topology_info in self.topology_infos.items():
+      execution_state = topology_info["execution_state"]
+      if (tn == topology_name and
+          cluster == execution_state["cluster"] and
+          environ == execution_state["environ"] and
+          (not role or execution_state.get("role") == role)
+         ):
+        return topology_info
+
+    Log.info(
+        f"Count not find topology info for cluster={cluster!r},"
+        f" role={role!r}, environ={environ!r}, role={role!r},"
+        f" topology={topology_name!r}"
+    )
     raise Exception("No topology found")
