@@ -36,7 +36,6 @@ import com.esotericsoftware.kryo.serializers.CollectionSerializer;
 import com.esotericsoftware.kryo.serializers.DefaultSerializers.BigIntegerSerializer;
 
 import org.apache.storm.Config;
-import org.apache.storm.serialization.types.HashSetSerializer;
 import org.apache.storm.tuple.Values;
 import org.apache.storm.utils.ListDelegate;
 import org.apache.storm.utils.Utils;
@@ -62,7 +61,7 @@ public final class SerializationFactory {
     k.register(ListDelegate.class);
     k.register(ArrayList.class);
     k.register(HashMap.class);
-    k.register(HashSet.class, new HashSetSerializer());
+    k.register(HashSet.class);
     k.register(BigInteger.class, new BigIntegerSerializer());
     // k.register(TransactionAttempt.class);
     k.register(Values.class);

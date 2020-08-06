@@ -94,7 +94,7 @@ public class KryoSerializer implements IPluggableSerializer {
     k.register(byte[].class);
     k.register(ArrayList.class);
     k.register(HashMap.class);
-    k.register(HashSet.class, new HashSetSerializer());
+    k.register(HashSet.class);
     k.register(BigInteger.class, new DefaultSerializers.BigIntegerSerializer());
     k.register(Values.class);
   }
@@ -214,12 +214,5 @@ public class KryoSerializer implements IPluggableSerializer {
     throw new IllegalArgumentException(
         String.format("Unable to create serializer \"%s\" for class: %s",
             serializerClass.getName(), superClass.getName()));
-  }
-
-  private static class HashSetSerializer extends CollectionSerializer<HashSet<?>> {
-    @Override
-    public HashSet<?> create(Kryo kryo, Input input, Class<? extends HashSet<?>> type, int size) {
-      return new HashSet<>(size);
-    }
   }
 }
