@@ -33,7 +33,7 @@ RUN apt-get update && apt-get -y install \
       libssl-dev \
       git \
       libtool \
-      python3-dev \
+      python3.5-dev \
       pkg-config \
       libcppunit-dev \
       zip \
@@ -46,6 +46,10 @@ RUN apt-get update && apt-get -y install \
       openjdk-11-jdk-headless
 
 ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk-amd64
+
+RUN update-alternatives --install /usr/bin/python python /usr/bin/python3.5 10
+
+ENV PYTHON3 /usr/bin/python3.5
 
 ENV bazelVersion 3.4.1
 
