@@ -604,8 +604,9 @@ genrule(
         "export RELEASE_FILE_DIR=$$(pwd)",
         "export TMP_DIR=$$(mktemp -d -t heronpy.XXXXX)",
         "echo $$TMP_DIR",
+        # Create the virtual environment
         'python3 -m venv $$TMP_DIR/venv --clear',
-        "PS1= source $$TMP_DIR/venv/bin/activate",
+        "VIRTUAL_ENV_DISABLE_PROMPT=1 source $$TMP_DIR/venv/bin/activate",
         "export HERONPY_DIR=$$TMP_DIR/heronpy",
         "export HERONPYAPI_UNZIP=$$TMP_DIR/heronapiunzip",
         "export HERONPYSTREAMLET_UNZIP=$$TMP_DIR/heronstreamletunzip",

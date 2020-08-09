@@ -25,10 +25,9 @@ LINUX_EXECUTE = [
 POST_EXECUTE = [
     'ln -sf "$$OUTDIR" "$$TMPF"',
     'VENV="$${TMPF}/venv"',
+    # Create the virtual environment
     'python3 -m venv $$VENV --clear',
-    # '# this is just to keep the activate script happy',
-    'PS1=',
-    'source "$$VENV/bin/activate"',
+    'VIRTUAL_ENV_DISABLE_PROMPT=1 source "$$VENV/bin/activate"',
 
     'pip install pex \
             --quiet --no-cache-dir --no-index --build $(@D)/pexbuild \
