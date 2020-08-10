@@ -40,6 +40,7 @@ from . import test_kill_stmgr_metricsmgr
 from . import test_kill_tmaster
 from . import test_scale_up
 from . import test_template
+from . import test_explorer
 
 TEST_CLASSES = [
     test_template.TestTemplate,
@@ -49,6 +50,7 @@ TEST_CLASSES = [
     test_kill_stmgr_metricsmgr.TestKillStmgrMetricsMgr,
     test_scale_up.TestScaleUp,
     # test_kill_bolt.TestKillBolt,
+    test_explorer.TestExplorer,
 ]
 
 # The location of default configure file
