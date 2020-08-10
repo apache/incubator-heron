@@ -69,7 +69,5 @@ genrule(
     executable = True,
     message = "Bootstrapping pex",
     output_to_bindir = True,
-    # tools = ["@virtualenv"],
-    tools = [],
     visibility = ["//visibility:public"],
 )
