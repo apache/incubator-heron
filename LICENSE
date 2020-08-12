@@ -316,14 +316,3 @@ See project link for details.
     d3(v3.4.11, https://github.com/d3/d3/blob/master/LICENSE)
       -> heron/tools/ui/resources/static/js/d3.min.3.4.11.js
 
-========================================================================
-Third party Boost Software License, Version 1.0 licenses
-========================================================================
-
-The following components are provided under the Boost Software License, Version 1.0.
-See project link for details.
-
-    kashmir(https://github.com/Corvusoft/kashmir-dependency/blob/master/LICENSE_1_0.txt)
-      -> third_party/kashmir/*
-
-

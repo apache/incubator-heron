@@ -1,0 +1,13 @@
+diff -Naur a/kashmir/devrandom.h b/kashmir/devrandom.h
+--- a/kashmir/devrandom.h	2020-08-12 21:56:17.449211882 +0100
++++ b/kashmir/devrandom.h	2020-08-12 21:56:33.729030394 +0100
+@@ -31,7 +31,7 @@
+     std::ifstream file;
+ 
+ public:
+-    DevRandom() : file("/dev/random", std::ios::binary)
++    DevRandom() : file("/dev/urandom", std::ios::binary)
+     {
+         if (!file)
+             throw std::runtime_error("failed to open random device.");
+
