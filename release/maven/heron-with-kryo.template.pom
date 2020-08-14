@@ -36,7 +36,7 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/ma
     <dependency>
       <groupId>com.esotericsoftware</groupId>
       <artifactId>kryo</artifactId>
-      <version>5.0.0-RC8</version>
+      <version>5.0.0-RC9</version>
       <scope>compile</scope>
     </dependency>
   </dependencies>
