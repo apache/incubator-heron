@@ -17,7 +17,7 @@
  * under the License.
  */
 
-#include "core/network/misc/echoserver.h"
+#include "heron/common/src/cpp/network/misc/echoserver.h"
 #include <iostream>
 
 EchoServer::EchoServer(EventLoopImpl* eventLoop, const NetworkOptions& _options)

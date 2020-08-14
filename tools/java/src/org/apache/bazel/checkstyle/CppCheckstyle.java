@@ -91,7 +91,7 @@ public final class CppCheckstyle {
       // Remove "runtime/references" when we fix all non-const references in our codebase.
       // TODO: https://github.com/apache/incubator-heron/issues/467,
       // Remove "runtime/threadsafe_fn" when we fix all non-threadsafe libc functions
-      commandBuilder.add("--filter=-build/header_guard,-runtime/references,-runtime/threadsafe_fn");
+      commandBuilder.add("--filter=-build/header_guard,-runtime/references,-runtime/threadsafe_fn,-whitespace,-readability,-build/include_what_you_use,-build/c++11,-runtime/string");
       commandBuilder.addAll(sourceFiles);
       runLinter(commandBuilder);
 

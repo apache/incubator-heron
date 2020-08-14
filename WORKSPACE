@@ -327,6 +327,16 @@ http_archive(
 )
 
 http_archive(
+    name = "com_github_corvusoft_kashmir_cpp",
+    build_file = "@//:third_party/kashmir/kashmir.BUILD",
+    patch_args = ["-p1"],
+    patches = ["//third_party/kashmir:kashmir-random-fix.patch"],
+    sha256 = "c3515d6c7a470663f06b79bb23cbb2ff2f3feab4c2a333f783edc0a802f1d062",
+    strip_prefix = "kashmir-dependency-19fb1d5c14866bd5202c2458baf50263001a9cb0",
+    urls = ["https://github.com/Corvusoft/kashmir-dependency/archive/19fb1d5c14866bd5202c2458baf50263001a9cb0.zip"],
+)
+
+http_archive(
     name = "com_github_danmar_cppcheck",
     build_file = "@//:third_party/cppcheck/cppcheck.BUILD",
     patch_args = ["-p2"],
