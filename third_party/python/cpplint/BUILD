@@ -4,6 +4,6 @@ package(default_visibility = ["//visibility:public"])
 
 pex_binary(
     name = "cpplint",
-    srcs = ["cpplint.py"],
-    main = "cpplint.py",
+    entrypoint = "cpplint",
+    reqs = ["cpplint==1.3.0"],
 )
