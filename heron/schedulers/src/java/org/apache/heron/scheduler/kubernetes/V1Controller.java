@@ -32,6 +32,7 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import com.google.protobuf.Api;
 import org.apache.heron.api.utils.TopologyUtils;
 import org.apache.heron.scheduler.TopologyRuntimeManagementException;
 import org.apache.heron.scheduler.TopologySubmissionException;
@@ -159,11 +160,8 @@ public class V1Controller extends KubernetesController {
     final int currentContainerCount = statefulSet.getSpec().getReplicas();
     final int newContainerCount = currentContainerCount + containersToAdd.size();
 
-    final V1StatefulSetSpec newSpec = new V1StatefulSetSpec();
-    newSpec.setReplicas(newContainerCount);
-
     try {
-      doPatch(newSpec);
+      patchStatefulsetReplicas(newContainerCount);
     } catch (ApiException ae) {
       throw new TopologyRuntimeManagementException(
           ae.getMessage() + "\ndetails\n" + ae.getResponseBody());
@@ -184,28 +182,25 @@ public class V1Controller extends KubernetesController {
     final int currentContainerCount = statefulSet.getSpec().getReplicas();
     final int newContainerCount = currentContainerCount - containersToRemove.size();
 
-    final V1StatefulSetSpec newSpec = new V1StatefulSetSpec();
-    newSpec.setReplicas(newContainerCount);
-
     try {
-      doPatch(newSpec);
+      patchStatefulsetReplicas(newContainerCount);
     } catch (ApiException e) {
       throw new TopologyRuntimeManagementException(
           e.getMessage() + "\ndetails\n" + e.getResponseBody());
     }
   }
 
-  private void doPatch(V1StatefulSetSpec patchedSpec) throws ApiException {
+  private void patchStatefulsetReplicas(int replicas) throws ApiException {
     final String body =
-            String.format(JSON_PATCH_STATEFUL_SET_REPLICAS_FORMAT,
-                    patchedSpec.getReplicas().toString());
+            String.format(JSON_PATCH_STATEFUL_SET_INT_REPLICAS_FORMAT,
+                    replicas);
     final V1Patch patch = new V1Patch(body);
     appsClient.patchNamespacedStatefulSet(getTopologyName(),
             getNamespace(), patch, null, null, null, null);
   }
 
   private static final String JSON_PATCH_STATEFUL_SET_REPLICAS_FORMAT =
-      "{\"op\":\"replace\",\"path\":\"/spec/replicas\",\"value\":%s}";
+          "[{\"op\":\"replace\",\"path\":\"/spec/replicas\",\"value\":%d}]";
 
   V1StatefulSet getStatefulSet() throws ApiException {
     return appsClient.readNamespacedStatefulSet(getTopologyName(), getNamespace(),
