@@ -191,7 +191,7 @@ public class V1Controller extends KubernetesController {
 
   private void patchStatefulsetReplicas(int replicas) throws ApiException {
     final String body =
-            String.format(JSON_PATCH_STATEFUL_SET_INT_REPLICAS_FORMAT,
+            String.format(JSON_PATCH_STATEFUL_SET_REPLICAS_FORMAT,
                     replicas);
     final V1Patch patch = new V1Patch(body);
     appsClient.patchNamespacedStatefulSet(getTopologyName(),
