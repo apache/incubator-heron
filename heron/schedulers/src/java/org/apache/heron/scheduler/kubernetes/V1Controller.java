@@ -32,7 +32,6 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import com.google.protobuf.Api;
 import org.apache.heron.api.utils.TopologyUtils;
 import org.apache.heron.scheduler.TopologyRuntimeManagementException;
 import org.apache.heron.scheduler.TopologySubmissionException;
