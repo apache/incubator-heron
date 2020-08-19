@@ -32,7 +32,6 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import io.kubernetes.client.util.PatchUtils;
 import org.apache.heron.api.utils.TopologyUtils;
 import org.apache.heron.scheduler.TopologyRuntimeManagementException;
 import org.apache.heron.scheduler.TopologySubmissionException;
@@ -67,6 +66,7 @@ import io.kubernetes.client.openapi.models.V1StatefulSetSpec;
 import io.kubernetes.client.openapi.models.V1Toleration;
 import io.kubernetes.client.openapi.models.V1Volume;
 import io.kubernetes.client.openapi.models.V1VolumeMount;
+import io.kubernetes.client.util.PatchUtils;
 
 import okhttp3.Response;
 
@@ -197,18 +197,18 @@ public class V1Controller extends KubernetesController {
     final V1Patch patch = new V1Patch(body);
 
     PatchUtils.patch(V1StatefulSet.class,
-            () ->
-                    appsClient.patchNamespacedStatefulSetCall(
-                            getTopologyName(),
-                            getNamespace(),
-                            patch,
-                            null,
-                            null,
-                            null,
-                            null,
-                            null),
-            V1Patch.PATCH_FORMAT_JSON_PATCH,
-            appsClient.getApiClient());
+        () ->
+          appsClient.patchNamespacedStatefulSetCall(
+            getTopologyName(),
+            getNamespace(),
+            patch,
+            null,
+            null,
+            null,
+            null,
+            null),
+        V1Patch.PATCH_FORMAT_JSON_PATCH,
+        appsClient.getApiClient());
   }
 
   private static final String JSON_PATCH_STATEFUL_SET_REPLICAS_FORMAT =
