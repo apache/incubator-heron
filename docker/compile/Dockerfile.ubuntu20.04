@@ -31,12 +31,12 @@ RUN apt-get update && apt-get -y install \
       libunwind8 \
       libcppunit-dev \
       patch \
+      python-is-python3 \
       python3-dev \
-      python \
+      python3-venv \
       pkg-config \
       wget \
       zip \
-      virtualenv \
       unzip \
       git \
       curl \

@@ -16,10 +16,9 @@ addons:
     packages:
       - libtool-bin
       - libcppunit-dev
-      - python3
       - pkg-config
       - python3-dev
-      - python3-wheel
+      - python3-venv
       - wget
       - zip
       - zlib1g-dev

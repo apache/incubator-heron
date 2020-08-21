@@ -25,10 +25,9 @@ LINUX_EXECUTE = [
 POST_EXECUTE = [
     'ln -sf "$$OUTDIR" "$$TMPF"',
     'VENV="$${TMPF}/venv"',
-    '$(location @virtualenv//:virtualenv) --no-download --quiet --clear "$$VENV"',
-    '# this is just to keep the activate script happy',
-    'PS1=',
-    'source "$$VENV/bin/activate"',
+    # Create the virtual environment
+    'python3 -m venv $$VENV --clear',
+    'VIRTUAL_ENV_DISABLE_PROMPT=1 source "$$VENV/bin/activate"',
 
     'pip install pex \
             --quiet --no-cache-dir --no-index --build $(@D)/pexbuild \
@@ -70,6 +69,5 @@ genrule(
     executable = True,
     message = "Bootstrapping pex",
     output_to_bindir = True,
-    tools = ["@virtualenv"],
     visibility = ["//visibility:public"],
 )
