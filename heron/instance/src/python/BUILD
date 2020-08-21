@@ -15,7 +15,7 @@ pex_library(
 # build binary for single thread python heron instance
 pex_binary(
     name = "heron-python-instance",
-    srcs = ["instance/st_heron_instance.py"],
+    srcs = ["instance.py"],
     reqs = [
         "PyYAML==3.13",
         "click==7.1.2",
