@@ -60,6 +60,8 @@ public final class AckingTopology {
     Config conf = new Config();
     conf.setDebug(true);
 
+    conf.setSerializationClassName(Config.HERON_KRYO_SERIALIZER_CLASS_NAME);
+
     // Specifies that all tuples will be automatically failed if not acked within 10 seconds
     conf.setMessageTimeoutSecs(10);
 
