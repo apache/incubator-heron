@@ -32,12 +32,10 @@ import java.util.logging.Logger;
 
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.Serializer;
+import com.esotericsoftware.kryo.serializers.CollectionSerializer;
 import com.esotericsoftware.kryo.serializers.DefaultSerializers.BigIntegerSerializer;
 
 import org.apache.storm.Config;
-import org.apache.storm.serialization.types.ArrayListSerializer;
-import org.apache.storm.serialization.types.HashMapSerializer;
-import org.apache.storm.serialization.types.HashSetSerializer;
 import org.apache.storm.tuple.Values;
 import org.apache.storm.utils.ListDelegate;
 import org.apache.storm.utils.Utils;
@@ -61,9 +59,9 @@ public final class SerializationFactory {
     Kryo k = kryoFactory.getKryo(conf);
     k.register(byte[].class);
     k.register(ListDelegate.class);
-    k.register(ArrayList.class, new ArrayListSerializer());
-    k.register(HashMap.class, new HashMapSerializer());
-    k.register(HashSet.class, new HashSetSerializer());
+    k.register(ArrayList.class);
+    k.register(HashMap.class);
+    k.register(HashSet.class);
     k.register(BigInteger.class, new BigIntegerSerializer());
     // k.register(TransactionAttempt.class);
     k.register(Values.class);
@@ -166,8 +164,8 @@ public final class SerializationFactory {
     }
 
     try {
-      return serializerClass.newInstance();
-    } catch (InstantiationException | IllegalAccessException ex) {
+      return serializerClass.getDeclaredConstructor().newInstance();
+    } catch (NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException ex) {
       // do nothing
     }
 

@@ -44,7 +44,7 @@ public class HeronPluggableSerializerDelegate implements
 
   @Override
   public byte[] serialize(Object object) {
-    kryoOut.clear();
+    kryoOut.reset();
     kryo.writeClassAndObject(kryoOut, object);
     return kryoOut.toBytes();
   }
