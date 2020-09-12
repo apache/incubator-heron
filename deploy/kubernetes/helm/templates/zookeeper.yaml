@@ -121,7 +121,7 @@ spec:
         - name: ZOOKEEPER_SERVERS
           {{- $replicaCount := int .Values.zkReplicas }}
           {{- $fullName := printf "%s-%s" .Release.Name "zookeeper" }}
-          value: "{{ range $i, $e := until $replicaCount }}{{ fullName }}-{{ $e }},{{ end }}"
+          value: "{{ range $i, $e := until $replicaCount }}{{ $fullName }}-{{ $e }},{{ end }}"
         command:
         - sh
         - -c
