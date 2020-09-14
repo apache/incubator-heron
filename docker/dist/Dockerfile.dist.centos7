@@ -17,6 +17,8 @@
 
 FROM centos:centos7
 
+ENV LC_ALL en_US.utf8
+
 RUN yum -y install epel-release \
     && yum -y update \
     && yum -y install \
@@ -29,6 +31,8 @@ RUN yum -y install epel-release \
     unzip \
     which \
     && yum clean all
+
+ENV JAVA_HOME /usr/
 
 ADD artifacts /heron
 
