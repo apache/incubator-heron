@@ -39,6 +39,7 @@ jobReplicas: 1
 # amount of memory to provide for API server
 apiServerMemory: 512M
 heron:
+  enable_url: true
   url: ~
 # Topologies uploader
 uploader:
