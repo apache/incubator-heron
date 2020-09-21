@@ -217,20 +217,51 @@ metadata:
     k8s-app: {{ .Release.Name }}-apiserver
 
 ---
-apiVersion: rbac.authorization.k8s.io/v1beta1
-kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
 metadata:
   name: {{ .Release.Name }}-apiserver
   labels:
     app: {{ .Release.Name }}-apiserver
 roleRef:
   apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: cluster-admin
-subjects: 
+  kind: Role
+  name: {{ .Release.Name }}-apiserver
+subjects:
 - kind: ServiceAccount
   name: {{ .Release.Name }}-apiserver
   namespace: {{ .Release.Namespace }}
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ .Release.Name }}-apiserver
+rules:
+- apiGroups:
+  - apps
+  resources:
+  - statefulsets
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - services
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
 
 ---
 apiVersion: v1
