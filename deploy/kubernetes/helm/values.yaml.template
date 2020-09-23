@@ -39,7 +39,9 @@ jobReplicas: 1
 # amount of memory to provide for API server
 apiServerMemory: 512M
 heron:
-  url: ~
+  # set to `-` to set base_url to the default k8s proxy URL
+  # set to `null` to remove the use of base_url
+  url: "-"
 # Topologies uploader
 uploader:
   class: dlog # s3
