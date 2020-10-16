@@ -647,6 +647,7 @@ genrule(
         "rm setup.py.template",
         "tree $$HERONPY_DIR",
         "/usr/bin/env python3 setup.py sdist",
+        "pip3 install wheel",
         "/usr/bin/env python3 setup.py bdist_wheel",
         "cd -",
         "ls -l $$HERONPY_DIR/dist",
