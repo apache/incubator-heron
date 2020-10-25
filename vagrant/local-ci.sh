@@ -33,9 +33,9 @@ HERE="$(cd "$(dirname "$0")" && pwd -P)"
 
 cd "$HERE"
 
-state="$(vagrant status master --machine-readable | grep master,state, | cut -d, -f4)"
+state="$(vagrant status primary --machine-readable | grep primary,state, | cut -d, -f4)"
 if [ "$state" != "running" ]; then
-    vagrant up master
+    vagrant up primary
 fi
 
 
@@ -43,5 +43,5 @@ fi
 script="${1-ci}"
 env="PLATFORM=Ubuntu JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64/"
 # run the CI, if it fails drop into a shell
-vagrant ssh master --command "cd /vagrant && $env ./scripts/travis/$script.sh" \
-    || vagrant ssh master --command "cd /vagrant && $env exec bash"
+vagrant ssh primary --command "cd /vagrant && $env ./scripts/travis/$script.sh" \
+    || vagrant ssh primary --command "cd /vagrant && $env exec bash"
