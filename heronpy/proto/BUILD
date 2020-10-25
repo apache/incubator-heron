@@ -12,7 +12,7 @@ genrule(
         "networktests.proto",
         "physical_plan.proto",
         "stats.proto",
-        "tmaster.proto",
+        "tmanager.proto",
         "tuple.proto",
         "metrics.proto",
         "packing_plan.proto",
@@ -40,7 +40,7 @@ pex_library(
         ":proto_scheduler_py",
         ":proto_stats_py",
         ":proto_stmgr_py",
-        ":proto_tmaster_py",
+        ":proto_tmanager_py",
         ":proto_topology_py",
         ":proto_tuple_py",
     ],
@@ -63,7 +63,7 @@ pex_binary(
         ":proto_scheduler_py",
         ":proto_stats_py",
         ":proto_stmgr_py",
-        ":proto_tmaster_py",
+        ":proto_tmanager_py",
         ":proto_topology_py",
         ":proto_tuple_py",
     ],
@@ -139,8 +139,8 @@ proto_library(
 )
 
 proto_library(
-    name = "proto_tmaster",
-    src = "tmaster.proto",
+    name = "proto_tmanager",
+    src = "tmanager.proto",
     gen_py = 1,
     includes = ["$(GENDIR)/heronpy/proto"],
     deps = [
@@ -159,7 +159,7 @@ proto_library(
     includes = ["$(GENDIR)/heronpy/proto"],
     deps = [
         ":proto_common",
-        ":proto_tmaster",
+        ":proto_tmanager",
     ],
 )
 
