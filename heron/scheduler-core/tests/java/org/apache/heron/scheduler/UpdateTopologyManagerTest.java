@@ -53,7 +53,7 @@ import org.apache.heron.spi.statemgr.Lock;
 import org.apache.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import org.apache.heron.spi.utils.NetworkUtils;
 import org.apache.heron.spi.utils.PackingTestUtils;
-import org.apache.heron.spi.utils.TMasterUtils;
+import org.apache.heron.spi.utils.TManagerUtils;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -153,7 +153,7 @@ public class UpdateTopologyManagerTest {
    * Test scalable scheduler invocation
    */
   @Test
-  @PrepareForTest(TMasterUtils.class)
+  @PrepareForTest(TManagerUtils.class)
   public void requestsToAddAndRemoveContainers() throws Exception {
     Lock lock = mockLock(true);
     SchedulerStateManagerAdaptor mockStateMgr = mockStateManager(
@@ -168,14 +168,14 @@ public class UpdateTopologyManagerTest {
     UpdateTopologyManager spyUpdateManager =
         spyUpdateManager(mockStateMgr, mockScheduler, testTopology);
 
-    PowerMockito.spy(TMasterUtils.class);
-    PowerMockito.doNothing().when(TMasterUtils.class, "sendToTMaster",
+    PowerMockito.spy(TManagerUtils.class);
+    PowerMockito.doNothing().when(TManagerUtils.class, "sendToTManager",
         any(String.class), eq(TOPOLOGY_NAME),
         eq(mockStateMgr), any(NetworkUtils.TunnelConfig.class));
 
     // reactivation won't happen since topology state is still running due to mock state manager
-    PowerMockito.doNothing().when(TMasterUtils.class, "transitionTopologyState",
-        eq(TOPOLOGY_NAME), eq(TMasterUtils.TMasterCommand.ACTIVATE), eq(mockStateMgr),
+    PowerMockito.doNothing().when(TManagerUtils.class, "transitionTopologyState",
+        eq(TOPOLOGY_NAME), eq(TManagerUtils.TManagerCommand.ACTIVATE), eq(mockStateMgr),
         eq(TopologyAPI.TopologyState.PAUSED), eq(TopologyAPI.TopologyState.RUNNING),
         any(NetworkUtils.TunnelConfig.class));
 
@@ -190,14 +190,14 @@ public class UpdateTopologyManagerTest {
     verify(lock).unlock();
 
     PowerMockito.verifyStatic(times(1));
-    TMasterUtils.transitionTopologyState(eq(TOPOLOGY_NAME),
-        eq(TMasterUtils.TMasterCommand.DEACTIVATE), eq(mockStateMgr),
+    TManagerUtils.transitionTopologyState(eq(TOPOLOGY_NAME),
+        eq(TManagerUtils.TManagerCommand.DEACTIVATE), eq(mockStateMgr),
         eq(TopologyAPI.TopologyState.RUNNING), eq(TopologyAPI.TopologyState.PAUSED),
         any(NetworkUtils.TunnelConfig.class));
 
     PowerMockito.verifyStatic(times(1));
-    TMasterUtils.transitionTopologyState(eq(TOPOLOGY_NAME),
-        eq(TMasterUtils.TMasterCommand.ACTIVATE), eq(mockStateMgr),
+    TManagerUtils.transitionTopologyState(eq(TOPOLOGY_NAME),
+        eq(TManagerUtils.TManagerCommand.ACTIVATE), eq(mockStateMgr),
         eq(TopologyAPI.TopologyState.PAUSED), eq(TopologyAPI.TopologyState.RUNNING),
         any(NetworkUtils.TunnelConfig.class));
   }
