@@ -66,14 +66,14 @@ You should see output like this:
 
 ```bash
 [2018-01-22 10:37:06 -0800] [INFO]: Roles:
-[2018-01-22 10:37:06 -0800] [INFO]:  - Master Servers: ['127.0.0.1']
-[2018-01-22 10:37:06 -0800] [INFO]:  - Slave Servers: ['127.0.0.1']
+[2018-01-22 10:37:06 -0800] [INFO]:  - Primary Servers: ['127.0.0.1']
+[2018-01-22 10:37:06 -0800] [INFO]:  - Secondary Servers: ['127.0.0.1']
 [2018-01-22 10:37:06 -0800] [INFO]:  - Zookeeper Servers: ['127.0.0.1']
 [2018-01-22 10:37:06 -0800] [INFO]: Updating config files...
-[2018-01-22 10:37:06 -0800] [INFO]: Starting master on 127.0.0.1
-[2018-01-22 10:37:06 -0800] [INFO]: Done starting masters
-[2018-01-22 10:37:06 -0800] [INFO]: Starting slave on 127.0.0.1
-[2018-01-22 10:37:06 -0800] [INFO]: Done starting slaves
+[2018-01-22 10:37:06 -0800] [INFO]: Starting primary on 127.0.0.1
+[2018-01-22 10:37:06 -0800] [INFO]: Done starting primaries
+[2018-01-22 10:37:06 -0800] [INFO]: Starting secondary on 127.0.0.1
+[2018-01-22 10:37:06 -0800] [INFO]: Done starting secondaries
 [2018-01-22 10:37:06 -0800] [INFO]: Waiting for cluster to come up... 0
 [2018-01-22 10:37:08 -0800] [INFO]: Starting Heron API Server on 127.0.0.1
 [2018-01-22 10:37:08 -0800] [INFO]: Waiting for API server to come up... 0
@@ -112,10 +112,10 @@ This will return a JSON string containing a list of hosts for Heron and ZooKeepe
     "127.0.0.1"
   ],
   "roles": {
-    "masters": [
+    "primaries": [
       "127.0.0.1"
     ],
-    "slaves": [
+    "secondaries": [
       "127.0.0.1"
     ],
     "zookeepers": [
@@ -207,11 +207,11 @@ Once the topology has been submitted, it can be deactivated, killed, updated, an
 
 Heron standalone uses [Nomad](https://www.nomadproject.io/) as a scheduler. For the most part, you shouldn't need to interact with Nomad when managing your Heron standalone cluster. If you do need to manage Nomad directly, however, you can do so using the `heron-nomad` executable, which is installed at `~/.heron/bin/heron-nomad`. That executable is essentially an alias for the `nomad` CLI tool. You can find documentation in the [official Nomad docs](https://www.nomadproject.io/docs/commands/index.html).
 
-You can also access the [Nomad Web UI](https://www.nomadproject.io/guides/ui.html) on port 4646 of any master node in the Heron cluster. You can see a list of master nodes by running `heron-admin standalone info`. If you're running a standalone cluster locally on your machine, you can access the Nomad UI at `localhost:4646`.
+You can also access the [Nomad Web UI](https://www.nomadproject.io/guides/ui.html) on port 4646 of any primary node in the Heron cluster. You can see a list of primary nodes by running `heron-admin standalone info`. If you're running a standalone cluster locally on your machine, you can access the Nomad UI at `localhost:4646`.
 
 ## Debugging Help
 
-The locations of the logs for the Nomad Server (master node) and Nomad Clients (slave nodes) are located at '/tmp/nomad_server_log' and '/tmp/nomad_client.log' respectively. Please look through these logs to see if there was a error setting up the Nomad cluster
+The locations of the logs for the Nomad Server (primary node) and Nomad Clients (secondary nodes) are located at '/tmp/nomad_server_log' and '/tmp/nomad_client.log' respectively. Please look through these logs to see if there was a error setting up the Nomad cluster
 
 ### Common Problems
 
@@ -223,7 +223,7 @@ Error starting agent: Failed to start Consul server: Failed to start lan serf: F
 
 The Nomad server cannot determine the network address to advertise itself on.  You will need to manually set that address. You can do that by modifying the configuration file:
 
-~/.heron/conf/standalone/resources/master.hcl 
+~/.heron/conf/standalone/resources/primary.hcl
 
 You will need to add a stanza like:
 

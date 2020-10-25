@@ -43,7 +43,7 @@ configuration. Once you are familiar with the system you can tune these paramete
 high throughput or low latency topologies.
 
 * **metrics_sinks.yaml** --- This file specifies where the run-time system and topology metrics
-will be routed. By default, the `file sink` and `tmaster sink` need to be present. In addition,
+will be routed. By default, the `file sink` and `tmanager sink` need to be present. In addition,
 `scribe sink` and `graphite sink` are also supported.
 
 * **packing.yaml** --- This file specifies the classes for `packing algorithm`, which defaults

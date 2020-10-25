@@ -49,7 +49,7 @@ Parameter | Meaning | Default
 `heron.streammgr.cache.drain.frequency.ms` | The frequency (in milliseconds) at which the SM's tuple cache is drained | `10`
 `heron.streammgr.cache.drain.size.mb` | The size threshold (in megabytes) at which the SM's tuple cache is drained | `100`
 `heron.streammgr.client.reconnect.interval.sec` | The reconnect interval to other SMs for the SM client (in seconds) | `1`
-`heron.streammgr.client.reconnect.tmaster.interval.sec` | The reconnect interval to the Topology Master for the SM client (in seconds) | `10`
-`heron.streammgr.tmaster.heartbeat.interval.sec` | The interval (in seconds) at which a heartbeat is sent to the Topology Master | `10`
+`heron.streammgr.client.reconnect.tmanager.interval.sec` | The reconnect interval to the Topology Manager for the SM client (in seconds) | `10`
+`heron.streammgr.tmanager.heartbeat.interval.sec` | The interval (in seconds) at which a heartbeat is sent to the Topology Manager | `10`
 `heron.streammgr.connection.read.batch.size.mb` | The maximum batch size (in megabytes) at which the SM reads from the socket | `1`
 `heron.streammgr.connection.write.batch.size.mb` | The maximum batch size (in megabytes) to write by the stream manager to the socket | `1`

@@ -68,7 +68,7 @@
       "cluster-config-instance",
       "cluster-config-metrics",
       "cluster-config-stream",
-      "cluster-config-tmaster"
+      "cluster-config-tmanager"
     ],
     "Observability": [
       "observability-prometheus",

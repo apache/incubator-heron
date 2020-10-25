@@ -113,14 +113,14 @@ We assume here that heron client has successfully launched the topology.
 *Symptom* - Physical plan or logical plan does not show up on UI
 
 *Possible Cause* - One of more of stream managers have not yet connected to
-Tmaster.
+Tmanager.
 
 *What to do* -
 
-1. Go to the Tmaster logs for the topology. The zeroth container is reserved for
-   Tmaster. Go to the container and browse to
+1. Go to the Tmanager logs for the topology. The zeroth container is reserved for
+   Tmanager. Go to the container and browse to
 
-        log-files/heron-tmaster-<topology-name><topology-id>.INFO
+        log-files/heron-tmanager-<topology-name><topology-id>.INFO
 
     and see which stream managers have not yet connected. The `stmgr` ID
     corresponds to the container number. For example, `stmgr-10` corresponds to
@@ -128,7 +128,7 @@ Tmaster.
 
 2. Visit that container to
     see what is wrong in stream manager's logs, which can be found in `log-files`
-    directory similar to Tmaster.
+    directory similar to Tmanager.
 
 #### 3. Instances are not starting up
 

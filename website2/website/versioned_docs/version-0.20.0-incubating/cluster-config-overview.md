@@ -52,7 +52,7 @@ specific components in a topology and are detailed in the docs below:
 * [Heron Instance](cluster-config-instance)
 * [Heron Metrics Manager](cluster-config-metrics)
 * [Heron Stream Manager](cluster-config-stream)
-* [Heron Topology Master](cluster-config-tmaster)
+* [Heron Topology Manager](cluster-config-tmanager)
 
 ### Overriding Heron Cluster Configuration
 
