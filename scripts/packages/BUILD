@@ -78,7 +78,7 @@ pkg_tar(
         "//heron/instance/src/python:heron-python-instance",
         "//heron/shell/src/python:heron-shell",
         "//heron/stmgr/src/cpp:heron-stmgr",
-        "//heron/tmaster/src/cpp:heron-tmaster",
+        "//heron/tmanager/src/cpp:heron-tmanager",
     ],
     package_dir = "heron-core/bin",
 )
