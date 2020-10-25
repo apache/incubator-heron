@@ -19,24 +19,24 @@
 #  under the License.
 
 
-"""test_kill_tmaster.py"""
+"""test_kill_tmanager.py"""
 import logging
 import subprocess
 from . import test_template
 
-TMASTER_SHARD = 0
+TMANAGER_SHARD = 0
 
-class TestKillTMaster(test_template.TestTemplate):
+class TestKillTManager(test_template.TestTemplate):
 
   def execute_test_case(self):
     restart_shard(self.params['cliPath'], self.params['cluster'],
-                  self.params['topologyName'], TMASTER_SHARD)
+                  self.params['topologyName'], TMANAGER_SHARD)
 
 def restart_shard(heron_cli_path, test_cluster, topology_name, shard_num):
-  """ restart tmaster """
+  """ restart tmanager """
   splitcmd = [heron_cli_path, 'restart', '--verbose', test_cluster, topology_name, str(shard_num)]
 
-  logging.info("Killing TMaster: %s", splitcmd)
+  logging.info("Killing TManager: %s", splitcmd)
   if subprocess.call(splitcmd) != 0:
-    raise RuntimeError("Unable to kill TMaster")
-  logging.info("Killed TMaster")
+    raise RuntimeError("Unable to kill TManager")
+  logging.info("Killed TManager")

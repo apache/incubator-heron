@@ -40,7 +40,7 @@ TEST_INPUT = ["1\n", "2\n", "3\n", "4\n", "5\n", "6\n", "7\n", "8\n",
 RETRY_COUNT = 5
 RETRY_INTERVAL = 10
 # Topology shard definitions
-NON_TMASTER_SHARD = 1
+NON_TMANAGER_SHARD = 1
 # Topology process name definitions
 STMGR = 'stmgr'
 HERON_BIN = "bin"
@@ -240,13 +240,13 @@ class TestTemplate:
 
   def kill_strmgr(self):
     logging.info("Executing kill stream manager")
-    stmgr_pid = self.get_pid('%s-%d' % (STMGR, NON_TMASTER_SHARD), self.params['workingDirectory'])
+    stmgr_pid = self.get_pid('%s-%d' % (STMGR, NON_TMANAGER_SHARD), self.params['workingDirectory'])
     self.kill_process(stmgr_pid)
 
   def kill_metricsmgr(self):
     logging.info("Executing kill metrics manager")
     metricsmgr_pid = self.get_pid(
-        '%s-%d' % (HERON_METRICSMGR, NON_TMASTER_SHARD), self.params['workingDirectory'])
+        '%s-%d' % (HERON_METRICSMGR, NON_TMANAGER_SHARD), self.params['workingDirectory'])
     self.kill_process(metricsmgr_pid)
 
   def _get_tracker_pplan(self):
