@@ -19,12 +19,18 @@
 log_level = "DEBUG"
 
 # Setup data dir
-data_dir = "/tmp/master"
+data_dir = "/tmp/secondary"
 
-# Enable the server
-server {
+# Enable the client
+client {
     enabled = true
+    servers = [<nomad_primaries:primary_port>]
+    options = {
+     "driver.raw_exec.enable" = "1"
+  }
+}
 
-    # Self-elect, should be 3 or 5 for production
-    bootstrap_expect = 1
+# Modify our port to avoid a collision with server1
+ports {
+    http = 5656
 }
