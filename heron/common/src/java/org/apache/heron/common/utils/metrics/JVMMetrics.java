@@ -105,7 +105,7 @@ public class JVMMetrics {
    */
   private MultiAssignableMetric<Long> threadsCPUTimeNs;
 
-  // The CPU time used by threads other than SlaveThread and GatewayThread
+  // The CPU time used by threads other than ExecutorThread and GatewayThread
   private AssignableMetric<Long> otherThreadsCPUTimeNs;
 
   /*
@@ -121,7 +121,7 @@ public class JVMMetrics {
    */
   private MultiAssignableMetric<Long> threadsUserCPUTimeNs;
 
-  // The user CPU time used by threads other than SlaveThread and GatewayThread
+  // The user CPU time used by threads other than ExecutorThread and GatewayThread
   private AssignableMetric<Long> otherThreadsUserCPUTimeNs;
 
   /*
@@ -383,7 +383,7 @@ public class JVMMetrics {
           String threadName = threadInfo.getThreadName();
 
           if (threadName.equals(ThreadNames.THREAD_GATEWAY_NAME)
-              || threadName.equals(ThreadNames.THREAD_SLAVE_NAME)) {
+              || threadName.equals(ThreadNames.THREAD_EXECUTOR_NAME)) {
             threadsCPUTimeNs.scope(threadName).setValue(cpuTime);
             threadsUserCPUTimeNs.scope(threadName).setValue(cpuUserTime);
           } else {

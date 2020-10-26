@@ -33,17 +33,17 @@ import org.junit.Test;
  */
 public class WakeableLooperTest {
   private static int globalValue;
-  private WakeableLooper slaveLooper;
+  private WakeableLooper executorLooper;
 
   @Before
   public void before() {
-    slaveLooper = new SlaveLooper();
+    executorLooper = new ExecutorLooper();
     globalValue = 6;
   }
 
   @After
   public void after() {
-    slaveLooper = null;
+    executorLooper = null;
   }
 
   /**
@@ -57,15 +57,15 @@ public class WakeableLooperTest {
       @Override
       public void run() {
         globalValue += 10;
-        slaveLooper.wakeUp();
+        executorLooper.wakeUp();
         i--;
         if (i == 0) {
-          slaveLooper.exitLoop();
+          executorLooper.exitLoop();
         }
       }
     };
-    slaveLooper.addTasksOnWakeup(r);
-    slaveLooper.loop();
+    executorLooper.addTasksOnWakeup(r);
+    executorLooper.loop();
     Assert.assertEquals(36, globalValue);
   }
 
@@ -77,12 +77,12 @@ public class WakeableLooperTest {
     Runnable r = new Runnable() {
       @Override
       public void run() {
-        slaveLooper.exitLoop();
+        executorLooper.exitLoop();
         globalValue = 10;
       }
     };
-    slaveLooper.addTasksOnWakeup(r);
-    slaveLooper.loop();
+    executorLooper.addTasksOnWakeup(r);
+    executorLooper.loop();
     Assert.assertEquals(10, globalValue);
   }
 
@@ -94,15 +94,15 @@ public class WakeableLooperTest {
     Runnable r = new Runnable() {
       @Override
       public void run() {
-        slaveLooper.exitLoop();
+        executorLooper.exitLoop();
         globalValue = 10;
       }
     };
 
     long startTime = System.nanoTime();
     Duration interval = Duration.ofSeconds(1);
-    slaveLooper.registerTimerEvent(interval, r);
-    slaveLooper.loop();
+    executorLooper.registerTimerEvent(interval, r);
+    executorLooper.loop();
     long endTime = System.nanoTime();
     Assert.assertTrue(endTime - startTime - interval.toNanos() >= 0);
     Assert.assertEquals(10, globalValue);
@@ -116,15 +116,15 @@ public class WakeableLooperTest {
     Runnable r = new Runnable() {
       @Override
       public void run() {
-        slaveLooper.exitLoop();
+        executorLooper.exitLoop();
         globalValue = 10;
       }
     };
 
     long startTime = System.nanoTime();
     Duration interval = Duration.ofMillis(6);
-    slaveLooper.registerTimerEvent(interval, r);
-    slaveLooper.loop();
+    executorLooper.registerTimerEvent(interval, r);
+    executorLooper.loop();
     long endTime = System.nanoTime();
     Assert.assertTrue(endTime - startTime - interval.toNanos() >= 0);
     Assert.assertEquals(10, globalValue);
@@ -138,12 +138,12 @@ public class WakeableLooperTest {
     Runnable r = new Runnable() {
       @Override
       public void run() {
-        slaveLooper.exitLoop();
+        executorLooper.exitLoop();
         globalValue = 10;
       }
     };
-    slaveLooper.addTasksOnWakeup(r);
-    slaveLooper.loop();
+    executorLooper.addTasksOnWakeup(r);
+    executorLooper.loop();
     Assert.assertEquals(10, globalValue);
   }
 
@@ -156,18 +156,18 @@ public class WakeableLooperTest {
     Runnable r = new Runnable() {
       @Override
       public void run() {
-        slaveLooper.exitLoop();
+        executorLooper.exitLoop();
         globalValue = 10;
       }
     };
 
     Duration interval = Duration.ofSeconds(6);
-    slaveLooper.registerTimerEvent(interval, r);
+    executorLooper.registerTimerEvent(interval, r);
 
     Method method =
-        slaveLooper.getClass().getSuperclass().getDeclaredMethod("getNextTimeoutInterval");
+        executorLooper.getClass().getSuperclass().getDeclaredMethod("getNextTimeoutInterval");
     method.setAccessible(true);
-    Duration res = (Duration) method.invoke(slaveLooper);
+    Duration res = (Duration) method.invoke(executorLooper);
 
     Assert.assertNotNull(res);
 
@@ -186,11 +186,11 @@ public class WakeableLooperTest {
         globalValue = 10;
       }
     };
-    slaveLooper.addTasksOnWakeup(r);
+    executorLooper.addTasksOnWakeup(r);
 
-    Method method = slaveLooper.getClass().getSuperclass().getDeclaredMethod("runOnce");
+    Method method = executorLooper.getClass().getSuperclass().getDeclaredMethod("runOnce");
     method.setAccessible(true);
-    method.invoke(slaveLooper);
+    method.invoke(executorLooper);
 
     Assert.assertEquals(10, globalValue);
   }
@@ -207,12 +207,12 @@ public class WakeableLooperTest {
         globalValue = 10;
       }
     };
-    slaveLooper.addTasksOnWakeup(r);
+    executorLooper.addTasksOnWakeup(r);
 
     Method method =
-        slaveLooper.getClass().getSuperclass().getDeclaredMethod("executeTasksOnWakeup");
+        executorLooper.getClass().getSuperclass().getDeclaredMethod("executeTasksOnWakeup");
     method.setAccessible(true);
-    method.invoke(slaveLooper);
+    method.invoke(executorLooper);
 
     Assert.assertEquals(10, globalValue);
   }
@@ -231,14 +231,14 @@ public class WakeableLooperTest {
     };
 
     Duration interval = Duration.ofNanos(1);
-    slaveLooper.registerTimerEvent(interval, r);
+    executorLooper.registerTimerEvent(interval, r);
 
     Method method =
-        slaveLooper.getClass().getSuperclass().getDeclaredMethod(
+        executorLooper.getClass().getSuperclass().getDeclaredMethod(
             "triggerExpiredTimers", long.class);
     long current = System.nanoTime();
     method.setAccessible(true);
-    method.invoke(slaveLooper, current);
+    method.invoke(executorLooper, current);
 
     Assert.assertEquals(10, globalValue);
   }

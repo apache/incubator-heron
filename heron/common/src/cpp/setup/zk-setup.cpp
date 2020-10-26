@@ -52,7 +52,7 @@ void AllDone(sp_int32 _status) {
   }
 }
 
-void TMastersDone(sp_int32 _status) {
+void TManagersDone(sp_int32 _status) {
   if (_status == ZNODEEXISTS || _status == ZOK) {
     zkclient->CreateNode(zkroot + "/executionstate", "Heron Cluster " + clustername, false,
                          [](sp_int32 status) { AllDone(status); });
@@ -64,8 +64,8 @@ void TMastersDone(sp_int32 _status) {
 
 void PplansDone(sp_int32 _status) {
   if (_status == ZNODEEXISTS || _status == ZOK) {
-    zkclient->CreateNode(zkroot + "/tmasters", "Heron Cluster " + clustername, false,
-                         [](sp_int32 status) { TMastersDone(status); });
+    zkclient->CreateNode(zkroot + "/tmanagers", "Heron Cluster " + clustername, false,
+                         [](sp_int32 status) { TManagersDone(status); });
   } else {
     LOG(ERROR) << "Error creating node in zk " << _status << std::endl;
     ::exit(1);

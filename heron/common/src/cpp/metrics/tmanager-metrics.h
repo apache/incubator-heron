@@ -19,12 +19,12 @@
 
 //////////////////////////////////////////////////////////////////////////////
 //
-// tmaster-metric.h
+// tmanager-metric.h
 //
-// Defines all the metrics that needs to be sent to tmaster
+// Defines all the metrics that needs to be sent to tmanager
 //////////////////////////////////////////////////////////////////////////////
-#ifndef __TMASTER_METRICS_H_
-#define __TMASTER_METRICS_H_
+#ifndef __TMANAGER_METRICS_H_
+#define __TMANAGER_METRICS_H_
 
 #include <map>
 #include "metrics/imetric.h"
@@ -41,7 +41,7 @@ class MetricsSinksReader;
 namespace heron {
 namespace common {
 
-class TMasterMetrics {
+class TManagerMetrics {
  public:
   enum MetricAggregationType {
     UNKNOWN = -1,
@@ -49,10 +49,10 @@ class TMasterMetrics {
     AVG,
     LAST  // We only care about the last value
   };
-  TMasterMetrics(const sp_string& metrics_sinks, std::shared_ptr<EventLoop> eventLoop);
-  ~TMasterMetrics();
+  TManagerMetrics(const sp_string& metrics_sinks, std::shared_ptr<EventLoop> eventLoop);
+  ~TManagerMetrics();
 
-  bool IsTMasterMetric(const sp_string& _name);
+  bool IsTManagerMetric(const sp_string& _name);
   MetricAggregationType GetAggregationType(const sp_string& _name);
 
  private:

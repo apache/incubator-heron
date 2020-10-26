@@ -17,7 +17,7 @@
  * under the License.
  */
 
-#include "metrics/tmaster-metrics.h"
+#include "metrics/tmanager-metrics.h"
 #include <stdio.h>
 #include <unistd.h>
 #include <iostream>
@@ -37,25 +37,25 @@ namespace common {
 
 using std::shared_ptr;
 
-TMasterMetrics::TMasterMetrics(const sp_string& sinks_filename, shared_ptr<EventLoop> eventLoop) {
+TManagerMetrics::TManagerMetrics(const sp_string& sinks_filename, shared_ptr<EventLoop> eventLoop) {
   sinks_reader_ = new config::MetricsSinksReader(eventLoop, sinks_filename);
   std::list<std::pair<sp_string, sp_string> > metrics;
-  sinks_reader_->GetTMasterMetrics(metrics);
+  sinks_reader_->GetTManagerMetrics(metrics);
   for (auto iter = metrics.begin(); iter != metrics.end(); ++iter) {
     metrics_prefixes_[iter->first] = TranslateFromString(iter->second);
   }
 }
 
-TMasterMetrics::~TMasterMetrics() { delete sinks_reader_; }
+TManagerMetrics::~TManagerMetrics() { delete sinks_reader_; }
 
-bool TMasterMetrics::IsTMasterMetric(const sp_string& _name) {
+bool TManagerMetrics::IsTManagerMetric(const sp_string& _name) {
   for (auto iter = metrics_prefixes_.begin(); iter != metrics_prefixes_.end(); ++iter) {
     if (_name.find(iter->first) == 0) return true;
   }
   return false;
 }
 
-TMasterMetrics::MetricAggregationType TMasterMetrics::GetAggregationType(const sp_string& _name) {
+TManagerMetrics::MetricAggregationType TManagerMetrics::GetAggregationType(const sp_string& _name) {
   for (auto iter = metrics_prefixes_.begin(); iter != metrics_prefixes_.end(); ++iter) {
     if (_name.find(iter->first) == 0) {
       return iter->second;
@@ -64,7 +64,7 @@ TMasterMetrics::MetricAggregationType TMasterMetrics::GetAggregationType(const s
   return UNKNOWN;
 }
 
-TMasterMetrics::MetricAggregationType TMasterMetrics::TranslateFromString(const sp_string& type) {
+TManagerMetrics::MetricAggregationType TManagerMetrics::TranslateFromString(const sp_string& type) {
   if (type == "SUM") {
     return SUM;
   } else if (type == "AVG") {

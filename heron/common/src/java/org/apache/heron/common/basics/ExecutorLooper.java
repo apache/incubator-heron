@@ -22,17 +22,17 @@ package org.apache.heron.common.basics;
 import java.time.Duration;
 
 /**
- * A SlaveLooper, implementing WakeableLooper, is a class wrapping object wait()/notify() to await/unblock a thread.
+ * A ExecutorLooper, implementing WakeableLooper, is a class wrapping object wait()/notify() to await/unblock a thread.
  * It extends WakeableLooper, so it will execute in a while loop unless the exitLoop() is called.
  * And in every execution, in tasksOnWakeup(), it will do nothing by default
- * The SlaveLooper should start by calling {@code loop()}
+ * The ExecutorLooper should start by calling {@code loop()}
  */
 
-public class SlaveLooper extends WakeableLooper {
+public class ExecutorLooper extends WakeableLooper {
   // The lock to implement the await/unblock
   private final RunnableLock lock;
 
-  public SlaveLooper() {
+  public ExecutorLooper() {
     this.lock = new RunnableLock();
   }
 

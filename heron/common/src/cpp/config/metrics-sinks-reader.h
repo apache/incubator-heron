@@ -39,9 +39,9 @@ class MetricsSinksReader : public YamlFileReader {
   MetricsSinksReader(std::shared_ptr<EventLoop> eventLoop, const sp_string& _defaults_file);
   virtual ~MetricsSinksReader();
 
-  // Get the list of metrics whitelisted for tmaster along
+  // Get the list of metrics whitelisted for tmanager along
   // with their types
-  void GetTMasterMetrics(std::list<std::pair<sp_string, sp_string> >& metrics);
+  void GetTManagerMetrics(std::list<std::pair<sp_string, sp_string> >& metrics);
 
   virtual void OnConfigFileLoad();
 };

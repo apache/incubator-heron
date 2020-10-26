@@ -35,8 +35,8 @@ public class CommunicatorTest {
 
   @Before
   public void before() {
-    producer = new SlaveLooper();
-    consumer = new SlaveLooper();
+    producer = new ExecutorLooper();
+    consumer = new ExecutorLooper();
     communicator = new Communicator<Integer>(producer, consumer);
     communicator.init(QUEUE_BUFFER_SIZE, QUEUE_BUFFER_SIZE, 0.5);
   }
