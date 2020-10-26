@@ -378,7 +378,7 @@ public class TManagerSink implements IMetricsSink {
       tManagerClient =
           new TManagerClient(looper,
               currentTManagerLocation.getHost(),
-              currentTManagerLocation.getManagerPort(),
+              currentTManagerLocation.getServerPort(),
               socketOptions, metricsCommunicator,
               TypeUtils.getDuration(
                   tmanagerClientConfig.get(KEY_TMANAGER_RECONNECT_INTERVAL_SEC), ChronoUnit.SECONDS));

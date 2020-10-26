@@ -390,7 +390,7 @@ public class MetricsCacheSink implements IMetricsSink {
 
       metricsCacheClient = new MetricsCacheClient(looper,
           currentMetricsCacheLocation.getHost(),
-          currentMetricsCacheLocation.getManagerPort(),
+          currentMetricsCacheLocation.getServerPort(),
           socketOptions, metricsCommunicator,
           TypeUtils.getDuration(
               metricsCacheClientConfig.get(KEY_TMANAGER_RECONNECT_INTERVAL_SEC),

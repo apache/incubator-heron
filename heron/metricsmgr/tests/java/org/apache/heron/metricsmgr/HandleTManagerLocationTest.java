@@ -66,14 +66,14 @@ public class HandleTManagerLocationTest {
       Metrics.TManagerLocationRefreshMessage.newBuilder().setTmanager(
           TopologyManager.TManagerLocation.newBuilder().
               setTopologyName("topology-name").setTopologyId("topology-id").
-              setHost("host").setControllerPort(0).setManagerPort(0)).
+              setHost("host").setControllerPort(0).setServerPort(0)).
           build();
 
   private static final Metrics.TManagerLocationRefreshMessage TMANAGERLOCATIONREFRESHMESSAGE1 =
       Metrics.TManagerLocationRefreshMessage.newBuilder().setTmanager(
           TopologyManager.TManagerLocation.newBuilder().
               setTopologyName("topology-name").setTopologyId("topology-id").
-              setHost("host").setControllerPort(0).setManagerPort(1)).
+              setHost("host").setControllerPort(0).setServerPort(1)).
           build();
 
   // Bean name to register the TManagerLocation object into SingletonRegistry
@@ -142,7 +142,7 @@ public class HandleTManagerLocationTest {
     Assert.assertEquals("topology-id", tManagerLocation.getTopologyId());
     Assert.assertEquals("host", tManagerLocation.getHost());
     Assert.assertEquals(0, tManagerLocation.getControllerPort());
-    Assert.assertEquals(1, tManagerLocation.getManagerPort());
+    Assert.assertEquals(1, tManagerLocation.getServerPort());
   }
 
   private static final class TestRequestHandler implements HeronServerTester.TestRequestHandler {

@@ -79,7 +79,7 @@ public class MetricsCacheSinkTest {
     // and then dies
     return TopologyManager.MetricsCacheLocation.newBuilder().
         setTopologyName("topology-name").setTopologyId("topology-id").setHost("host").
-        setControllerPort(0).setManagerPort(serverPort).setStatsPort(0).build();
+        setControllerPort(0).setServerPort(serverPort).setStatsPort(0).build();
   }
 
   @Before
