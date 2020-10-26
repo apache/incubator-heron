@@ -133,7 +133,7 @@ class HeronExecutorTest(unittest.TestCase):
            "-XX:+PrintHeapAtGC -XX:+HeapDumpOnOutOfMemoryError -XX:ParallelGCThreads=4 " \
            "-Xloggc:log-files/gc.metricscache.log " \
            "-cp metricscachemgr_classpath org.apache.heron.metricscachemgr.MetricsCacheManager " \
-           "--metricscache_id metricscache-0 --master_port metricscachemgr_masterport " \
+           "--metricscache_id metricscache-0 --server_port metricscachemgr_serverport " \
            "--stats_port metricscachemgr_statsport --topology_name topname --topology_id topid " \
            "--system_config_file %s --override_config_file %s " \
            "--sink_config_file metrics_sinks_config_file " \
@@ -167,17 +167,17 @@ class HeronExecutorTest(unittest.TestCase):
            "-cp instance_classpath:classpath -XX:+HeapDumpOnOutOfMemoryError " \
            "org.apache.heron.instance.HeronInstance -topology_name topname -topology_id topid " \
            "-instance_id %s -component_name %s -task_id %d -component_index 0 -stmgr_id stmgr-%d " \
-           "-stmgr_port tmaster_controller_port -metricsmgr_port metricsmgr_port " \
+           "-stmgr_port tmanager_controller_port -metricsmgr_port metricsmgr_port " \
            "-system_config_file %s -override_config_file %s" \
            % (instance_name, instance_name, component_name, instance_id,
               container_id, INTERNAL_CONF_PATH, OVERRIDE_PATH)
 
   MockPOpen.set_next_pid(37)
   expected_processes_container_0 = [
-      ProcessInfo(MockPOpen(), 'heron-tmaster',
-                  'tmaster_binary --topology_name=topname --topology_id=topid '
-                  '--zkhostportlist=zknode --zkroot=zkroot --myhost=%s --master_port=master_port '
-                  '--controller_port=tmaster_controller_port --stats_port=tmaster_stats_port '
+      ProcessInfo(MockPOpen(), 'heron-tmanager',
+                  'tmanager_binary --topology_name=topname --topology_id=topid '
+                  '--zkhostportlist=zknode --zkroot=zkroot --myhost=%s --server_port=server_port '
+                  '--controller_port=tmanager_controller_port --stats_port=tmanager_stats_port '
                   '--config_file=%s --override_config_file=%s '
                   '--metrics_sinks_yaml=metrics_sinks_config_file '
                   '--metricsmgr_port=metricsmgr_port '
@@ -195,8 +195,8 @@ class HeronExecutorTest(unittest.TestCase):
                   '--topologydefn_file=topdefnfile --zkhostportlist=zknode --zkroot=zkroot '
                   '--stmgr_id=stmgr-1 '
                   '--instance_ids=container_1_word_3,container_1_exclaim1_2,container_1_exclaim1_1 '
-                  '--myhost=%s --data_port=master_port '
-                  '--local_data_port=tmaster_controller_port --metricsmgr_port=metricsmgr_port '
+                  '--myhost=%s --data_port=server_port '
+                  '--local_data_port=tmanager_controller_port --metricsmgr_port=metricsmgr_port '
                   '--shell_port=shell-port --config_file=%s --override_config_file=%s '
                   '--ckptmgr_port=ckptmgr-port --ckptmgr_id=ckptmgr-1 '
                   '--metricscachemgr_mode=cluster'
@@ -217,8 +217,8 @@ class HeronExecutorTest(unittest.TestCase):
                   '--topologydefn_file=topdefnfile --zkhostportlist=zknode --zkroot=zkroot '
                   '--stmgr_id=stmgr-7 '
                   '--instance_ids=container_7_word_11,container_7_exclaim1_210 --myhost=%s '
-                  '--data_port=master_port '
-                  '--local_data_port=tmaster_controller_port --metricsmgr_port=metricsmgr_port '
+                  '--data_port=server_port '
+                  '--local_data_port=tmanager_controller_port --metricsmgr_port=metricsmgr_port '
                   '--shell_port=shell-port --config_file=%s --override_config_file=%s '
                   '--ckptmgr_port=ckptmgr-port --ckptmgr_id=ckptmgr-7 '
                   '--metricscachemgr_mode=cluster'
@@ -242,9 +242,9 @@ class HeronExecutorTest(unittest.TestCase):
     })
 
   # ./heron-executor <shardid> <topname> <topid> <topdefnfile>
-  # <zknode> <zkroot> <tmaster_binary> <stmgr_binary>
+  # <zknode> <zkroot> <tmanager_binary> <stmgr_binary>
   # <metricsmgr_classpath> <instance_jvm_opts_in_base64> <classpath>
-  # <master_port> <tmaster_controller_port> <tmaster_stats_port> <heron_internals_config_file>
+  # <server_port> <tmanager_controller_port> <tmanager_stats_port> <heron_internals_config_file>
   # <override_config_file> <component_rammap> <component_jvm_opts_in_base64> <pkg_type>
   # <topology_bin_file> <heron_java_home> <shell-port> <heron_shell_binary> <metricsmgr_port>
   # <cluster> <role> <environ> <instance_classpath> <metrics_sinks_config_file>
@@ -259,14 +259,14 @@ class HeronExecutorTest(unittest.TestCase):
       ("--state-manager-connection", "zknode"),
       ("--state-manager-root", "zkroot"),
       ("--state-manager-config-file", "state_manager_config_file"),
-      ("--tmaster-binary", "tmaster_binary"),
+      ("--tmanager-binary", "tmanager_binary"),
       ("--stmgr-binary", "stmgr_binary"),
       ("--metrics-manager-classpath", "metricsmgr_classpath"),
       ("--instance-jvm-opts", "LVhYOitIZWFwRHVtcE9uT3V0T2ZNZW1vcnlFcnJvcg(61)(61)"),
       ("--classpath", "classpath"),
-      ("--master-port", "master_port"),
-      ("--tmaster-controller-port", "tmaster_controller_port"),
-      ("--tmaster-stats-port", "tmaster_stats_port"),
+      ("--server-port", "server_port"),
+      ("--tmanager-controller-port", "tmanager_controller_port"),
+      ("--tmanager-stats-port", "tmanager_stats_port"),
       ("--heron-internals-config-file", INTERNAL_CONF_PATH),
       ("--override-config-file", OVERRIDE_PATH),
       ("--component-ram-map", "exclaim1:536870912,word:536870912"),
@@ -287,7 +287,7 @@ class HeronExecutorTest(unittest.TestCase):
       ("--python-instance-binary", "python_instance_binary"),
       ("--cpp-instance-binary", "cpp_instance_binary"),
       ("--metricscache-manager-classpath", "metricscachemgr_classpath"),
-      ("--metricscache-manager-master-port", "metricscachemgr_masterport"),
+      ("--metricscache-manager-server-port", "metricscachemgr_serverport"),
       ("--metricscache-manager-stats-port", "metricscachemgr_statsport"),
       ("--is-stateful", "is_stateful_enabled"),
       ("--checkpoint-manager-classpath", "ckptmgr_classpath"),
@@ -445,7 +445,7 @@ class HeronExecutorJDK11Test(unittest.TestCase):
            " -Xlog:gc*,safepoint=info:file=log-files/gc.metricscache.log:tags,time,uptime," \
            "level:filecount=5,filesize=100M " \
            "-cp metricscachemgr_classpath org.apache.heron.metricscachemgr.MetricsCacheManager " \
-           "--metricscache_id metricscache-0 --master_port metricscachemgr_masterport " \
+           "--metricscache_id metricscache-0 --server_port metricscachemgr_serverport " \
            "--stats_port metricscachemgr_statsport --topology_name topname --topology_id topid " \
            "--system_config_file %s --override_config_file %s " \
            "--sink_config_file metrics_sinks_config_file " \
@@ -476,7 +476,7 @@ class HeronExecutorJDK11Test(unittest.TestCase):
            "-cp instance_classpath:classpath -XX:+HeapDumpOnOutOfMemoryError " \
            "org.apache.heron.instance.HeronInstance -topology_name topname -topology_id topid " \
            "-instance_id %s -component_name %s -task_id %d -component_index 0 -stmgr_id stmgr-%d " \
-           "-stmgr_port tmaster_controller_port -metricsmgr_port metricsmgr_port " \
+           "-stmgr_port tmanager_controller_port -metricsmgr_port metricsmgr_port " \
            "-system_config_file %s -override_config_file %s" \
            % (instance_name, instance_name, component_name, instance_id,
               container_id, INTERNAL_CONF_PATH, OVERRIDE_PATH)

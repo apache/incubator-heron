@@ -75,12 +75,12 @@ Log = log.Log
 @click.option("--instance-classpath", required=True)
 @click.option("--instance-jvm-opts", required=True)
 @click.option("--is-stateful", required=True)
-@click.option("--master-port", required=True)
+@click.option("--server-port", required=True)
 @click.option("--metrics-manager-classpath", required=True)
 @click.option("--metrics-manager-port", required=True)
 @click.option("--metrics-sinks-config-file", required=True)
 @click.option("--metricscache-manager-classpath", required=True)
-@click.option("--metricscache-manager-master-port", required=True)
+@click.option("--metricscache-manager-server-port", required=True)
 @click.option("--metricscache-manager-mode", required=False)
 @click.option("--metricscache-manager-stats-port", required=True)
 @click.option("--override-config-file", required=True)
@@ -95,9 +95,9 @@ Log = log.Log
 @click.option("--state-manager-root", required=True)
 @click.option("--stateful-config-file", required=True)
 @click.option("--stmgr-binary", required=True)
-@click.option("--tmaster-binary", required=True)
-@click.option("--tmaster-controller-port", required=True)
-@click.option("--tmaster-stats-port", required=True)
+@click.option("--tmanager-binary", required=True)
+@click.option("--tmanager-controller-port", required=True)
+@click.option("--tmanager-stats-port", required=True)
 @click.option("--topology-binary-file", required=True)
 @click.option("--topology-defn-file", required=True)
 @click.option("--topology-id", required=True)
@@ -254,7 +254,7 @@ class ProcessInfo:
 class HeronExecutor:
   """ Heron executor is a class that is responsible for running each of the process on a given
   container. Based on the container id and the instance distribution, it determines if the container
-  is a master node or a worker node and it starts processes accordingly."""
+  is a primary node or a worker node and it starts processes accordingly."""
   def init_from_parsed_args(self, parsed_args):
     """ initialize from parsed arguments """
     self.shard = parsed_args.shard
@@ -264,7 +264,7 @@ class HeronExecutor:
     self.state_manager_connection = parsed_args.state_manager_connection
     self.state_manager_root = parsed_args.state_manager_root
     self.state_manager_config_file = parsed_args.state_manager_config_file
-    self.tmaster_binary = parsed_args.tmaster_binary
+    self.tmanager_binary = parsed_args.tmanager_binary
     self.stmgr_binary = parsed_args.stmgr_binary
     self.metrics_manager_classpath = parsed_args.metrics_manager_classpath
     self.metricscache_manager_classpath = parsed_args.metricscache_manager_classpath
@@ -281,14 +281,14 @@ class HeronExecutor:
     # id within docker, rather than the host's hostname. NOTE: this 'HOST' env variable is not
     # guaranteed to be set in all Docker executor environments (outside of Marathon)
     if is_kubernetes_environment():
-      self.master_host = socket.getfqdn()
+      self.primary_host = socket.getfqdn()
     elif is_docker_environment():
-      self.master_host = os.environ.get('HOST') if 'HOST' in os.environ else socket.gethostname()
+      self.primary_host = os.environ.get('HOST') if 'HOST' in os.environ else socket.gethostname()
     else:
-      self.master_host = socket.gethostname()
-    self.master_port = parsed_args.master_port
-    self.tmaster_controller_port = parsed_args.tmaster_controller_port
-    self.tmaster_stats_port = parsed_args.tmaster_stats_port
+      self.primary_host = socket.gethostname()
+    self.server_port = parsed_args.server_port
+    self.tmanager_controller_port = parsed_args.tmanager_controller_port
+    self.tmanager_stats_port = parsed_args.tmanager_stats_port
     self.heron_internals_config_file = parsed_args.heron_internals_config_file
     self.override_config_file = parsed_args.override_config_file
     self.component_ram_map = [{x.split(':')[0]:int(x.split(':')[1])}
@@ -320,7 +320,7 @@ class HeronExecutor:
     self.shell_port = parsed_args.shell_port
     self.heron_shell_binary = parsed_args.heron_shell_binary
     self.metrics_manager_port = parsed_args.metrics_manager_port
-    self.metricscache_manager_master_port = parsed_args.metricscache_manager_master_port
+    self.metricscache_manager_server_port = parsed_args.metricscache_manager_server_port
     self.metricscache_manager_stats_port = parsed_args.metricscache_manager_stats_port
     self.cluster = parsed_args.cluster
     self.role = parsed_args.role
@@ -389,7 +389,7 @@ class HeronExecutor:
     chmod_logs_dir = Command('chmod a+rx . && chmod a+x %s' % self.log_dir, self.shell_env)
     self.run_command_or_exit(chmod_logs_dir)
 
-    chmod_x_binaries = [self.tmaster_binary, self.stmgr_binary, self.heron_shell_binary]
+    chmod_x_binaries = [self.tmanager_binary, self.stmgr_binary, self.heron_shell_binary]
 
     for binary in chmod_x_binaries:
       stat_result = os.stat(binary)[stat.ST_MODE]
@@ -455,7 +455,7 @@ class HeronExecutor:
                            self.metricscache_manager_classpath,
                            metricscachemgr_main_class,
                            "--metricscache_id", 'metricscache-0',
-                           "--master_port", self.metricscache_manager_master_port,
+                           "--server_port", self.metricscache_manager_server_port,
                            "--stats_port", self.metricscache_manager_stats_port,
                            "--topology_name", self.topology_name,
                            "--topology_id", self.topology_id,
@@ -492,34 +492,34 @@ class HeronExecutor:
     healthmgr_cmd = self._get_java_gc_instance_cmd(healthmgr_cmd, 'healthmgr')
     return Command(healthmgr_cmd, self.shell_env)
 
-  def _get_tmaster_processes(self):
-    ''' get the command to start the tmaster processes '''
+  def _get_tmanager_processes(self):
+    ''' get the command to start the tmanager processes '''
     retval = {}
-    tmaster_cmd_lst = [
-        self.tmaster_binary,
+    tmanager_cmd_lst = [
+        self.tmanager_binary,
         '--topology_name=%s' % self.topology_name,
         '--topology_id=%s' % self.topology_id,
         '--zkhostportlist=%s' % self.state_manager_connection,
         '--zkroot=%s' % self.state_manager_root,
-        '--myhost=%s' % self.master_host,
-        '--master_port=%s' % str(self.master_port),
-        '--controller_port=%s' % str(self.tmaster_controller_port),
-        '--stats_port=%s' % str(self.tmaster_stats_port),
+        '--myhost=%s' % self.primary_host,
+        '--server_port=%s' % str(self.server_port),
+        '--controller_port=%s' % str(self.tmanager_controller_port),
+        '--stats_port=%s' % str(self.tmanager_stats_port),
         '--config_file=%s' % self.heron_internals_config_file,
         '--override_config_file=%s' % self.override_config_file,
         '--metrics_sinks_yaml=%s' % self.metrics_sinks_config_file,
         '--metricsmgr_port=%s' % str(self.metrics_manager_port),
         '--ckptmgr_port=%s' % str(self.checkpoint_manager_port)]
 
-    tmaster_env = self.shell_env.copy() if self.shell_env is not None else {}
-    tmaster_cmd = Command(tmaster_cmd_lst, tmaster_env)
+    tmanager_env = self.shell_env.copy() if self.shell_env is not None else {}
+    tmanager_cmd = Command(tmanager_cmd_lst, tmanager_env)
     if os.environ.get('ENABLE_HEAPCHECK') is not None:
-      tmaster_cmd.env.update({
+      tmanager_cmd.env.update({
           'LD_PRELOAD': "/usr/lib/libtcmalloc.so",
           'HEAPCHECK': "normal"
       })
 
-    retval["heron-tmaster"] = tmaster_cmd
+    retval["heron-tmanager"] = tmanager_cmd
 
     if self.metricscache_manager_mode.lower() != "disabled":
       retval["heron-metricscache"] = self._get_metrics_cache_cmd()
@@ -665,7 +665,7 @@ class HeronExecutor:
         '-task_id', str(global_task_id),
         '-component_index', str(component_index),
         '-stmgr_id', self.stmgr_ids[self.shard],
-        '-stmgr_port', self.tmaster_controller_port,
+        '-stmgr_port', self.tmanager_controller_port,
         '-metricsmgr_port', self.metrics_manager_port,
         '-system_config_file', self.heron_internals_config_file,
         '-override_config_file', self.override_config_file]
@@ -707,7 +707,7 @@ class HeronExecutor:
                       '--task_id=%s' % str(global_task_id),
                       '--component_index=%s' % str(component_index),
                       '--stmgr_id=%s' % self.stmgr_ids[self.shard],
-                      '--stmgr_port=%s' % self.tmaster_controller_port,
+                      '--stmgr_port=%s' % self.tmanager_controller_port,
                       '--metricsmgr_port=%s' % self.metrics_manager_port,
                       '--sys_config=%s' % self.heron_internals_config_file,
                       '--override_config=%s' % self.override_config_file,
@@ -734,7 +734,7 @@ class HeronExecutor:
           '--task_id=%s' % str(global_task_id),
           '--component_index=%s' % str(component_index),
           '--stmgr_id=%s' % self.stmgr_ids[self.shard],
-          '--stmgr_port=%s' % str(self.tmaster_controller_port),
+          '--stmgr_port=%s' % str(self.tmanager_controller_port),
           '--metricsmgr_port=%s' % str(self.metrics_manager_port),
           '--config_file=%s' % self.heron_internals_config_file,
           '--override_config_file=%s' % self.override_config_file,
@@ -771,9 +771,9 @@ class HeronExecutor:
         '--zkroot=%s' % self.state_manager_root,
         '--stmgr_id=%s' % self.stmgr_ids[self.shard],
         '--instance_ids=%s' % ','.join([x[0] for x in instance_info]),
-        '--myhost=%s' % self.master_host,
-        '--data_port=%s' % str(self.master_port),
-        '--local_data_port=%s' % str(self.tmaster_controller_port),
+        '--myhost=%s' % self.primary_host,
+        '--data_port=%s' % str(self.server_port),
+        '--local_data_port=%s' % str(self.tmanager_controller_port),
         '--metricsmgr_port=%s' % str(self.metrics_manager_port),
         '--shell_port=%s' % str(self.shell_port),
         '--config_file=%s' % self.heron_internals_config_file,
@@ -989,7 +989,7 @@ class HeronExecutor:
 
   def get_commands_to_run(self):
     """
-    Prepare either TMaster or Streaming commands according to shard.
+    Prepare either TManager or Streaming commands according to shard.
     The Shell command is attached to all containers. The empty container plan and non-exist
     container plan are bypassed.
     """
@@ -1006,7 +1006,7 @@ class HeronExecutor:
       return retval
 
     if self.shard == 0:
-      commands = self._get_tmaster_processes()
+      commands = self._get_tmanager_processes()
     else:
       self._untar_if_needed()
       commands = self._get_streaming_processes()
@@ -1027,7 +1027,7 @@ class HeronExecutor:
     # if the current command has a matching command in the updated commands we keep it
     # otherwise we kill it
     for current_name, current_command in list(current_commands.items()):
-      # We don't restart tmaster since it watches the packing plan and updates itself. The stream
+      # We don't restart tmanager since it watches the packing plan and updates itself. The stream
       # manager is restarted just to reset state, but we could update it to do so without a restart
       if current_name in list(updated_commands.keys()) and \
         current_command == updated_commands[current_name] and \
