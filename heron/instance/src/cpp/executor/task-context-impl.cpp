@@ -22,7 +22,7 @@
 #include <unordered_set>
 #include <string>
 #include <utility>
-#include "slave/task-context-impl.h"
+#include "executor/task-context-impl.h"
 #include "basics/basics.h"
 #include "proto/messages.h"
 #include "network/network.h"

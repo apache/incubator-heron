@@ -18,8 +18,8 @@
  */
 
 
-#ifndef HERON_INSTANCE_SLAVE_IMETRICS_REGISTRAR_IMPL_H_
-#define HERON_INSTANCE_SLAVE_IMETRICS_REGISTRAR_IMPL_H_
+#ifndef HERON_INSTANCE_EXECUTOR_IMETRICS_REGISTRAR_IMPL_H_
+#define HERON_INSTANCE_EXECUTOR_IMETRICS_REGISTRAR_IMPL_H_
 
 #include <map>
 #include <list>
@@ -43,7 +43,7 @@ namespace instance {
 class IMetricsRegistrarImpl : public api::metric::IMetricsRegistrar {
  public:
   explicit IMetricsRegistrarImpl(std::shared_ptr<EventLoop> eventLoop,
-           NotifyingCommunicator<google::protobuf::Message*>* metricsFromSlave);
+           NotifyingCommunicator<google::protobuf::Message*>* metricsFromExecutor);
   virtual ~IMetricsRegistrarImpl();
   virtual void registerMetric(const std::string& metricName,
                               std::shared_ptr<api::metric::IMetric> metric,
@@ -58,7 +58,7 @@ class IMetricsRegistrarImpl : public api::metric::IMetricsRegistrar {
   std::map<std::string, std::shared_ptr<api::metric::IMultiMetric>> multiMetrics_;
   std::map<int, std::list<std::string>> timeBuckets_;
   std::shared_ptr<EventLoop> eventLoop_;
-  NotifyingCommunicator<google::protobuf::Message*>* metricsFromSlave_;
+  NotifyingCommunicator<google::protobuf::Message*>* metricsFromExecutor_;
 };
 
 }  // namespace instance

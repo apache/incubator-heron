@@ -18,7 +18,7 @@
  */
 
 #include <string>
-#include "slave/outgoing-tuple-collection.h"
+#include "executor/outgoing-tuple-collection.h"
 #include "proto/messages.h"
 #include "network/network.h"
 #include "basics/basics.h"
@@ -29,8 +29,8 @@ namespace heron {
 namespace instance {
 
 OutgoingTupleCollection::OutgoingTupleCollection(const std::string& componentName,
-                             NotifyingCommunicator<google::protobuf::Message*>* dataFromSlave)
-  : componentName_(componentName), dataFromSlave_(dataFromSlave),
+                             NotifyingCommunicator<google::protobuf::Message*>* dataFromExecutor)
+  : componentName_(componentName), dataFromExecutor_(dataFromExecutor),
     currentDataTuple_(NULL), currentControlTuple_(NULL),
     totalDataSizeEmitted_(0), totalDataTuplesEmitted_(0),
     totalAckTuplesEmitted_(0), totalFailTuplesEmitted_(0), currentDataTupleSize_(0) {
@@ -106,14 +106,14 @@ void OutgoingTupleCollection::flushRemaining() {
   if (currentDataTuple_) {
     auto msg = new proto::system::HeronTupleSet();
     msg->set_allocated_data(currentDataTuple_);
-    dataFromSlave_->enqueue(msg);
+    dataFromExecutor_->enqueue(msg);
     currentDataTuple_ = NULL;
     currentDataTupleSize_ = 0;
   }
   if (currentControlTuple_) {
     auto msg = new proto::system::HeronTupleSet();
     msg->set_allocated_control(currentControlTuple_);
-    dataFromSlave_->enqueue(msg);
+    dataFromExecutor_->enqueue(msg);
     currentControlTuple_ = NULL;
   }
 }

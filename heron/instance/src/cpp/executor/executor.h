@@ -17,8 +17,8 @@
  * under the License.
  */
 
-#ifndef HERON_INSTANCE_SLAVE_SLAVE_H_
-#define HERON_INSTANCE_SLAVE_SLAVE_H_
+#ifndef HERON_INSTANCE_EXECUTOR_EXECUTOR_H_
+#define HERON_INSTANCE_EXECUTOR_EXECUTOR_H_
 
 #include <string>
 #include <thread>
@@ -27,25 +27,25 @@
 #include "basics/basics.h"
 
 #include "utils/notifying-communicator.h"
-#include "slave/task-context-impl.h"
-#include "slave/instance-base.h"
+#include "executor/task-context-impl.h"
+#include "executor/instance-base.h"
 
 namespace heron {
 namespace instance {
 
-class Slave {
+class Executor {
  public:
-  Slave(int myTaskId, const std::string& topologySo);
-  ~Slave();
+  Executor(int myTaskId, const std::string& topologySo);
+  ~Executor();
 
   // This essentially fires a thread with internalStart
   void Start();
 
   std::shared_ptr<EventLoop> eventLoop() { return eventLoop_; }
   void setCommunicators(
-                    NotifyingCommunicator<pool_unique_ptr<google::protobuf::Message>>* dataToSlave,
-                    NotifyingCommunicator<google::protobuf::Message*>* dataFromSlave,
-                    NotifyingCommunicator<google::protobuf::Message*>* metricsFromSlave);
+                    NotifyingCommunicator<pool_unique_ptr<google::protobuf::Message>>* dataToExecutor,
+                    NotifyingCommunicator<google::protobuf::Message*>* dataFromExecutor,
+                    NotifyingCommunicator<google::protobuf::Message*>* metricsFromExecutor);
 
   // Handles data from gateway thread
   void HandleGatewayData(pool_unique_ptr<google::protobuf::Message> msg);
@@ -57,7 +57,7 @@ class Slave {
   void HandleGatewayMetricsConsumed() { }
 
  private:
-  // This is the one thats running in the slave thread
+  // This is the one thats running in the executor thread
   void InternalStart();
   // Called when a new phyiscal plan is received
   void HandleNewPhysicalPlan(pool_unique_ptr<proto::system::PhysicalPlan> pplan);
@@ -66,17 +66,17 @@ class Slave {
 
   int myTaskId_;
   std::shared_ptr<TaskContextImpl> taskContext_;
-  NotifyingCommunicator<pool_unique_ptr<google::protobuf::Message>>* dataToSlave_;
-  NotifyingCommunicator<google::protobuf::Message*>* dataFromSlave_;
-  NotifyingCommunicator<google::protobuf::Message*>* metricsFromSlave_;
+  NotifyingCommunicator<pool_unique_ptr<google::protobuf::Message>>* dataToExecutor_;
+  NotifyingCommunicator<google::protobuf::Message*>* dataFromExecutor_;
+  NotifyingCommunicator<google::protobuf::Message*>* metricsFromExecutor_;
   InstanceBase* instance_;
   std::shared_ptr<EventLoop> eventLoop_;
   void* dllHandle_;
   std::string pplan_typename_;
-  std::unique_ptr<std::thread> slaveThread_;
+  std::unique_ptr<std::thread> executorThread_;
 };
 
 }  // namespace instance
 }  // namespace heron
 
-#endif  // HERON_INSTANCE_SLAVE_SLAVE_H_
+#endif  // HERON_INSTANCE_EXECUTOR_EXECUTOR_H_

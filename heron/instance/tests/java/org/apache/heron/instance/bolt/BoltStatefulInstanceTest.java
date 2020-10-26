@@ -35,7 +35,7 @@ import org.apache.heron.api.serializer.JavaSerializer;
 import org.apache.heron.common.basics.SingletonRegistry;
 import org.apache.heron.common.utils.misc.PhysicalPlanHelper;
 import org.apache.heron.instance.InstanceControlMsg;
-import org.apache.heron.instance.SlaveTester;
+import org.apache.heron.instance.ExecutorTester;
 import org.apache.heron.proto.system.HeronTuples;
 import org.apache.heron.proto.system.PhysicalPlans;
 import org.apache.heron.resource.Constants;
@@ -51,18 +51,18 @@ import static org.junit.Assert.*;
  * Test if stateful bolt is able to respond to incoming control/data tuples as expected.
  */
 public class BoltStatefulInstanceTest {
-  private SlaveTester slaveTester;
+  private ExecutorTester executorTester;
   private static IPluggableSerializer serializer = new JavaSerializer();
 
   @Before
   public void before() {
-    slaveTester = new SlaveTester();
-    slaveTester.start();
+    executorTester = new ExecutorTester();
+    executorTester.start();
   }
 
   @After
   public void after() throws NoSuchFieldException, IllegalAccessException {
-    slaveTester.stop();
+    executorTester.stop();
   }
 
   @Test
@@ -72,22 +72,22 @@ public class BoltStatefulInstanceTest {
     SingletonRegistry.INSTANCE.registerSingleton(Constants.PRESAVE_LATCH, preSaveLatch);
     SingletonRegistry.INSTANCE.registerSingleton(Constants.POSTSAVE_LATCH, postSaveLatch);
 
-    slaveTester.getInControlQueue().offer(UnitTestHelper.buildRestoreInstanceState("c0"));
-    slaveTester.getInControlQueue().offer(UnitTestHelper.buildStartInstanceProcessingMessage("c0"));
-    slaveTester.getInControlQueue().offer(buildPhysicalPlanMessageFor2PCBolt());
+    executorTester.getInControlQueue().offer(UnitTestHelper.buildRestoreInstanceState("c0"));
+    executorTester.getInControlQueue().offer(UnitTestHelper.buildStartInstanceProcessingMessage("c0"));
+    executorTester.getInControlQueue().offer(buildPhysicalPlanMessageFor2PCBolt());
 
     // initially non of preSave or postSave are invoked yet
     assertEquals(1, preSaveLatch.getCount());
     assertEquals(1, postSaveLatch.getCount());
 
     // this should invoke preSave
-    slaveTester.getInStreamQueue().offer(UnitTestHelper.buildPersistStateMessage("c0"));
+    executorTester.getInStreamQueue().offer(UnitTestHelper.buildPersistStateMessage("c0"));
     assertTrue(preSaveLatch.await(Constants.TEST_WAIT_TIME.toMillis(), TimeUnit.MILLISECONDS));
     assertEquals(0, preSaveLatch.getCount());
     assertEquals(1, postSaveLatch.getCount());
 
     // this should invoke postSave
-    slaveTester.getInControlQueue().offer(UnitTestHelper.buildCheckpointSavedMessage("c0", "p0"));
+    executorTester.getInControlQueue().offer(UnitTestHelper.buildCheckpointSavedMessage("c0", "p0"));
     assertTrue(postSaveLatch.await(Constants.TEST_WAIT_TIME.toMillis(), TimeUnit.MILLISECONDS));
     assertEquals(0, preSaveLatch.getCount());
     assertEquals(0, postSaveLatch.getCount());
@@ -98,13 +98,13 @@ public class BoltStatefulInstanceTest {
     CountDownLatch preRestoreLatch = new CountDownLatch(1);
     SingletonRegistry.INSTANCE.registerSingleton(Constants.PRERESTORE_LATCH, preRestoreLatch);
 
-    slaveTester.getInControlQueue().offer(UnitTestHelper.buildRestoreInstanceState("c0"));
-    slaveTester.getInControlQueue().offer(UnitTestHelper.buildStartInstanceProcessingMessage("c0"));
-    slaveTester.getInControlQueue().offer(buildPhysicalPlanMessageFor2PCBolt());
+    executorTester.getInControlQueue().offer(UnitTestHelper.buildRestoreInstanceState("c0"));
+    executorTester.getInControlQueue().offer(UnitTestHelper.buildStartInstanceProcessingMessage("c0"));
+    executorTester.getInControlQueue().offer(buildPhysicalPlanMessageFor2PCBolt());
 
     assertEquals(1, preRestoreLatch.getCount());
 
-    slaveTester.getInControlQueue().offer(UnitTestHelper.buildRestoreInstanceState("cx"));
+    executorTester.getInControlQueue().offer(UnitTestHelper.buildRestoreInstanceState("cx"));
 
     assertTrue(preRestoreLatch.await(Constants.TEST_WAIT_TIME.toMillis(), TimeUnit.MILLISECONDS));
     assertEquals(0, preRestoreLatch.getCount());
@@ -125,9 +125,9 @@ public class BoltStatefulInstanceTest {
     SingletonRegistry.INSTANCE.registerSingleton(Constants.POSTSAVE_LATCH, postSaveLatch);
     SingletonRegistry.INSTANCE.registerSingleton(Constants.EXECUTE_LATCH, executeLatch);
 
-    slaveTester.getInControlQueue().offer(UnitTestHelper.buildRestoreInstanceState("c0"));
-    slaveTester.getInControlQueue().offer(UnitTestHelper.buildStartInstanceProcessingMessage("c0"));
-    slaveTester.getInControlQueue().offer(buildPhysicalPlanMessageFor2PCBolt());
+    executorTester.getInControlQueue().offer(UnitTestHelper.buildRestoreInstanceState("c0"));
+    executorTester.getInControlQueue().offer(UnitTestHelper.buildStartInstanceProcessingMessage("c0"));
+    executorTester.getInControlQueue().offer(buildPhysicalPlanMessageFor2PCBolt());
 
     // initially non of preSave or postSave are invoked yet
     assertEquals(1, preSaveLatch.getCount());
@@ -135,10 +135,10 @@ public class BoltStatefulInstanceTest {
     assertEquals(1, executeLatch.getCount());
 
     // this should invoke preSave
-    slaveTester.getInStreamQueue().offer(UnitTestHelper.buildPersistStateMessage("c0"));
+    executorTester.getInStreamQueue().offer(UnitTestHelper.buildPersistStateMessage("c0"));
 
     // put a data tuple into the inStreamQueue
-    slaveTester.getInStreamQueue().offer(buildTupleSet());
+    executorTester.getInStreamQueue().offer(buildTupleSet());
 
     assertTrue(preSaveLatch.await(Constants.TEST_WAIT_TIME.toMillis(), TimeUnit.MILLISECONDS));
     assertEquals(0, preSaveLatch.getCount());
@@ -154,7 +154,7 @@ public class BoltStatefulInstanceTest {
     assertEquals(1, executeLatch.getCount());
 
     // this should invoke postSave
-    slaveTester.getInControlQueue().offer(UnitTestHelper.buildCheckpointSavedMessage("c0", "p0"));
+    executorTester.getInControlQueue().offer(UnitTestHelper.buildCheckpointSavedMessage("c0", "p0"));
     assertTrue(postSaveLatch.await(Constants.TEST_WAIT_TIME.toMillis(), TimeUnit.MILLISECONDS));
     assertTrue(executeLatch.await(Constants.TEST_WAIT_TIME.toMillis(), TimeUnit.MILLISECONDS));
 
@@ -175,19 +175,19 @@ public class BoltStatefulInstanceTest {
     SingletonRegistry.INSTANCE.registerSingleton(Constants.PRESAVE_LATCH, preSaveLatch);
     SingletonRegistry.INSTANCE.registerSingleton(Constants.EXECUTE_LATCH, executeLatch);
 
-    slaveTester.getInControlQueue().offer(UnitTestHelper.buildRestoreInstanceState("c0"));
-    slaveTester.getInControlQueue().offer(UnitTestHelper.buildStartInstanceProcessingMessage("c0"));
-    slaveTester.getInControlQueue().offer(buildPhysicalPlanMessageForStatefulBolt());
+    executorTester.getInControlQueue().offer(UnitTestHelper.buildRestoreInstanceState("c0"));
+    executorTester.getInControlQueue().offer(UnitTestHelper.buildStartInstanceProcessingMessage("c0"));
+    executorTester.getInControlQueue().offer(buildPhysicalPlanMessageForStatefulBolt());
 
     // initially non of preSave or postSave are invoked yet
     assertEquals(1, preSaveLatch.getCount());
     assertEquals(1, executeLatch.getCount());
 
     // this should invoke preSave
-    slaveTester.getInStreamQueue().offer(UnitTestHelper.buildPersistStateMessage("c0"));
+    executorTester.getInStreamQueue().offer(UnitTestHelper.buildPersistStateMessage("c0"));
 
     // put a data tuple into the inStreamQueue
-    slaveTester.getInStreamQueue().offer(buildTupleSet());
+    executorTester.getInStreamQueue().offer(buildTupleSet());
 
     assertTrue(preSaveLatch.await(Constants.TEST_WAIT_TIME.toMillis(), TimeUnit.MILLISECONDS));
     assertEquals(0, preSaveLatch.getCount());

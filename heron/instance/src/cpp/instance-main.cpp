@@ -30,7 +30,7 @@
 #include "config/heron-internals-config-reader.h"
 
 #include "gateway/gateway.h"
-#include "slave/slave.h"
+#include "executor/executor.h"
 
 DEFINE_string(topology_name, "", "Name of the topology");
 DEFINE_string(topology_id, "", "Id of the topology");
@@ -61,36 +61,36 @@ int main(int argc, char* argv[]) {
                                               FLAGS_task_id, FLAGS_component_index,
                                               FLAGS_stmgr_id, FLAGS_stmgr_port,
                                               FLAGS_metricsmgr_port, eventLoop);
-  auto slave = new heron::instance::Slave(FLAGS_task_id, FLAGS_topology_binary);
+  auto executor = new heron::instance::Executor(FLAGS_task_id, FLAGS_topology_binary);
 
-  auto dataToSlave =
+  auto dataToExecutor =
           new heron::instance::NotifyingCommunicator<pool_unique_ptr<google::protobuf::Message>>(
-                               slave->eventLoop(),
-                               std::bind(&heron::instance::Slave::HandleGatewayData,
-                                         slave, std::placeholders::_1),
+                               executor->eventLoop(),
+                               std::bind(&heron::instance::Executor::HandleGatewayData,
+                                         executor, std::placeholders::_1),
                                gateway->eventLoop(),
-                               std::bind(&heron::instance::Gateway::HandleSlaveDataConsumed,
+                               std::bind(&heron::instance::Gateway::HandleExecutorDataConsumed,
                                          gateway));
 
-  auto dataFromSlave = new heron::instance::NotifyingCommunicator<google::protobuf::Message*>(
+  auto dataFromExecutor = new heron::instance::NotifyingCommunicator<google::protobuf::Message*>(
                                gateway->eventLoop(),
-                               std::bind(&heron::instance::Gateway::HandleSlaveData,
+                               std::bind(&heron::instance::Gateway::HandleExecutorData,
                                          gateway, std::placeholders::_1),
-                               slave->eventLoop(),
-                               std::bind(&heron::instance::Slave::HandleGatewayDataConsumed,
-                                         slave));
+                               executor->eventLoop(),
+                               std::bind(&heron::instance::Executor::HandleGatewayDataConsumed,
+                                         executor));
 
-  auto metricsFromSlave = new heron::instance::NotifyingCommunicator<google::protobuf::Message*>(
+  auto metricsFromExecutor = new heron::instance::NotifyingCommunicator<google::protobuf::Message*>(
                                gateway->eventLoop(),
-                               std::bind(&heron::instance::Gateway::HandleSlaveMetrics,
+                               std::bind(&heron::instance::Gateway::HandleExecutorMetrics,
                                          gateway, std::placeholders::_1),
-                               slave->eventLoop(),
-                               std::bind(&heron::instance::Slave::HandleGatewayMetricsConsumed,
-                                         slave));
+                               executor->eventLoop(),
+                               std::bind(&heron::instance::Executor::HandleGatewayMetricsConsumed,
+                                         executor));
 
-  gateway->setCommunicators(dataToSlave, dataFromSlave, metricsFromSlave);
-  slave->setCommunicators(dataToSlave, dataFromSlave, metricsFromSlave);
-  slave->Start();  // goes off to a thread
+  gateway->setCommunicators(dataToExecutor, dataFromExecutor, metricsFromExecutor);
+  executor->setCommunicators(dataToExecutor, dataFromExecutor, metricsFromExecutor);
+  executor->Start();  // goes off to a thread
   gateway->Start();  // never returns
   return 0;
 }

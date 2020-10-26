@@ -34,7 +34,7 @@ import org.apache.heron.api.state.State;
 import org.apache.heron.common.basics.Communicator;
 import org.apache.heron.common.basics.FileUtils;
 import org.apache.heron.common.basics.SingletonRegistry;
-import org.apache.heron.common.basics.SlaveLooper;
+import org.apache.heron.common.basics.ExecutorLooper;
 import org.apache.heron.common.config.SystemConfig;
 import org.apache.heron.common.utils.metrics.MetricsCollector;
 import org.apache.heron.common.utils.misc.PhysicalPlanHelper;
@@ -47,15 +47,15 @@ import org.apache.heron.proto.system.Common;
 import org.apache.heron.proto.system.Metrics;
 
 /**
- * The slave, which in fact is a InstanceFactory, creates a new spout or bolt according to the PhysicalPlan.
+ * The executor, which in fact is a InstanceFactory, creates a new spout or bolt according to the PhysicalPlan.
  * First, if the instance is null, it will wait for the PhysicalPlan from inQueue and, if it receives one,
  * will instantiate a new instance (spout or bolt) according to the PhysicalPlanHelper in SingletonRegistry.
- * It is a Runnable so it could be executed in a Thread. During run(), it will begin the SlaveLooper's loop().
+ * It is a Runnable so it could be executed in a Thread. During run(), it will begin the ExecutorLooper's loop().
  */
-public class Slave implements Runnable, AutoCloseable {
-  private static final Logger LOG = Logger.getLogger(Slave.class.getName());
+public class Executor implements Runnable, AutoCloseable {
+  private static final Logger LOG = Logger.getLogger(Executor.class.getName());
 
-  private final SlaveLooper slaveLooper;
+  private final ExecutorLooper executorLooper;
   private MetricsCollector metricsCollector;
   // Communicator
   private final Communicator<Message> streamInCommunicator;
@@ -72,12 +72,12 @@ public class Slave implements Runnable, AutoCloseable {
   private State<Serializable, Serializable> instanceState;
   private boolean isStatefulProcessingStarted;
 
-  public Slave(SlaveLooper slaveLooper,
+  public Executor(ExecutorLooper executorLooper,
                final Communicator<Message> streamInCommunicator,
                final Communicator<Message> streamOutCommunicator,
                final Communicator<InstanceControlMsg> inControlQueue,
                final Communicator<Metrics.MetricPublisherPublishMessage> metricsOutCommunicator) {
-    this.slaveLooper = slaveLooper;
+    this.executorLooper = executorLooper;
     this.streamInCommunicator = streamInCommunicator;
     this.streamOutCommunicator = streamOutCommunicator;
     this.inControlQueue = inControlQueue;
@@ -92,7 +92,7 @@ public class Slave implements Runnable, AutoCloseable {
     this.systemConfig =
         (SystemConfig) SingletonRegistry.INSTANCE.getSingleton(SystemConfig.HERON_SYSTEM_CONFIG);
 
-    this.metricsCollector = new MetricsCollector(slaveLooper, metricsOutCommunicator);
+    this.metricsCollector = new MetricsCollector(executorLooper, metricsOutCommunicator);
 
     handleControlMessage();
   }
@@ -137,7 +137,7 @@ public class Slave implements Runnable, AutoCloseable {
       }
     };
 
-    slaveLooper.addTasksOnWakeup(handleControlMessageTask);
+    executorLooper.addTasksOnWakeup(handleControlMessageTask);
   }
 
   private void handleGlobalCheckpointConsistent(String checkpointId) {
@@ -148,8 +148,8 @@ public class Slave implements Runnable, AutoCloseable {
   private void resetCurrentAssignment() {
     helper.setTopologyContext(metricsCollector);
     instance = helper.getMySpout() != null
-        ? new SpoutInstance(helper, streamInCommunicator, streamOutCommunicator, slaveLooper)
-        : new BoltInstance(helper, streamInCommunicator, streamOutCommunicator, slaveLooper);
+        ? new SpoutInstance(helper, streamInCommunicator, streamOutCommunicator, executorLooper)
+        : new BoltInstance(helper, streamInCommunicator, streamOutCommunicator, executorLooper);
 
     startInstanceIfNeeded();
   }
@@ -164,10 +164,10 @@ public class Slave implements Runnable, AutoCloseable {
         SerializeDeSerializeHelper.getSerializer(helper.getTopologyContext().getTopologyConfig());
 
     // During the initiation of instance,
-    // we would add a bunch of tasks to slaveLooper's tasksOnWakeup
+    // we would add a bunch of tasks to executorLooper's tasksOnWakeup
     if (helper.getMySpout() != null) {
       instance =
-          new SpoutInstance(helper, streamInCommunicator, streamOutCommunicator, slaveLooper);
+          new SpoutInstance(helper, streamInCommunicator, streamOutCommunicator, executorLooper);
 
       streamInCommunicator.init(systemConfig.getInstanceInternalSpoutReadQueueCapacity(),
           systemConfig.getInstanceTuningExpectedSpoutReadQueueSize(),
@@ -177,7 +177,7 @@ public class Slave implements Runnable, AutoCloseable {
           systemConfig.getInstanceTuningCurrentSampleWeight());
     } else {
       instance =
-          new BoltInstance(helper, streamInCommunicator, streamOutCommunicator, slaveLooper);
+          new BoltInstance(helper, streamInCommunicator, streamOutCommunicator, executorLooper);
 
       streamInCommunicator.init(systemConfig.getInstanceInternalBoltReadQueueCapacity(),
           systemConfig.getInstanceTuningExpectedBoltReadQueueSize(),
@@ -196,9 +196,9 @@ public class Slave implements Runnable, AutoCloseable {
 
   @Override
   public void run() {
-    Thread.currentThread().setName(ThreadNames.THREAD_SLAVE_NAME);
+    Thread.currentThread().setName(ThreadNames.THREAD_EXECUTOR_NAME);
 
-    slaveLooper.loop();
+    executorLooper.loop();
   }
 
   @SuppressWarnings("unchecked")
@@ -252,7 +252,7 @@ public class Slave implements Runnable, AutoCloseable {
   }
 
   public void close() {
-    LOG.info("Closing the Slave Thread");
+    LOG.info("Closing the Executor Thread");
     this.metricsCollector.forceGatherAllMetrics();
     LOG.info("Shutting down the instance");
     if (instance != null) {
@@ -260,7 +260,7 @@ public class Slave implements Runnable, AutoCloseable {
     }
 
     // Clean the resources we own
-    slaveLooper.exitLoop();
+    executorLooper.exitLoop();
     streamInCommunicator.clear();
     // The clean of out stream communicator will be handled by instance itself
   }
@@ -277,7 +277,7 @@ public class Slave implements Runnable, AutoCloseable {
     startInstanceIfNeeded();
   }
 
-  private void cleanAndStopSlaveBeforeRestore(String checkpointId) {
+  private void cleanAndStopExecutorBeforeRestore(String checkpointId) {
     // Clear all queues
     streamInCommunicator.clear();
     streamOutCommunicator.clear();
@@ -285,9 +285,9 @@ public class Slave implements Runnable, AutoCloseable {
     // Flash out existing metrics
     metricsCollector.forceGatherAllMetrics();
 
-    // Stop slave looper consuming data/control_msg
-    slaveLooper.clearTasksOnWakeup();
-    slaveLooper.clearTimers();
+    // Stop executor looper consuming data/control_msg
+    executorLooper.clearTasksOnWakeup();
+    executorLooper.clearTimers();
 
     if (instance != null) {
       instance.preRestore(checkpointId);
@@ -297,9 +297,9 @@ public class Slave implements Runnable, AutoCloseable {
     isStatefulProcessingStarted = false;
   }
 
-  private void registerTasksWithSlave() {
-    // Create a new MetricsCollector with the clean slaveLooper and register its task
-    metricsCollector = new MetricsCollector(slaveLooper, metricsOutCommunicator);
+  private void registerTasksWithExecutor() {
+    // Create a new MetricsCollector with the clean executorLooper and register its task
+    metricsCollector = new MetricsCollector(executorLooper, metricsOutCommunicator);
 
     // registering the handling of control msg
     handleControlMessage();
@@ -314,9 +314,9 @@ public class Slave implements Runnable, AutoCloseable {
     // ID of the checkpoint we are restoring to
     String checkpointId = request.getState().getCheckpointId();
 
-    // Clean buffers and unregister tasks in slave looper
+    // Clean buffers and unregister tasks in executor looper
     if (isInstanceStarted) {
-      cleanAndStopSlaveBeforeRestore(checkpointId);
+      cleanAndStopExecutorBeforeRestore(checkpointId);
     }
 
     // Restore the state
@@ -362,7 +362,7 @@ public class Slave implements Runnable, AutoCloseable {
       resetCurrentAssignment();
     }
 
-    registerTasksWithSlave();
+    registerTasksWithExecutor();
 
     // Send back the response
     CheckpointManager.RestoreInstanceStateResponse response =
@@ -407,7 +407,7 @@ public class Slave implements Runnable, AutoCloseable {
                 + helper.getTopologyState());
         }
       } else {
-        LOG.info("Topology state remains the same in Slave: " + oldTopologyState);
+        LOG.info("Topology state remains the same in Executor: " + oldTopologyState);
       }
     }
   }

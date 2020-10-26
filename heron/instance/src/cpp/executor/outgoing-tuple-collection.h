@@ -17,8 +17,8 @@
  * under the License.
  */
 
-#ifndef HERON_INSTANCE_SLAVE_OUTGOING_TUPLE_COLLECTION_H_
-#define HERON_INSTANCE_SLAVE_OUTGOING_TUPLE_COLLECTION_H_
+#ifndef HERON_INSTANCE_EXECUTOR_OUTGOING_TUPLE_COLLECTION_H_
+#define HERON_INSTANCE_EXECUTOR_OUTGOING_TUPLE_COLLECTION_H_
 
 #include <string>
 #include "proto/messages.h"
@@ -33,7 +33,7 @@ namespace instance {
 class OutgoingTupleCollection {
  public:
   OutgoingTupleCollection(const std::string& componentName,
-                          NotifyingCommunicator<google::protobuf::Message*>* dataFromSlave);
+                          NotifyingCommunicator<google::protobuf::Message*>* dataFromExecutor);
   ~OutgoingTupleCollection();
 
   void sendOutTuples();
@@ -54,7 +54,7 @@ class OutgoingTupleCollection {
   void flushRemaining();
 
   std::string componentName_;
-  NotifyingCommunicator<google::protobuf::Message*>* dataFromSlave_;
+  NotifyingCommunicator<google::protobuf::Message*>* dataFromExecutor_;
   proto::system::HeronDataTupleSet* currentDataTuple_;
   proto::system::HeronControlTupleSet* currentControlTuple_;
   int64_t totalDataSizeEmitted_;
@@ -70,4 +70,4 @@ class OutgoingTupleCollection {
 }  // namespace instance
 }  // namespace heron
 
-#endif  // HERON_INSTANCE_SLAVE_OUTGOING_TUPLE_COLLECTION_H_
+#endif  // HERON_INSTANCE_EXECUTOR_OUTGOING_TUPLE_COLLECTION_H_

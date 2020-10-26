@@ -43,7 +43,7 @@ import org.apache.heron.common.basics.ByteAmount;
 import org.apache.heron.common.basics.Communicator;
 import org.apache.heron.common.basics.FileUtils;
 import org.apache.heron.common.basics.SingletonRegistry;
-import org.apache.heron.common.basics.SlaveLooper;
+import org.apache.heron.common.basics.ExecutorLooper;
 import org.apache.heron.common.basics.TypeUtils;
 import org.apache.heron.common.config.SystemConfig;
 import org.apache.heron.common.utils.metrics.FullSpoutMetrics;
@@ -77,7 +77,7 @@ public class SpoutInstance implements IInstance {
 
   private State<Serializable, Serializable> instanceState;
 
-  private final SlaveLooper looper;
+  private final ExecutorLooper looper;
 
   private final SystemConfig systemConfig;
 
@@ -92,7 +92,7 @@ public class SpoutInstance implements IInstance {
   public SpoutInstance(PhysicalPlanHelper helper,
                        Communicator<Message> streamInQueue,
                        Communicator<Message> streamOutQueue,
-                       SlaveLooper looper) {
+                       ExecutorLooper looper) {
     this.helper = helper;
     this.looper = looper;
     this.streamInQueue = streamInQueue;

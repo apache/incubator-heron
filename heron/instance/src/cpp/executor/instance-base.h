@@ -17,8 +17,8 @@
  * under the License.
  */
 
-#ifndef HERON_INSTANCE_SLAVE_INSTANCE_BASE_H_
-#define HERON_INSTANCE_SLAVE_INSTANCE_BASE_H_
+#ifndef HERON_INSTANCE_EXECUTOR_INSTANCE_BASE_H_
+#define HERON_INSTANCE_EXECUTOR_INSTANCE_BASE_H_
 
 #include <string>
 #include "proto/messages.h"
@@ -42,4 +42,4 @@ class InstanceBase {
 }  // namespace instance
 }  // namespace heron
 
-#endif  // HERON_INSTANCE_SLAVE_INSTANCE_BASE_H_
+#endif  // HERON_INSTANCE_EXECUTOR_INSTANCE_BASE_H_

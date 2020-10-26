@@ -33,8 +33,8 @@
 #include "utils/notifying-communicator.h"
 #include "bolt/ibolt-output-collector.h"
 #include "serializer/ipluggable-serializer.h"
-#include "slave/task-context-impl.h"
-#include "slave/outgoing-tuple-collection.h"
+#include "executor/task-context-impl.h"
+#include "executor/outgoing-tuple-collection.h"
 #include "boltimpl/bolt-metrics.h"
 
 namespace heron {
@@ -44,7 +44,7 @@ class BoltOutputCollectorImpl : public api::bolt::IBoltOutputCollector {
  public:
   BoltOutputCollectorImpl(std::shared_ptr<api::serializer::IPluggableSerializer> serializer,
                           std::shared_ptr<TaskContextImpl> taskContext,
-                          NotifyingCommunicator<google::protobuf::Message*>* dataFromSlave,
+                          NotifyingCommunicator<google::protobuf::Message*>* dataFromExecutor,
                           std::shared_ptr<BoltMetrics> metrics);
   virtual ~BoltOutputCollectorImpl();
 

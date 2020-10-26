@@ -21,7 +21,7 @@
 #include <list>
 #include <string>
 #include <utility>
-#include "slave/imetrics-registrar-impl.h"
+#include "executor/imetrics-registrar-impl.h"
 #include "basics/basics.h"
 #include "proto/messages.h"
 #include "network/network.h"
@@ -30,8 +30,8 @@ namespace heron {
 namespace instance {
 
 IMetricsRegistrarImpl::IMetricsRegistrarImpl(std::shared_ptr<EventLoop> eventLoop,
-           NotifyingCommunicator<google::protobuf::Message*>* metricsFromSlave)
-  : eventLoop_(eventLoop), metricsFromSlave_(metricsFromSlave) {
+           NotifyingCommunicator<google::protobuf::Message*>* metricsFromExecutor)
+  : eventLoop_(eventLoop), metricsFromExecutor_(metricsFromExecutor) {
 }
 
 IMetricsRegistrarImpl::~IMetricsRegistrarImpl() {
@@ -89,7 +89,7 @@ void IMetricsRegistrarImpl::sendMetrics(int timeBucketSizeInSecs) {
       }
     }
   }
-  metricsFromSlave_->enqueue(msg);
+  metricsFromExecutor_->enqueue(msg);
 }
 
 }  // namespace instance

@@ -43,7 +43,7 @@ import org.apache.heron.api.utils.Utils;
 import org.apache.heron.common.basics.Communicator;
 import org.apache.heron.common.basics.FileUtils;
 import org.apache.heron.common.basics.SingletonRegistry;
-import org.apache.heron.common.basics.SlaveLooper;
+import org.apache.heron.common.basics.ExecutorLooper;
 import org.apache.heron.common.basics.TypeUtils;
 import org.apache.heron.common.config.SystemConfig;
 import org.apache.heron.common.utils.metrics.FullBoltMetrics;
@@ -81,7 +81,7 @@ public class BoltInstance implements IInstance {
   // The reference to topology's config
   private final Map<String, Object> config;
 
-  private final SlaveLooper looper;
+  private final ExecutorLooper looper;
 
   private final SystemConfig systemConfig;
 
@@ -91,7 +91,7 @@ public class BoltInstance implements IInstance {
   public BoltInstance(PhysicalPlanHelper helper,
                       Communicator<Message> streamInQueue,
                       Communicator<Message> streamOutQueue,
-                      SlaveLooper looper) {
+                      ExecutorLooper looper) {
     this.helper = helper;
     this.looper = looper;
     this.streamInQueue = streamInQueue;

@@ -24,22 +24,22 @@
 
 #include "glog/logging.h"
 
-#include "slave/slave.h"
+#include "executor/executor.h"
 #include "proto/messages.h"
 #include "network/network.h"
 #include "basics/basics.h"
 
-#include "slave/imetrics-registrar-impl.h"
-#include "slave/task-context-impl.h"
+#include "executor/imetrics-registrar-impl.h"
+#include "executor/task-context-impl.h"
 #include "spoutimpl/spout-instance.h"
 #include "boltimpl/bolt-instance.h"
 
 namespace heron {
 namespace instance {
 
-Slave::Slave(int myTaskId, const std::string& topologySo)
+Executor::Executor(int myTaskId, const std::string& topologySo)
   : myTaskId_(myTaskId), taskContext_(new TaskContextImpl(myTaskId_)),
-    dataToSlave_(NULL), dataFromSlave_(NULL), metricsFromSlave_(NULL),
+    dataToExecutor_(NULL), dataFromExecutor_(NULL), metricsFromExecutor_(NULL),
     instance_(NULL), eventLoop_(std::make_shared<EventLoopImpl>()) {
   auto pplan = new proto::system::PhysicalPlan();
   pplan_typename_ = pplan->GetTypeName();
@@ -51,38 +51,38 @@ Slave::Slave(int myTaskId, const std::string& topologySo)
   }
 }
 
-Slave::~Slave() {
+Executor::~Executor() {
   if (dlclose(dllHandle_) != 0) {
     LOG(FATAL) << "dlclose failed with error " << dlerror();
   }
 }
 
-void Slave::setCommunicators(
-                    NotifyingCommunicator<pool_unique_ptr<google::protobuf::Message>>* dataToSlave,
-                    NotifyingCommunicator<google::protobuf::Message*>* dataFromSlave,
-                    NotifyingCommunicator<google::protobuf::Message*>* metricsFromSlave) {
-  dataToSlave_ = dataToSlave;
-  dataFromSlave_ = dataFromSlave;
-  metricsFromSlave_ = metricsFromSlave;
+void Executor::setCommunicators(
+                    NotifyingCommunicator<pool_unique_ptr<google::protobuf::Message>>* dataToExecutor,
+                    NotifyingCommunicator<google::protobuf::Message*>* dataFromExecutor,
+                    NotifyingCommunicator<google::protobuf::Message*>* metricsFromExecutor) {
+  dataToExecutor_ = dataToExecutor;
+  dataFromExecutor_ = dataFromExecutor;
+  metricsFromExecutor_ = metricsFromExecutor;
   std::shared_ptr<api::metric::IMetricsRegistrar> registrar(new IMetricsRegistrarImpl(eventLoop_,
-                                                                metricsFromSlave));
+                                                                metricsFromExecutor));
   taskContext_->setMericsRegistrar(registrar);
 }
 
-void Slave::Start() {
-  LOG(INFO) << "Creating slave thread";
-  slaveThread_.reset(new std::thread(&Slave::InternalStart, this));
+void Executor::Start() {
+  LOG(INFO) << "Creating executor thread";
+  executorThread_.reset(new std::thread(&Executor::InternalStart, this));
 }
 
-// This is the one thats running in the slave thread
-void Slave::InternalStart() {
-  LOG(INFO) << "Slave thread started up";
+// This is the one thats running in the executor thread
+void Executor::InternalStart() {
+  LOG(INFO) << "Executor thread started up";
   eventLoop_->loop();
 }
 
-void Slave::HandleGatewayData(pool_unique_ptr<google::protobuf::Message> msg) {
+void Executor::HandleGatewayData(pool_unique_ptr<google::protobuf::Message> msg) {
   if (msg->GetTypeName() == pplan_typename_) {
-    LOG(INFO) << "Slave Received a new pplan message from Gateway";
+    LOG(INFO) << "Executor Received a new pplan message from Gateway";
     auto pplan = pool_unique_ptr<proto::system::PhysicalPlan>(
             static_cast<proto::system::PhysicalPlan*>(msg.release()));
     HandleNewPhysicalPlan(std::move(pplan));
@@ -93,7 +93,7 @@ void Slave::HandleGatewayData(pool_unique_ptr<google::protobuf::Message> msg) {
   }
 }
 
-void Slave::HandleNewPhysicalPlan(pool_unique_ptr<proto::system::PhysicalPlan> pplan) {
+void Executor::HandleNewPhysicalPlan(pool_unique_ptr<proto::system::PhysicalPlan> pplan) {
   std::shared_ptr<proto::system::PhysicalPlan> newPplan = std::move(pplan);
   taskContext_->newPhysicalPlan(newPplan);
   if (!instance_) {
@@ -101,11 +101,11 @@ void Slave::HandleNewPhysicalPlan(pool_unique_ptr<proto::system::PhysicalPlan> p
     if (taskContext_->isSpout()) {
       LOG(INFO) << "We are a spout";
       instance_ = new SpoutInstance(eventLoop_, taskContext_,
-                                    dataFromSlave_, dllHandle_);
+                                    dataFromExecutor_, dllHandle_);
     } else {
       LOG(INFO) << "We are a bolt";
       instance_ = new BoltInstance(eventLoop_, taskContext_,
-                                   dataToSlave_, dataFromSlave_, dllHandle_);
+                                   dataToExecutor_, dataFromExecutor_, dllHandle_);
     }
     if (newPplan->topology().state() == proto::api::TopologyState::RUNNING) {
       LOG(INFO) << "Starting the instance";
@@ -125,7 +125,7 @@ void Slave::HandleNewPhysicalPlan(pool_unique_ptr<proto::system::PhysicalPlan> p
   }
 }
 
-void Slave::HandleStMgrTuples(pool_unique_ptr<proto::system::HeronTupleSet2> tupleSet) {
+void Executor::HandleStMgrTuples(pool_unique_ptr<proto::system::HeronTupleSet2> tupleSet) {
   if (instance_) {
     instance_->HandleGatewayTuples(std::move(tupleSet));
   } else {
@@ -133,7 +133,7 @@ void Slave::HandleStMgrTuples(pool_unique_ptr<proto::system::HeronTupleSet2> tup
   }
 }
 
-void Slave::HandleGatewayDataConsumed() {
+void Executor::HandleGatewayDataConsumed() {
   if (instance_) {
     instance_->DoWork();
   }

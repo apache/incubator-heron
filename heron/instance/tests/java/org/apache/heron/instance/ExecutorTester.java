@@ -23,28 +23,28 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import org.apache.heron.common.basics.SlaveLooper;
+import org.apache.heron.common.basics.ExecutorLooper;
 
 /**
- * Class to help write tests that require Slave instances, loopers and communicators
+ * Class to help write tests that require Executor instances, loopers and communicators
  */
-public class SlaveTester extends CommunicatorTester {
+public class ExecutorTester extends CommunicatorTester {
   private final ExecutorService threadsPool;
-  private final Slave slave;
+  private final Executor executor;
 
-  public SlaveTester() {
+  public ExecutorTester() {
     this(null);
   }
 
-  public SlaveTester(CountDownLatch outStreamQueueOfferLatch) {
-    super(new SlaveLooper(), outStreamQueueOfferLatch);
-    slave = new Slave(getSlaveLooper(), getInStreamQueue(), getOutStreamQueue(),
-        getInControlQueue(), getSlaveMetricsOut());
+  public ExecutorTester(CountDownLatch outStreamQueueOfferLatch) {
+    super(new ExecutorLooper(), outStreamQueueOfferLatch);
+    executor = new Executor(getExecutorLooper(), getInStreamQueue(), getOutStreamQueue(),
+        getInControlQueue(), getExecutorMetricsOut());
     threadsPool = Executors.newSingleThreadExecutor();
   }
 
   public void start() {
-    threadsPool.execute(slave);
+    threadsPool.execute(executor);
   }
 
   public void stop() throws NoSuchFieldException, IllegalAccessException {
