@@ -17,8 +17,8 @@
  * under the License.
  */
 
-#ifndef SRC_CPP_SVCS_STMGR_SRC_MANAGER_TMASTER_CLIENT_H_
-#define SRC_CPP_SVCS_STMGR_SRC_MANAGER_TMASTER_CLIENT_H_
+#ifndef SRC_CPP_SVCS_STMGR_SRC_MANAGER_TMANAGER_CLIENT_H_
+#define SRC_CPP_SVCS_STMGR_SRC_MANAGER_TMANAGER_CLIENT_H_
 
 #include <set>
 #include <string>
@@ -33,9 +33,9 @@ namespace stmgr {
 
 using std::shared_ptr;
 
-class TMasterClient : public Client {
+class TManagerClient : public Client {
  public:
-  TMasterClient(shared_ptr<EventLoop> eventLoop, const NetworkOptions& _options,
+  TManagerClient(shared_ptr<EventLoop> eventLoop, const NetworkOptions& _options,
                 const sp_string& _stmgr_id,
                 const sp_string& _stmgr_host, sp_int32 _data_port, sp_int32 _local_data_port,
                 sp_int32 _shell_port,
@@ -45,7 +45,7 @@ class TMasterClient : public Client {
                 VCallback<sp_string> _start_stateful_watch,
                 VCallback<const proto::ckptmgr::StatefulConsistentCheckpointSaved&>
                     _broadcast_checkpoint_saved);
-  virtual ~TMasterClient();
+  virtual ~TManagerClient();
 
   // Told by the upper layer to disconnect and self destruct
   void Die();
@@ -53,19 +53,19 @@ class TMasterClient : public Client {
   // Sets the instances that belong to us
   void SetInstanceInfo(const std::vector<proto::system::Instance*>& _instances);
 
-  // returns the tmaster address "host:port" form.
-  sp_string getTmasterHostPort();
+  // returns the tmanager address "host:port" form.
+  sp_string getTmanagerHostPort();
 
-  // Send a InstanceStateStored message to tmaster
+  // Send a InstanceStateStored message to tmanager
   void SavedInstanceState(const proto::system::Instance& _instance,
                           const std::string& _checkpoint_id);
 
-  // Send RestoreTopologyStateResponse to tmaster
+  // Send RestoreTopologyStateResponse to tmanager
   void SendRestoreTopologyStateResponse(proto::system::StatusCode _status,
                                         const std::string& _checkpoint_id,
                                         sp_int64 _txid);
 
-  // Send ResetTopologyState message to tmaster
+  // Send ResetTopologyState message to tmanager
   void SendResetTopologyState(const std::string& _dead_stmgr,
                               int32_t _dead_instance,
                               const std::string& _reason);
@@ -76,10 +76,10 @@ class TMasterClient : public Client {
 
  private:
   void HandleRegisterResponse(void*,
-                              pool_unique_ptr<proto::tmaster::StMgrRegisterResponse> _response,
+                              pool_unique_ptr<proto::tmanager::StMgrRegisterResponse> _response,
                               NetworkErrorCode);
   void HandleHeartbeatResponse(void*,
-                               pool_unique_ptr<proto::tmaster::StMgrHeartbeatResponse> response,
+                               pool_unique_ptr<proto::tmanager::StMgrHeartbeatResponse> response,
                                NetworkErrorCode);
 
   void HandleNewAssignmentMessage(pool_unique_ptr<proto::stmgr::NewPhysicalPlanMessage> _message);
@@ -106,19 +106,19 @@ class TMasterClient : public Client {
   sp_int32 local_data_port_;
   sp_int32 shell_port_;
 
-  // Set of instances to be reported to tmaster
+  // Set of instances to be reported to tmanager
   std::set<unique_ptr<proto::system::Instance>> instances_;
 
   bool to_die_;
-  // We invoke this callback upon a new physical plan from tmaster
+  // We invoke this callback upon a new physical plan from tmanager
   VCallback<shared_ptr<proto::system::PhysicalPlan>> pplan_watch_;
-  // We invoke this callback upon receiving a checkpoint message from tmaster
+  // We invoke this callback upon receiving a checkpoint message from tmanager
   // passing in the checkpoint id
   VCallback<sp_string> stateful_checkpoint_watch_;
-  // We invoke this callback upon receiving a restore topology message from tmaster
+  // We invoke this callback upon receiving a restore topology message from tmanager
   // passing in the checkpoint id and the txid
   VCallback<sp_string, sp_int64> restore_topology_watch_;
-  // We invoke this callback upon receiving a StartStatefulProcessing message from tmaster
+  // We invoke this callback upon receiving a StartStatefulProcessing message from tmanager
   // passing in the checkpoint id
   VCallback<sp_string> start_stateful_watch_;
   // This callback will be invoked upon receiving a StatefulConsistentCheckpointSaved message.
@@ -126,8 +126,8 @@ class TMasterClient : public Client {
   VCallback<const proto::ckptmgr::StatefulConsistentCheckpointSaved&> broadcast_checkpoint_saved_;
 
   // Configs to be read
-  sp_int32 reconnect_tmaster_interval_sec_;
-  sp_int32 stream_to_tmaster_heartbeat_interval_sec_;
+  sp_int32 reconnect_tmanager_interval_sec_;
+  sp_int32 stream_to_tmanager_heartbeat_interval_sec_;
 
   sp_int64 reconnect_timer_id;
   sp_int64 heartbeat_timer_id;
@@ -144,4 +144,4 @@ class TMasterClient : public Client {
 }  // namespace stmgr
 }  // namespace heron
 
-#endif  // SRC_CPP_SVCS_STMGR_SRC_MANAGER_TMASTER_CLIENT_H_
+#endif  // SRC_CPP_SVCS_STMGR_SRC_MANAGER_TMANAGER_CLIENT_H_

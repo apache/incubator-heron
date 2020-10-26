@@ -17,7 +17,7 @@
  * under the License.
  */
 
-#include "manager/tmaster-client.h"
+#include "manager/tmanager-client.h"
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
@@ -35,7 +35,7 @@
 namespace heron {
 namespace stmgr {
 
-TMasterClient::TMasterClient(shared_ptr<EventLoop> eventLoop, const NetworkOptions& _options,
+TManagerClient::TManagerClient(shared_ptr<EventLoop> eventLoop, const NetworkOptions& _options,
                              const sp_string& _stmgr_id, const sp_string& _stmgr_host,
                              sp_int32 _data_port, sp_int32 _local_data_port, sp_int32 _shell_port,
                              VCallback<shared_ptr<proto::system::PhysicalPlan>> _pplan_watch,
@@ -59,33 +59,33 @@ TMasterClient::TMasterClient(shared_ptr<EventLoop> eventLoop, const NetworkOptio
       reconnect_timer_id(0),
       heartbeat_timer_id(0),
       reconnect_attempts_(0) {
-  reconnect_tmaster_interval_sec_ = config::HeronInternalsConfigReader::Instance()
-      ->GetHeronStreammgrClientReconnectTmasterIntervalSec();
-  stream_to_tmaster_heartbeat_interval_sec_ = config::HeronInternalsConfigReader::Instance()
-      ->GetHeronStreammgrTmasterHeartbeatIntervalSec();
+  reconnect_tmanager_interval_sec_ = config::HeronInternalsConfigReader::Instance()
+      ->GetHeronStreammgrClientReconnectTmanagerIntervalSec();
+  stream_to_tmanager_heartbeat_interval_sec_ = config::HeronInternalsConfigReader::Instance()
+      ->GetHeronStreammgrTmanagerHeartbeatIntervalSec();
   reconnect_max_attempt_ = config::HeronInternalsConfigReader::Instance()
-      ->GetHeronStreammgrClientReconnectTmasterMaxAttempts();
+      ->GetHeronStreammgrClientReconnectTmanagerMaxAttempts();
 
   reconnect_timer_cb = [this]() { this->OnReConnectTimer(); };
   heartbeat_timer_cb = [this]() { this->OnHeartbeatTimer(); };
 
-  InstallResponseHandler(make_unique<proto::tmaster::StMgrRegisterRequest>(),
-                         &TMasterClient::HandleRegisterResponse);
-  InstallResponseHandler(make_unique<proto::tmaster::StMgrHeartbeatRequest>(),
-                         &TMasterClient::HandleHeartbeatResponse);
-  InstallMessageHandler(&TMasterClient::HandleNewAssignmentMessage);
-  InstallMessageHandler(&TMasterClient::HandleStatefulCheckpointMessage);
-  InstallMessageHandler(&TMasterClient::HandleRestoreTopologyStateRequest);
-  InstallMessageHandler(&TMasterClient::HandleStartStmgrStatefulProcessing);
-  InstallMessageHandler(&TMasterClient::HandleStatefulCheckpointSavedMessage);
+  InstallResponseHandler(make_unique<proto::tmanager::StMgrRegisterRequest>(),
+                         &TManagerClient::HandleRegisterResponse);
+  InstallResponseHandler(make_unique<proto::tmanager::StMgrHeartbeatRequest>(),
+                         &TManagerClient::HandleHeartbeatResponse);
+  InstallMessageHandler(&TManagerClient::HandleNewAssignmentMessage);
+  InstallMessageHandler(&TManagerClient::HandleStatefulCheckpointMessage);
+  InstallMessageHandler(&TManagerClient::HandleRestoreTopologyStateRequest);
+  InstallMessageHandler(&TManagerClient::HandleStartStmgrStatefulProcessing);
+  InstallMessageHandler(&TManagerClient::HandleStatefulCheckpointSavedMessage);
 }
 
-TMasterClient::~TMasterClient() {
+TManagerClient::~TManagerClient() {
   CleanInstances();
 }
 
-void TMasterClient::Die() {
-  LOG(INFO) << "Tmaster client is being destroyed " << std::endl;
+void TManagerClient::Die() {
+  LOG(INFO) << "Tmanager client is being destroyed " << std::endl;
   to_die_ = true;
   Stop();
   // Unregister the timers
@@ -98,11 +98,11 @@ void TMasterClient::Die() {
   }
 }
 
-sp_string TMasterClient::getTmasterHostPort() {
+sp_string TManagerClient::getTmanagerHostPort() {
   return options_.get_host() + ":" + std::to_string(options_.get_port());
 }
 
-void TMasterClient::HandleConnect(NetworkErrorCode _status) {
+void TManagerClient::HandleConnect(NetworkErrorCode _status) {
   if (_status == OK) {
     // reset the reconnect attempt once connection established
     reconnect_attempts_ = 0;
@@ -111,7 +111,7 @@ void TMasterClient::HandleConnect(NetworkErrorCode _status) {
       Stop();
       return;
     }
-    LOG(INFO) << "Connected to tmaster running at " << get_clientoptions().get_host() << ":"
+    LOG(INFO) << "Connected to tmanager running at " << get_clientoptions().get_host() << ":"
               << get_clientoptions().get_port() << std::endl;
     SendRegisterRequest();
   } else {
@@ -119,23 +119,23 @@ void TMasterClient::HandleConnect(NetworkErrorCode _status) {
       delete this;
       return;
     }
-    LOG(ERROR) << "Could not connect to tmaster at " << get_clientoptions().get_host() << ":"
+    LOG(ERROR) << "Could not connect to tmanager at " << get_clientoptions().get_host() << ":"
                << get_clientoptions().get_port() << ", Status code: " << _status << std::endl;
     LOG(INFO) << "Will retry again..." << std::endl;
     // Shouldn't be in a state where a previous timer is not cleared yet.
     if (reconnect_timer_id == 0) {
-      reconnect_timer_id = AddTimer(reconnect_timer_cb, reconnect_tmaster_interval_sec_ * 1000000);
+      reconnect_timer_id = AddTimer(reconnect_timer_cb, reconnect_tmanager_interval_sec_ * 1000000);
     }
   }
 }
 
-void TMasterClient::HandleClose(NetworkErrorCode _code) {
+void TManagerClient::HandleClose(NetworkErrorCode _code) {
   if (to_die_) {
     delete this;
     return;
   }
-  LOG(INFO) << "TMaster connection closed with code " << _code << std::endl;
-  LOG(INFO) << "Will try to reconnect again after " << reconnect_tmaster_interval_sec_ << "seconds"
+  LOG(INFO) << "TManager connection closed with code " << _code << std::endl;
+  LOG(INFO) << "Will try to reconnect again after " << reconnect_tmanager_interval_sec_ << "seconds"
             << std::endl;
   // Shouldn't be in a state where a previous timer is not cleared yet.
   CHECK_EQ(reconnect_timer_id, 0);
@@ -146,15 +146,15 @@ void TMasterClient::HandleClose(NetworkErrorCode _code) {
     heartbeat_timer_id = 0;
   }
 
-  reconnect_timer_id = AddTimer(reconnect_timer_cb, reconnect_tmaster_interval_sec_ * 1000000);
+  reconnect_timer_id = AddTimer(reconnect_timer_cb, reconnect_tmanager_interval_sec_ * 1000000);
 }
 
-void TMasterClient::HandleRegisterResponse(
+void TManagerClient::HandleRegisterResponse(
                                   void*,
-                                  pool_unique_ptr<proto::tmaster::StMgrRegisterResponse> _response,
+                                  pool_unique_ptr<proto::tmanager::StMgrRegisterResponse> _response,
                                   NetworkErrorCode _status) {
   if (_status != OK) {
-    LOG(ERROR) << "non ok network stack code for Register Response from Tmaster" << std::endl;
+    LOG(ERROR) << "non ok network stack code for Register Response from Tmanager" << std::endl;
     Stop();
     return;
   }
@@ -162,23 +162,23 @@ void TMasterClient::HandleRegisterResponse(
   proto::system::StatusCode status = _response->status().status();
 
   if (status != proto::system::OK) {
-    LOG(ERROR) << "Register with Tmaster failed with status " << status << std::endl;
+    LOG(ERROR) << "Register with Tmanager failed with status " << status << std::endl;
     Stop();
   } else {
-    LOG(INFO) << "Registered successfully with Tmaster" << std::endl;
+    LOG(INFO) << "Registered successfully with Tmanager" << std::endl;
     if (_response->has_pplan()) {
       pplan_watch_(shared_ptr<proto::system::PhysicalPlan>(_response->release_pplan()));
     }
     // Shouldn't be in a state where a previous timer is not cleared yet.
     CHECK_EQ(heartbeat_timer_id, 0);
     heartbeat_timer_id =
-        AddTimer(heartbeat_timer_cb, stream_to_tmaster_heartbeat_interval_sec_ * 1000000);
+        AddTimer(heartbeat_timer_cb, stream_to_tmanager_heartbeat_interval_sec_ * 1000000);
   }
 }
 
-void TMasterClient::HandleHeartbeatResponse(
+void TManagerClient::HandleHeartbeatResponse(
                                   void*,
-                                  pool_unique_ptr<proto::tmaster::StMgrHeartbeatResponse> _response,
+                                  pool_unique_ptr<proto::tmanager::StMgrHeartbeatResponse> _response,
                                   NetworkErrorCode _status) {
   if (_status != OK) {
     LOG(ERROR) << "NonOK response message for heartbeat Response" << std::endl;
@@ -195,49 +195,49 @@ void TMasterClient::HandleHeartbeatResponse(
     // Shouldn't be in a state where a previous timer is not cleared yet.
     CHECK_EQ(heartbeat_timer_id, 0);
     heartbeat_timer_id =
-        AddTimer(heartbeat_timer_cb, stream_to_tmaster_heartbeat_interval_sec_ * 1000000);
+        AddTimer(heartbeat_timer_cb, stream_to_tmanager_heartbeat_interval_sec_ * 1000000);
   }
 }
 
-void TMasterClient::HandleNewAssignmentMessage(
+void TManagerClient::HandleNewAssignmentMessage(
         pool_unique_ptr<proto::stmgr::NewPhysicalPlanMessage> _message) {
   LOG(INFO) << "Got a new assignment" << std::endl;
   pplan_watch_(shared_ptr<proto::system::PhysicalPlan>(_message->release_new_pplan()));
 }
 
-void TMasterClient::HandleStatefulCheckpointMessage(
+void TManagerClient::HandleStatefulCheckpointMessage(
         pool_unique_ptr<proto::ckptmgr::StartStatefulCheckpoint> _message) {
-  LOG(INFO) << "Got a new start stateful checkpoint message from tmaster with id "
+  LOG(INFO) << "Got a new start stateful checkpoint message from tmanager with id "
             << _message->checkpoint_id();
   stateful_checkpoint_watch_(_message->checkpoint_id());
 }
 
-void TMasterClient::OnReConnectTimer() {
+void TManagerClient::OnReConnectTimer() {
   // The timer has triggered the callback, so reset the timer_id;
   reconnect_timer_id = 0;
 
   if (++reconnect_attempts_ < reconnect_max_attempt_) {
     Start();
   } else {
-    LOG(FATAL) << "Could not connect to tmaster after reaching"
+    LOG(FATAL) << "Could not connect to tmanager after reaching"
                << " the max reconnect attempts" << reconnect_max_attempt_
                << ". Quitting...";
   }
 }
 
-void TMasterClient::OnHeartbeatTimer() {
+void TManagerClient::OnHeartbeatTimer() {
   LOG(INFO) << "Sending heartbeat" << std::endl;
   // The timer has triggered the callback, so reset the timer_id;
   heartbeat_timer_id = 0;
   SendHeartbeatRequest();
 }
 
-void TMasterClient::CleanInstances() {
+void TManagerClient::CleanInstances() {
   instances_.clear();
 }
 
-void TMasterClient::SendRegisterRequest() {
-  auto request = make_unique<proto::tmaster::StMgrRegisterRequest>();
+void TManagerClient::SendRegisterRequest() {
+  auto request = make_unique<proto::tmanager::StMgrRegisterRequest>();
 
   sp_string cwd;
   FileUtils::getCwd(cwd);
@@ -258,7 +258,7 @@ void TMasterClient::SendRegisterRequest() {
   return;
 }
 
-void TMasterClient::SetInstanceInfo(const std::vector<proto::system::Instance*>& _instances) {
+void TManagerClient::SetInstanceInfo(const std::vector<proto::system::Instance*>& _instances) {
     if (!instances_.empty()) {
       CleanInstances();
     }
@@ -270,8 +270,8 @@ void TMasterClient::SetInstanceInfo(const std::vector<proto::system::Instance*>&
     }
 }
 
-void TMasterClient::SendHeartbeatRequest() {
-  auto request = make_unique<proto::tmaster::StMgrHeartbeatRequest>();
+void TManagerClient::SendHeartbeatRequest() {
+  auto request = make_unique<proto::tmanager::StMgrHeartbeatRequest>();
   request->set_heartbeat_time(time(nullptr));
   // TODO(vikasr) Send actual stats
   request->mutable_stats();
@@ -279,7 +279,7 @@ void TMasterClient::SendHeartbeatRequest() {
   return;
 }
 
-void TMasterClient::SavedInstanceState(const proto::system::Instance& _instance,
+void TManagerClient::SavedInstanceState(const proto::system::Instance& _instance,
                                        const std::string& _checkpoint_id) {
   proto::ckptmgr::InstanceStateStored message;
   message.set_checkpoint_id(_checkpoint_id);
@@ -287,7 +287,7 @@ void TMasterClient::SavedInstanceState(const proto::system::Instance& _instance,
   SendMessage(message);
 }
 
-void TMasterClient::SendRestoreTopologyStateResponse(proto::system::StatusCode _status,
+void TManagerClient::SendRestoreTopologyStateResponse(proto::system::StatusCode _status,
                                                      const std::string& _ckpt_id,
                                                      sp_int64 _txid) {
   proto::ckptmgr::RestoreTopologyStateResponse message;
@@ -297,22 +297,22 @@ void TMasterClient::SendRestoreTopologyStateResponse(proto::system::StatusCode _
   SendMessage(message);
 }
 
-void TMasterClient::HandleRestoreTopologyStateRequest(
+void TManagerClient::HandleRestoreTopologyStateRequest(
         pool_unique_ptr<proto::ckptmgr::RestoreTopologyStateRequest> _message) {
   restore_topology_watch_(_message->checkpoint_id(), _message->restore_txid());
 }
 
-void TMasterClient::HandleStartStmgrStatefulProcessing(
+void TManagerClient::HandleStartStmgrStatefulProcessing(
         pool_unique_ptr<proto::ckptmgr::StartStmgrStatefulProcessing> _message) {
   start_stateful_watch_(_message->checkpoint_id());
 }
 
-void TMasterClient::HandleStatefulCheckpointSavedMessage(
+void TManagerClient::HandleStatefulCheckpointSavedMessage(
     pool_unique_ptr<proto::ckptmgr::StatefulConsistentCheckpointSaved> _msg) {
   broadcast_checkpoint_saved_(*_msg);
 }
 
-void TMasterClient::SendResetTopologyState(const std::string& _dead_stmgr,
+void TManagerClient::SendResetTopologyState(const std::string& _dead_stmgr,
                                            int32_t _dead_task,
                                            const std::string& _reason) {
   proto::ckptmgr::ResetTopologyState message;

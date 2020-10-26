@@ -54,7 +54,7 @@ class TupleCache;
 class StMgrClientMgr;
 class CkptMgrClient;
 
-// For Heron topologies running in effectively once semantics, the tmaster
+// For Heron topologies running in effectively once semantics, the tmanager
 // could initiate restore topology to a certain globally consistent checkpoint.
 // This could be triggered either during startup or after failure of certain
 // topology components. StatefulRestorer implements the state machine of this recovery
