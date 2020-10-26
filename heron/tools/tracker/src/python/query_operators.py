@@ -67,9 +67,9 @@ class Metrics:
     endtime = end // 60 * 60
     while starttime <= endtime:
       # STREAMCOMP-1559
-      # Second check is a work around, because the response from tmaster
+      # Second check is a work around, because the response from tmanager
       # contains value 0, if it is queries for the current timestamp,
-      # since the bucket is created in the tmaster, but is not filled
+      # since the bucket is created in the tmanager, but is not filled
       # by the metrics.
       if starttime not in self.timeline or self.timeline[starttime] == 0:
         self.timeline[starttime] = constant
@@ -87,7 +87,7 @@ class Operator:
 
   # pylint: disable=unused-argument
   @tornado.gen.coroutine
-  def execute(self, tracker, tmaster, start, end):
+  def execute(self, tracker, tmanager, start, end):
     """ execute """
     raise Exception("Not implemented exception")
 
@@ -98,7 +98,7 @@ class Operator:
 
 class TS(Operator):
   """Time Series Operator. This is the basic operator that is
-  responsible for getting metrics from tmaster.
+  responsible for getting metrics from tmanager.
   Accepts a list of 3 elements:
   1. componentName
   2. instance - can be "*" for all instances, or a single instance ID
@@ -123,12 +123,12 @@ class TS(Operator):
       raise Exception("TS expects metric name as third argument")
 
   @tornado.gen.coroutine
-  def execute(self, tracker, tmaster, start, end):
+  def execute(self, tracker, tmanager, start, end):
     # Fetch metrics for start-60 to end+60 because the minute mark
     # may be a little skewed. By getting a couple more values,
     # we can then truncate based on the interval needed.
     metrics = yield getMetricsTimeline(
-        tmaster, self.component, [self.metricName], self.instances,
+        tmanager, self.component, [self.metricName], self.instances,
         start - 60, end + 60)
     if not metrics:
       return
@@ -182,8 +182,8 @@ class Default(Operator):
           "Second argument to DEFAULT must be an operator, but is " + str(type(self.timeseries)))
 
   @tornado.gen.coroutine
-  def execute(self, tracker, tmaster, start, end):
-    allMetrics = yield self.timeseries.execute(tracker, tmaster, start, end)
+  def execute(self, tracker, tmanager, start, end):
+    allMetrics = yield self.timeseries.execute(tracker, tmanager, start, end)
     if is_str_instance(allMetrics):
       raise Exception(allMetrics)
     for metric in allMetrics:
@@ -203,7 +203,7 @@ class Sum(Operator):
     self.timeSeriesList = children
 
   @tornado.gen.coroutine
-  def execute(self, tracker, tmaster, start, end):
+  def execute(self, tracker, tmanager, start, end):
     # Initialize the metric to be returned with sum of all the constants.
     retMetrics = Metrics(None, None, None, start, end, {})
     constants = [ts for ts in self.timeSeriesList if isinstance(ts, float)]
@@ -212,7 +212,7 @@ class Sum(Operator):
 
     futureMetrics = []
     for timeseries in leftOverTimeSeries:
-      futureMetrics.append(timeseries.execute(tracker, tmaster, start, end))
+      futureMetrics.append(timeseries.execute(tracker, tmanager, start, end))
 
     metrics = yield futureMetrics
     # Get all the timeseries metrics
@@ -245,7 +245,7 @@ class Max(Operator):
     self.timeSeriesList = children
 
   @tornado.gen.coroutine
-  def execute(self, tracker, tmaster, start, end):
+  def execute(self, tracker, tmanager, start, end):
     # Initialize the metric to be returned with max of all the constants.
     retMetrics = Metrics(None, None, None, start, end, {})
     constants = [ts for ts in self.timeSeriesList if isinstance(ts, float)]
@@ -255,7 +255,7 @@ class Max(Operator):
 
     futureMetrics = []
     for timeseries in leftOverTimeSeries:
-      futureMetrics.append(timeseries.execute(tracker, tmaster, start, end))
+      futureMetrics.append(timeseries.execute(tracker, tmanager, start, end))
 
     metrics = yield futureMetrics
 
@@ -300,12 +300,12 @@ class Percentile(Operator):
     self.timeSeriesList = children[1:]
 
   @tornado.gen.coroutine
-  def execute(self, tracker, tmaster, start, end):
+  def execute(self, tracker, tmanager, start, end):
     leftOverTimeSeries = [ts for ts in self.timeSeriesList if not isinstance(ts, float)]
 
     futureMetrics = []
     for timeseries in leftOverTimeSeries:
-      futureMetrics.append(timeseries.execute(tracker, tmaster, start, end))
+      futureMetrics.append(timeseries.execute(tracker, tmanager, start, end))
 
     metrics = yield futureMetrics
 
@@ -369,13 +369,13 @@ class Divide(Operator):
 
   # pylint: disable=too-many-branches, too-many-statements
   @tornado.gen.coroutine
-  def execute(self, tracker, tmaster, start, end):
+  def execute(self, tracker, tmanager, start, end):
     # Future metrics so as to execute them in parallel
     futureMetrics = []
     if not isinstance(self.timeSeries1, float):
-      futureMetrics.append(self.timeSeries1.execute(tracker, tmaster, start, end))
+      futureMetrics.append(self.timeSeries1.execute(tracker, tmanager, start, end))
     if not isinstance(self.timeSeries2, float):
-      futureMetrics.append(self.timeSeries2.execute(tracker, tmaster, start, end))
+      futureMetrics.append(self.timeSeries2.execute(tracker, tmanager, start, end))
 
     futureResolvedMetrics = yield futureMetrics
 
@@ -494,13 +494,13 @@ class Multiply(Operator):
 
   # pylint: disable=too-many-branches, too-many-statements
   @tornado.gen.coroutine
-  def execute(self, tracker, tmaster, start, end):
+  def execute(self, tracker, tmanager, start, end):
     # Future metrics so as to execute them in parallel
     futureMetrics = []
     if not isinstance(self.timeSeries1, float):
-      futureMetrics.append(self.timeSeries1.execute(tracker, tmaster, start, end))
+      futureMetrics.append(self.timeSeries1.execute(tracker, tmanager, start, end))
     if not isinstance(self.timeSeries2, float):
-      futureMetrics.append(self.timeSeries2.execute(tracker, tmaster, start, end))
+      futureMetrics.append(self.timeSeries2.execute(tracker, tmanager, start, end))
 
     futureResolvedMetrics = yield futureMetrics
 
@@ -617,13 +617,13 @@ class Subtract(Operator):
 
   # pylint: disable=too-many-branches, too-many-statements
   @tornado.gen.coroutine
-  def execute(self, tracker, tmaster, start, end):
+  def execute(self, tracker, tmanager, start, end):
     # Future metrics so as to execute them in parallel
     futureMetrics = []
     if not isinstance(self.timeSeries1, float):
-      futureMetrics.append(self.timeSeries1.execute(tracker, tmaster, start, end))
+      futureMetrics.append(self.timeSeries1.execute(tracker, tmanager, start, end))
     if not isinstance(self.timeSeries2, float):
-      futureMetrics.append(self.timeSeries2.execute(tracker, tmaster, start, end))
+      futureMetrics.append(self.timeSeries2.execute(tracker, tmanager, start, end))
 
     futureResolvedMetrics = yield futureMetrics
 
@@ -720,9 +720,9 @@ class Rate(Operator):
     self.timeSeries = children[0]
 
   @tornado.gen.coroutine
-  def execute(self, tracker, tmaster, start, end):
+  def execute(self, tracker, tmanager, start, end):
     # Get 1 previous data point to be able to apply rate on the first data
-    metrics = yield self.timeSeries.execute(tracker, tmaster, start-60, end)
+    metrics = yield self.timeSeries.execute(tracker, tmanager, start-60, end)
 
     # Apply rate on all of them
     for metric in metrics:

@@ -215,10 +215,10 @@ class Tracker:
       if not data:
         Log.debug("No data to be set")
 
-    def on_topology_tmaster(data):
-      """set tmaster"""
-      Log.info("Watch triggered for topology tmaster: " + topologyName)
-      topology.set_tmaster(data)
+    def on_topology_tmanager(data):
+      """set tmanager"""
+      Log.info("Watch triggered for topology tmanager: " + topologyName)
+      topology.set_tmanager(data)
       if not data:
         Log.debug("No data to be set")
 
@@ -229,11 +229,11 @@ class Tracker:
       if not data:
         Log.debug("No data to be set")
 
-    # Set watches on the pplan, execution_state, tmaster and scheduler_location.
+    # Set watches on the pplan, execution_state, tmanager and scheduler_location.
     state_manager.get_pplan(topologyName, on_topology_pplan)
     state_manager.get_packing_plan(topologyName, on_topology_packing_plan)
     state_manager.get_execution_state(topologyName, on_topology_execution_state)
-    state_manager.get_tmaster(topologyName, on_topology_tmaster)
+    state_manager.get_tmanager(topologyName, on_topology_tmanager)
     state_manager.get_scheduler_location(topologyName, on_topology_scheduler_location)
 
   def removeTopology(self, topology_name, state_manager_name):
@@ -270,7 +270,7 @@ class Tracker:
         "release_tag": execution_state.release_state.release_tag,
         "release_version": execution_state.release_state.release_version,
         "has_physical_plan": None,
-        "has_tmaster_location": None,
+        "has_tmanager_location": None,
         "has_scheduler_location": None,
         "extra_links": [],
     }
@@ -313,7 +313,7 @@ class Tracker:
     runtime_state = {}
     runtime_state["has_physical_plan"] = bool(topology.physical_plan)
     runtime_state["has_packing_plan"] = bool(topology.packing_plan)
-    runtime_state["has_tmaster_location"] = bool(topology.tmaster)
+    runtime_state["has_tmanager_location"] = bool(topology.tmanager)
     runtime_state["has_scheduler_location"] = bool(topology.scheduler_location)
     # "stmgrs" listed runtime state for each stream manager
     # however it is possible that physical plan is not complete
@@ -343,28 +343,28 @@ class Tracker:
 
     return schedulerLocation
 
-  def extract_tmaster(self, topology):
+  def extract_tmanager(self, topology):
     """
-    Returns the representation of tmaster that will
+    Returns the representation of tmanager that will
     be returned from Tracker.
     """
-    tmasterLocation = {
+    tmanagerLocation = {
         "name": None,
         "id": None,
         "host": None,
         "controller_port": None,
-        "master_port": None,
+        "server_port": None,
         "stats_port": None,
     }
-    if topology.tmaster:
-      tmasterLocation["name"] = topology.tmaster.topology_name
-      tmasterLocation["id"] = topology.tmaster.topology_id
-      tmasterLocation["host"] = topology.tmaster.host
-      tmasterLocation["controller_port"] = topology.tmaster.controller_port
-      tmasterLocation["master_port"] = topology.tmaster.master_port
-      tmasterLocation["stats_port"] = topology.tmaster.stats_port
+    if topology.tmanager:
+      tmanagerLocation["name"] = topology.tmanager.topology_name
+      tmanagerLocation["id"] = topology.tmanager.topology_id
+      tmanagerLocation["host"] = topology.tmanager.host
+      tmanagerLocation["controller_port"] = topology.tmanager.controller_port
+      tmanagerLocation["server_port"] = topology.tmanager.server_port
+      tmanagerLocation["stats_port"] = topology.tmanager.stats_port
 
-    return tmasterLocation
+    return tmanagerLocation
 
   # pylint: disable=too-many-locals
   def extract_logical_plan(self, topology):
@@ -618,9 +618,9 @@ class Tracker:
     if not topology.packing_plan:
       has_packing_plan = False
 
-    has_tmaster_location = True
-    if not topology.tmaster:
-      has_tmaster_location = False
+    has_tmanager_location = True
+    if not topology.tmanager:
+      has_tmanager_location = False
 
     has_scheduler_location = True
     if not topology.scheduler_location:
@@ -633,14 +633,14 @@ class Tracker:
         "physical_plan": None,
         "packing_plan": None,
         "execution_state": None,
-        "tmaster_location": None,
+        "tmanager_location": None,
         "scheduler_location": None,
     }
 
     executionState = self.extract_execution_state(topology)
     executionState["has_physical_plan"] = has_physical_plan
     executionState["has_packing_plan"] = has_packing_plan
-    executionState["has_tmaster_location"] = has_tmaster_location
+    executionState["has_tmanager_location"] = has_tmanager_location
     executionState["has_scheduler_location"] = has_scheduler_location
     executionState["status"] = topology.get_status()
 
@@ -651,7 +651,7 @@ class Tracker:
     topologyInfo["logical_plan"] = self.extract_logical_plan(topology)
     topologyInfo["physical_plan"] = self.extract_physical_plan(topology)
     topologyInfo["packing_plan"] = self.extract_packing_plan(topology)
-    topologyInfo["tmaster_location"] = self.extract_tmaster(topology)
+    topologyInfo["tmanager_location"] = self.extract_tmanager(topology)
     topologyInfo["scheduler_location"] = self.extract_scheduler_location(topology)
 
     self.topologyInfos[(topology.name, topology.state_manager_name)] = topologyInfo

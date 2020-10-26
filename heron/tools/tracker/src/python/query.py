@@ -35,7 +35,7 @@ class Query:
      individual metrics that are part of the query.
      Example usage:
         query = Query(tracker)
-        result = query.execute(tmaster, query_string)"""
+        result = query.execute(tmanager, query_string)"""
   # pylint: disable=undefined-variable
   def __init__(self, tracker):
     self.tracker = tracker
@@ -54,13 +54,13 @@ class Query:
 
   # pylint: disable=attribute-defined-outside-init, no-member
   @tornado.gen.coroutine
-  def execute_query(self, tmaster, query_string, start, end):
+  def execute_query(self, tmanager, query_string, start, end):
     """ execute query """
-    if not tmaster:
-      raise Exception("No tmaster found")
-    self.tmaster = tmaster
+    if not tmanager:
+      raise Exception("No tmanager found")
+    self.tmanager = tmanager
     root = self.parse_query_string(query_string)
-    metrics = yield root.execute(self.tracker, self.tmaster, start, end)
+    metrics = yield root.execute(self.tracker, self.tmanager, start, end)
     raise tornado.gen.Return(metrics)
 
   def find_closing_braces(self, query):

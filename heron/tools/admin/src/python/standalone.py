@@ -51,8 +51,8 @@ TYPE = "type"
 
 class Role:
   ZOOKEEPERS = "zookeepers"
-  MASTERS = "masters"
-  SLAVES = "slaves"
+  PRIMARIES = "primaries"
+  SECONDARIES = "secondaries"
   CLUSTER = "cluster"
 
 class Cluster:
@@ -92,7 +92,7 @@ def create_parser(subparsers):
 
   parser_set = parser_action.add_parser(
       Action.SET,
-      help='Set configurations for standalone cluster e.g. master or slave nodes',
+      help='Set configurations for standalone cluster e.g. primary or secondary nodes',
       add_help=True,
       formatter_class=argparse.RawTextHelpFormatter
   )
@@ -205,71 +205,71 @@ def update_config_files(cl_args):
   Log.info("Updating config files...")
   roles = read_and_parse_roles(cl_args)
   Log.debug("roles: %s" % roles)
-  masters = list(roles[Role.MASTERS])
+  primaries = list(roles[Role.PRIMARIES])
   zookeepers = list(roles[Role.ZOOKEEPERS])
 
-  template_slave_hcl(cl_args, masters)
-  template_scheduler_yaml(cl_args, masters)
-  template_uploader_yaml(cl_args, masters)
-  template_apiserver_hcl(cl_args, masters, zookeepers)
+  template_secondary_hcl(cl_args, primaries)
+  template_scheduler_yaml(cl_args, primaries)
+  template_uploader_yaml(cl_args, primaries)
+  template_apiserver_hcl(cl_args, primaries, zookeepers)
   template_statemgr_yaml(cl_args, zookeepers)
-  template_heron_tools_hcl(cl_args, masters, zookeepers)
+  template_heron_tools_hcl(cl_args, primaries, zookeepers)
 
 ##################### Templating functions ######################################
 
-def template_slave_hcl(cl_args, masters):
+def template_secondary_hcl(cl_args, primaries):
   '''
-  Template slave config file
+  Template secondary config file
   '''
-  slave_config_template = "%s/standalone/templates/slave.template.hcl" % cl_args["config_path"]
-  slave_config_actual = "%s/standalone/resources/slave.hcl" % cl_args["config_path"]
-  masters_in_quotes = ['"%s"' % master for master in masters]
-  template_file(slave_config_template, slave_config_actual,
-                {"<nomad_masters:master_port>": ", ".join(masters_in_quotes)})
+  secondary_config_template = "%s/standalone/templates/secondary.template.hcl" % cl_args["config_path"]
+  secondary_config_actual = "%s/standalone/resources/secondary.hcl" % cl_args["config_path"]
+  primaries_in_quotes = ['"%s"' % primary for primary in primaries]
+  template_file(secondary_config_template, secondary_config_actual,
+                {"<nomad_primaries:primary_port>": ", ".join(primaries_in_quotes)})
 
-def template_scheduler_yaml(cl_args, masters):
+def template_scheduler_yaml(cl_args, primaries):
   '''
   Template scheduler.yaml
   '''
-  single_master = masters[0]
+  single_primary = primaries[0]
   scheduler_config_actual = "%s/standalone/scheduler.yaml" % cl_args["config_path"]
 
   scheduler_config_template = "%s/standalone/templates/scheduler.template.yaml" \
                               % cl_args["config_path"]
   template_file(scheduler_config_template, scheduler_config_actual,
-                {"<scheduler_uri>": "http://%s:4646" % single_master})
+                {"<scheduler_uri>": "http://%s:4646" % single_primary})
 
-def template_uploader_yaml(cl_args, masters):
+def template_uploader_yaml(cl_args, primaries):
   '''
   Tempate uploader.yaml
   '''
-  single_master = masters[0]
+  single_primary = primaries[0]
   uploader_config_template = "%s/standalone/templates/uploader.template.yaml" \
                              % cl_args["config_path"]
   uploader_config_actual = "%s/standalone/uploader.yaml" % cl_args["config_path"]
 
   template_file(uploader_config_template, uploader_config_actual,
-                {"<http_uploader_uri>": "http://%s:9000/api/v1/file/upload" % single_master})
+                {"<http_uploader_uri>": "http://%s:9000/api/v1/file/upload" % single_primary})
 
-def template_apiserver_hcl(cl_args, masters, zookeepers):
+def template_apiserver_hcl(cl_args, primaries, zookeepers):
   """
   template apiserver.hcl
   """
-  single_master = masters[0]
+  single_primary = primaries[0]
   apiserver_config_template = "%s/standalone/templates/apiserver.template.hcl" \
                               % cl_args["config_path"]
   apiserver_config_actual = "%s/standalone/resources/apiserver.hcl" % cl_args["config_path"]
 
   replacements = {
-      "<heron_apiserver_hostname>": '"%s"' % get_hostname(single_master, cl_args),
+      "<heron_apiserver_hostname>": '"%s"' % get_hostname(single_primary, cl_args),
       "<heron_apiserver_executable>": '"%s/heron-apiserver"'
                                       % config.get_heron_bin_dir()
-                                      if is_self(single_master)
+                                      if is_self(single_primary)
                                       else '"%s/.heron/bin/heron-apiserver"'
-                                      % get_remote_home(single_master, cl_args),
+                                      % get_remote_home(single_primary, cl_args),
       "<zookeeper_host:zookeeper_port>": ",".join(
           ['%s' % zk if ":" in zk else '%s:2181' % zk for zk in zookeepers]),
-      "<scheduler_uri>": "http://%s:4646" % single_master
+      "<scheduler_uri>": "http://%s:4646" % single_primary
   }
 
   template_file(apiserver_config_template, apiserver_config_actual, replacements)
@@ -287,7 +287,7 @@ def template_statemgr_yaml(cl_args, zookeepers):
                 {"<zookeeper_host:zookeeper_port>": ",".join(
                     ['"%s"' % zk if ":" in zk else '"%s:2181"' % zk for zk in zookeepers])})
 
-def template_heron_tools_hcl(cl_args, masters, zookeepers):
+def template_heron_tools_hcl(cl_args, primaries, zookeepers):
   '''
   template heron tools
   '''
@@ -296,13 +296,13 @@ def template_heron_tools_hcl(cl_args, masters, zookeepers):
   heron_tools_hcl_actual = "%s/standalone/resources/heron_tools.hcl" \
                              % cl_args["config_path"]
 
-  single_master = masters[0]
+  single_primary = primaries[0]
   template_file(heron_tools_hcl_template, heron_tools_hcl_actual,
                 {
                     "<zookeeper_host:zookeeper_port>": ",".join(
                         ['%s' % zk if ":" in zk else '%s:2181' % zk for zk in zookeepers]),
                     "<heron_tracker_executable>": '"%s/heron-tracker"' % config.get_heron_bin_dir(),
-                    "<heron_tools_hostname>": '"%s"' % get_hostname(single_master, cl_args),
+                    "<heron_tools_hostname>": '"%s"' % get_hostname(single_primary, cl_args),
                     "<heron_ui_executable>": '"%s/heron-ui"' % config.get_heron_bin_dir()
                 })
 
@@ -330,29 +330,29 @@ def get_service_url(cl_args):
   get service url for standalone cluster
   '''
   roles = read_and_parse_roles(cl_args)
-  return "http://%s:9000" % list(roles[Role.MASTERS])[0]
+  return "http://%s:9000" % list(roles[Role.PRIMARIES])[0]
 
 def get_heron_tracker_url(cl_args):
   '''
   get service url for standalone cluster
   '''
   roles = read_and_parse_roles(cl_args)
-  return "http://%s:8888" % list(roles[Role.MASTERS])[0]
+  return "http://%s:8888" % list(roles[Role.PRIMARIES])[0]
 
 def get_heron_ui_url(cl_args):
   '''
   get service url for standalone cluster
   '''
   roles = read_and_parse_roles(cl_args)
-  return "http://%s:8889" % list(roles[Role.MASTERS])[0]
+  return "http://%s:8889" % list(roles[Role.PRIMARIES])[0]
 
 def print_cluster_info(cl_args):
   '''
   get cluster info for standalone cluster
   '''
   parsed_roles = read_and_parse_roles(cl_args)
-  masters = list(parsed_roles[Role.MASTERS])
-  slaves = list(parsed_roles[Role.SLAVES])
+  primaries = list(parsed_roles[Role.PRIMARIES])
+  secondaries = list(parsed_roles[Role.SECONDARIES])
   zookeepers = list(parsed_roles[Role.ZOOKEEPERS])
   cluster = list(parsed_roles[Role.CLUSTER])
 
@@ -362,8 +362,8 @@ def print_cluster_info(cl_args):
   info['numNodes'] = len(cluster)
   info['nodes'] = cluster
   roles = OrderedDict()
-  roles['masters'] = masters
-  roles['slaves'] = slaves
+  roles['primaries'] = primaries
+  roles['secondaries'] = secondaries
   roles['zookeepers'] = zookeepers
   urls = OrderedDict()
   urls['serviceUrl'] = get_service_url(cl_args)
@@ -393,19 +393,19 @@ def stop_cluster(cl_args):
   Log.info("Terminating cluster...")
 
   roles = read_and_parse_roles(cl_args)
-  masters = roles[Role.MASTERS]
-  slaves = roles[Role.SLAVES]
-  dist_nodes = masters.union(slaves)
+  primaries = roles[Role.PRIMARIES]
+  secondaries = roles[Role.SECONDARIES]
+  dist_nodes = primaries.union(secondaries)
 
   # stop all jobs
-  if masters:
+  if primaries:
     try:
-      single_master = list(masters)[0]
-      jobs = get_jobs(cl_args, single_master)
+      single_primary = list(primaries)[0]
+      jobs = get_jobs(cl_args, single_primary)
       for job in jobs:
         job_id = job["ID"]
         Log.info("Terminating job %s" % job_id)
-        delete_job(cl_args, job_id, single_master)
+        delete_job(cl_args, job_id, single_primary)
     except:
       Log.debug("Error stopping jobs")
       Log.debug(sys.exc_info()[0])
@@ -431,7 +431,7 @@ def stop_cluster(cl_args):
     Log.debug("return code: %s output: %s" % (return_code, output))
 
     Log.info("Cleaning up directories on %s" % node)
-    cmd = "rm -rf /tmp/slave ; rm -rf /tmp/master"
+    cmd = "rm -rf /tmp/secondary ; rm -rf /tmp/primary"
     if not is_self(node):
       cmd = ssh_remote_execute(cmd, node, cl_args)
     Log.debug(cmd)
@@ -450,18 +450,18 @@ def start_cluster(cl_args):
   Start a Heron standalone cluster
   '''
   roles = read_and_parse_roles(cl_args)
-  masters = roles[Role.MASTERS]
-  slaves = roles[Role.SLAVES]
+  primaries = roles[Role.PRIMARIES]
+  secondaries = roles[Role.SECONDARIES]
   zookeepers = roles[Role.ZOOKEEPERS]
   Log.info("Roles:")
-  Log.info(" - Master Servers: %s" % list(masters))
-  Log.info(" - Slave Servers: %s" % list(slaves))
+  Log.info(" - Primary Servers: %s" % list(primaries))
+  Log.info(" - Secondary Servers: %s" % list(secondaries))
   Log.info(" - Zookeeper Servers: %s" % list(zookeepers))
-  if not masters:
-    Log.error("No master servers specified!")
+  if not primaries:
+    Log.error("No primary servers specified!")
     sys.exit(-1)
-  if not slaves:
-    Log.error("No slave servers specified!")
+  if not secondaries:
+    Log.error("No secondary servers specified!")
     sys.exit(-1)
   if not zookeepers:
     Log.error("No zookeeper servers specified!")
@@ -469,30 +469,30 @@ def start_cluster(cl_args):
   # make sure configs are templated
   update_config_files(cl_args)
 
-  dist_nodes = list(masters.union(slaves))
+  dist_nodes = list(primaries.union(secondaries))
   # if just local deployment
   if not (len(dist_nodes) == 1 and is_self(dist_nodes[0])):
     distribute_package(roles, cl_args)
-  start_master_nodes(masters, cl_args)
-  start_slave_nodes(slaves, cl_args)
-  start_api_server(masters, cl_args)
-  start_heron_tools(masters, cl_args)
+  start_primary_nodes(primaries, cl_args)
+  start_secondary_nodes(secondaries, cl_args)
+  start_api_server(primaries, cl_args)
+  start_heron_tools(primaries, cl_args)
   Log.info("Heron standalone cluster complete!")
 
-def start_api_server(masters, cl_args):
+def start_api_server(primaries, cl_args):
   '''
   Start the Heron API server
   '''
   # make sure nomad cluster is up
-  single_master = list(masters)[0]
-  wait_for_master_to_start(single_master)
+  single_primary = list(primaries)[0]
+  wait_for_primary_to_start(single_primary)
 
   cmd = "%s run %s >> /tmp/apiserver_start.log 2>&1 &" \
         % (get_nomad_path(cl_args), get_apiserver_job_file(cl_args))
-  Log.info("Starting Heron API Server on %s" % single_master)
+  Log.info("Starting Heron API Server on %s" % single_primary)
 
-  if not is_self(single_master):
-    cmd = ssh_remote_execute(cmd, single_master, cl_args)
+  if not is_self(single_primary):
+    cmd = ssh_remote_execute(cmd, single_primary, cl_args)
   Log.debug(cmd)
   pid = subprocess.Popen(cmd,
                          shell=True,
@@ -504,25 +504,25 @@ def start_api_server(masters, cl_args):
   output = pid.communicate()
   Log.debug("return code: %s output: %s" % (return_code, output))
   if return_code != 0:
-    Log.error("Failed to start API server on %s with error:\n%s" % (single_master, output[1]))
+    Log.error("Failed to start API server on %s with error:\n%s" % (single_primary, output[1]))
     sys.exit(-1)
 
-  wait_for_job_to_start(single_master, "apiserver")
+  wait_for_job_to_start(single_primary, "apiserver")
   Log.info("Done starting Heron API Server")
 
-def start_heron_tools(masters, cl_args):
+def start_heron_tools(primaries, cl_args):
   '''
   Start Heron tracker and UI
   '''
-  single_master = list(masters)[0]
-  wait_for_master_to_start(single_master)
+  single_primary = list(primaries)[0]
+  wait_for_primary_to_start(single_primary)
 
   cmd = "%s run %s >> /tmp/heron_tools_start.log 2>&1 &" \
         % (get_nomad_path(cl_args), get_heron_tools_job_file(cl_args))
-  Log.info("Starting Heron Tools on %s" % single_master)
+  Log.info("Starting Heron Tools on %s" % single_primary)
 
-  if not is_self(single_master):
-    cmd = ssh_remote_execute(cmd, single_master, cl_args)
+  if not is_self(single_primary):
+    cmd = ssh_remote_execute(cmd, single_primary, cl_args)
   Log.debug(cmd)
   pid = subprocess.Popen(cmd,
                          shell=True,
@@ -534,10 +534,10 @@ def start_heron_tools(masters, cl_args):
   output = pid.communicate()
   Log.debug("return code: %s output: %s" % (return_code, output))
   if return_code != 0:
-    Log.error("Failed to start Heron Tools on %s with error:\n%s" % (single_master, output[1]))
+    Log.error("Failed to start Heron Tools on %s with error:\n%s" % (single_primary, output[1]))
     sys.exit(-1)
 
-  wait_for_job_to_start(single_master, "heron-tools")
+  wait_for_job_to_start(single_primary, "heron-tools")
   Log.info("Done starting Heron Tools")
 
 def distribute_package(roles, cl_args):
@@ -545,24 +545,24 @@ def distribute_package(roles, cl_args):
   distribute Heron packages to all nodes
   '''
   Log.info("Distributing heron package to nodes (this might take a while)...")
-  masters = roles[Role.MASTERS]
-  slaves = roles[Role.SLAVES]
+  primaries = roles[Role.PRIMARIES]
+  secondaries = roles[Role.SECONDARIES]
 
   tar_file = tempfile.NamedTemporaryFile(suffix=".tmp").name
   Log.debug("TAR file %s to %s" % (cl_args["heron_dir"], tar_file))
   make_tarfile(tar_file, cl_args["heron_dir"])
-  dist_nodes = masters.union(slaves)
+  dist_nodes = primaries.union(secondaries)
 
   scp_package(tar_file, dist_nodes, cl_args)
 
-def wait_for_master_to_start(single_master):
+def wait_for_primary_to_start(single_primary):
   '''
-  Wait for a nomad master to start
+  Wait for a nomad primary to start
   '''
   i = 0
   while True:
     try:
-      r = requests.get("http://%s:4646/v1/status/leader" % single_master)
+      r = requests.get("http://%s:4646/v1/status/leader" % single_primary)
       if r.status_code == 200:
         break
     except:
@@ -574,14 +574,14 @@ def wait_for_master_to_start(single_master):
         sys.exit(-1)
     i = i + 1
 
-def wait_for_job_to_start(single_master, job):
+def wait_for_job_to_start(single_primary, job):
   '''
   Wait for a Nomad job to start
   '''
   i = 0
   while True:
     try:
-      r = requests.get("http://%s:4646/v1/job/%s" % (single_master, job))
+      r = requests.get("http://%s:4646/v1/job/%s" % (single_primary, job))
       if r.status_code == 200 and r.json()["Status"] == "running":
         break
       raise RuntimeError()
@@ -642,24 +642,24 @@ def make_tarfile(output_filename, source_dir):
   with tarfile.open(output_filename, "w:gz") as tar:
     tar.add(source_dir, arcname=os.path.basename(source_dir))
 
-def start_master_nodes(masters, cl_args):
+def start_primary_nodes(primaries, cl_args):
   '''
-  Start master nodes
+  Start primary nodes
   '''
   pids = []
-  for master in masters:
-    Log.info("Starting master on %s" % master)
+  for primary in primaries:
+    Log.info("Starting primary on %s" % primary)
     cmd = "%s agent -config %s >> /tmp/nomad_server_log 2>&1 &" \
-          % (get_nomad_path(cl_args), get_nomad_master_config_file(cl_args))
-    if not is_self(master):
-      cmd = ssh_remote_execute(cmd, master, cl_args)
+          % (get_nomad_path(cl_args), get_nomad_primary_config_file(cl_args))
+    if not is_self(primary):
+      cmd = ssh_remote_execute(cmd, primary, cl_args)
     Log.debug(cmd)
     pid = subprocess.Popen(cmd,
                            shell=True,
                            universal_newlines=True,
                            stdout=subprocess.PIPE,
                            stderr=subprocess.PIPE)
-    pids.append({"pid": pid, "dest": master})
+    pids.append({"pid": pid, "dest": primary})
 
   errors = []
   for entry in pids:
@@ -668,33 +668,33 @@ def start_master_nodes(masters, cl_args):
     output = pid.communicate()
     Log.debug("return code: %s output: %s" % (return_code, output))
     if return_code != 0:
-      errors.append("Failed to start master on %s with error:\n%s" % (entry["dest"], output[1]))
+      errors.append("Failed to start primary on %s with error:\n%s" % (entry["dest"], output[1]))
 
   if errors:
     for error in errors:
       Log.error(error)
     sys.exit(-1)
 
-  Log.info("Done starting masters")
+  Log.info("Done starting primaries")
 
-def start_slave_nodes(slaves, cl_args):
+def start_secondary_nodes(secondaries, cl_args):
   '''
-  Star slave nodes
+  Star secondary nodes
   '''
   pids = []
-  for slave in slaves:
-    Log.info("Starting slave on %s" % slave)
+  for secondary in secondaries:
+    Log.info("Starting secondary on %s" % secondary)
     cmd = "%s agent -config %s >> /tmp/nomad_client.log 2>&1 &" \
-          % (get_nomad_path(cl_args), get_nomad_slave_config_file(cl_args))
-    if not is_self(slave):
-      cmd = ssh_remote_execute(cmd, slave, cl_args)
+          % (get_nomad_path(cl_args), get_nomad_secondary_config_file(cl_args))
+    if not is_self(secondary):
+      cmd = ssh_remote_execute(cmd, secondary, cl_args)
     Log.debug(cmd)
     pid = subprocess.Popen(cmd,
                            shell=True,
                            universal_newlines=True,
                            stdout=subprocess.PIPE,
                            stderr=subprocess.PIPE)
-    pids.append({"pid": pid, "dest": slave})
+    pids.append({"pid": pid, "dest": secondary})
 
   errors = []
   for entry in pids:
@@ -703,14 +703,14 @@ def start_slave_nodes(slaves, cl_args):
     output = pid.communicate()
     Log.debug("return code: %s output: %s" % (return_code, output))
     if return_code != 0:
-      errors.append("Failed to start slave on %s with error:\n%s" % (entry["dest"], output[1]))
+      errors.append("Failed to start secondary on %s with error:\n%s" % (entry["dest"], output[1]))
 
   if errors:
     for error in errors:
       Log.error(error)
     sys.exit(-1)
 
-  Log.info("Done starting slaves")
+  Log.info("Done starting secondaries")
 
 
 def read_and_parse_roles(cl_args):
@@ -735,8 +735,8 @@ def read_and_parse_roles(cl_args):
     sys.exit(-1)
 
   # Set roles
-  roles[Role.MASTERS] = set([roles[Role.CLUSTER][0]])
-  roles[Role.SLAVES] = set(roles[Role.CLUSTER])
+  roles[Role.PRIMARIES] = set([roles[Role.CLUSTER][0]])
+  roles[Role.SECONDARIES] = set(roles[Role.CLUSTER])
   roles[Role.ZOOKEEPERS] = set(roles[Role.ZOOKEEPERS])
   roles[Role.CLUSTER] = set(roles[Role.CLUSTER])
 
@@ -788,17 +788,17 @@ def get_nomad_path(cl_args):
 
   return "%s/heron-nomad" % config.get_heron_bin_dir()
 
-def get_nomad_master_config_file(cl_args):
+def get_nomad_primary_config_file(cl_args):
   '''
-  get path to nomad master config file
+  get path to nomad primary config file
   '''
-  return "%s/standalone/resources/master.hcl" % config.get_heron_conf_dir()
+  return "%s/standalone/resources/primary.hcl" % config.get_heron_conf_dir()
 
-def get_nomad_slave_config_file(cl_args):
+def get_nomad_secondary_config_file(cl_args):
   '''
-  get path to nomad slave config file
+  get path to nomad secondary config file
   '''
-  return "%s/standalone/resources/slave.hcl" % config.get_heron_conf_dir()
+  return "%s/standalone/resources/secondary.hcl" % config.get_heron_conf_dir()
 
 def get_apiserver_job_file(cl_args):
   '''

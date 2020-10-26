@@ -23,11 +23,11 @@ import tornado.gen
 
 from heron.common.src.python.utils.log import Log
 from heron.proto import common_pb2
-from heron.proto import tmaster_pb2
+from heron.proto import tmanager_pb2
 
 # pylint: disable=too-many-locals, too-many-branches, unused-argument
 @tornado.gen.coroutine
-def getMetricsTimeline(tmaster,
+def getMetricsTimeline(tmanager,
                        component_name,
                        metric_names,
                        instances,
@@ -58,16 +58,16 @@ def getMetricsTimeline(tmaster,
     "message": "..."
   }
   """
-  # Tmaster is the proto object and must have host and port for stats.
-  if not tmaster or not tmaster.host or not tmaster.stats_port:
-    raise Exception("No Tmaster found")
+  # Tmanager is the proto object and must have host and port for stats.
+  if not tmanager or not tmanager.host or not tmanager.stats_port:
+    raise Exception("No Tmanager found")
 
-  host = tmaster.host
-  port = tmaster.stats_port
+  host = tmanager.host
+  port = tmanager.stats_port
 
   # Create the proto request object to get metrics.
 
-  metricRequest = tmaster_pb2.MetricRequest()
+  metricRequest = tmanager_pb2.MetricRequest()
   metricRequest.component_name = component_name
 
   # If no instances are give, metrics for all instances
@@ -107,17 +107,17 @@ def getMetricsTimeline(tmaster,
   # Check the response code - error if it is in 400s or 500s
   responseCode = result.code
   if responseCode >= 400:
-    message = "Error in getting metrics from Tmaster, code: " + responseCode
+    message = "Error in getting metrics from Tmanager, code: " + responseCode
     Log.error(message)
     raise Exception(message)
 
-  # Parse the response from tmaster.
-  metricResponse = tmaster_pb2.MetricResponse()
+  # Parse the response from tmanager.
+  metricResponse = tmanager_pb2.MetricResponse()
   metricResponse.ParseFromString(result.body)
 
   if metricResponse.status.status == common_pb2.NOTOK:
     if metricResponse.status.HasField("message"):
-      Log.warn("Received response from Tmaster: %s", metricResponse.status.message)
+      Log.warn("Received response from Tmanager: %s", metricResponse.status.message)
 
   # Form the response.
   ret = {}
