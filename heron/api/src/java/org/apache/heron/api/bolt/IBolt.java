@@ -34,7 +34,7 @@ import org.apache.heron.api.tuple.Tuple;
  * <p>A bolt's lifecycle is as follows:</p>
  * <p>
  * <p>IBolt object created on client machine. The IBolt is serialized into the topology
- * (using Java serialization) and submitted to the master machine of the cluster (Nimbus).
+ * (using Java serialization) and submitted to the primary machine of the cluster (Nimbus).
  * Nimbus then launches workers which deserialize the object, call prepare on it, and then
  * start processing tuples.</p>
  * <p>
