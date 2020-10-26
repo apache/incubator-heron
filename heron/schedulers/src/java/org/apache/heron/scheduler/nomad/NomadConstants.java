@@ -67,13 +67,13 @@ public final class NomadConstants {
   public static final String HERON_TOPOLOGY_DOWNLOAD_CMD = "HERON_TOPOLOGY_DOWNLOAD_CMD";
   public static final String HERON_EXECUTOR_CMD = "HERON_EXECUTOR_CMD";
   //Ports
-  public static final String MASTER_PORT = String.format("${NOMAD_PORT_%s}",
-      SchedulerUtils.ExecutorPort.MASTER_PORT.getName());
-  public static final String TMASTER_CONTROLLER_PORT = String.format("${NOMAD_PORT_%s}",
-      SchedulerUtils.ExecutorPort.TMASTER_CONTROLLER_PORT.getName()
+  public static final String SERVER_PORT = String.format("${NOMAD_PORT_%s}",
+      SchedulerUtils.ExecutorPort.SERVER_PORT.getName());
+  public static final String TMANAGER_CONTROLLER_PORT = String.format("${NOMAD_PORT_%s}",
+      SchedulerUtils.ExecutorPort.TMANAGER_CONTROLLER_PORT.getName()
           .replace("-", "_"));
-  public static final String TMASTER_STATS_PORT = String.format("${NOMAD_PORT_%s}",
-      SchedulerUtils.ExecutorPort.TMASTER_STATS_PORT.getName()
+  public static final String TMANAGER_STATS_PORT = String.format("${NOMAD_PORT_%s}",
+      SchedulerUtils.ExecutorPort.TMANAGER_STATS_PORT.getName()
           .replace("-", "_"));
   public static final String SHELL_PORT = String.format("${NOMAD_PORT_%s}",
       SchedulerUtils.ExecutorPort.SHELL_PORT.getName()
@@ -84,8 +84,8 @@ public final class NomadConstants {
   public static final String SCHEDULER_PORT = String.format("${NOMAD_PORT_%s}",
       SchedulerUtils.ExecutorPort.SCHEDULER_PORT.getName()
           .replace("-", "_"));
-  public static final String METRICS_CACHE_MASTER_PORT = String.format("${NOMAD_PORT_%s}",
-      SchedulerUtils.ExecutorPort.METRICS_CACHE_MASTER_PORT.getName()
+  public static final String METRICS_CACHE_SERVER_PORT = String.format("${NOMAD_PORT_%s}",
+      SchedulerUtils.ExecutorPort.METRICS_CACHE_SERVER_PORT.getName()
           .replace("-", "_"));
   public static final String METRICS_CACHE_STATS_PORT = String.format("${NOMAD_PORT_%s}",
       SchedulerUtils.ExecutorPort.METRICS_CACHE_STATS_PORT.getName()
@@ -102,15 +102,15 @@ public final class NomadConstants {
   public static final Map<SchedulerUtils.ExecutorPort, String> EXECUTOR_PORTS = new HashMap<>();
 
   static {
-    EXECUTOR_PORTS.put(SchedulerUtils.ExecutorPort.MASTER_PORT, MASTER_PORT);
-    EXECUTOR_PORTS.put(SchedulerUtils.ExecutorPort.TMASTER_CONTROLLER_PORT,
-        TMASTER_CONTROLLER_PORT);
-    EXECUTOR_PORTS.put(SchedulerUtils.ExecutorPort.TMASTER_STATS_PORT, TMASTER_STATS_PORT);
+    EXECUTOR_PORTS.put(SchedulerUtils.ExecutorPort.SERVER_PORT, SERVER_PORT);
+    EXECUTOR_PORTS.put(SchedulerUtils.ExecutorPort.TMANAGER_CONTROLLER_PORT,
+        TMANAGER_CONTROLLER_PORT);
+    EXECUTOR_PORTS.put(SchedulerUtils.ExecutorPort.TMANAGER_STATS_PORT, TMANAGER_STATS_PORT);
     EXECUTOR_PORTS.put(SchedulerUtils.ExecutorPort.SHELL_PORT, SHELL_PORT);
     EXECUTOR_PORTS.put(SchedulerUtils.ExecutorPort.METRICS_MANAGER_PORT, METRICS_MANAGER_PORT);
     EXECUTOR_PORTS.put(SchedulerUtils.ExecutorPort.SCHEDULER_PORT, SCHEDULER_PORT);
-    EXECUTOR_PORTS.put(SchedulerUtils.ExecutorPort.METRICS_CACHE_MASTER_PORT,
-        METRICS_CACHE_MASTER_PORT);
+    EXECUTOR_PORTS.put(SchedulerUtils.ExecutorPort.METRICS_CACHE_SERVER_PORT,
+        METRICS_CACHE_SERVER_PORT);
     EXECUTOR_PORTS.put(SchedulerUtils.ExecutorPort.METRICS_CACHE_STATS_PORT,
         METRICS_CACHE_STATS_PORT);
     EXECUTOR_PORTS.put(SchedulerUtils.ExecutorPort.CHECKPOINT_MANAGER_PORT,

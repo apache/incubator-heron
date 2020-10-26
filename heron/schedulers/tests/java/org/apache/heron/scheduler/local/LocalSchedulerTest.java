@@ -193,7 +193,7 @@ public class LocalSchedulerTest {
       Mockito.doReturn(processes[i]).when(scheduler)
           .startExecutorProcess(i,  instances);
       if (i > 0) {
-        // ignore the container for TMaster. existing containers simulate the containers created
+        // ignore the container for TManager. existing containers simulate the containers created
         // by packing plan
         existingContainers.add(PackingTestUtils.testContainerPlan(i));
       }

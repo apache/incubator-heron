@@ -190,7 +190,7 @@ public class LocalScheduler implements IScheduler, IScalable {
     LOG.info("Starting to deploy topology: " + LocalContext.topologyName(config));
 
     synchronized (processToContainer) {
-      LOG.info("Starting executor for TMaster");
+      LOG.info("Starting executor for TManager");
       startExecutor(0, null);
 
       // for each container, run its own executor
