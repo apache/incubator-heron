@@ -50,7 +50,7 @@ void HeronLocalFileStateMgr::InitTree() {
   path += "/topologies";
   FileUtils::makeDirectory(path);
   path = dpath;
-  path += "/tmasters";
+  path += "/tmanagers";
   FileUtils::makeDirectory(path);
   path = dpath;
   path += "/pplans";
@@ -66,14 +66,14 @@ void HeronLocalFileStateMgr::InitTree() {
   FileUtils::makeDirectory(path);
 }
 
-void HeronLocalFileStateMgr::SetTMasterLocationWatch(const std::string& topology_name,
+void HeronLocalFileStateMgr::SetTManagerLocationWatch(const std::string& topology_name,
                                                      VCallback<> watcher) {
   CHECK(watcher);
   // We kind of cheat here. We check periodically
-  time_t tmaster_last_change = FileUtils::getModifiedTime(GetTMasterLocationPath(topology_name));
+  time_t tmanager_last_change = FileUtils::getModifiedTime(GetTManagerLocationPath(topology_name));
 
-  auto cb = [topology_name, tmaster_last_change, watcher, this](EventLoop::Status status) {
-    this->CheckTMasterLocation(topology_name, tmaster_last_change, std::move(watcher), status);
+  auto cb = [topology_name, tmanager_last_change, watcher, this](EventLoop::Status status) {
+    this->CheckTManagerLocation(topology_name, tmanager_last_change, std::move(watcher), status);
   };
 
   CHECK_GT(eventLoop_->registerTimer(std::move(cb), false, 1000000), 0);
@@ -83,11 +83,11 @@ void HeronLocalFileStateMgr::SetMetricsCacheLocationWatch(const std::string& top
                                                      VCallback<> watcher) {
   CHECK(watcher);
   // We kind of cheat here. We check periodically
-  time_t tmaster_last_change = FileUtils::getModifiedTime(
+  time_t tmanager_last_change = FileUtils::getModifiedTime(
                                GetMetricsCacheLocationPath(topology_name));
 
-  auto cb = [topology_name, tmaster_last_change, watcher, this](EventLoop::Status status) {
-    this->CheckMetricsCacheLocation(topology_name, tmaster_last_change, std::move(watcher), status);
+  auto cb = [topology_name, tmanager_last_change, watcher, this](EventLoop::Status status) {
+    this->CheckMetricsCacheLocation(topology_name, tmanager_last_change, std::move(watcher), status);
   };
 
   CHECK_GT(eventLoop_->registerTimer(std::move(cb), false, 1000000), 0);
@@ -106,12 +106,12 @@ void HeronLocalFileStateMgr::SetPackingPlanWatch(const std::string& topology_nam
   CHECK_GT(eventLoop_->registerTimer(std::move(cb), false, 1000000), 0);
 }
 
-void HeronLocalFileStateMgr::GetTMasterLocation(const std::string& _topology_name,
-                                                shared_ptr<proto::tmaster::TMasterLocation> _return,
+void HeronLocalFileStateMgr::GetTManagerLocation(const std::string& _topology_name,
+                                                shared_ptr<proto::tmanager::TManagerLocation> _return,
                                                 VCallback<proto::system::StatusCode> cb) {
   std::string contents;
   proto::system::StatusCode status =
-      ReadAllFileContents(GetTMasterLocationPath(_topology_name), contents);
+      ReadAllFileContents(GetTManagerLocationPath(_topology_name), contents);
   if (status == proto::system::OK) {
     if (!_return->ParseFromString(contents)) {
       status = proto::system::STATE_CORRUPTED;
@@ -123,7 +123,7 @@ void HeronLocalFileStateMgr::GetTMasterLocation(const std::string& _topology_nam
 }
 
 void HeronLocalFileStateMgr::GetMetricsCacheLocation(const std::string& _topology_name,
-                                          shared_ptr<proto::tmaster::MetricsCacheLocation> _return,
+                                          shared_ptr<proto::tmanager::MetricsCacheLocation> _return,
                                           VCallback<proto::system::StatusCode> cb) {
   std::string contents;
   proto::system::StatusCode status =
@@ -138,12 +138,12 @@ void HeronLocalFileStateMgr::GetMetricsCacheLocation(const std::string& _topolog
   CHECK_GT(eventLoop_->registerTimer(std::move(wCb), false, 0), 0);
 }
 
-void HeronLocalFileStateMgr::SetTMasterLocation(const proto::tmaster::TMasterLocation& _location,
+void HeronLocalFileStateMgr::SetTManagerLocation(const proto::tmanager::TManagerLocation& _location,
                                                 VCallback<proto::system::StatusCode> cb) {
   // Note: Unlike Zk statemgr, we overwrite the location even if there is already one.
-  // This is because when running in simulator we control when a tmaster dies and
+  // This is because when running in simulator we control when a tmanager dies and
   // comes up deterministically.
-  std::string fname = GetTMasterLocationPath(_location.topology_name());
+  std::string fname = GetTManagerLocationPath(_location.topology_name());
   std::string contents;
   _location.SerializeToString(&contents);
   proto::system::StatusCode status = WriteToFile(fname, contents);
@@ -152,10 +152,10 @@ void HeronLocalFileStateMgr::SetTMasterLocation(const proto::tmaster::TMasterLoc
 }
 
 void HeronLocalFileStateMgr::SetMetricsCacheLocation(
-        const proto::tmaster::MetricsCacheLocation& _location,
+        const proto::tmanager::MetricsCacheLocation& _location,
         VCallback<proto::system::StatusCode> cb) {
   // Note: Unlike Zk statemgr, we overwrite the location even if there is already one.
-  // This is because when running in simulator we control when a tmaster dies and
+  // This is because when running in simulator we control when a tmanager dies and
   // comes up deterministically.
   std::string fname = GetMetricsCacheLocationPath(_location.topology_name());
   std::string contents;
@@ -464,9 +464,9 @@ proto::system::StatusCode HeronLocalFileStateMgr::MakeSureFileDoesNotExist(
   }
 }
 
-void HeronLocalFileStateMgr::CheckTMasterLocation(std::string topology_name, time_t last_change,
+void HeronLocalFileStateMgr::CheckTManagerLocation(std::string topology_name, time_t last_change,
                                                   VCallback<> watcher, EventLoop::Status) {
-  time_t nlast_change = FileUtils::getModifiedTime(GetTMasterLocationPath(topology_name));
+  time_t nlast_change = FileUtils::getModifiedTime(GetTManagerLocationPath(topology_name));
   if (nlast_change > last_change) {
     watcher();
   } else {
@@ -474,7 +474,7 @@ void HeronLocalFileStateMgr::CheckTMasterLocation(std::string topology_name, tim
   }
 
   auto cb = [topology_name, nlast_change, watcher, this](EventLoop::Status status) {
-    this->CheckTMasterLocation(topology_name, nlast_change, std::move(watcher), status);
+    this->CheckTManagerLocation(topology_name, nlast_change, std::move(watcher), status);
   };
 
   CHECK_GT(eventLoop_->registerTimer(std::move(cb), false, 1000000), 0);

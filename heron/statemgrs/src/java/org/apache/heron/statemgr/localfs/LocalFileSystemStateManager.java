@@ -36,7 +36,7 @@ import org.apache.heron.proto.scheduler.Scheduler;
 import org.apache.heron.proto.system.ExecutionEnvironment;
 import org.apache.heron.proto.system.PackingPlans;
 import org.apache.heron.proto.system.PhysicalPlans;
-import org.apache.heron.proto.tmaster.TopologyMaster;
+import org.apache.heron.proto.tmanager.TopologyManager;
 import org.apache.heron.spi.common.Config;
 import org.apache.heron.spi.common.Key;
 import org.apache.heron.spi.statemgr.Lock;
@@ -184,19 +184,19 @@ public class LocalFileSystemStateManager extends FileSystemStateManager {
   }
 
   @Override
-  public ListenableFuture<Boolean> setTMasterLocation(
-      TopologyMaster.TMasterLocation location, String topologyName) {
+  public ListenableFuture<Boolean> setTManagerLocation(
+      TopologyManager.TManagerLocation location, String topologyName) {
     // Note: Unlike Zk statemgr, we overwrite the location even if there is already one.
-    // This is because when running in simulator we control when a tmaster dies and
+    // This is because when running in simulator we control when a tmanager dies and
     // comes up deterministically.
-    return setData(StateLocation.TMASTER_LOCATION, topologyName, location.toByteArray(), true);
+    return setData(StateLocation.TMANAGER_LOCATION, topologyName, location.toByteArray(), true);
   }
 
   @Override
   public ListenableFuture<Boolean> setMetricsCacheLocation(
-      TopologyMaster.MetricsCacheLocation location, String topologyName) {
+      TopologyManager.MetricsCacheLocation location, String topologyName) {
     // Note: Unlike Zk statemgr, we overwrite the location even if there is already one.
-    // This is because when running in simulator we control when a tmaster dies and
+    // This is because when running in simulator we control when a tmanager dies and
     // comes up deterministically.
     LOG.info("setMetricsCacheLocation: ");
     return setData(StateLocation.METRICSCACHE_LOCATION, topologyName, location.toByteArray(), true);

@@ -82,8 +82,8 @@ class HeronZKStateMgrTest : public ::testing::Test {
   }
   // a proxy for the call since the tests cannot call directly
   // (friendship inheritance is not supported)
-  static void CallTMasterLocationWatch(HeronZKStateMgr* heron_zkstatemgr) {
-    heron_zkstatemgr->TMasterLocationWatch();
+  static void CallTManagerLocationWatch(HeronZKStateMgr* heron_zkstatemgr) {
+    heron_zkstatemgr->TManagerLocationWatch();
   }
   static void CallPackingPlanWatch(HeronZKStateMgr* heron_zkstatemgr) {
     heron_zkstatemgr->PackingPlanWatch();
@@ -96,7 +96,7 @@ class HeronZKStateMgrTest : public ::testing::Test {
     heron_zkstatemgr->GlobalWatchEventHandler(event);
   }
 
-  static void TmasterLocationWatchHandler() { tmaster_watch_handler_count++; }
+  static void TmanagerLocationWatchHandler() { tmanager_watch_handler_count++; }
   static void PackingPlanWatchHandler() { packing_plan_watch_handler_count++; }
 
   MockZKClient* mock_zkclient;
@@ -104,13 +104,13 @@ class HeronZKStateMgrTest : public ::testing::Test {
   std::shared_ptr<EventLoop> ss;
   std::string hostportlist;
   std::string topleveldir;
-  // used to verify the number of calls to TmasterLocationWatchHandler
-  static int tmaster_watch_handler_count;
+  // used to verify the number of calls to TmanagerLocationWatchHandler
+  static int tmanager_watch_handler_count;
   static int packing_plan_watch_handler_count;
 };
 
 // static member needs to be defined outside class... sigh :(
-int HeronZKStateMgrTest::tmaster_watch_handler_count = 0;
+int HeronZKStateMgrTest::tmanager_watch_handler_count = 0;
 int HeronZKStateMgrTest::packing_plan_watch_handler_count = 0;
 
 // Ensure that ZKClient is created and deleted appropriately.
@@ -129,9 +129,9 @@ TEST_F(HeronZKStateMgrTest, testCreateDelete) {
   delete heron_zkstatemgr;
 }
 
-TEST_F(HeronZKStateMgrTest, testSetTMasterLocationWatch) {
+TEST_F(HeronZKStateMgrTest, testSetTManagerLocationWatch) {
   const std::string topology_name = "dummy_topology";
-  const std::string expected_path = topleveldir + "/tmasters/" + topology_name;
+  const std::string expected_path = topleveldir + "/tmanagers/" + topology_name;
 
   // Calling the factory create method ensures that ZkClient is created once
   EXPECT_CALL(*mock_zkclient_factory, create(hostportlist, ss, _)).Times(1);
@@ -139,10 +139,10 @@ TEST_F(HeronZKStateMgrTest, testSetTMasterLocationWatch) {
   HeronZKStateMgr* heron_zkstatemgr =
       new HeronZKStateMgrWithMock(hostportlist, topleveldir, ss, mock_zkclient_factory);
 
-  // Ensure that it sets a watch to the tmaster location
+  // Ensure that it sets a watch to the tmanager location
   EXPECT_CALL(*mock_zkclient, Exists(expected_path, _, _)).Times(1);
 
-  heron_zkstatemgr->SetTMasterLocationWatch(topology_name, []() { TmasterLocationWatchHandler(); });
+  heron_zkstatemgr->SetTManagerLocationWatch(topology_name, []() { TmanagerLocationWatchHandler(); });
 
   EXPECT_CALL(*mock_zkclient, Die()).Times(1);
   EXPECT_CALL(*mock_zkclient_factory, Die()).Times(1);
@@ -150,22 +150,22 @@ TEST_F(HeronZKStateMgrTest, testSetTMasterLocationWatch) {
   delete heron_zkstatemgr;
 }
 
-TEST_F(HeronZKStateMgrTest, testTMasterLocationWatch) {
+TEST_F(HeronZKStateMgrTest, testTManagerLocationWatch) {
   const std::string topology_name = "dummy_topology";
-  const std::string expected_path = topleveldir + "/tmasters/" + topology_name;
+  const std::string expected_path = topleveldir + "/tmanagers/" + topology_name;
 
   HeronZKStateMgr* heron_zkstatemgr =
       new HeronZKStateMgrWithMock(hostportlist, topleveldir, ss, mock_zkclient_factory);
 
-  heron_zkstatemgr->SetTMasterLocationWatch(topology_name, []() { TmasterLocationWatchHandler(); });
+  heron_zkstatemgr->SetTManagerLocationWatch(topology_name, []() { TmanagerLocationWatchHandler(); });
 
-  // ensure TmasterLocationWatch resets the watch
+  // ensure TmanagerLocationWatch resets the watch
   EXPECT_CALL(*mock_zkclient, Exists(expected_path, _, _)).Times(1);
 
-  tmaster_watch_handler_count = 0;
-  CallTMasterLocationWatch(heron_zkstatemgr);
+  tmanager_watch_handler_count = 0;
+  CallTManagerLocationWatch(heron_zkstatemgr);
   // ensure watch handler is called.
-  ASSERT_EQ(tmaster_watch_handler_count, 1);
+  ASSERT_EQ(tmanager_watch_handler_count, 1);
 
   EXPECT_CALL(*mock_zkclient, Die()).Times(1);
   EXPECT_CALL(*mock_zkclient_factory, Die()).Times(1);
@@ -182,7 +182,7 @@ TEST_F(HeronZKStateMgrTest, testPackingPlanWatch) {
 
   heron_zkstatemgr->SetPackingPlanWatch(topology_name, []() { PackingPlanWatchHandler(); });
 
-  // ensure TmasterLocationWatch resets the watch
+  // ensure TmanagerLocationWatch resets the watch
   EXPECT_CALL(*mock_zkclient, Exists(expected_path, _, _)).Times(1);
 
   packing_plan_watch_handler_count = 0;
@@ -198,14 +198,14 @@ TEST_F(HeronZKStateMgrTest, testPackingPlanWatch) {
 
 TEST_F(HeronZKStateMgrTest, testGlobalWatchEventHandler) {
   const std::string topology_name = "dummy_topology";
-  const std::string expected_path = topleveldir + "/tmasters/" + topology_name;
+  const std::string expected_path = topleveldir + "/tmanagers/" + topology_name;
 
   heron::common::HeronZKStateMgr* heron_zkstatemgr =
       new HeronZKStateMgrWithMock(hostportlist, topleveldir, ss, mock_zkclient_factory);
 
-  heron_zkstatemgr->SetTMasterLocationWatch(topology_name, []() { TmasterLocationWatchHandler(); });
+  heron_zkstatemgr->SetTManagerLocationWatch(topology_name, []() { TmanagerLocationWatchHandler(); });
 
-  tmaster_watch_handler_count = 0;
+  tmanager_watch_handler_count = 0;
   const ZKClient::ZkWatchEvent session_expired_event = {ZOO_SESSION_EVENT,
                                                         ZOO_EXPIRED_SESSION_STATE, ""};
 
@@ -217,7 +217,7 @@ TEST_F(HeronZKStateMgrTest, testGlobalWatchEventHandler) {
   CallGlobalWatchEventHandler(heron_zkstatemgr, session_expired_event);
 
   // Ensure watch handler is called
-  ASSERT_EQ(tmaster_watch_handler_count, 1);
+  ASSERT_EQ(tmanager_watch_handler_count, 1);
 
   EXPECT_CALL(*mock_zkclient_factory, Die()).Times(1);
   EXPECT_CALL(*mock_zkclient, Die()).Times(1);
