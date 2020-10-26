@@ -20,17 +20,17 @@
 package org.apache.heron.spi.utils;
 
 /**
- * Thrown to indicate a TMaster error
+ * Thrown to indicate a TManager error
  */
-public class TMasterException extends RuntimeException {
+public class TManagerException extends RuntimeException {
 
   public static final long serialVersionUID = 2718487207462907715L;
 
-  public TMasterException(String message) {
+  public TManagerException(String message) {
     super(message);
   }
 
-  public TMasterException(String message, Throwable cause) {
+  public TManagerException(String message, Throwable cause) {
     super(message, cause);
   }
 }

@@ -147,8 +147,8 @@ public class KeysTest {
         Key.STMGR_BINARY
     );
     assertEquals(
-        "heron.binaries.tmaster",
-        Key.TMASTER_BINARY
+        "heron.binaries.tmanager",
+        Key.TMANAGER_BINARY
     );
     assertEquals(
         "heron.binaries.shell",
