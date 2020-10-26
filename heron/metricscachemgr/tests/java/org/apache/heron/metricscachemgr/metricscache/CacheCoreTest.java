@@ -36,7 +36,7 @@ import org.apache.heron.metricscachemgr.metricscache.query.MetricDatum;
 import org.apache.heron.metricscachemgr.metricscache.query.MetricRequest;
 import org.apache.heron.metricscachemgr.metricscache.query.MetricResponse;
 import org.apache.heron.metricscachemgr.metricscache.query.MetricTimeRangeValue;
-import org.apache.heron.proto.tmaster.TopologyMaster;
+import org.apache.heron.proto.tmanager.TopologyManager;
 import org.apache.heron.spi.metricsmgr.metrics.MetricsFilter;
 
 import static org.apache.heron.metricscachemgr.metricscache.query.MetricGranularity.RAW;
@@ -99,7 +99,7 @@ public class CacheCoreTest {
     // although it may be slightly different from the time origin
     // in the CacheCore initialization.
     now = System.currentTimeMillis();
-    TopologyMaster.PublishMetrics.Builder builder = TopologyMaster.PublishMetrics.newBuilder();
+    TopologyManager.PublishMetrics.Builder builder = TopologyManager.PublishMetrics.newBuilder();
     // should be in bucket 1
     long ts = now - 90 * 1000;
 
@@ -119,7 +119,7 @@ public class CacheCoreTest {
     for (String component : components) {
       for (String instance : instances) {
         for (String metric : metrics) {
-          builder.addMetrics(TopologyMaster.MetricDatum.newBuilder()
+          builder.addMetrics(TopologyManager.MetricDatum.newBuilder()
               .setTimestamp(ts)
               .setComponentName(component).setInstanceId(instance)
               .setName(metric)
@@ -478,7 +478,7 @@ public class CacheCoreTest {
     // although it may be slightly different from the time origin
     // in the CacheCore initialization.
     now = System.currentTimeMillis();
-    TopologyMaster.PublishMetrics.Builder builder = TopologyMaster.PublishMetrics.newBuilder();
+    TopologyManager.PublishMetrics.Builder builder = TopologyManager.PublishMetrics.newBuilder();
     long[] ts = new long[]{
         // the timestamp falls outside cache time window. too old to be in the cache
         now - 120 * 1000,
@@ -501,7 +501,7 @@ public class CacheCoreTest {
         "0.0", "0.1", "0.2", "0.3", "0.4", "0.5", "0.6", "0.7"
     };
     for (int i = 0; i < ts.length; i++) {
-      builder.addMetrics(TopologyMaster.MetricDatum.newBuilder()
+      builder.addMetrics(TopologyManager.MetricDatum.newBuilder()
           .setTimestamp(ts[i])
           .setComponentName("c1").setInstanceId("i1")
           .setName("m1")
@@ -634,11 +634,11 @@ public class CacheCoreTest {
     // in the CacheCore initialization.
     now = ticker.read();
 
-    TopologyMaster.PublishMetrics.Builder builder = TopologyMaster.PublishMetrics.newBuilder();
+    TopologyManager.PublishMetrics.Builder builder = TopologyManager.PublishMetrics.newBuilder();
     // should be in bucket 1
     long ts = now - 9 * 1000;
     // c1-i1, m1: 0.1
-    builder.addMetrics(TopologyMaster.MetricDatum.newBuilder()
+    builder.addMetrics(TopologyManager.MetricDatum.newBuilder()
         .setTimestamp(ts)
         .setComponentName("c1").setInstanceId("i1")
         .setName("m1")
@@ -680,11 +680,11 @@ public class CacheCoreTest {
     );
 
     // insert-select after purge
-    TopologyMaster.PublishMetrics.Builder builder2 = TopologyMaster.PublishMetrics.newBuilder();
+    TopologyManager.PublishMetrics.Builder builder2 = TopologyManager.PublishMetrics.newBuilder();
     // should be in bucket 1
     ts = now - 3 * 1000;
     // c1-i1, m1: 0.1
-    builder2.addMetrics(TopologyMaster.MetricDatum.newBuilder()
+    builder2.addMetrics(TopologyManager.MetricDatum.newBuilder()
         .setTimestamp(ts)
         .setComponentName("c1").setInstanceId("i1")
         .setName("m1")

@@ -35,7 +35,7 @@ import org.apache.heron.metricscachemgr.metricscache.query.MetricRequest;
 import org.apache.heron.metricscachemgr.metricscache.query.MetricResponse;
 import org.apache.heron.metricscachemgr.metricscache.query.MetricTimeRangeValue;
 import org.apache.heron.proto.system.Common;
-import org.apache.heron.proto.tmaster.TopologyMaster;
+import org.apache.heron.proto.tmanager.TopologyManager;
 
 import static org.apache.heron.metricscachemgr.metricscache.query.MetricGranularity.AGGREGATE_ALL_METRICS;
 import static org.apache.heron.metricscachemgr.metricscache.query.MetricGranularity.AGGREGATE_BY_BUCKET;
@@ -48,11 +48,11 @@ public final class MetricsCacheQueryUtils {
   }
 
   /**
-   * compatible with org.apache.heron.proto.tmaster.TopologyMaster.MetricRequest
+   * compatible with org.apache.heron.proto.tmanager.TopologyManager.MetricRequest
    * @param request protobuf defined message
    * @return metricscache defined data structure
    */
-  public static MetricRequest fromProtobuf(TopologyMaster.MetricRequest request) {
+  public static MetricRequest fromProtobuf(TopologyManager.MetricRequest request) {
     String componentName = request.getComponentName();
 
     Map<String, Set<String>> componentNameInstanceId = new HashMap<>();
@@ -101,15 +101,15 @@ public final class MetricsCacheQueryUtils {
   }
 
   /**
-   * compatible with org.apache.heron.proto.tmaster.TopologyMaster.MetricResponse
+   * compatible with org.apache.heron.proto.tmanager.TopologyManager.MetricResponse
    * @param response metricscache defined data structure
    * @param request metricscache defined data structure
    * @return protobuf defined message
    */
-  public static TopologyMaster.MetricResponse toProtobuf(MetricResponse response,
+  public static TopologyManager.MetricResponse toProtobuf(MetricResponse response,
                                                          MetricRequest request) {
-    TopologyMaster.MetricResponse.Builder builder =
-        TopologyMaster.MetricResponse.newBuilder();
+    TopologyManager.MetricResponse.Builder builder =
+        TopologyManager.MetricResponse.newBuilder();
     builder.setInterval((request.getEndTime() - request.getStartTime()) / 1000); // in seconds
 
     // default OK if we have response to build already
@@ -136,14 +136,14 @@ public final class MetricsCacheQueryUtils {
 
     // add TaskMetric
     for (String instanceId : aggregation.keySet()) {
-      TopologyMaster.MetricResponse.TaskMetric.Builder taskMetricBuilder =
-          TopologyMaster.MetricResponse.TaskMetric.newBuilder();
+      TopologyManager.MetricResponse.TaskMetric.Builder taskMetricBuilder =
+          TopologyManager.MetricResponse.TaskMetric.newBuilder();
 
       taskMetricBuilder.setInstanceId(instanceId);
       // add IndividualMetric
       for (String metricName : aggregation.get(instanceId).keySet()) {
-        TopologyMaster.MetricResponse.IndividualMetric.Builder individualMetricBuilder =
-            TopologyMaster.MetricResponse.IndividualMetric.newBuilder();
+        TopologyManager.MetricResponse.IndividualMetric.Builder individualMetricBuilder =
+            TopologyManager.MetricResponse.IndividualMetric.newBuilder();
 
         individualMetricBuilder.setName(metricName);
         // add value|IntervalValue
@@ -152,12 +152,12 @@ public final class MetricsCacheQueryUtils {
           individualMetricBuilder.setValue(list.get(0).getValue());
         } else {
           for (MetricTimeRangeValue v : list) {
-            TopologyMaster.MetricResponse.IndividualMetric.IntervalValue.Builder
+            TopologyManager.MetricResponse.IndividualMetric.IntervalValue.Builder
                 intervalValueBuilder =
-                TopologyMaster.MetricResponse.IndividualMetric.IntervalValue.newBuilder();
+                TopologyManager.MetricResponse.IndividualMetric.IntervalValue.newBuilder();
 
             intervalValueBuilder.setValue(v.getValue());
-            intervalValueBuilder.setInterval(TopologyMaster.MetricInterval.newBuilder()
+            intervalValueBuilder.setInterval(TopologyManager.MetricInterval.newBuilder()
                 .setStart(v.getStartTime()).setEnd(v.getEndTime()));
 
             individualMetricBuilder.addIntervalValues(intervalValueBuilder);
@@ -173,8 +173,8 @@ public final class MetricsCacheQueryUtils {
     return builder.build();
   }
 
-  // compatible with org.apache.heron.proto.tmaster.TopologyMaster.ExceptionLogRequest
-  public static ExceptionRequest fromProtobuf(TopologyMaster.ExceptionLogRequest request) {
+  // compatible with org.apache.heron.proto.tmanager.TopologyManager.ExceptionLogRequest
+  public static ExceptionRequest fromProtobuf(TopologyManager.ExceptionLogRequest request) {
     String componentName = request.getComponentName();
 
     Map<String, Set<String>> componentNameInstanceId = new HashMap<>();
@@ -191,16 +191,16 @@ public final class MetricsCacheQueryUtils {
     return new ExceptionRequest(componentNameInstanceId);
   }
 
-  // compatible with org.apache.heron.proto.tmaster.TopologyMaster.ExceptionLogResponse
-  public static TopologyMaster.ExceptionLogResponse toProtobuf(ExceptionResponse response) {
-    TopologyMaster.ExceptionLogResponse.Builder builder =
-        TopologyMaster.ExceptionLogResponse.newBuilder();
+  // compatible with org.apache.heron.proto.tmanager.TopologyManager.ExceptionLogResponse
+  public static TopologyManager.ExceptionLogResponse toProtobuf(ExceptionResponse response) {
+    TopologyManager.ExceptionLogResponse.Builder builder =
+        TopologyManager.ExceptionLogResponse.newBuilder();
     // default OK if we have response to build already
     builder.setStatus(Common.Status.newBuilder().setStatus(Common.StatusCode.OK));
 
     for (ExceptionDatum e : response.getExceptionDatapointList()) {
-      TopologyMaster.TmasterExceptionLog.Builder exceptionBuilder =
-          TopologyMaster.TmasterExceptionLog.newBuilder();
+      TopologyManager.TmanagerExceptionLog.Builder exceptionBuilder =
+          TopologyManager.TmanagerExceptionLog.newBuilder();
       // ExceptionDatapoint
       exceptionBuilder.setComponentName(e.getComponentName());
       exceptionBuilder.setHostname(e.getHostname());

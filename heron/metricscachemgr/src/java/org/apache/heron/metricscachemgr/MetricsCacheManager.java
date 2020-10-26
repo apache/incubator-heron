@@ -40,7 +40,7 @@ import org.apache.heron.common.utils.logging.ErrorReportLoggingHandler;
 import org.apache.heron.common.utils.logging.LoggingHelper;
 import org.apache.heron.metricscachemgr.metricscache.MetricsCache;
 import org.apache.heron.metricsmgr.MetricsSinksConfig;
-import org.apache.heron.proto.tmaster.TopologyMaster;
+import org.apache.heron.proto.tmanager.TopologyManager;
 import org.apache.heron.spi.common.Config;
 import org.apache.heron.spi.common.ConfigLoader;
 import org.apache.heron.spi.common.Context;
@@ -76,7 +76,7 @@ public class MetricsCacheManager {
 
   private Config config;
 
-  private TopologyMaster.MetricsCacheLocation metricsCacheLocation;
+  private TopologyManager.MetricsCacheLocation metricsCacheLocation;
 
   /**
    * Constructor: MetricsCacheManager needs 4 type information:
@@ -87,7 +87,7 @@ public class MetricsCacheManager {
    *
    * @param topologyName topology name
    * @param serverHost server host
-   * @param masterPort port to accept message from sink
+   * @param serverPort port to accept message from sink
    * @param statsPort port to respond to query request
    * @param systemConfig heron config
    * @param metricsSinkConfig sink config
@@ -95,10 +95,10 @@ public class MetricsCacheManager {
    * @param metricsCacheLocation location for state mgr
    */
   public MetricsCacheManager(String topologyName,
-                             String serverHost, int masterPort, int statsPort,
+                             String serverHost, int serverPort, int statsPort,
                              SystemConfig systemConfig, MetricsSinksConfig metricsSinkConfig,
                              Config configExpand,
-                             TopologyMaster.MetricsCacheLocation metricsCacheLocation)
+                             TopologyManager.MetricsCacheLocation metricsCacheLocation)
       throws IOException {
     this.topologyName = topologyName;
     this.config = configExpand;
@@ -121,11 +121,11 @@ public class MetricsCacheManager {
 
     // Construct the server to accepts messages from sinks
     metricsCacheManagerServer = new MetricsCacheManagerServer(metricsCacheManagerServerLoop,
-        serverHost, masterPort, serverSocketOptions, metricsCache);
+        serverHost, serverPort, serverSocketOptions, metricsCache);
 
-    metricsCacheManagerServer.registerOnMessage(TopologyMaster.PublishMetrics.newBuilder());
-    metricsCacheManagerServer.registerOnRequest(TopologyMaster.MetricRequest.newBuilder());
-    metricsCacheManagerServer.registerOnRequest(TopologyMaster.ExceptionLogRequest.newBuilder());
+    metricsCacheManagerServer.registerOnMessage(TopologyManager.PublishMetrics.newBuilder());
+    metricsCacheManagerServer.registerOnRequest(TopologyManager.MetricRequest.newBuilder());
+    metricsCacheManagerServer.registerOnRequest(TopologyManager.ExceptionLogRequest.newBuilder());
 
     // Construct the server to respond to query request
     metricsCacheManagerHttpServer = new MetricsCacheManagerHttpServer(metricsCache, statsPort);
@@ -183,11 +183,11 @@ public class MetricsCacheManager {
         .required()
         .build();
 
-    Option masterPort = Option.builder("m")
-        .desc("Master port to accept the metric/exception messages from sinks")
-        .longOpt("master_port")
+    Option serverPort = Option.builder("m")
+        .desc("Server port to accept the metric/exception messages from sinks")
+        .longOpt("server_port")
         .hasArgs()
-        .argName("master port")
+        .argName("server port")
         .required()
         .build();
 
@@ -252,7 +252,7 @@ public class MetricsCacheManager {
     options.addOption(cluster);
     options.addOption(role);
     options.addOption(environment);
-    options.addOption(masterPort);
+    options.addOption(serverPort);
     options.addOption(statsPort);
     options.addOption(systemConfig);
     options.addOption(overrideConfig);
@@ -312,7 +312,7 @@ public class MetricsCacheManager {
     String cluster = cmd.getOptionValue("cluster");
     String role = cmd.getOptionValue("role");
     String environ = cmd.getOptionValue("environment");
-    int masterPort = Integer.valueOf(cmd.getOptionValue("master_port"));
+    int serverPort = Integer.valueOf(cmd.getOptionValue("server_port"));
     int statsPort = Integer.valueOf(cmd.getOptionValue("stats_port"));
     String systemConfigFilename = cmd.getOptionValue("system_config_file");
     String overrideConfigFilename = cmd.getOptionValue("override_config_file");
@@ -336,8 +336,8 @@ public class MetricsCacheManager {
     LoggingHelper.addLoggingHandler(new ErrorReportLoggingHandler());
 
     LOG.info(String.format("Starting MetricsCache for topology %s with topologyId %s with "
-            + "MetricsCache Id %s, master port: %d.",
-        topologyName, topologyId, metricsCacheMgrId, masterPort));
+            + "MetricsCache Id %s, server port: %d.",
+        topologyName, topologyId, metricsCacheMgrId, serverPort));
 
     LOG.info("System Config: " + systemConfig);
 
@@ -359,18 +359,18 @@ public class MetricsCacheManager {
     LOG.info("Cli Config: " + config.toString());
 
     // build metricsCache location
-    TopologyMaster.MetricsCacheLocation metricsCacheLocation =
-        TopologyMaster.MetricsCacheLocation.newBuilder()
+    TopologyManager.MetricsCacheLocation metricsCacheLocation =
+        TopologyManager.MetricsCacheLocation.newBuilder()
             .setTopologyName(topologyName)
             .setTopologyId(topologyId)
             .setHost(InetAddress.getLocalHost().getHostName())
             .setControllerPort(-1) // not used for metricscache
-            .setMasterPort(masterPort)
+            .setServerPort(serverPort)
             .setStatsPort(statsPort)
             .build();
 
     MetricsCacheManager metricsCacheManager = new MetricsCacheManager(
-        topologyName, METRICS_CACHE_HOST, masterPort, statsPort,
+        topologyName, METRICS_CACHE_HOST, serverPort, statsPort,
         systemConfig, sinksConfig, config, metricsCacheLocation);
     metricsCacheManager.start();
 

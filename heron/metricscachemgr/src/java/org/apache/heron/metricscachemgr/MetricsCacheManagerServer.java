@@ -30,7 +30,7 @@ import org.apache.heron.common.network.HeronSocketOptions;
 import org.apache.heron.common.network.REQID;
 import org.apache.heron.metricscachemgr.metricscache.MetricsCache;
 import org.apache.heron.metricsmgr.MetricsManagerServer;
-import org.apache.heron.proto.tmaster.TopologyMaster;
+import org.apache.heron.proto.tmanager.TopologyManager;
 
 /**
  * server to accept metrics from a particular sink in metrics manager
@@ -71,10 +71,10 @@ public class MetricsCacheManagerServer extends HeronServer {
     LOG.fine("MetricsCacheManagerServer onRequest from host:port "
         + channel.socket().getRemoteSocketAddress());
 
-    if (request instanceof TopologyMaster.MetricRequest) {
-      LOG.fine("received request " + (TopologyMaster.MetricRequest) request);
-      TopologyMaster.MetricResponse resp =
-          metricsCache.getMetrics((TopologyMaster.MetricRequest) request);
+    if (request instanceof TopologyManager.MetricRequest) {
+      LOG.fine("received request " + (TopologyManager.MetricRequest) request);
+      TopologyManager.MetricResponse resp =
+          metricsCache.getMetrics((TopologyManager.MetricRequest) request);
       LOG.fine("query finished, to send response");
       sendResponse(requestId, channel, resp);
       LOG.fine("queued response size " + resp.getSerializedSize());
@@ -89,9 +89,9 @@ public class MetricsCacheManagerServer extends HeronServer {
     LOG.fine("MetricsCacheManagerServer onMessage from host:port "
         + channel.socket().getRemoteSocketAddress());
 
-    if (message instanceof TopologyMaster.PublishMetrics) {
-      LOG.fine("received message " + (TopologyMaster.PublishMetrics) message);
-      metricsCache.addMetrics((TopologyMaster.PublishMetrics) message);
+    if (message instanceof TopologyManager.PublishMetrics) {
+      LOG.fine("received message " + (TopologyManager.PublishMetrics) message);
+      metricsCache.addMetrics((TopologyManager.PublishMetrics) message);
     } else {
       LOG.severe("Unknown kind of message received "
           + channel.socket().getRemoteSocketAddress() + "; " + message);
