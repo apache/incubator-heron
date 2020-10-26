@@ -41,44 +41,44 @@ import org.apache.heron.common.network.HeronClient;
 import org.apache.heron.common.network.StatusCode;
 import org.apache.heron.common.testhelpers.HeronServerTester;
 import org.apache.heron.proto.system.Metrics;
-import org.apache.heron.proto.tmaster.TopologyMaster;
+import org.apache.heron.proto.tmanager.TopologyManager;
 
 import static org.apache.heron.common.testhelpers.HeronServerTester.RESPONSE_RECEIVED_TIMEOUT;
 import static org.mockito.Mockito.spy;
 
 /**
- * Test whether MetricsManagerServer could handle TMasterLocationRefreshMessage correctly.
+ * Test whether MetricsManagerServer could handle TManagerLocationRefreshMessage correctly.
  * <p>
- * We make a SimpleTMasterLocationPublisher, which would send two TMasterLocationRefreshMessage,
+ * We make a SimpleTManagerLocationPublisher, which would send two TManagerLocationRefreshMessage,
  * (twice each) after connected and registered with
  * MetricsManagerServer, and then we check:
  * 1. Whether onMessage(...) is invoked 4 times, with correct arguments.
  * <p>
  * 2. Whether onMessage(...) is invoked 4 times, with correct order.
  * <p>
- * 3. Whether eventually the TMasterLocation in SingletonRegistry should be the latest one.
+ * 3. Whether eventually the TManagerLocation in SingletonRegistry should be the latest one.
  */
 
-public class HandleTMasterLocationTest {
+public class HandleTManagerLocationTest {
 
-  // Two TMasterLocationRefreshMessage to verify
-  private static final Metrics.TMasterLocationRefreshMessage TMASTERLOCATIONREFRESHMESSAGE0 =
-      Metrics.TMasterLocationRefreshMessage.newBuilder().setTmaster(
-          TopologyMaster.TMasterLocation.newBuilder().
+  // Two TManagerLocationRefreshMessage to verify
+  private static final Metrics.TManagerLocationRefreshMessage TMANAGERLOCATIONREFRESHMESSAGE0 =
+      Metrics.TManagerLocationRefreshMessage.newBuilder().setTmanager(
+          TopologyManager.TManagerLocation.newBuilder().
               setTopologyName("topology-name").setTopologyId("topology-id").
-              setHost("host").setControllerPort(0).setMasterPort(0)).
+              setHost("host").setControllerPort(0).setManagerPort(0)).
           build();
 
-  private static final Metrics.TMasterLocationRefreshMessage TMASTERLOCATIONREFRESHMESSAGE1 =
-      Metrics.TMasterLocationRefreshMessage.newBuilder().setTmaster(
-          TopologyMaster.TMasterLocation.newBuilder().
+  private static final Metrics.TManagerLocationRefreshMessage TMANAGERLOCATIONREFRESHMESSAGE1 =
+      Metrics.TManagerLocationRefreshMessage.newBuilder().setTmanager(
+          TopologyManager.TManagerLocation.newBuilder().
               setTopologyName("topology-name").setTopologyId("topology-id").
-              setHost("host").setControllerPort(0).setMasterPort(1)).
+              setHost("host").setControllerPort(0).setManagerPort(1)).
           build();
 
-  // Bean name to register the TMasterLocation object into SingletonRegistry
-  private static final String TMASTER_LOCATION_BEAN_NAME =
-      TopologyMaster.TMasterLocation.newBuilder().getDescriptorForType().getFullName();
+  // Bean name to register the TManagerLocation object into SingletonRegistry
+  private static final String TMANAGER_LOCATION_BEAN_NAME =
+      TopologyManager.TManagerLocation.newBuilder().getDescriptorForType().getFullName();
 
   private LatchedMultiCountMetric serverMetrics;
   private MetricsManagerServer metricsManagerServer;
@@ -88,7 +88,7 @@ public class HandleTMasterLocationTest {
   public void before() throws IOException {
     // MetricsManagerServer increments this counter every time a location refresh message is
     // received, so we can await this counter getting to 4 before proceeding with the test
-    serverMetrics = new LatchedMultiCountMetric("tmaster-location-received", 4L);
+    serverMetrics = new LatchedMultiCountMetric("tmanager-location-received", 4L);
 
     // Spy it for unit test
     metricsManagerServer =
@@ -117,32 +117,32 @@ public class HandleTMasterLocationTest {
   }
 
   @Test
-  public void testHandleTMasterLocation() throws InterruptedException {
+  public void testHandleTManagerLocation() throws InterruptedException {
     serverMetrics.await(Duration.ofSeconds(10));
 
     // Verification
-    TopologyMaster.TMasterLocation tMasterLocation = (TopologyMaster.TMasterLocation)
-        SingletonRegistry.INSTANCE.getSingleton(TMASTER_LOCATION_BEAN_NAME);
+    TopologyManager.TManagerLocation tManagerLocation = (TopologyManager.TManagerLocation)
+        SingletonRegistry.INSTANCE.getSingleton(TMANAGER_LOCATION_BEAN_NAME);
 
     // Verify we received these message
     Mockito.verify(metricsManagerServer, Mockito.times(2)).
-        onMessage(Mockito.any(SocketChannel.class), Mockito.eq(TMASTERLOCATIONREFRESHMESSAGE0));
+        onMessage(Mockito.any(SocketChannel.class), Mockito.eq(TMANAGERLOCATIONREFRESHMESSAGE0));
     Mockito.verify(metricsManagerServer, Mockito.times(2)).
-        onMessage(Mockito.any(SocketChannel.class), Mockito.eq(TMASTERLOCATIONREFRESHMESSAGE1));
+        onMessage(Mockito.any(SocketChannel.class), Mockito.eq(TMANAGERLOCATIONREFRESHMESSAGE1));
 
     // Verify we received message in order
     InOrder inOrder = Mockito.inOrder(metricsManagerServer);
 
     inOrder.verify(metricsManagerServer, Mockito.times(2)).
-        onMessage(Mockito.any(SocketChannel.class), Mockito.eq(TMASTERLOCATIONREFRESHMESSAGE0));
+        onMessage(Mockito.any(SocketChannel.class), Mockito.eq(TMANAGERLOCATIONREFRESHMESSAGE0));
     inOrder.verify(metricsManagerServer, Mockito.times(2)).
-        onMessage(Mockito.any(SocketChannel.class), Mockito.eq(TMASTERLOCATIONREFRESHMESSAGE1));
+        onMessage(Mockito.any(SocketChannel.class), Mockito.eq(TMANAGERLOCATIONREFRESHMESSAGE1));
 
-    Assert.assertEquals("topology-name", tMasterLocation.getTopologyName());
-    Assert.assertEquals("topology-id", tMasterLocation.getTopologyId());
-    Assert.assertEquals("host", tMasterLocation.getHost());
-    Assert.assertEquals(0, tMasterLocation.getControllerPort());
-    Assert.assertEquals(1, tMasterLocation.getMasterPort());
+    Assert.assertEquals("topology-name", tManagerLocation.getTopologyName());
+    Assert.assertEquals("topology-id", tManagerLocation.getTopologyId());
+    Assert.assertEquals("host", tManagerLocation.getHost());
+    Assert.assertEquals(0, tManagerLocation.getControllerPort());
+    Assert.assertEquals(1, tManagerLocation.getManagerPort());
   }
 
   private static final class TestRequestHandler implements HeronServerTester.TestRequestHandler {
@@ -151,7 +151,7 @@ public class HandleTMasterLocationTest {
       Metrics.MetricPublisher publisher = Metrics.MetricPublisher.newBuilder().
           setHostname("hostname").
           setPort(0).
-          setComponentName("tmaster-location-publisher").
+          setComponentName("tmanager-location-publisher").
           setInstanceId("instance-id").
           setInstanceIndex(1).
           build();
@@ -169,17 +169,17 @@ public class HandleTMasterLocationTest {
     @Override
     public void handleResponse(HeronClient client, StatusCode status,
                                Object ctx, Message response) {
-      // We send two TMasterLocationRefreshMessage twice each
+      // We send two TManagerLocationRefreshMessage twice each
       // Then we check:
       // 1. Whether onMessage(...) is invoked 4 times, with correct arguments.
-      // 2. Finally the TMasterLocation in SingletonRegistry should be the latest one.
-      // First send TMASTERLOCATIONREFRESHMESSAGE0 twice
-      client.sendMessage(TMASTERLOCATIONREFRESHMESSAGE0);
-      client.sendMessage(TMASTERLOCATIONREFRESHMESSAGE0);
+      // 2. Finally the TManagerLocation in SingletonRegistry should be the latest one.
+      // First send TMANAGERLOCATIONREFRESHMESSAGE0 twice
+      client.sendMessage(TMANAGERLOCATIONREFRESHMESSAGE0);
+      client.sendMessage(TMANAGERLOCATIONREFRESHMESSAGE0);
 
-      // Then send TMASTERLOCATIONREFRESHMESSAGE1 twice
-      client.sendMessage(TMASTERLOCATIONREFRESHMESSAGE1);
-      client.sendMessage(TMASTERLOCATIONREFRESHMESSAGE1);
+      // Then send TMANAGERLOCATIONREFRESHMESSAGE1 twice
+      client.sendMessage(TMANAGERLOCATIONREFRESHMESSAGE1);
+      client.sendMessage(TMANAGERLOCATIONREFRESHMESSAGE1);
     }
   }
 }

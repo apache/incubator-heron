@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.heron.metricsmgr.sink.tmaster;
+package org.apache.heron.metricsmgr.sink.tmanager;
 
 import java.time.Duration;
 import java.util.logging.Logger;
@@ -29,15 +29,15 @@ import org.apache.heron.common.basics.NIOLooper;
 import org.apache.heron.common.network.HeronClient;
 import org.apache.heron.common.network.HeronSocketOptions;
 import org.apache.heron.common.network.StatusCode;
-import org.apache.heron.proto.tmaster.TopologyMaster;
+import org.apache.heron.proto.tmanager.TopologyManager;
 
 /**
- * TMasterClient connects to TMaster and then send TopologyMaster.PublishMetrics continuously.
- * Note that TMaster will not send registerRequest or wait for registerResponse.
+ * TManagerClient connects to TManager and then send TopologyManager.PublishMetrics continuously.
+ * Note that TManager will not send registerRequest or wait for registerResponse.
  */
-public class TMasterClient extends HeronClient implements Runnable {
-  private static final Logger LOG = Logger.getLogger(TMasterClient.class.getName());
-  private final Communicator<TopologyMaster.PublishMetrics> publishMetricsCommunicator;
+public class TManagerClient extends HeronClient implements Runnable {
+  private static final Logger LOG = Logger.getLogger(TManagerClient.class.getName());
+  private final Communicator<TopologyManager.PublishMetrics> publishMetricsCommunicator;
   private final Duration reconnectInterval;
 
   /**
@@ -46,10 +46,10 @@ public class TMasterClient extends HeronClient implements Runnable {
    * @param s the NIOLooper bind with this socket client
    * @param host the host of remote endpoint to communicate with
    * @param port the port of remote endpoint to communicate with
-   * @param publishMetricsCommunicator the queue to read PublishMetrics from and send to TMaster
+   * @param publishMetricsCommunicator the queue to read PublishMetrics from and send to TManager
    */
-  public TMasterClient(NIOLooper s, String host, int port, HeronSocketOptions options,
-                       Communicator<TopologyMaster.PublishMetrics> publishMetricsCommunicator,
+  public TManagerClient(NIOLooper s, String host, int port, HeronSocketOptions options,
+                       Communicator<TopologyManager.PublishMetrics> publishMetricsCommunicator,
                        Duration reconnectInterval) {
     super(s, host, port, options);
     this.publishMetricsCommunicator = publishMetricsCommunicator;
@@ -58,8 +58,8 @@ public class TMasterClient extends HeronClient implements Runnable {
 
   @Override
   public void onError() {
-    LOG.severe("Disconnected from TMaster.");
-    throw new RuntimeException("Errors happened due to write or read failure from TMaster.");
+    LOG.severe("Disconnected from TManager.");
+    throw new RuntimeException("Errors happened due to write or read failure from TManager.");
     // We would not clear the publishMetricsCommunicator since we need to copy items from it
     // to the new one to avoid data loss
   }
@@ -67,7 +67,7 @@ public class TMasterClient extends HeronClient implements Runnable {
   @Override
   public void onConnect(StatusCode status) {
     if (status != StatusCode.OK) {
-      LOG.severe("Cannot connect to the TMaster port, Will Retry..");
+      LOG.severe("Cannot connect to the TManager port, Will Retry..");
       if (reconnectInterval != Duration.ZERO) {
         Runnable r = new Runnable() {
           public void run() {
@@ -79,16 +79,16 @@ public class TMasterClient extends HeronClient implements Runnable {
       return;
     }
 
-    addTMasterClientTasksOnWakeUp();
+    addTManagerClientTasksOnWakeUp();
 
-    LOG.info("Connected to TMaster. Ready to send metrics");
+    LOG.info("Connected to TManager. Ready to send metrics");
   }
 
-  private void addTMasterClientTasksOnWakeUp() {
+  private void addTManagerClientTasksOnWakeUp() {
     Runnable task = new Runnable() {
       @Override
       public void run() {
-        TopologyMaster.PublishMetrics publishMetrics;
+        TopologyManager.PublishMetrics publishMetrics;
         while (true) {
           synchronized (publishMetricsCommunicator) {
             publishMetrics = publishMetricsCommunicator.poll();
@@ -97,9 +97,9 @@ public class TMasterClient extends HeronClient implements Runnable {
             break;  // No metrics left
           }
 
-          LOG.info(String.format("%d Metrics, %d Exceptions to send to TMaster",
+          LOG.info(String.format("%d Metrics, %d Exceptions to send to TManager",
               publishMetrics.getMetricsCount(), publishMetrics.getExceptionsCount()));
-          LOG.fine("Publish Metrics sending to TMaster: " + publishMetrics.toString());
+          LOG.fine("Publish Metrics sending to TManager: " + publishMetrics.toString());
 
           sendMessage(publishMetrics);
         }
@@ -110,17 +110,17 @@ public class TMasterClient extends HeronClient implements Runnable {
 
   @Override
   public void onResponse(StatusCode status, Object ctx, Message response) {
-    LOG.severe("TMasterClient got an unknown response from TMaster");
+    LOG.severe("TManagerClient got an unknown response from TManager");
   }
 
   @Override
   public void onIncomingMessage(Message message) {
-    LOG.severe("TMasterClient got an unknown message from TMaster");
+    LOG.severe("TManagerClient got an unknown message from TManager");
   }
 
   @Override
   public void onClose() {
-    LOG.info("TMasterClient exits");
+    LOG.info("TManagerClient exits");
   }
 
   @Override

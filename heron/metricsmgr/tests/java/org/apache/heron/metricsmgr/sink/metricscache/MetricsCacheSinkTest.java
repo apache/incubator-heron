@@ -37,7 +37,7 @@ import org.apache.heron.common.basics.SysUtils;
 import org.apache.heron.common.config.SystemConfig;
 import org.apache.heron.common.config.SystemConfigKey;
 import org.apache.heron.metricsmgr.sink.SinkContextImpl;
-import org.apache.heron.proto.tmaster.TopologyMaster;
+import org.apache.heron.proto.tmanager.TopologyManager;
 import org.apache.heron.spi.metricsmgr.sink.SinkContext;
 
 import static org.junit.Assert.assertEquals;
@@ -51,7 +51,7 @@ public class MetricsCacheSinkTest {
 
   // Bean name to register the MetricsCacheLocation object into SingletonRegistry
   private static final String METRICSCACHE_LOCATION_BEAN_NAME =
-      TopologyMaster.MetricsCacheLocation.newBuilder().getDescriptorForType().getFullName();
+      TopologyManager.MetricsCacheLocation.newBuilder().getDescriptorForType().getFullName();
 
   private static final Duration RECONNECT_INTERVAL = Duration.ofSeconds(1);
   // Restart wait time is set at 2 times of reconnect time plus another second. The 2 times factor
@@ -73,13 +73,13 @@ public class MetricsCacheSinkTest {
     return serviceConfig;
   }
 
-  private static TopologyMaster.MetricsCacheLocation getMetricsCacheLocation(int masterPort) {
+  private static TopologyManager.MetricsCacheLocation getMetricsCacheLocation(int serverPort) {
     // Notice here we set host and port as invalid values
     // So MetricsCache would throw "java.nio.channels.UnresolvedAddressException" once it starts,
     // and then dies
-    return TopologyMaster.MetricsCacheLocation.newBuilder().
+    return TopologyManager.MetricsCacheLocation.newBuilder().
         setTopologyName("topology-name").setTopologyId("topology-id").setHost("host").
-        setControllerPort(0).setMasterPort(masterPort).setStatsPort(0).build();
+        setControllerPort(0).setManagerPort(serverPort).setStatsPort(0).build();
   }
 
   @Before
@@ -161,7 +161,7 @@ public class MetricsCacheSinkTest {
     metricsCacheSink.init(sinkConfig, sinkContext);
 
     // Put the MetricsCacheLocation into SingletonRegistry
-    TopologyMaster.MetricsCacheLocation oldLoc = getMetricsCacheLocation(0);
+    TopologyManager.MetricsCacheLocation oldLoc = getMetricsCacheLocation(0);
     SingletonRegistry.INSTANCE.registerSingleton(METRICSCACHE_LOCATION_BEAN_NAME, oldLoc);
 
     SysUtils.sleep(RESTART_WAIT_INTERVAL);
@@ -172,7 +172,7 @@ public class MetricsCacheSinkTest {
     assertEquals(oldLoc, metricsCacheSink.getCurrentMetricsCacheLocationInService());
 
     // Update it, the MetricsCacheSink should pick up the new one.
-    TopologyMaster.MetricsCacheLocation newLoc = getMetricsCacheLocation(1);
+    TopologyManager.MetricsCacheLocation newLoc = getMetricsCacheLocation(1);
     SingletonRegistry.INSTANCE.updateSingleton(METRICSCACHE_LOCATION_BEAN_NAME, newLoc);
 
     int lastMetricsCacheStartedAttempts = metricsCacheSink.getMetricsCacheStartedAttempts();
@@ -192,12 +192,12 @@ public class MetricsCacheSinkTest {
 
   @Test
   public void testCheckCommunicator() {
-    Communicator<TopologyMaster.PublishMetrics> communicator = new Communicator<>();
+    Communicator<TopologyManager.PublishMetrics> communicator = new Communicator<>();
     int initSize = 16;
     int capSize = 10;
 
-    TopologyMaster.PublishMetrics.Builder publishMetrics =
-        TopologyMaster.PublishMetrics.newBuilder();
+    TopologyManager.PublishMetrics.Builder publishMetrics =
+        TopologyManager.PublishMetrics.newBuilder();
     for (int i = 0; i < initSize; ++i) {
       communicator.offer(publishMetrics.build());
     }

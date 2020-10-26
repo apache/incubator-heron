@@ -26,7 +26,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.heron.common.basics.Communicator;
-import org.apache.heron.common.basics.SlaveLooper;
+import org.apache.heron.common.basics.ExecutorLooper;
 import org.apache.heron.common.basics.SysUtils;
 import org.apache.heron.common.basics.TypeUtils;
 import org.apache.heron.metricsmgr.MetricsSinksConfig;
@@ -46,7 +46,7 @@ import org.apache.heron.spi.metricsmgr.sink.SinkContext;
  */
 public class SinkExecutor implements Runnable, AutoCloseable {
   private final IMetricsSink metricsSink;
-  private final SlaveLooper slaveLooper;
+  private final ExecutorLooper executorLooper;
 
   // Communicator to read MetricsRecord
   private final Communicator<MetricsRecord> metricsInSinkQueue;
@@ -65,15 +65,15 @@ public class SinkExecutor implements Runnable, AutoCloseable {
    *
    * @param executorName the name of this executor used as the name of running thread
    * @param metricsSink the class implementing IMetricsSink
-   * @param slaveLooper the SlaveLoop to bind with
+   * @param executorLooper the ExecutorLooper to bind with
    * @param metricsInSinkQueue the queue to read MetricsRecord from
    */
   public SinkExecutor(String executorName, IMetricsSink metricsSink,
-                      SlaveLooper slaveLooper, Communicator<MetricsRecord> metricsInSinkQueue,
+                      ExecutorLooper executorLooper, Communicator<MetricsRecord> metricsInSinkQueue,
                       SinkContext sinkContext) {
     this.executorName = executorName;
     this.metricsSink = metricsSink;
-    this.slaveLooper = slaveLooper;
+    this.executorLooper = executorLooper;
     this.metricsInSinkQueue = metricsInSinkQueue;
     this.sinkContext = sinkContext;
     this.sinkConfig = new HashMap<String, Object>();
@@ -108,7 +108,7 @@ public class SinkExecutor implements Runnable, AutoCloseable {
 
     metricsSink.init(Collections.unmodifiableMap(sinkConfig), sinkContext);
 
-    slaveLooper.loop();
+    executorLooper.loop();
   }
 
   // Add task to invoke processRecord method when the WakeableLooper is waken up
@@ -122,7 +122,7 @@ public class SinkExecutor implements Runnable, AutoCloseable {
       }
     };
 
-    slaveLooper.addTasksOnWakeup(sinkTasks);
+    executorLooper.addTasksOnWakeup(sinkTasks);
   }
 
   // Add TimerTask to invoke flush() in IMetricsSink
@@ -138,12 +138,12 @@ public class SinkExecutor implements Runnable, AutoCloseable {
         public void run() {
           metricsSink.flush();
           //Plan itself in future
-          slaveLooper.registerTimerEvent(flushInterval, this);
+          executorLooper.registerTimerEvent(flushInterval, this);
         }
       };
 
       // Plan the runnable explicitly at the first time
-      slaveLooper.registerTimerEvent(flushInterval, flushSink);
+      executorLooper.registerTimerEvent(flushInterval, flushSink);
     }
   }
 }
