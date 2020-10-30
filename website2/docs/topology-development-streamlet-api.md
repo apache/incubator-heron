@@ -113,7 +113,7 @@ $ heron submit local \
 
 ### Java Streamlet API starter project
 
-If you'd like to up and running quickly with the Heron Streamlet API for Java,  you can view the example topologies [here](https://github.com/apache/incubator-heron/tree/master/examples/src/java/org/apache/heron/examples/streamlet)
+If you'd like to up and running quickly with the Heron Streamlet API for Java, you can view the example topologies [here](https://github.com/apache/incubator-heron/tree/master/examples/src/java/org/apache/heron/examples/streamlet)
 
 If you're running a [local Heron cluster](getting-started-local-single-node), you can submit the built example topology like this:
 
