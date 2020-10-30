@@ -22,7 +22,7 @@ sidebar_label: Code Organization
 
 This document contains information about the Heron codebase intended primarily
 for developers who want to contribute to Heron. The Heron codebase lives on
-[github]({{% githubMaster %}}).
+[github](https://github.com/apache/incubator-heron/tree/master).
 
 If you're looking for documentation about developing topologies for a Heron
 cluster, see [Building Topologies](topology-development-topology-api-java) instead.
@@ -51,7 +51,7 @@ Information on setting up and using Bazel for Heron can be found in [Compiling H
 * **Inter-component communication** --- Heron uses [Protocol
 Buffers](https://developers.google.com/protocol-buffers/?hl=en) for
 communication between components. Most `.proto` definition files can be found in
-[`heron/proto`]({{% githubMaster %}}/heron/proto).
+[`heron/proto`](https://github.com/apache/incubator-heron/tree/master/heron/proto).
 
 * **Cluster coordination** --- Heron relies heavily on ZooKeeper for cluster
 coordination for distributed deployment, be it for [Aurora](schedulers-aurora-cluster) or for a [custom
@@ -61,7 +61,7 @@ Management](#state-management) section below.
 
 ## Common Utilities
 
-The [`heron/common`]({{% githubMaster %}}/heron/common) contains a variety of
+The [`heron/common`](https://github.com/apache/incubator-heron/tree/master/heron/common) contains a variety of
 utilities for each of Heron's languages, including useful constants, file
 utilities, networking interfaces, and more.
 
@@ -70,7 +70,7 @@ utilities, networking interfaces, and more.
 Heron supports two cluster schedulers out of the box:
 [Aurora](schedulers-aurora-cluster) and a [local
 scheduler](schedulers-local). The Java code for each of those
-schedulers can be found in [`heron/schedulers`]({{% githubMaster %}}/heron/schedulers)
+schedulers can be found in [`heron/schedulers`](https://github.com/apache/incubator-heron/tree/master/heron/schedulers)
 , while the underlying scheduler API can be found [here](/api/org/apache/heron/spi/scheduler/package-summary.html)
 
 Info on custom schedulers can be found in [Implementing a Custom
@@ -83,10 +83,10 @@ Deployment](schedulers-local).
 
 The parts of Heron's codebase related to
 [ZooKeeper](http://zookeeper.apache.org/) are mostly contained in
-[`heron/state`]({{% githubMaster %}}/heron/state). There are ZooKeeper-facing
-interfaces for [C++]({{% githubMaster %}}/heron/state/src/cpp),
-[Java]({{% githubMaster %}}/heron/state/src/java), and
-[Python]({{% githubMaster %}}/heron/state/src/python) that are used in a variety of
+[`heron/state`](https://github.com/apache/incubator-heron/tree/master/heron/state). There are ZooKeeper-facing
+interfaces for [C++](https://github.com/apache/incubator-heron/tree/master/heron/state/src/cpp),
+[Java](https://github.com/apache/incubator-heron/tree/master/heron/state/src/java), and
+[Python](https://github.com/apache/incubator-heron/tree/master/heron/state/src/python) that are used in a variety of
 Heron components.
 
 ## Topology Components
@@ -95,25 +95,25 @@ Heron components.
 
 The C++ code for Heron's [Topology
 Master](heron-architecture#topology-master) is written in C++ can be
-found in [`heron/tmaster`]({{% githubMaster %}}/heron/tmaster).
+found in [`heron/tmaster`](https://github.com/apache/incubator-heron/tree/master/heron/tmaster).
 
 ### Stream Manager
 
 The C++ code for Heron's [Stream
 Manager](heron-architecture#stream-manager) can be found in
-[`heron/stmgr`]({{% githubMaster %}}/heron/stmgr).
+[`heron/stmgr`](https://github.com/apache/incubator-heron/tree/master/heron/stmgr).
 
 ### Heron Instance
 
 The Java code for [Heron
 instances](heron-architecture#heron-instance) can be found in
-[`heron/instance`]({{% githubMaster %}}/heron/instance).
+[`heron/instance`](https://github.com/apache/incubator-heron/tree/master/heron/instance).
 
 ### Metrics Manager
 
 The Java code for Heron's [Metrics
 Manager](heron-architecture#metrics-manager) can be found in
-[`heron/metricsmgr`]({{% githubMaster %}}/heron/metricsmgr).
+[`heron/metricsmgr`](https://github.com/apache/incubator-heron/tree/master/heron/metricsmgr).
 
 If you'd like to implement your own custom metrics handler (known as a **metrics
 sink**), see [Implementing a Custom Metrics Sink](extending-heron-metric-sink).
@@ -123,7 +123,7 @@ sink**), see [Implementing a Custom Metrics Sink](extending-heron-metric-sink).
 ### Topology API
 
 Heron's API for writing topologies is written in Java. The code for this API can
-be found in [`heron/api`]({{% githubMaster %}}/heron/api).
+be found in [`heron/api`](https://github.com/apache/incubator-heron/tree/master/heron/api).
 
 Documentation for writing topologies can be found in [Building
 Topologies](topology-development-topology-api-java), while API documentation can be found
@@ -142,7 +142,7 @@ The Java API for simulator can be found in
 Heron's codebase includes a wide variety of example
 [topologies](heron-topology-concepts) built using Heron's topology API for
 Java. Those examples can be found in
-[`heron/examples`]({{% githubMaster %}}/heron/examples).
+[`heron/examples`](https://github.com/apache/incubator-heron/tree/master/heron/examples).
 
 ## User Interface Components
 
@@ -152,45 +152,45 @@ Heron has a tool called `heron` that is used to both provide a CLI interface
 for [managing topologies](user-manuals-heron-cli) and to perform much of
 the heavy lifting behind assembling physical topologies in your cluster.
 The Python code for `heron` can be found in
-[`heron/tools/cli`]({{% githubMaster %}}/heron/tools/cli).
+[`heron/tools/cli`](https://github.com/apache/incubator-heron/tree/master/heron/tools/cli).
 
 Sample configurations for different Heron schedulers
 
-* [Local scheduler](schedulers-local) config can be found in [`heron/config/src/yaml/conf/local`]({{% githubMaster %}}/heron/config/src/yaml/conf/local),
-* [Aurora scheduler](schedulers-aurora-cluster) config can be found [`heron/config/src/yaml/conf/aurora`]({{% githubMaster %}}/heron/config/src/yaml/conf/aurora).
+* [Local scheduler](schedulers-local) config can be found in [`heron/config/src/yaml/conf/local`](https://github.com/apache/incubator-heron/tree/master/heron/config/src/yaml/conf/local),
+* [Aurora scheduler](schedulers-aurora-cluster) config can be found [`heron/config/src/yaml/conf/aurora`]({https://github.com/apache/incubator-heron/tree/master/heron/config/src/yaml/conf/aurora).
 
 ### Heron Tracker
 
 The Python code for the [Heron Tracker](user-manuals-heron-tracker-runbook) can be
-found in [`heron/tools/tracker`]({{% githubMaster %}}/heron/tools/tracker).
+found in [`heron/tools/tracker`](https://github.com/apache/incubator-heron/tree/master/heron/tools/tracker).
 
 The Tracker is a web server written in Python. It relies on the
 [Tornado](http://www.tornadoweb.org/en/stable/) framework. You can add new HTTP
 routes to the Tracker in
-[`main.py`]({{% githubMaster %}}/heron/tools/tracker/src/python/main.py) and
+[`main.py`](https://github.com/apache/incubator-heron/tree/master/heron/tools/tracker/src/python/main.py) and
 corresponding handlers in the
-[`handlers`]({{% githubMaster %}}/heron/tools/tracker/src/python/handlers) directory.
+[`handlers`](https://github.com/apache/incubator-heron/tree/master/heron/tools/tracker/src/python/handlers) directory.
 
 ### Heron UI
 
 The Python code for the [Heron UI](user-manuals-heron-ui) can be found in
-[`heron/tools/ui`]({{% githubMaster %}}/heron/tools/ui).
+[`heron/tools/ui`](https://github.com/apache/incubator-heron/tree/master/heron/tools/ui).
 
 Like Heron Tracker, Heron UI is a web server written in Python that relies on
 the [Tornado](http://www.tornadoweb.org/en/stable/) framework. You can add new
 HTTP routes to Heron UI in
-[`main.py`]({{% githubMaster %}}/heron/web/source/python/main.py) and corresponding
-handlers in the [`handlers`]({{% githubMaster %}}/heron/web/source/python/handlers)
+[`main.py`](https://github.com/apache/incubator-heron/tree/master/heron/web/source/python/main.py) and corresponding
+handlers in the [`handlers`](https://github.com/apache/incubator-heron/tree/master/heron/web/source/python/handlers)
 directory.
 
 ### Heron Shell
 
 The Python code for the [Heron Shell](user-manuals-heron-shell) can be
-found in [`heron/shell`]({{% githubMaster %}}/heron/shell). The HTTP handlers and
+found in [`heron/shell`](https://github.com/apache/incubator-heron/tree/master/heron/shell). The HTTP handlers and
 web server are defined in
-[`main.py`]({{% githubMaster %}}/heron/shell/src/python/main.py) while the HTML,
+[`main.py`](https://github.com/apache/incubator-heron/tree/master/heron/shell/src/python/main.py) while the HTML,
 JavaScript, CSS, and images for the web UI can be found in the
-[`assets`]({{% githubMaster %}}/heron/shell/assets) directory.
+[`assets`](https://github.com/apache/incubator-heron/tree/master/heron/shell/assets) directory.
 
 ## Tests
 
