@@ -113,34 +113,26 @@ $ heron submit local \
 
 ### Java Streamlet API starter project
 
-If you'd like to up and running quickly with the Heron Streamlet API for Java, you can clone [this repository](https://github.com/streamlio/heron-java-streamlet-api-example), which includes an example topology built using the Streamlet API as well as the necessary Maven configuration. To build a JAR with dependencies of this example topology:
-
-```bash
-$ git clone https://github.com/streamlio/heron-java-streamlet-api-example
-$ cd heron-java-streamlet-api-example
-$ mvn assembly:assembly
-$ ls target/*.jar
-target/heron-java-streamlet-api-example-latest-jar-with-dependencies.jar
-target/heron-java-streamlet-api-example-latest.jar
-```
+If you'd like to up and running quickly with the Heron Streamlet API for Java,  you can view the example topologies [here](https://github.com/apache/incubator-heron/tree/master/examples/src/java/org/apache/heron/examples/streamlet)
 
 If you're running a [local Heron cluster](getting-started-local-single-node), you can submit the built example topology like this:
 
 ```bash
-$ heron submit local target/heron-java-streamlet-api-example-latest-jar-with-dependencies.jar \
-  io.streaml.heron.streamlet.WordCountStreamletTopology \
-  WordCountStreamletTopology
+$ heron submit local \
+  ~/.heron/examples/heron-streamlet-examples.jar \
+  org.apache.heron.examples.streamlet.WindowedWordCountTopology \
+  streamletWindowedWordCount
 ```
 
 #### Selecting delivery semantics
 
-Heron enables you to apply one of three [delivery semantics](heron-delivery-semantics) to any Heron topology. For the [example topology](#java-streamlet-api-starter-project) above, you can select the delivery semantics when you submit the topology with the topology's second argument. This command, for example, would apply [effectively-once](heron-delivery-semantics) to the example topology:
+Heron enables you to apply one of three [delivery semantics](heron-delivery-semantics) to any Heron topology. For the example topology above, you can select the delivery semantics when you submit the topology with the topology's second argument. This command, for example, would apply [effectively-once](heron-delivery-semantics) to the example topology:
 
 ```bash
-$ heron submit local target/heron-java-streamlet-api-example-latest-jar-with-dependencies.jar \
-  io.streaml.heron.streamlet.WordCountStreamletTopology \
-  WordCountStreamletTopology \
-  effectively-once
+$ heron submit local \
+  ~/.heron/examples/heron-streamlet-examples.jar \
+  org.apache.heron.examples.streamlet.WireRequestsTopology \
+  wireRequestsTopology
 ```
 
 The other options are `at-most-once` and `at-least-once`. If you don't explicitly select the delivery semantics, at-least-once semantics will be applied.

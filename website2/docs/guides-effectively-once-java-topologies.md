@@ -240,7 +240,7 @@ public class EffectivelyOnceTopology {
 
 ### Submitting the topology
 
-The code for this topology can be found in [this GitHub repository](https://github.com/streamlio/heron-java-effectively-once-example). You can clone the repo locally like this:
+The code for this topology can be found in. You can clone the repo locally like this:
 
 ```bash
 $ git clone https://github.com/streamlio/heron-java-effectively-once-example
