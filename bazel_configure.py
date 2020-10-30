@@ -37,6 +37,7 @@ import getpass
 import datetime
 import platform
 import subprocess
+import tempfile
 
 sys.path.append('third_party/python/semver')
 import semver
@@ -293,6 +294,11 @@ def discover_jdk():
   print('Using %s:\t%s' % ('JDK'.ljust(20), jdk_path))
   return jdk_path
 
+def test_venv():
+  with tempfile.TemporaryDirectory() as tmpdirname:
+    if subprocess.run(["python3", "-m", "venv", tmpdirname]).returncode != 0:
+      fail("Python3 venv module is not installed.")
+
 ######################################################################
 # Discover the linker directory
 ######################################################################
@@ -413,7 +419,8 @@ def main():
   env_map['AUTOMAKE'] = discover_tool('automake', 'Automake', 'AUTOMAKE', '1.9.6')
   env_map['AUTOCONF'] = discover_tool('autoconf', 'Autoconf', 'AUTOCONF', '2.6.3')
   env_map['MAKE'] = discover_tool('make', 'Make', 'MAKE', '3.81')
-  env_map['PYTHON3'] = discover_tool('python3', 'Python3', 'PYTHON3', '3.4')
+  env_map['PYTHON3'] = discover_tool('python3', 'Python3', 'PYTHON3', '3.6')
+  test_venv()
 
   if platform == 'Darwin':
     env_map['LIBTOOL'] = discover_tool('glibtool', 'Libtool', 'LIBTOOL', '2.4.2')

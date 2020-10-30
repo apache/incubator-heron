@@ -68,7 +68,7 @@ maven_install(
         "antlr:antlr:2.7.7",
         "org.apache.zookeeper:zookeeper:3.5.8",
         "io.kubernetes:client-java:" + kubernetes_client_version,
-        "com.esotericsoftware:kryo:3.0.3",
+        "com.esotericsoftware:kryo:5.0.0",
         "org.apache.avro:avro:1.7.4",
         "org.apache.mesos:mesos:0.22.0",
         "com.hashicorp.nomad:nomad-sdk:0.7.0",
@@ -181,10 +181,6 @@ REQUESTS_SRC = "https://pypi.python.org/packages/d9/03/155b3e67fe35fe5b6f4227a8d
 
 SETUPTOOLS_WHEEL = "https://pypi.python.org/packages/a0/df/635cdb901ee4a8a42ec68e480c49f85f4c59e8816effbf57d9e6ee8b3588/setuptools-46.1.3-py3-none-any.whl"
 
-VIRTUALENV_SRC = "https://pypi.python.org/packages/d4/0c/9840c08189e030873387a73b90ada981885010dd9aea134d6de30cd24cb8/virtualenv-15.1.0.tar.gz"
-
-VIRTUALENV_PREFIX = "virtualenv-15.1.0"
-
 WHEEL_SRC = "https://pypi.python.org/packages/c9/1d/bd19e691fd4cfe908c76c429fe6e4436c9e83583c4414b54f6c85471954a/wheel-0.29.0.tar.gz"
 
 http_file(
@@ -229,21 +225,6 @@ http_file(
     urls = [SETUPTOOLS_WHEEL],
 )
 
-http_archive(
-    name = "virtualenv",
-    build_file_content = "\n".join([
-        "load(\"@rules_python//python:defs.bzl\", \"py_binary\")",
-        "py_binary(",
-        "    name = 'virtualenv',",
-        "    srcs = ['virtualenv.py'],",
-        "    data = glob(['**/*']),",
-        "    visibility = ['//visibility:public'],",
-        ")",
-    ]),
-    sha256 = "02f8102c2436bb03b3ee6dede1919d1dac8a427541652e5ec95171ec8adbc93a",
-    strip_prefix = VIRTUALENV_PREFIX,
-    urls = [VIRTUALENV_SRC],
-)
 # end pex repos
 
 # protobuf dependencies for C++ and Java
@@ -324,6 +305,16 @@ http_archive(
     sha256 = "e4d8560e163c3d875fd5d9e5542b5fd5bec810febdcba61481fe5fc4e6b1fd05",
     strip_prefix = "yaml-cpp-yaml-cpp-0.6.2",
     urls = ["https://github.com/jbeder/yaml-cpp/archive/yaml-cpp-0.6.2.tar.gz"],
+)
+
+http_archive(
+    name = "com_github_corvusoft_kashmir_cpp",
+    build_file = "@//:third_party/kashmir/kashmir.BUILD",
+    patch_args = ["-p1"],
+    patches = ["//third_party/kashmir:kashmir-random-fix.patch"],
+    sha256 = "c3515d6c7a470663f06b79bb23cbb2ff2f3feab4c2a333f783edc0a802f1d062",
+    strip_prefix = "kashmir-dependency-19fb1d5c14866bd5202c2458baf50263001a9cb0",
+    urls = ["https://github.com/Corvusoft/kashmir-dependency/archive/19fb1d5c14866bd5202c2458baf50263001a9cb0.zip"],
 )
 
 http_archive(
