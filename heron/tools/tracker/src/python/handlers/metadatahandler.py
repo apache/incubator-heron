@@ -67,7 +67,7 @@ class MetaDataHandler(BaseHandler):
       role = self.get_argument_role()
       environ = self.get_argument_environ()
       topology_name = self.get_argument_topology()
-      topology_info = self.tracker.getTopologyInfo(topology_name, cluster, role, environ)
+      topology_info = self.tracker.get_topology_info(topology_name, cluster, role, environ)
       metadata = topology_info["metadata"]
       self.write_success_response(metadata)
     except Exception as e:

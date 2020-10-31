@@ -58,13 +58,13 @@ class QueryOperatorTests(tornado.testing.AsyncTestCase):
           }
       })
 
-    with patch("heron.tools.tracker.src.python.query_operators.getMetricsTimeline",
+    with patch("heron.tools.tracker.src.python.query_operators.get_metrics_timeline",
                side_effect=getMetricTimelineSideEffect):
       metrics = yield ts.execute(tracker, tmaster, start, end)
       self.assertEqual(1, len(metrics))
       self.assertEqual("b", metrics[0].instance)
-      self.assertEqual("c", metrics[0].metricName)
-      self.assertEqual("a", metrics[0].componentName)
+      self.assertEqual("c", metrics[0].metric_name)
+      self.assertEqual("a", metrics[0].component_name)
       self.assertDictEqual({
           120: 1.0,
           180: 1.0,
@@ -90,7 +90,7 @@ class QueryOperatorTests(tornado.testing.AsyncTestCase):
 
     # pylint: disable=unused-variable
     with self.assertRaises(Exception):
-      with patch("heron.tools.tracker.src.python.query_operators.getMetricsTimeline",
+      with patch("heron.tools.tracker.src.python.query_operators.get_metrics_timeline",
                  side_effect=getMetricTimelineSideEffect):
         metrics = yield ts.execute(tracker, tmaster, start, end)
 
@@ -133,7 +133,7 @@ class QueryOperatorTests(tornado.testing.AsyncTestCase):
       })
 
     # pylint: disable=unused-variable
-    with patch("heron.tools.tracker.src.python.query_operators.getMetricsTimeline",
+    with patch("heron.tools.tracker.src.python.query_operators.get_metrics_timeline",
                side_effect=getMetricTimelineSideEffect):
       ts = TS(["a", "*", "c"])
       metrics = yield ts.execute(tracker, tmaster, start, end)
@@ -142,8 +142,8 @@ class QueryOperatorTests(tornado.testing.AsyncTestCase):
       metric2 = metrics[1]
       for metric in metrics:
         if metric.instance == "b":
-          self.assertEqual("c", metric.metricName)
-          self.assertEqual("a", metric.componentName)
+          self.assertEqual("c", metric.metric_name)
+          self.assertEqual("a", metric.component_name)
           self.assertDictEqual({
               # 120: 1.0, # Missing value is not reported
               180: 1.0,
@@ -151,8 +151,8 @@ class QueryOperatorTests(tornado.testing.AsyncTestCase):
               300: 1.0
           }, metric.timeline)
         elif metric.instance == "d":
-          self.assertEqual("c", metric.metricName)
-          self.assertEqual("a", metric.componentName)
+          self.assertEqual("c", metric.metric_name)
+          self.assertEqual("a", metric.component_name)
           self.assertDictEqual({
               120: 2.0,
               180: 2.0,
@@ -164,7 +164,7 @@ class QueryOperatorTests(tornado.testing.AsyncTestCase):
 
   @tornado.testing.gen_test
   def test_DEFAULT_execute(self):
-    ts = Mock()
+    ts = Mock(TS)
     default = Default([float(0), ts])
     tmaster = Mock()
     tracker = Mock()
@@ -176,7 +176,7 @@ class QueryOperatorTests(tornado.testing.AsyncTestCase):
     def ts_side_effect(*args):
       self.assertEqual((tracker, tmaster, 100, 300), args)
       raise tornado.gen.Return([
-        Metrics("component", "metricName", "instance", start, end, {
+        Metrics("component", "metric_name", "instance", start, end, {
             120: 1.0,
             180: 1.0,
             240: 1.0,
@@ -188,8 +188,8 @@ class QueryOperatorTests(tornado.testing.AsyncTestCase):
     metrics = yield default.execute(tracker, tmaster, start, end)
     self.assertEqual(1, len(metrics))
     self.assertEqual("instance", metrics[0].instance)
-    self.assertEqual("metricName", metrics[0].metricName)
-    self.assertEqual("component", metrics[0].componentName)
+    self.assertEqual("metric_name", metrics[0].metric_name)
+    self.assertEqual("component", metrics[0].component_name)
     self.assertDictEqual({
       120: 1.0,
       180: 1.0,
@@ -199,7 +199,7 @@ class QueryOperatorTests(tornado.testing.AsyncTestCase):
 
   @tornado.testing.gen_test
   def test_DEFAULT_execute_when_exception(self):
-    ts = Mock()
+    ts = Mock(TS)
     default = Default([float(0), ts])
     tmaster = Mock()
     tracker = Mock()
@@ -217,7 +217,7 @@ class QueryOperatorTests(tornado.testing.AsyncTestCase):
 
   @tornado.testing.gen_test
   def test_DEFAULT_execute_when_missing_value(self):
-    ts = Mock()
+    ts = Mock(TS)
     default = Default([float(0), ts])
     tmaster = Mock()
     tracker = Mock()
@@ -229,7 +229,7 @@ class QueryOperatorTests(tornado.testing.AsyncTestCase):
     def ts_side_effect3(*args):
       self.assertEqual((tracker, tmaster, 100, 300), args)
       raise tornado.gen.Return([
-        Metrics("component", "metricName", "instance", start, end, {
+        Metrics("component", "metric_name", "instance", start, end, {
           180: 1.0,
           240: 1.0,
           300: 1.0,
@@ -240,8 +240,8 @@ class QueryOperatorTests(tornado.testing.AsyncTestCase):
     metrics = yield default.execute(tracker, tmaster, start, end)
     self.assertEqual(1, len(metrics))
     self.assertEqual("instance", metrics[0].instance)
-    self.assertEqual("metricName", metrics[0].metricName)
-    self.assertEqual("component", metrics[0].componentName)
+    self.assertEqual("metric_name", metrics[0].metric_name)
+    self.assertEqual("component", metrics[0].component_name)
     self.assertDictEqual({
       120: 0, # Missing value filled
       180: 1.0,
@@ -251,7 +251,7 @@ class QueryOperatorTests(tornado.testing.AsyncTestCase):
 
   @tornado.testing.gen_test
   def test_DEFAULT_execute_with_multiple_ts(self):
-    ts = Mock()
+    ts = Mock(TS)
     default = Default([float(0), ts])
     tmaster = Mock()
     tracker = Mock()
@@ -263,13 +263,13 @@ class QueryOperatorTests(tornado.testing.AsyncTestCase):
     def ts_side_effect3(*args):
       self.assertEqual((tracker, tmaster, 100, 300), args)
       raise tornado.gen.Return([
-        Metrics("component", "metricName", "instance", start, end, {
+        Metrics("component", "metric_name", "instance", start, end, {
           # 120: 1.0, # Missing
           180: 1.0,
           240: 1.0,
           300: 1.0,
         }),
-        Metrics("component", "metricName", "instance2", start, end, {
+        Metrics("component", "metric_name", "instance2", start, end, {
           120: 2.0,
           # 180: 2.0, # Missing
           240: 2.0,
@@ -283,8 +283,8 @@ class QueryOperatorTests(tornado.testing.AsyncTestCase):
     for metric in metrics:
       if metric.instance == "instance":
         self.assertEqual("instance", metric.instance)
-        self.assertEqual("metricName", metric.metricName)
-        self.assertEqual("component", metric.componentName)
+        self.assertEqual("metric_name", metric.metric_name)
+        self.assertEqual("component", metric.component_name)
         self.assertDictEqual({
           120: 0, # Filled
           180: 1.0,
@@ -293,8 +293,8 @@ class QueryOperatorTests(tornado.testing.AsyncTestCase):
         }, metric.timeline)
       elif metric.instance == "instance2":
         self.assertEqual("instance2", metric.instance)
-        self.assertEqual("metricName", metric.metricName)
-        self.assertEqual("component", metric.componentName)
+        self.assertEqual("metric_name", metric.metric_name)
+        self.assertEqual("component", metric.component_name)
         self.assertDictEqual({
           120: 2.0,
           180: 0, # Filled
@@ -306,7 +306,7 @@ class QueryOperatorTests(tornado.testing.AsyncTestCase):
 
   @tornado.testing.gen_test
   def test_SUM_execute(self):
-    ts = Mock()
+    ts = Mock(TS)
     operator = Sum([float(10), ts])
     tmaster = Mock()
     tracker = Mock()
@@ -318,7 +318,7 @@ class QueryOperatorTests(tornado.testing.AsyncTestCase):
     def ts_side_effect(*args):
       self.assertEqual((tracker, tmaster, 100, 300), args)
       raise tornado.gen.Return([
-        Metrics("component", "metricName", "instance", start, end, {
+        Metrics("component", "metric_name", "instance", start, end, {
           120: 1.0,
           180: 1.0,
           240: 1.0,
@@ -338,7 +338,7 @@ class QueryOperatorTests(tornado.testing.AsyncTestCase):
 
   @tornado.testing.gen_test
   def test_SUM_execute_when_exception(self):
-    ts = Mock()
+    ts = Mock(TS)
     operator = Sum([float(10), ts])
     tmaster = Mock()
     tracker = Mock()
@@ -356,7 +356,7 @@ class QueryOperatorTests(tornado.testing.AsyncTestCase):
 
   @tornado.testing.gen_test
   def test_SUM_execute_when_missing_value(self):
-    ts = Mock()
+    ts = Mock(TS)
     operator = Sum([float(10), ts])
     tmaster = Mock()
     tracker = Mock()
@@ -368,7 +368,7 @@ class QueryOperatorTests(tornado.testing.AsyncTestCase):
     def ts_side_effect3(*args):
       self.assertEqual((tracker, tmaster, 100, 300), args)
       raise tornado.gen.Return([
-        Metrics("component", "metricName", "instance", start, end, {
+        Metrics("component", "metric_name", "instance", start, end, {
           180: 1.0,
           240: 1.0,
           300: 1.0,
@@ -387,7 +387,7 @@ class QueryOperatorTests(tornado.testing.AsyncTestCase):
 
   @tornado.testing.gen_test
   def test_SUM_execute_with_multiple_ts(self):
-    ts = Mock()
+    ts = Mock(TS)
     operator = Sum([float(10), ts])
     tmaster = Mock()
     tracker = Mock()
@@ -399,13 +399,13 @@ class QueryOperatorTests(tornado.testing.AsyncTestCase):
     def ts_side_effect3(*args):
       self.assertEqual((tracker, tmaster, 100, 300), args)
       raise tornado.gen.Return([
-        Metrics("component", "metricName", "instance", start, end, {
+        Metrics("component", "metric_name", "instance", start, end, {
           # 120: 1.0, # Missing
           180: 1.0,
           240: 1.0,
           300: 1.0,
         }),
-        Metrics("component", "metricName", "instance2", start, end, {
+        Metrics("component", "metric_name", "instance2", start, end, {
           120: 2.0,
           180: 2.0,
           240: 2.0,
@@ -425,7 +425,7 @@ class QueryOperatorTests(tornado.testing.AsyncTestCase):
 
   @tornado.testing.gen_test
   def test_MAX_execute(self):
-    ts = Mock()
+    ts = Mock(TS)
     operator = Max([ts])
     tmaster = Mock()
     tracker = Mock()
@@ -437,7 +437,7 @@ class QueryOperatorTests(tornado.testing.AsyncTestCase):
     def ts_side_effect(*args):
       self.assertEqual((tracker, tmaster, 100, 300), args)
       raise tornado.gen.Return([
-        Metrics("component", "metricName", "instance", start, end, {
+        Metrics("component", "metric_name", "instance", start, end, {
           120: 1.0,
           180: 1.0,
           240: 1.0,
@@ -457,7 +457,7 @@ class QueryOperatorTests(tornado.testing.AsyncTestCase):
 
   @tornado.testing.gen_test
   def test_MAX_execute_when_exception(self):
-    ts = Mock()
+    ts = Mock(TS)
     operator = Max([ts])
     tmaster = Mock()
     tracker = Mock()
@@ -475,7 +475,7 @@ class QueryOperatorTests(tornado.testing.AsyncTestCase):
 
   @tornado.testing.gen_test
   def test_MAX_execute_when_missing_values(self):
-    ts = Mock()
+    ts = Mock(TS)
     operator = Max([ts])
     tmaster = Mock()
     tracker = Mock()
@@ -487,7 +487,7 @@ class QueryOperatorTests(tornado.testing.AsyncTestCase):
     def ts_side_effect3(*args):
       self.assertEqual((tracker, tmaster, 100, 300), args)
       raise tornado.gen.Return([
-        Metrics("component", "metricName", "instance", start, end, {
+        Metrics("component", "metric_name", "instance", start, end, {
           180: 1.0,
           240: 1.0,
           300: 1.0,
@@ -505,7 +505,7 @@ class QueryOperatorTests(tornado.testing.AsyncTestCase):
 
   @tornado.testing.gen_test
   def test_MAX_execute_with_multiple_ts(self):
-    ts = Mock()
+    ts = Mock(TS)
     operator = Max([ts])
     tmaster = Mock()
     tracker = Mock()
@@ -517,13 +517,13 @@ class QueryOperatorTests(tornado.testing.AsyncTestCase):
     def ts_side_effect3(*args):
       self.assertEqual((tracker, tmaster, 100, 300), args)
       raise tornado.gen.Return([
-        Metrics("component", "metricName", "instance", start, end, {
+        Metrics("component", "metric_name", "instance", start, end, {
           # 120: 1.0, # Missing
           180: 1.0,
           240: 3.0,
           300: 3.0,
         }),
-        Metrics("component", "metricName", "instance2", start, end, {
+        Metrics("component", "metric_name", "instance2", start, end, {
           120: 2.0,
           180: 0.0,
           240: 2.0,
@@ -543,7 +543,7 @@ class QueryOperatorTests(tornado.testing.AsyncTestCase):
 
   @tornado.testing.gen_test
   def test_PERCENTILE_execute(self):
-    ts = Mock()
+    ts = Mock(TS)
     operator = Percentile([float(90), ts])
     tmaster = Mock()
     tracker = Mock()
@@ -555,7 +555,7 @@ class QueryOperatorTests(tornado.testing.AsyncTestCase):
     def ts_side_effect(*args):
       self.assertEqual((tracker, tmaster, 100, 300), args)
       raise tornado.gen.Return([
-        Metrics("component", "metricName", "instance", start, end, {
+        Metrics("component", "metric_name", "instance", start, end, {
           120: 1.0,
           180: 1.0,
           240: 1.0,
@@ -575,7 +575,7 @@ class QueryOperatorTests(tornado.testing.AsyncTestCase):
 
   @tornado.testing.gen_test
   def test_PERCENTILE_execute_when_exception(self):
-    ts = Mock()
+    ts = Mock(TS)
     operator = Percentile([float(90), ts])
     tmaster = Mock()
     tracker = Mock()
@@ -593,7 +593,7 @@ class QueryOperatorTests(tornado.testing.AsyncTestCase):
 
   @tornado.testing.gen_test
   def test_PERCENTILE_execute_when_missing_values(self):
-    ts = Mock()
+    ts = Mock(TS)
     operator = Percentile([float(90), ts])
     tmaster = Mock()
     tracker = Mock()
@@ -605,7 +605,7 @@ class QueryOperatorTests(tornado.testing.AsyncTestCase):
     def ts_side_effect3(*args):
       self.assertEqual((tracker, tmaster, 100, 300), args)
       raise tornado.gen.Return([
-        Metrics("component", "metricName", "instance", start, end, {
+        Metrics("component", "metric_name", "instance", start, end, {
           180: 1.0,
           240: 1.0,
           300: 1.0,
@@ -623,7 +623,7 @@ class QueryOperatorTests(tornado.testing.AsyncTestCase):
 
   @tornado.testing.gen_test
   def test_PERCENTILE_execute_with_multiple_ts(self):
-    ts = Mock()
+    ts = Mock(TS)
     operator = Percentile([float(90), ts])
     tmaster = Mock()
     tracker = Mock()
@@ -635,31 +635,31 @@ class QueryOperatorTests(tornado.testing.AsyncTestCase):
     def ts_side_effect3(*args):
       self.assertEqual((tracker, tmaster, 100, 300), args)
       raise tornado.gen.Return([
-        Metrics("component", "metricName", "instance", start, end, {
+        Metrics("component", "metric_name", "instance", start, end, {
           120: 1.0,
           180: 4.0,
           240: 6.0,
           300: 3.0,
         }),
-        Metrics("component", "metricName", "instance2", start, end, {
+        Metrics("component", "metric_name", "instance2", start, end, {
           120: 2.0,
           180: 5.0,
           240: 5.0,
           300: 5.0,
         }),
-        Metrics("component", "metricName", "instance3", start, end, {
+        Metrics("component", "metric_name", "instance3", start, end, {
           120: 4.0,
           180: 6.0,
           240: 4.0,
           300: 4.0,
         }),
-        Metrics("component", "metricName", "instance4", start, end, {
+        Metrics("component", "metric_name", "instance4", start, end, {
           120: 3.0,
           180: 7.0,
           240: 3.0,
           300: 6.0,
         }),
-        Metrics("component", "metricName", "instance5", start, end, {
+        Metrics("component", "metric_name", "instance5", start, end, {
           120: 5.0,
           180: 8.0,
           240: 2.0,
@@ -679,7 +679,7 @@ class QueryOperatorTests(tornado.testing.AsyncTestCase):
 
   @tornado.testing.gen_test
   def test_DIVIDE_execute(self):
-    ts = Mock()
+    ts = Mock(TS)
     operator = Divide([float(100), ts])
     tmaster = Mock()
     tracker = Mock()
@@ -691,7 +691,7 @@ class QueryOperatorTests(tornado.testing.AsyncTestCase):
     def ts_side_effect(*args):
       self.assertEqual((tracker, tmaster, 100, 300), args)
       raise tornado.gen.Return([
-        Metrics("component", "metricName", "instance", start, end, {
+        Metrics("component", "metric_name", "instance", start, end, {
           120: 1.0,
           180: 2.0,
           240: 4.0,
@@ -712,7 +712,7 @@ class QueryOperatorTests(tornado.testing.AsyncTestCase):
 
   @tornado.testing.gen_test
   def test_DIVIDE_execute_when_exception(self):
-    ts = Mock()
+    ts = Mock(TS)
     operator = Divide([float(100), ts])
     tmaster = Mock()
     tracker = Mock()
@@ -730,7 +730,7 @@ class QueryOperatorTests(tornado.testing.AsyncTestCase):
 
   @tornado.testing.gen_test
   def test_DIVIDE_execute_when_missing_values(self):
-    ts = Mock()
+    ts = Mock(TS)
     operator = Divide([float(100), ts])
     tmaster = Mock()
     tracker = Mock()
@@ -742,7 +742,7 @@ class QueryOperatorTests(tornado.testing.AsyncTestCase):
     def ts_side_effect3(*args):
       self.assertEqual((tracker, tmaster, 100, 300), args)
       raise tornado.gen.Return([
-        Metrics("component", "metricName", "instance", start, end, {
+        Metrics("component", "metric_name", "instance", start, end, {
           180: 2.0,
           240: 4.0,
           300: 5.0,
@@ -761,8 +761,8 @@ class QueryOperatorTests(tornado.testing.AsyncTestCase):
 
   @tornado.testing.gen_test
   def test_DIVIDE_execute_with_multiple_ts(self):
-    ts = Mock()
-    ts2 = Mock()
+    ts = Mock(TS)
+    ts2 = Mock(TS)
     operator = Divide([ts, ts2])
     tmaster = Mock()
     tracker = Mock()
@@ -774,31 +774,31 @@ class QueryOperatorTests(tornado.testing.AsyncTestCase):
     def ts_side_effect3(*args):
       self.assertEqual((tracker, tmaster, 100, 300), args)
       raise tornado.gen.Return([
-        Metrics("component", "metricName", "instance", start, end, {
+        Metrics("component", "metric_name", "instance", start, end, {
           120: 1.0,
           180: 1.0,
           240: 1.0,
           300: 1.0,
         }),
-        Metrics("component", "metricName", "instance2", start, end, {
+        Metrics("component", "metric_name", "instance2", start, end, {
           120: 2.0,
           180: 2.0,
           240: 2.0,
           300: 2.0,
         }),
-        Metrics("component", "metricName", "instance3", start, end, {
+        Metrics("component", "metric_name", "instance3", start, end, {
           120: 3.0,
           180: 3.0,
           240: 3.0,
           300: 3.0,
         }),
-        Metrics("component", "metricName", "instance4", start, end, {
+        Metrics("component", "metric_name", "instance4", start, end, {
           120: 4.0,
           180: 4.0,
           240: 4.0,
           300: 4.0,
         }),
-        Metrics("component", "metricName", "instance5", start, end, {
+        Metrics("component", "metric_name", "instance5", start, end, {
           120: 5.0,
           180: 5.0,
           240: 5.0,
@@ -811,31 +811,31 @@ class QueryOperatorTests(tornado.testing.AsyncTestCase):
     def ts_side_effect4(*args):
       self.assertEqual((tracker, tmaster, 100, 300), args)
       raise tornado.gen.Return([
-        Metrics("component", "metricName", "instance", start, end, {
+        Metrics("component", "metric_name", "instance", start, end, {
           120: 2.0,
           180: 2.0,
           240: 2.0,
           300: 2.0,
         }),
-        Metrics("component", "metricName", "instance2", start, end, {
+        Metrics("component", "metric_name", "instance2", start, end, {
           120: 4.0,
           180: 4.0,
           240: 4.0,
           300: 4.0,
         }),
-        Metrics("component", "metricName", "instance3", start, end, {
+        Metrics("component", "metric_name", "instance3", start, end, {
           120: 6.0,
           180: 6.0,
           240: 6.0,
           300: 6.0,
         }),
-        Metrics("component", "metricName", "instance4", start, end, {
+        Metrics("component", "metric_name", "instance4", start, end, {
           120: 8.0,
           180: 8.0,
           240: 8.0,
           300: 8.0,
         }),
-        Metrics("component", "metricName", "instance5", start, end, {
+        Metrics("component", "metric_name", "instance5", start, end, {
           120: 10.0,
           180: 10.0,
           240: 10.0,
@@ -857,8 +857,8 @@ class QueryOperatorTests(tornado.testing.AsyncTestCase):
 
   @tornado.testing.gen_test
   def test_DIVIDE_execute_with_mulitiple_ts_when_instances_do_not_match(self):
-    ts = Mock()
-    ts2 = Mock()
+    ts = Mock(TS)
+    ts2 = Mock(TS)
     operator = Divide([ts, ts2])
     tmaster = Mock()
     tracker = Mock()
@@ -870,31 +870,31 @@ class QueryOperatorTests(tornado.testing.AsyncTestCase):
     def ts_side_effect3(*args):
       self.assertEqual((tracker, tmaster, 100, 300), args)
       raise tornado.gen.Return([
-        Metrics("component", "metricName", "instance", start, end, {
+        Metrics("component", "metric_name", "instance", start, end, {
           120: 1.0,
           180: 1.0,
           240: 1.0,
           300: 1.0,
         }),
-        Metrics("component", "metricName", "instance2", start, end, {
+        Metrics("component", "metric_name", "instance2", start, end, {
           120: 2.0,
           180: 2.0,
           240: 2.0,
           300: 2.0,
         }),
-        Metrics("component", "metricName", "instance3", start, end, {
+        Metrics("component", "metric_name", "instance3", start, end, {
           120: 3.0,
           180: 3.0,
           240: 3.0,
           300: 3.0,
         }),
-        Metrics("component", "metricName", "instance4", start, end, {
+        Metrics("component", "metric_name", "instance4", start, end, {
           120: 4.0,
           180: 4.0,
           240: 4.0,
           300: 4.0,
         }),
-        Metrics("component", "metricName", "instance5", start, end, {
+        Metrics("component", "metric_name", "instance5", start, end, {
           120: 5.0,
           180: 5.0,
           240: 5.0,
@@ -908,13 +908,13 @@ class QueryOperatorTests(tornado.testing.AsyncTestCase):
     def ts_side_effect4(*args):
       self.assertEqual((tracker, tmaster, 100, 300), args)
       raise tornado.gen.Return([
-        Metrics("component", "metricName", "instance", start, end, {
+        Metrics("component", "metric_name", "instance", start, end, {
           120: 2.0,
           180: 2.0,
           240: 2.0,
           300: 2.0,
         }),
-        Metrics("component", "metricName", "instance2", start, end, {
+        Metrics("component", "metric_name", "instance2", start, end, {
           120: 4.0,
           180: 4.0,
           240: 4.0,
@@ -938,7 +938,7 @@ class QueryOperatorTests(tornado.testing.AsyncTestCase):
 
   @tornado.testing.gen_test
   def test_MULTIPLY_execute(self):
-    ts = Mock()
+    ts = Mock(TS)
     operator = Multiply([float(100), ts])
     tmaster = Mock()
     tracker = Mock()
@@ -950,7 +950,7 @@ class QueryOperatorTests(tornado.testing.AsyncTestCase):
     def ts_side_effect(*args):
       self.assertEqual((tracker, tmaster, 100, 300), args)
       raise tornado.gen.Return([
-        Metrics("component", "metricName", "instance", start, end, {
+        Metrics("component", "metric_name", "instance", start, end, {
           120: 1.0,
           180: 2.0,
           240: 4.0,
@@ -971,7 +971,7 @@ class QueryOperatorTests(tornado.testing.AsyncTestCase):
 
   @tornado.testing.gen_test
   def test_MULTIPLY_execute_when_exception(self):
-    ts = Mock()
+    ts = Mock(TS)
     operator = Multiply([float(100), ts])
     tmaster = Mock()
     tracker = Mock()
@@ -989,7 +989,7 @@ class QueryOperatorTests(tornado.testing.AsyncTestCase):
 
   @tornado.testing.gen_test
   def test_MULTIPLY_execute_when_missing_values(self):
-    ts = Mock()
+    ts = Mock(TS)
     operator = Multiply([float(100), ts])
     tmaster = Mock()
     tracker = Mock()
@@ -1001,7 +1001,7 @@ class QueryOperatorTests(tornado.testing.AsyncTestCase):
     def ts_side_effect3(*args):
       self.assertEqual((tracker, tmaster, 100, 300), args)
       raise tornado.gen.Return([
-        Metrics("component", "metricName", "instance", start, end, {
+        Metrics("component", "metric_name", "instance", start, end, {
           180: 2.0,
           240: 4.0,
           300: 5.0,
@@ -1020,8 +1020,8 @@ class QueryOperatorTests(tornado.testing.AsyncTestCase):
 
   @tornado.testing.gen_test
   def test_MULTIPLY_execute_with_multiple_ts(self):
-    ts = Mock()
-    ts2 = Mock()
+    ts = Mock(TS)
+    ts2 = Mock(TS)
     operator = Multiply([ts, ts2])
     tmaster = Mock()
     tracker = Mock()
@@ -1033,31 +1033,31 @@ class QueryOperatorTests(tornado.testing.AsyncTestCase):
     def ts_side_effect3(*args):
       self.assertEqual((tracker, tmaster, 100, 300), args)
       raise tornado.gen.Return([
-        Metrics("component", "metricName", "instance", start, end, {
+        Metrics("component", "metric_name", "instance", start, end, {
           120: 1.0,
           180: 1.0,
           240: 1.0,
           300: 1.0,
         }),
-        Metrics("component", "metricName", "instance2", start, end, {
+        Metrics("component", "metric_name", "instance2", start, end, {
           120: 2.0,
           180: 2.0,
           240: 2.0,
           300: 2.0,
         }),
-        Metrics("component", "metricName", "instance3", start, end, {
+        Metrics("component", "metric_name", "instance3", start, end, {
           120: 3.0,
           180: 3.0,
           240: 3.0,
           300: 3.0,
         }),
-        Metrics("component", "metricName", "instance4", start, end, {
+        Metrics("component", "metric_name", "instance4", start, end, {
           120: 4.0,
           180: 4.0,
           240: 4.0,
           300: 4.0,
         }),
-        Metrics("component", "metricName", "instance5", start, end, {
+        Metrics("component", "metric_name", "instance5", start, end, {
           120: 5.0,
           180: 5.0,
           240: 5.0,
@@ -1070,31 +1070,31 @@ class QueryOperatorTests(tornado.testing.AsyncTestCase):
     def ts_side_effect4(*args):
       self.assertEqual((tracker, tmaster, 100, 300), args)
       raise tornado.gen.Return([
-        Metrics("component", "metricName", "instance", start, end, {
+        Metrics("component", "metric_name", "instance", start, end, {
           120: 2.0,
           180: 2.0,
           240: 2.0,
           300: 2.0,
         }),
-        Metrics("component", "metricName", "instance2", start, end, {
+        Metrics("component", "metric_name", "instance2", start, end, {
           120: 4.0,
           180: 4.0,
           240: 4.0,
           300: 4.0,
         }),
-        Metrics("component", "metricName", "instance3", start, end, {
+        Metrics("component", "metric_name", "instance3", start, end, {
           120: 6.0,
           180: 6.0,
           240: 6.0,
           300: 6.0,
         }),
-        Metrics("component", "metricName", "instance4", start, end, {
+        Metrics("component", "metric_name", "instance4", start, end, {
           120: 8.0,
           180: 8.0,
           240: 8.0,
           300: 8.0,
         }),
-        Metrics("component", "metricName", "instance5", start, end, {
+        Metrics("component", "metric_name", "instance5", start, end, {
           120: 10.0,
           180: 10.0,
           240: 10.0,
@@ -1144,8 +1144,8 @@ class QueryOperatorTests(tornado.testing.AsyncTestCase):
 
   @tornado.testing.gen_test
   def test_MULTIPLY_execute_with_multiple_ts_when_instances_do_not_match(self):
-    ts = Mock()
-    ts2 = Mock()
+    ts = Mock(TS)
+    ts2 = Mock(TS)
     operator = Multiply([ts, ts2])
     tmaster = Mock()
     tracker = Mock()
@@ -1157,31 +1157,31 @@ class QueryOperatorTests(tornado.testing.AsyncTestCase):
     def ts_side_effect3(*args):
       self.assertEqual((tracker, tmaster, 100, 300), args)
       raise tornado.gen.Return([
-        Metrics("component", "metricName", "instance", start, end, {
+        Metrics("component", "metric_name", "instance", start, end, {
           120: 1.0,
           180: 1.0,
           240: 1.0,
           300: 1.0,
         }),
-        Metrics("component", "metricName", "instance2", start, end, {
+        Metrics("component", "metric_name", "instance2", start, end, {
           120: 2.0,
           180: 2.0,
           240: 2.0,
           300: 2.0,
         }),
-        Metrics("component", "metricName", "instance3", start, end, {
+        Metrics("component", "metric_name", "instance3", start, end, {
           120: 3.0,
           180: 3.0,
           240: 3.0,
           300: 3.0,
         }),
-        Metrics("component", "metricName", "instance4", start, end, {
+        Metrics("component", "metric_name", "instance4", start, end, {
           120: 4.0,
           180: 4.0,
           240: 4.0,
           300: 4.0,
         }),
-        Metrics("component", "metricName", "instance5", start, end, {
+        Metrics("component", "metric_name", "instance5", start, end, {
           120: 5.0,
           180: 5.0,
           240: 5.0,
@@ -1195,13 +1195,13 @@ class QueryOperatorTests(tornado.testing.AsyncTestCase):
     def ts_side_effect4(*args):
       self.assertEqual((tracker, tmaster, 100, 300), args)
       raise tornado.gen.Return([
-        Metrics("component", "metricName", "instance", start, end, {
+        Metrics("component", "metric_name", "instance", start, end, {
           120: 2.0,
           180: 2.0,
           240: 2.0,
           300: 2.0,
         }),
-        Metrics("component", "metricName", "instance2", start, end, {
+        Metrics("component", "metric_name", "instance2", start, end, {
           120: 4.0,
           180: 4.0,
           240: 4.0,
@@ -1233,7 +1233,7 @@ class QueryOperatorTests(tornado.testing.AsyncTestCase):
 
   @tornado.testing.gen_test
   def test_SUBTRACT_execute(self):
-    ts = Mock()
+    ts = Mock(TS)
     operator = Subtract([float(100), ts])
     tmaster = Mock()
     tracker = Mock()
@@ -1245,7 +1245,7 @@ class QueryOperatorTests(tornado.testing.AsyncTestCase):
     def ts_side_effect(*args):
       self.assertEqual((tracker, tmaster, 100, 300), args)
       raise tornado.gen.Return([
-        Metrics("component", "metricName", "instance", start, end, {
+        Metrics("component", "metric_name", "instance", start, end, {
           120: 1.0,
           180: 2.0,
           240: 4.0,
@@ -1266,7 +1266,7 @@ class QueryOperatorTests(tornado.testing.AsyncTestCase):
 
   @tornado.testing.gen_test
   def test_SUBTRACT_execute_when_exception(self):
-    ts = Mock()
+    ts = Mock(TS)
     operator = Subtract([float(100), ts])
     tmaster = Mock()
     tracker = Mock()
@@ -1284,7 +1284,7 @@ class QueryOperatorTests(tornado.testing.AsyncTestCase):
 
   @tornado.testing.gen_test
   def test_SUBTRACT_execute_when_missing_values(self):
-    ts = Mock()
+    ts = Mock(TS)
     operator = Subtract([float(100), ts])
     tmaster = Mock()
     tracker = Mock()
@@ -1296,7 +1296,7 @@ class QueryOperatorTests(tornado.testing.AsyncTestCase):
     def ts_side_effect3(*args):
       self.assertEqual((tracker, tmaster, 100, 300), args)
       raise tornado.gen.Return([
-        Metrics("component", "metricName", "instance", start, end, {
+        Metrics("component", "metric_name", "instance", start, end, {
           180: 2.0,
           240: 4.0,
           300: 5.0,
@@ -1315,8 +1315,8 @@ class QueryOperatorTests(tornado.testing.AsyncTestCase):
 
   @tornado.testing.gen_test
   def test_SUBTRACT_execute_with_multiple_ts(self):
-    ts = Mock()
-    ts2 = Mock()
+    ts = Mock(TS)
+    ts2 = Mock(TS)
     operator = Subtract([ts, ts2])
     tmaster = Mock()
     tracker = Mock()
@@ -1328,31 +1328,31 @@ class QueryOperatorTests(tornado.testing.AsyncTestCase):
     def ts_side_effect3(*args):
       self.assertEqual((tracker, tmaster, 100, 300), args)
       raise tornado.gen.Return([
-        Metrics("component", "metricName", "instance", start, end, {
+        Metrics("component", "metric_name", "instance", start, end, {
           120: 1.0,
           180: 1.0,
           240: 1.0,
           300: 1.0,
         }),
-        Metrics("component", "metricName", "instance2", start, end, {
+        Metrics("component", "metric_name", "instance2", start, end, {
           120: 2.0,
           180: 2.0,
           240: 2.0,
           300: 2.0,
         }),
-        Metrics("component", "metricName", "instance3", start, end, {
+        Metrics("component", "metric_name", "instance3", start, end, {
           120: 3.0,
           180: 3.0,
           240: 3.0,
           300: 3.0,
         }),
-        Metrics("component", "metricName", "instance4", start, end, {
+        Metrics("component", "metric_name", "instance4", start, end, {
           120: 4.0,
           180: 4.0,
           240: 4.0,
           300: 4.0,
         }),
-        Metrics("component", "metricName", "instance5", start, end, {
+        Metrics("component", "metric_name", "instance5", start, end, {
           120: 5.0,
           180: 5.0,
           240: 5.0,
@@ -1365,31 +1365,31 @@ class QueryOperatorTests(tornado.testing.AsyncTestCase):
     def ts_side_effect4(*args):
       self.assertEqual((tracker, tmaster, 100, 300), args)
       raise tornado.gen.Return([
-        Metrics("component", "metricName", "instance", start, end, {
+        Metrics("component", "metric_name", "instance", start, end, {
           120: 2.0,
           180: 2.0,
           240: 2.0,
           300: 2.0,
         }),
-        Metrics("component", "metricName", "instance2", start, end, {
+        Metrics("component", "metric_name", "instance2", start, end, {
           120: 4.0,
           180: 4.0,
           240: 4.0,
           300: 4.0,
         }),
-        Metrics("component", "metricName", "instance3", start, end, {
+        Metrics("component", "metric_name", "instance3", start, end, {
           120: 6.0,
           180: 6.0,
           240: 6.0,
           300: 6.0,
         }),
-        Metrics("component", "metricName", "instance4", start, end, {
+        Metrics("component", "metric_name", "instance4", start, end, {
           120: 8.0,
           180: 8.0,
           240: 8.0,
           300: 8.0,
         }),
-        Metrics("component", "metricName", "instance5", start, end, {
+        Metrics("component", "metric_name", "instance5", start, end, {
           120: 10.0,
           180: 10.0,
           240: 10.0,
@@ -1439,8 +1439,8 @@ class QueryOperatorTests(tornado.testing.AsyncTestCase):
 
   @tornado.testing.gen_test
   def test_SUBTRACT_execute_with_multiple_ts_when_instances_do_not_match(self):
-    ts = Mock()
-    ts2 = Mock()
+    ts = Mock(TS)
+    ts2 = Mock(TS)
     operator = Subtract([ts, ts2])
     tmaster = Mock()
     tracker = Mock()
@@ -1452,31 +1452,31 @@ class QueryOperatorTests(tornado.testing.AsyncTestCase):
     def ts_side_effect3(*args):
       self.assertEqual((tracker, tmaster, 100, 300), args)
       raise tornado.gen.Return([
-        Metrics("component", "metricName", "instance", start, end, {
+        Metrics("component", "metric_name", "instance", start, end, {
           120: 1.0,
           180: 1.0,
           240: 1.0,
           300: 1.0,
         }),
-        Metrics("component", "metricName", "instance2", start, end, {
+        Metrics("component", "metric_name", "instance2", start, end, {
           120: 2.0,
           180: 2.0,
           240: 2.0,
           300: 2.0,
         }),
-        Metrics("component", "metricName", "instance3", start, end, {
+        Metrics("component", "metric_name", "instance3", start, end, {
           120: 3.0,
           180: 3.0,
           240: 3.0,
           300: 3.0,
         }),
-        Metrics("component", "metricName", "instance4", start, end, {
+        Metrics("component", "metric_name", "instance4", start, end, {
           120: 4.0,
           180: 4.0,
           240: 4.0,
           300: 4.0,
         }),
-        Metrics("component", "metricName", "instance5", start, end, {
+        Metrics("component", "metric_name", "instance5", start, end, {
           120: 5.0,
           180: 5.0,
           240: 5.0,
@@ -1490,13 +1490,13 @@ class QueryOperatorTests(tornado.testing.AsyncTestCase):
     def ts_side_effect4(*args):
       self.assertEqual((tracker, tmaster, 100, 300), args)
       raise tornado.gen.Return([
-        Metrics("component", "metricName", "instance", start, end, {
+        Metrics("component", "metric_name", "instance", start, end, {
           120: 2.0,
           180: 2.0,
           240: 2.0,
           300: 2.0,
         }),
-        Metrics("component", "metricName", "instance2", start, end, {
+        Metrics("component", "metric_name", "instance2", start, end, {
           120: 4.0,
           180: 4.0,
           240: 4.0,
@@ -1528,7 +1528,7 @@ class QueryOperatorTests(tornado.testing.AsyncTestCase):
 
   @tornado.testing.gen_test
   def test_RATE_execute(self):
-    ts = Mock()
+    ts = Mock(TS)
     operator = Rate([ts])
     tmaster = Mock()
     tracker = Mock()
@@ -1540,7 +1540,7 @@ class QueryOperatorTests(tornado.testing.AsyncTestCase):
     def ts_side_effect(*args):
       self.assertEqual((tracker, tmaster, 40, 300), args)
       raise tornado.gen.Return([
-        Metrics("component", "metricName", "instance", start-60, end, {
+        Metrics("component", "metric_name", "instance", start-60, end, {
           60: 0.0,
           120: 1.0,
           180: 2.0,
@@ -1562,7 +1562,7 @@ class QueryOperatorTests(tornado.testing.AsyncTestCase):
 
   @tornado.testing.gen_test
   def test_RATE_execute_when_exception(self):
-    ts = Mock()
+    ts = Mock(TS)
     operator = Rate([ts])
     tmaster = Mock()
     tracker = Mock()
@@ -1580,7 +1580,7 @@ class QueryOperatorTests(tornado.testing.AsyncTestCase):
 
   @tornado.testing.gen_test
   def test_RATE_execute_when_missing_values(self):
-    ts = Mock()
+    ts = Mock(TS)
     operator = Rate([ts])
     tmaster = Mock()
     tracker = Mock()
@@ -1592,7 +1592,7 @@ class QueryOperatorTests(tornado.testing.AsyncTestCase):
     def ts_side_effect3(*args):
       self.assertEqual((tracker, tmaster, 40, 300), args)
       raise tornado.gen.Return([
-        Metrics("component", "metricName", "instance", start-60, end, {
+        Metrics("component", "metric_name", "instance", start-60, end, {
           60: 0.0,
           # 120: 1.0, # Missing
           180: 2.0,
@@ -1613,7 +1613,7 @@ class QueryOperatorTests(tornado.testing.AsyncTestCase):
 
   @tornado.testing.gen_test
   def test_RATE_execute_with_multiple_ts(self):
-    ts = Mock()
+    ts = Mock(TS)
     operator = Rate([ts])
     tmaster = Mock()
     tracker = Mock()
@@ -1625,35 +1625,35 @@ class QueryOperatorTests(tornado.testing.AsyncTestCase):
     def ts_side_effect3(*args):
       self.assertEqual((tracker, tmaster, 40, 300), args)
       raise tornado.gen.Return([
-        Metrics("component", "metricName", "instance", start-60, end, {
+        Metrics("component", "metric_name", "instance", start-60, end, {
           60: 0.0,
           120: 1.0,
           180: 1.0,
           240: 1.0,
           300: 1.0,
         }),
-        Metrics("component", "metricName", "instance2", start-60, end, {
+        Metrics("component", "metric_name", "instance2", start-60, end, {
           60: 0.0,
           120: 2.0,
           180: 2.0,
           240: 2.0,
           300: 2.0,
         }),
-        Metrics("component", "metricName", "instance3", start-60, end, {
+        Metrics("component", "metric_name", "instance3", start-60, end, {
           60: 0.0,
           120: 3.0,
           180: 3.0,
           240: 3.0,
           300: 3.0,
         }),
-        Metrics("component", "metricName", "instance4", start-60, end, {
+        Metrics("component", "metric_name", "instance4", start-60, end, {
           60: 0.0,
           120: 4.0,
           180: 4.0,
           240: 4.0,
           300: 4.0,
         }),
-        Metrics("component", "metricName", "instance5", start-60, end, {
+        Metrics("component", "metric_name", "instance5", start-60, end, {
           60: 0.0,
           120: 5.0,
           180: 5.0,

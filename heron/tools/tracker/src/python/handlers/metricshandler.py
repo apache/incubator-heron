@@ -64,7 +64,7 @@ class MetricsHandler(BaseHandler):
       component = self.get_argument_component()
       metric_names = self.get_required_arguments_metricnames()
 
-      topology = self.tracker.getTopologyByClusterRoleEnvironAndName(
+      topology = self.tracker.get_topology(
           cluster, role, environ, topology_name)
 
       interval = int(self.get_argument(constants.PARAM_INTERVAL, default=-1))
@@ -84,7 +84,7 @@ class MetricsHandler(BaseHandler):
   def getComponentMetrics(self,
                           tmaster,
                           componentName,
-                          metricNames,
+                          metric_names,
                           instances,
                           interval,
                           callback=None):
@@ -116,8 +116,8 @@ class MetricsHandler(BaseHandler):
     if len(instances) > 0:
       for instance in instances:
         metricRequest.instance_id.append(instance)
-    for metricName in metricNames:
-      metricRequest.metric.append(metricName)
+    for metric_name in metric_names:
+      metricRequest.metric.append(metric_name)
     metricRequest.interval = interval
 
     # Serialize the metricRequest to send as a payload
