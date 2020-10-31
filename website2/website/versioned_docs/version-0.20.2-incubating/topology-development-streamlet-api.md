@@ -1,7 +1,8 @@
 ---
-id: topology-development-streamlet-api
+id: version-0.20.2-incubating-topology-development-streamlet-api
 title: The Heron Streamlet API for Java
 sidebar_label: The Heron Streamlet API for Java
+original_id: topology-development-streamlet-api
 ---
 <!--
     Licensed to the Apache Software Foundation (ASF) under one
@@ -113,7 +114,7 @@ $ heron submit local \
 
 ### Java Streamlet API starter project
 
-If you'd like to up and running quickly with the Heron Streamlet API for Java, you can view the example topologies [here](https://github.com/apache/incubator-heron/tree/{{ heron:version }}/examples/src/java/org/apache/heron/examples/streamlet)
+If you'd like to up and running quickly with the Heron Streamlet API for Java,  you can view the example topologies [here](https://github.com/apache/incubator-heron/tree/master/examples/src/java/org/apache/heron/examples/streamlet)
 
 If you're running a [local Heron cluster](getting-started-local-single-node), you can submit the built example topology like this:
 

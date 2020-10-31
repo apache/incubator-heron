@@ -1,7 +1,8 @@
 ---
-id: compiling-code-organization
+id: version-0.20.2-incubating-compiling-code-organization
 title: Code Organization
 sidebar_label: Code Organization
+original_id: compiling-code-organization
 ---
 <!--
     Licensed to the Apache Software Foundation (ASF) under one

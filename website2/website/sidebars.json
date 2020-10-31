@@ -23,7 +23,6 @@
     ],
     "Guides": [
       "guides-effectively-once-java-topologies",
-      "guides-python-topologies",
       "guides-data-model",
       "guides-tuple-serialization",
       "guides-ui-guide",

@@ -1,7 +1,8 @@
 ---
-id: guides-effectively-once-java-topologies
+id: version-0.20.2-incubating-guides-effectively-once-java-topologies
 title: Effectively Once Java Topologies
 sidebar_label: Effectively Once Java Topologies
+original_id: guides-effectively-once-java-topologies
 ---
 <!--
     Licensed to the Apache Software Foundation (ASF) under one
