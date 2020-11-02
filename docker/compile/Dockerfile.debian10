@@ -43,7 +43,7 @@ RUN apt-get update && apt-get -y install \
       wget \
       zip
 
-ENV bazelVersion 3.4.1
+ENV bazelVersion 3.5.0
 
 RUN wget -O /tmp/bazel.sh https://github.com/bazelbuild/bazel/releases/download/$bazelVersion/bazel-$bazelVersion-installer-linux-x86_64.sh \
       && chmod +x /tmp/bazel.sh \
