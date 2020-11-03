@@ -19,11 +19,13 @@
 #  under the License.
 
 """ query.py """
+from typing import Any, List, Optional
+
 import tornado.httpclient
 import tornado.gen
 
+from heron.proto.tmanager_pb2 import TManagerLocation
 from heron.tools.tracker.src.python.query_operators import *
-
 
 ####################################################################
 # Parsing and executing the query string.
@@ -54,7 +56,7 @@ class Query:
 
   # pylint: disable=attribute-defined-outside-init, no-member
   @tornado.gen.coroutine
-  def execute_query(self, tmanager, query_string, start, end):
+  def execute_query(self, tmanager: TManagerLocation, query_string: str, start: int, end: int) -> Any:
     """ execute query """
     if not tmanager:
       raise Exception("No tmanager found")
@@ -63,15 +65,14 @@ class Query:
     metrics = yield root.execute(self.tracker, self.tmanager, start, end)
     raise tornado.gen.Return(metrics)
 
-  def find_closing_braces(self, query):
+  def find_closing_braces(self, query: str) -> int:
     """Find the index of the closing braces for the opening braces
     at the start of the query string. Note that first character
     of input string must be an opening braces."""
     if query[0] != '(':
       raise Exception("Trying to find closing braces for no opening braces")
     num_open_braces = 0
-    for i in range(len(query)):
-      c = query[i]
+    for i, c in enumerate(query):
       if c == '(':
         num_open_braces += 1
       elif c == ')':
@@ -80,27 +81,30 @@ class Query:
         return i
     raise Exception("No closing braces found")
 
-  def get_sub_parts(self, query):
+  def get_sub_parts(self, query: str) -> List[str]:
     """The subparts are seperated by a comma. Make sure
     that commas inside the part themselves are not considered."""
-    parts = []
+    parts: List[str] = []
     num_open_braces = 0
     delimiter = ','
     last_starting_index = 0
-    for i in range(len(query)):
-      if query[i] == '(':
+    for i, c in enumerate(query):
+      if c == '(':
         num_open_braces += 1
-      elif query[i] == ')':
+      elif c == ')':
         num_open_braces -= 1
-      elif query[i] == delimiter and num_open_braces == 0:
+        if num_open_braces < 0:
+          raise Exception("Too many closing braces")
+      elif c == delimiter and num_open_braces == 0:
         parts.append(query[last_starting_index: i].strip())
         last_starting_index = i + 1
     parts.append(query[last_starting_index:].strip())
     return parts
 
-  def parse_query_string(self, query):
+  def parse_query_string(self, query: str) -> Optional[Operator]:
     """Returns a parse tree for the query, each of the node is a
     subclass of Operator. This is both a lexical as well as syntax analyzer step."""
+    query = query.strip()
     if not query:
       return None
     # Just braces do not matter
@@ -109,7 +113,7 @@ class Query:
       # This must be the last index, since this was an NOP starting brace
       if index != len(query) - 1:
         raise Exception("Invalid syntax")
-      return self.parse_query_string(query[1:-1])
+      return self.parse_query_string(query[1:index])
     start_index = query.find("(")
     # There must be a ( in the query
     if start_index < 0:
@@ -119,9 +123,10 @@ class Query:
         return constant
       except ValueError:
         raise Exception("Invalid syntax")
-    token = query[:start_index]
-    if token not in self.operators:
-      raise Exception("Invalid token: " + token)
+    token = query[:start_index].rstrip()
+    operator_cls = self.operators.get(token)
+    if operator_cls is None:
+      raise Exception(f"Invalid token: {token!r}")
 
     # Get sub components
     rest_of_the_query = query[start_index:]
@@ -133,12 +138,13 @@ class Query:
     # parts are simple strings in this case
     if token == "TS":
       # This will raise exception if parts are not syntactically correct
-      return self.operators[token](parts)
+      return operator_cls(parts)
 
-    children = []
-    for part in parts:
-      children.append(self.parse_query_string(part))
+    children = [
+        self.parse_query_string(part)
+        for part in parts
+    ]
 
     # Make a node for the current token
-    node = self.operators[token](children)
+    node = operator_cls(children)
     return node

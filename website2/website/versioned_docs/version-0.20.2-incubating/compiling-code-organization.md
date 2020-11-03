@@ -1,7 +1,8 @@
 ---
-id: compiling-code-organization
+id: version-0.20.2-incubating-compiling-code-organization
 title: Code Organization
 sidebar_label: Code Organization
+original_id: compiling-code-organization
 ---
 <!--
     Licensed to the Apache Software Foundation (ASF) under one
@@ -32,7 +33,7 @@ cluster, see [Building Topologies](topology-development-topology-api-java) inste
 The primary programming languages for Heron are C++, Java, and Python.
 
 * **C++ 11** is used for most of Heron's core components, including the
-[Topology Manager](heron-architecture#topology-manager), and
+[Topology Master](heron-architecture#topology-master), and
 [Stream Manager](heron-architecture#stream-manager).
 
 * **Java 11** is used primarily for Heron's [topology
@@ -91,11 +92,11 @@ Heron components.
 
 ## Topology Components
 
-### Topology Manager
+### Topology Master
 
 The C++ code for Heron's [Topology
-Manager](heron-architecture#topology-manager) is written in C++ can be
-found in [`heron/tmanager`](https://github.com/apache/incubator-heron/tree/master/heron/tmanager).
+Master](heron-architecture#topology-master) is written in C++ can be
+found in [`heron/tmaster`](https://github.com/apache/incubator-heron/tree/master/heron/tmaster).
 
 ### Stream Manager
 
