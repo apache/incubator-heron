@@ -178,7 +178,8 @@ public class MetricsManagerServer extends HeronServer {
     } else if (message instanceof Metrics.TManagerLocationRefreshMessage) {
       // LOG down where the TManager Location comes from
       LOG.info("TManager Location is refresh from: " + channel.socket().getRemoteSocketAddress());
-      handleTManagerLocationRefreshMessage(request, (Metrics.TManagerLocationRefreshMessage) message);
+      handleTManagerLocationRefreshMessage(
+          request, (Metrics.TManagerLocationRefreshMessage) message);
     } else {
       LOG.severe("Unknown kind of message received from Metrics Manager");
     }

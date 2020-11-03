@@ -118,7 +118,8 @@ public class MetricsCacheManagerHttpServer {
     byte[] responseData = NetworkUtils.readHttpResponse(con);
 
     // parse response data
-    TopologyManager.MetricResponse response = TopologyManager.MetricResponse.parseFrom(responseData);
+    TopologyManager.MetricResponse response =
+        TopologyManager.MetricResponse.parseFrom(responseData);
 
     System.out.println(response.toString());
   }

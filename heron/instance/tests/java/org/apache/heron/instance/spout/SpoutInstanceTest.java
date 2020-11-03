@@ -39,8 +39,8 @@ import org.apache.heron.api.serializer.JavaSerializer;
 import org.apache.heron.common.basics.SingletonRegistry;
 import org.apache.heron.common.testhelpers.HeronServerTester;
 import org.apache.heron.common.utils.misc.PhysicalPlanHelper;
-import org.apache.heron.instance.InstanceControlMsg;
 import org.apache.heron.instance.ExecutorTester;
+import org.apache.heron.instance.InstanceControlMsg;
 import org.apache.heron.proto.system.HeronTuples;
 import org.apache.heron.proto.system.Metrics;
 import org.apache.heron.proto.system.PhysicalPlans;
@@ -170,7 +170,8 @@ public class SpoutInstanceTest {
       public void run() {
         for (int i = 0; i < Constants.RETRY_TIMES; i++) {
           if (!executorTester.getExecutorMetricsOut().isEmpty()) {
-            Metrics.MetricPublisherPublishMessage msg = executorTester.getExecutorMetricsOut().poll();
+            Metrics.MetricPublisherPublishMessage msg =
+                executorTester.getExecutorMetricsOut().poll();
             Set<String> metricsName = new HashSet<>();
             for (Metrics.MetricDatum metricDatum : msg.getMetricsList()) {
               metricsName.add(metricDatum.getName());

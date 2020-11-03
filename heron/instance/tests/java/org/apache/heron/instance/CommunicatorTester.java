@@ -25,8 +25,8 @@ import java.util.concurrent.CountDownLatch;
 import com.google.protobuf.Message;
 
 import org.apache.heron.common.basics.Communicator;
-import org.apache.heron.common.basics.NIOLooper;
 import org.apache.heron.common.basics.ExecutorLooper;
+import org.apache.heron.common.basics.NIOLooper;
 import org.apache.heron.common.basics.WakeableLooper;
 import org.apache.heron.common.testhelpers.CommunicatorTestHelper;
 import org.apache.heron.proto.system.Metrics;

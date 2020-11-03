@@ -439,7 +439,8 @@ public class MetricsCacheSink implements IMetricsSink {
           LOG.log(Level.SEVERE, "metricsCacheClient dies in thread: " + t, e);
 
           Duration reconnectInterval = TypeUtils.getDuration(
-              metricsCacheClientConfig.get(KEY_TMANAGER_RECONNECT_INTERVAL_SEC), ChronoUnit.SECONDS);
+              metricsCacheClientConfig.get(KEY_TMANAGER_RECONNECT_INTERVAL_SEC),
+              ChronoUnit.SECONDS);
           SysUtils.sleep(reconnectInterval);
           LOG.info("Restarting metricsCacheClient");
 

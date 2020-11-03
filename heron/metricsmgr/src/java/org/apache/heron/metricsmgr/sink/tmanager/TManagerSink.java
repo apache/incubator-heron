@@ -381,7 +381,8 @@ public class TManagerSink implements IMetricsSink {
               currentTManagerLocation.getServerPort(),
               socketOptions, metricsCommunicator,
               TypeUtils.getDuration(
-                  tmanagerClientConfig.get(KEY_TMANAGER_RECONNECT_INTERVAL_SEC), ChronoUnit.SECONDS));
+                  tmanagerClientConfig.get(KEY_TMANAGER_RECONNECT_INTERVAL_SEC),
+                  ChronoUnit.SECONDS));
 
       int attempts = startedAttempts.incrementAndGet();
       LOG.severe(String.format("Starting TManagerClient for the %d time.", attempts));

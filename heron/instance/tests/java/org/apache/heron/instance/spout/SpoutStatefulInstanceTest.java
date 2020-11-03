@@ -33,8 +33,8 @@ import org.apache.heron.api.serializer.JavaSerializer;
 import org.apache.heron.api.spout.IRichSpout;
 import org.apache.heron.common.basics.SingletonRegistry;
 import org.apache.heron.common.utils.misc.PhysicalPlanHelper;
-import org.apache.heron.instance.InstanceControlMsg;
 import org.apache.heron.instance.ExecutorTester;
+import org.apache.heron.instance.InstanceControlMsg;
 import org.apache.heron.proto.system.PhysicalPlans;
 import org.apache.heron.resource.Constants;
 import org.apache.heron.resource.MockPhysicalPlansBuilder;
@@ -69,7 +69,8 @@ public class SpoutStatefulInstanceTest {
     SingletonRegistry.INSTANCE.registerSingleton(Constants.POSTSAVE_LATCH, postSaveLatch);
 
     executorTester.getInControlQueue().offer(UnitTestHelper.buildRestoreInstanceState("c0"));
-    executorTester.getInControlQueue().offer(UnitTestHelper.buildStartInstanceProcessingMessage("c0"));
+    executorTester.getInControlQueue().offer(
+        UnitTestHelper.buildStartInstanceProcessingMessage("c0"));
     executorTester.getInControlQueue().offer(buildPhysicalPlanMessageFor2PCSpout());
 
     // initially non of preSave or postSave are invoked yet
@@ -83,7 +84,8 @@ public class SpoutStatefulInstanceTest {
     assertEquals(1, postSaveLatch.getCount());
 
     // this should invoke postSave
-    executorTester.getInControlQueue().offer(UnitTestHelper.buildCheckpointSavedMessage("c0", "p0"));
+    executorTester.getInControlQueue().offer(
+        UnitTestHelper.buildCheckpointSavedMessage("c0", "p0"));
     assertTrue(postSaveLatch.await(Constants.TEST_WAIT_TIME.toMillis(), TimeUnit.MILLISECONDS));
     assertEquals(0, preSaveLatch.getCount());
     assertEquals(0, postSaveLatch.getCount());
@@ -95,7 +97,8 @@ public class SpoutStatefulInstanceTest {
     SingletonRegistry.INSTANCE.registerSingleton(Constants.PRERESTORE_LATCH, preRestoreLatch);
 
     executorTester.getInControlQueue().offer(UnitTestHelper.buildRestoreInstanceState("c0"));
-    executorTester.getInControlQueue().offer(UnitTestHelper.buildStartInstanceProcessingMessage("c0"));
+    executorTester.getInControlQueue().offer(
+        UnitTestHelper.buildStartInstanceProcessingMessage("c0"));
     executorTester.getInControlQueue().offer(buildPhysicalPlanMessageFor2PCSpout());
 
     assertEquals(1, preRestoreLatch.getCount());
@@ -127,7 +130,8 @@ public class SpoutStatefulInstanceTest {
     SingletonRegistry.INSTANCE.registerSingleton(Constants.EMIT_LATCH, emitLatch);
 
     executorTester.getInControlQueue().offer(UnitTestHelper.buildRestoreInstanceState("c0"));
-    executorTester.getInControlQueue().offer(UnitTestHelper.buildStartInstanceProcessingMessage("c0"));
+    executorTester.getInControlQueue().offer(
+        UnitTestHelper.buildStartInstanceProcessingMessage("c0"));
     executorTester.getInControlQueue().offer(buildPhysicalPlanMessageFor2PCSpout());
 
     // initially non of preSave or postSave are invoked yet
@@ -155,7 +159,8 @@ public class SpoutStatefulInstanceTest {
     assertEquals(1, emitLatch.getCount());
 
     // this should invoke postSave
-    executorTester.getInControlQueue().offer(UnitTestHelper.buildCheckpointSavedMessage("c0", "p0"));
+    executorTester.getInControlQueue().offer(
+        UnitTestHelper.buildCheckpointSavedMessage("c0", "p0"));
     assertTrue(postSaveLatch.await(Constants.TEST_WAIT_TIME.toMillis(), TimeUnit.MILLISECONDS));
     assertTrue(emitLatch.await(Constants.TEST_WAIT_TIME.toMillis(), TimeUnit.MILLISECONDS));
 
@@ -183,7 +188,8 @@ public class SpoutStatefulInstanceTest {
     SingletonRegistry.INSTANCE.registerSingleton(Constants.EMIT_LATCH, emitLatch);
 
     executorTester.getInControlQueue().offer(UnitTestHelper.buildRestoreInstanceState("c0"));
-    executorTester.getInControlQueue().offer(UnitTestHelper.buildStartInstanceProcessingMessage("c0"));
+    executorTester.getInControlQueue().offer(
+        UnitTestHelper.buildStartInstanceProcessingMessage("c0"));
     executorTester.getInControlQueue().offer(buildPhysicalPlanMessageForStatefulSpout());
 
     // initially non of preSave or postSave are invoked yet

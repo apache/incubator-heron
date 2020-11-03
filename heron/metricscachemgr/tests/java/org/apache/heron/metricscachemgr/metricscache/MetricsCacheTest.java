@@ -60,7 +60,8 @@ public class MetricsCacheTest {
         .build());
 
     // query last 10 seconds
-    TopologyManager.MetricResponse response = mc.getMetrics(TopologyManager.MetricRequest.newBuilder()
+    TopologyManager.MetricResponse response = mc.getMetrics(
+        TopologyManager.MetricRequest.newBuilder()
         .setComponentName("c1").addInstanceId("i1")
         .setInterval(10).addMetric("__jvm-uptime-secs")
         .build());

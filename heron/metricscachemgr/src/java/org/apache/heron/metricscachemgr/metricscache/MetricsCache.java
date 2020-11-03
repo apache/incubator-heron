@@ -206,7 +206,8 @@ public class MetricsCache {
 
     MetricRequest request1 = MetricsCacheQueryUtils.fromProtobuf(request);
     MetricResponse response1 = cache.getMetrics(request1, metricNameType);
-    TopologyManager.MetricResponse response = MetricsCacheQueryUtils.toProtobuf(response1, request1);
+    TopologyManager.MetricResponse response =
+        MetricsCacheQueryUtils.toProtobuf(response1, request1);
     return response;
   }
 }

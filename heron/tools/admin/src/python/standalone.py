@@ -221,7 +221,8 @@ def template_secondary_hcl(cl_args, primaries):
   '''
   Template secondary config file
   '''
-  secondary_config_template = "%s/standalone/templates/secondary.template.hcl" % cl_args["config_path"]
+  secondary_config_template = "%s/standalone/templates/secondary.template.hcl" \
+                              % cl_args["config_path"]
   secondary_config_actual = "%s/standalone/resources/secondary.hcl" % cl_args["config_path"]
   primaries_in_quotes = ['"%s"' % primary for primary in primaries]
   template_file(secondary_config_template, secondary_config_actual,

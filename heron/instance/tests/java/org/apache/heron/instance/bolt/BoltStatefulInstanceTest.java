@@ -34,8 +34,8 @@ import org.apache.heron.api.serializer.IPluggableSerializer;
 import org.apache.heron.api.serializer.JavaSerializer;
 import org.apache.heron.common.basics.SingletonRegistry;
 import org.apache.heron.common.utils.misc.PhysicalPlanHelper;
-import org.apache.heron.instance.InstanceControlMsg;
 import org.apache.heron.instance.ExecutorTester;
+import org.apache.heron.instance.InstanceControlMsg;
 import org.apache.heron.proto.system.HeronTuples;
 import org.apache.heron.proto.system.PhysicalPlans;
 import org.apache.heron.resource.Constants;
@@ -73,7 +73,8 @@ public class BoltStatefulInstanceTest {
     SingletonRegistry.INSTANCE.registerSingleton(Constants.POSTSAVE_LATCH, postSaveLatch);
 
     executorTester.getInControlQueue().offer(UnitTestHelper.buildRestoreInstanceState("c0"));
-    executorTester.getInControlQueue().offer(UnitTestHelper.buildStartInstanceProcessingMessage("c0"));
+    executorTester.getInControlQueue().offer(
+        UnitTestHelper.buildStartInstanceProcessingMessage("c0"));
     executorTester.getInControlQueue().offer(buildPhysicalPlanMessageFor2PCBolt());
 
     // initially non of preSave or postSave are invoked yet
@@ -87,7 +88,8 @@ public class BoltStatefulInstanceTest {
     assertEquals(1, postSaveLatch.getCount());
 
     // this should invoke postSave
-    executorTester.getInControlQueue().offer(UnitTestHelper.buildCheckpointSavedMessage("c0", "p0"));
+    executorTester.getInControlQueue().offer(
+        UnitTestHelper.buildCheckpointSavedMessage("c0", "p0"));
     assertTrue(postSaveLatch.await(Constants.TEST_WAIT_TIME.toMillis(), TimeUnit.MILLISECONDS));
     assertEquals(0, preSaveLatch.getCount());
     assertEquals(0, postSaveLatch.getCount());
@@ -99,7 +101,8 @@ public class BoltStatefulInstanceTest {
     SingletonRegistry.INSTANCE.registerSingleton(Constants.PRERESTORE_LATCH, preRestoreLatch);
 
     executorTester.getInControlQueue().offer(UnitTestHelper.buildRestoreInstanceState("c0"));
-    executorTester.getInControlQueue().offer(UnitTestHelper.buildStartInstanceProcessingMessage("c0"));
+    executorTester.getInControlQueue().offer(
+        UnitTestHelper.buildStartInstanceProcessingMessage("c0"));
     executorTester.getInControlQueue().offer(buildPhysicalPlanMessageFor2PCBolt());
 
     assertEquals(1, preRestoreLatch.getCount());
@@ -126,7 +129,8 @@ public class BoltStatefulInstanceTest {
     SingletonRegistry.INSTANCE.registerSingleton(Constants.EXECUTE_LATCH, executeLatch);
 
     executorTester.getInControlQueue().offer(UnitTestHelper.buildRestoreInstanceState("c0"));
-    executorTester.getInControlQueue().offer(UnitTestHelper.buildStartInstanceProcessingMessage("c0"));
+    executorTester.getInControlQueue().offer(
+        UnitTestHelper.buildStartInstanceProcessingMessage("c0"));
     executorTester.getInControlQueue().offer(buildPhysicalPlanMessageFor2PCBolt());
 
     // initially non of preSave or postSave are invoked yet
@@ -154,7 +158,8 @@ public class BoltStatefulInstanceTest {
     assertEquals(1, executeLatch.getCount());
 
     // this should invoke postSave
-    executorTester.getInControlQueue().offer(UnitTestHelper.buildCheckpointSavedMessage("c0", "p0"));
+    executorTester.getInControlQueue().offer(
+        UnitTestHelper.buildCheckpointSavedMessage("c0", "p0"));
     assertTrue(postSaveLatch.await(Constants.TEST_WAIT_TIME.toMillis(), TimeUnit.MILLISECONDS));
     assertTrue(executeLatch.await(Constants.TEST_WAIT_TIME.toMillis(), TimeUnit.MILLISECONDS));
 
@@ -176,7 +181,8 @@ public class BoltStatefulInstanceTest {
     SingletonRegistry.INSTANCE.registerSingleton(Constants.EXECUTE_LATCH, executeLatch);
 
     executorTester.getInControlQueue().offer(UnitTestHelper.buildRestoreInstanceState("c0"));
-    executorTester.getInControlQueue().offer(UnitTestHelper.buildStartInstanceProcessingMessage("c0"));
+    executorTester.getInControlQueue().offer(
+        UnitTestHelper.buildStartInstanceProcessingMessage("c0"));
     executorTester.getInControlQueue().offer(buildPhysicalPlanMessageForStatefulBolt());
 
     // initially non of preSave or postSave are invoked yet
