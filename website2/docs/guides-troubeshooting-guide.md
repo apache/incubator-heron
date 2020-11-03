@@ -233,5 +233,5 @@ Follow these steps to enable remote debugging:
    [set up Remote Debugging in Eclipse](http://help.eclipse.org/neon/index.jsp?topic=%2Forg.eclipse.jdt.doc.user%2Ftasks%2Ftask-remotejava_launch_config.htm) . 
    To setup remote debugging with intelij use [remote debugging instructions](https://www.jetbrains.com/help/idea/2016.2/run-debug-configuration-remote.html) .
  
-3. Once the topology is activated start the debugger at ```localhost:{port}``` if in standalone
+3. Once the topology is activated start the debugger at ```localhost:{port}``` if
    local deployment or ``` {IP}/{hostname}:{port}``` for multi container remote deployment. And you will be able to debug the code step by step.

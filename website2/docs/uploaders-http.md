@@ -52,8 +52,8 @@ package/jars as follows:
 
 ```
 ${HOME}/.heron/bin/heron-apiserver 
---cluster standalone 
---base-template standalone 
+--cluster nomad
+--base-template nomad
 -D heron.statemgr.connection.string=<zookeeper_host:zookeeper_port> 
 -D heron.nomad.scheduler.uri=<scheduler_uri> 
 -D heron.class.uploader=org.apache.heron.uploader.http.HttpUploader

@@ -192,7 +192,7 @@ public final class Runtime {
   // working-dir/heron-core
   private static String getHeronDirectory(CommandLine cmd) {
     final String cluster = cmd.getOptionValue(Flag.Cluster.name);
-    if ("local".equalsIgnoreCase(cluster) || "standalone".equalsIgnoreCase(cluster)) {
+    if ("local".equalsIgnoreCase(cluster)) {
       return Constants.DEFAULT_HERON_LOCAL;
     }
     return Key.HERON_CLUSTER_HOME.getDefaultString();
