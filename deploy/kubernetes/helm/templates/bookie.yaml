@@ -42,6 +42,9 @@ data:
   BK_indexDirectories: "/bookkeeper/data/ledgers" 
   BK_zkServers: {{ .Release.Name }}-zookeeper:{{ .Values.zookeeper.clientPort }}
   BK_autoRecoveryDaemonEnabled: "true"
+  BK_journalMaxBackups: {{ .Values.bookieJournalMaxBackups }}
+  BK_journalMaxSizeMB: {{ .Values.bookieJournalMaxSizeMB }}
+  BK_logSizeLimit: {{ .Values.bookieLogSizeLimit }}
   {{- if or (eq .Values.platform "gke") (eq .Values.platform "minikube") }}
   BK_useHostNameAsBookieID: "true"
   {{- end }}
