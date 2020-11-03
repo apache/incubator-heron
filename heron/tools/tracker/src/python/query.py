@@ -56,7 +56,13 @@ class Query:
 
   # pylint: disable=attribute-defined-outside-init, no-member
   @tornado.gen.coroutine
-  def execute_query(self, tmanager: TManagerLocation, query_string: str, start: int, end: int) -> Any:
+  def execute_query(
+    self,
+    tmanager: TManagerLocation,
+    query_string: str,
+    start: int,
+    end: int
+  ) -> Any:
     """ execute query """
     if not tmanager:
       raise Exception("No tmanager found")
