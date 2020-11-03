@@ -709,8 +709,8 @@ class HeronExecutor:
                       '--stmgr_id=%s' % self.stmgr_ids[self.shard],
                       '--stmgr_port=%s' % self.tmanager_controller_port,
                       '--metricsmgr_port=%s' % self.metrics_manager_port,
-                      '--sys_config=%s' % self.heron_internals_config_file,
-                      '--override_config=%s' % self.override_config_file,
+                      '--config_file=%s' % self.heron_internals_config_file,
+                      '--override_config_file=%s' % self.override_config_file,
                       '--topology_pex=%s' % self.topology_binary_file,
                       '--max_ram=%s' % str(self.component_ram_map[component_name])]
 

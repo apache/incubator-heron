@@ -556,8 +556,7 @@ public class TopologyResource extends HeronResource {
   }
 
   private boolean isLocalMode() {
-    return "local".equalsIgnoreCase(getCluster()) || "standalone".equalsIgnoreCase(getCluster())
-        || "nomad".equalsIgnoreCase(getCluster());
+    return "local".equalsIgnoreCase(getCluster()) || "nomad".equalsIgnoreCase(getCluster());
   }
 
   private static Map<String, String> getSubmitOverrides(FormDataMultiPart form) {

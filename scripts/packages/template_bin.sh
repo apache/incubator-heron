@@ -72,10 +72,6 @@ if [ -L "${bin}/heron" ]; then
   rm -f "${bin}/heron"
 fi
 
-if [ -L "${bin}/heron-admin" ]; then
-  rm -f "${bin}/heron-admin"
-fi
-
 if [ -L "${bin}/heron-explorer" ]; then
   rm -f "${bin}/heron-explorer"
 fi
@@ -104,7 +100,6 @@ unzip -q -o "${BASH_SOURCE[0]}" -d "${base}"
 untar ${base}/heron.tar.gz ${base}
 echo "..done"
 chmod 0755 ${base}/bin/heron
-chmod 0755 ${base}/bin/heron-admin
 chmod 0755 ${base}/bin/heron-explorer
 chmod 0755 ${base}/bin/heron-tracker
 chmod 0755 ${base}/bin/heron-ui
@@ -114,7 +109,6 @@ chmod -R og+rX "${base}"
 chmod -R u+rwX "${base}"
 
 ln -s "${base}/bin/heron" "${bin}/heron"
-ln -s "${base}/bin/heron-admin" "${bin}/heron-admin"
 ln -s "${base}/bin/heron-explorer" "${bin}/heron-explorer"
 ln -s "${base}/bin/heron-tracker" "${bin}/heron-tracker"
 ln -s "${base}/bin/heron-ui" "${bin}/heron-ui"

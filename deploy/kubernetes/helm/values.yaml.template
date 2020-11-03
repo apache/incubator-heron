@@ -64,6 +64,9 @@ bookieReadCacheSize: 32
 bookieWriteCacheSize: 32
 bookieJournalCapacity: 5G
 bookieStorageCapacity: 15G
+bookieJournalMaxBackups: 3
+bookieJournalMaxSizeMB: 300
+bookieLogSizeLimit: 10000000
 
 # Number of replicas for zookeeper
 zkReplicas: 3
