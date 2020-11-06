@@ -31,16 +31,16 @@
 #include "server/dummy_metricsmgr.h"
 ///////////////////////////// DummyMtrMgr /////////////////////////////////////////////////
 DummyMtrMgr::DummyMtrMgr(std::shared_ptr<EventLoopImpl> ss, const NetworkOptions& options,
-                         const sp_string& stmgr_id, CountDownLatch* tmasterLatch,
+                         const sp_string& stmgr_id, CountDownLatch* tmanagerLatch,
                          CountDownLatch* connectionCloseLatch)
     : Server(ss, options),
       stmgr_id_expected_(stmgr_id),
       location_(NULL),
-      tmasterLatch_(tmasterLatch),
+      tmanagerLatch_(tmanagerLatch),
       connectionCloseLatch_(connectionCloseLatch) {
   InstallRequestHandler(&DummyMtrMgr::HandleMetricPublisherRegisterRequest);
   InstallMessageHandler(&DummyMtrMgr::HandleMetricPublisherPublishMessage);
-  InstallMessageHandler(&DummyMtrMgr::HandleTMasterLocationMessage);
+  InstallMessageHandler(&DummyMtrMgr::HandleTManagerLocationMessage);
 }
 
 DummyMtrMgr::~DummyMtrMgr() { delete location_; }
@@ -67,16 +67,16 @@ void DummyMtrMgr::HandleMetricPublisherRegisterRequest(REQID id, Connection* con
 void DummyMtrMgr::HandleMetricPublisherPublishMessage(
     Connection*, pool_unique_ptr<heron::proto::system::MetricPublisherPublishMessage> message) {}
 
-void DummyMtrMgr::HandleTMasterLocationMessage(
-    Connection*, pool_unique_ptr<heron::proto::system::TMasterLocationRefreshMessage> message) {
-  location_ = message->release_tmaster();
+void DummyMtrMgr::HandleTManagerLocationMessage(
+    Connection*, pool_unique_ptr<heron::proto::system::TManagerLocationRefreshMessage> message) {
+  location_ = message->release_tmanager();
 
-  LOG(INFO) << "Got tmaster location: " << location_->host() << ":" << location_->master_port();
+  LOG(INFO) << "Got tmanager location: " << location_->host() << ":" << location_->server_port();
 
-  if (tmasterLatch_ != NULL) {
-    // notify that we received tmaster location
-    tmasterLatch_->countDown();
+  if (tmanagerLatch_ != NULL) {
+    // notify that we received tmanager location
+    tmanagerLatch_->countDown();
   }
 }
 
-heron::proto::tmaster::TMasterLocation* DummyMtrMgr::get_tmaster() { return location_; }
+heron::proto::tmanager::TManagerLocation* DummyMtrMgr::get_tmanager() { return location_; }

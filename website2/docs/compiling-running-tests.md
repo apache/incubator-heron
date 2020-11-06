@@ -82,7 +82,7 @@ Integration tests are divided into two categories:
 * Failure integration tests
 
     These integration tests are designed for testing recovery from failure/restart
-    in certain processes, such as Topology Master and Metrics Manager.
+    in certain processes, such as Topology Manager and Metrics Manager.
     To run the failure integration tests on a Mac OS X, do the following:
 
     ```bash

@@ -24,7 +24,7 @@ from typing import Any, List, Optional
 import tornado.httpclient
 import tornado.gen
 
-from heron.proto.tmaster_pb2 import TMasterLocation
+from heron.proto.tmanager_pb2 import TManagerLocation
 from heron.tools.tracker.src.python.query_operators import *
 
 ####################################################################
@@ -37,7 +37,7 @@ class Query:
      individual metrics that are part of the query.
      Example usage:
         query = Query(tracker)
-        result = query.execute(tmaster, query_string)"""
+        result = query.execute(tmanager, query_string)"""
   # pylint: disable=undefined-variable
   def __init__(self, tracker):
     self.tracker = tracker
@@ -56,13 +56,19 @@ class Query:
 
   # pylint: disable=attribute-defined-outside-init, no-member
   @tornado.gen.coroutine
-  def execute_query(self, tmaster: TMasterLocation, query_string: str, start: int, end: int) -> Any:
+  def execute_query(
+      self,
+      tmanager: TManagerLocation,
+      query_string: str,
+      start: int,
+      end: int
+  ) -> Any:
     """ execute query """
-    if not tmaster:
-      raise Exception("No tmaster found")
-    self.tmaster = tmaster
+    if not tmanager:
+      raise Exception("No tmanager found")
+    self.tmanager = tmanager
     root = self.parse_query_string(query_string)
-    metrics = yield root.execute(self.tracker, self.tmaster, start, end)
+    metrics = yield root.execute(self.tracker, self.tmanager, start, end)
     raise tornado.gen.Return(metrics)
 
   def find_closing_braces(self, query: str) -> int:

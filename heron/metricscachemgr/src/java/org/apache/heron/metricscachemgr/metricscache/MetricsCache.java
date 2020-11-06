@@ -34,13 +34,13 @@ import org.apache.heron.metricscachemgr.metricscache.query.MetricRequest;
 import org.apache.heron.metricscachemgr.metricscache.query.MetricResponse;
 import org.apache.heron.metricsmgr.MetricsSinksConfig;
 import org.apache.heron.proto.system.Common;
-import org.apache.heron.proto.tmaster.TopologyMaster;
+import org.apache.heron.proto.tmanager.TopologyManager;
 import org.apache.heron.spi.metricsmgr.metrics.MetricsFilter;
 
 /**
  * Interface for the cache core
- * providing compatible interface with tmaster
- * see heron/tmaster/src/cpp/manager/tmetrics-collector.h
+ * providing compatible interface with tmanager
+ * see heron/tmanager/src/cpp/manager/tmetrics-collector.h
  */
 public class MetricsCache {
   public static final String METRICS_SINKS_METRICSCACHE_SINK = "metricscache-sink";
@@ -55,27 +55,27 @@ public class MetricsCache {
                       WakeableLooper looper) {
     // metadata
     metricNameType = new MetricsFilter();
-    Map<String, Object> sinksTMaster =
+    Map<String, Object> sinksTManager =
         sinksConfig.getConfigForSink(METRICS_SINKS_METRICSCACHE_SINK);
     @SuppressWarnings("unchecked")
     Map<String, String> metricsTypes =
-        (Map<String, String>) sinksTMaster.get(METRICS_SINKS_METRICSCACHE_METRICS);
+        (Map<String, String>) sinksTManager.get(METRICS_SINKS_METRICSCACHE_METRICS);
     for (String metricName : metricsTypes.keySet()) {
       metricNameType.setMetricToType(metricName, translateFromString(metricsTypes.get(metricName)));
     }
 
-    Duration maxInterval = systemConfig.getTmasterMetricsCollectorMaximumInterval();
-    Duration purgeInterval = systemConfig.getTmasterMetricsCollectorPurgeInterval();
-    long maxExceptions = systemConfig.getTmasterMetricsCollectorMaximumException();
+    Duration maxInterval = systemConfig.getTmanagerMetricsCollectorMaximumInterval();
+    Duration purgeInterval = systemConfig.getTmanagerMetricsCollectorPurgeInterval();
+    long maxExceptions = systemConfig.getTmanagerMetricsCollectorMaximumException();
 
     cache = new CacheCore(maxInterval, purgeInterval, maxExceptions);
 
     cache.startPurge(looper);
   }
 
-  private static TopologyMaster.MetricResponse.Builder buildResponseNotOk(String message) {
-    TopologyMaster.MetricResponse.Builder builder =
-        TopologyMaster.MetricResponse.newBuilder();
+  private static TopologyManager.MetricResponse.Builder buildResponseNotOk(String message) {
+    TopologyManager.MetricResponse.Builder builder =
+        TopologyManager.MetricResponse.newBuilder();
     builder.setStatus(Common.Status.newBuilder()
         .setStatus(Common.StatusCode.NOTOK)
         .setMessage(message));
@@ -96,7 +96,7 @@ public class MetricsCache {
    *
    * @param metrics message from sinks
    */
-  public void addMetrics(TopologyMaster.PublishMetrics metrics) {
+  public void addMetrics(TopologyManager.PublishMetrics metrics) {
     cache.addMetricException(metrics);
   }
 
@@ -121,16 +121,16 @@ public class MetricsCache {
   }
 
   /**
-   * compatible with tmaster interface
+   * compatible with tmanager interface
    *
    * @param request query request defined in protobuf
    * @return query result defined in protobuf
    */
-  public TopologyMaster.ExceptionLogResponse getExceptions(
-      TopologyMaster.ExceptionLogRequest request) {
+  public TopologyManager.ExceptionLogResponse getExceptions(
+      TopologyManager.ExceptionLogRequest request) {
     ExceptionRequest request1 = MetricsCacheQueryUtils.fromProtobuf(request);
     ExceptionResponse response1 = cache.getExceptions(request1);
-    TopologyMaster.ExceptionLogResponse response = MetricsCacheQueryUtils.toProtobuf(response1);
+    TopologyManager.ExceptionLogResponse response = MetricsCacheQueryUtils.toProtobuf(response1);
     return response;
   }
 
@@ -164,27 +164,27 @@ public class MetricsCache {
   }
 
   /**
-   * compatible with tmaster interface
+   * compatible with tmanager interface
    *
    * @param request query statement defined in protobuf
    * @return query result defined in protobuf
    */
-  public TopologyMaster.ExceptionLogResponse getExceptionsSummary(
-      TopologyMaster.ExceptionLogRequest request) {
+  public TopologyManager.ExceptionLogResponse getExceptionsSummary(
+      TopologyManager.ExceptionLogRequest request) {
     ExceptionRequest request1 = MetricsCacheQueryUtils.fromProtobuf(request);
     ExceptionResponse response1 = cache.getExceptions(request1);
     ExceptionResponse response2 = summarizeException(response1);
-    TopologyMaster.ExceptionLogResponse response = MetricsCacheQueryUtils.toProtobuf(response2);
+    TopologyManager.ExceptionLogResponse response = MetricsCacheQueryUtils.toProtobuf(response2);
     return response;
   }
 
   /**
-   * compatible with tmaster interface
+   * compatible with tmanager interface
    *
    * @param request query statement defined in protobuf
    * @return query result defined in protobuf
    */
-  public TopologyMaster.MetricResponse getMetrics(TopologyMaster.MetricRequest request) {
+  public TopologyManager.MetricResponse getMetrics(TopologyManager.MetricRequest request) {
     String componentName = request.getComponentName();
     if (!cache.componentInstanceExists(componentName, null)) {
       return buildResponseNotOk(
@@ -206,7 +206,8 @@ public class MetricsCache {
 
     MetricRequest request1 = MetricsCacheQueryUtils.fromProtobuf(request);
     MetricResponse response1 = cache.getMetrics(request1, metricNameType);
-    TopologyMaster.MetricResponse response = MetricsCacheQueryUtils.toProtobuf(response1, request1);
+    TopologyManager.MetricResponse response =
+        MetricsCacheQueryUtils.toProtobuf(response1, request1);
     return response;
   }
 }

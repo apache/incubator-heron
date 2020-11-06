@@ -41,7 +41,7 @@ message StMgr {
 
   // Http port to connect to heron-shell.
   // The port is not used by stmgr itself, except to
-  // pass it on to tmaster to be included in pplan.
+  // pass it on to tmanager to be included in pplan.
   optional int32 shell_port = 7;
 }
 

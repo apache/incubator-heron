@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import org.apache.heron.common.basics.Communicator;
-import org.apache.heron.common.basics.SlaveLooper;
+import org.apache.heron.common.basics.ExecutorLooper;
 import org.apache.heron.common.basics.WakeableLooper;
 import org.apache.heron.common.config.SystemConfig;
 import org.apache.heron.common.utils.metrics.JVMMetrics;
@@ -135,6 +135,6 @@ public class MetricsExecutor implements Runnable {
   }
 
   protected WakeableLooper createWakeableLooper() {
-    return new SlaveLooper();
+    return new ExecutorLooper();
   }
 }

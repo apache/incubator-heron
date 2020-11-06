@@ -35,7 +35,7 @@ import org.apache.heron.api.generated.TopologyAPI;
 import org.apache.heron.packing.roundrobin.RoundRobinPacking;
 import org.apache.heron.proto.scheduler.Scheduler;
 import org.apache.heron.proto.system.PackingPlans;
-import org.apache.heron.proto.tmaster.TopologyMaster;
+import org.apache.heron.proto.tmanager.TopologyManager;
 import org.apache.heron.scheduler.client.ISchedulerClient;
 import org.apache.heron.scheduler.utils.Runtime;
 import org.apache.heron.spi.common.Config;
@@ -101,7 +101,7 @@ public class RuntimeManagerRunnerTest {
     SchedulerStateManagerAdaptor adaptor = mock(SchedulerStateManagerAdaptor.class);
     RuntimeManagerRunner runner = newRuntimeManagerRunner(Command.RESTART, client);
 
-    // Restart container 1, not containing TMaster
+    // Restart container 1, not containing TManager
     Scheduler.RestartTopologyRequest restartTopologyRequest =
         Scheduler.RestartTopologyRequest.newBuilder()
             .setTopologyName(TOPOLOGY_NAME).setContainerIndex(1).build();
@@ -110,7 +110,7 @@ public class RuntimeManagerRunnerTest {
     try {
       runner.restartTopologyHandler(TOPOLOGY_NAME);
     } finally {
-      verify(adaptor, never()).deleteTMasterLocation(TOPOLOGY_NAME);
+      verify(adaptor, never()).deleteTManagerLocation(TOPOLOGY_NAME);
     }
   }
 
@@ -120,7 +120,7 @@ public class RuntimeManagerRunnerTest {
     SchedulerStateManagerAdaptor adaptor = mock(SchedulerStateManagerAdaptor.class);
     RuntimeManagerRunner runner = newRuntimeManagerRunner(Command.RESTART, client);
 
-    // Restart container 1, not containing TMaster
+    // Restart container 1, not containing TManager
     Scheduler.RestartTopologyRequest restartTopologyRequest =
         Scheduler.RestartTopologyRequest.newBuilder()
             .setTopologyName(TOPOLOGY_NAME).setContainerIndex(1).build();
@@ -129,30 +129,30 @@ public class RuntimeManagerRunnerTest {
     // Success case
     when(client.restartTopology(restartTopologyRequest)).thenReturn(true);
     runner.restartTopologyHandler(TOPOLOGY_NAME);
-    // Should not invoke DeleteTMasterLocation
-    verify(adaptor, never()).deleteTMasterLocation(TOPOLOGY_NAME);
+    // Should not invoke DeleteTManagerLocation
+    verify(adaptor, never()).deleteTManagerLocation(TOPOLOGY_NAME);
   }
 
   @Test(expected = TopologyRuntimeManagementException.class)
-  public void testRestartTopologyHandlerFailDeleteTMasterLoc() {
+  public void testRestartTopologyHandlerFailDeleteTManagerLoc() {
     ISchedulerClient client = mock(ISchedulerClient.class);
     SchedulerStateManagerAdaptor adaptor = mock(SchedulerStateManagerAdaptor.class);
     RuntimeManagerRunner runner = newRuntimeManagerRunner(Command.RESTART, client);
 
-    // Restart container 1, not containing TMaster
+    // Restart container 1, not containing TManager
     Scheduler.RestartTopologyRequest restartTopologyRequest =
         Scheduler.RestartTopologyRequest.newBuilder()
             .setTopologyName(TOPOLOGY_NAME).setContainerIndex(1).build();
     when(config.getIntegerValue(Key.TOPOLOGY_CONTAINER_ID)).thenReturn(1);
-    // Restart container 0, containing TMaster
+    // Restart container 0, containing TManager
     when(config.getIntegerValue(Key.TOPOLOGY_CONTAINER_ID)).thenReturn(0);
     when(runtime.get(Key.SCHEDULER_STATE_MANAGER_ADAPTOR)).thenReturn(adaptor);
-    when(adaptor.deleteTMasterLocation(TOPOLOGY_NAME)).thenReturn(false);
+    when(adaptor.deleteTManagerLocation(TOPOLOGY_NAME)).thenReturn(false);
     try {
       runner.restartTopologyHandler(TOPOLOGY_NAME);
     } finally {
-      // DeleteTMasterLocation should be invoked
-      verify(adaptor).deleteTMasterLocation(TOPOLOGY_NAME);
+      // DeleteTManagerLocation should be invoked
+      verify(adaptor).deleteTManagerLocation(TOPOLOGY_NAME);
     }
   }
 
@@ -268,10 +268,10 @@ public class RuntimeManagerRunnerTest {
     SchedulerStateManagerAdaptor manager = mock(SchedulerStateManagerAdaptor.class);
     HttpURLConnection connection = mock(HttpURLConnection.class);
     RuntimeManagerRunner runner = newRuntimeManagerRunner(Command.UPDATE, client);
-    TopologyMaster.TMasterLocation location = TopologyMaster.TMasterLocation.newBuilder().
+    TopologyManager.TManagerLocation location = TopologyManager.TManagerLocation.newBuilder().
               setTopologyName("topology-name").setTopologyId("topology-id").
-              setHost("host").setControllerPort(1).setMasterPort(2).build();
-    when(manager.getTMasterLocation(TOPOLOGY_NAME)).thenReturn(location);
+              setHost("host").setControllerPort(1).setServerPort(2).build();
+    when(manager.getTManagerLocation(TOPOLOGY_NAME)).thenReturn(location);
     when(connection.getResponseCode()).thenReturn(HttpURLConnection.HTTP_OK);
 
     PowerMockito.mockStatic(Runtime.class);

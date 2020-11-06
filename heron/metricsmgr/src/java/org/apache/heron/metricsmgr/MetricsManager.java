@@ -40,9 +40,9 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.heron.api.metric.MultiCountMetric;
 import org.apache.heron.common.basics.Communicator;
+import org.apache.heron.common.basics.ExecutorLooper;
 import org.apache.heron.common.basics.NIOLooper;
 import org.apache.heron.common.basics.SingletonRegistry;
-import org.apache.heron.common.basics.SlaveLooper;
 import org.apache.heron.common.basics.SysUtils;
 import org.apache.heron.common.basics.TypeUtils;
 import org.apache.heron.common.config.SystemConfig;
@@ -373,7 +373,7 @@ public class MetricsManager {
     Level loggingLevel = Level.INFO;
     String loggingDir = systemConfig.getHeronLoggingDirectory();
 
-    // Log to file and TMaster
+    // Log to file and TManager
     LoggingHelper.loggerInit(loggingLevel, true);
     LoggingHelper.addLoggingHandler(
         LoggingHelper.getFileHandler(metricsmgrId, loggingDir, true,
@@ -442,7 +442,7 @@ public class MetricsManager {
     } catch (ClassNotFoundException e) {
       throw new RuntimeException(e + " IMetricsSink class must be a class path.");
     }
-    SlaveLooper sinkExecutorLoop = new SlaveLooper();
+    ExecutorLooper sinkExecutorLoop = new ExecutorLooper();
     Communicator<MetricsRecord> executorInMetricsQueue =
         new Communicator<MetricsRecord>(null, sinkExecutorLoop);
 

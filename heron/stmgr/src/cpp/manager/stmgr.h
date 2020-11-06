@@ -52,7 +52,7 @@ using std::shared_ptr;
 class StMgrServer;
 class InstanceServer;
 class StMgrClientMgr;
-class TMasterClient;
+class TManagerClient;
 class StreamConsumers;
 class XorManager;
 class TupleCache;
@@ -76,7 +76,7 @@ class StMgr {
   // All kinds of initialization like starting servers and clients
   void Init();
 
-  // Called by tmaster client when a new physical plan is available
+  // Called by tmanager client when a new physical plan is available
   void NewPhysicalPlan(shared_ptr<proto::system::PhysicalPlan> pplan);
   void HandleStreamManagerData(const sp_string& _stmgr_id,
                                pool_unique_ptr<proto::stmgr::TupleStreamMessage> _message);
@@ -104,7 +104,7 @@ class StMgr {
   void SendStopBackPressureToOtherStMgrs();
   void StartBackPressureOnSpouts();
   void AttemptStopBackPressureFromSpouts();
-  void StartTMasterClient();
+  void StartTManagerClient();
   bool DidAnnounceBackPressure();
   bool DidOthersAnnounceBackPressure();
   const NetworkOptions&  GetStmgrServerNetworkOptions() const;
@@ -124,14 +124,14 @@ class StMgr {
                                           const std::string& _checkpoint_id);
 
  private:
-  void OnTMasterLocationFetch(shared_ptr<proto::tmaster::TMasterLocation> _tmaster,
+  void OnTManagerLocationFetch(shared_ptr<proto::tmanager::TManagerLocation> _tmanager,
           proto::system::StatusCode);
   void OnMetricsCacheLocationFetch(
-         shared_ptr<proto::tmaster::MetricsCacheLocation> _tmaster, proto::system::StatusCode);
-  void FetchTMasterLocation();
+         shared_ptr<proto::tmanager::MetricsCacheLocation> _tmanager, proto::system::StatusCode);
+  void FetchTManagerLocation();
   void FetchMetricsCacheLocation();
-  // A wrapper that calls FetchTMasterLocation. Needed for RegisterTimer
-  void CheckTMasterLocation(EventLoop::Status);
+  // A wrapper that calls FetchTManagerLocation. Needed for RegisterTimer
+  void CheckTManagerLocation(EventLoop::Status);
 
   void UpdateUptimeMetric();
   void UpdateProcessMetrics(EventLoop::Status);
@@ -167,28 +167,28 @@ class StMgr {
 
   sp_int32 ExtractTopologyTimeout(const proto::api::Topology& _topology);
 
-  void CreateTMasterClient(shared_ptr<proto::tmaster::TMasterLocation> tmasterLocation);
+  void CreateTManagerClient(shared_ptr<proto::tmanager::TManagerLocation> tmanagerLocation);
   void StartStmgrServer();
   void StartInstanceServer();
   void CreateTupleCache();
-  // This is called when we receive a valid new Tmaster Location.
-  // Performs all the actions necessary to deal with new tmaster.
-  void HandleNewTmaster(shared_ptr<proto::tmaster::TMasterLocation> newTmasterLocation);
-  // Broadcast the tmaster location changes to other components. (MM for now)
-  void BroadcastTmasterLocation(shared_ptr<proto::tmaster::TMasterLocation> tmasterLocation);
+  // This is called when we receive a valid new Tmanager Location.
+  // Performs all the actions necessary to deal with new tmanager.
+  void HandleNewTmanager(shared_ptr<proto::tmanager::TManagerLocation> newTmanagerLocation);
+  // Broadcast the tmanager location changes to other components. (MM for now)
+  void BroadcastTmanagerLocation(shared_ptr<proto::tmanager::TManagerLocation> tmanagerLocation);
   void BroadcastMetricsCacheLocation(
-          shared_ptr<proto::tmaster::MetricsCacheLocation> tmasterLocation);
+          shared_ptr<proto::tmanager::MetricsCacheLocation> tmanagerLocation);
 
-  // Called when TMaster sends a InitiateStatefulCheckpoint message with a checkpoint_id
+  // Called when TManager sends a InitiateStatefulCheckpoint message with a checkpoint_id
   // This will send intiate checkpoint messages to local instances to capture their state.
   void InitiateStatefulCheckpoint(sp_string checkpoint_id);
 
-  // Invoked when TMaster asks us to restore all our local instances state to
+  // Invoked when TManager asks us to restore all our local instances state to
   // the checkpoint represented by _checkpoint_id. This starts the
   // Restore state machine
   void RestoreTopologyState(sp_string _checkpoint_id, sp_int64 _restore_txid);
 
-  // Invoked when TMaster sends the StartStatefulProcessing request to kick
+  // Invoked when TManager sends the StartStatefulProcessing request to kick
   // start the computation. We send the StartStatefulProcessing to all our
   // local instances so that they can start the processing.
   void StartStatefulProcessing(sp_string _checkpoint_id);
@@ -197,7 +197,7 @@ class StMgr {
   void HandleStatefulRestoreDone(proto::system::StatusCode _status,
                                  std::string _checkpoint_id, sp_int64 _restore_txid);
 
-  // Called when stmgr received StatefulConsistentCheckpointSaved message from TMaster
+  // Called when stmgr received StatefulConsistentCheckpointSaved message from TManager
   // Then, the stmgr will forward this fact to all heron instances connected to it
   void BroadcastCheckpointSaved(const proto::ckptmgr::StatefulConsistentCheckpointSaved& _msg);
 
@@ -222,7 +222,7 @@ class StMgr {
   shared_ptr<InstanceServer> instance_server_;
   // Pushing data to other streammanagers
   shared_ptr<StMgrClientMgr> clientmgr_;
-  shared_ptr<TMasterClient> tmaster_client_;
+  shared_ptr<TManagerClient> tmanager_client_;
   shared_ptr<EventLoop> eventLoop_;
 
   // Map of task_id to stmgr_id

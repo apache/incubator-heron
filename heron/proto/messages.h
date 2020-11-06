@@ -26,7 +26,7 @@
 #include "proto/execution_state.pb.h"
 #include "proto/physical_plan.pb.h"
 #include "proto/tuple.pb.h"
-#include "proto/tmaster.pb.h"
+#include "proto/tmanager.pb.h"
 #include "proto/scheduler.pb.h"
 #include "proto/stmgr.pb.h"
 #include "proto/metrics.pb.h"

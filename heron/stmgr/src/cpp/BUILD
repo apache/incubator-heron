@@ -88,8 +88,8 @@ cc_library(
         "manager/stmgr-server.h",
         "manager/stream-consumers.cpp",
         "manager/stream-consumers.h",
-        "manager/tmaster-client.cpp",
-        "manager/tmaster-client.h",
+        "manager/tmanager-client.cpp",
+        "manager/tmanager-client.h",
     ],
     copts = [
         "-Iheron",

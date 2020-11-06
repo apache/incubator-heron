@@ -69,7 +69,7 @@ docs
 ├── cluster-config-overview.md
 ├── cluster-config-stream.md
 ├── cluster-config-system-level.md
-├── cluster-config-tmaster.md
+├── cluster-config-tmanager.md
 ├── compiling-code-organization.md
 ├── compiling-docker.md
 ├── compiling-linux.md

@@ -35,8 +35,8 @@
 
 namespace heron {
 namespace proto {
-namespace tmaster {
-class TMasterLocation;
+namespace tmanager {
+class TManagerLocation;
 }
 }
 }
@@ -56,8 +56,8 @@ class MetricsMgrSt {
 
   void register_metric(const sp_string& _metric_name, shared_ptr<IMetric> _metric);
   void unregister_metric(const sp_string& _metric_name);
-  void RefreshTMasterLocation(const proto::tmaster::TMasterLocation& location);
-  void RefreshMetricsCacheLocation(const proto::tmaster::MetricsCacheLocation& location);
+  void RefreshTManagerLocation(const proto::tmanager::TManagerLocation& location);
+  void RefreshMetricsCacheLocation(const proto::tmanager::MetricsCacheLocation& location);
 
   /**
       Start MetricsMgrClient object

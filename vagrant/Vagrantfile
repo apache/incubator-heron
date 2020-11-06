@@ -15,11 +15,11 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
-SLAVES=0
+SECONDARIES=0
 NET_PREFIX="192.168.25."
 
-NODES={"master" => NET_PREFIX + "5"}
-(0..SLAVES-1).each do |i| NODES["slave#{i}"] = NET_PREFIX + (6 + i).to_s end
+NODES={"primary" => NET_PREFIX + "5"}
+(0..SECONDARIES-1).each do |i| NODES["secondary#{i}"] = NET_PREFIX + (6 + i).to_s end
 
 # create hosts
 File.open('.vagrant/hosts', 'w') do |file|
@@ -34,8 +34,8 @@ Vagrant.configure(2) do |config|
   config.vm.synced_folder "../", "/vagrant"
   config.vm.boot_timeout = 600
 
-  config.vm.define "master" do |master|
-    master.vm.provider "virtualbox" do |v|
+  config.vm.define "primary" do |primary|
+    primary.vm.provider "virtualbox" do |v|
       host = RbConfig::CONFIG['host_os']
       mem_ratio = 1.0/2
       cpu_exec_cap = 75
@@ -58,23 +58,25 @@ Vagrant.configure(2) do |config|
       v.cpus = cpus
     end
 
-    master.vm.hostname = "master"
-    master.vm.network :private_network, ip: NODES["master"]
+    primary.vm.hostname = "primary"
+    primary.vm.network :private_network, ip: NODES["primary"]
 
-    master.vm.provision "shell", path: "init.sh", args: "master"
+    # NB: Apache Mesos requires the use of "master"/"slave"
+    primary.vm.provision "shell", path: "init.sh", args: "master"
   end
 
-  (0..SLAVES-1).each do |i|
-    config.vm.define "slave#{i}" do |slave|
-      slave.vm.provider "virtualbox" do |v|
+  (0..SECONDARIES-1).each do |i|
+    config.vm.define "secondary#{i}" do |secondary|
+      secondary.vm.provider "virtualbox" do |v|
         v.memory = 2048
         v.cpus = 2
       end
 
-      slave.vm.hostname = "slave#{i}"
-      slave.vm.network :private_network, ip: NODES[slave.vm.hostname]
+      secondary.vm.hostname = "secondary#{i}"
+      secondary.vm.network :private_network, ip: NODES[secondary.vm.hostname]
 
-      slave.vm.provision "shell", path: "init.sh", args: "slave"
+      # NB: Apache Mesos requires the use of "master"/"slave"
+      secondary.vm.provision "shell", path: "init.sh", args: "slave"
     end
   end
 end

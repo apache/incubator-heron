@@ -40,11 +40,11 @@ state manager. You should set this to `org.apache.heron.statemgr.localfs.LocalFi
 
 * `heron.statemgr.root.path` --- The root path in the local file system where state information
 is stored.  We recommend providing Heron with an exclusive directory; if you do not, make sure that
-the following sub-directories are unused: `/tmasters`, `/topologies`, `/pplans`, `/executionstate`,
+the following sub-directories are unused: `/tmanagers`, `/topologies`, `/pplans`, `/executionstate`,
 `/schedulers`.
 
 * `heron.statemgr.localfs.is.initialize.file.tree` --- Indicates whether the nodes under root
-`/tmasters`, `/topologies`, `/pplans`, `/executionstate`, and `/schedulers` need to created, if they
+`/tmanagers`, `/topologies`, `/pplans`, `/executionstate`, and `/schedulers` need to created, if they
 are not found. Set it to `True`, if you could like Heron to create those directories. If those
 directories are already there, set it to `False`. The absence of this configuration implies `True`.
 

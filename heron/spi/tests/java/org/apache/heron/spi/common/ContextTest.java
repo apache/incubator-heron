@@ -37,7 +37,7 @@ public class ContextTest {
 
     assertEquals(Key.EXECUTOR_BINARY.getDefault(), Context.executorBinary(props));
     assertEquals(Key.STMGR_BINARY.getDefault(), Context.stmgrBinary(props));
-    assertEquals(Key.TMASTER_BINARY.getDefault(), Context.tmasterBinary(props));
+    assertEquals(Key.TMANAGER_BINARY.getDefault(), Context.tmanagerBinary(props));
     assertEquals(Key.SHELL_BINARY.getDefault(), Context.shellBinary(props));
     assertEquals(
         Key.PYTHON_INSTANCE_BINARY.getDefault(),

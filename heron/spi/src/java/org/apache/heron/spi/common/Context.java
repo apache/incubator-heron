@@ -326,8 +326,8 @@ public class Context {
     return cfg.getStringValue(Key.STMGR_BINARY);
   }
 
-  public static String tmasterBinary(Config cfg) {
-    return cfg.getStringValue(Key.TMASTER_BINARY);
+  public static String tmanagerBinary(Config cfg) {
+    return cfg.getStringValue(Key.TMANAGER_BINARY);
   }
 
   public static String shellBinary(Config cfg) {

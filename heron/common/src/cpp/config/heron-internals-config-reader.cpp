@@ -105,8 +105,8 @@ sp_int32 HeronInternalsConfigReader::GetHeronLoggingMaximumFiles() {
   return config_[HeronInternalsConfigVars::HERON_LOGGING_MAXIMUM_FILES].as<int>();
 }
 
-sp_int32 HeronInternalsConfigReader::GetCheckTMasterLocationIntervalSec() {
-  return config_[HeronInternalsConfigVars::HERON_CHECK_TMASTER_LOCATION_INTERVAL_SEC].as<int>();
+sp_int32 HeronInternalsConfigReader::GetCheckTManagerLocationIntervalSec() {
+  return config_[HeronInternalsConfigVars::HERON_CHECK_TMANAGER_LOCATION_INTERVAL_SEC].as<int>();
 }
 
 sp_int32 HeronInternalsConfigReader::GetHeronLoggingPruneIntervalSec() {
@@ -158,8 +158,8 @@ sp_int32 HeronInternalsConfigReader::GetHeronMetricsmgrScribePeriodicFlushInterv
       .as<int>();
 }
 
-sp_int32 HeronInternalsConfigReader::GetHeronMetricsmgrReconnectTmasterIntervalSec() {
-  return config_[HeronInternalsConfigVars::HERON_METRICSMGR_RECONNECT_TMASTER_INTERVAL_SEC]
+sp_int32 HeronInternalsConfigReader::GetHeronMetricsmgrReconnectTmanagerIntervalSec() {
+  return config_[HeronInternalsConfigVars::HERON_METRICSMGR_RECONNECT_TMANAGER_INTERVAL_SEC]
       .as<int>();
 }
 
@@ -168,52 +168,52 @@ sp_int32 HeronInternalsConfigReader::GetHeronMetricsmgrNetworkOptionsMaximumPack
       .as<int>();
 }
 
-sp_int32 HeronInternalsConfigReader::GetHeronTmasterMetricsCollectorMaximumIntervalMin() {
-  return config_[HeronInternalsConfigVars::HERON_TMASTER_METRICS_COLLECTOR_MAXIMUM_INTERVAL_MIN]
+sp_int32 HeronInternalsConfigReader::GetHeronTmanagerMetricsCollectorMaximumIntervalMin() {
+  return config_[HeronInternalsConfigVars::HERON_TMANAGER_METRICS_COLLECTOR_MAXIMUM_INTERVAL_MIN]
       .as<int>();
 }
 
-sp_int32 HeronInternalsConfigReader::GetHeronTmasterEstablishRetryTimes() {
-  return config_[HeronInternalsConfigVars::HERON_TMASTER_ESTABLISH_RETRY_TIMES].as<int>();
+sp_int32 HeronInternalsConfigReader::GetHeronTmanagerEstablishRetryTimes() {
+  return config_[HeronInternalsConfigVars::HERON_TMANAGER_ESTABLISH_RETRY_TIMES].as<int>();
 }
 
-sp_int32 HeronInternalsConfigReader::GetHeronTmasterEstablishRetryIntervalSec() {
-  return config_[HeronInternalsConfigVars::HERON_TMASTER_ESTABLISH_RETRY_INTERVAL_SEC].as<int>();
+sp_int32 HeronInternalsConfigReader::GetHeronTmanagerEstablishRetryIntervalSec() {
+  return config_[HeronInternalsConfigVars::HERON_TMANAGER_ESTABLISH_RETRY_INTERVAL_SEC].as<int>();
 }
 
-sp_int32 HeronInternalsConfigReader::GetHeronTmasterNetworkMasterOptionsMaximumPacketMb() {
-  return config_[HeronInternalsConfigVars::HERON_TMASTER_NETWORK_MASTER_OPTIONS_MAXIMUM_PACKET_MB]
+sp_int32 HeronInternalsConfigReader::GetHeronTmanagerNetworkServerOptionsMaximumPacketMb() {
+  return config_[HeronInternalsConfigVars::HERON_TMANAGER_NETWORK_SERVER_OPTIONS_MAXIMUM_PACKET_MB]
       .as<int>();
 }
 
-sp_int32 HeronInternalsConfigReader::GetHeronTmasterNetworkControllerOptionsMaximumPacketMb() {
+sp_int32 HeronInternalsConfigReader::GetHeronTmanagerNetworkControllerOptionsMaximumPacketMb() {
   return config_
-      [HeronInternalsConfigVars::HERON_TMASTER_NETWORK_CONTROLLER_OPTIONS_MAXIMUM_PACKET_MB]
+      [HeronInternalsConfigVars::HERON_TMANAGER_NETWORK_CONTROLLER_OPTIONS_MAXIMUM_PACKET_MB]
           .as<int>();
 }
 
-sp_int32 HeronInternalsConfigReader::GetHeronTmasterNetworkStatsOptionsMaximumPacketMb() {
-  return config_[HeronInternalsConfigVars::HERON_TMASTER_NETWORK_STATS_OPTIONS_MAXIMUM_PACKET_MB]
+sp_int32 HeronInternalsConfigReader::GetHeronTmanagerNetworkStatsOptionsMaximumPacketMb() {
+  return config_[HeronInternalsConfigVars::HERON_TMANAGER_NETWORK_STATS_OPTIONS_MAXIMUM_PACKET_MB]
       .as<int>();
 }
 
-sp_int32 HeronInternalsConfigReader::GetHeronTmasterMetricsCollectorPurgeIntervalSec() {
-  return config_[HeronInternalsConfigVars::HERON_TMASTER_METRICS_COLLECTOR_PURGE_INTERVAL_SEC]
+sp_int32 HeronInternalsConfigReader::GetHeronTmanagerMetricsCollectorPurgeIntervalSec() {
+  return config_[HeronInternalsConfigVars::HERON_TMANAGER_METRICS_COLLECTOR_PURGE_INTERVAL_SEC]
       .as<int>();
 }
 
-sp_int32 HeronInternalsConfigReader::GetHeronTmasterMetricsCollectorMaximumException() {
-  return config_[HeronInternalsConfigVars::HERON_TMASTER_METRICS_COLLECTOR_MAXIMUM_EXCEPTION]
+sp_int32 HeronInternalsConfigReader::GetHeronTmanagerMetricsCollectorMaximumException() {
+  return config_[HeronInternalsConfigVars::HERON_TMANAGER_METRICS_COLLECTOR_MAXIMUM_EXCEPTION]
       .as<int>();
 }
 
-bool HeronInternalsConfigReader::GetHeronTmasterMetricsNetworkBindAllInterfaces() {
-  return config_[HeronInternalsConfigVars::HERON_TMASTER_METRICS_NETWORK_BINDALLINTERFACES]
+bool HeronInternalsConfigReader::GetHeronTmanagerMetricsNetworkBindAllInterfaces() {
+  return config_[HeronInternalsConfigVars::HERON_TMANAGER_METRICS_NETWORK_BINDALLINTERFACES]
       .as<bool>();
 }
 
-sp_int32 HeronInternalsConfigReader::GetHeronTmasterStmgrStateTimeoutSec() {
-  return config_[HeronInternalsConfigVars::HERON_TMASTER_STMGR_STATE_TIMEOUT_SEC].as<int>();
+sp_int32 HeronInternalsConfigReader::GetHeronTmanagerStmgrStateTimeoutSec() {
+  return config_[HeronInternalsConfigVars::HERON_TMANAGER_STMGR_STATE_TIMEOUT_SEC].as<int>();
 }
 
 sp_int32 HeronInternalsConfigReader::GetHeronStreammgrCacheDrainFrequencyMs() {
@@ -237,8 +237,8 @@ sp_int32 HeronInternalsConfigReader::GetHeronStreammgrXormgrRotatingmapNbuckets(
   return config_[HeronInternalsConfigVars::HERON_STREAMMGR_XORMGR_ROTATINGMAP_NBUCKETS].as<int>();
 }
 
-sp_int32 HeronInternalsConfigReader::GetHeronStreammgrClientReconnectTmasterMaxAttempts() {
-  return config_[HeronInternalsConfigVars::HERON_STREAMMGR_CLIENT_RECONNECT_TMASTER_MAX_ATTEMPTS]
+sp_int32 HeronInternalsConfigReader::GetHeronStreammgrClientReconnectTmanagerMaxAttempts() {
+  return config_[HeronInternalsConfigVars::HERON_STREAMMGR_CLIENT_RECONNECT_TMANAGER_MAX_ATTEMPTS]
       .as<int>();
 }
 
@@ -246,8 +246,8 @@ sp_int32 HeronInternalsConfigReader::GetHeronStreammgrClientReconnectIntervalSec
   return config_[HeronInternalsConfigVars::HERON_STREAMMGR_CLIENT_RECONNECT_INTERVAL_SEC].as<int>();
 }
 
-sp_int32 HeronInternalsConfigReader::GetHeronStreammgrClientReconnectTmasterIntervalSec() {
-  return config_[HeronInternalsConfigVars::HERON_STREAMMGR_CLIENT_RECONNECT_TMASTER_INTERVAL_SEC]
+sp_int32 HeronInternalsConfigReader::GetHeronStreammgrClientReconnectTmanagerIntervalSec() {
+  return config_[HeronInternalsConfigVars::HERON_STREAMMGR_CLIENT_RECONNECT_TMANAGER_INTERVAL_SEC]
       .as<int>();
 }
 
@@ -256,8 +256,8 @@ sp_int32 HeronInternalsConfigReader::GetHeronStreammgrNetworkOptionsMaximumPacke
       .as<int>();
 }
 
-sp_int32 HeronInternalsConfigReader::GetHeronStreammgrTmasterHeartbeatIntervalSec() {
-  return config_[HeronInternalsConfigVars::HERON_STREAMMGR_TMASTER_HEARTBEAT_INTERVAL_SEC]
+sp_int32 HeronInternalsConfigReader::GetHeronStreammgrTmanagerHeartbeatIntervalSec() {
+  return config_[HeronInternalsConfigVars::HERON_STREAMMGR_TMANAGER_HEARTBEAT_INTERVAL_SEC]
       .as<int>();
 }
 

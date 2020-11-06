@@ -58,7 +58,7 @@ public class YarnScheduler implements IScheduler, IScalable {
     HeronMasterDriver driver = HeronMasterDriverProvider.getInstance();
     try {
       driver.scheduleHeronWorkers(packing);
-      driver.launchTMaster();
+      driver.launchTManager();
       return true;
     } catch (HeronMasterDriver.ContainerAllocationException e) {
       LOG.log(Level.ALL, "Failed to allocate containers for topology", e);

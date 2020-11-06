@@ -37,14 +37,14 @@ from heron.common.src.python.utils import log
 from . import test_kill_metricsmgr
 from . import test_kill_stmgr
 from . import test_kill_stmgr_metricsmgr
-from . import test_kill_tmaster
+from . import test_kill_tmanager
 from . import test_scale_up
 from . import test_template
 from . import test_explorer
 
 TEST_CLASSES = [
     test_template.TestTemplate,
-    test_kill_tmaster.TestKillTMaster,
+    test_kill_tmanager.TestKillTManager,
     test_kill_stmgr.TestKillStmgr,
     test_kill_metricsmgr.TestKillMetricsMgr,
     test_kill_stmgr_metricsmgr.TestKillStmgrMetricsMgr,

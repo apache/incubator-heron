@@ -23,7 +23,7 @@ import math
 
 from typing import Any, Dict, List, Optional, Union
 
-from heron.proto.tmaster_pb2 import TMasterLocation
+from heron.proto.tmanager_pb2 import TManagerLocation
 from heron.tools.tracker.src.python.metricstimeline import get_metrics_timeline
 
 import tornado.httpclient
@@ -86,9 +86,9 @@ class Metrics:
     endtime = end // 60 * 60
     while starttime <= endtime:
       # STREAMCOMP-1559
-      # Second check is a work around, because the response from tmaster
+      # Second check is a work around, because the response from tmanager
       # contains value 0, if it is queries for the current timestamp,
-      # since the bucket is created in the tmaster, but is not filled
+      # since the bucket is created in the tmanager, but is not filled
       # by the metrics.
       if not self.timeline.get(starttime):
         self.timeline[starttime] = constant
@@ -106,7 +106,7 @@ class Operator:
 
   # pylint: disable=unused-argument
   @tornado.gen.coroutine
-  def execute(self, tracker, tmaster: TMasterLocation, start: int, end: int) -> Any:
+  def execute(self, tracker, tmanager: TManagerLocation, start: int, end: int) -> Any:
     """ execute """
     raise Exception("Not implemented exception")
 
@@ -114,7 +114,7 @@ class Operator:
 class TS(Operator):
   """
   Time Series Operator. This is the basic operator that is
-  responsible for getting metrics from tmaster.
+  responsible for getting metrics from tmanager.
   Accepts a list of 3 elements:
   1. component_name
   2. instance - can be "*" for all instances, or a single instance ID
@@ -135,12 +135,12 @@ class TS(Operator):
       self.instances.append(instance)
 
   @tornado.gen.coroutine
-  def execute(self, tracker, tmaster: TMasterLocation, start: int, end: int) -> Optional[Any]:
+  def execute(self, tracker, tmanager: TManagerLocation, start: int, end: int) -> Optional[Any]:
     # Fetch metrics for start-60 to end+60 because the minute mark
     # may be a little skewed. By getting a couple more values,
     # we can then truncate based on the interval needed.
     metrics = yield get_metrics_timeline(
-        tmaster, self.component, [self.metric_name], self.instances,
+        tmanager, self.component, [self.metric_name], self.instances,
         start - 60, end + 60)
     if not metrics:
       return
@@ -190,8 +190,8 @@ class Default(Operator):
     self.timeseries = timeseries
 
   @tornado.gen.coroutine
-  def execute(self, tracker, tmaster: TMasterLocation, start: int, end: int) -> Any:
-    all_metrics = yield self.timeseries.execute(tracker, tmaster, start, end)
+  def execute(self, tracker, tmanager: TManagerLocation, start: int, end: int) -> Any:
+    all_metrics = yield self.timeseries.execute(tracker, tmanager, start, end)
     if isinstance(all_metrics, str):
       raise Exception(all_metrics)
     for metric in all_metrics:
@@ -214,14 +214,14 @@ class Sum(Operator):
     self.timeSeriesList = children
 
   @tornado.gen.coroutine
-  def execute(self, tracker, tmaster: TMasterLocation, start: int, end: int) -> Any:
+  def execute(self, tracker, tmanager: TManagerLocation, start: int, end: int) -> Any:
     # Initialize the metric to be returned with sum of all the constants.
     result = Metrics(None, None, None, start, end, {})
     constant_sum = sum(ts for ts in self.timeSeriesList if isinstance(ts, float))
     result.setDefault(constant_sum, start, end)
 
     futureMetrics = [
-        ts.execute(tracker, tmaster, start, end)
+        ts.execute(tracker, tmanager, start, end)
         for ts in self.timeSeriesList if isinstance(ts, Operator)
     ]
 
@@ -258,7 +258,7 @@ class Max(Operator):
     self.timeSeriesList = children
 
   @tornado.gen.coroutine
-  def execute(self, tracker, tmaster: TMasterLocation, start: int, end: int) -> Any:
+  def execute(self, tracker, tmanager: TManagerLocation, start: int, end: int) -> Any:
     # Initialize the metric to be returned with max of all the constants.
     result = Metrics(None, None, None, start, end, {})
     constants = [ts for ts in self.timeSeriesList if isinstance(ts, float)]
@@ -266,7 +266,7 @@ class Max(Operator):
       result.setDefault(max(constants), start, end)
 
     futureMetrics = [
-        ts.execute(tracker, tmaster, start, end)
+        ts.execute(tracker, tmanager, start, end)
         for ts in self.timeSeriesList if isinstance(ts, Operator)
     ]
     metrics = yield futureMetrics
@@ -316,9 +316,9 @@ class Percentile(Operator):
     self.timeSeriesList = timeseries_list
 
   @tornado.gen.coroutine
-  def execute(self, tracker, tmaster, start, end):
+  def execute(self, tracker, tmanager, start, end):
     futureMetrics = [
-        ts.execute(tracker, tmaster, start, end)
+        ts.execute(tracker, tmanager, start, end)
         for ts in self.timeSeriesList if isinstance(ts, Operator)
     ]
     metrics = yield futureMetrics
@@ -389,7 +389,7 @@ class _SimpleArithmaticOperator(Operator):
       cls,
       operand: Union[float, Operator],
       tracker,
-      tmaster: TMasterLocation,
+      tmanager: TManagerLocation,
       start: int,
       end: int,
   ) -> dict:
@@ -399,7 +399,7 @@ class _SimpleArithmaticOperator(Operator):
       met.setDefault(operand, start, end)
       result[""] = met
     else:
-      met = yield operand.execute(tracker, tmaster, start, end)
+      met = yield operand.execute(tracker, tmanager, start, end)
       if not met:
         pass
       elif len(met) == 1 and not met[0].instance:
@@ -428,15 +428,15 @@ class _SimpleArithmaticOperator(Operator):
 
   # pylint: disable=too-many-branches
   @tornado.gen.coroutine
-  def execute(self, tracker, tmaster: TMasterLocation, start: int, end: int) -> Any:
+  def execute(self, tracker, tmanager: TManagerLocation, start: int, end: int) -> Any:
     """
     Return _f applied over all values in [start, end] of the two operands. Scalars
     are expanded a timeseries with all points equal to the scalar.
 
     """
     metrics, metrics2 = yield [
-        self._get_metrics(self.operand1, tracker, tmaster, start, end),
-        self._get_metrics(self.operand2, tracker, tmaster, start, end),
+        self._get_metrics(self.operand1, tracker, tmanager, start, end),
+        self._get_metrics(self.operand2, tracker, tmanager, start, end),
     ]
 
     # In case both are multivariate, only equal instances will get operated
@@ -531,9 +531,9 @@ class Rate(Operator):
     self.timeSeries = timeSeries
 
   @tornado.gen.coroutine
-  def execute(self, tracker, tmaster: TMasterLocation, start: int, end: int) -> Any:
+  def execute(self, tracker, tmanager: TManagerLocation, start: int, end: int) -> Any:
     # Get 1 previous data point to be able to apply rate on the first data
-    metrics = yield self.timeSeries.execute(tracker, tmaster, start-60, end)
+    metrics = yield self.timeSeries.execute(tracker, tmanager, start-60, end)
 
     # Apply rate on all of them
     for metric in metrics:

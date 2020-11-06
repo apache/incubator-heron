@@ -209,7 +209,7 @@ class TrackerTest(unittest.TestCase):
 
     self.assertEqual(2, mock_state_manager_1.get_pplan.call_count)
     self.assertEqual(2, mock_state_manager_1.get_execution_state.call_count)
-    self.assertEqual(2, mock_state_manager_1.get_tmaster.call_count)
+    self.assertEqual(2, mock_state_manager_1.get_tmanager.call_count)
 
   def test_remove_topology(self):
     self.fill_tracker_topologies()

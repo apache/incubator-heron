@@ -22,7 +22,7 @@
 
 #include <string>
 
-#include "slave/instance-base.h"
+#include "executor/instance-base.h"
 
 #include "proto/messages.h"
 #include "network/network.h"
@@ -41,8 +41,8 @@ namespace instance {
 class BoltInstance : public InstanceBase {
  public:
   BoltInstance(std::shared_ptr<EventLoop> eventLoop, std::shared_ptr<TaskContextImpl> taskContext,
-               NotifyingCommunicator<pool_unique_ptr<google::protobuf::Message>>* dataToSlave,
-               NotifyingCommunicator<google::protobuf::Message*>* dataFromSlave,
+               NotifyingCommunicator<pool_unique_ptr<google::protobuf::Message>>* dataToExecutor,
+               NotifyingCommunicator<google::protobuf::Message*>* dataFromExecutor,
                void* dllHandle);
   virtual ~BoltInstance();
 
@@ -62,8 +62,8 @@ class BoltInstance : public InstanceBase {
                     const proto::system::HeronDataTuple& tup);
 
   std::shared_ptr<TaskContextImpl> taskContext_;
-  NotifyingCommunicator<pool_unique_ptr<google::protobuf::Message>>* dataToSlave_;
-  NotifyingCommunicator<google::protobuf::Message*>* dataFromSlave_;
+  NotifyingCommunicator<pool_unique_ptr<google::protobuf::Message>>* dataToExecutor_;
+  NotifyingCommunicator<google::protobuf::Message*>* dataFromExecutor_;
   std::shared_ptr<EventLoop> eventLoop_;
   api::bolt::IBolt* bolt_;
   std::shared_ptr<api::serializer::IPluggableSerializer> serializer_;

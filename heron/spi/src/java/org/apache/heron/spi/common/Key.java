@@ -182,7 +182,7 @@ public enum Key {
   //keys for config provided user binaries
   EXECUTOR_BINARY       ("heron.binaries.executor",        "${HERON_BIN}/heron-executor"),
   STMGR_BINARY          ("heron.binaries.stmgr",           "${HERON_BIN}/heron-stmgr"),
-  TMASTER_BINARY        ("heron.binaries.tmaster",         "${HERON_BIN}/heron-tmaster"),
+  TMANAGER_BINARY       ("heron.binaries.tmanager",        "${HERON_BIN}/heron-tmanager"),
   SHELL_BINARY          ("heron.binaries.shell",           "${HERON_BIN}/heron-shell"),
   PYTHON_INSTANCE_BINARY("heron.binaries.python.instance", "${HERON_BIN}/heron-python-instance"),
   CPP_INSTANCE_BINARY   ("heron.binaries.cpp.instance",    "${HERON_BIN}/heron-cpp-instance"),

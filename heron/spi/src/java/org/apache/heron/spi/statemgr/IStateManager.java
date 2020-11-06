@@ -29,7 +29,7 @@ import org.apache.heron.proto.scheduler.Scheduler;
 import org.apache.heron.proto.system.ExecutionEnvironment;
 import org.apache.heron.proto.system.PackingPlans;
 import org.apache.heron.proto.system.PhysicalPlans;
-import org.apache.heron.proto.tmaster.TopologyMaster;
+import org.apache.heron.proto.tmanager.TopologyManager;
 import org.apache.heron.spi.common.Config;
 
 /**
@@ -37,22 +37,22 @@ import org.apache.heron.spi.common.Config;
  * <p>
  * Services across Heron use HeronStateMgr to get/set state information.
  * Currently the primary things kept by state are:
- * 1. Where is the the topology master running.
- * The topology master is responsible for writing this information out
+ * 1. Where is the the topology manager running.
+ * The topology manager is responsible for writing this information out
  * upon startup. The stream managers query this upon startup to find out
- * who is their topology master. In case they loose connection with
- * the topology master, the stream managers query this again to see
- * if the topology master has changed.
+ * who is their topology manager. In case they loose connection with
+ * the topology manager, the stream managers query this again to see
+ * if the topology manager has changed.
  * <p>
  * 2. Topology and the current running state of the topology
  * This information is seeded by the topology submitter.
- * The topology master updates this when the state of the topology
+ * The topology manager updates this when the state of the topology
  * changes.
  * <p>
  * 3. Current assignment.
- * This information is solely used by topology master. When it
+ * This information is solely used by topology manager. When it
  * creates a new assignment or when the assignment changes, it writes
- * out this information. This is required for topology master failover.
+ * out this information. This is required for topology manager failover.
  * <p>
  * Clients call the methods of the state passing a callback. The callback
  * is called with result code upon the completion of the operation.
@@ -116,28 +116,28 @@ public interface IStateManager extends AutoCloseable {
   ListenableFuture<Boolean> deleteLocks(String topologyName);
 
   /**
-   * Set the location of Tmaster.
+   * Set the location of Tmanager.
    *
    * @return Boolean - Success or Failure
    */
-  ListenableFuture<Boolean> setTMasterLocation(
-      TopologyMaster.TMasterLocation location, String topologyName);
+  ListenableFuture<Boolean> setTManagerLocation(
+      TopologyManager.TManagerLocation location, String topologyName);
 
   /**
-   * Get the tmaster location for the given topology
+   * Get the tmanager location for the given topology
    *
    * @param watcher @see org.apache.heron.spi.statemgr.WatchCallback
-   * @return TMasterLocation
+   * @return TManagerLocation
    */
-  ListenableFuture<TopologyMaster.TMasterLocation> getTMasterLocation(
+  ListenableFuture<TopologyManager.TManagerLocation> getTManagerLocation(
       WatchCallback watcher, String topologyName);
 
   /**
-   * Delete the tmaster location for the given topology
+   * Delete the tmanager location for the given topology
    *
    * @return Boolean - Success or Failure
    */
-  ListenableFuture<Boolean> deleteTMasterLocation(String topologyName);
+  ListenableFuture<Boolean> deleteTManagerLocation(String topologyName);
 
   /**
    * Set the location of MetricsCache.
@@ -145,15 +145,15 @@ public interface IStateManager extends AutoCloseable {
    * @return Boolean - Success or Failure
    */
   ListenableFuture<Boolean> setMetricsCacheLocation(
-      TopologyMaster.MetricsCacheLocation location, String topologyName);
+      TopologyManager.MetricsCacheLocation location, String topologyName);
 
   /**
    * Get the MetricsCache location for the given topology
    *
    * @param watcher @see org.apache.heron.spi.statemgr.WatchCallback
-   * @return TMasterLocation
+   * @return TManagerLocation
    */
-  ListenableFuture<TopologyMaster.MetricsCacheLocation> getMetricsCacheLocation(
+  ListenableFuture<TopologyManager.MetricsCacheLocation> getMetricsCacheLocation(
       WatchCallback watcher, String topologyName);
 
   /**

@@ -67,7 +67,7 @@ class MetricsQueryHandler(BaseHandler):
 
       query = self.get_argument_query()
       metrics = yield tornado.gen.Task(self.executeMetricsQuery,
-                                       topology.tmaster, query, int(start_time), int(end_time))
+                                       topology.tmanager, query, int(start_time), int(end_time))
       self.write_success_response(metrics)
     except Exception as e:
       Log.debug(traceback.format_exc())
@@ -75,7 +75,7 @@ class MetricsQueryHandler(BaseHandler):
 
   # pylint: disable=unused-argument
   @tornado.gen.coroutine
-  def executeMetricsQuery(self, tmaster, queryString, start_time, end_time, callback=None):
+  def executeMetricsQuery(self, tmanager, queryString, start_time, end_time, callback=None):
     """
     Get the specified metrics for the given query in this topology.
     Returns the following dict on success:
@@ -101,7 +101,7 @@ class MetricsQueryHandler(BaseHandler):
     """
 
     query = Query(self.tracker)
-    metrics = yield query.execute_query(tmaster, queryString, start_time, end_time)
+    metrics = yield query.execute_query(tmanager, queryString, start_time, end_time)
 
     # Parse the response
     ret = {}

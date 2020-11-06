@@ -23,13 +23,13 @@
 #include <vector>
 #include "network/network_error.h"
 
-class DummyTMasterClient : public Client {
+class DummyTManagerClient : public Client {
  public:
-  DummyTMasterClient(std::shared_ptr<EventLoopImpl> eventLoop, const NetworkOptions& _options,
+  DummyTManagerClient(std::shared_ptr<EventLoopImpl> eventLoop, const NetworkOptions& _options,
                      const sp_string& stmgr_id, const sp_string& stmgr_host, sp_int32 stmgr_port,
                      sp_int32 shell_port,
                      const std::vector<std::shared_ptr<heron::proto::system::Instance>>& instances);
-  virtual ~DummyTMasterClient();
+  virtual ~DummyTManagerClient();
 
   void setStmgrPort(sp_int32 stmgrPort) {
     stmgr_port_ = stmgrPort;
@@ -43,7 +43,7 @@ class DummyTMasterClient : public Client {
   virtual void HandleClose(NetworkErrorCode _status);
   virtual void HandleRegisterResponse(
                             void*,
-                            pool_unique_ptr<heron::proto::tmaster::StMgrRegisterResponse> response,
+                            pool_unique_ptr<heron::proto::tmanager::StMgrRegisterResponse> response,
                             NetworkErrorCode);
   // Send worker request
   void CreateAndSendRegisterRequest();
@@ -61,8 +61,8 @@ class DummyStMgr : public Server {
  public:
   DummyStMgr(std::shared_ptr<EventLoopImpl> ss, const NetworkOptions& options,
              const sp_string& stmgr_id,
-             const sp_string& stmgr_host, sp_int32 stmgr_port, const sp_string& tmaster_host,
-             sp_int32 tmaster_port, sp_int32 shell_port,
+             const sp_string& stmgr_host, sp_int32 stmgr_port, const sp_string& tmanager_host,
+             sp_int32 tmanager_port, sp_int32 shell_port,
              const std::vector<std::shared_ptr<heron::proto::system::Instance>>& instances);
 
   virtual ~DummyStMgr();
@@ -90,7 +90,7 @@ class DummyStMgr : public Server {
   std::vector<sp_string> other_stmgrs_ids_;
   sp_int32 num_start_bp_;
   sp_int32 num_stop_bp_;
-  DummyTMasterClient* tmaster_client_;
+  DummyTManagerClient* tmanager_client_;
 };
 
 #endif

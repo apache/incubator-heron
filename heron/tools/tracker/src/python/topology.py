@@ -41,7 +41,7 @@ class Topology:
     The watches are the callbacks that are called
     when there is any change in the topology
     instance using set_physical_plan, set_execution_state,
-    set_tmaster, and set_scheduler_location. Any other means of changing will
+    set_tmanager, and set_scheduler_location. Any other means of changing will
     not call the watches.
 
   """
@@ -53,7 +53,7 @@ class Topology:
     self.packing_plan: PackingPlan = None
     self.execution_state: Optional[str] = None
     self.id: Optional[int] = None
-    self.tmaster = None
+    self.tmanager = None
     self.scheduler_location = None
     self.watches: Dict[uuid.UUID, Callable[[Topology], None]] = {}
 
@@ -153,9 +153,9 @@ class Topology:
       return self.execution_state.environ
     return None
 
-  def set_tmaster(self, tmaster) -> None:
+  def set_tmanager(self, tmanager) -> None:
     """ set exectuion state """
-    self.tmaster = tmaster
+    self.tmanager = tmanager
     self.trigger_watches()
 
   def set_scheduler_location(self, scheduler_location) -> None:

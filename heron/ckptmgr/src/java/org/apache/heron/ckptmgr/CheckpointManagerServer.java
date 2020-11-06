@@ -82,7 +82,7 @@ public class CheckpointManagerServer extends HeronServer {
   private void registerInitialization() {
     registerOnRequest(CheckpointManager.RegisterStMgrRequest.newBuilder());
 
-    registerOnRequest(CheckpointManager.RegisterTMasterRequest.newBuilder());
+    registerOnRequest(CheckpointManager.RegisterTManagerRequest.newBuilder());
 
     registerOnRequest(CheckpointManager.SaveInstanceStateRequest.newBuilder());
 
@@ -101,9 +101,9 @@ public class CheckpointManagerServer extends HeronServer {
   public void onRequest(REQID rid, SocketChannel channel, Message request) {
     if (request instanceof CheckpointManager.RegisterStMgrRequest) {
       handleStMgrRegisterRequest(rid, channel, (CheckpointManager.RegisterStMgrRequest) request);
-    } else if (request instanceof CheckpointManager.RegisterTMasterRequest) {
-      handleTMasterRegisterRequest(rid, channel,
-                                   (CheckpointManager.RegisterTMasterRequest) request);
+    } else if (request instanceof CheckpointManager.RegisterTManagerRequest) {
+      handleTManagerRegisterRequest(rid, channel,
+                                   (CheckpointManager.RegisterTManagerRequest) request);
     } else if (request instanceof CheckpointManager.SaveInstanceStateRequest) {
       handleSaveInstanceStateRequest(
           rid, channel, (CheckpointManager.SaveInstanceStateRequest) request);
@@ -153,20 +153,20 @@ public class CheckpointManagerServer extends HeronServer {
     sendResponse(rid, channel, responseBuilder.build());
   }
 
-  protected void handleTMasterRegisterRequest(
+  protected void handleTManagerRegisterRequest(
       REQID rid,
       SocketChannel channel,
-      CheckpointManager.RegisterTMasterRequest request
+      CheckpointManager.RegisterTManagerRequest request
   ) {
-    LOG.info("Got a TMaster register request from TMaster host:port "
+    LOG.info("Got a TManager register request from TManager host:port "
         + channel.socket().getRemoteSocketAddress());
 
-    CheckpointManager.RegisterTMasterResponse.Builder responseBuilder =
-        CheckpointManager.RegisterTMasterResponse.newBuilder();
+    CheckpointManager.RegisterTManagerResponse.Builder responseBuilder =
+        CheckpointManager.RegisterTManagerResponse.newBuilder();
 
     if (!checkRegistrationValidity(request.getTopologyName(),
                                    request.getTopologyId())) {
-      String errorMessage = String.format("The TMaster register message came with a different "
+      String errorMessage = String.format("The TManager register message came with a different "
                                + "topologyName: %s and/or topologyId: %s",
                                request.getTopologyName(),
                                request.getTopologyId());

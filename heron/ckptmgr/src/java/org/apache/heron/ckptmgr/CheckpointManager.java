@@ -254,7 +254,7 @@ public class CheckpointManager {
     Level loggingLevel = Level.INFO;
     String loggingDir = systemConfig.getHeronLoggingDirectory();
 
-    // Log to file and TMaster
+    // Log to file and TManager
     LoggingHelper.loggerInit(loggingLevel, true);
     LoggingHelper.addLoggingHandler(
         LoggingHelper.getFileHandler(ckptmgrId, loggingDir, true,

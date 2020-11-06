@@ -20,7 +20,7 @@ cc_test(
         "-Iheron/statemgrs/src/cpp",
         "-Iheron/stmgr/src/cpp",
         "-Iheron/stmgr/tests/cpp",
-        "-Iheron/tmaster/src/cpp",
+        "-Iheron/tmanager/src/cpp",
         "-I$(GENDIR)/heron",
         "-I$(GENDIR)/heron/common/src/cpp",
     ],
@@ -34,8 +34,8 @@ cc_test(
         "//heron/stmgr/src/cpp:manager-cxx",
         "//heron/stmgr/src/cpp:grouping-cxx",
         "//heron/stmgr/src/cpp:util-cxx",
-        # TODO: Stmgr unit tests should not depend on tmaster
-        "//heron/tmaster/src/cpp:tmaster-cxx",
+        # TODO: Stmgr unit tests should not depend on tmanager
+        "//heron/tmanager/src/cpp:tmanager-cxx",
         "@com_google_googletest//:gtest",
     ],
 )

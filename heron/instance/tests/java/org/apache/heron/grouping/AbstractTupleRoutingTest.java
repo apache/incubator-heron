@@ -34,8 +34,8 @@ import org.apache.heron.api.topology.TopologyBuilder;
 import org.apache.heron.common.basics.SingletonRegistry;
 import org.apache.heron.common.testhelpers.HeronServerTester;
 import org.apache.heron.common.utils.misc.PhysicalPlanHelper;
+import org.apache.heron.instance.ExecutorTester;
 import org.apache.heron.instance.InstanceControlMsg;
-import org.apache.heron.instance.SlaveTester;
 import org.apache.heron.proto.system.HeronTuples;
 import org.apache.heron.proto.system.PhysicalPlans;
 import org.apache.heron.resource.TestBolt;
@@ -55,7 +55,7 @@ public abstract class AbstractTupleRoutingTest {
   private volatile int tupleReceived;
   private volatile StringBuilder groupingInitInfo;
   private CountDownLatch outStreamQueueOfferLatch;
-  private SlaveTester slaveTester;
+  private ExecutorTester executorTester;
 
   // Test component info. Topology is SPOUT -> BOLT_A -> BOLT_B
   protected enum Component {
@@ -86,13 +86,13 @@ public abstract class AbstractTupleRoutingTest {
     groupingInitInfo = new StringBuilder();
 
     outStreamQueueOfferLatch = new CountDownLatch(1);
-    slaveTester = new SlaveTester(outStreamQueueOfferLatch);
-    slaveTester.start();
+    executorTester = new ExecutorTester(outStreamQueueOfferLatch);
+    executorTester.start();
   }
 
   @After
   public void after() throws NoSuchFieldException, IllegalAccessException {
-    slaveTester.stop();
+    executorTester.stop();
   }
 
   String getInitInfoKey(String componentName) {
@@ -110,7 +110,7 @@ public abstract class AbstractTupleRoutingTest {
         .setNewPhysicalPlanHelper(physicalPlanHelper)
         .build();
 
-    slaveTester.getInControlQueue().offer(instanceControlMsg);
+    executorTester.getInControlQueue().offer(instanceControlMsg);
 
     SingletonRegistry.INSTANCE.registerSingleton(
         getInitInfoKey(getComponentToVerify().getName()), groupingInitInfo);
@@ -120,14 +120,14 @@ public abstract class AbstractTupleRoutingTest {
       @Override
       public void run() {
         HeronServerTester.await(outStreamQueueOfferLatch);
-        assertNotEquals(0, slaveTester.getOutStreamQueue().size());
+        assertNotEquals(0, executorTester.getOutStreamQueue().size());
 
         while (tupleReceived < expectedTuplesValidated) {
-          if (slaveTester.getOutStreamQueue().isEmpty()) {
+          if (executorTester.getOutStreamQueue().isEmpty()) {
             continue;
           }
 
-          Message msg = slaveTester.getOutStreamQueue().poll();
+          Message msg = executorTester.getOutStreamQueue().poll();
           assertTrue(msg instanceof HeronTuples.HeronTupleSet);
 
           HeronTuples.HeronTupleSet set = (HeronTuples.HeronTupleSet) msg;
@@ -151,12 +151,12 @@ public abstract class AbstractTupleRoutingTest {
 
         assertEquals(expectedTuplesValidated, tupleReceived);
         assertEquals(getExpectedComponentInitInfo(), groupingInitInfo.toString());
-        slaveTester.getTestLooper().exitLoop();
+        executorTester.getTestLooper().exitLoop();
       }
     };
 
-    slaveTester.getTestLooper().addTasksOnWakeup(task);
-    slaveTester.getTestLooper().loop();
+    executorTester.getTestLooper().addTasksOnWakeup(task);
+    executorTester.getTestLooper().loop();
     assertEquals(expectedTuplesValidated, tupleReceived);
   }
 

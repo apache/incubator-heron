@@ -38,7 +38,7 @@ HeronZKStateMgr::HeronZKStateMgr(const std::string& zkhostport, const std::strin
       zkclient_(NULL),
       zkclient_factory_(new DefaultZKClientFactory()),
       eventLoop_(eventLoop),
-      tmaster_location_watcher_info_(NULL),
+      tmanager_location_watcher_info_(NULL),
       exitOnSessionExpiry_(exitOnSessionExpiry) {
   Init();
 }
@@ -52,7 +52,7 @@ HeronZKStateMgr::HeronZKStateMgr(const std::string& zkhostport, const std::strin
       zkclient_(NULL),
       zkclient_factory_(zkclient_factory),
       eventLoop_(eventLoop),
-      tmaster_location_watcher_info_(NULL),
+      tmanager_location_watcher_info_(NULL),
       exitOnSessionExpiry_(exitOnSessionExpiry) {
   Init();
 }
@@ -73,7 +73,7 @@ void HeronZKStateMgr::Init() {
 HeronZKStateMgr::~HeronZKStateMgr() {
   delete zkclient_;
   delete zkclient_factory_;
-  delete tmaster_location_watcher_info_;
+  delete tmanager_location_watcher_info_;
 }
 
 void HeronZKStateMgr::InitTree() {
@@ -81,13 +81,13 @@ void HeronZKStateMgr::InitTree() {
   CHECK(false);
 }
 
-void HeronZKStateMgr::SetTMasterLocationWatch(const std::string& topology_name,
+void HeronZKStateMgr::SetTManagerLocationWatch(const std::string& topology_name,
                                               VCallback<> watcher) {
   CHECK(watcher);
   CHECK(!topology_name.empty());
 
-  tmaster_location_watcher_info_ = new TMasterLocationWatchInfo(std::move(watcher), topology_name);
-  SetTMasterLocationWatchInternal();
+  tmanager_location_watcher_info_ = new TManagerLocationWatchInfo(std::move(watcher), topology_name);
+  SetTManagerLocationWatchInternal();
 }
 
 void HeronZKStateMgr::SetMetricsCacheLocationWatch(const std::string& topology_name,
@@ -95,7 +95,7 @@ void HeronZKStateMgr::SetMetricsCacheLocationWatch(const std::string& topology_n
   CHECK(watcher);
   CHECK(!topology_name.empty());
 
-  metricscache_location_watcher_info_ = new TMasterLocationWatchInfo(
+  metricscache_location_watcher_info_ = new TManagerLocationWatchInfo(
                               std::move(watcher), topology_name);
   SetMetricsCacheLocationWatchInternal();
 }
@@ -104,22 +104,22 @@ void HeronZKStateMgr::SetPackingPlanWatch(const std::string& topology_name, VCal
   CHECK(watcher);
   CHECK(!topology_name.empty());
 
-  packing_plan_watcher_info_ = new TMasterLocationWatchInfo(std::move(watcher), topology_name);
+  packing_plan_watcher_info_ = new TManagerLocationWatchInfo(std::move(watcher), topology_name);
   SetPackingPlanWatchInternal();
 }
 
-void HeronZKStateMgr::SetTMasterLocation(const proto::tmaster::TMasterLocation& _location,
+void HeronZKStateMgr::SetTManagerLocation(const proto::tmanager::TManagerLocation& _location,
                                          VCallback<proto::system::StatusCode> cb) {
   // Just try to create an ephimeral node
-  std::string path = GetTMasterLocationPath(_location.topology_name());
+  std::string path = GetTManagerLocationPath(_location.topology_name());
   std::string value;
   _location.SerializeToString(&value);
 
-  auto wCb = [cb, this](sp_int32 rc) { this->SetTMasterLocationDone(std::move(cb), rc); };
+  auto wCb = [cb, this](sp_int32 rc) { this->SetTManagerLocationDone(std::move(cb), rc); };
   zkclient_->CreateNode(path, value, true, std::move(wCb));
 }
 
-void HeronZKStateMgr::SetMetricsCacheLocation(const proto::tmaster::MetricsCacheLocation& _location,
+void HeronZKStateMgr::SetMetricsCacheLocation(const proto::tmanager::MetricsCacheLocation& _location,
                                          VCallback<proto::system::StatusCode> cb) {
   // Just try to create an ephimeral node
   std::string path = GetMetricsCacheLocationPath(_location.topology_name());
@@ -130,21 +130,21 @@ void HeronZKStateMgr::SetMetricsCacheLocation(const proto::tmaster::MetricsCache
   zkclient_->CreateNode(path, value, true, std::move(wCb));
 }
 
-void HeronZKStateMgr::GetTMasterLocation(const std::string& _topology_name,
-                                         shared_ptr<proto::tmaster::TMasterLocation> _return,
+void HeronZKStateMgr::GetTManagerLocation(const std::string& _topology_name,
+                                         shared_ptr<proto::tmanager::TManagerLocation> _return,
                                          VCallback<proto::system::StatusCode> cb) {
-  std::string path = GetTMasterLocationPath(_topology_name);
+  std::string path = GetTManagerLocationPath(_topology_name);
   std::string* contents = new std::string();
 
   auto wCb = [contents, _return, cb, this](sp_int32 rc) {
-    this->GetTMasterLocationDone(contents, _return, std::move(cb), rc);
+    this->GetTManagerLocationDone(contents, _return, std::move(cb), rc);
   };
 
   zkclient_->Get(path, contents, std::move(wCb));
 }
 
 void HeronZKStateMgr::GetMetricsCacheLocation(const std::string& _topology_name,
-                                         shared_ptr<proto::tmaster::MetricsCacheLocation> _return,
+                                         shared_ptr<proto::tmanager::MetricsCacheLocation> _return,
                                          VCallback<proto::system::StatusCode> cb) {
   std::string path = GetMetricsCacheLocationPath(_topology_name);
   std::string* contents = new std::string();
@@ -362,13 +362,13 @@ void HeronZKStateMgr::GlobalWatchEventHandler(const ZKClient::ZkWatchEvent event
     LOG(INFO) << "Deleted current zk client, creating a new one...";
     zkclient_ = zkclient_factory_->create(zkhostport_, eventLoop_, watch_event_cb_);
     LOG(INFO) << "New zk client created";
-    // set tmaster watch and notify the client watcher
+    // set tmanager watch and notify the client watcher
     // NOTE: It isn't enough to just set the watch here, since we could
-    // have lost a tmaster node change when the session expired. This is needed
+    // have lost a tmanager node change when the session expired. This is needed
     // since the current zkclient design notifies only the "Connected_State" events to
     // the individual node watchers. Session expired events need explicit notification.
-    if (IsTmasterWatchDefined()) {
-      TMasterLocationWatch();
+    if (IsTmanagerWatchDefined()) {
+      TManagerLocationWatch();
     }
   } else {
     LOG(WARNING) << "Events other than session expired event are not"
@@ -376,14 +376,14 @@ void HeronZKStateMgr::GlobalWatchEventHandler(const ZKClient::ZkWatchEvent event
   }
 }
 
-void HeronZKStateMgr::SetTMasterLocationDone(VCallback<proto::system::StatusCode> cb,
+void HeronZKStateMgr::SetTManagerLocationDone(VCallback<proto::system::StatusCode> cb,
                                              sp_int32 _rc) {
   proto::system::StatusCode code = proto::system::OK;
   if (_rc == ZNODEEXISTS) {
-    LOG(ERROR) << "Setting TMaster Location failed because another zmaster exists" << std::endl;
-    code = proto::system::TMASTERLOCATION_ALREADY_EXISTS;
+    LOG(ERROR) << "Setting TManager Location failed because another zprimary exists" << std::endl;
+    code = proto::system::TMANAGERLOCATION_ALREADY_EXISTS;
   } else if (_rc != ZOK) {
-    LOG(ERROR) << "Setting TMaster Location failed with error " << _rc << std::endl;
+    LOG(ERROR) << "Setting TManager Location failed with error " << _rc << std::endl;
     code = proto::system::STATE_WRITE_ERROR;
   }
 
@@ -394,7 +394,7 @@ void HeronZKStateMgr::SetMetricsCacheLocationDone(VCallback<proto::system::Statu
                                              sp_int32 _rc) {
   proto::system::StatusCode code = proto::system::OK;
   if (_rc == ZNODEEXISTS) {
-    LOG(ERROR) << "Setting MetricsCache Location failed because another zmaster exists"
+    LOG(ERROR) << "Setting MetricsCache Location failed because another zprimary exists"
                << std::endl;
     code = proto::system::METRICSCACHELOCATION_ALREADY_EXISTS;
   } else if (_rc != ZOK) {
@@ -405,21 +405,21 @@ void HeronZKStateMgr::SetMetricsCacheLocationDone(VCallback<proto::system::Statu
   cb(code);
 }
 
-void HeronZKStateMgr::GetTMasterLocationDone(std::string* _contents,
-                                             shared_ptr<proto::tmaster::TMasterLocation> _return,
+void HeronZKStateMgr::GetTManagerLocationDone(std::string* _contents,
+                                             shared_ptr<proto::tmanager::TManagerLocation> _return,
                                              VCallback<proto::system::StatusCode> cb,
                                              sp_int32 _rc) {
   proto::system::StatusCode code = proto::system::OK;
   if (_rc == ZOK) {
     if (!_return->ParseFromString(*_contents)) {
-      LOG(ERROR) << "Error parsing tmaster location" << std::endl;
+      LOG(ERROR) << "Error parsing tmanager location" << std::endl;
       code = proto::system::STATE_CORRUPTED;
     }
   } else if (_rc == ZNONODE) {
-    LOG(ERROR) << "Error getting tmaster location because the tmaster does not exist" << std::endl;
+    LOG(ERROR) << "Error getting tmanager location because the tmanager does not exist" << std::endl;
     code = proto::system::PATH_DOES_NOT_EXIST;
   } else {
-    LOG(ERROR) << "Getting TMaster Location failed with error " << _rc << std::endl;
+    LOG(ERROR) << "Getting TManager Location failed with error " << _rc << std::endl;
     code = proto::system::STATE_READ_ERROR;
   }
   delete _contents;
@@ -427,7 +427,7 @@ void HeronZKStateMgr::GetTMasterLocationDone(std::string* _contents,
 }
 
 void HeronZKStateMgr::GetMetricsCacheLocationDone(std::string* _contents,
-                                         shared_ptr<proto::tmaster::MetricsCacheLocation> _return,
+                                         shared_ptr<proto::tmanager::MetricsCacheLocation> _return,
                                          VCallback<proto::system::StatusCode> cb,
                                          sp_int32 _rc) {
   proto::system::StatusCode code = proto::system::OK;
@@ -713,9 +713,9 @@ void HeronZKStateMgr::ListExecutionStateTopologiesDone(VCallback<proto::system::
   cb(code);
 }
 
-bool HeronZKStateMgr::IsTmasterWatchDefined() {
-  return (tmaster_location_watcher_info_ != NULL && tmaster_location_watcher_info_->watcher_cb &&
-          !tmaster_location_watcher_info_->topology_name.empty());
+bool HeronZKStateMgr::IsTmanagerWatchDefined() {
+  return (tmanager_location_watcher_info_ != NULL && tmanager_location_watcher_info_->watcher_cb &&
+          !tmanager_location_watcher_info_->topology_name.empty());
 }
 
 bool HeronZKStateMgr::IsMetricsCacheWatchDefined() {
@@ -744,19 +744,19 @@ bool HeronZKStateMgr::ShouldRetrySetWatch(sp_int32 rc) {
   }
 }
 
-void HeronZKStateMgr::SetTMasterWatchCompletionHandler(sp_int32 rc) {
+void HeronZKStateMgr::SetTManagerWatchCompletionHandler(sp_int32 rc) {
   if (rc == ZOK || rc == ZNONODE) {
-    // NoNode is when there is no tmaster up yet, but the watch is set.
-    LOG(INFO) << "Setting watch on tmaster location succeeded: " << zerror(rc) << std::endl;
+    // NoNode is when there is no tmanager up yet, but the watch is set.
+    LOG(INFO) << "Setting watch on tmanager location succeeded: " << zerror(rc) << std::endl;
   } else {
     // Any other return code should be treated as warning, since ideally
     // we shouldn't be in this state.
-    LOG(WARNING) << "Setting watch on tmaster location returned: " << zerror(rc) << std::endl;
+    LOG(WARNING) << "Setting watch on tmanager location returned: " << zerror(rc) << std::endl;
 
     if (ShouldRetrySetWatch(rc)) {
       LOG(INFO) << "Retrying after " << SET_WATCH_RETRY_INTERVAL_S << " seconds" << std::endl;
 
-      auto cb = [this](EventLoop::Status status) { this->CallSetTMasterLocationWatch(status); };
+      auto cb = [this](EventLoop::Status status) { this->CallSetTManagerLocationWatch(status); };
 
       eventLoop_->registerTimer(std::move(cb), false, SET_WATCH_RETRY_INTERVAL_S * 1000 * 1000);
     }
@@ -765,7 +765,7 @@ void HeronZKStateMgr::SetTMasterWatchCompletionHandler(sp_int32 rc) {
 
 void HeronZKStateMgr::SetMetricsCacheWatchCompletionHandler(sp_int32 rc) {
   if (rc == ZOK || rc == ZNONODE) {
-    // NoNode is when there is no tmaster up yet, but the watch is set.
+    // NoNode is when there is no tmanager up yet, but the watch is set.
     LOG(INFO) << "Setting watch on metricscache location succeeded: " << zerror(rc) << std::endl;
   } else {
     // Any other return code should be treated as warning, since ideally
@@ -801,8 +801,8 @@ void HeronZKStateMgr::SetPackingPlanWatchCompletionHandler(sp_int32 rc) {
   }
 }
 
-void HeronZKStateMgr::CallSetTMasterLocationWatch(EventLoop::Status) {
-  SetTMasterLocationWatchInternal();
+void HeronZKStateMgr::CallSetTManagerLocationWatch(EventLoop::Status) {
+  SetTManagerLocationWatchInternal();
 }
 
 void HeronZKStateMgr::CallSetMetricsCacheLocationWatch(EventLoop::Status) {
@@ -813,14 +813,14 @@ void HeronZKStateMgr::CallSetPackingPlanWatch(EventLoop::Status) {
   SetPackingPlanWatchInternal();
 }
 
-void HeronZKStateMgr::SetTMasterLocationWatchInternal() {
-  CHECK(IsTmasterWatchDefined());
+void HeronZKStateMgr::SetTManagerLocationWatchInternal() {
+  CHECK(IsTmanagerWatchDefined());
 
-  LOG(INFO) << "Setting watch on tmaster location " << std::endl;
-  std::string path = GetTMasterLocationPath(tmaster_location_watcher_info_->topology_name);
+  LOG(INFO) << "Setting watch on tmanager location " << std::endl;
+  std::string path = GetTManagerLocationPath(tmanager_location_watcher_info_->topology_name);
 
-  zkclient_->Exists(path, [this]() { this->TMasterLocationWatch(); },
-                    [this](sp_int32 rc) { this->SetTMasterWatchCompletionHandler(rc); });
+  zkclient_->Exists(path, [this]() { this->TManagerLocationWatch(); },
+                    [this](sp_int32 rc) { this->SetTManagerWatchCompletionHandler(rc); });
 }
 
 void HeronZKStateMgr::SetMetricsCacheLocationWatchInternal() {
@@ -844,11 +844,11 @@ void HeronZKStateMgr::SetPackingPlanWatchInternal() {
                     [this](sp_int32 rc) { this->SetPackingPlanWatchCompletionHandler(rc); });
 }
 
-void HeronZKStateMgr::TMasterLocationWatch() {
+void HeronZKStateMgr::TManagerLocationWatch() {
   // First setup watch again
-  SetTMasterLocationWatchInternal();
+  SetTManagerLocationWatchInternal();
   // Then run the watcher
-  tmaster_location_watcher_info_->watcher_cb();
+  tmanager_location_watcher_info_->watcher_cb();
 }
 
 void HeronZKStateMgr::MetricsCacheLocationWatch() {

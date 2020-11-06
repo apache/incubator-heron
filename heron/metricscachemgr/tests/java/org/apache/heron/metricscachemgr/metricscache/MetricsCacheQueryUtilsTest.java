@@ -37,7 +37,7 @@ import org.apache.heron.metricscachemgr.metricscache.query.MetricRequest;
 import org.apache.heron.metricscachemgr.metricscache.query.MetricResponse;
 import org.apache.heron.metricscachemgr.metricscache.query.MetricTimeRangeValue;
 import org.apache.heron.proto.system.Common;
-import org.apache.heron.proto.tmaster.TopologyMaster;
+import org.apache.heron.proto.tmanager.TopologyManager;
 
 import static org.apache.heron.metricscachemgr.metricscache.MetricsCacheQueryUtils.toProtobuf;
 import static org.junit.Assert.assertEquals;
@@ -83,8 +83,8 @@ public class MetricsCacheQueryUtilsTest {
 
   @Test
   public void testFromProtoBufMetricInterval() {
-    TopologyMaster.MetricRequest request =
-        TopologyMaster.MetricRequest.newBuilder()
+    TopologyManager.MetricRequest request =
+        TopologyManager.MetricRequest.newBuilder()
             .setComponentName("c1")
             .addInstanceId("i1").addInstanceId("i2")
             .addMetric("m1").addMetric("m2")
@@ -104,12 +104,12 @@ public class MetricsCacheQueryUtilsTest {
 
   @Test
   public void testFromProtoBufMetricExplicitInterval() {
-    TopologyMaster.MetricRequest request =
-        TopologyMaster.MetricRequest.newBuilder()
+    TopologyManager.MetricRequest request =
+        TopologyManager.MetricRequest.newBuilder()
             .setComponentName("c1")
             .addInstanceId("i1").addInstanceId("i2")
             .addMetric("m1").addMetric("m2")
-            .setExplicitInterval(TopologyMaster.MetricInterval.newBuilder()
+            .setExplicitInterval(TopologyManager.MetricInterval.newBuilder()
                 .setStart(100).setEnd(200)) // in seconds
             .build();
 
@@ -126,12 +126,12 @@ public class MetricsCacheQueryUtilsTest {
 
   @Test
   public void testFromProtoBufMetricMinutely() {
-    TopologyMaster.MetricRequest request =
-        TopologyMaster.MetricRequest.newBuilder()
+    TopologyManager.MetricRequest request =
+        TopologyManager.MetricRequest.newBuilder()
             .setComponentName("c1")
             .addInstanceId("i1").addInstanceId("i2")
             .addMetric("m1").addMetric("m2")
-            .setExplicitInterval(TopologyMaster.MetricInterval.newBuilder()
+            .setExplicitInterval(TopologyManager.MetricInterval.newBuilder()
                 .setStart(100).setEnd(200)) // in seconds
             .setMinutely(true)
             .build();
@@ -149,11 +149,11 @@ public class MetricsCacheQueryUtilsTest {
 
   @Test
   public void testFromProtoBufMetricEmptyMetrics() {
-    TopologyMaster.MetricRequest request =
-        TopologyMaster.MetricRequest.newBuilder()
+    TopologyManager.MetricRequest request =
+        TopologyManager.MetricRequest.newBuilder()
             .setComponentName("c1")
             .addInstanceId("i1").addInstanceId("i2")
-            .setExplicitInterval(TopologyMaster.MetricInterval.newBuilder()
+            .setExplicitInterval(TopologyManager.MetricInterval.newBuilder()
                 .setStart(100).setEnd(200)) // in seconds
             .setMinutely(true)
             .build();
@@ -171,11 +171,11 @@ public class MetricsCacheQueryUtilsTest {
 
   @Test
   public void testFromProtoBufMetricEmptyInstanceIds() {
-    TopologyMaster.MetricRequest request =
-        TopologyMaster.MetricRequest.newBuilder()
+    TopologyManager.MetricRequest request =
+        TopologyManager.MetricRequest.newBuilder()
             .setComponentName("c1")
             .addMetric("m1").addMetric("m2")
-            .setExplicitInterval(TopologyMaster.MetricInterval.newBuilder()
+            .setExplicitInterval(TopologyManager.MetricInterval.newBuilder()
                 .setStart(100).setEnd(200)) // in seconds
             .setMinutely(true)
             .build();
@@ -196,7 +196,7 @@ public class MetricsCacheQueryUtilsTest {
     long endTime = 200 * 1000;
     MetricRequest request = new MetricRequest(null, null, startTime, endTime, null);
 
-    TopologyMaster.MetricResponse response1 = toProtobuf(response, request);
+    TopologyManager.MetricResponse response1 = toProtobuf(response, request);
 
     assertEquals(200 - 100, response1.getInterval());
     assertEquals(Common.StatusCode.OK, response1.getStatus().getStatus());
@@ -219,7 +219,7 @@ public class MetricsCacheQueryUtilsTest {
     long endTime = 200 * 1000;
     MetricRequest request = new MetricRequest(null, null, startTime, endTime, null);
 
-    TopologyMaster.MetricResponse response1 = toProtobuf(response, request);
+    TopologyManager.MetricResponse response1 = toProtobuf(response, request);
 
     assertEquals(200 - 100, response1.getInterval());
     assertEquals(Common.StatusCode.OK, response1.getStatus().getStatus());
@@ -242,8 +242,8 @@ public class MetricsCacheQueryUtilsTest {
 
   @Test
   public void testFromProtoBufException() {
-    TopologyMaster.ExceptionLogRequest request =
-        TopologyMaster.ExceptionLogRequest.newBuilder()
+    TopologyManager.ExceptionLogRequest request =
+        TopologyManager.ExceptionLogRequest.newBuilder()
             .setComponentName("c1")
             .addInstances("i1").addInstances("i2")
             .build();
@@ -260,8 +260,8 @@ public class MetricsCacheQueryUtilsTest {
 
   @Test
   public void testFromProtoBufExceptionEmptyInstances() {
-    TopologyMaster.ExceptionLogRequest request =
-        TopologyMaster.ExceptionLogRequest.newBuilder()
+    TopologyManager.ExceptionLogRequest request =
+        TopologyManager.ExceptionLogRequest.newBuilder()
             .setComponentName("c1")
             .build();
 
@@ -279,7 +279,7 @@ public class MetricsCacheQueryUtilsTest {
     ExceptionDatum dp = new ExceptionDatum("c1", "i1", "h1", "s1", "lt1", "ft1", 10, "l1");
     response.add(dp);
 
-    TopologyMaster.ExceptionLogResponse response1 = toProtobuf(new ExceptionResponse(response));
+    TopologyManager.ExceptionLogResponse response1 = toProtobuf(new ExceptionResponse(response));
 
     assertEquals(1, response1.getExceptionsCount());
     assertEquals("c1", response1.getExceptions(0).getComponentName());

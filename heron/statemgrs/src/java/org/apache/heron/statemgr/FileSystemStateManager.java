@@ -33,7 +33,7 @@ import org.apache.heron.proto.scheduler.Scheduler;
 import org.apache.heron.proto.system.ExecutionEnvironment;
 import org.apache.heron.proto.system.PackingPlans;
 import org.apache.heron.proto.system.PhysicalPlans;
-import org.apache.heron.proto.tmaster.TopologyMaster;
+import org.apache.heron.proto.tmanager.TopologyManager;
 import org.apache.heron.spi.common.Config;
 import org.apache.heron.spi.common.Context;
 import org.apache.heron.spi.common.Key;
@@ -60,7 +60,7 @@ public abstract class FileSystemStateManager implements IStateManager {
   protected String rootAddress;
 
   protected enum StateLocation {
-    TMASTER_LOCATION("tmasters", "TMaster location"),
+    TMANAGER_LOCATION("tmanagers", "TManager location"),
     METRICSCACHE_LOCATION("metricscaches", "MetricsCache location"),
     TOPOLOGY("topologies", "Topologies"),
     PACKING_PLAN("packingplans", "Packing plan"),
@@ -171,17 +171,17 @@ public abstract class FileSystemStateManager implements IStateManager {
   }
 
   @Override
-  public ListenableFuture<TopologyMaster.TMasterLocation> getTMasterLocation(
+  public ListenableFuture<TopologyManager.TManagerLocation> getTManagerLocation(
       WatchCallback watcher, String topologyName) {
-    return getNodeData(watcher, StateLocation.TMASTER_LOCATION, topologyName,
-        TopologyMaster.TMasterLocation.newBuilder());
+    return getNodeData(watcher, StateLocation.TMANAGER_LOCATION, topologyName,
+        TopologyManager.TManagerLocation.newBuilder());
   }
 
   @Override
-  public ListenableFuture<TopologyMaster.MetricsCacheLocation> getMetricsCacheLocation(
+  public ListenableFuture<TopologyManager.MetricsCacheLocation> getMetricsCacheLocation(
       WatchCallback watcher, String topologyName) {
     return getNodeData(watcher, StateLocation.METRICSCACHE_LOCATION, topologyName,
-        TopologyMaster.MetricsCacheLocation.newBuilder());
+        TopologyManager.MetricsCacheLocation.newBuilder());
   }
 
   @Override
@@ -192,8 +192,8 @@ public abstract class FileSystemStateManager implements IStateManager {
   }
 
   @Override
-  public ListenableFuture<Boolean> deleteTMasterLocation(String topologyName) {
-    return deleteNode(StateLocation.TMASTER_LOCATION, topologyName);
+  public ListenableFuture<Boolean> deleteTManagerLocation(String topologyName) {
+    return deleteNode(StateLocation.TMANAGER_LOCATION, topologyName);
   }
 
   @Override
@@ -311,9 +311,9 @@ public abstract class FileSystemStateManager implements IStateManager {
         print("SchedulerLocation node not found %s", e.getMessage());
       }
       try {
-        print("==> TMasterLocation:\n%s", getTMasterLocation(null, topologyName).get());
+        print("==> TManagerLocation:\n%s", getTManagerLocation(null, topologyName).get());
       } catch (ExecutionException e) {
-        print("TMasterLocation node not found %s", e.getMessage());
+        print("TManagerLocation node not found %s", e.getMessage());
       }
       try {
         print("==> MetricsCacheLocation:\n%s", getMetricsCacheLocation(null, topologyName).get());

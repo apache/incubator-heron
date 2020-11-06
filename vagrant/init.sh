@@ -16,11 +16,12 @@ set -o errexit -o nounset -o pipefail
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# NB: Apache Mesos requires the use of "master"/"slave"
 install_mesos() {
     mode=$1 # master | slave
     apt-get -qy install mesos=0.25.0*
 
-    echo "zk://master:2181/mesos" > /etc/mesos/zk
+    echo "zk://primary:2181/mesos" > /etc/mesos/zk
     echo '5mins' > /etc/mesos-slave/executor_registration_timeout
 
     ip=$(cat /etc/hosts | grep `hostname` | grep -E -o "([0-9]{1,3}[\.]){3}[0-9]{1,3}")

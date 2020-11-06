@@ -199,7 +199,7 @@ Each execution state object lists the following:
   topology
 * `release_version` --- Release version
 * `has_physical_plan` --- Whether the topology has a physical plan
-* `has_tmaster_location` --- Whether the topology has a Topology Master Location
+* `has_tmanager_location` --- Whether the topology has a Topology Manager Location
 * `has_scheduler_location` --- Whether the topology has a Scheduler Location
 * `viz` --- Metric visualization UI URL for the topology if it was [configured](user-manuals-heron-tracker-runbook)
 
@@ -225,8 +225,8 @@ $ curl "http://heron-tracker-url/topologies/states?cluster=cluster1&environ=deve
 ### <a name="topologies_info">/topologies/info</a>
 
 Returns a JSON representation of a dictionary containing logical plan, physical plan,
-execution state, scheduler location and TMaster location for a topology, as described above.
-`TMasterLocation` is the location of the TMaster, including its host,
+execution state, scheduler location and TManager location for a topology, as described above.
+`TManagerLocation` is the location of the TManager, including its host,
 port, and the heron-shell port that it exposes.
 
 #### Parameters
@@ -280,7 +280,7 @@ Returns a JSON map of instances of the topology to their respective metrics.
 To filter instances returned use the `instance` parameter discussed below.
 
 
-Note that these metrics come from TMaster, which only holds metrics
+Note that these metrics come from TManager, which only holds metrics
 for last 3 hours minutely data, as well as cumulative values. If the `interval`
 is greater than `10800` seconds, the values will be for all-time metrics.
 
@@ -305,7 +305,7 @@ The difference between this and `/metrics` endpoint above, is that `/metrics` wi
 cumulative value over the period of `interval` provided. On the other hand, `/metricstimeline`
 endpoint will report minutely values for each metricname for each instance.
 
-Note that these metrics come from TMaster, which only holds metrics
+Note that these metrics come from TManager, which only holds metrics
 for last 3 hours minutely data, as well as cumulative all-time values. If the starttime
 is older than 3 hours ago, those minutes would not be part of the response.
 
@@ -326,7 +326,7 @@ is older than 3 hours ago, those minutes would not be part of the response.
 Executes the metrics query for the topology and returns the result in form of minutely timeseries.
 A detailed description of query language is given [below](#metricsquery).
 
-Note that these metrics come from TMaster, which only holds metrics
+Note that these metrics come from TManager, which only holds metrics
 for last 3 hours minutely data, as well as cumulative all-time values. If the starttime
 is older than 3 hours ago, those minutes would not be part of the response.
 
@@ -472,7 +472,7 @@ Example:
 TS(component1, *, __emit-count/stream1)
 ```
 
-Time Series Operator. This is the basic operator that is responsible for getting metrics from TMaster.
+Time Series Operator. This is the basic operator that is responsible for getting metrics from TManager.
 Accepts a list of 3 elements:
 
 1. componentName

@@ -51,10 +51,10 @@ cluster (e.g) "127.0.0.1:2181".
 
 * `heron.statemgr.root.path` --- The root ZooKeeper node to be used by Heron. We recommend
 providing Heron with an exclusive root node; if you do not, make sure that the following child
-nodes are unused: `/tmasters`, `/topologies`, `/pplans`, `/executionstate`, `/schedulers`.
+nodes are unused: `/tmanagers`, `/topologies`, `/pplans`, `/executionstate`, `/schedulers`.
 
 * `heron.statemgr.zookeeper.is.initialize.tree` --- Indicates whether the nodes under ZooKeeper
-root `/tmasters`, `/topologies`, `/pplans`, `/executionstate`, and `/schedulers` need to created,
+root `/tmanagers`, `/topologies`, `/pplans`, `/executionstate`, and `/schedulers` need to created,
 if they are not found. Set it to `True` if you could like Heron to create those nodes. If those
 nodes are already there, set it to `False`. The absence of this configuration implies `True`.
 

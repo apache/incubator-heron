@@ -172,7 +172,7 @@ void StMgrClient::SendTupleMessage(const proto::system::HeronTupleSet& msg) {
 void StMgrClient::putBackPressure() {
   auto conn = static_cast<Connection*>(conn_);
   if (!conn->isUnderBackPressure()) {
-    LOG(INFO) << "Buffer to Slave Thread at maximum capacity. Clamping down on reads from Stmgr";
+    LOG(INFO) << "Buffer to Executor Thread at maximum capacity. Clamping down on reads from Stmgr";
     conn->putBackPressure();
   }
 }
@@ -180,7 +180,7 @@ void StMgrClient::putBackPressure() {
 void StMgrClient::removeBackPressure() {
   auto conn = static_cast<Connection*>(conn_);
   if (conn->isUnderBackPressure()) {
-    LOG(INFO) << "Buffer to Slave Thread less than capacity. Resuming reads from stmgr";
+    LOG(INFO) << "Buffer to Executor Thread less than capacity. Resuming reads from stmgr";
     conn->removeBackPressure();
   }
 }

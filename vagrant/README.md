@@ -18,6 +18,6 @@
 -->
 Vagrant VM for CI and debugging
 =================================
-Running `vagrant up master` will bring up an environment similar to the one used by Travis for CI. If the build fails, it can be inspected by entering the machine with `vagrant ssh master`. When you're down with the VM, you can clean up with `vagrant destroy -f`.
+Running `vagrant up primary` will bring up an environment similar to the one used by Travis for CI. If the build fails, it can be inspected by entering the machine with `vagrant ssh primary`. When you're down with the VM, you can clean up with `vagrant destroy -f`.
 
 The advantage of this is you don't need to worry about the potential environment pollution, and others can reproduce the results from other platforms.

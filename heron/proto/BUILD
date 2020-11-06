@@ -97,8 +97,8 @@ proto_library(
 )
 
 proto_library(
-    name = "proto_tmaster",
-    src = "tmaster.proto",
+    name = "proto_tmanager",
+    src = "tmanager.proto",
     gen_cc = 1,
     gen_java = 1,
     gen_py = 1,
@@ -121,7 +121,7 @@ proto_library(
     includes = ["heron/proto"],
     deps = [
         ":proto_common",
-        ":proto_tmaster",
+        ":proto_tmanager",
     ],
 )
 
@@ -171,7 +171,7 @@ java_library(
         ":proto_scheduler_java",
         ":proto_stats_java",
         ":proto_stmgr_java",
-        ":proto_tmaster_java",
+        ":proto_tmanager_java",
         ":proto_topology_java",
         ":proto_tuple_java",
         "@com_google_protobuf//:protobuf_java",
@@ -194,7 +194,7 @@ pex_library(
         ":proto_scheduler_py",
         ":proto_stats_py",
         ":proto_stmgr_py",
-        ":proto_tmaster_py",
+        ":proto_tmanager_py",
         ":proto_topology_py",
         ":proto_tuple_py",
     ],
@@ -215,7 +215,7 @@ cc_library(
         "scheduler.pb.h",
         "stats.pb.h",
         "stmgr.pb.h",
-        "tmaster.pb.h",
+        "tmanager.pb.h",
         "topology.pb.h",
         "tuple.pb.h",
     ],
@@ -230,7 +230,7 @@ cc_library(
         ":proto_scheduler_cc",
         ":proto_stats_cc",
         ":proto_stmgr_cc",
-        ":proto_tmaster_cc",
+        ":proto_tmanager_cc",
         ":proto_topology_cc",
         ":proto_tuple_cc",
         "@com_google_protobuf//:protobuf",

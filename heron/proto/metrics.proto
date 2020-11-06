@@ -22,11 +22,11 @@ option java_package = "org.apache.heron.proto.system";
 option java_outer_classname = "Metrics";
 
 import "common.proto";
-import "tmaster.proto";
+import "tmanager.proto";
 
 // This file defines the various protocol buffers needed
 // for sending metrics from all the system components(workers,
-// (stmgrs, tmasters). The components first register themselves
+// (stmgrs, tmanagers). The components first register themselves
 // with MetricPublisherRegisterRequest. And then everytime
 // they want to send a metric, they use the 
 // MetricPublisherPublishMessage to send out the actual message
@@ -76,12 +76,12 @@ message MetricPublisherPublishMessage {
 }
 
 
-// This is the tmaster location refresh message sent 
+// This is the tmanager location refresh message sent
 // by the stmgrs to the metricsmgrs
-message TMasterLocationRefreshMessage {
-  required heron.proto.tmaster.TMasterLocation tmaster = 1;
+message TManagerLocationRefreshMessage {
+  required heron.proto.tmanager.TManagerLocation tmanager = 1;
 }
 
 message MetricsCacheLocationRefreshMessage {
-  required heron.proto.tmaster.MetricsCacheLocation metricscache = 1;
+  required heron.proto.tmanager.MetricsCacheLocation metricscache = 1;
 }

@@ -57,11 +57,11 @@ root@16092325a696:/heron# heron submit sandbox /heron/examples/heron-api-example
 [2018-02-01 20:24:21 +0000] [INFO]: Successfully launched topology 'exclamation' 
 root@16092325a696:/heron# heron deactivate sandbox exclamation
 [2018-02-01 20:24:46 +0000] [INFO]: Using cluster definition in /heron/heron-tools/conf/sandbox
-[2018-02-01 20:24:47 +0000] [INFO] org.apache.heron.spi.utils.TMasterUtils: Topology command DEACTIVATE completed successfully.
+[2018-02-01 20:24:47 +0000] [INFO] org.apache.heron.spi.utils.TManagerUtils: Topology command DEACTIVATE completed successfully.
 [2018-02-01 20:24:47 +0000] [INFO]: Successfully deactivate topology: exclamation
 root@16092325a696:/heron# heron activate sandbox exclamation
 [2018-02-01 20:24:55 +0000] [INFO]: Using cluster definition in /heron/heron-tools/conf/sandbox
-[2018-02-01 20:24:56 +0000] [INFO] org.apache.heron.spi.utils.TMasterUtils: Topology command ACTIVATE completed successfully.
+[2018-02-01 20:24:56 +0000] [INFO] org.apache.heron.spi.utils.TManagerUtils: Topology command ACTIVATE completed successfully.
 [2018-02-01 20:24:56 +0000] [INFO]: Successfully activate topology: exclamation
 root@16092325a696:/heron# heron kill sandbox exclamation
 [2018-02-01 20:25:08 +0000] [INFO]: Using cluster definition in /heron/heron-tools/conf/sandbox

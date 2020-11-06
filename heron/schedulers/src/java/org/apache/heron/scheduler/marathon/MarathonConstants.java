@@ -61,25 +61,25 @@ public final class MarathonConstants {
   public static final String DOCKER_FORCE_PULL = "forcePullImage";
   public static final String DOCKER_NETWORK_BRIDGE = "BRIDGE";
 
-  public static final String MASTER_PORT = "$PORT0";
-  public static final String TMASTER_CONTROLLER_PORT = "$PORT1";
-  public static final String TMASTER_STATS_PORT = "$PORT2";
+  public static final String SERVER_PORT = "$PORT0";
+  public static final String TMANAGER_CONTROLLER_PORT = "$PORT1";
+  public static final String TMANAGER_STATS_PORT = "$PORT2";
   public static final String SHELL_PORT = "$PORT3";
   public static final String METRICSMGR_PORT = "$PORT4";
   public static final String SCHEDULER_PORT = "$PORT5";
-  public static final String METRICS_CACHE_MASTER_PORT = "$PORT6";
+  public static final String METRICS_CACHE_SERVER_PORT = "$PORT6";
   public static final String METRICS_CACHE_STATS_PORT = "$PORT7";
   public static final String CKPTMGR_PORT = "$PORT8";
 
   public static final Map<ExecutorPort, String> EXECUTOR_PORTS = new HashMap<>();
   static {
-    EXECUTOR_PORTS.put(ExecutorPort.MASTER_PORT, MASTER_PORT);
-    EXECUTOR_PORTS.put(ExecutorPort.TMASTER_CONTROLLER_PORT, TMASTER_CONTROLLER_PORT);
-    EXECUTOR_PORTS.put(ExecutorPort.TMASTER_STATS_PORT, TMASTER_STATS_PORT);
+    EXECUTOR_PORTS.put(ExecutorPort.SERVER_PORT, SERVER_PORT);
+    EXECUTOR_PORTS.put(ExecutorPort.TMANAGER_CONTROLLER_PORT, TMANAGER_CONTROLLER_PORT);
+    EXECUTOR_PORTS.put(ExecutorPort.TMANAGER_STATS_PORT, TMANAGER_STATS_PORT);
     EXECUTOR_PORTS.put(ExecutorPort.SHELL_PORT, SHELL_PORT);
     EXECUTOR_PORTS.put(ExecutorPort.METRICS_MANAGER_PORT, METRICSMGR_PORT);
     EXECUTOR_PORTS.put(ExecutorPort.SCHEDULER_PORT, SCHEDULER_PORT);
-    EXECUTOR_PORTS.put(ExecutorPort.METRICS_CACHE_MASTER_PORT, METRICS_CACHE_MASTER_PORT);
+    EXECUTOR_PORTS.put(ExecutorPort.METRICS_CACHE_SERVER_PORT, METRICS_CACHE_SERVER_PORT);
     EXECUTOR_PORTS.put(ExecutorPort.METRICS_CACHE_STATS_PORT, METRICS_CACHE_STATS_PORT);
     EXECUTOR_PORTS.put(ExecutorPort.CHECKPOINT_MANAGER_PORT, CKPTMGR_PORT);
   }

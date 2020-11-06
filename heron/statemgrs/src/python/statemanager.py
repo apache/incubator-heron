@@ -30,7 +30,7 @@ HERON_EXECUTION_STATE_PREFIX = "{0}/executionstate/"
 HERON_PACKING_PLANS_PREFIX = "{0}/packingplans/"
 HERON_PPLANS_PREFIX = "{0}/pplans/"
 HERON_SCHEDULER_LOCATION_PREFIX = "{0}/schedulers/"
-HERON_TMASTER_PREFIX = "{0}/tmasters/"
+HERON_TMANAGER_PREFIX = "{0}/tmanagers/"
 HERON_TOPOLOGIES_KEY = "{0}/topologies"
 
 # pylint: disable=too-many-public-methods, attribute-defined-outside-init
@@ -146,8 +146,8 @@ class StateManager(metaclass=abc.ABCMeta):
   def get_execution_state_path(self, topologyName):
     return HERON_EXECUTION_STATE_PREFIX.format(self.rootpath) + topologyName
 
-  def get_tmaster_path(self, topologyName):
-    return HERON_TMASTER_PREFIX.format(self.rootpath) + topologyName
+  def get_tmanager_path(self, topologyName):
+    return HERON_TMANAGER_PREFIX.format(self.rootpath) + topologyName
 
   def get_scheduler_location_path(self, topologyName):
     return HERON_SCHEDULER_LOCATION_PREFIX.format(self.rootpath) + topologyName
@@ -202,7 +202,7 @@ class StateManager(metaclass=abc.ABCMeta):
     pass
 
   @abc.abstractmethod
-  def get_tmaster(self, topologyName, callback=None):
+  def get_tmanager(self, topologyName, callback=None):
     pass
 
   @abc.abstractmethod

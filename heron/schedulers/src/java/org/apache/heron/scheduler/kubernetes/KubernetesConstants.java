@@ -57,13 +57,13 @@ public final class KubernetesConstants {
   public static final String PROMETHEUS_PORT = "8080";
 
 
-  public static final int MASTER_PORT = 6001;
-  public static final int TMASTER_CONTROLLER_PORT = 6002;
-  public static final int TMASTER_STATS_PORT = 6003;
+  public static final int SERVER_PORT = 6001;
+  public static final int TMANAGER_CONTROLLER_PORT = 6002;
+  public static final int TMANAGER_STATS_PORT = 6003;
   public static final int SHELL_PORT = 6004;
   public static final int METRICSMGR_PORT = 6005;
   public static final int SCHEDULER_PORT = 6006;
-  public static final int METRICS_CACHE_MASTER_PORT = 6007;
+  public static final int METRICS_CACHE_SERVER_PORT = 6007;
   public static final int METRICS_CACHE_STATS_PORT = 6008;
   public static final int CHECKPOINT_MGR_PORT = 6009;
   // port number the start with when more than one port needed for remote debugging
@@ -72,13 +72,13 @@ public final class KubernetesConstants {
 
   public static final Map<ExecutorPort, Integer> EXECUTOR_PORTS = new HashMap<>();
   static {
-    EXECUTOR_PORTS.put(ExecutorPort.MASTER_PORT, MASTER_PORT);
-    EXECUTOR_PORTS.put(ExecutorPort.TMASTER_CONTROLLER_PORT, TMASTER_CONTROLLER_PORT);
-    EXECUTOR_PORTS.put(ExecutorPort.TMASTER_STATS_PORT, TMASTER_STATS_PORT);
+    EXECUTOR_PORTS.put(ExecutorPort.SERVER_PORT, SERVER_PORT);
+    EXECUTOR_PORTS.put(ExecutorPort.TMANAGER_CONTROLLER_PORT, TMANAGER_CONTROLLER_PORT);
+    EXECUTOR_PORTS.put(ExecutorPort.TMANAGER_STATS_PORT, TMANAGER_STATS_PORT);
     EXECUTOR_PORTS.put(ExecutorPort.SHELL_PORT, SHELL_PORT);
     EXECUTOR_PORTS.put(ExecutorPort.METRICS_MANAGER_PORT, METRICSMGR_PORT);
     EXECUTOR_PORTS.put(ExecutorPort.SCHEDULER_PORT, SCHEDULER_PORT);
-    EXECUTOR_PORTS.put(ExecutorPort.METRICS_CACHE_MASTER_PORT, METRICS_CACHE_MASTER_PORT);
+    EXECUTOR_PORTS.put(ExecutorPort.METRICS_CACHE_SERVER_PORT, METRICS_CACHE_SERVER_PORT);
     EXECUTOR_PORTS.put(ExecutorPort.METRICS_CACHE_STATS_PORT, METRICS_CACHE_STATS_PORT);
     EXECUTOR_PORTS.put(ExecutorPort.CHECKPOINT_MANAGER_PORT, CHECKPOINT_MGR_PORT);
   }

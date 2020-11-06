@@ -29,8 +29,8 @@ import com.google.protobuf.Message;
 import org.apache.heron.api.generated.TopologyAPI;
 import org.apache.heron.common.basics.ByteAmount;
 import org.apache.heron.common.basics.Communicator;
+import org.apache.heron.common.basics.ExecutorLooper;
 import org.apache.heron.common.basics.SingletonRegistry;
-import org.apache.heron.common.basics.SlaveLooper;
 import org.apache.heron.common.config.SystemConfig;
 import org.apache.heron.common.utils.misc.PhysicalPlanHelper;
 import org.apache.heron.common.utils.tuple.TupleImpl;
@@ -47,7 +47,7 @@ public class BoltInstance
   public BoltInstance(PhysicalPlanHelper helper,
                       Communicator<Message> streamInQueue,
                       Communicator<Message> streamOutQueue,
-                      SlaveLooper looper) {
+                      ExecutorLooper looper) {
     super(helper, streamInQueue, streamOutQueue, looper);
     SystemConfig systemConfig =
         (SystemConfig) SingletonRegistry.INSTANCE.getSingleton(SystemConfig.HERON_SYSTEM_CONFIG);

@@ -64,7 +64,7 @@ public class CheckpointManagerServerTest {
   private static CheckpointManager.GetInstanceStateRequest getInstanceStateRequest;
   private static CheckpointManager.CleanStatefulCheckpointRequest cleanStatefulCheckpointRequest;
   private static CheckpointManager.RegisterStMgrRequest registerStmgrRequest;
-  private static CheckpointManager.RegisterTMasterRequest registerTMasterRequest;
+  private static CheckpointManager.RegisterTManagerRequest registerTManagerRequest;
 
   private static PhysicalPlans.Instance instance;
 
@@ -137,7 +137,7 @@ public class CheckpointManagerServerTest {
         .setPhysicalPlan(pplan)
         .build();
 
-    registerTMasterRequest = CheckpointManager.RegisterTMasterRequest.newBuilder()
+    registerTManagerRequest = CheckpointManager.RegisterTManagerRequest.newBuilder()
         .setTopologyId(TOPOLOGY_ID)
         .setTopologyName(TOPOLOGY_NAME)
         .build();
@@ -224,10 +224,10 @@ public class CheckpointManagerServerTest {
   }
 
   @Test
-  public void testRegisterTMaster() throws Exception {
-    runTest(TestRequestHandler.RequestType.REGISTER_TMASTER,
+  public void testRegisterTManager() throws Exception {
+    runTest(TestRequestHandler.RequestType.REGISTER_TMANAGER,
         new HeronServerTester.SuccessResponseHandler(
-            CheckpointManager.RegisterTMasterResponse.class));
+            CheckpointManager.RegisterTManagerResponse.class));
   }
 
   @Test
@@ -249,8 +249,8 @@ public class CheckpointManagerServerTest {
           CheckpointManager.CleanStatefulCheckpointResponse.getDescriptor()),
       REGISTER_STMGR(registerStmgrRequest,
           CheckpointManager.RegisterStMgrResponse.getDescriptor()),
-      REGISTER_TMASTER(registerTMasterRequest,
-          CheckpointManager.RegisterTMasterResponse.getDescriptor());
+      REGISTER_TMANAGER(registerTManagerRequest,
+          CheckpointManager.RegisterTManagerResponse.getDescriptor());
 
       private Message requestMessage;
       private Descriptors.Descriptor responseMessageDescriptor;

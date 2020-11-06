@@ -33,9 +33,9 @@ namespace instance {
 SpoutOutputCollectorImpl::SpoutOutputCollectorImpl(
                           std::shared_ptr<api::serializer::IPluggableSerializer> serializer,
                           std::shared_ptr<TaskContextImpl> taskContext,
-                          NotifyingCommunicator<google::protobuf::Message*>* dataFromSlave)
+                          NotifyingCommunicator<google::protobuf::Message*>* dataFromExecutor)
   : api::spout::ISpoutOutputCollector(serializer) {
-  collector_ = new OutgoingTupleCollection(taskContext->getThisComponentName(), dataFromSlave);
+  collector_ = new OutgoingTupleCollection(taskContext->getThisComponentName(), dataFromExecutor);
   ackingEnabled_ = taskContext->isAckingEnabled();
   taskId_ = taskContext->getThisTaskId();
 }

@@ -25,7 +25,7 @@ from heron.proto.execution_state_pb2 import ExecutionState
 from heron.proto.packing_plan_pb2 import PackingPlan
 from heron.proto.physical_plan_pb2 import PhysicalPlan
 from heron.proto.scheduler_pb2 import SchedulerLocation
-from heron.proto.tmaster_pb2 import TMasterLocation
+from heron.proto.tmanager_pb2 import TManagerLocation
 from heron.proto.topology_pb2 import Topology
 
 from heron.statemgrs.src.python.log import Log as LOG
@@ -416,8 +416,8 @@ class ZkStateManager(StateManager):
       self.client.delete(path)
     return True
 
-  def get_tmaster(self, topologyName, callback=None):
-    """ get tmaster """
+  def get_tmanager(self, topologyName, callback=None):
+    """ get tmanager """
     isWatching = False
 
     # Temp dict used to return result
@@ -434,29 +434,29 @@ class ZkStateManager(StateManager):
         """
         ret["result"] = data
 
-    self._get_tmaster_with_watch(topologyName, callback, isWatching)
+    self._get_tmanager_with_watch(topologyName, callback, isWatching)
 
     # The topologies are now populated with the data.
     return ret["result"]
 
-  def _get_tmaster_with_watch(self, topologyName, callback, isWatching):
+  def _get_tmanager_with_watch(self, topologyName, callback, isWatching):
     """
     Helper function to get pplan with
     a callback. The future watch is placed
     only if isWatching is True.
     """
-    path = self.get_tmaster_path(topologyName)
+    path = self.get_tmanager_path(topologyName)
     if isWatching:
       LOG.info("Adding data watch for path: " + path)
 
     # pylint: disable=unused-variable, unused-argument
     @self.client.DataWatch(path)
-    def watch_tmaster(data, stats, event):
-      """ invoke callback to watch tmaster """
+    def watch_tmanager(data, stats, event):
+      """ invoke callback to watch tmanager """
       if data:
-        tmaster = TMasterLocation()
-        tmaster.ParseFromString(data)
-        callback(tmaster)
+        tmanager = TManagerLocation()
+        tmanager.ParseFromString(data)
+        callback(tmanager)
       else:
         callback(None)
 

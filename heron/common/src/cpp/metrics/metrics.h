@@ -30,6 +30,6 @@
 #include "metrics/time-spent-metric.h"
 #include "metrics/metricsmgr-client.h"
 #include "metrics/metrics-mgr-st.h"
-#include "metrics/tmaster-metrics.h"
+#include "metrics/tmanager-metrics.h"
 
 #endif

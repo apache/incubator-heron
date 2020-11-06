@@ -312,7 +312,7 @@ public class AuroraSchedulerTest {
             + " --state-manager-connection=null"
             + " --state-manager-root=null"
             + " --state-manager-config-file=" + expectedConf + "/statemgr.yaml"
-            + " --tmaster-binary=" + expectedBin + "/heron-tmaster"
+            + " --tmanager-binary=" + expectedBin + "/heron-tmanager"
             + " --stmgr-binary=" + expectedBin + "/heron-stmgr"
             + " --metrics-manager-classpath=" + expectedLib + "/metricsmgr/*"
             + " --instance-jvm-opts=\"\""

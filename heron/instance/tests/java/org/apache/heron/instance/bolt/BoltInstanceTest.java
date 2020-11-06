@@ -36,8 +36,8 @@ import org.apache.heron.api.serializer.JavaSerializer;
 import org.apache.heron.common.basics.SingletonRegistry;
 import org.apache.heron.common.testhelpers.HeronServerTester;
 import org.apache.heron.common.utils.misc.PhysicalPlanHelper;
+import org.apache.heron.instance.ExecutorTester;
 import org.apache.heron.instance.InstanceControlMsg;
-import org.apache.heron.instance.SlaveTester;
 import org.apache.heron.proto.system.HeronTuples;
 import org.apache.heron.proto.system.PhysicalPlans;
 import org.apache.heron.resource.Constants;
@@ -45,7 +45,7 @@ import org.apache.heron.resource.UnitTestHelper;
 
 /**
  * To test the Bolt's ReadTupleAndExecute() method, it will:
- * 1. We will instantiate a slave with TestBolt's instance.
+ * 1. We will instantiate a executor with TestBolt's instance.
  * 2. Construct a bunch of mock Tuples as protobuf Message to be consumed by the TestBolt
  * 3. Offer those protobuf Message into inStreamQueue.
  * 4. The TestBolt should consume the Tuples, and behave as described in its comments.
@@ -63,7 +63,7 @@ public class BoltInstanceTest {
   private AtomicInteger tupleExecutedCount;
   private volatile StringBuilder receivedStrings;
 
-  private SlaveTester slaveTester;
+  private ExecutorTester executorTester;
 
   static {
     serializer.initialize(null);
@@ -76,13 +76,13 @@ public class BoltInstanceTest {
     tupleExecutedCount = new AtomicInteger(0);
     receivedStrings = new StringBuilder();
 
-    slaveTester = new SlaveTester();
-    slaveTester.start();
+    executorTester = new ExecutorTester();
+    executorTester.start();
   }
 
   @After
   public void after() throws NoSuchFieldException, IllegalAccessException {
-    slaveTester.stop();
+    executorTester.stop();
   }
 
   /**
@@ -97,7 +97,7 @@ public class BoltInstanceTest {
         setNewPhysicalPlanHelper(physicalPlanHelper).
         build();
 
-    slaveTester.getInControlQueue().offer(instanceControlMsg);
+    executorTester.getInControlQueue().offer(instanceControlMsg);
 
     final int expectedTuples = 10;
     CountDownLatch executeLatch = new CountDownLatch(expectedTuples);
@@ -133,7 +133,7 @@ public class BoltInstanceTest {
     }
 
     heronTupleSet.setData(dataTupleSet);
-    slaveTester.getInStreamQueue().offer(heronTupleSet.build());
+    executorTester.getInStreamQueue().offer(heronTupleSet.build());
 
     // Wait the bolt's finishing
     HeronServerTester.await(executeLatch);

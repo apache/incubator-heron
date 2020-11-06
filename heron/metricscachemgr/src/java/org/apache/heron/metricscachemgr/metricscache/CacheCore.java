@@ -42,7 +42,7 @@ import org.apache.heron.metricscachemgr.metricscache.query.MetricResponse;
 import org.apache.heron.metricscachemgr.metricscache.query.MetricTimeRangeValue;
 import org.apache.heron.metricscachemgr.metricscache.store.ExceptionDatapoint;
 import org.apache.heron.metricscachemgr.metricscache.store.MetricDatapoint;
-import org.apache.heron.proto.tmaster.TopologyMaster;
+import org.apache.heron.proto.tmanager.TopologyManager;
 import org.apache.heron.spi.metricsmgr.metrics.MetricsFilter;
 
 /**
@@ -57,11 +57,11 @@ import org.apache.heron.spi.metricsmgr.metrics.MetricsFilter;
  * 4. Index for exceptions:
  * component -(map)-&gt; instance -(map)-&gt; idxComponentInstance (int: locator)
  * 5. Query pattern: component-instance (equality), metricName (equality), timestamp (range)
- * Different from tmaster:
+ * Different from tmanager:
  * 1. order bucket by metric timestamp rather than metric message arriving time
  * 2. free buckets for instances that are gone during scaling process
  * 3. lock for multiple threads
- * Same as tmaster:
+ * Same as tmanager:
  * 1. support same protobuf message/request format
  */
 public class CacheCore {
@@ -154,15 +154,15 @@ public class CacheCore {
   }
 
   /**
-   * compatible with heron::tmaster::TMetricsCollector
+   * compatible with heron::tmanager::TMetricsCollector
    * @param metrics The metrics to be added
    */
-  public void addMetricException(TopologyMaster.PublishMetrics metrics) {
+  public void addMetricException(TopologyManager.PublishMetrics metrics) {
     synchronized (CacheCore.class) {
-      for (TopologyMaster.MetricDatum metricDatum : metrics.getMetricsList()) {
+      for (TopologyManager.MetricDatum metricDatum : metrics.getMetricsList()) {
         addMetric(metricDatum);
       }
-      for (TopologyMaster.TmasterExceptionLog exceptionLog : metrics.getExceptionsList()) {
+      for (TopologyManager.TmanagerExceptionLog exceptionLog : metrics.getExceptionsList()) {
         addException(exceptionLog);
       }
     }
@@ -194,7 +194,7 @@ public class CacheCore {
    *
    * @param metricDatum the metric to be inserted
    */
-  private void addMetric(TopologyMaster.MetricDatum metricDatum) {
+  private void addMetric(TopologyManager.MetricDatum metricDatum) {
     String componentName = metricDatum.getComponentName();
     String instanceId = metricDatum.getInstanceId();
     String metricName = metricDatum.getName();
@@ -224,7 +224,7 @@ public class CacheCore {
     }
   }
 
-  private void addException(TopologyMaster.TmasterExceptionLog exceptionLog) {
+  private void addException(TopologyManager.TmanagerExceptionLog exceptionLog) {
     String componentName = exceptionLog.getComponentName();
     String instanceId = exceptionLog.getInstanceId();
     assureComponentInstance(componentName, instanceId);
@@ -359,7 +359,7 @@ public class CacheCore {
     } // end tree
   }
 
-  // we assume the metric value is Double: compatible with tmaster
+  // we assume the metric value is Double: compatible with tmanager
   @SuppressWarnings("fallthrough")
   private void getAggregatedMetrics(List<MetricTimeRangeValue> metricValue,
                                     long startTime, long endTime, long bucketId,
