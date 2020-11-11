@@ -32,8 +32,8 @@ under the License.
   <!-- Row end -->
 </div>
 
-<script src="{{ static_url('js/d3.min.3.4.11.js') }}"></script>
-<script type="text/jsx" src="{{ static_url('js/alltopologies.js') }}" ></script>
+<script src="{{ url_for('static', path='/js/d3.min.3.4.11.js') }}"></script>
+<script type="text/jsx" src="{{ url_for('static', path='/js/alltopologies.js') }}" ></script>
 <script type="application/javascript">
   window.onload = function() {
     d3.select("#page-title")
@@ -48,8 +48,8 @@ under the License.
   
   /** @jsx React.DOM */
   React.renderComponent(
-      <FilterableTopologyTable clusters={ {% raw clusters %}  } />,
+      <FilterableTopologyTable clusters={ {{ clusters | safe }}  } />,
       document.getElementById('topotable-container')
   );
 </script>
-{% end %}
+{% endblock %}

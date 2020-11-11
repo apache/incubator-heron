@@ -23,16 +23,15 @@ import logging
 import os
 import sys
 
-import heron.common.src.python.utils.log as log
-import heron.tools.common.src.python.access.tracker_access as tracker_access
-import heron.tools.common.src.python.utils.config as config
-import heron.tools.explorer.src.python.logicalplan as logicalplan
-import heron.tools.explorer.src.python.physicalplan as physicalplan
-import heron.tools.explorer.src.python.topologies as topologies
+from heron.common.src.python.utils import log
+from heron.tools.common.src.python.clients import tracker
+from heron.tools.common.src.python.utils import config
+from heron.tools.explorer.src.python import logicalplan
+from heron.tools.explorer.src.python import physicalplan
+from heron.tools.explorer.src.python import topologies
 
 import click
-
-from tornado.options import define
+import requests
 
 Log = log.Log
 
@@ -85,11 +84,11 @@ def cli(verbose: int):
 @cli.command("clusters")
 @tracker_url_option()
 def cli_clusters(tracker_url: str):
-  define("tracker_url", tracker_url)
+  tracker.tracker_url = tracker_url
   try:
-    clusters = tracker_access.get_clusters()
-  except:
-    Log.error("Fail to connect to tracker")
+    clusters = tracker.get_clusters()
+  except requests.ConnectionError as e:
+    Log.error(f"Fail to connect to tracker: {e}")
     sys.exit(1)
   print("Available clusters:")
   for cluster in clusters:
@@ -100,7 +99,7 @@ def cli_clusters(tracker_url: str):
 @click.argument("cre", metavar="CLUSTER[/ROLE[/ENV]]")
 def cli_topologies(tracker_url: str, cre: str):
   """Show the topologies under the given CLUSTER[/ROLE[/ENV]]."""
-  define("tracker_url", tracker_url)
+  tracker.tracker_url = tracker_url
   topologies.run(
       cre=cre,
   )
@@ -124,7 +123,7 @@ def logical_plan(
     tracker_url: str,
 ) -> None:
   """Show logical plan information for the given topology."""
-  define("tracker_url", tracker_url)
+  tracker.tracker_url = tracker_url
   cluster = config.get_heron_cluster(cre)
   cluster_config_path = config.get_heron_cluster_conf_dir(cluster, config_path)
   cluster, role, environment = config.parse_cluster_role_env(cre, cluster_config_path)
@@ -154,7 +153,7 @@ def metrics(
     topology: str,
     component: str,
 ) -> None:
-  define("tracker_url", tracker_url)
+  tracker.tracker_url = tracker_url
   cluster = config.get_heron_cluster(cre)
   cluster_config_path = config.get_heron_cluster_conf_dir(cluster, config_path)
   cluster, role, environment = config.parse_cluster_role_env(cre, cluster_config_path)
@@ -187,7 +186,7 @@ def containers(
     topology: str,
     container_id: int,
 ) -> None:
-  define("tracker_url", tracker_url)
+  tracker.tracker_url = tracker_url
   cluster = config.get_heron_cluster(cre)
   cluster_config_path = config.get_heron_cluster_conf_dir(cluster, config_path)
   cluster, role, environment = config.parse_cluster_role_env(cre, cluster_config_path)

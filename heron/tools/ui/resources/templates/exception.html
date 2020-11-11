@@ -31,8 +31,8 @@ under the License.
   <!-- Row end -->
 </div>
 
-<script src="{{ static_url('js/d3.min.3.4.11.js') }}"></script>
-<script type="text/jsx" src="{{ static_url('js/exceptions.js') }}"></script>
+<script src="{{ url_for('static', path='js/d3.min.3.4.11.js') }}"></script>
+<script type="text/jsx" src="{{ url_for('static', path='js/exceptions.js') }}"></script>
 
 <script type="application/javascript">
   window.onload = function() {
@@ -49,4 +49,4 @@ under the License.
     document.getElementById("display-exceptions")
   );
 </script>
-{% end %}
+{% endblock %}

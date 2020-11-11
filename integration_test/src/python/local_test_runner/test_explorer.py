@@ -22,23 +22,10 @@
 """test_kill_stmgr.py"""
 import logging
 
-from contextlib import contextmanager
-from subprocess import run, Popen
-from time import sleep
+from subprocess import run
 
 from . import test_template
 
-
-@contextmanager
-def bound_subprocess(popen: Popen) -> None:
-  with popen:
-    logging.debug(f"starting {popen!r}")
-    try:
-      yield
-    finally:
-      logging.debug(f"killing {popen!r}")
-      popen.kill()
-      popen.communicate()
 
 def run_explorer(*args):
   cmd = ["heron-explorer", *args]
@@ -49,25 +36,23 @@ def run_explorer(*args):
 
 class TestExplorer(test_template.TestTemplate):
 
-
   def execute_test_case(self):
     from getpass import getuser
+    from time import sleep
     cre = f"{self.params['cluster']}/{getuser()}/default"
     topology = self.params["topologyName"]
-    # heron-explorer depens on heron-tracker, so start an instance as it is not started
-    # by heron-cli when running against the local "cluster"
-    with bound_subprocess(Popen(["heron-tracker"])):
-      sleep(2)
-      run_explorer("clusters")
+    sleep(2)
+    tracker_option = f"--tracker-url=http://127.0.0.1:{self.params['trackerPort']}"
+    run_explorer("clusters", tracker_option)
 
-      cre_parts = cre.split("/")
-      for i in range(len(cre_parts)):
-        run_explorer("topologies", "/".join(cre_parts[:i+1]))
+    cre_parts = cre.split("/")
+    for i in range(len(cre_parts)):
+      run_explorer("topologies", tracker_option, "/".join(cre_parts[:i+1]))
 
-      run_explorer("logical-plan", cre, topology)
-      run_explorer("logical-plan", cre, topology, "--component-type=bolts")
-      run_explorer("logical-plan", cre, topology, "--component-type=spouts")
+    run_explorer("logical-plan", tracker_option, cre, topology)
+    run_explorer("logical-plan", tracker_option, cre, topology, "--component-type=bolts")
+    run_explorer("logical-plan", tracker_option, cre, topology, "--component-type=spouts")
 
-      run_explorer("physical-plan", "containers", cre, topology)
-      run_explorer("physical-plan", "containers", cre, topology, "--id=1")
-      run_explorer("physical-plan", "metrics", cre, topology)
+    run_explorer("physical-plan", "containers", tracker_option, cre, topology)
+    run_explorer("physical-plan", "containers", tracker_option, cre, topology, "--id=1")
+    run_explorer("physical-plan", "metrics", tracker_option, cre, topology)

@@ -24,10 +24,11 @@ import sys
 from collections import defaultdict
 
 from heron.common.src.python.utils.log import Log
-
-import heron.tools.common.src.python.access.tracker_access as tracker_access
+from heron.tools.common.src.python.clients import tracker
 
 from tabulate import tabulate
+
+import requests
 
 
 def to_table(components, topo_info, component_filter):
@@ -67,10 +68,10 @@ def to_table(components, topo_info, component_filter):
 def run(component_type: str, cluster: str, role: str, environment: str, topology: str):
   """ run command """
   try:
-    components = tracker_access.get_logical_plan(cluster, environment, topology, role)
-    topo_info = tracker_access.get_topology_info(cluster, environment, topology, role)
-  except:
-    Log.error("Fail to connect to tracker")
+    components = tracker.get_logical_plan(cluster, environment, topology, role)
+    topo_info = tracker.get_topology_info(cluster, environment, topology, role)
+  except requests.ConnectionError as e:
+    Log.error(f"Fail to connect to tracker: {e}")
     sys.exit(1)
   table, header = to_table(components, topo_info, component_type)
   print(tabulate(table, headers=header))
