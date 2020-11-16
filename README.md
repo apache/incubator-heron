@@ -16,7 +16,7 @@
     specific language governing permissions and limitations
     under the License.
 -->
-[![Build Status](https://travis-ci.org/apache/incubator-heron.svg?&branch=master)](https://travis-ci.org/apache/incubator-heron)
+[![Build Status](https://travis-ci.com/apache/incubator-heron.svg?&branch=master)](https://travis-ci.com/apache/incubator-heron)
 
 ![logo](website2/docs/assets/HeronTextLogo.png)
 
