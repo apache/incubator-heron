@@ -20,6 +20,10 @@ m4
 META-INF
 # website and website2 are not part of the release
 website
+website2
+
+# travis toolchain config is not part of the release
+cc_toolchain_config.bzl
 
 # UI resources
 # Apache 2.0 licenses & MIT Licenses
