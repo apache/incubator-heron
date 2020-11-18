@@ -18,9 +18,10 @@ heron\.iml
 bazel-.*
 m4
 META-INF
-# website and website2 are not part of the release
+# website, website2, and generated-ste are not part of the release
 website
 website2
+generated-site
 
 # travis toolchain config is not part of the release
 cc_toolchain_config.bzl
