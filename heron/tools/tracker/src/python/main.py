@@ -49,8 +49,6 @@ class Application(tornado.web.Application):
     self.tracker = Tracker(config)
     self.tracker.synch_topologies()
     tornadoHandlers = [
-        (r"/", handlers.MainHandler),
-        (r"/clusters", handlers.ClustersHandler, {"tracker":self.tracker}),
         (r"/topologies", handlers.TopologiesHandler, {"tracker":self.tracker}),
         (r"/topologies/states", handlers.StatesHandler, {"tracker":self.tracker}),
         (r"/topologies/info", handlers.TopologyHandler, {"tracker":self.tracker}),
@@ -76,12 +74,10 @@ class Application(tornado.web.Application):
         (r"/topologies/exceptions", handlers.ExceptionHandler, {"tracker":self.tracker}),
         (r"/topologies/exceptionsummary", handlers.ExceptionSummaryHandler,
          {"tracker":self.tracker}),
-        (r"/machines", handlers.MachinesHandler, {"tracker":self.tracker}),
         (r"/topologies/pid", handlers.PidHandler, {"tracker":self.tracker}),
         (r"/topologies/jstack", handlers.JstackHandler, {"tracker":self.tracker}),
         (r"/topologies/jmap", handlers.JmapHandler, {"tracker":self.tracker}),
         (r"/topologies/histo", handlers.MemoryHistogramHandler, {"tracker":self.tracker}),
-        (r"(.*)", handlers.DefaultHandler),
     ]
 
     settings = dict(
