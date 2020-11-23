@@ -117,7 +117,7 @@ spec:
               heron-ui
               --port=8889
               {{- if not (kindIs "invalid" .Values.heron.url) }}
-              --base_url={{ eq .Values.heron.url "-" | ternary $defaultUrl .Values.heron.url }}
+              --base-url={{ eq .Values.heron.url "-" | ternary $defaultUrl .Values.heron.url }}
               {{- end }}
         - name: heron-apiserver
           image: {{ .Values.image }}
