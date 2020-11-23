@@ -44,7 +44,7 @@ data:
   BK_autoRecoveryDaemonEnabled: "true"
   BK_journalMaxBackups: "{{ .Values.bookieJournalMaxBackups }}"
   BK_journalMaxSizeMB: "{{ .Values.bookieJournalMaxSizeMB }}"
-  BK_logSizeLimit: "{{ .Values.bookieLogSizeLimit }}"
+  BK_logSizeLimit: "{{ int64 .Values.bookieLogSizeLimit }}"
   {{- if or (eq .Values.platform "gke") (eq .Values.platform "minikube") }}
   BK_useHostNameAsBookieID: "true"
   {{- end }}
