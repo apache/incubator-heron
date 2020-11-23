@@ -66,8 +66,7 @@ bookieJournalCapacity: 5G
 bookieStorageCapacity: 15G
 bookieJournalMaxBackups: 3
 bookieJournalMaxSizeMB: 300
-# This needs to be in quotes to protect from Helm scientific notation problem
-bookieLogSizeLimit: "10000000"
+bookieLogSizeLimit: 10000000
 
 # Number of replicas for zookeeper
 zkReplicas: 3
