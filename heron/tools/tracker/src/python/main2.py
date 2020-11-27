@@ -14,6 +14,7 @@ from starlette.responses import (
     HTTPException as StarletteHTTPException,
 )
 
+# TODO: implement a 120s timeout to be consistent with previous implementation
 app = FastAPI()
 app.include_router(metrics.router)
 app.include_router(containers.router)

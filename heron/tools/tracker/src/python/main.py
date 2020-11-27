@@ -49,22 +49,10 @@ class Application(tornado.web.Application):
     self.tracker = Tracker(config)
     self.tracker.synch_topologies()
     tornadoHandlers = [
-        (r"/topologies/containerfiledata", handlers.ContainerFileDataHandler,
-         {"tracker":self.tracker}),
-        (r"/topologies/containerfiledownload", handlers.ContainerFileDownloadHandler,
-         {"tracker":self.tracker}),
-        (r"/topologies/containerfilestats",
-         handlers.ContainerFileStatsHandler, {"tracker":self.tracker}),
-        # Deprecated. See https://github.com/apache/incubator-heron/issues/1754
-         {"tracker":self.tracker}),
         (r"/topologies/runtimestate", handlers.RuntimeStateHandler, {"tracker":self.tracker}),
         (r"/topologies/exceptions", handlers.ExceptionHandler, {"tracker":self.tracker}),
         (r"/topologies/exceptionsummary", handlers.ExceptionSummaryHandler,
          {"tracker":self.tracker}),
-        (r"/topologies/pid", handlers.PidHandler, {"tracker":self.tracker}),
-        (r"/topologies/jstack", handlers.JstackHandler, {"tracker":self.tracker}),
-        (r"/topologies/jmap", handlers.JmapHandler, {"tracker":self.tracker}),
-        (r"/topologies/histo", handlers.MemoryHistogramHandler, {"tracker":self.tracker}),
     ]
 
     settings = dict(
