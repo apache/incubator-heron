@@ -14,5 +14,5 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-"""Excample python topologies"""
+"""Example python topologies"""
 __all__ = ['bolt', 'spout', 'misc', 'custom_grouping_topology', 'word_count_topology']
