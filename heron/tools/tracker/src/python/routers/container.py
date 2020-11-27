@@ -5,8 +5,7 @@ Views on Heron containers/instances within toplogies.
 from typing import List, Optional
 
 from heron.proto import common_pb2, tmanager_pb2
-from heron.tools.tracker.src.python import tracker
-from heron.tools.tracker.src.python import utils
+from heron.tools.tracker.src.python import state, utils
 
 import httpx
 
@@ -34,8 +33,8 @@ async def get_file_data(  # pylint: disable=too-many-arguments
     Usually used to retrieve a log file chunk.
 
     """
-    topology = tracker.get_topology_info(topology_name, cluster, role, environ)
-    stmgr = topology["physical_plan"]["stmgrs"][f"stmgr-{container}"]
+    topology = state.tracker.get_topology(cluster, role, environ, topology_name)
+    stmgr = state.tracker.pb2_to_api(topology)["physical_plan"]["stmgrs"][f"stmgr-{container}"]
     url = f"http://{stmgr['host']}:{stmgr['shell_port']}/filedata/{path}"
     params = {"offset": offset, "length": length}
 
@@ -54,8 +53,8 @@ async def get_file_download(  # pylint: disable=too-many-arguments
     topology_name: str = Query(..., "topology"),
 ):
     """Return the data for a given file."""
-    topology = tracker.get_topology_info(topology_name, cluster, role, environ)
-    stmgr = topology["physical_plan"]["stmgrs"][f"stmgr-{container}"]
+    topology = state.tracker.get_topology(cluster, role, environ, topology_name)
+    stmgr = state.tracker.pb2_to_api(topology)["physical_plan"]["stmgrs"][f"stmgr-{container}"]
     url = f"http://{stmgr['host']}:{stmgr['shell_port']}/download/{path}"
 
     _, _, filename = path.rpartition("/")
@@ -76,8 +75,8 @@ async def get_file_stats(  # pylint: disable=too-many-arguments
     topology_name: str = Query(..., "topology"),
 ):
     """Return the stats for a given directory."""
-    topology = tracker.get_topology_info(topology_name, cluster, role, environ)
-    stmgr = topology["physical_plan"]["stmgrs"][f"stmgr-{container}"]
+    topology = state.tracker.get_topology(cluster, role, environ, topology_name)
+    stmgr = state.tracker.pb2_to_api(topology)["physical_plan"]["stmgrs"][f"stmgr-{container}"]
     url = utils.make_shell_filestats_url(stmgr["host"], stmgr["shell_port"], path)
     with httpx.AsyncClient() as client:
         response = await client.get(url)
@@ -92,8 +91,8 @@ async def get_runtime_state(
     topology_name: str = Query(..., alias="topology"),
 ):
     """Return the runtime state."""
-    topology_info = tracker.get_topology_info(topology_name, cluster, role, environ)
-    topology = tracker.get_topology(cluster, role, environ, topology_name)
+    topology = state.tracker.get_topology(cluster, role, environ, topology_name)
+    topology_info = state.tracker.pb2_to_api(topology)
     tmanager = topology.tmanager
 
     # find out what is registed
@@ -131,7 +130,7 @@ async def _get_exception_log_response(
     topology_name: str = Query(..., alias="topology"),
     summary: bool = False,
 ) -> tmanager_pb2.ExceptionLogResponse:
-    topology = tracker.get_topology(cluster, role, environ, topology_name)
+    topology = state.tracker.get_topology(cluster, role, environ, topology_name)
     tmanager = topology.tmanager
 
     if not (tmanager and tmanager.host and tmanager.stats_port):
@@ -231,8 +230,8 @@ async def get_pid(
     topology_name: str = Query(..., alias="topology"),
 ):
     """Get the PId of the heron process."""
-    topology = tracker.get_topology_info(topology_name, cluster, role, environ)
-    base_url = utils.make_shell_endpoint(topology, instance)
+    topology = state.tracker.get_topology(cluster, role, environ, topology_name)
+    base_url = utils.make_shell_endpoint(state.tracker.pb2_to_api(topology), instance)
     url = f"{base_url}/pid/{instance}"
     with httpx.AsyncClient() as client:
         return await client.get(url).json()
@@ -247,12 +246,12 @@ async def get_jstack(
     topology_name: str = Query(..., alias="topology"),
 ):
     """Get jstack output for the heron process."""
-    topology = tracker.get_topology_info(topology_name, cluster, role, environ)
+    topology = state.tracker.get_topology(cluster, role, environ, topology_name)
 
     pid_response = await get_pid(cluster, role, environ, instance, topology_name)
     pid = pid_response["stdout"].strip()
 
-    base_url = utils.make_shell_endpoint(topology, instance)
+    base_url = utils.make_shell_endpoint(state.tracker.pb2_to_api(topology), instance)
     url = f"{base_url}/jstack/{pid}"
     with httpx.AsyncClient() as client:
         return await client.get(url).json()
@@ -267,12 +266,12 @@ async def get_jmap(
     topology_name: str = Query(..., alias="topology"),
 ):
     """Get jmap output for the heron process."""
-    topology = tracker.get_topology_info(topology_name, cluster, role, environ)
+    topology = state.tracker.get_topology(cluster, role, environ, topology_name)
 
     pid_response = await get_pid(cluster, role, environ, instance, topology_name)
     pid = pid_response["stdout"].strip()
 
-    base_url = utils.make_shell_endpoint(topology, instance)
+    base_url = utils.make_shell_endpoint(state.tracker.pb2_to_api(topology), instance)
     url = f"{base_url}/jmap/{pid}"
     with httpx.AsyncClient() as client:
         return await client.get(url).json()
@@ -287,12 +286,12 @@ async def get_memory_histogram(
     topology_name: str = Query(..., alias="topology"),
 ):
     """Get memory usage histogram the heron process. This uses the ouput of the last jmap run."""
-    topology = tracker.get_topology_info(topology_name, cluster, role, environ)
+    topology = state.tracker.get_topology(cluster, role, environ, topology_name)
 
     pid_response = await get_pid(cluster, role, environ, instance, topology_name)
     pid = pid_response["stdout"].strip()
 
-    base_url = utils.make_shell_endpoint(topology, instance)
+    base_url = utils.make_shell_endpoint(state.tracker.pb2_to_api(topology), instance)
     url = f"{base_url}/histo/{pid}"
     with httpx.AsyncClient() as client:
         return await client.get(url).json()

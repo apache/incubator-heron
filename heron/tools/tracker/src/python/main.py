@@ -21,50 +21,23 @@
 ''' main.py '''
 import logging
 import os
-import signal
 import sys
 import tornado.httpserver
 import tornado.ioloop
 import tornado.web
-from tornado.options import define
-from tornado.httpclient import AsyncHTTPClient
 
 from heron.tools.common.src.python.utils import config as common_config
 from heron.common.src.python.utils import log
 from heron.tools.tracker.src.python import constants
-from heron.tools.tracker.src.python import handlers
 from heron.tools.tracker.src.python import utils
 from heron.tools.tracker.src.python.config import Config, STATEMGRS_KEY
 from heron.tools.tracker.src.python.tracker import Tracker
+from heron.tools.tracker.src.python.app import app
+from heron.tools.tracker.src.python import state
 
 import click
 
 Log = log.Log
-
-class Application(tornado.web.Application):
-  """ Tornado server application """
-  def __init__(self, config):
-
-    AsyncHTTPClient.configure(None, defaults=dict(request_timeout=120.0))
-    self.tracker = Tracker(config)
-    self.tracker.synch_topologies()
-    tornadoHandlers = [
-        (r"/topologies/runtimestate", handlers.RuntimeStateHandler, {"tracker":self.tracker}),
-        (r"/topologies/exceptions", handlers.ExceptionHandler, {"tracker":self.tracker}),
-        (r"/topologies/exceptionsummary", handlers.ExceptionSummaryHandler,
-         {"tracker":self.tracker}),
-    ]
-
-    settings = dict(
-        debug=True,
-        serve_traceback=True,
-        static_path=os.path.dirname(__file__)
-    )
-    tornado.web.Application.__init__(self, tornadoHandlers, **settings)
-    Log.info("Tracker has started")
-
-  def stop(self):
-    self.tracker.stop_sync()
 
 
 def define_options(port: int, config_file: str) -> None:
@@ -171,32 +144,12 @@ def cli(
   }
   config = Config(create_tracker_config(config_file, stmgr_override))
 
-  # create Tornado application
-  application = Application(config)
+  state.tracker = Tracker(config)
+  state.tracker.synch_topologies()
+  # TODO: work out topology vs. topology_info
+  # TODO: run
+  state.tracker.stop_sync()
 
-  # pylint: disable=unused-argument
-  # SIGINT handler:
-  # 1. stop all the running zkstatemanager and filestatemanagers
-  # 2. stop the Tornado IO loop
-  def signal_handler(signum, frame):
-    # start a new line after ^C character because this looks nice
-    print('\n', end='')
-    application.stop()
-    tornado.ioloop.IOLoop.instance().stop()
-
-  # associate SIGINT and SIGTERM with a handler
-  signal.signal(signal.SIGINT, signal_handler)
-  signal.signal(signal.SIGTERM, signal_handler)
-
-  Log.info("Running on port: %d", port)
-  if config_file:
-    Log.info("Using config file: %s", config_file)
-  Log.info(f"Using state manager:\n{config}")
-
-  http_server = tornado.httpserver.HTTPServer(application)
-  http_server.listen(port)
-
-  tornado.ioloop.IOLoop.instance().start()
 
 if __name__ == "__main__":
   cli() # pylint: disable=no-value-for-parameter

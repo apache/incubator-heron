@@ -1,7 +1,7 @@
 from typing import Generic, TypeVar, Dict, List, Literal, Optional
 
-from heron.tools.tracker.src.python import constants
-from heron.tools.tracker.src.python import tracker
+from heron.tools.tracker.src.python import constants, state
+from heron.tools.tracker.src.python.utils import ResponseEnvelope
 from heron.tools.tracker.src.python.routers import topologies, containers, metrics
 
 from fastapi import FastAPI, Query
@@ -20,18 +20,15 @@ app.include_router(metrics.router)
 app.include_router(containers.router)
 app.include_router(topologies.router, prefix="/topologies")
 
-ResultType = TypeVar("ResultType")
-# FIXME: move into own module to avoid circular import
-# XXX: use of Pydantic generics requires Python 3.7+
-class ResponseEnvelope(GenericModel, Generic[ResultType]):
-    # XXX: looking to deprecate exception time - leve to logging or calling app
-    executiontime: float = 0
-    message: str
-    result: Optional[ResultType] = None
-    status: Literal[
-        constants.RESPONSE_STATUS_FAILURE, constants.RESPONSE_STATUS_SUCCESS
-    ]
-    tracker_version: str = constants.API_VERSION
+@app.on_event("startup")
+async def startup_event():
+    """Start recieving topology updates."""
+    state.tracker.sync_topologies()
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    """Stop recieving topology updates."""
+    state.tracker.stop_sync()
 
 
 @app.exception_handler(Exception)
@@ -54,7 +51,7 @@ async def home():
 
 @app.get("/clusters", response_model=ResponseEnvelope[List[str]])
 async def clusters() -> List[str]:
-    return [s.name for s in tracker.state_managers]
+    return [s.name for s in state.tracker.state_managers]
 
 
 @app.get(
@@ -81,7 +78,7 @@ async def get(
         )
 
     response: Dict[str, Dict[str, Dict[str, List[str]]]] = {}
-    for topology in tracker.topologies:
+    for topology in state.tracker.topologies:
         cluster, environ, name = topology.cluster, topology.environ, topology.name
         if cluster_names and cluster not in cluster_names:
             continue

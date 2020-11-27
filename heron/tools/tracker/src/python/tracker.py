@@ -24,7 +24,8 @@ import sys
 import collections
 
 from functools import partial
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional
+from weakref import WeakKeyDictionary
 
 from heron.common.src.python.utils.log import Log
 from heron.proto import topology_pb2
@@ -104,15 +105,7 @@ class Tracker:
     self.config = config
     self.topologies = []
     self.state_managers = []
-
-    # A map from a tuple of form
-    # (topology_name, state_manager_name) to its
-    # info, which is its representation
-    # exposed through the APIs.
-    # The state_manager_name help when we
-    # want to remove the topology,
-    # since other info can not be relied upon.
-    self.topology_infos: Dict[Tuple[str, str], Any] = {}
+    self._pb2_to_api_cache = WeakKeyDictionary()
 
   def synch_topologies(self) -> None:
     """
@@ -129,9 +122,9 @@ class Tracker:
     def on_topologies_watch(state_manager, topologies) -> None:
       """watch topologies"""
       Log.info("State watch triggered for topologies.")
-      Log.debug("Topologies: " + str(topologies))
+      Log.debug("Topologies: %s" + topologies)
       cached_names = [t.name for t in self.get_stmgr_topologies(state_manager.name)]
-      Log.debug(f"Existing topologies: {cached_names}")
+      Log.debug("Existing topologies: %s", cached_names)
       for name in cached_names:
         if name not in topologies:
           Log.info("Removing topology: %s in rootpath: %s",
@@ -170,9 +163,9 @@ class Tracker:
                   and t.environ == environ]
     if len(topologies) != 1:
       if role is not None:
-        raise Exception("Topology not found for {0}, {1}, {2}, {3}".format(
+        raise KeyError("Topology not found for {0}, {1}, {2}, {3}".format(
             cluster, role, environ, topology_name))
-      raise Exception("Topology not found for {0}, {1}, {2}".format(
+      raise KeyError("Topology not found for {0}, {1}, {2}".format(
           cluster, environ, topology_name))
 
     # There is only one topology which is returned.
@@ -192,11 +185,14 @@ class Tracker:
     topology = Topology(topology_name, state_manager.name)
     Log.info("Adding new topology: %s, state_manager: %s",
              topology_name, state_manager.name)
+    # populate the cache before making it addressable in the topologies to
+    # avoid races due to concurrent execution
+    info = self._pb2_to_api(topology)
+    if info is not None:
+      self._pb2_to_api_cache[topology] = info
     self.topologies.append(topology)
 
-    # Register a watch on topology and change
-    # the topology_info on any new change.
-    topology.register_watch(self.set_topology_info)
+    topology.register_watch(self.pb2_to_api)
 
     # Set watches on the pplan, execution_state, tmanager and scheduler_location.
     state_manager.get_pplan(topology_name, topology.set_physical_plan)
@@ -209,17 +205,38 @@ class Tracker:
     """
     Removes the topology from the local cache.
     """
-    topologies = []
-    for top in self.topologies:
-      if (top.name == topology_name and
-          top.state_manager_name == state_manager_name):
-        # Remove topology_info
-        if (topology_name, state_manager_name) in self.topology_infos:
-          self.topology_infos.pop((topology_name, state_manager_name))
-      else:
-        topologies.append(top)
+    self.topologies = [
+        topology
+        for topology in self.topologies
+        if not (topology.name == topology_name and topology.state_manager_name == state_manager_name)
+    ]
 
-    self.topologies = topologies
+  def _pb2_to_api(self, topology: topology_pb2.Topology) -> Optional[Dict[str, Any]]:
+    """
+    Extracts info from the stored proto states and convert it into representation
+    that is exposed using the API.
+    """
+    # Execution state is the most basic info.
+    # If there is no execution state, just return
+    # as the rest of the things don't matter.
+    if not topology.execution_state:
+      Log.info("No execution state found for: " + topology.name)
+      return None
+
+    info = {
+      "execution_state": self.extract_execution_state(topology),
+      "id": topology.id,
+      "logical_plan": self.extract_logical_plan(topology),
+      "metadata": self.extract_metadata(topology),
+      "name": topology.name,
+      "packing_plan": self.extract_packing_plan(topology),
+      "physical_plan": self.extract_physical_plan(topology),
+      "runtime_state": self.extract_runtime_state(topology),
+      "scheduler_location": self.extract_scheduler_location(topology),
+      "tmanager_location": self.extract_tmanager(topology),
+    }
+
+    return info
 
   def extract_execution_state(self, topology) -> dict:
     """
@@ -232,9 +249,11 @@ class Tracker:
     """
     result = self.extract_metadata(topology)
     result.update({
-        "has_physical_plan": None,
-        "has_tmanager_location": None,
-        "has_scheduler_location": None,
+      "has_physical_plan": bool(topology.physical_plan),
+      "has_packing_plan": bool(topology.has_packing_plan),
+      "has_tmanager_location": bool(topology.tmanager),
+      "has_scheduler_location": bool(topology.scheduler_location),
+      "status": topology.get_status(),
     })
     return result
 
@@ -283,27 +302,37 @@ class Tracker:
     Returns the representation of scheduler location that will
     be returned from Tracker.
     """
-    schedulerLocation = {
-        "name": None,
-        "http_endpoint": None,
-        "job_page_link": None,
-    }
-
     if topology.scheduler_location:
-      schedulerLocation["name"] = topology.scheduler_location.topology_name
-      schedulerLocation["http_endpoint"] = topology.scheduler_location.http_endpoint
-      schedulerLocation["job_page_link"] = \
-          topology.scheduler_location.job_page_link[0] \
-          if topology.scheduler_location.job_page_link else ""
-
-    return schedulerLocation
+      return {
+          "name": topology.scheduler_location.topology_name,
+          "http_endpoint": topology.scheduler_location.http_endpoint,
+          "job_page_link": (
+              topology.scheduler_location.job_page_link[0] \
+              if topology.scheduler_location.job_page_link
+              else ""
+          ),
+      }
+      return {
+          "name": None,
+          "http_endpoint": None,
+          "job_page_link": None,
+      }
 
   def extract_tmanager(self, topology) -> dict:
     """
     Returns the representation of tmanager that will
     be returned from Tracker.
     """
-    tmanagerLocation = {
+    if topology.tmanager:
+      return {
+          "name": topology.tmanager.topology_name,
+          "id": topology.tmanager.topology_id,
+          "host": topology.tmanager.host,
+          "controller_port": topology.tmanager.controller_port,
+          "server_port": topology.tmanager.server_port,
+          "stats_port": topology.tmanager.stats_port,
+      }
+    return {
         "name": None,
         "id": None,
         "host": None,
@@ -311,15 +340,6 @@ class Tracker:
         "server_port": None,
         "stats_port": None,
     }
-    if topology.tmanager:
-      tmanagerLocation["name"] = topology.tmanager.topology_name
-      tmanagerLocation["id"] = topology.tmanager.topology_id
-      tmanagerLocation["host"] = topology.tmanager.host
-      tmanagerLocation["controller_port"] = topology.tmanager.controller_port
-      tmanagerLocation["server_port"] = topology.tmanager.server_port
-      tmanagerLocation["stats_port"] = topology.tmanager.stats_port
-
-    return tmanagerLocation
 
   # pylint: disable=too-many-locals
   def extract_logical_plan(self, topology):
@@ -327,40 +347,40 @@ class Tracker:
     Returns the representation of logical plan that will
     be returned from Tracker.
     """
-    logicalPlan = {
+    logical_plan = {
         "spouts": {},
         "bolts": {},
     }
 
     # Add spouts.
     for spout in topology.spouts():
-      spoutType = "default"
-      spoutSource = "NA"
-      spoutVersion = "NA"
-      spoutConfigs = spout.comp.config.kvs
-      spoutExtraLinks = []
-      for kvs in spoutConfigs:
+      spout_type = "default"
+      spout_source = "NA"
+      spout_version = "NA"
+      spout_config = spout.comp.config.kvs
+      spout_extra_links = []
+      for kvs in spout_config:
         if kvs.key == "spout.type":
-          spoutType = javaobj.loads(kvs.serialized_value)
+          spout_type = javaobj.loads(kvs.serialized_value)
         elif kvs.key == "spout.source":
-          spoutSource = javaobj.loads(kvs.serialized_value)
+          spout_source = javaobj.loads(kvs.serialized_value)
         elif kvs.key == "spout.version":
-          spoutVersion = javaobj.loads(kvs.serialized_value)
+          spout_version = javaobj.loads(kvs.serialized_value)
         elif kvs.key == "extra.links":
-          spoutExtraLinks = json.loads(javaobj.loads(kvs.serialized_value))
+          spout_extra_links = json.loads(javaobj.loads(kvs.serialized_value))
 
-      spoutPlan = {
-          "config": convert_pb_kvs(spoutConfigs, include_non_primitives=False),
-          "type": spoutType,
-          "source": spoutSource,
-          "version": spoutVersion,
+      spout_plan = {
+          "config": convert_pb_kvs(spout_config, include_non_primitives=False),
+          "type": spout_type,
+          "source": spout_source,
+          "version": spout_version,
           "outputs": [
-              {"stream_name": outputStream.stream.id}
-              for outputStream in spout.outputs
+              {"stream_name": output.stream.id}
+              for output in spout.outputs
           ],
-          "extra_links": spoutExtraLinks,
+          "extra_links": spout_extra_links,
       }
-      logicalPlan["spouts"][spout.comp.name] = spoutPlan
+      logical_plan["spouts"][spout.comp.name] = spout_plan
 
       # render component extra links with general params
       execution_state = {
@@ -371,18 +391,18 @@ class Tracker:
           "submission_user": topology.execution_state.submission_user,
       }
 
-      for link in spoutPlan["extra_links"]:
+      for link in spout_plan["extra_links"]:
         link[EXTRA_LINK_URL_KEY] = self.config.get_formatted_url(link[EXTRA_LINK_FORMATTER_KEY],
                                                                  execution_state)
 
     # Add bolts.
     for bolt in topology.bolts():
-      boltName = bolt.comp.name
-      logicalPlan["bolts"][boltName] = {
+      bolt_name = bolt.comp.name
+      logical_plan["bolts"][bolt_name] = {
           "config": convert_pb_kvs(bolt.comp.config.kvs, include_non_primitives=False),
           "outputs": [
-              {"stream_name": outputStream.stream.id}
-              for outputStream in bolt.outputs
+              {"stream_name": output.stream.id}
+              for output in bolt.outputs
           ],
           "inputs": [
               {
@@ -395,7 +415,7 @@ class Tracker:
       }
 
 
-    return logicalPlan
+    return logical_plan
 
   # pylint: disable=too-many-locals
   def extract_physical_plan(self, topology):
@@ -403,7 +423,7 @@ class Tracker:
     Returns the representation of physical plan that will
     be returned from Tracker.
     """
-    physicalPlan = {
+    physical_plan = {
         "instances": {},
         "instance_groups": {},
         "stmgrs": {},
@@ -414,7 +434,7 @@ class Tracker:
     }
 
     if not topology.physical_plan:
-      return physicalPlan
+      return physical_plan
 
     spouts = topology.spouts()
     bolts = topology.bolts()
@@ -427,20 +447,20 @@ class Tracker:
 
     # Configs
     if topology.physical_plan.topology.topology_config:
-      physicalPlan["config"] = convert_pb_kvs(topology.physical_plan.topology.topology_config.kvs)
+      physical_plan["config"] = convert_pb_kvs(topology.physical_plan.topology.topology_config.kvs)
 
     for spout in spouts:
       spout_name = spout.comp.name
-      physicalPlan["spouts"][spout_name] = []
-      if spout_name not in physicalPlan["components"]:
-        physicalPlan["components"][spout_name] = {
+      physical_plan["spouts"][spout_name] = []
+      if spout_name not in physical_plan["components"]:
+        physical_plan["components"][spout_name] = {
             "config": convert_pb_kvs(spout.comp.config.kvs)
         }
     for bolt in bolts:
       bolt_name = bolt.comp.name
-      physicalPlan["bolts"][bolt_name] = []
-      if bolt_name not in physicalPlan["components"]:
-        physicalPlan["components"][bolt_name] = {
+      physical_plan["bolts"][bolt_name] = []
+      if bolt_name not in physical_plan["components"]:
+        physical_plan["components"][bolt_name] = {
             "config": convert_pb_kvs(bolt.comp.config.kvs)
         }
 
@@ -448,7 +468,7 @@ class Tracker:
       host = stmgr.host_name
       cwd = stmgr.cwd
       shell_port = stmgr.shell_port if stmgr.HasField("shell_port") else None
-      physicalPlan["stmgrs"][stmgr.id] = {
+      physical_plan["stmgrs"][stmgr.id] = {
           "id": stmgr.id,
           "host": host,
           "port": stmgr.data_port,
@@ -463,12 +483,12 @@ class Tracker:
     instance_groups = collections.OrderedDict()
     for instance in instances:
       instance_id = instance.instance_id
-      stmgrId = instance.stmgr_id
+      stmgr_id = instance.stmgr_id
       name = instance.info.component_name
-      stmgrInfo = physicalPlan["stmgrs"][stmgrId]
-      host = stmgrInfo["host"]
-      cwd = stmgrInfo["cwd"]
-      shell_port = stmgrInfo["shell_port"]
+      stmgr_info = physical_plan["stmgrs"][stmgr_id]
+      host = stmgr_info["host"]
+      cwd = stmgr_info["cwd"]
+      shell_port = stmgr_info["shell_port"]
 
 
       # instance_id format container_<index>_component_1
@@ -478,21 +498,21 @@ class Tracker:
       igroup.append(instance_id)
       instance_groups[group_name] = igroup
 
-      physicalPlan["instances"][instance_id] = {
+      physical_plan["instances"][instance_id] = {
           "id": instance_id,
           "name": name,
-          "stmgrId": stmgrId,
+          "stmgr_id": stmgr_id,
           "logfile": utils.make_shell_logfiles_url(host, shell_port, cwd, instance.instance_id),
       }
-      physicalPlan["stmgrs"][stmgrId]["instance_ids"].append(instance_id)
-      if name in physicalPlan["spouts"]:
-        physicalPlan["spouts"][name].append(instance_id)
+      physical_plan["stmgrs"][stmgr_id]["instance_ids"].append(instance_id)
+      if name in physical_plan["spouts"]:
+        physical_plan["spouts"][name].append(instance_id)
       else:
-        physicalPlan["bolts"][name].append(instance_id)
+        physical_plan["bolts"][name].append(instance_id)
 
-    physicalPlan["instance_groups"] = instance_groups
+    physical_plan["instance_groups"] = instance_groups
 
-    return physicalPlan
+    return physical_plan
 
   # pylint: disable=too-many-locals
   def extract_packing_plan(self, topology):
@@ -500,16 +520,16 @@ class Tracker:
     Returns the representation of packing plan that will be returned from Tracker.
 
     """
-    packingPlan = {
+    packing_plan = {
         "id": "",
         "container_plans": []
     }
 
     if not topology.packing_plan:
-      return packingPlan
+      return packing_plan
 
-    packingPlan["id"] = topology.packing_plan.id
-    packingPlan["container_plans"] = [
+    packing_plan["id"] = topology.packing_plan.id
+    packing_plan["container_plans"] = [
         {
             "id": container_plan.id,
             "instances": [
@@ -543,100 +563,21 @@ class Tracker:
         for container_plan in topology.packing_plan.container_plans
     ]
 
-    return packingPlan
+    return packing_plan
 
-  def set_topology_info(self, topology) -> Optional[dict]:
+  def pb2_to_api(self, topology: topology_pb2.Topology) -> Dict[str, Any]:
     """
-    Extracts info from the stored proto states and
-    convert it into representation that is exposed using
-    the API.
-    This method is called on any change for the topology.
-    For example, when a container moves and its host or some
-    port changes. All the information is parsed all over
-    again and cache is updated.
-    """
-    # Execution state is the most basic info.
-    # If there is no execution state, just return
-    # as the rest of the things don't matter.
-    if not topology.execution_state:
-      Log.info("No execution state found for: " + topology.name)
-      return
+    Returns the JSON marshalled form of a topology.
 
-    Log.info("Setting topology info for topology: " + topology.name)
-    has_physical_plan = True
-    if not topology.physical_plan:
-      has_physical_plan = False
-
-    Log.info("Setting topology info for topology: " + topology.name)
-    has_packing_plan = True
-    if not topology.packing_plan:
-      has_packing_plan = False
-
-    has_tmanager_location = True
-    if not topology.tmanager:
-      has_tmanager_location = False
-
-    has_scheduler_location = True
-    if not topology.scheduler_location:
-      has_scheduler_location = False
-
-    topology_info = {
-        "name": topology.name,
-        "id": topology.id,
-        "logical_plan": None,
-        "physical_plan": None,
-        "packing_plan": None,
-        "execution_state": None,
-        "tmanager_location": None,
-        "scheduler_location": None,
-    }
-
-    execution_state = self.extract_execution_state(topology)
-    execution_state["has_physical_plan"] = has_physical_plan
-    execution_state["has_packing_plan"] = has_packing_plan
-    execution_state["has_tmanager_location"] = has_tmanager_location
-    execution_state["has_scheduler_location"] = has_scheduler_location
-    execution_state["status"] = topology.get_status()
-
-    topology_info["metadata"] = self.extract_metadata(topology)
-    topology_info["runtime_state"] = self.extract_runtime_state(topology)
-
-    topology_info["execution_state"] = execution_state
-    topology_info["logical_plan"] = self.extract_logical_plan(topology)
-    topology_info["physical_plan"] = self.extract_physical_plan(topology)
-    topology_info["packing_plan"] = self.extract_packing_plan(topology)
-    topology_info["tmanager_location"] = self.extract_tmanager(topology)
-    topology_info["scheduler_location"] = self.extract_scheduler_location(topology)
-
-    self.topology_infos[(topology.name, topology.state_manager_name)] = topology_info
-
-  # topology_name should be at the end to follow the trend
-  def get_topology_info(
-      self,
-      topology_name: str,
-      cluster: str,
-      role: Optional[str],
-      environ: str,
-  ) -> str:
-    """
-    Returns the JSON representation of a topology
-    by its name, cluster, environ, and an optional role parameter.
-    Raises exception if no such topology is found.
+    This uses a cache that is managed by the tracker so that the transform
+    only happens once for those Topology instances. Bear this in mind if
+    you want to modify the results - it is probably better to make those
+    changes in the Tracker._pb2_to_api and its dependencies.
 
     """
-    # Iterate over the values to filter the desired topology.
-    for (tn, _), topology_info in self.topology_infos.items():
-      execution_state = topology_info["execution_state"]
-      if (tn == topology_name and
-          cluster == execution_state["cluster"] and
-          environ == execution_state["environ"] and
-          (not role or execution_state.get("role") == role)
-         ):
-        return topology_info
-
-    Log.info(
-        f"Count not find topology info for cluster={cluster!r},"
-        f" role={role!r}, environ={environ!r}, role={role!r},"
-        f" topology={topology_name!r}"
-    )
-    raise Exception("No topology found")
+    topology_info = self._pb2_to_api_cache.get(topology)
+    if topology_info is None:
+      # this happens if the Toplogy instance was not managed by the tracker
+      topology_info = self._pb2_to_api(topology)
+      self._pb2_to_api_cache[topology] = topology_info
+    return topology_info

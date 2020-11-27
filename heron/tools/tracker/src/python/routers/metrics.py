@@ -7,7 +7,7 @@ from typing import Dict, List, Optional
 from heron.common.src.python.utils.log import Log
 from heron.proto import common_pb2
 from heron.proto import tmanager_pb2
-from heron.tools.tracker.src.python import tracker, metricstimeline
+from heron.tools.tracker.src.python import metricstimeline, state
 from heron.tools.tracker.src.python.main2 import ResponseEnvelope
 from heron.tools.tracker.src.python.query import Query as TManagerQuery
 
@@ -82,7 +82,7 @@ async def get_metrics( # pylint: disable=too-many-arguments
     will be truncated.
 
     """
-    topology = tracker.get_topology(cluster, role, environ, topology_name)
+    topology = state.tracker.get_topology(cluster, role, environ, topology_name)
     return await get_component_metrics(
         topology.tmanager, component, metric_names, instances, interval
     )
@@ -103,7 +103,7 @@ async def get_metrics_timeline( # pylint: disable=too-many-arguments
     """Return metrics over the given interval."""
     if start_time > end_time:
         raise RequestError("start_time > end_time")
-    topology = tracker.get_toplogy(cluster, role, environ, topology_name)
+    topology = state.tracker.get_toplogy(cluster, role, environ, topology_name)
     return await metricstimeline.get_metrics_timeline(
         topology.tmanager, component, metric_names, instances, start_time, end_time
     )
@@ -138,8 +138,8 @@ async def get_metrics_query( # pylint: disable=too-many-arguments
     topology_name: str = Query(..., alias="topology"),
 ) -> MetricsQueryResponse:
     """Run a metrics query against a particular toplogy."""
-    topology = tracker.get_topology(cluster, role, environ, topology_name)
-    metrics = await TManagerQuery(tracker).execute_query(
+    topology = state.tracker.get_topology(cluster, role, environ, topology_name)
+    metrics = await TManagerQuery(state.tracker).execute_query(
         topology.tmanager, query, start_time, end_time
     )
 

@@ -28,15 +28,33 @@ import sys
 import subprocess
 
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any, Generic, Literal, Optional, TypeVar
+
+from heron.tools.tracker.src.python import constants
 
 import yaml
+
+from fastapi import GenericModel
 
 
 # directories for heron tools distribution
 BIN_DIR = "bin"
 CONF_DIR = "conf"
 LIB_DIR = "lib"
+
+ResultType = TypeVar("ResultType")
+
+
+# XXX: requires python 3.7+
+class ResponseEnvelope(GenericModel, Generic[ResultType]):
+  # XXX: looking to deprecate exception time - leve to logging or calling app
+  executiontime: float = 0
+  message: str
+  result: Optional[ResultType] = None
+  status: Literal[
+      constants.RESPONSE_STATUS_FAILURE, constants.RESPONSE_STATUS_SUCCESS
+  ]
+  tracker_version: str = constants.API_VERSION
 
 
 def make_shell_endpoint(topology_info: dict, instance_id: int) -> str:
