@@ -21,15 +21,15 @@
 """ metricstimeline.py """
 from typing import List
 
-import tornado.gen
-
 from heron.common.src.python.utils.log import Log
 from heron.proto import common_pb2
 from heron.proto import tmanager_pb2
 
+import httpx
+
+
 # pylint: disable=too-many-locals, too-many-branches, unused-argument
-@tornado.gen.coroutine
-def get_metrics_timeline(
+async def get_metrics_timeline(
     tmanager: tmanager_pb2.TManagerLocation,
     component_name: str,
     metric_names: List[str],
@@ -85,20 +85,8 @@ def get_metrics_timeline(
 
   # Form and send the http request.
   url = f"http://{host}:{port}/stats"
-  request = tornado.httpclient.HTTPRequest(url,
-                                           body=request_parameters.SerializeToString(),
-                                           method='POST',
-                                           request_timeout=5)
-
-  Log.debug("Making HTTP call to fetch metrics")
-  Log.debug("url: " + url)
-  try:
-    client = tornado.httpclient.AsyncHTTPClient()
-    result = yield client.fetch(request)
-    Log.debug("HTTP call complete.")
-  except tornado.httpclient.HTTPError as e:
-    raise Exception(str(e))
-
+  with httpx.AsyncClient() as client:
+    result = await client.post(url, data=request_parameters.SerializeToString())
 
   # Check the response code - error if it is in 400s or 500s
   if result.code >= 400:
@@ -140,4 +128,4 @@ def get_metrics_timeline(
       for interval_value in im.interval_values:
         ret["timeline"][metricname][instance][interval_value.interval.start] = interval_value.value
 
-  raise tornado.gen.Return(ret)
+  raise ret

@@ -26,8 +26,7 @@ from typing import Any, Dict, List, Optional, Union
 from heron.proto.tmanager_pb2 import TManagerLocation
 from heron.tools.tracker.src.python.metricstimeline import get_metrics_timeline
 
-import tornado.httpclient
-import tornado.gen
+import httpx
 
 
 #####################################################################
@@ -105,8 +104,7 @@ class Operator:
     raise Exception("Not implemented exception")
 
   # pylint: disable=unused-argument
-  @tornado.gen.coroutine
-  def execute(self, tracker, tmanager: TManagerLocation, start: int, end: int) -> Any:
+  async def execute(self, tracker, tmanager: TManagerLocation, start: int, end: int) -> Any:
     """ execute """
     raise Exception("Not implemented exception")
 
@@ -134,12 +132,11 @@ class TS(Operator):
     if instance != "*":
       self.instances.append(instance)
 
-  @tornado.gen.coroutine
-  def execute(self, tracker, tmanager: TManagerLocation, start: int, end: int) -> Optional[Any]:
+  async def execute(self, tracker, tmanager: TManagerLocation, start: int, end: int) -> Optional[Any]:
     # Fetch metrics for start-60 to end+60 because the minute mark
     # may be a little skewed. By getting a couple more values,
     # we can then truncate based on the interval needed.
-    metrics = yield get_metrics_timeline(
+    metrics = await get_metrics_timeline(
         tmanager, self.component, [self.metric_name], self.instances,
         start - 60, end + 60)
     if not metrics:
@@ -161,7 +158,7 @@ class TS(Operator):
         })
         for instance, timeline in timelines.items()
     ]
-    raise tornado.gen.Return(all_metrics)
+    return all_metrics
 
 
 class Default(Operator):
@@ -189,14 +186,13 @@ class Default(Operator):
     self.constant = default
     self.timeseries = timeseries
 
-  @tornado.gen.coroutine
-  def execute(self, tracker, tmanager: TManagerLocation, start: int, end: int) -> Any:
-    all_metrics = yield self.timeseries.execute(tracker, tmanager, start, end)
+  async def execute(self, tracker, tmanager: TManagerLocation, start: int, end: int) -> Any:
+    all_metrics = await self.timeseries.execute(tracker, tmanager, start, end)
     if isinstance(all_metrics, str):
       raise Exception(all_metrics)
     for metric in all_metrics:
       metric.setDefault(self.constant, start, end)
-    raise tornado.gen.Return(all_metrics)
+    return all_metrics
 
 class Sum(Operator):
   """
@@ -213,8 +209,7 @@ class Sum(Operator):
   def __init__(self, children) -> None:
     self.timeSeriesList = children
 
-  @tornado.gen.coroutine
-  def execute(self, tracker, tmanager: TManagerLocation, start: int, end: int) -> Any:
+  async def execute(self, tracker, tmanager: TManagerLocation, start: int, end: int) -> Any:
     # Initialize the metric to be returned with sum of all the constants.
     result = Metrics(None, None, None, start, end, {})
     constant_sum = sum(ts for ts in self.timeSeriesList if isinstance(ts, float))
@@ -225,10 +220,9 @@ class Sum(Operator):
         for ts in self.timeSeriesList if isinstance(ts, Operator)
     ]
 
-    metrics = yield futureMetrics
     # Get all the timeseries metrics
     all_metrics = []
-    for met in metrics:
+    for met in asyncio.as_completed(metrics):
       if isinstance(met, str):
         raise Exception(met)
       all_metrics.extend(met)
@@ -240,7 +234,7 @@ class Sum(Operator):
         # result.timeline.update(timeline) which uses C
         if timestamp in result.timeline:
           result.timeline[timestamp] += value
-    raise tornado.gen.Return([result])
+    return [result]
 
 class Max(Operator):
   """Max Operator. This operator is used to find max of all children timeseries
@@ -257,8 +251,7 @@ class Max(Operator):
       raise Exception("MAX expects at least one operand.")
     self.timeSeriesList = children
 
-  @tornado.gen.coroutine
-  def execute(self, tracker, tmanager: TManagerLocation, start: int, end: int) -> Any:
+  async def execute(self, tracker, tmanager: TManagerLocation, start: int, end: int) -> Any:
     # Initialize the metric to be returned with max of all the constants.
     result = Metrics(None, None, None, start, end, {})
     constants = [ts for ts in self.timeSeriesList if isinstance(ts, float)]
@@ -269,11 +262,10 @@ class Max(Operator):
         ts.execute(tracker, tmanager, start, end)
         for ts in self.timeSeriesList if isinstance(ts, Operator)
     ]
-    metrics = yield futureMetrics
 
     # Get all the timeseries metrics
     all_metrics = []
-    for met in metrics:
+    for met in asyncio.as_completed(futureMetrics):
       if isinstance(met, str):
         raise Exception(met)
       all_metrics.extend(met)
@@ -285,7 +277,7 @@ class Max(Operator):
           if timestamp not in result.timeline:
             result.timeline[timestamp] = value
           result.timeline[timestamp] = max(value, result.timeline[timestamp])
-    raise tornado.gen.Return([result])
+    return [result]
 
 class Percentile(Operator):
   """
@@ -315,17 +307,15 @@ class Percentile(Operator):
     self.quantile = quantile
     self.timeSeriesList = timeseries_list
 
-  @tornado.gen.coroutine
-  def execute(self, tracker, tmanager, start, end):
+  async def execute(self, tracker, tmanager, start, end):
     futureMetrics = [
         ts.execute(tracker, tmanager, start, end)
         for ts in self.timeSeriesList if isinstance(ts, Operator)
     ]
-    metrics = yield futureMetrics
 
     # Get all the timeseries metrics
     all_metrics = []
-    for met in metrics:
+    for met in asyncio.as_completed(futureMetrics):
       if isinstance(met, str):
         raise Exception(met)
       all_metrics.extend(met)
@@ -345,7 +335,7 @@ class Percentile(Operator):
       index = int(self.quantile * 1.0 * (len(values) - 1) / 100.0)
       timeline[timestamp] = sorted(values)[index]
     result = Metrics(None, None, None, start, end, timeline)
-    raise tornado.gen.Return([result])
+    return [result]
 
 
 class _SimpleArithmaticOperator(Operator):
@@ -384,8 +374,7 @@ class _SimpleArithmaticOperator(Operator):
     self.operand2: Union[float, Operator] = children[1]
 
   @classmethod
-  @tornado.gen.coroutine
-  def _get_metrics(
+  async def _get_metrics(
       cls,
       operand: Union[float, Operator],
       tracker,
@@ -399,7 +388,7 @@ class _SimpleArithmaticOperator(Operator):
       met.setDefault(operand, start, end)
       result[""] = met
     else:
-      met = yield operand.execute(tracker, tmanager, start, end)
+      met = await operand.execute(tracker, tmanager, start, end)
       if not met:
         pass
       elif len(met) == 1 and not met[0].instance:
@@ -410,7 +399,7 @@ class _SimpleArithmaticOperator(Operator):
           if not m.instance:
             raise Exception(f"{cls.NAME} with multivariate requires instance based timeseries")
           result[m.instance] = m
-    raise tornado.gen.Return(result)
+    return result
 
   @staticmethod
   def _is_multivariate(metrics: dict) -> bool:
@@ -427,17 +416,16 @@ class _SimpleArithmaticOperator(Operator):
     raise NotImplementedError()
 
   # pylint: disable=too-many-branches
-  @tornado.gen.coroutine
-  def execute(self, tracker, tmanager: TManagerLocation, start: int, end: int) -> Any:
+  async def execute(self, tracker, tmanager: TManagerLocation, start: int, end: int) -> Any:
     """
     Return _f applied over all values in [start, end] of the two operands. Scalars
     are expanded a timeseries with all points equal to the scalar.
 
     """
-    metrics, metrics2 = yield [
+    metrics, metrics2 = asyncio.wait([
         self._get_metrics(self.operand1, tracker, tmanager, start, end),
         self._get_metrics(self.operand2, tracker, tmanager, start, end),
-    ]
+    ])
 
     # In case both are multivariate, only equal instances will get operated
     if self._is_multivariate(metrics) and self._is_multivariate(metrics2):
@@ -456,7 +444,7 @@ class _SimpleArithmaticOperator(Operator):
           else:
             met.timeline[timestamp] = value
         all_metrics.append(met)
-      raise tornado.gen.Return(all_metrics)
+      return all_metrics
 
     # If first is univariate
     if not self._is_multivariate(metrics):
@@ -472,7 +460,7 @@ class _SimpleArithmaticOperator(Operator):
           else:
             met.timeline[timestamp] = v
         all_metrics.append(met)
-      raise tornado.gen.Return(all_metrics)
+      return all_metrics
 
     # If second is univariate
     all_metrics = []
@@ -486,7 +474,7 @@ class _SimpleArithmaticOperator(Operator):
         else:
           met.timeline[timestamp] = v
       all_metrics.append(met)
-    raise tornado.gen.Return(all_metrics)
+    return all_metrics
 
 
 class Multiply(_SimpleArithmaticOperator):
@@ -530,10 +518,9 @@ class Rate(Operator):
       raise Exception("RATE requires a timeseries, not constant.")
     self.timeSeries = timeSeries
 
-  @tornado.gen.coroutine
-  def execute(self, tracker, tmanager: TManagerLocation, start: int, end: int) -> Any:
+  async def execute(self, tracker, tmanager: TManagerLocation, start: int, end: int) -> Any:
     # Get 1 previous data point to be able to apply rate on the first data
-    metrics = yield self.timeSeries.execute(tracker, tmanager, start-60, end)
+    metrics = await self.timeSeries.execute(tracker, tmanager, start-60, end)
 
     # Apply rate on all of them
     for metric in metrics:
@@ -544,4 +531,4 @@ class Rate(Operator):
         if start <= timestamp <= end and timestamp - prev == 60:
           timeline[timestamp] = metric.timeline[timestamp] - metric.timeline[prev]
       metric.timeline = timeline
-    raise tornado.gen.Return(metrics)
+    return metrics

@@ -1,3 +1,7 @@
+"""
+Views on Heron toplogies.
+
+"""
 from heron.tools.tracker.src.python import tracker
 from heron.tools.tracker.src.python.main2 import ResponseEnvelope
 
@@ -93,6 +97,7 @@ async def get_physical_plan(
     return topology_info["physical_plan"]
 
 
+# Deprecated. See https://github.com/apache/incubator-heron/issues/1754
 @router.get("/executionstate")
 async def get_execution_state(
     cluster: str, role: str, environ: str, topology: str,

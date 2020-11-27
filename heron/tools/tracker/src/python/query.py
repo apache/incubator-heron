@@ -21,9 +21,6 @@
 """ query.py """
 from typing import Any, List, Optional
 
-import tornado.httpclient
-import tornado.gen
-
 from heron.proto.tmanager_pb2 import TManagerLocation
 from heron.tools.tracker.src.python.query_operators import *
 
@@ -55,8 +52,7 @@ class Query:
 
 
   # pylint: disable=attribute-defined-outside-init, no-member
-  @tornado.gen.coroutine
-  def execute_query(
+  async def execute_query(
       self,
       tmanager: TManagerLocation,
       query_string: str,
@@ -68,8 +64,7 @@ class Query:
       raise Exception("No tmanager found")
     self.tmanager = tmanager
     root = self.parse_query_string(query_string)
-    metrics = yield root.execute(self.tracker, self.tmanager, start, end)
-    raise tornado.gen.Return(metrics)
+    return await root.execute(self.tracker, self.tmanager, start, end)
 
   def find_closing_braces(self, query: str) -> int:
     """Find the index of the closing braces for the opening braces

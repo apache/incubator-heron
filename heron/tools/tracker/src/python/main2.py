@@ -15,9 +15,12 @@ from starlette.responses import (
 )
 
 app = FastAPI()
+app.include_router(metrics.router)
+app.include_router(containers.router)
 app.include_router(topologies.router, prefix="/topologies")
 
 ResultType = TypeVar("ResultType")
+# FIXME: move into own module to avoid circular import
 # XXX: use of Pydantic generics requires Python 3.7+
 class ResponseEnvelope(GenericModel, Generic[ResultType]):
     # XXX: looking to deprecate exception time - leve to logging or calling app
