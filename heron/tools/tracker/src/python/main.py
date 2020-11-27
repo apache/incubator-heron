@@ -49,24 +49,14 @@ class Application(tornado.web.Application):
     self.tracker = Tracker(config)
     self.tracker.synch_topologies()
     tornadoHandlers = [
-        (r"/topologies", handlers.TopologiesHandler, {"tracker":self.tracker}),
-        (r"/topologies/states", handlers.StatesHandler, {"tracker":self.tracker}),
-        (r"/topologies/info", handlers.TopologyHandler, {"tracker":self.tracker}),
-        (r"/topologies/logicalplan", handlers.LogicalPlanHandler, {"tracker":self.tracker}),
-        (r"/topologies/config", handlers.TopologyConfigHandler, {"tracker":self.tracker}),
         (r"/topologies/containerfiledata", handlers.ContainerFileDataHandler,
          {"tracker":self.tracker}),
         (r"/topologies/containerfiledownload", handlers.ContainerFileDownloadHandler,
          {"tracker":self.tracker}),
         (r"/topologies/containerfilestats",
          handlers.ContainerFileStatsHandler, {"tracker":self.tracker}),
-        (r"/topologies/physicalplan", handlers.PhysicalPlanHandler, {"tracker":self.tracker}),
-        (r"/topologies/packingplan", handlers.PackingPlanHandler, {"tracker":self.tracker}),
         # Deprecated. See https://github.com/apache/incubator-heron/issues/1754
-        (r"/topologies/executionstate", handlers.ExecutionStateHandler, {"tracker":self.tracker}),
-        (r"/topologies/schedulerlocation", handlers.SchedulerLocationHandler,
          {"tracker":self.tracker}),
-        (r"/topologies/metadata", handlers.MetaDataHandler, {"tracker":self.tracker}),
         (r"/topologies/runtimestate", handlers.RuntimeStateHandler, {"tracker":self.tracker}),
         (r"/topologies/metrics", handlers.MetricsHandler, {"tracker":self.tracker}),
         (r"/topologies/metricstimeline", handlers.MetricsTimelineHandler, {"tracker":self.tracker}),
