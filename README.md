@@ -25,6 +25,17 @@ Heron is realtime analytics platform developed by Twitter.  It has a wide array 
 
 [Heron in Apache Incubation](http://incubator.apache.org/projects/heron.html)
 
+## Code of Conduct
+
+This conversation was marked as resolved by sreev
+We are proud to be an adopter of [Contributor Covenant](https://www.contributor-covenant.org/).
+_Pledge your respect and appreciation for contributors of all kinds to your open source project._
+
+There are 184 two-letter language codes ([ISO 639-1](https://en.wikipedia.org/wiki/ISO_639-1)) registered as of December 2018.
+We’re always looking for new localizations of Contributor Covenant and are thankful to the volunteers who spend their time on translations.
+
+Instructions for translations can be found [here](https://github.com/ContributorCovenant/contributor_covenant#translating).
+
 ### Documentation
 
 [https://heron.incubator.apache.org/](https://heron.incubator.apache.org/)
