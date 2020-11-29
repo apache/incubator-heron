@@ -34,7 +34,7 @@ from heron.tools.tracker.src.python import constants
 
 import yaml
 
-from fastapi import GenericModel
+from pydantic.generics import GenericModel
 
 
 # directories for heron tools distribution

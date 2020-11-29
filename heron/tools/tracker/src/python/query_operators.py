@@ -19,6 +19,7 @@
 #  under the License.
 
 ''' query_operators.py '''
+import asyncio
 import math
 
 from typing import Any, Dict, List, Optional, Union
@@ -222,7 +223,9 @@ class Sum(Operator):
 
     # Get all the timeseries metrics
     all_metrics = []
-    for met in asyncio.as_completed(metrics):
+    for met_f in asyncio.as_completed(futureMetrics):
+      met = await met_f
+      # TODO: change this interface from str to plain raise (raised on await)
       if isinstance(met, str):
         raise Exception(met)
       all_metrics.extend(met)
@@ -265,7 +268,8 @@ class Max(Operator):
 
     # Get all the timeseries metrics
     all_metrics = []
-    for met in asyncio.as_completed(futureMetrics):
+    for met_f in asyncio.as_completed(futureMetrics):
+      met = await met_f
       if isinstance(met, str):
         raise Exception(met)
       all_metrics.extend(met)
@@ -315,7 +319,8 @@ class Percentile(Operator):
 
     # Get all the timeseries metrics
     all_metrics = []
-    for met in asyncio.as_completed(futureMetrics):
+    for met_f in asyncio.as_completed(futureMetrics):
+      met = await met_f
       if isinstance(met, str):
         raise Exception(met)
       all_metrics.extend(met)
@@ -422,10 +427,10 @@ class _SimpleArithmaticOperator(Operator):
     are expanded a timeseries with all points equal to the scalar.
 
     """
-    metrics, metrics2 = asyncio.wait([
+    metrics, metrics2 = await asyncio.gather(
         self._get_metrics(self.operand1, tracker, tmanager, start, end),
         self._get_metrics(self.operand2, tracker, tmanager, start, end),
-    ])
+    )
 
     # In case both are multivariate, only equal instances will get operated
     if self._is_multivariate(metrics) and self._is_multivariate(metrics2):

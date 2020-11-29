@@ -110,8 +110,8 @@ class TrackerTest(unittest.TestCase):
                                             call(mock_state_manager_2, 'top_name3'),
                                             call(mock_state_manager_2, 'top_name4')],
                                            any_order=True)
-    self.assertEqual(4, mock_add_new_topology.call_count)
-    self.assertEqual(0, mock_remove_topology.call_count)
+    assert 4 == mock_add_new_topology.call_count
+    assert 0 == mock_remove_topology.call_count
     mock_get_topologies_for_state_location.reset_mock()
     mock_add_new_topology.reset_mock()
     mock_remove_topology.reset_mock()
@@ -138,8 +138,8 @@ class TrackerTest(unittest.TestCase):
                                            call('top_name3', 'mock_name2'),
                                            call('top_name4', 'mock_name2')],
                                           any_order=False)
-    self.assertEqual(3, mock_add_new_topology.call_count)
-    self.assertEqual(3, mock_remove_topology.call_count)
+    assert 3 == mock_add_new_topology.call_count
+    assert 3 == mock_remove_topology.call_count
 
   def fill_tracker_topologies(self):
 
@@ -174,14 +174,14 @@ class TrackerTest(unittest.TestCase):
   # pylint: disable=line-too-long
   def test_get_topology_by_cluster_environ_and_name(self):
     self.fill_tracker_topologies()
-    self.assertEqual(self.topology1, self.tracker.get_topology('cluster1', 'mark', 'env1', 'top_name1'))
-    self.assertEqual(self.topology1, self.tracker.get_topology('cluster1', None, 'env1', 'top_name1'))
-    self.assertEqual(self.topology2, self.tracker.get_topology('cluster1', 'bob', 'env1', 'top_name2'))
-    self.assertEqual(self.topology2, self.tracker.get_topology('cluster1', None, 'env1', 'top_name2'))
-    self.assertEqual(self.topology3, self.tracker.get_topology('cluster1', 'tom', 'env2', 'top_name3'))
-    self.assertEqual(self.topology3, self.tracker.get_topology('cluster1', None, 'env2', 'top_name3'))
-    self.assertEqual(self.topology4, self.tracker.get_topology('cluster2', None, 'env1', 'top_name4'))
-    self.assertEqual(self.topology5, self.tracker.get_topology('cluster2', None, 'env2', 'top_name5'))
+    assert self.topology1 == self.tracker.get_topology('cluster1', 'mark', 'env1', 'top_name1')
+    assert self.topology1 == self.tracker.get_topology('cluster1', None, 'env1', 'top_name1')
+    assert self.topology2 == self.tracker.get_topology('cluster1', 'bob', 'env1', 'top_name2')
+    assert self.topology2 == self.tracker.get_topology('cluster1', None, 'env1', 'top_name2')
+    assert self.topology3 == self.tracker.get_topology('cluster1', 'tom', 'env2', 'top_name3')
+    assert self.topology3 == self.tracker.get_topology('cluster1', None, 'env2', 'top_name3')
+    assert self.topology4 == self.tracker.get_topology('cluster2', None, 'env1', 'top_name4')
+    assert self.topology5 == self.tracker.get_topology('cluster2', None, 'env2', 'top_name5')
 
   def test_get_topolies_for_state_location(self):
     self.fill_tracker_topologies()
@@ -207,9 +207,9 @@ class TrackerTest(unittest.TestCase):
         ['top_name1', 'top_name2'],
         [t.name for t in self.tracker.topologies])
 
-    self.assertEqual(2, mock_state_manager_1.get_pplan.call_count)
-    self.assertEqual(2, mock_state_manager_1.get_execution_state.call_count)
-    self.assertEqual(2, mock_state_manager_1.get_tmanager.call_count)
+    assert 2 == mock_state_manager_1.get_pplan.call_count
+    assert 2 == mock_state_manager_1.get_execution_state.call_count
+    assert 2 == mock_state_manager_1.get_tmanager.call_count
 
   def test_remove_topology(self):
     self.fill_tracker_topologies()
@@ -235,15 +235,15 @@ class TrackerTest(unittest.TestCase):
     # Extract physical plan
     pplan = self.tracker.extract_physical_plan(topology)
     # Mock topology doesn't have topology config and instances
-    self.assertEqual(pplan['config'], {})
-    self.assertEqual(pplan['bolts'], {'mock_bolt': []})
-    self.assertEqual(pplan['spouts'], {'mock_spout': []})
-    self.assertEqual(pplan['components']['mock_bolt']['config'],
-                     {'topology.component.parallelism': '1'})
-    self.assertEqual(pplan['components']['mock_spout']['config'],
-                     {'topology.component.parallelism': '1'})
-    self.assertEqual(pplan['instances'], {})
-    self.assertEqual(pplan['stmgrs'], {})
+    assert pplan['config'] == {}
+    assert pplan['bolts'] == {'mock_bolt': []}
+    assert pplan['spouts'] == {'mock_spout': []}
+    assert pplan['components']['mock_bolt']['config'] == \
+                     {'topology.component.parallelism': '1'}
+    assert pplan['components']['mock_spout']['config'] == \
+                     {'topology.component.parallelism': '1'}
+    assert pplan['instances'] == {}
+    assert pplan['stmgrs'] == {}
 
   def test_extract_packing_plan(self):
     # Create topology
@@ -252,14 +252,14 @@ class TrackerTest(unittest.TestCase):
     topology.set_packing_plan(pb_pplan)
     # Extract packing plan
     packing_plan = self.tracker.extract_packing_plan(topology)
-    self.assertEqual(packing_plan['id'], 'ExclamationTopology')
-    self.assertEqual(packing_plan['container_plans'][0]['id'], 1)
-    self.assertEqual(packing_plan['container_plans'][0]['required_resources'],
-                     {'disk': 2048, 'ram': 1024, 'cpu': 1.0})
-    self.assertEqual(packing_plan['container_plans'][0]['instances'][0],
+    assert packing_plan['id'] == 'ExclamationTopology'
+    assert packing_plan['container_plans'][0]['id'] == 1
+    assert packing_plan['container_plans'][0]['required_resources'] == \
+                     {'disk': 2048, 'ram': 1024, 'cpu': 1.0}
+    assert packing_plan['container_plans'][0]['instances'][0] == \
                      {
                        'component_index': 1,
                         'component_name': 'word',
                         'instance_resources': {'cpu': 1.0, 'disk': 2048, 'ram': 1024},
                         'task_id': 1
-                     })
+                     }

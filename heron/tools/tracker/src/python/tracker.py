@@ -122,7 +122,7 @@ class Tracker:
     def on_topologies_watch(state_manager, topologies) -> None:
       """watch topologies"""
       Log.info("State watch triggered for topologies.")
-      Log.debug("Topologies: %s" + topologies)
+      Log.debug("Topologies: %s", topologies)
       cached_names = [t.name for t in self.get_stmgr_topologies(state_manager.name)]
       Log.debug("Existing topologies: %s", cached_names)
       for name in cached_names:
