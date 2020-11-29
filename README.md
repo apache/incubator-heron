@@ -16,6 +16,7 @@
     specific language governing permissions and limitations
     under the License.
 -->
+[![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-v2.0%20adopted-ff69b4.svg)](CODE_OF_CONDUCT.md)
 [![Build Status](https://travis-ci.com/apache/incubator-heron.svg?&branch=master)](https://travis-ci.com/apache/incubator-heron)
 
 ![logo](website2/docs/assets/HeronTextLogo.png)
