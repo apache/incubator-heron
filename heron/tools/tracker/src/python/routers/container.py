@@ -25,7 +25,7 @@ async def get_file_data(  # pylint: disable=too-many-arguments
     path: str,
     offset: int,
     length: int,
-    topology_name: str = Query(..., "topology"),
+    topology_name: str = Query(..., alias="topology"),
 ):
   """
   Return a range of bytes for the given file wrapped in JSON.
@@ -50,7 +50,7 @@ async def get_file_download(  # pylint: disable=too-many-arguments
     role: str,
     container: str,
     path: str,
-    topology_name: str = Query(..., "topology"),
+    topology_name: str = Query(..., alias="topology"),
 ):
   """Return the data for a given file."""
   topology = state.tracker.get_topology(cluster, role, environ, topology_name)
@@ -72,7 +72,7 @@ async def get_file_stats(  # pylint: disable=too-many-arguments
     role: str,
     container: str,
     path: str,
-    topology_name: str = Query(..., "topology"),
+    topology_name: str = Query(..., alias="topology"),
 ):
   """Return the stats for a given directory."""
   topology = state.tracker.get_topology(cluster, role, environ, topology_name)

@@ -56,6 +56,7 @@ class Topology:
     self.tmanager = None
     self.scheduler_location = None
     self.watches: Dict[uuid.UUID, Callable[[Topology], None]] = {}
+    self._api_form: Optional[dict] = None
 
   def register_watch(self, callback: Callable[["Topology"], None]) -> Optional[uuid.UUID]:
     """

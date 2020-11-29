@@ -24,7 +24,7 @@ import sys
 import collections
 
 from functools import partial
-from typing import Any, Dict, List, Optional
+from typing import Any, Container, Dict, List, Optional
 from weakref import WeakKeyDictionary
 
 from heron.common.src.python.utils.log import Log
@@ -101,9 +101,11 @@ class Tracker:
   by handlers.
   """
 
+  __slots__ = ["topologies", "config", "state_managers", "_pb2_to_api_cache"]
+
   def __init__(self, config):
     self.config = config
-    self.topologies = []
+    self.topologies: List[Topology] = []
     self.state_managers = []
     self._pb2_to_api_cache = WeakKeyDictionary()
 
@@ -214,7 +216,7 @@ class Tracker:
         )
     ]
 
-  def _pb2_to_api(self, topology: topology_pb2.Topology) -> Optional[Dict[str, Any]]:
+  def _pb2_to_api(self, topology: Topology) -> Optional[Dict[str, Any]]:
     """
     Extracts info from the stored proto states and convert it into representation
     that is exposed using the API.
@@ -568,7 +570,7 @@ class Tracker:
 
     return packing_plan
 
-  def pb2_to_api(self, topology: topology_pb2.Topology) -> Dict[str, Any]:
+  def pb2_to_api(self, topology: Topology) -> Dict[str, Any]:
     """
     Returns the JSON marshalled form of a topology.
 
@@ -584,3 +586,27 @@ class Tracker:
       topology_info = self._pb2_to_api(topology)
       self._pb2_to_api_cache[topology] = topology_info
     return topology_info
+
+  def filtered_topologies(
+      self,
+      clusters: Container[str],
+      environs: Container[str],
+      names: Container[str],
+      roles: Container[str], # should deprecate?
+    ) -> List[Topology]:
+    """
+    Return a filtered copy of the topologies which have the given properties.
+
+    If a filter is falsy (i.e. empty) then all topologies will match on that property.
+
+    """
+    return [
+        topology
+        for topology in self.topologies[:]
+        if (
+            (not clusters or topology.cluster in clusters)
+            and (not environs or topology.environ in environs)
+            and (not names or topology.name in names)
+            and (not roles or (topology.execution_state and topology.execution_state.role))
+        )
+    ]

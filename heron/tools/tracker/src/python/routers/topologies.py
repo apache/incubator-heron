@@ -4,7 +4,7 @@ Views on Heron toplogies.
 """
 from typing import List, Optional, Dict
 
-from heron.tools.tracker.src.python import tracker
+from heron.tools.tracker.src.python import state
 from heron.tools.tracker.src.python.main2 import ResponseEnvelope
 
 import networkx
@@ -16,7 +16,7 @@ router = APIRouter()
 
 @router.get("", response_model=ResponseEnvelope[Dict[str, Dict[str, List[str]]]])
 async def get_topologies(
-    role: Optional[str],
+    role: Optional[str], # what is rolve vs. name?
     cluster_names: List[str] = Query(None, alias="cluster"),
     environ_names: List[str] = Query(None, alias="environ"),
 ):
@@ -25,18 +25,12 @@ async def get_topologies(
 
   """
   result = {}
-  for topology in tracker.topologies[:]:
-    cluster, environ, state = topology.cluster, topology.environ, topology.state
-
-    if not (cluster and environ and state):
-      continue
-    if cluster_names and cluster not in cluster_names:
-      continue
-    if environ_names and environ not in environ_names:
-      continue
-    if role is not None and role != topology.role:
-      continue
-    result.setdefault(cluster, {}).setdefault(topology.role, []).append(
+  for topology in state.tracker.filtered_topologies(cluster_names, environ_names, roles={role}):
+    if topology.execution_state:
+      t_role = topology.execution_state.role
+    else:
+      t_role = None
+    result.setdefault(topology.cluster, {}).setdefault(t_role, []).append(
         topology.name
     )
   return result
@@ -51,17 +45,10 @@ async def get_states(
   """Return the execution states for topologies. Keyed by (cluster, environ, topology)."""
   result = {}
 
-  for topology in tracker.topologies[:]:
-    cluster, environ = topology.cluster, topology.environ
-    if not (cluster and environ):
-      continue
-    if cluster_names and cluster not in cluster_names:
-      continue
-    if environ_names and environ not in environ_names:
-      continue
-    topology_info = tracker.pb2_to_api(topology)
+  for topology in state.tracker.filtered_topologies(cluster_names, environ_names, {}, {role}):
+    topology_info = state.tracker.pb2_to_api(topology)
     if topology_info is not None:
-      result.setdefault(cluster, {}).setdefault(environ, {})[
+      result.setdefault(topology.cluster, {}).setdefault(topology.environ, {})[
           topology.name
       ] = topology_info["execution_state"]
   return result
@@ -71,8 +58,8 @@ async def get_states(
 async def get_info(
     cluster: str, role: str, environ: str, topology: str,
 ):
-  topology = tracker.get_topology(cluster, role, environ, topology)
-  return tracker.pb2_to_api(topology)
+  topology = state.tracker.get_topology(cluster, role, environ, topology)
+  return state.tracker.pb2_to_api(topology)
 
 
 # XXX: this all smells like graphql
@@ -81,8 +68,8 @@ async def get_config(
     cluster: str, role: str, environ: str, topology: str,
 ):
   # TODO: deprecate in favour of /info
-  topology = tracker.get_topology(cluster, role, environ, topology)
-  topology_info = tracker.pb2_to_api(topology)
+  topology = state.tracker.get_topology(cluster, role, environ, topology)
+  topology_info = state.tracker.pb2_to_api(topology)
   return topology_info["physical_plan"]["config"]
 
 
@@ -91,8 +78,8 @@ async def get_physical_plan(
     cluster: str, role: str, environ: str, topology: str,
 ):
   # TODO: deprecate in favour of /info
-  topology = tracker.get_topology(cluster, role, environ, topology)
-  return tracker.pb2_to_api(topology)["physical_plan"]
+  topology = state.tracker.get_topology(cluster, role, environ, topology)
+  return state.tracker.pb2_to_api(topology)["physical_plan"]
 
 
 # Deprecated. See https://github.com/apache/incubator-heron/issues/1754
@@ -101,8 +88,8 @@ async def get_execution_state(
     cluster: str, role: str, environ: str, topology: str,
 ):
   # TODO: deprecate in favour of /info
-  topology = tracker.get_topology(cluster, role, environ, topology)
-  return tracker.pb2_to_api(topology)["execution_state"]
+  topology = state.tracker.get_topology(cluster, role, environ, topology)
+  return state.tracker.pb2_to_api(topology)["execution_state"]
 
 
 @router.get("/schedulerlocation")
@@ -110,8 +97,8 @@ async def get_scheduler_location(
     cluster: str, role: str, environ: str, topology: str,
 ):
   # TODO: deprecate in favour of /info
-  topology = tracker.get_topology(cluster, role, environ, topology)
-  return tracker.pb2_to_api(topology)["scheduler_location"]
+  topology = state.tracker.get_topology(cluster, role, environ, topology)
+  return state.tracker.pb2_to_api(topology)["scheduler_location"]
 
 
 @router.get("/metadata")
@@ -119,8 +106,8 @@ async def get_metadata(
     cluster: str, role: str, environ: str, topology: str,
 ):
   # TODO: deprecate in favour of /info
-  topology = tracker.get_topology(cluster, role, environ, topology)
-  return tracker.pb2_to_api(topology)["metadata"]
+  topology = state.tracker.get_topology(cluster, role, environ, topology)
+  return state.tracker.pb2_to_api(topology)["metadata"]
 
 
 def topology_stages(logical_plan):
@@ -145,8 +132,8 @@ async def get_logical_plan(
   to live.
 
   """
-  topology = tracker.get_topology(cluster, role, environ, topology)
-  topology_info = tracker.pb2_to_api(topology)
+  topology = state.tracker.get_topology(cluster, role, environ, topology)
+  topology_info = state.tracker.pb2_to_api(topology)
   logical_plan = topology_info["logical_plan"]
 
   # format the logical plan as required by the web (because of Ambrose)
