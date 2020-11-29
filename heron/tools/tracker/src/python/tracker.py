@@ -208,7 +208,10 @@ class Tracker:
     self.topologies = [
         topology
         for topology in self.topologies
-        if not (topology.name == topology_name and topology.state_manager_name == state_manager_name)
+        if not (
+            topology.name == topology_name
+            and topology.state_manager_name == state_manager_name
+        )
     ]
 
   def _pb2_to_api(self, topology: topology_pb2.Topology) -> Optional[Dict[str, Any]]:
@@ -224,16 +227,16 @@ class Tracker:
       return None
 
     info = {
-      "execution_state": self.extract_execution_state(topology),
-      "id": topology.id,
-      "logical_plan": self.extract_logical_plan(topology),
-      "metadata": self.extract_metadata(topology),
-      "name": topology.name,
-      "packing_plan": self.extract_packing_plan(topology),
-      "physical_plan": self.extract_physical_plan(topology),
-      "runtime_state": self.extract_runtime_state(topology),
-      "scheduler_location": self.extract_scheduler_location(topology),
-      "tmanager_location": self.extract_tmanager(topology),
+        "execution_state": self.extract_execution_state(topology),
+        "id": topology.id,
+        "logical_plan": self.extract_logical_plan(topology),
+        "metadata": self.extract_metadata(topology),
+        "name": topology.name,
+        "packing_plan": self.extract_packing_plan(topology),
+        "physical_plan": self.extract_physical_plan(topology),
+        "runtime_state": self.extract_runtime_state(topology),
+        "scheduler_location": self.extract_scheduler_location(topology),
+        "tmanager_location": self.extract_tmanager(topology),
     }
 
     return info
@@ -249,11 +252,11 @@ class Tracker:
     """
     result = self.extract_metadata(topology)
     result.update({
-      "has_physical_plan": bool(topology.physical_plan),
-      "has_packing_plan": bool(topology.has_packing_plan),
-      "has_tmanager_location": bool(topology.tmanager),
-      "has_scheduler_location": bool(topology.scheduler_location),
-      "status": topology.get_status(),
+        "has_physical_plan": bool(topology.physical_plan),
+        "has_packing_plan": bool(topology.has_packing_plan),
+        "has_tmanager_location": bool(topology.tmanager),
+        "has_scheduler_location": bool(topology.scheduler_location),
+        "status": topology.get_status(),
     })
     return result
 
@@ -312,11 +315,11 @@ class Tracker:
               else ""
           ),
       }
-      return {
-          "name": None,
-          "http_endpoint": None,
-          "job_page_link": None,
-      }
+    return {
+        "name": None,
+        "http_endpoint": None,
+        "job_page_link": None,
+    }
 
   def extract_tmanager(self, topology) -> dict:
     """

@@ -27,8 +27,6 @@ from typing import Any, Dict, List, Optional, Union
 from heron.proto.tmanager_pb2 import TManagerLocation
 from heron.tools.tracker.src.python.metricstimeline import get_metrics_timeline
 
-import httpx
-
 
 #####################################################################
 # Data Structure for fetched Metrics
@@ -133,7 +131,13 @@ class TS(Operator):
     if instance != "*":
       self.instances.append(instance)
 
-  async def execute(self, tracker, tmanager: TManagerLocation, start: int, end: int) -> Optional[Any]:
+  async def execute(
+      self,
+      tracker,
+      tmanager: TManagerLocation,
+      start: int,
+      end: int,
+    ) -> Optional[Any]:
     # Fetch metrics for start-60 to end+60 because the minute mark
     # may be a little skewed. By getting a couple more values,
     # we can then truncate based on the interval needed.

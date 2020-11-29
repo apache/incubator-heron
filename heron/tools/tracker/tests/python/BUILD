@@ -41,6 +41,19 @@ pex_pytest(
 )
 
 pex_pytest(
+    name = "app_unittest",
+    size = "small",
+    srcs = ["app_unittest.py"],
+    reqs = [
+        "pytest==6.1.2",
+        "pytest-asyncio==0.14.0",
+    ],
+    deps = [
+        "//heron/tools/tracker/src/python:tracker-py",
+    ],
+)
+
+pex_pytest(
     name = "query_unittest",
     size = "small",
     srcs = ["query_unittest.py"],

@@ -128,4 +128,4 @@ async def get_metrics_timeline(
       for interval_value in im.interval_values:
         ret["timeline"][metricname][instance][interval_value.interval.start] = interval_value.value
 
-  raise ret
+  return ret

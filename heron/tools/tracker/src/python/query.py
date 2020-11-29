@@ -123,7 +123,7 @@ class Query:
         constant = float(query)
         return constant
       except ValueError:
-        raise Exception("Invalid syntax")
+        raise Exception("Invalid syntax") from ValueError
     token = query[:start_index].rstrip()
     operator_cls = self.operators.get(token)
     if operator_cls is None:

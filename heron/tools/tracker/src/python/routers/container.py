@@ -18,14 +18,14 @@ router = APIRouter()
 
 @router.get("/containerfiledata")
 async def get_file_data(  # pylint: disable=too-many-arguments
-  cluster: str,
-  environ: str,
-  role: str,
-  container: str,
-  path: str,
-  offset: int,
-  length: int,
-  topology_name: str = Query(..., "topology"),
+    cluster: str,
+    environ: str,
+    role: str,
+    container: str,
+    path: str,
+    offset: int,
+    length: int,
+    topology_name: str = Query(..., "topology"),
 ):
   """
   Return a range of bytes for the given file wrapped in JSON.
@@ -45,12 +45,12 @@ async def get_file_data(  # pylint: disable=too-many-arguments
 
 @router.get("/containerfiledownload")
 async def get_file_download(  # pylint: disable=too-many-arguments
-  cluster: str,
-  environ: str,
-  role: str,
-  container: str,
-  path: str,
-  topology_name: str = Query(..., "topology"),
+    cluster: str,
+    environ: str,
+    role: str,
+    container: str,
+    path: str,
+    topology_name: str = Query(..., "topology"),
 ):
   """Return the data for a given file."""
   topology = state.tracker.get_topology(cluster, role, environ, topology_name)
@@ -60,19 +60,19 @@ async def get_file_download(  # pylint: disable=too-many-arguments
   _, _, filename = path.rpartition("/")
   with httpx.stream("GET", url) as response:
     return StreamingResponse(
-      content=response.iter_bytes(),
-      headers={"Content-Disposition": f"attachment; filename={filename}"},
+        content=response.iter_bytes(),
+        headers={"Content-Disposition": f"attachment; filename={filename}"},
     )
 
 
 @router.get("/containerfilestats")
 async def get_file_stats(  # pylint: disable=too-many-arguments
-  cluster: str,
-  environ: str,
-  role: str,
-  container: str,
-  path: str,
-  topology_name: str = Query(..., "topology"),
+    cluster: str,
+    environ: str,
+    role: str,
+    container: str,
+    path: str,
+    topology_name: str = Query(..., "topology"),
 ):
   """Return the stats for a given directory."""
   topology = state.tracker.get_topology(cluster, role, environ, topology_name)
@@ -85,10 +85,10 @@ async def get_file_stats(  # pylint: disable=too-many-arguments
 
 @router.get("/runtimestate")
 async def get_runtime_state(
-  cluster: str,
-  role: str,
-  environ: str,
-  topology_name: str = Query(..., alias="topology"),
+    cluster: str,
+    role: str,
+    environ: str,
+    topology_name: str = Query(..., alias="topology"),
 ):
   """Return the runtime state."""
   topology = state.tracker.get_topology(cluster, role, environ, topology_name)
@@ -101,34 +101,34 @@ async def get_runtime_state(
   url = f"http://{tmanager.host}:{tmanager.stats_port}/stmgrsregistrationsummary"
   with httpx.AsyncClient() as client:
     response = await client.post(
-      url,
-      data=tmanager_pb2.StmgrsRegistrationSummaryRequest().SerializeToString(),
+        url,
+        data=tmanager_pb2.StmgrsRegistrationSummaryRequest().SerializeToString(),
     )
   response.raise_for_status()
   reg = tmanager_pb2.StmgrsRegistrationSummaryResponse()
   reg.ParseFromString(response.content)
 
   # update the result with registration status
-  state = topology_info["runtime_state"]
+  runtime_state = topology_info["runtime_state"]
   # XXX: another mutation, looks bad - check it doesn't modify globals
-  state["topology_version"] = topology_info["metadata"]["release_version"]
+  runtime_state["topology_version"] = topology_info["metadata"]["release_version"]
   for stmgr, is_registered in (
-    (reg.registered_stmgrs, True),
-    (reg.absent_stmgrs, False),
+      (reg.registered_stmgrs, True),
+      (reg.absent_stmgrs, False),
   ):
-    state["stmgrs"].setdefault(stmgr, {})["is_registered"] = is_registered
+    runtime_state["stmgrs"].setdefault(stmgr, {})["is_registered"] = is_registered
 
-  return state
+  return runtime_state
 
 
 async def _get_exception_log_response(
-  cluster: str,
-  role: str,
-  environ: str,
-  component: str,
-  instances: List[str] = Query(..., alias="instance"),
-  topology_name: str = Query(..., alias="topology"),
-  summary: bool = False,
+    cluster: str,
+    role: str,
+    environ: str,
+    component: str,
+    instances: List[str] = Query(..., alias="instance"),
+    topology_name: str = Query(..., alias="topology"),
+    summary: bool = False,
 ) -> tmanager_pb2.ExceptionLogResponse:
   topology = state.tracker.get_topology(cluster, role, environ, topology_name)
   tmanager = topology.tmanager
@@ -139,7 +139,7 @@ async def _get_exception_log_response(
   exception_request.component_name = component
   exception_request.instances.extend(instances)
   url_suffix = "ummary" if summary else ""
-  url = f"http://{tmanager.host}:{tmanager.stats_port}/exceptions{suffix}"
+  url = f"http://{tmanager.host}:{tmanager.stats_port}/exceptions{url_suffix}"
   with httpx.AsyncClient() as client:
     response = await client.post(url, data=exception_request.SerializeToString())
   response.raise_for_status()
@@ -149,67 +149,67 @@ async def _get_exception_log_response(
 
   if exception_response.status.status == common_pb2.NOTOK:
     raise RuntimeError(
-      exception_response.status.message
-      if exception_response.status.HasField("message")
-      else "an error occurred"
+        exception_response.status.message
+        if exception_response.status.HasField("message")
+        else "an error occurred"
     )
   return exception_response
 
 
 @router.get("/exceptions")
 async def get_exceptions(  # pylint: disable=too-many-arguments
-  cluster: str,
-  role: str,
-  environ: str,
-  component: str,
-  instances: List[str] = Query(..., alias="instance"),
-  topology_name: str = Query(..., alias="topology"),
+    cluster: str,
+    role: str,
+    environ: str,
+    component: str,
+    instances: List[str] = Query(..., alias="instance"),
+    topology_name: str = Query(..., alias="topology"),
 ):
   """Return info about exceptions that have occurred per instance."""
   exception_response = await _get_exception_log_response(
-    cluster, role, environ, component, instances, topology_name, summary=False
+      cluster, role, environ, component, instances, topology_name, summary=False
   )
 
   return [
-    {
-      "hostname": exception_log.hostname,
-      "instance_id": exception_log.instance_id,
-      # inconsistency
-      "stack_trace": exception_log.stacktrace,
-      "lasttime": exception_log.lasttime,
-      "firsttime": exception_log.firsttime,
-      # odd transformation
-      "count": str(exception_log.count),
-      "logging": exception_log.logging,
-    }
-    for exception_log in exception_response.exceptions
+      {
+          "hostname": exception_log.hostname,
+          "instance_id": exception_log.instance_id,
+          # inconsistency
+          "stack_trace": exception_log.stacktrace,
+          "lasttime": exception_log.lasttime,
+          "firsttime": exception_log.firsttime,
+          # odd transformation
+          "count": str(exception_log.count),
+          "logging": exception_log.logging,
+      }
+      for exception_log in exception_response.exceptions
   ]
 
 
 @router.get("/exceptionsummary")
 async def get_exception_summary(  # pylint: disable=too-many-arguments
-  cluster: str,
-  role: str,
-  environ: str,
-  component: str,
-  instances: List[str] = Query(..., alias="instance"),
-  topology_name: str = Query(..., alias="topology"),
+    cluster: str,
+    role: str,
+    environ: str,
+    component: str,
+    instances: List[str] = Query(..., alias="instance"),
+    topology_name: str = Query(..., alias="topology"),
 ):
   """Return info about exceptions that have occurred."""
   exception_response = await _get_exception_log_response(
-    cluster, role, environ, component, instances, topology_name, summary=False
+      cluster, role, environ, component, instances, topology_name, summary=False
   )
 
   return [
-    {
-      # inconsistency
-      "class_name": exception_log.stacktrace,
-      "lasttime": exception_log.lasttime,
-      "firsttime": exception_log.firsttime,
-      # odd transformation
-      "count": str(exception_log.count),
-    }
-    for exception_log in exception_response.exceptions
+      {
+          # inconsistency
+          "class_name": exception_log.stacktrace,
+          "lasttime": exception_log.lasttime,
+          "firsttime": exception_log.firsttime,
+          # odd transformation
+          "count": str(exception_log.count),
+      }
+      for exception_log in exception_response.exceptions
   ]
 
 
@@ -223,11 +223,11 @@ class ShellResponse(BaseModel):  # pylint: disable=too-few-public-methods
 
 @router.get("/pid", response_model=ShellResponse)
 async def get_pid(
-  cluster: str,
-  role: str,
-  environ: str,
-  instance: str,
-  topology_name: str = Query(..., alias="topology"),
+    cluster: str,
+    role: str,
+    environ: str,
+    instance: str,
+    topology_name: str = Query(..., alias="topology"),
 ):
   """Get the PId of the heron process."""
   topology = state.tracker.get_topology(cluster, role, environ, topology_name)
@@ -239,11 +239,11 @@ async def get_pid(
 
 @router.get("/jstack", response_model=ShellResponse)
 async def get_jstack(
-  cluster: str,
-  role: str,
-  environ: str,
-  instance: str,
-  topology_name: str = Query(..., alias="topology"),
+    cluster: str,
+    role: str,
+    environ: str,
+    instance: str,
+    topology_name: str = Query(..., alias="topology"),
 ):
   """Get jstack output for the heron process."""
   topology = state.tracker.get_topology(cluster, role, environ, topology_name)
@@ -259,11 +259,11 @@ async def get_jstack(
 
 @router.get("/jmap", response_model=ShellResponse)
 async def get_jmap(
-  cluster: str,
-  role: str,
-  environ: str,
-  instance: str,
-  topology_name: str = Query(..., alias="topology"),
+    cluster: str,
+    role: str,
+    environ: str,
+    instance: str,
+    topology_name: str = Query(..., alias="topology"),
 ):
   """Get jmap output for the heron process."""
   topology = state.tracker.get_topology(cluster, role, environ, topology_name)
@@ -279,11 +279,11 @@ async def get_jmap(
 
 @router.get("/histo", response_model=ShellResponse)
 async def get_memory_histogram(
-  cluster: str,
-  role: str,
-  environ: str,
-  instance: str,
-  topology_name: str = Query(..., alias="topology"),
+    cluster: str,
+    role: str,
+    environ: str,
+    instance: str,
+    topology_name: str = Query(..., alias="topology"),
 ):
   """Get memory usage histogram the heron process. This uses the ouput of the last jmap run."""
   topology = state.tracker.get_topology(cluster, role, environ, topology_name)

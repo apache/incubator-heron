@@ -22,9 +22,6 @@
 import logging
 import os
 import sys
-import tornado.httpserver
-import tornado.ioloop
-import tornado.web
 
 from heron.tools.common.src.python.utils import config as common_config
 from heron.common.src.python.utils import log
