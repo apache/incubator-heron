@@ -1,7 +1,8 @@
 ---
-id: compiling-overview
+id: version-0.20.3-incubating-rc8-compiling-overview
 title: Compiling Heron
 sidebar_label: Compiling Overview
+original_id: compiling-overview
 ---
 <!--
     Licensed to the Apache Software Foundation (ASF) under one
@@ -50,7 +51,7 @@ You must have the following installed to compile Heron:
 * [GNU Libtool](http://www.gnu.org/software/libtool/) >= 2.4.6
 * [gcc/g++](https://gcc.gnu.org/) >= 4.8.1 (Linux platforms)
 * [CMake](https://cmake.org/) >= 2.6.4
-* [Python](https://www.python.org/) >= 3.8
+* [Python](https://www.python.org/) >= 3.4
 * [Perl](https://www.perl.org/) >= 5.8.8
 * [Ant] (https://ant.apache.org/) >= 1.10.0
 * [CppUnit] (https://freedesktop.org/wiki/Software/cppunit/) >= 1.10.1
