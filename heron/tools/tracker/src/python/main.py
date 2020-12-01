@@ -29,18 +29,13 @@ from heron.tools.tracker.src.python import constants
 from heron.tools.tracker.src.python import utils
 from heron.tools.tracker.src.python.config import Config, STATEMGRS_KEY
 from heron.tools.tracker.src.python.tracker import Tracker
-from heron.tools.tracker.src.python.app import app
+from heron.tools.tracker.src.python.main2 import app
 from heron.tools.tracker.src.python import state
 
 import click
+import uvicorn
 
 Log = log.Log
-
-
-def define_options(port: int, config_file: str) -> None:
-  """ define Tornado global variables """
-  define("port", default=port)
-  define("config_file", default=config_file)
 
 
 def create_tracker_config(config_file: str, stmgr_override: dict) -> dict:
@@ -118,7 +113,7 @@ def cli(
     hostport: str,
     port: int,
     verbose: bool,
-) -> None:
+) -> int:
   """
   A HTTP service for serving data about clusters.
 
@@ -127,10 +122,8 @@ def cli(
 
   """
 
-  log.configure(logging.DEBUG if verbose else logging.INFO)
-
-  # set Tornado global option
-  define_options(port, config_file)
+  log_level = logging.DEBUG if verbose else logging.INFO
+  log.configure(log_level)
 
   stmgr_override = {
       "type": stmgr_type,
@@ -142,11 +135,13 @@ def cli(
   config = Config(create_tracker_config(config_file, stmgr_override))
 
   state.tracker = Tracker(config)
-  state.tracker.synch_topologies()
-  # TODO: work out topology vs. topology_info
-  # TODO: run
+  state.tracker.sync_topologies()
+  # this only returns when interrupted
+  uvicorn.run(app, host="0.0.0.0", port=port, log_level=log_level)
+
   state.tracker.stop_sync()
+  return 0
 
 
 if __name__ == "__main__":
-  cli() # pylint: disable=no-value-for-parameter
+  sys.exit(cli()) # pylint: disable=no-value-for-parameter

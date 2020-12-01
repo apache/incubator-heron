@@ -21,165 +21,194 @@
 ''' topology.py '''
 import json
 import string
-import uuid
 
 from copy import deepcopy
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
-from heronpy.api import api_constants
-from heron.common.src.python.utils.log import Log
 from heron.proto import topology_pb2
 from heron.proto.execution_state_pb2 import ExecutionState as ExecutionState_pb
 from heron.proto.packing_plan_pb2 import PackingPlan as PackingPlan_pb
 from heron.proto.physical_plan_pb2 import PhysicalPlan as PhysicalPlan_pb
 from heron.proto.scheduler_pb2 import SchedulerLocation as SchedulerLocation_pb
 from heron.proto.tmanager_pb2 import TManagerLocation as TManagerLocation_pb
-from heron.tools.tracker.src.python.config import Config, EXTRA_LINK_FORMATTER_KEY, EXTRA_LINK_URL_KEY
+from heron.tools.tracker.src.python.config import (
+    Config,
+    EXTRA_LINK_FORMATTER_KEY,
+    EXTRA_LINK_URL_KEY,
+)
 from heron.tools.tracker.src.python import utils
+
+import networkx
 
 from pydantic import BaseModel, Field
 
 
 class TopologyInfoMetadata(BaseModel):
-    cluster: str
-    environ: str
-    role: str
-    jobname: str
-    submission_time: int
-    submission_user: str
-    release_username: str
-    release_tag: str
-    release_version: str
-    extra_links: List[Dict[str, str]]
+  cluster: str
+  environ: str
+  role: str
+  jobname: str
+  submission_time: int
+  submission_user: str
+  release_username: str
+  release_tag: str
+  release_version: str
+  extra_links: List[Dict[str, str]]
 
 class TopologyInfoExecutionState(TopologyInfoMetadata):
-    """
-    This model is a superset of the "metadata".
+  """
+  This model is a superset of the "metadata".
 
-    Note: this may be a symptom of a bad pattern, the presence of these
-        things could be determined by making their respective objects
-        optional rather than empty
-    """
-    has_physical_plan: bool
-    has_packing_plan: bool
-    has_tmanager_location: bool
-    has_scheduler_location: bool
+  Note: this may be a symptom of a bad pattern, the presence of these
+      things could be determined by making their respective objects
+      optional rather than empty
+  """
+  has_physical_plan: bool
+  has_packing_plan: bool
+  has_tmanager_location: bool
+  has_scheduler_location: bool
+
+class RuntimeStateStatemanager(BaseModel):
+  is_registered: bool
 
 class TopologyInfoRuntimeState(BaseModel):
-    has_physical_plan: bool
-    has_packing_plan: bool
-    has_tmanager_location: bool
-    has_scheduler_location: bool
-    stmgrs: Dict[str, str] = Field(..., deprecated=True)
+  has_physical_plan: bool
+  has_packing_plan: bool
+  has_tmanager_location: bool
+  has_scheduler_location: bool
+  stmgrs: Dict[str, RuntimeStateStatemanager] = Field(
+      ...,
+      deprecated=True,
+      description="this is only populated by the /topologies/runtimestate endpoint",
+  )
 
 
 class TopologyInfoSchedulerLocation(BaseModel):
-    name: Optional[str]
-    http_endpoint: Optional[str]
-    job_page_link: Optional[str] = Field(None, description="may be empty")
+  name: Optional[str]
+  http_endpoint: Optional[str]
+  job_page_link: Optional[str] = Field(None, description="may be empty")
 
 class TopologyInfoTmanagerLocation(BaseModel):
-    name: Optional[str]
-    id: Optional[str]
-    host: Optional[str]
-    controller_port: Optional[int]
-    server_port: Optional[int]
-    stats_port: Optional[int]
+  name: Optional[str]
+  id: Optional[str]
+  host: Optional[str]
+  controller_port: Optional[int]
+  server_port: Optional[int]
+  stats_port: Optional[int]
 
 class PackingPlanRequired(BaseModel):
-    cpu: float
-    ram: int
-    disk: int
+  cpu: float
+  ram: int
+  disk: int
 
 class PackingPlanScheduled(BaseModel):
-    cpu: Optional[float]
-    ram: Optional[int]
-    disk: Optional[int]
+  cpu: Optional[float]
+  ram: Optional[int]
+  disk: Optional[int]
 
 class PackingPlanInstance(BaseModel):
-    component_name: str
-    task_id: int
-    component_index: int
-    instance_resources: PackingPlanRequired
+  component_name: str
+  task_id: int
+  component_index: int
+  instance_resources: PackingPlanRequired
 
 class PackingPlan(BaseModel):
-    id: int
-    instances: List[PackingPlanInstance]
-    required_respources: PackingPlanRequired
-    # this should be an optional object
-    scheduled_resources: PackingPlanScheduled
+  id: int
+  instances: List[PackingPlanInstance]
+  required_respources: PackingPlanRequired
+  # this should be an optional object
+  scheduled_resources: PackingPlanScheduled
 
 class TopologyInfoPackingPlan(BaseModel):
-    id: str
-    container_plans: List[PackingPlan]
+  id: str
+  container_plans: List[PackingPlan]
 
 class PhysicalPlanStmgr(BaseModel):
-    id: str
-    host: str
-    port: int
-    shell_port: int
-    cwd: str
-    pid: int
-    joburl: str
-    logfiles: str = Field(..., description="URL to retrieve logs")
-    instance_ids: List[str]
+  id: str
+  host: str
+  port: int
+  shell_port: int
+  cwd: str
+  pid: int
+  joburl: str
+  logfiles: str = Field(..., description="URL to retrieve logs")
+  instance_ids: List[str]
 
 class PhysicalPlanInstance(BaseModel):
-    id: str
-    name: str
-    stmgr_id: str
-    logfile: str = Field(..., description="URL to retrieve log")
+  id: str
+  name: str
+  stmgr_id: str
+  logfile: str = Field(..., description="URL to retrieve log")
 
 class PhysicalPlanComponent(BaseModel):
-    config: Dict[str, Any]
+  config: Dict[str, Any]
 
 class TopologyInfoPhysicalPlan(BaseModel):
-    instances: Dict[str, PhysicalPlanInstance]
-    # instance_id is in the form <container>_<container index>_<component>_<component index>
-    # the container is the "group"
-    instance_groups: Dict[str, List[str]] = Field(..., description="map of instance group name to instance ids")
-    stmgrs: Dict[str, PhysicalPlanStmgr] = Field(..., description="map of stmgr id to stmgr info")
-    spouts: Dict[str, List[str]] = Field(..., description="map of name to instance ids")
-    bolts: Dict[str, List[str]] = Field(..., description="map of name to instance ids")
-    config: Dict[str, Any]
-    components: Dict[str, PhysicalPlanComponent] = Field(..., description="map of bolt/spout name to info")
+  instances: Dict[str, PhysicalPlanInstance]
+  # instance_id is in the form <container>_<container index>_<component>_<component index>
+  # the container is the "group"
+  instance_groups: Dict[str, List[str]] = Field(
+      ...,
+      description="map of instance group name to instance ids",
+  )
+  stmgrs: Dict[str, PhysicalPlanStmgr] = Field(..., description="map of stmgr id to stmgr info")
+  spouts: Dict[str, List[str]] = Field(..., description="map of name to instance ids")
+  bolts: Dict[str, List[str]] = Field(..., description="map of name to instance ids")
+  config: Dict[str, Any]
+  components: Dict[str, PhysicalPlanComponent] = Field(
+      ...,
+      description="map of bolt/spout name to info",
+  )
 
 class LogicalPlanStream(BaseModel):
-    stream_name: str
+  stream_name: str
 
 class LogicalPlanBoltInput(BaseModel):
-    stream_name: str
-    component_name: str
-    grouping: str
+  stream_name: str
+  component_name: str
+  grouping: str
 
 class LogicalPlanBolt(BaseModel):
-    config: Dict[str, Any]
-    outputs: List[LogicalPlanStream]
-    inputs: List[LogicalPlanBoltInput]
+  config: Dict[str, Any]
+  outputs: List[LogicalPlanStream]
+  inputs: List[LogicalPlanBoltInput]
+  input_components: List[str] = Field(..., alias="inputComponents", deprecated=True)
 
 class LogicalPlanSpout(BaseModel):
-    config: Dict[str, Any]
-    type: str
-    source: str
-    version: str
-    outputs: List[LogicalPlanStream]
-    extra_links: Dict[str, Any]
+  config: Dict[str, Any]
+  type: str = Field(..., alias="spout_type")
+  source: str = Field(..., alias="spout_source")
+  version: str
+  outputs: List[LogicalPlanStream]
+  extra_links: List[Dict[str, Any]]
 
 class TopologyInfoLogicalPlan(BaseModel):
-    bolts: Dict[str, LogicalPlanBolt]
-    spouts: Dict[str, LogicalPlanSpout]
+  bolts: Dict[str, LogicalPlanBolt]
+  spouts: Dict[str, LogicalPlanSpout]
+  stages: int = Field(..., description="number of components in longest path")
 
 class TopologyInfo(BaseModel):
-    execution_state: TopologyInfoExecutionState
-    id: Optional[str]
-    logical_plan: TopologyInfoLogicalPlan
-    metadata: TopologyInfoMetadata
-    name: str
-    packing_plan: TopologyInfoPackingPlan
-    physical_plan: TopologyInfoPhysicalPlan
-    runtime_state: TopologyInfoRuntimeState
-    scheduler_location: TopologyInfoSchedulerLocation
-    tmanager_location: TopologyInfoTmanagerLocation
+  execution_state: TopologyInfoExecutionState
+  id: Optional[str]
+  logical_plan: TopologyInfoLogicalPlan
+  metadata: TopologyInfoMetadata
+  name: str
+  packing_plan: TopologyInfoPackingPlan
+  physical_plan: TopologyInfoPhysicalPlan
+  runtime_state: TopologyInfoRuntimeState
+  scheduler_location: TopologyInfoSchedulerLocation
+  tmanager_location: TopologyInfoTmanagerLocation
+
+
+def topology_stages(logical_plan: TopologyInfoLogicalPlan) -> int:
+  """Return the number of stages in a logical plan."""
+  graph = networkx.DiGraph(
+      (input_info.component_name, bolt_name)
+      for bolt_name, bolt_info in logical_plan.bolts.items()
+      for input_info in bolt_info.inputs
+  )
+  # this is is the same as "diameter" if treating the topology as an undirected graph
+  return networkx.dag_longest_path_length(graph)
 
 
 # pylint: disable=too-many-instance-attributes
@@ -218,14 +247,14 @@ class Topology:
         "submission_user": execution_state.submission_user,
     }
     for link in extra_links:
-        link[EXTRA_LINK_URL_KEY] = string.Template(link[EXTRA_LINK_FORMATTER_KEY]).substitute(subs)
+      link[EXTRA_LINK_URL_KEY] = string.Template(link[EXTRA_LINK_FORMATTER_KEY]).substitute(subs)
 
-  def _rebuild_info(self) -> TopologyInfo:
-    # Execution state is the most basic info. If there is no execution state, just return
+  def _rebuild_info(self) -> Optional[TopologyInfo]:
+    # Execution state is the most basic info. If returnecution state, just return
     # as the rest of the things don't matter.
     execution_state = self.execution_state
     if not execution_state:
-        return
+      return None
     # take references to instances to reduce inconsistency risk, which would
     # be a problem if the topology is updated in the middle of a call to this
 
@@ -235,18 +264,19 @@ class Topology:
     tmanager = self.tmanager
     scheduler_location = self.scheduler_location
     tracker_config = self.tracker_config
-    self.info = TopologyInfo(
+    return TopologyInfo(
         id=topology.id,
         logical_plan=self._build_logical_plan(topology, execution_state, physical_plan),
         metadata=self._build_metadata(topology, execution_state, tracker_config),
         name=topology.name, # was self.name
         packing_plan=self._build_packing_plan(packing_plan),
-        physical_plan=self._build_physical_plan(topology, physical_plan),
+        physical_plan=self._build_physical_plan(physical_plan),
         runtime_state=self._build_runtime_state(
             physical_plan=physical_plan,
             packing_plan=packing_plan,
             tmanager=tmanager,
             scheduler_location=scheduler_location,
+            execution_state=execution_state,
         ),
         execution_state=self._build_execution_state(
             topology=topology,
@@ -293,25 +323,26 @@ class Topology:
       physical_plan: Optional[PhysicalPlan_pb],
     ) -> TopologyInfoLogicalPlan:
     if not physical_plan:
-      return TopologyInfoLogicalPlan(spouts={}, bolts={})
+      return TopologyInfoLogicalPlan(spouts={}, bolts={}, stages=0)
     spouts = {}
     for spout in physical_plan.topology.spouts:
-        config = utils.convert_pb_kvs(spout.comp.config.kvs, include_non_primatives=False)
-        extra_links = json.loads(config.get("extra.links", "{}"))
-        Topology._render_extra_links(extra_links, topology, execution_state)
-        spouts[spout.comp.name] = LogicalPlanSpout(
-            config=config,
-            type=config.get("spout.type", "default"),
-            source=config.get("spout.source", "NA"),
-            version=config.get("spout.version", "NA"),
-            extra_links=extra_links,
-            outputs=[
-                LogicalPlanStream(name=output.stream.id)
-                for output in spout.outputs
-            ],
-        )
+      config = utils.convert_pb_kvs(spout.comp.config.kvs, include_non_primatives=False)
+      extra_links = json.loads(config.get("extra.links", "{}"))
+      Topology._render_extra_links(extra_links, topology, execution_state)
+      spouts[spout.comp.name] = LogicalPlanSpout(
+          config=config,
+          type=config.get("spout.type", "default"),
+          source=config.get("spout.source", "NA"),
+          version=config.get("spout.version", "NA"),
+          extra_links=extra_links,
+          outputs=[
+              LogicalPlanStream(name=output.stream.id)
+              for output in spout.outputs
+          ],
+      )
 
-    return TopologyInfoLogicalPlan(
+    info = TopologyInfoLogicalPlan(
+        stages=0,
         spouts=spouts,
         bolts={
             bolt.comp.name: LogicalPlanBolt(
@@ -328,15 +359,21 @@ class Topology:
                     )
                     for input_ in bolt.inputs
                 ],
+                input_components=[
+                    input_.component_name
+                    for input_ in bolt.inputs
+                ],
             )
             for bolt in physical_plan.topology.bolts
         },
     )
+    info.stages = topology_stages(info)
+    return info
 
   @staticmethod
   def _build_metadata(topology, execution_state, tracker_config) -> TopologyInfoMetadata:
     if not execution_state:
-        return  TopologyInfoMetadata()
+      return  TopologyInfoMetadata()
     metadata = {
         "cluster": execution_state.cluster,
         "environ": execution_state.environ,
@@ -389,7 +426,7 @@ class Topology:
     )
 
   @staticmethod
-  def _build_physical_plan(topology, physical_plan) -> TopologyInfoPhysicalPlan:
+  def _build_physical_plan(physical_plan) -> TopologyInfoPhysicalPlan:
     if not physical_plan:
       return TopologyInfoPhysicalPlan(
           instances={},
@@ -449,7 +486,12 @@ class Topology:
           id=instance_id,
           name=component_name,
           stmgr_id=instance.stmgr_id,
-          logfile=utils.make_shell_logfiles_url(stmgr.host, stmgr.shell_port, stmgr.cwd, instance_id),
+          logfile=utils.make_shell_logfiles_url(
+              stmgr.host,
+              stmgr.shell_port,
+              stmgr.cwd,
+              instance_id,
+          ),
       )
 
       # instance_id example: container_1_component_1
@@ -473,12 +515,14 @@ class Topology:
       packing_plan,
       tmanager,
       scheduler_location,
+      execution_state,
     ) -> TopologyInfoRuntimeState:
     return TopologyInfoRuntimeState(
         has_physical_plan=bool(physical_plan),
         has_packing_plan=bool(packing_plan),
         has_tmanager_location=bool(tmanager),
         has_scheduler_location=bool(scheduler_location),
+        release_version=execution_state.release_state.release_version,
         stmgrs={},
     )
 

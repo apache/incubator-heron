@@ -8,15 +8,15 @@ from heron.common.src.python.utils.log import Log
 from heron.proto import common_pb2
 from heron.proto import tmanager_pb2
 from heron.tools.tracker.src.python import metricstimeline, state
-from heron.tools.tracker.src.python.main2 import ResponseEnvelope
 from heron.tools.tracker.src.python.query import Query as TManagerQuery
+from heron.tools.tracker.src.python.utils import EnvelopingAPIRouter, BadRequest
 
 import httpx
 
-from fastapi import APIRouter, Query
+from fastapi import Query
 from pydantic import BaseModel, Field
 
-router = APIRouter()
+router = EnvelopingAPIRouter()
 
 
 async def get_component_metrics(
@@ -102,7 +102,7 @@ async def get_metrics_timeline( # pylint: disable=too-many-arguments
 ):
   """Return metrics over the given interval."""
   if start_time > end_time:
-    raise RequestError("start_time > end_time")
+    raise BadRequest("start_time > end_time")
   topology = state.tracker.get_toplogy(cluster, role, environ, topology_name)
   return await metricstimeline.get_metrics_timeline(
       topology.tmanager, component, metric_names, instances, start_time, end_time
@@ -127,7 +127,7 @@ class MetricsQueryResponse(BaseModel): # pylint: disable=too-few-public-methods
   )
 
 
-@router.get("/metricsquery", response_model=ResponseEnvelope[MetricsQueryResponse])
+@router.get("/metricsquery", response_model=MetricsQueryResponse)
 async def get_metrics_query( # pylint: disable=too-many-arguments
     cluster: str,
     role: str,

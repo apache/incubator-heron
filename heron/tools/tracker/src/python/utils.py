@@ -28,6 +28,8 @@ import os
 import sys
 import subprocess
 
+from asyncio import iscoroutinefunction
+from functools import wraps
 from pathlib import Path
 from typing import Any, Generic, Literal, Optional, TypeVar
 
@@ -38,6 +40,8 @@ from heron.proto import topology_pb2
 import javaobj.v1 as javaobj
 import yaml
 
+from fastapi import APIRouter, HTTPException
+from pydantic import Field
 from pydantic.generics import GenericModel
 
 
@@ -52,13 +56,55 @@ ResultType = TypeVar("ResultType")
 # XXX: requires python 3.7+
 class ResponseEnvelope(GenericModel, Generic[ResultType]):
   # XXX: looking to deprecate exception time - leve to logging or calling app
-  executiontime: float = 0
+  execution_time: float = Field(0.0, alias="executiontime")
   message: str
   result: Optional[ResultType] = None
   status: Literal[
       constants.RESPONSE_STATUS_FAILURE, constants.RESPONSE_STATUS_SUCCESS
   ]
   tracker_version: str = constants.API_VERSION
+
+class BadRequest(HTTPException):
+  """Raised when bad input is recieved."""
+  def __init__(self, detail: str = None) -> None:
+    super().__init__(400, detail)
+
+class EnvelopingAPIRouter(APIRouter):
+  """Router which wraps response_models with ResponseEnvelope."""
+
+  def api_route(self, response_model=None, **kwargs):
+    """This provides the decorator used by router.<method>."""
+    if not response_model:
+      return super().api_route(response_model=response_model, **kwargs)
+
+    wrapped_response_model = ResponseEnvelope[response_model]
+    decorator = super().api_route(response_model=wrapped_response_model, **kwargs)
+
+    @wraps(decorator)
+    def new_decorator(f):
+      if iscoroutinefunction(f):
+        @wraps(f)
+        async def envelope(*args, **kwargs):
+          result = await f(*args, **kwargs)
+          return wrapped_response_model(
+              result=result,
+              execution_time=0.0,
+              message="ok",
+              status="success",
+          )
+      else:
+        @wraps(f)
+        def envelope(*args, **kwargs):
+          result = f(*args, **kwargs)
+          return wrapped_response_model(
+              result=result,
+              execution_time=0.0,
+              message="ok",
+              status="success",
+          )
+      return decorator(envelope)
+
+    return new_decorator
 
 
 def make_shell_endpoint(topology_info: dict, instance_id: int) -> str:

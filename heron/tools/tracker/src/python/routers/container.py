@@ -6,18 +6,19 @@ from typing import List, Optional
 
 from heron.proto import common_pb2, tmanager_pb2
 from heron.tools.tracker.src.python import state, utils
+from heron.tools.tracker.src.python.utils import EnvelopingAPIRouter
 
 import httpx
 
-from fastapi import APIRouter, Query
+from fastapi import Query
 from pydantic import BaseModel, Field
 from starlette.responses import StreamingResponse
 
-router = APIRouter()
+router = EnvelopingAPIRouter()
 
 
 @router.get("/containerfiledata")
-async def get_file_data(  # pylint: disable=too-many-arguments
+async def get_container_file_slice(  # pylint: disable=too-many-arguments
     cluster: str,
     environ: str,
     role: str,
@@ -43,8 +44,8 @@ async def get_file_data(  # pylint: disable=too-many-arguments
     return response.json()
 
 
-@router.get("/containerfiledownload")
-async def get_file_download(  # pylint: disable=too-many-arguments
+@router.get("/containerfiledownload", response_class=StreamingResponse)
+async def get_container_file(  # pylint: disable=too-many-arguments
     cluster: str,
     environ: str,
     role: str,
@@ -52,7 +53,7 @@ async def get_file_download(  # pylint: disable=too-many-arguments
     path: str,
     topology_name: str = Query(..., alias="topology"),
 ):
-  """Return the data for a given file."""
+  """Return a given raw file."""
   topology = state.tracker.get_topology(cluster, role, environ, topology_name)
   stmgr = state.tracker.pb2_to_api(topology)["physical_plan"]["stmgrs"][f"stmgr-{container}"]
   url = f"http://{stmgr['host']}:{stmgr['shell_port']}/download/{path}"
@@ -66,7 +67,7 @@ async def get_file_download(  # pylint: disable=too-many-arguments
 
 
 @router.get("/containerfilestats")
-async def get_file_stats(  # pylint: disable=too-many-arguments
+async def get_container_file_listing(  # pylint: disable=too-many-arguments
     cluster: str,
     environ: str,
     role: str,
@@ -84,7 +85,7 @@ async def get_file_stats(  # pylint: disable=too-many-arguments
 
 
 @router.get("/runtimestate")
-async def get_runtime_state(
+async def get_container_runtime_state(
     cluster: str,
     role: str,
     environ: str,
@@ -92,7 +93,7 @@ async def get_runtime_state(
 ):
   """Return the runtime state."""
   topology = state.tracker.get_topology(cluster, role, environ, topology_name)
-  topology_info = state.tracker.pb2_to_api(topology)
+  topology_info = topology.info
   tmanager = topology.tmanager
 
   # find out what is registed
@@ -109,17 +110,23 @@ async def get_runtime_state(
   reg.ParseFromString(response.content)
 
   # update the result with registration status
-  runtime_state = topology_info["runtime_state"]
-  # XXX: another mutation, looks bad - check it doesn't modify globals
-  runtime_state["topology_version"] = topology_info["metadata"]["release_version"]
+  runtime_state = topology_info.runtime_state.copy()
   for stmgr, is_registered in (
       (reg.registered_stmgrs, True),
       (reg.absent_stmgrs, False),
   ):
-    runtime_state["stmgrs"].setdefault(stmgr, {})["is_registered"] = is_registered
+    runtime_state.stmgrs[stmgr] = {"is_registered": is_registered}
 
   return runtime_state
 
+class ExceptionLog(BaseModel):
+  hostname: str
+  instance_id: str
+  stack_trace: str = Field(..., alias="stacktrace")
+  last_time: int = Field(..., alias="lasttime")
+  first_time: int = Field(..., alias="firsttime")
+  count: str = Field(..., description="number of occurances during collection interval")
+  logging: str = Field(..., description="additional text logged with exception")
 
 async def _get_exception_log_response(
     cluster: str,
@@ -129,7 +136,7 @@ async def _get_exception_log_response(
     instances: List[str] = Query(..., alias="instance"),
     topology_name: str = Query(..., alias="topology"),
     summary: bool = False,
-) -> tmanager_pb2.ExceptionLogResponse:
+) -> List[tmanager_pb2.ExceptionLogResponse]:
   topology = state.tracker.get_topology(cluster, role, environ, topology_name)
   tmanager = topology.tmanager
 
@@ -156,7 +163,7 @@ async def _get_exception_log_response(
   return exception_response
 
 
-@router.get("/exceptions")
+@router.get("/exceptions", response_model=List[ExceptionLog])
 async def get_exceptions(  # pylint: disable=too-many-arguments
     cluster: str,
     role: str,
@@ -171,23 +178,27 @@ async def get_exceptions(  # pylint: disable=too-many-arguments
   )
 
   return [
-      {
-          "hostname": exception_log.hostname,
-          "instance_id": exception_log.instance_id,
-          # inconsistency
-          "stack_trace": exception_log.stacktrace,
-          "lasttime": exception_log.lasttime,
-          "firsttime": exception_log.firsttime,
-          # odd transformation
-          "count": str(exception_log.count),
-          "logging": exception_log.logging,
-      }
+      ExceptionLog(
+          hostname=exception_log.hostname,
+          instance_id=exception_log.instance_id,
+          stack_trace=exception_log.stacktrace,
+          lasttime=exception_log.lasttime,
+          firsttime=exception_log.firsttime,
+          count=str(exception_log.count),
+          logging=exception_log.logging,
+      )
       for exception_log in exception_response.exceptions
   ]
 
 
-@router.get("/exceptionsummary")
-async def get_exception_summary(  # pylint: disable=too-many-arguments
+class ExceptionSummaryItem(BaseModel):
+  class_name: str
+  last_time: int = Field(..., alias="lasttime")
+  first_time: int = Field(..., alias="firsttime")
+  count: str
+
+@router.get("/exceptionsummary", response_model=List[ExceptionSummaryItem])
+async def get_exceptions_summary(  # pylint: disable=too-many-arguments
     cluster: str,
     role: str,
     environ: str,
@@ -201,14 +212,12 @@ async def get_exception_summary(  # pylint: disable=too-many-arguments
   )
 
   return [
-      {
-          # inconsistency
-          "class_name": exception_log.stacktrace,
-          "lasttime": exception_log.lasttime,
-          "firsttime": exception_log.firsttime,
-          # odd transformation
-          "count": str(exception_log.count),
-      }
+      ExceptionSummaryItem(
+          class_name=exception_log.stacktrace,
+          last_time=exception_log.lasttime,
+          first_time=exception_log.firsttime,
+          count=str(exception_log.count),
+      )
       for exception_log in exception_response.exceptions
   ]
 
@@ -222,7 +231,7 @@ class ShellResponse(BaseModel):  # pylint: disable=too-few-public-methods
 
 
 @router.get("/pid", response_model=ShellResponse)
-async def get_pid(
+async def get_container_heron_pid(
     cluster: str,
     role: str,
     environ: str,
@@ -238,7 +247,7 @@ async def get_pid(
 
 
 @router.get("/jstack", response_model=ShellResponse)
-async def get_jstack(
+async def get_container_heron_jstack(
     cluster: str,
     role: str,
     environ: str,
@@ -248,7 +257,7 @@ async def get_jstack(
   """Get jstack output for the heron process."""
   topology = state.tracker.get_topology(cluster, role, environ, topology_name)
 
-  pid_response = await get_pid(cluster, role, environ, instance, topology_name)
+  pid_response = await get_container_heron_pid(cluster, role, environ, instance, topology_name)
   pid = pid_response["stdout"].strip()
 
   base_url = utils.make_shell_endpoint(state.tracker.pb2_to_api(topology), instance)
@@ -258,7 +267,7 @@ async def get_jstack(
 
 
 @router.get("/jmap", response_model=ShellResponse)
-async def get_jmap(
+async def get_container_heron_jmap(
     cluster: str,
     role: str,
     environ: str,
@@ -268,7 +277,7 @@ async def get_jmap(
   """Get jmap output for the heron process."""
   topology = state.tracker.get_topology(cluster, role, environ, topology_name)
 
-  pid_response = await get_pid(cluster, role, environ, instance, topology_name)
+  pid_response = await get_container_heron_pid(cluster, role, environ, instance, topology_name)
   pid = pid_response["stdout"].strip()
 
   base_url = utils.make_shell_endpoint(state.tracker.pb2_to_api(topology), instance)
@@ -278,7 +287,7 @@ async def get_jmap(
 
 
 @router.get("/histo", response_model=ShellResponse)
-async def get_memory_histogram(
+async def get_container_heron_memory_histogram(
     cluster: str,
     role: str,
     environ: str,
@@ -288,7 +297,7 @@ async def get_memory_histogram(
   """Get memory usage histogram the heron process. This uses the ouput of the last jmap run."""
   topology = state.tracker.get_topology(cluster, role, environ, topology_name)
 
-  pid_response = await get_pid(cluster, role, environ, instance, topology_name)
+  pid_response = await get_container_heron_pid(cluster, role, environ, instance, topology_name)
   pid = pid_response["stdout"].strip()
 
   base_url = utils.make_shell_endpoint(state.tracker.pb2_to_api(topology), instance)

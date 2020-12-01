@@ -11,14 +11,18 @@ from heron.tools.tracker.src.python.routers import topologies, container, metric
 from fastapi import FastAPI, Query
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
-from starlette.responses import RedirectResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 # TODO: implement a 120s timeout to be consistent with previous implementation
-app = FastAPI()
-app.include_router(metrics.router)
-app.include_router(container.router)
+app = FastAPI(redoc_url="/")
+app.include_router(container.router, prefix="/topologies")
+app.include_router(metrics.router, prefix="/topologies")
 app.include_router(topologies.router, prefix="/topologies")
+
+
+#APIRouter.api_route can be patched to take response_model, then add ResponseEnvelope to it
+# and decorate view so that it returns success ResponseEnvelope. This approach is fine if
+# adding routes to individual router, rather than directly to app.
 
 @app.on_event("startup")
 async def startup_event():
@@ -32,9 +36,12 @@ async def shutdown_event():
 
 
 @app.exception_handler(Exception)
-async def handle_exception(request, exc: Exception):
+async def handle_exception(_, exc: Exception):
   payload = ResponseEnvelope[str](
-      message=f"request failed: {exc}", status=constants.RESPONSE_STATUS_FAILURE
+      result="",
+      execution_time=0.0,
+      message=f"request failed: {exc}",
+      status=constants.RESPONSE_STATUS_FAILURE
   )
   status_code = 500
   if isinstance(exc, StarletteHTTPException):
@@ -44,19 +51,14 @@ async def handle_exception(request, exc: Exception):
   return JSONResponse(content=payload.dict(), status_code=status_code)
 
 
-@app.get("/")
-async def home():
-  return RedirectResponse(url="/topologies")
-
-
 @app.get("/clusters", response_model=ResponseEnvelope[List[str]])
 async def clusters() -> List[str]:
-    return ResponseEnvelope[List[str]](
-       message="ok",
-       status="success",
-       result=[s.name for s in state.tracker.state_managers],
-    )
-
+  return ResponseEnvelope[List[str]](
+      execution_time=0.0,
+      message="ok",
+      status="success",
+      result=[s.name for s in state.tracker.state_managers],
+  )
 
 @app.get(
     "/machines",
@@ -87,7 +89,8 @@ async def get(
     ] = topology.get_machines()
 
   return ResponseEnvelope[Dict[str, Dict[str, Dict[str, List[str]]]]](
-    result=response,
-    status="success",
-    message="ok",
+      execution_time=0.0,
+      result=response,
+      status="success",
+      message="ok",
   )

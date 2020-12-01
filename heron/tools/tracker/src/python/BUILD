@@ -8,7 +8,7 @@ pex_library(
     ),
     reqs = [
         "click==7.1.2",
-        "fastapi==0.60.1",
+        "fastapi==0.62.0",
         "httpx==0.16.1",
         "javaobj-py3==0.4.1",
         "networkx==2.4",

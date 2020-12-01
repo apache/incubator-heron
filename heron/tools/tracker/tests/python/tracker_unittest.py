@@ -44,7 +44,7 @@ def mock_tracker(tracker):
     yield tracker
 
 # pylint: disable=unused-argument
-def test_first_synch_topologies(mock_tracker):
+def test_first_sync_topologies(mock_tracker):
   mock_state_manager_1 = Mock()
   mock_state_manager_1.name = 'mock_name1'
 
@@ -65,7 +65,7 @@ def test_first_synch_topologies(mock_tracker):
     on_topologies_watch(['top_name3', 'top_name4'])
   mock_state_manager_2.get_topologies = side_effect2
 
-  mock_tracker.synch_topologies()
+  mock_tracker.sync_topologies()
   mock_tracker.get_stmgr_topologies.assert_has_calls(
       [call("mock_name2"),
        call("mock_name1")],
@@ -76,7 +76,7 @@ def test_first_synch_topologies(mock_tracker):
                                           call(mock_state_manager_2, 'top_name4')],
                                          any_order=True)
 
-def test_synch_topologies_leading_with_add_and_remove_topologies(mock_tracker):
+def test_sync_topologies_leading_with_add_and_remove_topologies(mock_tracker):
   mock_state_manager_1 = Mock()
   mock_state_manager_1.name = 'mock_name1'
 
@@ -97,7 +97,7 @@ def test_synch_topologies_leading_with_add_and_remove_topologies(mock_tracker):
     on_topologies_watch(['top_name3', 'top_name4'])
   mock_state_manager_2.get_topologies = side_effect2
 
-  mock_tracker.synch_topologies()
+  mock_tracker.sync_topologies()
   mock_tracker.get_stmgr_topologies.assert_has_calls(
       [call("mock_name2"),
        call("mock_name1")],
@@ -134,7 +134,7 @@ def test_synch_topologies_leading_with_add_and_remove_topologies(mock_tracker):
   mock_tracker.remove_topology.assert_has_calls([call('top_name2', 'mock_name1'),
                                          call('top_name3', 'mock_name2'),
                                          call('top_name4', 'mock_name2')],
-                                        any_order=False)
+                                        any_order=True)
   assert 3 == mock_tracker.add_new_topology.call_count
   assert 3 == mock_tracker.remove_topology.call_count
 

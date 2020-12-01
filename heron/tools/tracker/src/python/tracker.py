@@ -19,19 +19,16 @@
 #  under the License.
 
 ''' tracker.py '''
-import json
 import sys
 
 from functools import partial
-from typing import Any, Container, Dict, List, Optional
-from weakref import WeakKeyDictionary
+from typing import Any, Container, List, Optional
 
 from heron.common.src.python.utils.log import Log
 from heron.statemgrs.src.python import statemanagerfactory
 from heron.statemgrs.src.python.statemanager import StateManager
-from heron.tools.tracker.src.python.config import Config, EXTRA_LINK_FORMATTER_KEY, EXTRA_LINK_URL_KEY
+from heron.tools.tracker.src.python.config import Config
 from heron.tools.tracker.src.python.topology import Topology
-from heron.tools.tracker.src.python import utils
 
 
 class Tracker:
@@ -52,7 +49,7 @@ class Tracker:
     self.topologies: List[Topology] = []
     self.state_managers = []
 
-  def synch_topologies(self) -> None:
+  def sync_topologies(self) -> None:
     """
     Sync the topologies with the statemgrs.
     """
