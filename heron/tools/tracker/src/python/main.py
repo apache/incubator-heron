@@ -138,8 +138,8 @@ def cli(
   state.tracker.sync_topologies()
   # this only returns when interrupted
   uvicorn.run(app, host="0.0.0.0", port=port, log_level=log_level)
-
   state.tracker.stop_sync()
+
   return 0
 
 

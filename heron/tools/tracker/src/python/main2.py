@@ -1,10 +1,31 @@
+#!/usr/bin/env python3
+# -*- encoding: utf-8 -*-
+
+#  Licensed to the Apache Software Foundation (ASF) under one
+#  or more contributor license agreements.  See the NOTICE file
+#  distributed with this work for additional information
+#  regarding copyright ownership.  The ASF licenses this file
+#  to you under the Apache License, Version 2.0 (the
+#  "License"); you may not use this file except in compliance
+#  with the License.  You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing,
+#  software distributed under the License is distributed on an
+#  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+#  KIND, either express or implied.  See the License for the
+#  specific language governing permissions and limitations
+#  under the License.
 """
-WSGI application for the tracker.
+This service uses the configured state manager to retrieve notifications about
+running topologies, and uses data from that to communicate with individual containers
+when prompted to.
 
 """
 from typing import Dict, List, Optional
 
-from heron.tools.tracker.src.python import constants, state
+from heron.tools.tracker.src.python import constants, state, query
 from heron.tools.tracker.src.python.utils import ResponseEnvelope
 from heron.tools.tracker.src.python.routers import topologies, container, metrics
 
@@ -13,16 +34,42 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
+
+openapi_tags = [
+    {"name": "metrics", "description": query.__doc__},
+    {"name": "container", "description": container.__doc__},
+    {"name": "topologies", "description": topologies.__doc__},
+]
+
 # TODO: implement a 120s timeout to be consistent with previous implementation
-app = FastAPI(redoc_url="/")
-app.include_router(container.router, prefix="/topologies")
-app.include_router(metrics.router, prefix="/topologies")
-app.include_router(topologies.router, prefix="/topologies")
+app = FastAPI(
+    title="Heron Tracker",
+    redoc_url="/",
+    description=__doc__,
+    version=constants.API_VERSION,
+    openapi_tags=openapi_tags,
+    externalDocs={
+        "description": "Heron home page",
+        "url": "https://heron.incubator.apache.org/",
+    },
+    info={
+        "license": {
+            "name": "Apache 2.0",
+            "url": "https://www.apache.org/licenses/LICENSE-2.0.html"
+        },
+    },
+    **{
+        "x-logo": {
+            "url": "https://heron.incubator.apache.org/img/HeronTextLogo-small.png",
+            "href": "https://heron.incubator.apache.org/",
+            "backgroundColor": "#263238",
+        }
+    },
+)
+app.include_router(container.router, prefix="/topologies", tags=["container"])
+app.include_router(metrics.router, prefix="/topologies", tags=["metrics"])
+app.include_router(topologies.router, prefix="/topologies", tags=["topologies"])
 
-
-#APIRouter.api_route can be patched to take response_model, then add ResponseEnvelope to it
-# and decorate view so that it returns success ResponseEnvelope. This approach is fine if
-# adding routes to individual router, rather than directly to app.
 
 @app.on_event("startup")
 async def startup_event():
