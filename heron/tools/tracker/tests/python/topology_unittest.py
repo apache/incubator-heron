@@ -18,6 +18,9 @@
 # pylint: disable=missing-docstring
 import unittest
 
+from unittest.mock import MagicMock
+
+from heron.tools.tracker.src.python.tracker import Tracker
 from heron.tools.tracker.src.python.topology import Topology
 from mock_proto import MockProto
 
@@ -25,9 +28,16 @@ import pytest
 
 
 @pytest.fixture
-def topology():
+def tracker():
+    mock = MagicMock(Tracker)
+    mock.config.extra_links = []
+    return mock
+
+@pytest.fixture
+def topology(tracker):
   return Topology(MockProto.topology_name,
-                  "test_state_manager_name")
+                  "test_state_manager_name",
+                  tracker.config)
 
 def test_set_physical_plan(topology):
   # Set it to None
@@ -106,81 +116,3 @@ def test_bolts(topology):
   assert 3 == len(bolts)
   assert ["mock_bolt1", "mock_bolt2", "mock_bolt3"] == \
                    topology.bolt_names()
-
-def test_num_instances(topology):
-  # When pplan is not set
-  assert 0 == topology.num_instances()
-
-  pplan = MockProto().create_mock_medium_physical_plan(1, 2, 3, 4)
-  topology.set_physical_plan(pplan)
-
-  assert 10 == topology.num_instances()
-
-def test_trigger_watches(topology):
-  # Workaround
-  scope = {
-      "is_called": False
-  }
-  # pylint: disable=unused-argument, unused-variable
-  def callback(something):
-    scope["is_called"] = True
-  uid = topology.register_watch(callback)
-  assert scope["is_called"]
-
-  scope["is_called"] = False
-  assert not scope["is_called"]
-  print(scope)
-  topology.set_physical_plan(None)
-  print(scope)
-  assert scope["is_called"]
-  print(scope)
-
-  scope["is_called"] = False
-  assert not scope["is_called"]
-  topology.set_execution_state(None)
-  assert scope["is_called"]
-
-  scope["is_called"] = False
-  assert not scope["is_called"]
-  topology.set_tmanager(None)
-  assert scope["is_called"]
-
-def test_unregister_watch(topology):
-  # Workaround
-  scope = {
-      "is_called": False
-  }
-  # pylint: disable=unused-argument
-  def callback(something):
-    scope["is_called"] = True
-  uid = topology.register_watch(callback)
-  scope["is_called"] = False
-  assert not scope["is_called"]
-  topology.set_physical_plan(None)
-  assert scope["is_called"]
-
-  topology.unregister_watch(uid)
-  scope["is_called"] = False
-  assert not scope["is_called"]
-  topology.set_physical_plan(None)
-  assert not scope["is_called"]
-
-def test_bad_watch(topology):
-  # Workaround
-  scope = {
-      "is_called": False
-  }
-  # pylint: disable=unused-argument, unused-variable
-  def callback(something):
-    scope["is_called"] = True
-    raise Exception("Test Bad Trigger Exception")
-
-  uid = topology.register_watch(callback)
-  # is called the first time because of registeration
-  assert scope["is_called"]
-
-  # But should no longer be called
-  scope["is_called"] = False
-  assert not scope["is_called"]
-  topology.set_physical_plan(None)
-  assert not scope["is_called"]

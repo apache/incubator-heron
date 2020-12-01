@@ -18,13 +18,16 @@
 
 # pylint: disable=missing-docstring, attribute-defined-outside-init
 import unittest
+
+from functools import partial
 from unittest.mock import call, patch, Mock
 
 import heron.proto.execution_state_pb2 as protoEState
 from heron.statemgrs.src.python import statemanagerfactory
 from heron.tools.tracker.src.python.topology import Topology
 from heron.tools.tracker.src.python.tracker import Tracker
-from mock_proto import MockProto
+
+Topology = partial(Topology, tracker_config={})
 
 class TrackerTest(unittest.TestCase):
   def setUp(self):
@@ -226,40 +229,3 @@ class TrackerTest(unittest.TestCase):
     self.tracker.remove_topology('top_name4', 'mock_name2')
     self.assertCountEqual([self.topology3, self.topology5],
                           self.tracker.topologies)
-
-  def test_extract_physical_plan(self):
-    # Create topology
-    pb_pplan = MockProto().create_mock_simple_physical_plan()
-    topology = Topology('topology_name', 'state_manager')
-    topology.set_physical_plan(pb_pplan)
-    # Extract physical plan
-    pplan = self.tracker.extract_physical_plan(topology)
-    # Mock topology doesn't have topology config and instances
-    assert pplan['config'] == {}
-    assert pplan['bolts'] == {'mock_bolt': []}
-    assert pplan['spouts'] == {'mock_spout': []}
-    assert pplan['components']['mock_bolt']['config'] == \
-                     {'topology.component.parallelism': '1'}
-    assert pplan['components']['mock_spout']['config'] == \
-                     {'topology.component.parallelism': '1'}
-    assert pplan['instances'] == {}
-    assert pplan['stmgrs'] == {}
-
-  def test_extract_packing_plan(self):
-    # Create topology
-    pb_pplan = MockProto().create_mock_simple_packing_plan()
-    topology = Topology('topology_name', 'ExclamationTopology')
-    topology.set_packing_plan(pb_pplan)
-    # Extract packing plan
-    packing_plan = self.tracker.extract_packing_plan(topology)
-    assert packing_plan['id'] == 'ExclamationTopology'
-    assert packing_plan['container_plans'][0]['id'] == 1
-    assert packing_plan['container_plans'][0]['required_resources'] == \
-                     {'disk': 2048, 'ram': 1024, 'cpu': 1.0}
-    assert packing_plan['container_plans'][0]['instances'][0] == \
-                     {
-                       'component_index': 1,
-                        'component_name': 'word',
-                        'instance_resources': {'cpu': 1.0, 'disk': 2048, 'ram': 1024},
-                        'task_id': 1
-                     }
