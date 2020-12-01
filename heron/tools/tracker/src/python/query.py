@@ -46,7 +46,8 @@ Example:
 TS(component1, *, __emit-count/stream1)
 ```
 
-Time Series Operator. This is the basic operator that is responsible for getting metrics from TManager.
+Time Series Operator. This is the basic operator that is responsible for getting
+metrics from TManager.
 Accepts a list of 3 elements:
 
 1. componentName
@@ -87,7 +88,8 @@ Returns a univariate or multivariate time series, based on what the second opera
 SUM(TS(component1, instance1, metric1), DEFAULT(0, TS(component1, *, metric2)))
 ```
 
-Sum Operator. This operator is used to take sum of all argument time series. It can have any number of arguments,
+Sum Operator. This operator is used to take sum of all argument time series. It can have
+any number of arguments,
 each of which must be one of the following two types:
 
 1. Numeric constants, which will fill in the missing values as well, or
@@ -104,7 +106,8 @@ Note that "instance" attribute is not there in the result.
 MAX(100, TS(component1, *, metric1))
 ```
 
-Max Operator. This operator is used to find max of all argument operators for each individual timestamp.
+Max Operator. This operator is used to find max of all argument operators for each
+individual timestamp.
 Each argument must be one of the following types:
 
 1. Numeric constants, which will fill in the missing values as well, or
@@ -121,8 +124,10 @@ Note that "instance" attribute is not included in the result.
 PERCENTILE(99, TS(component1, *, metric1))
 ```
 
-Percentile Operator. This operator is used to find a quantile of all timelines retuned by the arguments, for each timestamp.
-This is a more general type of query similar to MAX. Note that `PERCENTILE(100, TS...)` is equivalent to `Max(TS...)`.
+Percentile Operator. This operator is used to find a quantile of all timelines retuned by
+the arguments, for each timestamp.
+This is a more general type of query similar to MAX. Note that `PERCENTILE(100, TS...)` is
+equivalent to `Max(TS...)`.
 Each argument must be either constant or Operators.
 First argument must always be the required Quantile.
 
@@ -144,7 +149,8 @@ DIVIDE(TS(component1, *, metrics1), 100)
 Divide Operator. Accepts two arguments, both can be univariate or multivariate.
 Each can be of one of the following types:
 
-1. Numeric constant will be considered as a constant time series for all applicable timestamps, they will not fill the missing values
+1. Numeric constant will be considered as a constant time series for all applicable
+  timestamps, they will not fill the missing values
 2. Operator - returns one or more timelines
 
 Three main cases are:
@@ -152,7 +158,8 @@ Three main cases are:
 1. When both operands are multivariate
     1. Divide operation will be done on matching data, that is, with same instance id.
     2. If the instances in both the operands do not match, error is thrown.
-    3. Returns multivariate time series, each representing the result of division on the two corresponding time series.
+    3. Returns multivariate time series, each representing the result of division on the two
+      corresponding time series.
 2. When one operand is univariate, and other is multivariate
     1. This includes division by constants as well.
     2. The univariate operand will participate with all time series in multivariate.
@@ -171,9 +178,11 @@ MULTIPLY(10, TS(component1, *, metrics1))
 ```
 
 Multiply Operator. Has same conditions as division operator. This is to keep the API simple.
-Accepts two arguments, both can be univariate or multivariate. Each can be of one of the following types:
+Accepts two arguments, both can be univariate or multivariate. Each can be of one of
+the following types:
 
-1. Numeric constant will be considered as a constant time series for all applicable timestamps, they will not fill the missing values
+1. Numeric constant will be considered as a constant time series for all applicable
+  timestamps, they will not fill the missing values
 2. Operator - returns one or more timelines
 
 Three main cases are:
@@ -203,9 +212,11 @@ SUBTRACT(TS(component1, instance1, metrics1), 100)
 ```
 
 Subtract Operator. Has same conditions as division operator. This is to keep the API simple.
-Accepts two arguments, both can be univariate or multivariate. Each can be of one of the following types:
+Accepts two arguments, both can be univariate or multivariate. Each can be of one of
+the following types:
 
-1. Numeric constant will be considered as a constant time series for all applicable timestamps, they will not fill the missing values
+1. Numeric constant will be considered as a constant time series for all applicable
+  timestamps, they will not fill the missing values
 2. Operator - returns one or more timelines
 
 Three main cases are:
@@ -235,9 +246,10 @@ RATE(TS(component1, *, metrics2))
 ```
 
 Rate Operator. This operator is used to find rate of change for all timeseries.
-Accepts a only a single argument, which must be an Operators which returns univariate or multivariate time series.
-Returns univariate or multivariate time series based on the argument, with each timestamp value
-corresponding to the rate of change for that timestamp.
+Accepts a only a single argument, which must be an Operators which returns
+univariate or multivariate time series.
+Returns univariate or multivariate time series based on the argument, with each
+timestamp value corresponding to the rate of change for that timestamp.
 """
 
 from typing import Any, List, Optional

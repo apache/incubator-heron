@@ -19,7 +19,7 @@
 #  under the License.
 
 """ metricstimeline.py """
-from typing import List
+from typing import Dict, List
 
 from heron.common.src.python.utils.log import Log
 from heron.proto import common_pb2
@@ -27,6 +27,17 @@ from heron.proto import tmanager_pb2
 
 import httpx
 
+from pydantic import BaseModel, Field
+
+
+class MetricsTimeline(BaseModel):
+  component: str
+  start_time: int = Field(..., alias="starttime")
+  end_time: int = Field(..., alias="enddtime")
+  timeline: Dict[str, Dict[str, Dict[int, int]]] = Field(
+      ...,
+      description="map of (metric name, instance, start) to metric value",
+  )
 
 # pylint: disable=too-many-locals, too-many-branches, unused-argument
 async def get_metrics_timeline(
@@ -37,40 +48,17 @@ async def get_metrics_timeline(
     start_time: int,
     end_time: int,
     callback=None,
-) -> dict:
+) -> MetricsTimeline:
   """
   Get the specified metrics for the given component name of this topology.
-  Returns the following dict on success:
-  {
-    "timeline": {
-      <metricname>: {
-        <instance>: {
-          <start_time> : <numeric value>,
-          <start_time> : <numeric value>,
-          ...
-        }
-        ...
-      }, ...
-    },
-    "starttime": <numeric value>,
-    "endtime": <numeric value>,
-    "component": "..."
-  }
 
-  Returns the following dict on failure:
-  {
-    "message": "..."
-  }
   """
+
   # Tmanager is the proto object and must have host and port for stats.
   if not tmanager or not tmanager.host or not tmanager.stats_port:
     raise Exception("No Tmanager found")
 
-  host = tmanager.host
-  port = tmanager.stats_port
-
   # Create the proto request object to get metrics.
-
   request_parameters = tmanager_pb2.MetricRequest()
   request_parameters.component_name = component_name
 
@@ -84,7 +72,7 @@ async def get_metrics_timeline(
   request_parameters.minutely = True
 
   # Form and send the http request.
-  url = f"http://{host}:{port}/stats"
+  url = f"http://{tmanager.host}:{tmanager.stats_port}/stats"
   with httpx.AsyncClient() as client:
     result = await client.post(url, data=request_parameters.SerializeToString())
 
@@ -95,19 +83,13 @@ async def get_metrics_timeline(
 
   # Parse the response from tmanager.
   response_data = tmanager_pb2.MetricResponse()
-  response_data.ParseFromString(result.body)
+  response_data.ParseFromString(result.content)
 
   if response_data.status.status == common_pb2.NOTOK:
     if response_data.status.HasField("message"):
       Log.warn("Received response from Tmanager: %s", response_data.status.message)
 
-  # Form the response.
-  ret = {}
-  ret["starttime"] = start_time
-  ret["endtime"] = end_time
-  ret["component"] = component_name
-  ret["timeline"] = {}
-
+  timeline = {}
   # Loop through all the metrics
   # One instance corresponds to one metric, which can have
   # multiple IndividualMetrics for each metricname requested.
@@ -117,15 +99,18 @@ async def get_metrics_timeline(
     # Loop through all individual metrics.
     for im in metric.metric:
       metricname = im.name
-      if metricname not in ret["timeline"]:
-        ret["timeline"][metricname] = {}
-      if instance not in ret["timeline"][metricname]:
-        ret["timeline"][metricname][instance] = {}
+      if instance not in timeline[metricname]:
+        timeline.setdefault(metricname, {})[instance] = {}
 
       # We get minutely metrics.
       # Interval-values correspond to the minutely mark for which
       # this metric value corresponds to.
       for interval_value in im.interval_values:
-        ret["timeline"][metricname][instance][interval_value.interval.start] = interval_value.value
+        timeline[metricname][instance][interval_value.interval.start] = interval_value.value
 
-  return ret
+  return MetricsTimeline(
+      starttime=start_time,
+      endtime=end_time,
+      component=component_name,
+      timeline=timeline,
+  )

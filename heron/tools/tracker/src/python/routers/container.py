@@ -41,7 +41,7 @@ router = EnvelopingAPIRouter()
 async def get_container_file_slice(  # pylint: disable=too-many-arguments
     cluster: str,
     environ: str,
-    role: str,
+    role: Optional[str],
     container: str,
     path: str,
     offset: int,
@@ -68,7 +68,7 @@ async def get_container_file_slice(  # pylint: disable=too-many-arguments
 async def get_container_file(  # pylint: disable=too-many-arguments
     cluster: str,
     environ: str,
-    role: str,
+    role: Optional[str],
     container: str,
     path: str,
     topology_name: str = Query(..., alias="topology"),
@@ -90,7 +90,7 @@ async def get_container_file(  # pylint: disable=too-many-arguments
 async def get_container_file_listing(  # pylint: disable=too-many-arguments
     cluster: str,
     environ: str,
-    role: str,
+    role: Optional[str],
     container: str,
     path: str,
     topology_name: str = Query(..., alias="topology"),
@@ -107,7 +107,7 @@ async def get_container_file_listing(  # pylint: disable=too-many-arguments
 @router.get("/runtimestate")
 async def get_container_runtime_state(
     cluster: str,
-    role: str,
+    role: Optional[str],
     environ: str,
     topology_name: str = Query(..., alias="topology"),
 ):
@@ -150,7 +150,7 @@ class ExceptionLog(BaseModel):
 
 async def _get_exception_log_response(
     cluster: str,
-    role: str,
+    role: Optional[str],
     environ: str,
     component: str,
     instances: List[str] = Query(..., alias="instance"),
@@ -186,7 +186,7 @@ async def _get_exception_log_response(
 @router.get("/exceptions", response_model=List[ExceptionLog])
 async def get_exceptions(  # pylint: disable=too-many-arguments
     cluster: str,
-    role: str,
+    role: Optional[str],
     environ: str,
     component: str,
     instances: List[str] = Query(..., alias="instance"),
@@ -220,7 +220,7 @@ class ExceptionSummaryItem(BaseModel):
 @router.get("/exceptionsummary", response_model=List[ExceptionSummaryItem])
 async def get_exceptions_summary(  # pylint: disable=too-many-arguments
     cluster: str,
-    role: str,
+    role: Optional[str],
     environ: str,
     component: str,
     instances: List[str] = Query(..., alias="instance"),
@@ -253,7 +253,7 @@ class ShellResponse(BaseModel):  # pylint: disable=too-few-public-methods
 @router.get("/pid", response_model=ShellResponse)
 async def get_container_heron_pid(
     cluster: str,
-    role: str,
+    role: Optional[str],
     environ: str,
     instance: str,
     topology_name: str = Query(..., alias="topology"),
@@ -269,7 +269,7 @@ async def get_container_heron_pid(
 @router.get("/jstack", response_model=ShellResponse)
 async def get_container_heron_jstack(
     cluster: str,
-    role: str,
+    role: Optional[str],
     environ: str,
     instance: str,
     topology_name: str = Query(..., alias="topology"),
@@ -289,7 +289,7 @@ async def get_container_heron_jstack(
 @router.get("/jmap", response_model=ShellResponse)
 async def get_container_heron_jmap(
     cluster: str,
-    role: str,
+    role: Optional[str],
     environ: str,
     instance: str,
     topology_name: str = Query(..., alias="topology"),
@@ -309,7 +309,7 @@ async def get_container_heron_jmap(
 @router.get("/histo", response_model=ShellResponse)
 async def get_container_heron_memory_histogram(
     cluster: str,
-    role: str,
+    role: Optional[str],
     environ: str,
     instance: str,
     topology_name: str = Query(..., alias="topology"),

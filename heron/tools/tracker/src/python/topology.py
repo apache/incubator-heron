@@ -19,6 +19,7 @@
 #  under the License.
 
 ''' topology.py '''
+import dataclasses
 import json
 import string
 
@@ -112,16 +113,15 @@ class PackingPlanInstance(BaseModel):
   component_index: int
   instance_resources: PackingPlanRequired
 
-class PackingPlan(BaseModel):
+class PackingPlanContainer(BaseModel):
   id: int
   instances: List[PackingPlanInstance]
-  required_respources: PackingPlanRequired
-  # this should be an optional object
+  required_resources: PackingPlanRequired
   scheduled_resources: PackingPlanScheduled
 
 class TopologyInfoPackingPlan(BaseModel):
   id: str
-  container_plans: List[PackingPlan]
+  container_plans: List[PackingPlanContainer]
 
 class PhysicalPlanStmgr(BaseModel):
   id: str
@@ -161,7 +161,7 @@ class TopologyInfoPhysicalPlan(BaseModel):
   )
 
 class LogicalPlanStream(BaseModel):
-  stream_name: str
+  name: str = Field(..., alias="stream_name")
 
 class LogicalPlanBoltInput(BaseModel):
   stream_name: str
@@ -210,6 +210,14 @@ def topology_stages(logical_plan: TopologyInfoLogicalPlan) -> int:
   # this is is the same as "diameter" if treating the topology as an undirected graph
   return networkx.dag_longest_path_length(graph)
 
+@dataclasses.dataclass(frozen=True)
+class TopologyState:
+  """Collection of state accumulated for tracker from state manager."""
+  tmanager: Optional[TManagerLocation_pb]
+  scheduler_location: Optional[SchedulerLocation_pb]
+  physical_plan: Optional[PhysicalPlan_pb]
+  packing_plan: Optional[PackingPlan_pb]
+  execution_state: Optional[ExecutionState_pb]
 
 # pylint: disable=too-many-instance-attributes
 class Topology:
@@ -249,21 +257,21 @@ class Topology:
     for link in extra_links:
       link[EXTRA_LINK_URL_KEY] = string.Template(link[EXTRA_LINK_FORMATTER_KEY]).substitute(subs)
 
-  def _rebuild_info(self) -> Optional[TopologyInfo]:
+  def _rebuild_info(self, t_state: TopologyState) -> Optional[TopologyInfo]:
     # Execution state is the most basic info. If returnecution state, just return
     # as the rest of the things don't matter.
-    execution_state = self.execution_state
+    execution_state = t_state.execution_state
     if not execution_state:
       return None
     # take references to instances to reduce inconsistency risk, which would
     # be a problem if the topology is updated in the middle of a call to this
 
-    topology = self # could be good to get the protobuf object
-    packing_plan = self.packing_plan
-    physical_plan = self.physical_plan
-    tmanager = self.tmanager
-    scheduler_location = self.scheduler_location
-    tracker_config = self.tracker_config
+    topology = self
+    packing_plan = t_state.packing_plan
+    physical_plan = t_state.physical_plan
+    tmanager = t_state.tmanager
+    scheduler_location = t_state.scheduler_location
+    tracker_config = self.tracker_config # assuming this is never updated
     return TopologyInfo(
         id=topology.id,
         logical_plan=self._build_logical_plan(topology, execution_state, physical_plan),
@@ -326,17 +334,17 @@ class Topology:
       return TopologyInfoLogicalPlan(spouts={}, bolts={}, stages=0)
     spouts = {}
     for spout in physical_plan.topology.spouts:
-      config = utils.convert_pb_kvs(spout.comp.config.kvs, include_non_primatives=False)
-      extra_links = json.loads(config.get("extra.links", "{}"))
+      config = utils.convert_pb_kvs(spout.comp.config.kvs, include_non_primitives=False)
+      extra_links = json.loads(config.get("extra.links", "[]"))
       Topology._render_extra_links(extra_links, topology, execution_state)
       spouts[spout.comp.name] = LogicalPlanSpout(
           config=config,
-          type=config.get("spout.type", "default"),
-          source=config.get("spout.source", "NA"),
+          spout_type=config.get("spout.type", "default"),
+          spout_source=config.get("spout.source", "NA"),
           version=config.get("spout.version", "NA"),
           extra_links=extra_links,
           outputs=[
-              LogicalPlanStream(name=output.stream.id)
+              LogicalPlanStream(stream_name=output.stream.id)
               for output in spout.outputs
           ],
       )
@@ -346,7 +354,7 @@ class Topology:
         spouts=spouts,
         bolts={
             bolt.comp.name: LogicalPlanBolt(
-                config=utils.convert_pb_kvs(bolt.comp.config.kvs, include_non_primatives=False),
+                config=utils.convert_pb_kvs(bolt.comp.config.kvs, include_non_primitives=False),
                 outputs=[
                     LogicalPlanStream(stream_name=output.stream.id)
                     for output in bolt.outputs
@@ -354,13 +362,13 @@ class Topology:
                 inputs=[
                     LogicalPlanBoltInput(
                         stream_name=input_.stream.id,
-                        component_name=input_.component_name,
+                        component_name=input_.stream.component_name,
                         grouping=topology_pb2.Grouping.Name(input_.gtype),
                     )
                     for input_ in bolt.inputs
                 ],
-                input_components=[
-                    input_.component_name
+                inputComponents=[
+                    input_.stream.component_name
                     for input_ in bolt.inputs
                 ],
             )
@@ -399,29 +407,37 @@ class Topology:
     return TopologyInfoPackingPlan(
         id=packing_plan.id,
         container_plans=[
-            PackingPlan(
-                id=plan.id,
-                required_resources=PackingPlanInstance(
-                    component_name=plan.component_name,
-                    task_id=plan.task_id,
-                    component_index=plan.component_index,
-                    instance_resources=PackingPlanRequired(
-                        cpu=plan.resource.cpu,
-                        ram=plan.resource.ram,
-                        disk=plan.resource.disk,
+            PackingPlanContainer(
+                id=container.id,
+                instances=[
+                    PackingPlanInstance(
+                        component_name=instance.component_name,
+                        task_id=instance.task_id,
+                        component_index=instance.component_index,
+                        instance_resources=PackingPlanRequired(
+                            cpu=instance.resource.cpu,
+                            ram=instance.resource.ram,
+                            disk=instance.resource.disk,
+                        ),
                     )
+                    for instance in container.instance_plans
+                ],
+                required_resources=PackingPlanRequired(
+                    cpu=container.requiredResource.cpu,
+                    ram=container.requiredResource.ram,
+                    disk=container.requiredResource.disk,
                 ),
                 scheduled_resources=(
                     PackingPlanScheduled(
-                        cpu=plan.scheduledResource.cpu,
-                        ram=plan.scheduledResource.ram,
-                        disk=plan.scheduledResource.ram,
+                        cpu=container.scheduledResource.cpu,
+                        ram=container.scheduledResource.ram,
+                        disk=container.scheduledResource.ram,
                     )
-                    if plan.scheduledResource else
+                    if container.scheduledResource else
                     PackingPlanScheduled()
                 ),
             )
-            for plan in packing_plan.container_plans
+            for container in packing_plan.container_plans
         ],
     )
 
@@ -448,25 +464,29 @@ class Topology:
       name = spout.comp.name
       spouts[name] = []
       if name not in components:
-        components[name] = PhysicalPlanComponent(config=spout.comp.config.kvs)
+        components[name] = PhysicalPlanComponent(
+            config=utils.convert_pb_kvs(spout.comp.config.kvs),
+        )
     for bolt in physical_plan.topology.bolts:
       name = bolt.comp.name
       bolts[name] = []
       if name not in components:
-        components[name] = PhysicalPlanComponent(config=bolt.comp.config.kvs)
+        components[name] = PhysicalPlanComponent(
+            config=utils.convert_pb_kvs(bolt.comp.config.kvs),
+        )
 
     stmgrs = {}
     for stmgr in physical_plan.stmgrs:
       shell_port = stmgr.shell_port if stmgr.HasField("shell_port") else None
       stmgrs[stmgr.id] = PhysicalPlanStmgr(
           id=stmgr.id,
-          host=stmgr.host,
+          host=stmgr.host_name,
           port=stmgr.data_port,
           shell_port=shell_port,
           cwd=stmgr.cwd,
           pid=stmgr.pid,
-          joburl=utils.make_shell_job_url(stmgr.host, shell_port, stmgr.cwd),
-          logfiles=utils.make_shell_logfiles_url(stmgr.host, stmgr.shell_port, stmgr.cwd),
+          joburl=utils.make_shell_job_url(stmgr.host_name, shell_port, stmgr.cwd),
+          logfiles=utils.make_shell_logfiles_url(stmgr.host_name, stmgr.shell_port, stmgr.cwd),
           instance_ids=[],
       )
 
@@ -482,7 +502,7 @@ class Topology:
 
       stmgr = stmgrs[instance.stmgr_id]
       stmgr.instance_ids.append(instance_id)
-      instances = PhysicalPlanInstance(
+      instances[instance_id] = PhysicalPlanInstance(
           id=instance_id,
           name=component_name,
           stmgr_id=instance.stmgr_id,
@@ -560,40 +580,59 @@ class Topology:
         status_port=tmanager.stats_port,
     )
 
+  def _update(
+      self,
+      physical_plan=...,
+      packing_plan=...,
+      execution_state=...,
+      tmanager=...,
+      scheduler_location=...,
+    ) -> None:
+    """Atomically update this instance to avoid inconsistent reads/writes from other threads."""
+    t_state = TopologyState(
+        physical_plan=self.physical_plan if physical_plan is ... else physical_plan,
+        packing_plan=self.packing_plan if packing_plan is ... else packing_plan,
+        execution_state=self.execution_state if execution_state is ... else execution_state,
+        tmanager=self.tmanager if tmanager is ... else tmanager,
+        scheduler_location=(
+            self.scheduler_location
+            if scheduler_location is ... else
+            scheduler_location
+        ),
+    )
+    if t_state.physical_plan:
+      id_ = t_state.physical_plan.topology.id
+    elif t_state.packing_plan:
+      id_ = t_state.packing_plan.id
+    else:
+      id_ = None
+
+    info = self._rebuild_info(t_state)
+    update = dataclasses.asdict(t_state)
+    update["info"] = info
+    update["id"] = id_
+    # atomic update using python GIL
+    self.__dict__.update(update)
+
   def set_physical_plan(self, physical_plan: PhysicalPlan_pb) -> None:
     """ set physical plan """
-    if not physical_plan:
-      self.physical_plan = None
-      self.id = None
-    else:
-      self.physical_plan = physical_plan
-      self.id = physical_plan.topology.id
-    self.info = self._rebuild_info()
+    self._update(physical_plan=physical_plan)
 
   def set_packing_plan(self, packing_plan: PackingPlan_pb) -> None:
     """ set packing plan """
-    if not packing_plan:
-      self.packing_plan = None
-      self.id = None
-    else:
-      self.packing_plan = packing_plan
-      self.id = packing_plan.id
-    self.info = self._rebuild_info()
+    self._update(packing_plan=packing_plan)
 
   def set_execution_state(self, execution_state: ExecutionState_pb) -> None:
     """ set exectuion state """
-    self.execution_state = execution_state
-    self.info = self._rebuild_info()
+    self._update(execution_state=execution_state)
 
   def set_tmanager(self, tmanager: TManagerLocation_pb) -> None:
     """ set exectuion state """
-    self.tmanager = tmanager
-    self.info = self._rebuild_info()
+    self._update(tmanager=tmanager)
 
   def set_scheduler_location(self, scheduler_location: SchedulerLocation_pb) -> None:
     """ set exectuion state """
-    self.scheduler_location = scheduler_location
-    self.info = self._rebuild_info()
+    self._update(scheduler_location=scheduler_location)
 
   @property
   def cluster(self) -> Optional[str]:

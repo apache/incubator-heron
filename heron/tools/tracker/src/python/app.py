@@ -19,7 +19,7 @@
 #  under the License.
 """
 This service uses the configured state manager to retrieve notifications about
-running topologies, and uses data from that to communicate with individual containers
+running topologies, and uses data from that to communicate with topology managers
 when prompted to.
 
 """
@@ -111,7 +111,7 @@ async def clusters() -> List[str]:
     "/machines",
     response_model=ResponseEnvelope[Dict[str, Dict[str, Dict[str, List[str]]]]],
 )
-async def get(
+async def get_machines(
     cluster_names: Optional[List[str]] = Query(None, alias="cluster"),
     environ_names: Optional[List[str]] = Query(None, alias="environ"),
     topology_names: Optional[List[str]] = Query(None, alias="topology"),

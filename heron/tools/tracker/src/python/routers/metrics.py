@@ -37,6 +37,14 @@ from pydantic import BaseModel, Field
 
 router = EnvelopingAPIRouter()
 
+class ComponentMetrics(BaseModel):
+  interval: int
+  component: str
+  metrics: Dict[str, Dict[str, str]] = Field(
+      ...,
+      description="a map of (metric, instance) to value"
+  )
+
 
 async def get_component_metrics(
     tmanager,
@@ -44,10 +52,13 @@ async def get_component_metrics(
     metric_names: List[str],
     instances: List[str],
     interval: int,
-):
+) -> ComponentMetrics:
   """
-  Return metrics from the Tmanager over the given interval. Metrics not included
-  in `metric_names` will be truncated.
+  Return metrics from the Tmanager over the given interval.
+
+  The metrics property is keyed with (metric, instance) to metric values.
+
+  Metrics not included in `metric_names` will be truncated.
 
   """
   if not (tmanager and tmanager.host and tmanager.stats_port):
@@ -59,11 +70,11 @@ async def get_component_metrics(
     metric_request.instance_id.extend(instances)
   metric_request.metric.extend(metric_names)
   metric_request.interval = interval
-  url = f"http://{tmanager.host}:{tmanager.port}/stats"
+  url = f"http://{tmanager.host}:{tmanager.stats_port}/stats"
   async with httpx.AsyncClient() as client:
     response = await client.post(url, data=metric_request.SerializeToString())
   metric_response = tmanager_pb2.MetricResponse()
-  metric_response.ParseFromString(response.body)
+  metric_response.ParseFromString(response.content)
 
   if metric_response.status.status == common_pb2.NOTOK:
     if metric_response.status.HasField("message"):
@@ -71,24 +82,25 @@ async def get_component_metrics(
           "Recieved response from Tmanager: %s", metric_response.status.message
       )
 
-  result = {
-      "interval": metric_response.interval,
-      "component": component,
-      "metrics": {},
-  }
+  metrics = {}
   for metric in metric_response.metric:
     instance = metric.instance_id
     for instance_metric in metric.metric:
-      result["metrics"].setdefault(instance_metric.name, {})[
+      metrics.setdefault(instance_metric.name, {})[
           instance
       ] = instance_metric.value
-  return result
+
+  return ComponentMetrics(
+      interval=metric_response.interval,
+      component=component,
+      metrics=metrics,
+  )
 
 
-@router.get("/metrics")
+@router.get("/metrics", response_model=ComponentMetrics)
 async def get_metrics( # pylint: disable=too-many-arguments
     cluster: str,
-    role: str,
+    role: Optional[str],
     environ: str,
     component: str,
     topology_name: str = Query(..., alias="topology"),
@@ -107,10 +119,10 @@ async def get_metrics( # pylint: disable=too-many-arguments
   )
 
 
-@router.get("/metricstimeline")
+@router.get("/metricstimeline", response_model=metricstimeline.MetricsTimeline)
 async def get_metrics_timeline( # pylint: disable=too-many-arguments
     cluster: str,
-    role: str,
+    role: Optional[str],
     environ: str,
     component: str,
     start_time: int,
@@ -142,14 +154,14 @@ class MetricsQueryResponse(BaseModel): # pylint: disable=too-few-public-methods
   start_time: int = Field(..., alias="starttime")
   end_time: int = Field(..., alias="endtime")
   timeline: List[TimelinePoint] = Field(
-      ..., description="list of timeline point objects"
+      ..., description="list of timeline point objects",
   )
 
 
 @router.get("/metricsquery", response_model=MetricsQueryResponse)
 async def get_metrics_query( # pylint: disable=too-many-arguments
     cluster: str,
-    role: str,
+    role: Optional[str],
     environ: str,
     query: str,
     start_time: int = Query(..., alias="starttime"),
@@ -162,15 +174,13 @@ async def get_metrics_query( # pylint: disable=too-many-arguments
       topology.tmanager, query, start_time, end_time
   )
 
-  timeline = []
-  for metric in metrics:
-    point = {"data": metric.timeline}
-    if metric.instance:
-      point["instance"] = metric.instance
-    timeline.append(point)
+  timeline = [
+      TimelinePoint(data=metric.timeline, instance=metric.instance)
+      for metric in metrics
+  ]
 
-  return {
-      "startime": start_time,
-      "endtime": end_time,
-      "timeline": timeline,
-  }
+  return MetricsQueryResponse(
+      startime=start_time,
+      endtime=end_time,
+      timeline=timeline,
+  )
