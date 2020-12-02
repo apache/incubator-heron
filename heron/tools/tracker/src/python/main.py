@@ -19,6 +19,7 @@
 #  under the License.
 
 ''' main.py '''
+import signal
 import logging
 import os
 import sys
@@ -113,7 +114,7 @@ def cli(
     hostport: str,
     port: int,
     verbose: bool,
-) -> int:
+) -> None:
   """
   A HTTP service for serving data about clusters.
 
@@ -140,8 +141,10 @@ def cli(
   uvicorn.run(app, host="0.0.0.0", port=port, log_level=log_level)
   state.tracker.stop_sync()
 
-  return 0
+  # non-daemon threads linger and stop the process for quitting, so signal
+  # for cleaning up
+  os.kill(os.getpid(), signal.SIGKILL)
 
 
 if __name__ == "__main__":
-  sys.exit(cli()) # pylint: disable=no-value-for-parameter
+  cli() # pylint: disable=no-value-for-parameter
