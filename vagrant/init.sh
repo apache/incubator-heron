@@ -103,7 +103,7 @@ REMOVED
 apt-get -qy update
 
 # install deps
-apt-get install -qy ant vim zip mc curl wget openjdk-11-jdk scala git python3-setuptools python3-dev libtool-bin libcppunit-dev python-is-python3
+apt-get install -qy ant vim zip mc curl wget openjdk-11-jdk scala git python3-setuptools python3-venv python3-dev libtool-bin libcppunit-dev python-is-python3
 
 # install_mesos $mode
 if [ $mode == "master" ]; then 
