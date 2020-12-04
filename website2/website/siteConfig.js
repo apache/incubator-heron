@@ -75,6 +75,7 @@ const siteConfig = {
     {href: '/api/java', label: "Javadocs"},
     {href: '/api/python', label: "Pydocs"},
     {doc: 'getting-started-local-single-node', label: 'Docs'},
+    {page: 'download', label: "Downloads"},
     {href: '#community', label: 'Community'},
     //{blog: true, label: 'Blog'},
     {href: '#apache', label: 'Apache'},
