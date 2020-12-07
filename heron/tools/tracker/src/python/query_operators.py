@@ -212,24 +212,23 @@ class Sum(Operator):
   """
   # pylint: disable=super-init-not-called
   def __init__(self, children) -> None:
-    self.timeSeriesList = children
+    self.time_series_list = children
 
   async def execute(self, tracker, tmanager: TManagerLocation, start: int, end: int) -> Any:
     # Initialize the metric to be returned with sum of all the constants.
     result = Metrics(None, None, None, start, end, {})
-    constant_sum = sum(ts for ts in self.timeSeriesList if isinstance(ts, float))
+    constant_sum = sum(ts for ts in self.time_series_list if isinstance(ts, float))
     result.setDefault(constant_sum, start, end)
 
     futureMetrics = [
         ts.execute(tracker, tmanager, start, end)
-        for ts in self.timeSeriesList if isinstance(ts, Operator)
+        for ts in self.time_series_list if isinstance(ts, Operator)
     ]
 
     # Get all the timeseries metrics
     all_metrics = []
     for met_f in asyncio.as_completed(futureMetrics):
       met = await met_f
-      # TODO: change this interface from str to plain raise (raised on await)
       if isinstance(met, str):
         raise Exception(met)
       all_metrics.extend(met)
@@ -256,18 +255,18 @@ class Max(Operator):
   def __init__(self, children):
     if len(children) < 1:
       raise Exception("MAX expects at least one operand.")
-    self.timeSeriesList = children
+    self.time_series_list = children
 
   async def execute(self, tracker, tmanager: TManagerLocation, start: int, end: int) -> Any:
     # Initialize the metric to be returned with max of all the constants.
     result = Metrics(None, None, None, start, end, {})
-    constants = [ts for ts in self.timeSeriesList if isinstance(ts, float)]
+    constants = [ts for ts in self.time_series_list if isinstance(ts, float)]
     if constants:
       result.setDefault(max(constants), start, end)
 
     futureMetrics = [
         ts.execute(tracker, tmanager, start, end)
-        for ts in self.timeSeriesList if isinstance(ts, Operator)
+        for ts in self.time_series_list if isinstance(ts, Operator)
     ]
 
     # Get all the timeseries metrics
@@ -313,12 +312,12 @@ class Percentile(Operator):
     if not 0 <= quantile <= 100:
       raise Exception("Quantile must be between 0 and 100 inclusive.")
     self.quantile = quantile
-    self.timeSeriesList = timeseries_list
+    self.time_series_list = timeseries_list
 
   async def execute(self, tracker, tmanager, start, end):
     futureMetrics = [
         ts.execute(tracker, tmanager, start, end)
-        for ts in self.timeSeriesList if isinstance(ts, Operator)
+        for ts in self.time_series_list if isinstance(ts, Operator)
     ]
 
     # Get all the timeseries metrics
@@ -522,14 +521,14 @@ class Rate(Operator):
   def __init__(self, children) -> None:
     if len(children) != 1:
       raise Exception("RATE requires exactly one argument.")
-    timeSeries, = children
-    if not isinstance(timeSeries, Operator):
+    time_series, = children
+    if not isinstance(time_series, Operator):
       raise Exception("RATE requires a timeseries, not constant.")
-    self.timeSeries = timeSeries
+    self.time_series = time_series
 
   async def execute(self, tracker, tmanager: TManagerLocation, start: int, end: int) -> Any:
     # Get 1 previous data point to be able to apply rate on the first data
-    metrics = await self.timeSeries.execute(tracker, tmanager, start-60, end)
+    metrics = await self.time_series.execute(tracker, tmanager, start-60, end)
 
     # Apply rate on all of them
     for metric in metrics:

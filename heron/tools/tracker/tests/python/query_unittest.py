@@ -89,21 +89,21 @@ def test_parse_query_string(mock_query):
   assert isinstance(root, Default)
   assert isinstance(root.constant, float)
   assert isinstance(root.timeseries, Sum)
-  assert 2 == len(root.timeseries.timeSeriesList)
-  assert isinstance(root.timeseries.timeSeriesList[0], TS)
-  assert isinstance(root.timeseries.timeSeriesList[1], TS)
+  assert 2 == len(root.timeseries.time_series_list)
+  assert isinstance(root.timeseries.time_series_list[0], TS)
+  assert isinstance(root.timeseries.time_series_list[1], TS)
 
   query = "MAX(1, TS(a, a, a))"
   root = mock_query.parse_query_string(query)
   assert isinstance(root, Max)
-  assert isinstance(root.timeSeriesList[0], float)
-  assert isinstance(root.timeSeriesList[1], TS)
+  assert isinstance(root.time_series_list[0], float)
+  assert isinstance(root.time_series_list[1], TS)
 
   query = "PERCENTILE(90, TS(a, a, a))"
   root = mock_query.parse_query_string(query)
   assert isinstance(root, Percentile)
   assert isinstance(root.quantile, float)
-  assert isinstance(root.timeSeriesList[0], TS)
+  assert isinstance(root.time_series_list[0], TS)
 
   query = "PERCENTILE(TS(a, a, a), 90)"
   with pytest.raises(Exception):
@@ -167,7 +167,7 @@ def test_parse_query_string(mock_query):
   query = "RATE(TS(a, a, a))"
   root = mock_query.parse_query_string(query)
   assert isinstance(root, Rate)
-  assert isinstance(root.timeSeries, TS)
+  assert isinstance(root.time_series, TS)
 
     # Must have one operand only
   query = "RATE(TS(a, a, a), TS(b, b, b))"

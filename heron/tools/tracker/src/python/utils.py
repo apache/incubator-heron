@@ -53,9 +53,7 @@ LIB_DIR = "lib"
 ResultType = TypeVar("ResultType")
 
 
-# XXX: requires python 3.7+
 class ResponseEnvelope(GenericModel, Generic[ResultType]):
-  # XXX: looking to deprecate exception time - leve to logging or calling app
   execution_time: float = Field(0.0, alias="executiontime")
   message: str
   result: Optional[ResultType] = None

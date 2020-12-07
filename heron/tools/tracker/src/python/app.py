@@ -41,7 +41,6 @@ openapi_tags = [
     {"name": "topologies", "description": topologies.__doc__},
 ]
 
-# TODO: implement a 120s timeout to be consistent with previous implementation
 app = FastAPI(
     title="Heron Tracker",
     redoc_url="/",
@@ -85,7 +84,7 @@ async def shutdown_event():
 @app.exception_handler(Exception)
 async def handle_exception(_, exc: Exception):
   payload = ResponseEnvelope[str](
-      result="",
+      result=None,
       execution_time=0.0,
       message=f"request failed: {exc}",
       status=constants.RESPONSE_STATUS_FAILURE

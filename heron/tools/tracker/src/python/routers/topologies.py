@@ -24,8 +24,6 @@ from the state manager.
 Some information may not be available for a topology due until the state
 manager has recieved more information from the state manager.
 
-> **TODO:** link to topology lifecycle documentation.
-
 """
 from typing import List, Optional, Dict, Union
 
@@ -102,12 +100,9 @@ async def get_topology_info(
     role: Optional[str] = Query(None, deprecated=True),
 ):
   topology = state.tracker.get_topology(cluster, role, environ, topology)
-  # TODO: 404 if no topology found
-  # TODO: 412 if no topology info
   return topology.info
 
 
-# XXX: this all smells like graphql
 @router.get("/config", response_model=Dict[str, Union[int, str]])
 async def get_topology_config(
     cluster: str,
@@ -115,7 +110,6 @@ async def get_topology_config(
     topology: str,
     role: Optional[str] = Query(None, deprecated=True),
 ):
-  # TODO: deprecate in favour of /info
   topology = state.tracker.get_topology(cluster, role, environ, topology)
   topology_info = topology.info
   return topology_info.physical_plan.config
@@ -128,7 +122,6 @@ async def get_topology_physical_plan(
     topology: str,
     role: Optional[str] = Query(None, deprecated=True),
 ):
-  # TODO: deprecate in favour of /info
   topology = state.tracker.get_topology(cluster, role, environ, topology)
   return topology.info.physical_plan
 
@@ -141,7 +134,6 @@ async def get_topology_execution_state(
     topology: str,
     role: Optional[str] = Query(None, deprecated=True),
 ):
-  # TODO: deprecate in favour of /info
   topology = state.tracker.get_topology(cluster, role, environ, topology)
   return topology.info.execution_state
 
@@ -153,7 +145,6 @@ async def get_topology_scheduler_location(
     topology: str,
     role: Optional[str] = Query(None, deprecated=True),
 ):
-  # TODO: deprecate in favour of /info
   topology = state.tracker.get_topology(cluster, role, environ, topology)
   return topology.info.scheduler_location
 
@@ -165,7 +156,6 @@ async def get_topology_metadata(
     topology: str,
     role: Optional[str] = Query(None, deprecated=True),
 ):
-  # TODO: deprecate in favour of /info
   topology = state.tracker.get_topology(cluster, role, environ, topology)
   return topology.info.metadata
 
