@@ -10,7 +10,7 @@ pex_pytest(
         "//heron/config/src/yaml:conf-yaml",
     ],
     reqs = [
-        "pytest==3.2.2",
+        "pytest==6.1.2",
     ],
     deps = [
         "//heron/statemgrs/src/python:statemgr-py",
@@ -24,7 +24,7 @@ pex_pytest(
         "zkstatemanager_unittest.py",
     ],
     reqs = [
-        "pytest==3.2.2",
+        "pytest==6.1.2",
     ],
     deps = [
         "//heron/statemgrs/src/python:statemgr-py",
@@ -38,7 +38,7 @@ pex_pytest(
         "statemanagerfactory_unittest.py",
     ],
     reqs = [
-        "pytest==3.2.2",
+        "pytest==6.1.2",
     ],
     deps = [
         "//heron/statemgrs/src/python:statemgr-py",

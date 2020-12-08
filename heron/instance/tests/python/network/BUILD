@@ -25,7 +25,7 @@ pex_pytest(
     size = "small",
     srcs = ["st_stmgr_client_unittest.py"],
     reqs = [
-        "pytest==3.2.2",
+        "pytest==6.1.2",
     ],
     deps = [
         ":instance-network-mock",
@@ -39,7 +39,7 @@ pex_pytest(
     size = "small",
     srcs = ["metricsmgr_client_unittest.py"],
     reqs = [
-        "pytest==3.2.2",
+        "pytest==6.1.2",
     ],
     deps = [
         ":pytest-network-py",
@@ -52,7 +52,7 @@ pex_library(
     name = "pytest-network-py",
     srcs = ["mock_generator.py"],
     reqs = [
-        "pytest==3.2.2",
+        "pytest==6.1.2",
     ],
     deps = [
         ":instance-network-mock-client",
@@ -64,7 +64,7 @@ pex_pytest(
     size = "small",
     srcs = ["protocol_unittest.py"],
     reqs = [
-        "pytest==3.2.2",
+        "pytest==6.1.2",
     ],
     deps = [
         ":pytest-network-py",
@@ -78,7 +78,7 @@ pex_pytest(
     size = "small",
     srcs = ["heron_client_unittest.py"],
     reqs = [
-        "pytest==3.2.2",
+        "pytest==6.1.2",
     ],
     deps = [
         ":pytest-network-py",
@@ -92,7 +92,7 @@ pex_pytest(
     size = "small",
     srcs = ["gateway_looper_unittest.py"],
     reqs = [
-        "pytest==3.2.2",
+        "pytest==6.1.2",
     ],
     deps = [
         "//heron/instance/src/python:instance-py",
@@ -104,7 +104,7 @@ pex_pytest(
     size = "small",
     srcs = ["event_looper_unittest.py"],
     reqs = [
-        "pytest==3.2.2",
+        "pytest==6.1.2",
     ],
     deps = [
         "//heron/instance/src/python:instance-py",
