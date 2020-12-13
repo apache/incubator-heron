@@ -44,13 +44,20 @@ class KillExecutorHandler(tornado.web.RequestHandler):
       logger.info("Killing parent executor")
       os.killpg(os.getppid(), signal.SIGTERM)
 
+    def is_local():
+      remote_ip = self.request.remote_ip
+      if 'localhost' == remote_ip or '127.0.0.1' == remote_ip or '::1' == remote_ip:
+        return True
+      else:
+        return False
+
     logger = logging.getLogger(__file__)
     logger.info("Received 'Killing process' request")
     data = dict(parse_qsl(self.request.body))
 
     # check shared secret
     sharedSecret = data.get('secret')
-    if sharedSecret != options.secret:
+    if not is_local() and sharedSecret != options.secret:
       status_finish(403)
       return
 
