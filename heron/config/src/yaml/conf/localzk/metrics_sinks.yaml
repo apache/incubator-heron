@@ -117,12 +117,12 @@ metricscache-sink:
 #  rules:
 #  # __jvm-peak-usage/G1-Survivor-Space-committed": "9",
 #  - pattern: __jvm-(.+)/(.+)
-#    name: heron_jvm_$1_$2
+#    name: jvm_$1_$2
 #    attrNameSnakeCase: true
 #    type: COUNTER
 #  # "__execute-time-ns/pulsar-prod-4/default": "418764",
 #  - pattern: __(?!jvm-+)(.+-count|.+-latency|.+-count|.+-time-ns)/(.+)/(.+)
-#    name: heron_$1
+#    name: $1
 #    attrNameSnakeCase: true
 #    type: COUNTER
 #    labels:
@@ -130,7 +130,7 @@ metricscache-sink:
 #      context: "$3"
 #  # "__execute-time-ns/pulsar-prod-4": "418764",
 #  - pattern: __(?!jvm-+)(.+-count|.+-latency|.+-count|.+-time-ns)/(.+)
-#    name: heron_$1
+#    name: $1
 #    attrNameSnakeCase: true
 #    type: COUNTER
 #    labels:
@@ -138,14 +138,14 @@ metricscache-sink:
 #  # StreamManager
 #  # "__client_stmgr-17/__bytes_to_stmgrs": "7841039",
 #  - pattern: __(client_stmgr-.+)/__(.+_to_stmgrs)
-#    name: heron_$2
+#    name: $2
 #    attrNameSnakeCase: true
 #    type: COUNTER
 #    labels:
 #      dest_componet: "$1"
 #  # "__connection_buffer_by_instanceid/container_1_pulsar-prod-9_201/bytes": "0.000000",
 #  - pattern: __(connection_buffer_by_instanceid)/container_(.+)_(.+)/(.+)
-#    name: heron_$1_$4
+#    name: $1_$4
 #    attrNameSnakeCase: true
 #    type: COUNTER
 #    labels:
@@ -153,7 +153,7 @@ metricscache-sink:
 #      dest_task: "$3"
 #  # "__time_spent_back_pressure_by_compid/container_1_pulsar-prod-5_151": "0",
 #  - pattern: __(time_spent_back_pressure_by_compid)/container_(.+)_(.+)
-#    name: heron_$1
+#    name: $1
 #    attrNameSnakeCase: true
 #    type: COUNTER
 #    labels:
