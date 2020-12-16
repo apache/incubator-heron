@@ -112,7 +112,7 @@ prometheus-sink:
      attrNameSnakeCase: true
      type: COUNTER
      labels:
-       dest_componet: "$1"
+       dest_component: "$1"
    # "__connection_buffer_by_instanceid/container_1_pulsar-prod-9_201/bytes": "0.000000",
    - pattern: __(connection_buffer_by_instanceid)/container_(.+)_(.+)/(.+)
      name: $1_$4
