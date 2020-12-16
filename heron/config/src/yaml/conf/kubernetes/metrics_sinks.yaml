@@ -90,7 +90,7 @@ prometheus-sink:
     attrNameSnakeCase: true
     type: COUNTER
   # "__execute-time-ns/pulsar-prod-4/default": "418764",
-  - pattern: __(.+-count|.+-latency|.+-count|.+-time-ns)/(.+)/(.+)
+  - pattern: __(?!jvm-+)(.+-count|.+-latency|.+-count|.+-time-ns)/(.+)/(.+)
     name: heron_$1
     attrNameSnakeCase: true
     type: COUNTER
@@ -98,7 +98,7 @@ prometheus-sink:
       dest_component: "$2"
       context: "$3"
   # "__execute-time-ns/pulsar-prod-4": "418764",
-  - pattern: __(.+-count|.+-latency|.+-count|.+-time-ns)/(.+)
+  - pattern: __(?!jvm-+)(.+-count|.+-latency|.+-count|.+-time-ns)/(.+)
     name: heron_$1
     attrNameSnakeCase: true
     type: COUNTER
