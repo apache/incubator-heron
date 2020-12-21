@@ -6,7 +6,7 @@ pex_library(
         ["**/*.py"],
     ),
     reqs = [
-        "requests==2.12.3",
+        "requests==2.25.0",
         "tornado==4.5.3",
     ],
     deps = [

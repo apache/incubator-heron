@@ -8,7 +8,7 @@ pex_pytest(
         "pex_loader_unittest.py",
     ],
     reqs = [
-        "pytest==3.2.2",
+        "pytest==6.1.2",
     ],
     deps = [
         "//heron/common/src/python:common-py",

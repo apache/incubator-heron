@@ -16,7 +16,7 @@ pex_pytest(
     size = "small",
     srcs = ["communicator_unittest.py"],
     reqs = [
-        "pytest==3.2.2",
+        "pytest==6.1.2",
     ],
     deps = [
         "//heron/instance/tests/python/utils:common-utils-mock",
@@ -28,7 +28,7 @@ pex_pytest(
     size = "small",
     srcs = ["custom_grouping_unittest.py"],
     reqs = [
-        "pytest==3.2.2",
+        "pytest==6.1.2",
     ],
     deps = [
         "//heron/instance/tests/python/utils:common-utils-mock",
@@ -40,7 +40,7 @@ pex_pytest(
     size = "small",
     srcs = ["metrics_helper_unittest.py"],
     reqs = [
-        "pytest==3.2.2",
+        "pytest==6.1.2",
     ],
     deps = [
         "//heron/instance/tests/python/utils:common-utils-mock",
@@ -52,7 +52,7 @@ pex_pytest(
     size = "small",
     srcs = ["outgoing_tuple_helper_unittest.py"],
     reqs = [
-        "pytest==3.2.2",
+        "pytest==6.1.2",
     ],
     deps = [
         "//heron/instance/tests/python/utils:common-utils-mock",
@@ -64,7 +64,7 @@ pex_pytest(
     size = "small",
     srcs = ["pplan_helper_unittest.py"],
     reqs = [
-        "pytest==3.2.2",
+        "pytest==6.1.2",
     ],
     deps = [
         "//heron/instance/tests/python/utils:common-utils-mock",
@@ -76,7 +76,7 @@ pex_pytest(
     size = "small",
     srcs = ["topology_context_impl_unittest.py"],
     reqs = [
-        "pytest==3.2.2",
+        "pytest==6.1.2",
     ],
     deps = [
         "//heron/instance/tests/python/utils:common-utils-mock",
@@ -88,7 +88,7 @@ pex_pytest(
     size = "small",
     srcs = ["tuple_helper_unittest.py"],
     reqs = [
-        "pytest==3.2.2",
+        "pytest==6.1.2",
     ],
     deps = [
         "//heron/instance/tests/python/utils:common-utils-mock",
@@ -100,7 +100,7 @@ pex_pytest(
     size = "small",
     srcs = ["global_metrics_unittest.py"],
     reqs = [
-        "pytest==3.2.2",
+        "pytest==6.1.2",
     ],
     deps = [
         ":common-utils-mock",
@@ -113,7 +113,7 @@ pex_pytest(
     size = "small",
     srcs = ["py_metrics_unittest.py"],
     reqs = [
-        "pytest==3.2.2",
+        "pytest==6.1.2",
     ],
     deps = [
         "//heron/instance/tests/python/utils:common-utils-mock",
@@ -125,7 +125,7 @@ pex_pytest(
     size = "small",
     srcs = ["log_unittest.py"],
     reqs = [
-        "pytest==3.2.2",
+        "pytest==6.1.2",
     ],
     deps = [
         "//heron/instance/tests/python/utils:common-utils-mock",
