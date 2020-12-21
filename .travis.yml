@@ -1,12 +1,9 @@
 ---
-
+os: linux
+dist: focal
 group: edge
 
-dist: bionic
-
 language: java
-
-os: linux
 
 jdk:
   - oraclejdk11
@@ -26,7 +23,7 @@ addons:
       - libgoogle-perftools-dev
 
 env:
-  - BAZEL_VERSION=3.7.0 ENABLE_HEAPCHECK=1
+  - BAZEL_VERSION=3.7.0 ENABLE_HEAPCHECK=1 PLATFORM=Ubuntu
 
 before_install:
   # download and install bazel

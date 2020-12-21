@@ -30,7 +30,7 @@ import heron.tools.common.src.python.utils.config as common_config
 try:
   API_VERSION = common_config.get_version_number()
 except:
-  API_VERSION = ""
+  API_VERSION = "0.1.0"
 
 
 # Handler Constants

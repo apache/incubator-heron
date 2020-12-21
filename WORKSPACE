@@ -158,9 +158,8 @@ pinned_maven_install()
 
 http_archive(
     name = "rules_python",
-    sha256 = "b5668cde8bb6e3515057ef465a35ad712214962f0b3a314e551204266c7be90c",
-    strip_prefix = "rules_python-0.0.2",
-    url = "https://github.com/bazelbuild/rules_python/releases/download/0.0.2/rules_python-0.0.2.tar.gz",
+    sha256 = "b6d46438523a3ec0f3cead544190ee13223a52f6a6765a29eae7b7cc24cc83a0",
+    url = "https://github.com/bazelbuild/rules_python/releases/download/0.1.0/rules_python-0.1.0.tar.gz",
 )
 
 load("@rules_python//python:repositories.bzl", "py_repositories")
@@ -355,11 +354,11 @@ http_archive(
 # end helm
 
 # for docker image building
-DOCKER_RULES_VERSION = "0.14.4"
+DOCKER_RULES_VERSION = "0.15.0"
 
 http_archive(
     name = "io_bazel_rules_docker",
-    sha256 = "4521794f0fba2e20f3bf15846ab5e01d5332e587e9ce81629c7f96c793bb7036",
+    sha256 = "1698624e878b0607052ae6131aa216d45ebb63871ec497f26c67455b34119c80",
     strip_prefix = "rules_docker-%s" % DOCKER_RULES_VERSION,
     urls = ["https://github.com/bazelbuild/rules_docker/archive/v%s.tar.gz" % DOCKER_RULES_VERSION],
 )
@@ -374,9 +373,9 @@ load("@io_bazel_rules_docker//repositories:deps.bzl", container_deps = "deps")
 
 container_deps()
 
-load("@io_bazel_rules_docker//repositories:pip_repositories.bzl", "pip_deps")
+load("@io_bazel_rules_docker//repositories:py_repositories.bzl", "py_deps")
 
-pip_deps()
+py_deps()
 
 load(
     "@io_bazel_rules_docker//container:container.bzl",

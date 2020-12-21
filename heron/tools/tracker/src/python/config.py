@@ -39,26 +39,23 @@ class Config:
   def __init__(self, configs):
     self.configs = configs
     self.statemgr_config = StateMgrConfig()
-    self.extra_links = []
+    self.statemgr_config.set_state_locations(configs[STATEMGRS_KEY])
 
-    self.load_configs()
+    self.extra_links = configs.get(EXTRA_LINKS_KEY, [])
+    for link in self.extra_links:
+      self.validate_extra_link(link)
 
-  def load_configs(self):
-    """load config files"""
-    self.statemgr_config.set_state_locations(self.configs[STATEMGRS_KEY])
-    if EXTRA_LINKS_KEY in self.configs:
-      for extra_link in self.configs[EXTRA_LINKS_KEY]:
-        self.extra_links.append(self.validate_extra_link(extra_link))
-
-  def validate_extra_link(self, extra_link: dict) -> None:
+  @classmethod
+  def validate_extra_link(cls, extra_link: dict) -> None:
     """validate extra link"""
     if EXTRA_LINK_NAME_KEY not in extra_link or EXTRA_LINK_FORMATTER_KEY not in extra_link:
       raise Exception("Invalid extra.links format. " +
                       "Extra link must include a 'name' and 'formatter' field")
 
-    self.validated_formatter(extra_link[EXTRA_LINK_FORMATTER_KEY])
+    cls.validated_formatter(extra_link[EXTRA_LINK_FORMATTER_KEY])
 
-  def validated_formatter(self, url_format: str) -> None:
+  @classmethod
+  def validated_formatter(cls, url_format: str) -> None:
     """Check visualization url format has no unrecongnised parameters."""
     # collect the parameters which would be interpolated
     formatter_variables = set()
@@ -69,30 +66,11 @@ class Config:
 
     string.Template(url_format).safe_substitute(ValidationHelper())
 
-    if not formatter_variables <= self.FORMATTER_PARAMETERS:
+    if not formatter_variables <= cls.FORMATTER_PARAMETERS:
       raise Exception(f"Invalid viz.url.format: {url_format!r}")
 
-  @staticmethod
-  def get_formatted_url(formatter: str, execution_state: dict) -> str:
-    """
-    Format a url string using values from the execution state.
-
-    """
-
-    subs = {
-        var: execution_state[prop]
-        for prop, var in (
-            ("cluster", "CLUSTER"),
-            ("environ", "ENVIRON"),
-            ("jobname", "TOPOLOGY"),
-            ("role", "ROLE"),
-            ("submission_user", "USER"))
-        if prop in execution_state
-    }
-    return string.Template(formatter).substitute(subs)
-
   def __str__(self):
-    return "".join((self.config_str(c) for c in self.configs[STATEMGRS_KEY]))
+    return "".join(self.config_str(c) for c in self.configs[STATEMGRS_KEY])
 
   @staticmethod
   def config_str(config):

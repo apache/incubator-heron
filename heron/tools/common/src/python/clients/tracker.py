@@ -133,8 +133,8 @@ def api_get(url: str, params=None) -> dict:
     return None
   end = time.time()
   data = response.json()
-  if "result" not in data:
-    Log.error(f"Empty response from {url}")
+  if data["status"] != "success":
+    Log.error("error from tracker: %s", data["message"])
     return None
 
   execution = data["executiontime"] * 1000

@@ -19,87 +19,24 @@
 #  under the License.
 
 ''' main.py '''
+import signal
 import logging
 import os
-import signal
 import sys
-import tornado.httpserver
-import tornado.ioloop
-import tornado.web
-from tornado.options import define
-from tornado.httpclient import AsyncHTTPClient
 
 from heron.tools.common.src.python.utils import config as common_config
 from heron.common.src.python.utils import log
 from heron.tools.tracker.src.python import constants
-from heron.tools.tracker.src.python import handlers
 from heron.tools.tracker.src.python import utils
 from heron.tools.tracker.src.python.config import Config, STATEMGRS_KEY
 from heron.tools.tracker.src.python.tracker import Tracker
+from heron.tools.tracker.src.python.app import app
+from heron.tools.tracker.src.python import state
 
 import click
+import uvicorn
 
 Log = log.Log
-
-class Application(tornado.web.Application):
-  """ Tornado server application """
-  def __init__(self, config):
-
-    AsyncHTTPClient.configure(None, defaults=dict(request_timeout=120.0))
-    self.tracker = Tracker(config)
-    self.tracker.synch_topologies()
-    tornadoHandlers = [
-        (r"/", handlers.MainHandler),
-        (r"/clusters", handlers.ClustersHandler, {"tracker":self.tracker}),
-        (r"/topologies", handlers.TopologiesHandler, {"tracker":self.tracker}),
-        (r"/topologies/states", handlers.StatesHandler, {"tracker":self.tracker}),
-        (r"/topologies/info", handlers.TopologyHandler, {"tracker":self.tracker}),
-        (r"/topologies/logicalplan", handlers.LogicalPlanHandler, {"tracker":self.tracker}),
-        (r"/topologies/config", handlers.TopologyConfigHandler, {"tracker":self.tracker}),
-        (r"/topologies/containerfiledata", handlers.ContainerFileDataHandler,
-         {"tracker":self.tracker}),
-        (r"/topologies/containerfiledownload", handlers.ContainerFileDownloadHandler,
-         {"tracker":self.tracker}),
-        (r"/topologies/containerfilestats",
-         handlers.ContainerFileStatsHandler, {"tracker":self.tracker}),
-        (r"/topologies/physicalplan", handlers.PhysicalPlanHandler, {"tracker":self.tracker}),
-        (r"/topologies/packingplan", handlers.PackingPlanHandler, {"tracker":self.tracker}),
-        # Deprecated. See https://github.com/apache/incubator-heron/issues/1754
-        (r"/topologies/executionstate", handlers.ExecutionStateHandler, {"tracker":self.tracker}),
-        (r"/topologies/schedulerlocation", handlers.SchedulerLocationHandler,
-         {"tracker":self.tracker}),
-        (r"/topologies/metadata", handlers.MetaDataHandler, {"tracker":self.tracker}),
-        (r"/topologies/runtimestate", handlers.RuntimeStateHandler, {"tracker":self.tracker}),
-        (r"/topologies/metrics", handlers.MetricsHandler, {"tracker":self.tracker}),
-        (r"/topologies/metricstimeline", handlers.MetricsTimelineHandler, {"tracker":self.tracker}),
-        (r"/topologies/metricsquery", handlers.MetricsQueryHandler, {"tracker":self.tracker}),
-        (r"/topologies/exceptions", handlers.ExceptionHandler, {"tracker":self.tracker}),
-        (r"/topologies/exceptionsummary", handlers.ExceptionSummaryHandler,
-         {"tracker":self.tracker}),
-        (r"/machines", handlers.MachinesHandler, {"tracker":self.tracker}),
-        (r"/topologies/pid", handlers.PidHandler, {"tracker":self.tracker}),
-        (r"/topologies/jstack", handlers.JstackHandler, {"tracker":self.tracker}),
-        (r"/topologies/jmap", handlers.JmapHandler, {"tracker":self.tracker}),
-        (r"/topologies/histo", handlers.MemoryHistogramHandler, {"tracker":self.tracker}),
-        (r"(.*)", handlers.DefaultHandler),
-    ]
-
-    settings = dict(
-        debug=True,
-        serve_traceback=True,
-        static_path=os.path.dirname(__file__)
-    )
-    tornado.web.Application.__init__(self, tornadoHandlers, **settings)
-    Log.info("Tracker has started")
-
-  def stop(self):
-    self.tracker.stop_sync()
-
-
-def define_options(port: int, config_file: str) -> None:
-  """ define Tornado global variables """
-  define("port", default=port)
-  define("config_file", default=config_file)
 
 
 def create_tracker_config(config_file: str, stmgr_override: dict) -> dict:
@@ -186,10 +123,8 @@ def cli(
 
   """
 
-  log.configure(logging.DEBUG if verbose else logging.INFO)
-
-  # set Tornado global option
-  define_options(port, config_file)
+  log_level = logging.DEBUG if verbose else logging.INFO
+  log.configure(log_level)
 
   stmgr_override = {
       "type": stmgr_type,
@@ -200,32 +135,16 @@ def cli(
   }
   config = Config(create_tracker_config(config_file, stmgr_override))
 
-  # create Tornado application
-  application = Application(config)
+  state.tracker = Tracker(config)
+  state.tracker.sync_topologies()
+  # this only returns when interrupted
+  uvicorn.run(app, host="0.0.0.0", port=port, log_level=log_level)
+  state.tracker.stop_sync()
 
-  # pylint: disable=unused-argument
-  # SIGINT handler:
-  # 1. stop all the running zkstatemanager and filestatemanagers
-  # 2. stop the Tornado IO loop
-  def signal_handler(signum, frame):
-    # start a new line after ^C character because this looks nice
-    print('\n', end='')
-    application.stop()
-    tornado.ioloop.IOLoop.instance().stop()
+  # non-daemon threads linger and stop the process for quitting, so signal
+  # for cleaning up
+  os.kill(os.getpid(), signal.SIGKILL)
 
-  # associate SIGINT and SIGTERM with a handler
-  signal.signal(signal.SIGINT, signal_handler)
-  signal.signal(signal.SIGTERM, signal_handler)
-
-  Log.info("Running on port: %d", port)
-  if config_file:
-    Log.info("Using config file: %s", config_file)
-  Log.info(f"Using state manager:\n{config}")
-
-  http_server = tornado.httpserver.HTTPServer(application)
-  http_server.listen(port)
-
-  tornado.ioloop.IOLoop.instance().start()
 
 if __name__ == "__main__":
   cli() # pylint: disable=no-value-for-parameter

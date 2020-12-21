@@ -16,158 +16,160 @@
 # under the License.
 ''' query_unittest.py '''
 # pylint: disable=missing-docstring, undefined-variable
-import unittest
-from unittest.mock import Mock
+from unittest.mock import MagicMock
 
 from heron.tools.tracker.src.python.query import *
+from heron.tools.tracker.src.python.tracker import Tracker
 
-class QueryTest(unittest.TestCase):
-  def setUp(self):
-    self.tracker = Mock()
-    self.query = Query(self.tracker)
+import pytest
 
-  def test_find_closing_braces(self):
-    query = "(())"
-    self.assertEqual(3, self.query.find_closing_braces(query))
+@pytest.fixture
+def mock_query():
+  tracker = MagicMock(Tracker)
+  return Query(tracker)
 
-    query = "hello()"
-    with self.assertRaises(Exception):
-      self.query.find_closing_braces(query)
+def test_find_closing_braces(mock_query):
+  query = "(())"
+  assert 3 == mock_query.find_closing_braces(query)
 
-    query = "(hello)"
-    self.assertEqual(6, self.query.find_closing_braces(query))
+  query = "hello()"
+  with pytest.raises(Exception):
+    mock_query.find_closing_braces(query)
 
-    query = "(no closing braces"
-    with self.assertRaises(Exception):
-      self.query.find_closing_braces(query)
+  query = "(hello)"
+  assert 6 == mock_query.find_closing_braces(query)
 
-    query = "()()"
-    self.assertEqual(1, self.query.find_closing_braces(query))
+  query = "(no closing braces"
+  with pytest.raises(Exception):
+    mock_query.find_closing_braces(query)
 
-  def test_get_sub_parts(self):
-    query = "abc, def, xyz"
-    self.assertEqual(["abc", "def", "xyz"], self.query.get_sub_parts(query))
+  query = "()()"
+  assert 1 == mock_query.find_closing_braces(query)
 
-    query = "(abc, xyz)"
-    self.assertEqual(["(abc, xyz)"], self.query.get_sub_parts(query))
+def test_get_sub_parts(mock_query):
+  query = "abc, def, xyz"
+  assert ["abc", "def", "xyz"] == mock_query.get_sub_parts(query)
 
-    query = "a(x, y), b(p, q)"
-    self.assertEqual(["a(x, y)", "b(p, q)"], self.query.get_sub_parts(query))
+  query = "(abc, xyz)"
+  assert ["(abc, xyz)"] == mock_query.get_sub_parts(query)
 
-    query = ",,"
-    self.assertEqual(["", "", ""], self.query.get_sub_parts(query))
+  query = "a(x, y), b(p, q)"
+  assert ["a(x, y)", "b(p, q)"] == mock_query.get_sub_parts(query)
 
-    query = "())"
-    with self.assertRaises(Exception):
-      self.query.get_sub_parts(query)
+  query = ",,"
+  assert ["", "", ""] == mock_query.get_sub_parts(query)
+
+  query = "())"
+  with pytest.raises(Exception):
+    mock_query.get_sub_parts(query)
 
   # pylint: disable=too-many-statements
-  def test_parse_query_string(self):
-    query = "TS(a, b, c)"
-    root = self.query.parse_query_string(query)
-    self.assertEqual("a", root.component)
-    self.assertEqual(["b"], root.instances)
-    self.assertEqual("c", root.metric_name)
+def test_parse_query_string(mock_query):
+  query = "TS(a, b, c)"
+  root = mock_query.parse_query_string(query)
+  assert "a" == root.component
+  assert ["b"] == root.instances
+  assert "c" == root.metric_name
 
-    query = "TS(a, *, m)"
-    root = self.query.parse_query_string(query)
-    self.assertEqual("a", root.component)
-    self.assertEqual([], root.instances)
-    self.assertEqual("m", root.metric_name)
+  query = "TS(a, *, m)"
+  root = mock_query.parse_query_string(query)
+  assert "a" == root.component
+  assert [] == root.instances
+  assert "m" == root.metric_name
 
-    query = "DEFAULT(0, TS(a, b, c))"
-    root = self.query.parse_query_string(query)
-    self.assertIsInstance(root, Default)
-    self.assertIsInstance(root.constant, float)
-    self.assertEqual(root.constant, 0)
-    self.assertIsInstance(root.timeseries, TS)
+  query = "DEFAULT(0, TS(a, b, c))"
+  root = mock_query.parse_query_string(query)
+  assert isinstance(root, Default)
+  assert isinstance(root.constant, float)
+  assert root.constant == 0
+  assert isinstance(root.timeseries, TS)
 
-    query = "DEFAULT(0, SUM(TS(a, a, a), TS(b, b, b)))"
-    root = self.query.parse_query_string(query)
-    self.assertIsInstance(root, Default)
-    self.assertIsInstance(root.constant, float)
-    self.assertIsInstance(root.timeseries, Sum)
-    self.assertEqual(2, len(root.timeseries.timeSeriesList))
-    self.assertIsInstance(root.timeseries.timeSeriesList[0], TS)
-    self.assertIsInstance(root.timeseries.timeSeriesList[1], TS)
+  query = "DEFAULT(0, SUM(TS(a, a, a), TS(b, b, b)))"
+  root = mock_query.parse_query_string(query)
+  assert isinstance(root, Default)
+  assert isinstance(root.constant, float)
+  assert isinstance(root.timeseries, Sum)
+  assert 2 == len(root.timeseries.time_series_list)
+  assert isinstance(root.timeseries.time_series_list[0], TS)
+  assert isinstance(root.timeseries.time_series_list[1], TS)
 
-    query = "MAX(1, TS(a, a, a))"
-    root = self.query.parse_query_string(query)
-    self.assertIsInstance(root, Max)
-    self.assertIsInstance(root.timeSeriesList[0], float)
-    self.assertIsInstance(root.timeSeriesList[1], TS)
+  query = "MAX(1, TS(a, a, a))"
+  root = mock_query.parse_query_string(query)
+  assert isinstance(root, Max)
+  assert isinstance(root.time_series_list[0], float)
+  assert isinstance(root.time_series_list[1], TS)
 
-    query = "PERCENTILE(90, TS(a, a, a))"
-    root = self.query.parse_query_string(query)
-    self.assertIsInstance(root, Percentile)
-    self.assertIsInstance(root.quantile, float)
-    self.assertIsInstance(root.timeSeriesList[0], TS)
+  query = "PERCENTILE(90, TS(a, a, a))"
+  root = mock_query.parse_query_string(query)
+  assert isinstance(root, Percentile)
+  assert isinstance(root.quantile, float)
+  assert isinstance(root.time_series_list[0], TS)
 
-    query = "PERCENTILE(TS(a, a, a), 90)"
-    with self.assertRaises(Exception):
-      self.query.parse_query_string(query)
+  query = "PERCENTILE(TS(a, a, a), 90)"
+  with pytest.raises(Exception):
+    mock_query.parse_query_string(query)
 
-    query = "DIVIDE(TS(a, a, a), TS(b, b, b))"
-    root = self.query.parse_query_string(query)
-    self.assertIsInstance(root, Divide)
-    self.assertIsInstance(root.operand1, TS)
-    self.assertIsInstance(root.operand2, TS)
+  query = "DIVIDE(TS(a, a, a), TS(b, b, b))"
+  root = mock_query.parse_query_string(query)
+  assert isinstance(root, Divide)
+  assert isinstance(root.operand1, TS)
+  assert isinstance(root.operand2, TS)
 
     # Dividing by a constant is fine
-    query = "DIVIDE(TS(a, a, a), 90)"
-    self.query.parse_query_string(query)
-    root = self.query.parse_query_string(query)
-    self.assertIsInstance(root, Divide)
-    self.assertIsInstance(root.operand1, TS)
-    self.assertIsInstance(root.operand2, float)
+  query = "DIVIDE(TS(a, a, a), 90)"
+  mock_query.parse_query_string(query)
+  root = mock_query.parse_query_string(query)
+  assert isinstance(root, Divide)
+  assert isinstance(root.operand1, TS)
+  assert isinstance(root.operand2, float)
 
     # Must have two operands
-    query = "DIVIDE(TS(a, a, a))"
-    with self.assertRaises(Exception):
-      self.query.parse_query_string(query)
+  query = "DIVIDE(TS(a, a, a))"
+  with pytest.raises(Exception):
+    mock_query.parse_query_string(query)
 
-    query = "MULTIPLY(TS(a, a, a), TS(b, b, b))"
-    root = self.query.parse_query_string(query)
-    self.assertIsInstance(root, Multiply)
-    self.assertIsInstance(root.operand1, TS)
-    self.assertIsInstance(root.operand2, TS)
+  query = "MULTIPLY(TS(a, a, a), TS(b, b, b))"
+  root = mock_query.parse_query_string(query)
+  assert isinstance(root, Multiply)
+  assert isinstance(root.operand1, TS)
+  assert isinstance(root.operand2, TS)
 
     # Multiplying with a constant is fine.
-    query = "MULTIPLY(TS(a, a, a), 10)"
-    root = self.query.parse_query_string(query)
-    self.assertIsInstance(root, Multiply)
-    self.assertIsInstance(root.operand1, TS)
-    self.assertIsInstance(root.operand2, float)
+  query = "MULTIPLY(TS(a, a, a), 10)"
+  root = mock_query.parse_query_string(query)
+  assert isinstance(root, Multiply)
+  assert isinstance(root.operand1, TS)
+  assert isinstance(root.operand2, float)
 
     # Must have two operands
-    query = "MULTIPLY(TS(a, a, a))"
-    with self.assertRaises(Exception):
-      self.query.parse_query_string(query)
+  query = "MULTIPLY(TS(a, a, a))"
+  with pytest.raises(Exception):
+    mock_query.parse_query_string(query)
 
-    query = "SUBTRACT(TS(a, a, a), TS(b, b, b))"
-    root = self.query.parse_query_string(query)
-    self.assertIsInstance(root, Subtract)
-    self.assertIsInstance(root.operand1, TS)
-    self.assertIsInstance(root.operand2, TS)
+  query = "SUBTRACT(TS(a, a, a), TS(b, b, b))"
+  root = mock_query.parse_query_string(query)
+  assert isinstance(root, Subtract)
+  assert isinstance(root.operand1, TS)
+  assert isinstance(root.operand2, TS)
 
     # Multiplying with a constant is fine.
-    query = "SUBTRACT(TS(a, a, a), 10)"
-    root = self.query.parse_query_string(query)
-    self.assertIsInstance(root, Subtract)
-    self.assertIsInstance(root.operand1, TS)
-    self.assertIsInstance(root.operand2, float)
+  query = "SUBTRACT(TS(a, a, a), 10)"
+  root = mock_query.parse_query_string(query)
+  assert isinstance(root, Subtract)
+  assert isinstance(root.operand1, TS)
+  assert isinstance(root.operand2, float)
 
     # Must have two operands
-    query = "SUBTRACT(TS(a, a, a))"
-    with self.assertRaises(Exception):
-      self.query.parse_query_string(query)
+  query = "SUBTRACT(TS(a, a, a))"
+  with pytest.raises(Exception):
+    mock_query.parse_query_string(query)
 
-    query = "RATE(TS(a, a, a))"
-    root = self.query.parse_query_string(query)
-    self.assertIsInstance(root, Rate)
-    self.assertIsInstance(root.timeSeries, TS)
+  query = "RATE(TS(a, a, a))"
+  root = mock_query.parse_query_string(query)
+  assert isinstance(root, Rate)
+  assert isinstance(root.time_series, TS)
 
     # Must have one operand only
-    query = "RATE(TS(a, a, a), TS(b, b, b))"
-    with self.assertRaises(Exception):
-      self.query.parse_query_string(query)
+  query = "RATE(TS(a, a, a), TS(b, b, b))"
+  with pytest.raises(Exception):
+    mock_query.parse_query_string(query)

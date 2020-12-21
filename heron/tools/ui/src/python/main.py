@@ -189,7 +189,6 @@ def metrics(
     return result[component]
   return result
 
-# should factor out the tornado based access module
 query_handler = tracker.HeronQueryHandler()
 @topologies_router.get("/metrics/timeline")
 def timeline(
