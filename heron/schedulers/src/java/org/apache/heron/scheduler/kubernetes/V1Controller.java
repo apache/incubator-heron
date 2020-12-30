@@ -70,6 +70,8 @@ import io.kubernetes.client.util.PatchUtils;
 
 import okhttp3.Response;
 
+import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
+
 public class V1Controller extends KubernetesController {
 
   private static final Logger LOG =
@@ -230,6 +232,10 @@ public class V1Controller extends KubernetesController {
             + "] in namespace [" + getNamespace() + "] is deleted.");
         return true;
       } else {
+        if (response.code() == HTTP_NOT_FOUND) {
+          LOG.log(Level.INFO, "Kubernetes headless service does not exist for Topology: " + getTopologyName());
+          return true;
+        }
         LOG.log(Level.SEVERE, "Error when deleting the Service of the job ["
             + getTopologyName() + "] in namespace [" + getNamespace() + "]");
         LOG.log(Level.SEVERE, "Error killing topoogy message:" + response.message());
@@ -238,8 +244,13 @@ public class V1Controller extends KubernetesController {
         throw new TopologyRuntimeManagementException(
             KubernetesUtils.errorMessageFromResponse(response));
       }
-    } catch (IOException | ApiException e) {
-      KubernetesUtils.logExceptionWithDetails(LOG, "Error deleting topology service", e);
+    } catch (ApiException e) {
+      if (e.getCode() == HTTP_NOT_FOUND) {
+        LOG.log(Level.INFO, "Kubernetes headless service does not exist for Topology: " + getTopologyName());
+        return true;
+      }
+    } catch (IOException e) {
+      KubernetesUtils.logExceptionWithDetails(LOG, "Error deleting topology [" + getTopologyName() +"] Kubernetes service", e);
       return false;
     }
   }
@@ -255,6 +266,10 @@ public class V1Controller extends KubernetesController {
             + "] in namespace [" + getNamespace() + "] is deleted.");
         return true;
       } else {
+        if (response.code() == HTTP_NOT_FOUND) {
+          LOG.log(Level.INFO, "Statefulset does not exist for Topology: " + getTopologyName());
+          return true;
+        }
         LOG.log(Level.SEVERE, "Error when deleting the StatefulSet of the job ["
             + getTopologyName() + "] in namespace [" + getNamespace() + "]");
         LOG.log(Level.SEVERE, "Error killing topology message: " + response.message());
@@ -263,7 +278,12 @@ public class V1Controller extends KubernetesController {
         throw new TopologyRuntimeManagementException(
             KubernetesUtils.errorMessageFromResponse(response));
       }
-    } catch (IOException | ApiException e) {
+    } catch (ApiException e) {
+      if (e.getCode() == HTTP_NOT_FOUND) {
+        LOG.log(Level.INFO, "Statefulset does not exist for Topology: " + getTopologyName());
+        return true;
+      }
+    } catch (IOException e) {
       KubernetesUtils.logExceptionWithDetails(LOG, "Error deleting topology", e);
       return false;
     }

@@ -54,7 +54,7 @@ jetty_version = "9.4.6.v20170531"
 
 jersey_version = "2.25.1"
 
-kubernetes_client_version = "8.0.0"
+kubernetes_client_version = "11.0.0"
 
 load("@rules_jvm_external//:defs.bzl", "maven_install")
 load("@rules_jvm_external//:specs.bzl", "maven")
@@ -263,6 +263,7 @@ http_archive(
 http_archive(
     name = "org_apache_zookeeper",
     build_file = "@//:third_party/zookeeper/BUILD",
+    sha256 = "bafc0abe7da696a2020ba11b8ce7d06f6e28e9bf1e5504de09be25b8b589777d",
     strip_prefix = "apache-zookeeper-3.5.8",
     urls = ["https://archive.apache.org/dist/zookeeper/zookeeper-3.5.8/apache-zookeeper-3.5.8.tar.gz"],
 )
