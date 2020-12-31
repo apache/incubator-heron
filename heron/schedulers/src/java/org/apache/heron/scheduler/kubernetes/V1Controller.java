@@ -233,7 +233,8 @@ public class V1Controller extends KubernetesController {
         return true;
       } else {
         if (response.code() == HTTP_NOT_FOUND) {
-          LOG.log(Level.INFO, "Kubernetes headless service does not exist for Topology: " + getTopologyName());
+          LOG.log(Level.INFO, "Kubernetes headless service does not exist for Topology: "
+                  + getTopologyName());
           return true;
         }
         LOG.log(Level.SEVERE, "Error when deleting the Service of the job ["
@@ -246,13 +247,16 @@ public class V1Controller extends KubernetesController {
       }
     } catch (ApiException e) {
       if (e.getCode() == HTTP_NOT_FOUND) {
-        LOG.log(Level.INFO, "Kubernetes headless service does not exist for Topology: " + getTopologyName());
+        LOG.log(Level.INFO, "Kubernetes headless service does not exist for Topology: "
+                + getTopologyName());
         return true;
       }
     } catch (IOException e) {
-      KubernetesUtils.logExceptionWithDetails(LOG, "Error deleting topology [" + getTopologyName() +"] Kubernetes service", e);
+      KubernetesUtils.logExceptionWithDetails(LOG, "Error deleting topology ["
+              + getTopologyName() + "] Kubernetes service", e);
       return false;
     }
+    return false;
   }
 
   boolean deleteStatefulSet() {
@@ -287,6 +291,7 @@ public class V1Controller extends KubernetesController {
       KubernetesUtils.logExceptionWithDetails(LOG, "Error deleting topology", e);
       return false;
     }
+    return false;
   }
 
   protected List<String> getExecutorCommand(String containerId) {
