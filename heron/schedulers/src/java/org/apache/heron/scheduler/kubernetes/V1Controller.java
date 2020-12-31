@@ -221,20 +221,20 @@ public class V1Controller extends KubernetesController {
         null, null, null);
   }
 
-  boolean deleteService() {
+  void deleteService() {
     try (Response response = coreClient.deleteNamespacedServiceCall(getTopologyName(),
           getNamespace(), null, null, 0, null,
           KubernetesConstants.DELETE_OPTIONS_PROPAGATION_POLICY, null, null).execute()) {
 
       if (!response.isSuccessful()) {
         if (response.code() == HTTP_NOT_FOUND) {
-          LOG.log(Level.INFO, "Kubernetes headless service does not exist for Topology: "
+          LOG.log(Level.WARNING, "Deleting non-existent Kubernetes headless service for Topology: "
                   + getTopologyName());
-          return true;
+          return;
         }
         LOG.log(Level.SEVERE, "Error when deleting the Service of the job ["
                 + getTopologyName() + "] in namespace [" + getNamespace() + "]");
-        LOG.log(Level.SEVERE, "Error killing topoogy message:" + response.message());
+        LOG.log(Level.SEVERE, "Error killing topology message:" + response.message());
         KubernetesUtils.logResponseBodyIfPresent(LOG, response);
 
         throw new TopologyRuntimeManagementException(
@@ -242,29 +242,30 @@ public class V1Controller extends KubernetesController {
       }
     } catch (ApiException e) {
       if (e.getCode() == HTTP_NOT_FOUND) {
-        LOG.log(Level.INFO, "Kubernetes headless service does not exist for Topology: "
+        LOG.log(Level.WARNING, "Tried to delete a non-existent Kubernetes service for Topology: "
                 + getTopologyName());
-        return true;
+        return;
       }
-    } catch (IOException e) {
-      KubernetesUtils.logExceptionWithDetails(LOG, "Error deleting topology ["
+      throw new TopologyRuntimeManagementException("Error deleting topology ["
               + getTopologyName() + "] Kubernetes service", e);
-      return false;
+    } catch (IOException e) {
+      throw new TopologyRuntimeManagementException("Error deleting topology ["
+              + getTopologyName() + "] Kubernetes service", e);
     }
     LOG.log(Level.INFO, "Headless Service for the Job [" + getTopologyName()
             + "] in namespace [" + getNamespace() + "] is deleted.");
-    return true;
   }
 
-  boolean deleteStatefulSet() {
+  void deleteStatefulSet() {
     try (Response response = appsClient.deleteNamespacedStatefulSetCall(getTopologyName(),
           getNamespace(), null, null, 0, null,
           KubernetesConstants.DELETE_OPTIONS_PROPAGATION_POLICY, null, null).execute()) {
 
       if (!response.isSuccessful()) {
         if (response.code() == HTTP_NOT_FOUND) {
-          LOG.log(Level.INFO, "Statefulset does not exist for Topology: " + getTopologyName());
-          return true;
+          LOG.log(Level.WARNING, "Tried to delete a non-existent StatefulSet for Topology: "
+                  + getTopologyName());
+          return;
         }
         LOG.log(Level.SEVERE, "Error when deleting the StatefulSet of the job ["
                 + getTopologyName() + "] in namespace [" + getNamespace() + "]");
@@ -276,16 +277,18 @@ public class V1Controller extends KubernetesController {
       }
     } catch (ApiException e) {
       if (e.getCode() == HTTP_NOT_FOUND) {
-        LOG.log(Level.INFO, "Statefulset does not exist for Topology: " + getTopologyName());
-        return true;
+        LOG.log(Level.WARNING, "Tried to delete a non-existent StatefulSet for Topology: "
+                + getTopologyName());
+        return;
       }
+      throw new TopologyRuntimeManagementException("Error deleting topology ["
+              + getTopologyName() + "] Kubernetes StatefulSet", e);
     } catch (IOException e) {
-      KubernetesUtils.logExceptionWithDetails(LOG, "Error deleting topology", e);
-      return false;
+      throw new TopologyRuntimeManagementException("Error deleting topology ["
+              + getTopologyName() + "] Kubernetes StatefulSet", e);
     }
     LOG.log(Level.INFO, "StatefulSet for the Job [" + getTopologyName()
             + "] in namespace [" + getNamespace() + "] is deleted.");
-    return true;
   }
 
   protected List<String> getExecutorCommand(String containerId) {
