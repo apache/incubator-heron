@@ -278,9 +278,8 @@ http_archive(
 http_archive(
     name = "com_github_google_glog",
     build_file = "@//:third_party/glog/glog.BUILD",
-    sha256 = "7580e408a2c0b5a89ca214739978ce6ff480b5e7d8d7698a2aa92fadc484d1e0",
-    strip_prefix = "glog-0.3.5",
-    urls = ["https://github.com/google/glog/archive/v0.3.5.tar.gz"],
+    strip_prefix = "glog-0.4.0",
+    urls = ["https://github.com/google/glog/archive/v0.4.0.tar.gz"],
 )
 
 http_archive(

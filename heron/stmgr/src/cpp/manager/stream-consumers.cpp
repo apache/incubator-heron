@@ -35,7 +35,7 @@ namespace stmgr {
 StreamConsumers::StreamConsumers(const proto::api::InputStream& _is,
                                  const proto::api::StreamSchema& _schema,
                                  const std::vector<sp_int32>& _task_ids) {
-  consumers_.push_back(std::move(Grouping::Create(_is.gtype(), _is, _schema, _task_ids)));
+  consumers_.push_back(Grouping::Create(_is.gtype(), _is, _schema, _task_ids));
 }
 
 StreamConsumers::~StreamConsumers() {
@@ -48,7 +48,7 @@ StreamConsumers::~StreamConsumers() {
 void StreamConsumers::NewConsumer(const proto::api::InputStream& _is,
                                   const proto::api::StreamSchema& _schema,
                                   const std::vector<sp_int32>& _task_ids) {
-  consumers_.push_back(std::move(Grouping::Create(_is.gtype(), _is, _schema, _task_ids)));
+  consumers_.push_back(Grouping::Create(_is.gtype(), _is, _schema, _task_ids));
 }
 
 void StreamConsumers::GetListToSend(const proto::system::HeronDataTuple& _tuple,
