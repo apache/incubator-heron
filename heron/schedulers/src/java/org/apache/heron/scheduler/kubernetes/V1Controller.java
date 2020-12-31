@@ -222,28 +222,23 @@ public class V1Controller extends KubernetesController {
   }
 
   boolean deleteService() {
-    try {
-      final Response response = coreClient.deleteNamespacedServiceCall(getTopologyName(),
+    try (Response response = coreClient.deleteNamespacedServiceCall(getTopologyName(),
           getNamespace(), null, null, 0, null,
-          KubernetesConstants.DELETE_OPTIONS_PROPAGATION_POLICY, null, null).execute();
+          KubernetesConstants.DELETE_OPTIONS_PROPAGATION_POLICY, null, null).execute()) {
 
-      if (response.isSuccessful()) {
-        LOG.log(Level.INFO, "Headless Service for the Job [" + getTopologyName()
-            + "] in namespace [" + getNamespace() + "] is deleted.");
-        return true;
-      } else {
+      if (!response.isSuccessful()) {
         if (response.code() == HTTP_NOT_FOUND) {
           LOG.log(Level.INFO, "Kubernetes headless service does not exist for Topology: "
                   + getTopologyName());
           return true;
         }
         LOG.log(Level.SEVERE, "Error when deleting the Service of the job ["
-            + getTopologyName() + "] in namespace [" + getNamespace() + "]");
+                + getTopologyName() + "] in namespace [" + getNamespace() + "]");
         LOG.log(Level.SEVERE, "Error killing topoogy message:" + response.message());
         KubernetesUtils.logResponseBodyIfPresent(LOG, response);
 
         throw new TopologyRuntimeManagementException(
-            KubernetesUtils.errorMessageFromResponse(response));
+                KubernetesUtils.errorMessageFromResponse(response));
       }
     } catch (ApiException e) {
       if (e.getCode() == HTTP_NOT_FOUND) {
@@ -256,31 +251,28 @@ public class V1Controller extends KubernetesController {
               + getTopologyName() + "] Kubernetes service", e);
       return false;
     }
-    return false;
+    LOG.log(Level.INFO, "Headless Service for the Job [" + getTopologyName()
+            + "] in namespace [" + getNamespace() + "] is deleted.");
+    return true;
   }
 
   boolean deleteStatefulSet() {
-    try {
-      final Response response = appsClient.deleteNamespacedStatefulSetCall(getTopologyName(),
+    try (Response response = appsClient.deleteNamespacedStatefulSetCall(getTopologyName(),
           getNamespace(), null, null, 0, null,
-          KubernetesConstants.DELETE_OPTIONS_PROPAGATION_POLICY, null, null).execute();
+          KubernetesConstants.DELETE_OPTIONS_PROPAGATION_POLICY, null, null).execute()) {
 
-      if (response.isSuccessful()) {
-        LOG.log(Level.INFO, "StatefulSet for the Job [" + getTopologyName()
-            + "] in namespace [" + getNamespace() + "] is deleted.");
-        return true;
-      } else {
+      if (!response.isSuccessful()) {
         if (response.code() == HTTP_NOT_FOUND) {
           LOG.log(Level.INFO, "Statefulset does not exist for Topology: " + getTopologyName());
           return true;
         }
         LOG.log(Level.SEVERE, "Error when deleting the StatefulSet of the job ["
-            + getTopologyName() + "] in namespace [" + getNamespace() + "]");
+                + getTopologyName() + "] in namespace [" + getNamespace() + "]");
         LOG.log(Level.SEVERE, "Error killing topology message: " + response.message());
         KubernetesUtils.logResponseBodyIfPresent(LOG, response);
 
         throw new TopologyRuntimeManagementException(
-            KubernetesUtils.errorMessageFromResponse(response));
+                KubernetesUtils.errorMessageFromResponse(response));
       }
     } catch (ApiException e) {
       if (e.getCode() == HTTP_NOT_FOUND) {
@@ -291,7 +283,9 @@ public class V1Controller extends KubernetesController {
       KubernetesUtils.logExceptionWithDetails(LOG, "Error deleting topology", e);
       return false;
     }
-    return false;
+    LOG.log(Level.INFO, "StatefulSet for the Job [" + getTopologyName()
+            + "] in namespace [" + getNamespace() + "] is deleted.");
+    return true;
   }
 
   protected List<String> getExecutorCommand(String containerId) {
