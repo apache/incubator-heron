@@ -125,7 +125,6 @@ void StMgrClient::HandleRegisterResponse(
 
   if (response->has_pplan()) {
     LOG(INFO) << "Registration response had a pplan";
-    using std::move;
     pplanWatcher_(pool_unique_ptr<proto::system::PhysicalPlan>(response->release_pplan()));
   }
 }
