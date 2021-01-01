@@ -49,13 +49,13 @@ DummyCkptMgrClient::DummyCkptMgrClient(std::shared_ptr<EventLoop> _eventLoop,
 DummyCkptMgrClient::~DummyCkptMgrClient() {
 }
 
-void DummyCkptMgrClient::SaveInstanceState(heron::proto::ckptmgr::SaveInstanceStateRequest* _req) {
+void DummyCkptMgrClient::SaveInstanceState(unique_ptr<heron::proto::ckptmgr::SaveInstanceStateRequest> _req) {
   const std::string& ckpt_id = _req->checkpoint().checkpoint_id();
   if (saves_.find(ckpt_id) == saves_.end()) {
     saves_[ckpt_id] = std::set<int32_t>();
   }
   saves_[ckpt_id].insert(_req->instance().info().task_id());
-  delete _req;
+  _req.reset();
 }
 
 void DummyCkptMgrClient::GetInstanceState(const heron::proto::system::Instance& _instance,

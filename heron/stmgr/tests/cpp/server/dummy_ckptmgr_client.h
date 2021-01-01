@@ -35,7 +35,7 @@ class DummyCkptMgrClient : public heron::stmgr::CkptMgrClient {
 
   virtual ~DummyCkptMgrClient();
 
-  virtual void SaveInstanceState(heron::proto::ckptmgr::SaveInstanceStateRequest* _request);
+  virtual void SaveInstanceState(unique_ptr<heron::proto::ckptmgr::SaveInstanceStateRequest> _request);
   virtual void GetInstanceState(const heron::proto::system::Instance& _instance,
                                 const std::string& _checkpoint_id);
 
