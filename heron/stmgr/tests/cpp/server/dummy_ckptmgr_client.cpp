@@ -55,7 +55,7 @@ void DummyCkptMgrClient::SaveInstanceState(unique_ptr<heron::proto::ckptmgr::Sav
     saves_[ckpt_id] = std::set<int32_t>();
   }
   saves_[ckpt_id].insert(_req->instance().info().task_id());
-  _req.reset();
+  _req.reset(nullptr);
 }
 
 void DummyCkptMgrClient::GetInstanceState(const heron::proto::system::Instance& _instance,
