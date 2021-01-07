@@ -42,9 +42,9 @@ DummyStMgr::DummyStMgr(std::shared_ptr<EventLoop> eventLoop, const NetworkOption
       pplan_(nullptr),
       got_restore_message_(false),
       got_start_message_(false) {
-  InstallResponseHandler(std::move(make_unique<proto::tmanager::StMgrRegisterRequest>()),
+  InstallResponseHandler(make_unique<proto::tmanager::StMgrRegisterRequest>(),
                          &DummyStMgr::HandleRegisterResponse);
-  InstallResponseHandler(std::move(make_unique<proto::tmanager::StMgrHeartbeatRequest>()),
+  InstallResponseHandler(make_unique<proto::tmanager::StMgrHeartbeatRequest>(),
                          &DummyStMgr::HandleHeartbeatResponse);
   InstallMessageHandler(&DummyStMgr::HandleNewAssignmentMessage);
   InstallMessageHandler(&DummyStMgr::HandleRestoreTopologyStateRequest);
