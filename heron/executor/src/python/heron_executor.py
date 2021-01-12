@@ -576,7 +576,7 @@ class HeronExecutor:
     return int(self._get_jvm_version().split(".")[0])
 
   def _get_java_gc_instance_cmd(self, cmd, gc_name):
-    gc_cmd += [
+    gc_cmd = [
         '-XX:+UseG1GC',
         '-XX:+ParallelRefProcEnabled',
         '-XX:+UseStringDeduplication',
