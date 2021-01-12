@@ -171,6 +171,9 @@ public enum Key {
   HERON_CLUSTER_CONF     ("heron.directory.cluster.conf",      "./heron-conf"),
   // TODO: rename below to heron.directory.cluster.java.home, coordinate change with twitter configs
   HERON_CLUSTER_JAVA_HOME("heron.directory.sandbox.java.home", "/usr/lib/jvm/default-java"),
+  
+  // Used to enable verbose JVM GC logging
+  ENABLE_VERBOSE_GC_LOG("heron.config.enable.verbose.gc.log", false),
 
   //keys for heron configuration files on the cluster
   OVERRIDE_YAML("heron.config.file.override.yaml",  "${HERON_CONF}/override.yaml"),

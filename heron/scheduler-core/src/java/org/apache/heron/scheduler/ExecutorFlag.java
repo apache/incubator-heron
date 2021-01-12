@@ -66,6 +66,7 @@ public enum ExecutorFlag {
   StatefulConfigFile("stateful-config-file"),
   HealthManagerMode("health-manager-mode"),
   HealthManagerClasspath("health-manager-classpath"),
+  EnableVerboseGCLog("enable-verbose-gc-log"),
   JvmRemoteDebuggerPorts("jvm-remote-debugger-ports");
 
   private final String name;
