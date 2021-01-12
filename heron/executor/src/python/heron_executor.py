@@ -584,7 +584,7 @@ class HeronExecutor:
         '-XX:InitiatingHeapOccupancyPercent=30',
         '-XX:+HeapDumpOnOutOfMemoryError',
         '-XX:ParallelGCThreads=4']
-    if self.enable_verbose_gc_log:
+    if self.verbose_gc_log:
         gc_cmd += ['-Xlog:gc*,safepoint=info:file=' + self.log_dir + '/gc.' + gc_name +
         '.log:tags,time,uptime,level:filecount=5,filesize=100M']
     try:
