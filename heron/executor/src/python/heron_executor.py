@@ -102,7 +102,7 @@ Log = log.Log
 @click.option("--topology-defn-file", required=True)
 @click.option("--topology-id", required=True)
 @click.option("--topology-name", required=True)
-@click.option("--enable-verbose-gc-log", required=False)
+@click.option("--verbose-gc-log", is_flag=True)
 @click.option("--jvm-remote-debugger-ports",
               help="comma separated list of ports to be used"
                    " by a remote debugger for JVM instances")
