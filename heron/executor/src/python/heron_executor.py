@@ -344,7 +344,7 @@ class HeronExecutor:
     self.health_manager_classpath = '%s:%s'\
         % (self.scheduler_classpath, parsed_args.health_manager_classpath)
     self.enable_verbose_gc_log = parsed_args.enable_verbose_gc_log \
-        if parsed_args.enable_verbose_gc_log else 'false'
+        if parsed_args.enable_verbose_gc_log else False
     self.jvm_remote_debugger_ports = \
       parsed_args.jvm_remote_debugger_ports.split(",") \
         if parsed_args.jvm_remote_debugger_ports else None
