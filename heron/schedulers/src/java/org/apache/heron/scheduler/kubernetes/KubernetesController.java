@@ -62,13 +62,16 @@ public abstract class KubernetesController implements IScalable {
     return KubernetesContext.getSchedulerURI(configuration);
   }
 
-  Resource getContainerResource(PackingPlan packingPlan) {
+  ContainerResourcePair getContainerResourcePair(PackingPlan packingPlan) {
     // Align resources to maximal requested resource
     PackingPlan updatedPackingPlan = packingPlan.cloneWithHomogeneousScheduledResource();
     SchedulerUtils.persistUpdatedPackingPlan(Runtime.topologyName(runtimeConfiguration),
         updatedPackingPlan, Runtime.schedulerStateManagerAdaptor(runtimeConfiguration));
 
-    return updatedPackingPlan.getContainers().iterator().next().getScheduledResource().get();
+    return new ContainerResourcePair(
+            updatedPackingPlan.getContainers().iterator().next().getRequiredResource(),
+            updatedPackingPlan.getContainers().iterator().next().getScheduledResource().get()
+    );
   }
 
   abstract boolean submit(PackingPlan packingPlan);
@@ -76,4 +79,24 @@ public abstract class KubernetesController implements IScalable {
   abstract boolean killTopology();
 
   abstract boolean restart(int shardId);
+
+  public static class ContainerResourcePair {
+    private final Resource requiredResource;
+    private final Resource scheduledResource;
+
+    public ContainerResourcePair(
+                         Resource requiredResource,
+                         Resource scheduledResource) {
+      this.requiredResource = requiredResource;
+      this.scheduledResource = scheduledResource;
+    }
+
+    public Resource getRequiredResource() {
+      return requiredResource;
+    }
+
+    public Resource getScheduledResource() {
+      return scheduledResource;
+    }
+  }
 }

@@ -40,7 +40,6 @@ import org.apache.heron.scheduler.utils.SchedulerUtils;
 import org.apache.heron.scheduler.utils.SchedulerUtils.ExecutorPort;
 import org.apache.heron.spi.common.Config;
 import org.apache.heron.spi.packing.PackingPlan;
-import org.apache.heron.spi.packing.Resource;
 
 import io.kubernetes.client.custom.Quantity;
 import io.kubernetes.client.custom.V1Patch;
@@ -100,7 +99,7 @@ public class V1Controller extends KubernetesController {
       throw new TopologySubmissionException("K8S scheduler does not allow upper case topologies.");
     }
 
-    final Resource containerResource = getContainerResource(packingPlan);
+    final ContainerResourcePair resourcePair = getContainerResourcePair(packingPlan);
 
     final V1Service topologyService = createTopologyyService();
     try {
@@ -118,7 +117,7 @@ public class V1Controller extends KubernetesController {
     for (PackingPlan.ContainerPlan containerPlan : packingPlan.getContainers()) {
       numberOfInstances = Math.max(numberOfInstances, containerPlan.getInstances().size());
     }
-    final V1StatefulSet statefulSet = createStatefulSet(containerResource, numberOfInstances);
+    final V1StatefulSet statefulSet = createStatefulSet(resourcePair, numberOfInstances);
 
     try {
       final V1StatefulSet response =
@@ -316,7 +315,7 @@ public class V1Controller extends KubernetesController {
     return service;
   }
 
-  private V1StatefulSet createStatefulSet(Resource containerResource, int numberOfInstances) {
+  private V1StatefulSet createStatefulSet(ContainerResourcePair containerResource, int numberOfInstances) {
     final String topologyName = getTopologyName();
     final Config runtimeConfiguration = getRuntimeConfiguration();
 
@@ -384,7 +383,7 @@ public class V1Controller extends KubernetesController {
     return labels;
   }
 
-  private V1PodSpec getPodSpec(List<String> executorCommand, Resource resource,
+  private V1PodSpec getPodSpec(List<String> executorCommand, ContainerResourcePair resource,
       int numberOfInstances) {
     final V1PodSpec podSpec = new V1PodSpec();
 
@@ -429,7 +428,7 @@ public class V1Controller extends KubernetesController {
     }
   }
 
-  private V1Container getContainer(List<String> executorCommand, Resource resource,
+  private V1Container getContainer(List<String> executorCommand, ContainerResourcePair resource,
       int numberOfInstances) {
     final Config configuration = getConfiguration();
     final V1Container container = new V1Container().name("executor");
@@ -463,10 +462,16 @@ public class V1Controller extends KubernetesController {
     final V1ResourceRequirements resourceRequirements = new V1ResourceRequirements();
     final Map<String, Quantity> requests = new HashMap<>();
     requests.put(KubernetesConstants.MEMORY,
-        Quantity.fromString(KubernetesUtils.Megabytes(resource.getRam())));
+        Quantity.fromString(KubernetesUtils.Megabytes(resource.getRequiredResource().getRam())));
     requests.put(KubernetesConstants.CPU,
-         Quantity.fromString(Double.toString(roundDecimal(resource.getCpu(), 3))));
+         Quantity.fromString(Double.toString(roundDecimal(resource.getRequiredResource().getCpu(), 3))));
     resourceRequirements.setRequests(requests);
+    final Map<String, Quantity> limits = new HashMap<>();
+    limits.put(KubernetesConstants.MEMORY,
+            Quantity.fromString(KubernetesUtils.Megabytes(resource.getScheduledResource().getRam())));
+    limits.put(KubernetesConstants.CPU,
+            Quantity.fromString(Double.toString(roundDecimal(resource.getScheduledResource().getCpu(), 3))));
+    resourceRequirements.setLimits(limits);
     container.setResources(resourceRequirements);
 
     // set container ports
