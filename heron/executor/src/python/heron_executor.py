@@ -585,8 +585,8 @@ class HeronExecutor:
         '-XX:+HeapDumpOnOutOfMemoryError',
         '-XX:ParallelGCThreads=4']
     if self.verbose_gc_log:
-        gc_cmd += ['-Xlog:gc*,safepoint=info:file=' + self.log_dir + '/gc.' + gc_name +
-        '.log:tags,time,uptime,level:filecount=5,filesize=100M']
+      gc_cmd += ['-Xlog:gc*,safepoint=info:file=' + self.log_dir + '/gc.' + gc_name +
+                 '.log:tags,time,uptime,level:filecount=5,filesize=100M']
     try:
       cp_index = cmd.index('-cp')
       return list(itertools.chain(*[cmd[0:cp_index], gc_cmd, cmd[cp_index:]]))
