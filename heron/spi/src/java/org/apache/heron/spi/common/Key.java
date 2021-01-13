@@ -62,6 +62,9 @@ public enum Key {
   DRY_RUN                  ("heron.config.dry_run",             Boolean.FALSE),
   DRY_RUN_FORMAT_TYPE      ("heron.config.dry_run_format_type", Type.DRY_RUN_FORMAT_TYPE),
   VERBOSE                  ("heron.config.verbose",             Boolean.FALSE),
+  // Used to enable verbose JVM GC logging
+  VERBOSE_GC               ("heron.config.verbose.gc",                         Boolean.FALSE),
+
   CONFIG_PROPERTY          ("heron.config.property",            Type.STRING),
 
   //keys for release/build information
@@ -171,9 +174,6 @@ public enum Key {
   HERON_CLUSTER_CONF     ("heron.directory.cluster.conf",      "./heron-conf"),
   // TODO: rename below to heron.directory.cluster.java.home, coordinate change with twitter configs
   HERON_CLUSTER_JAVA_HOME("heron.directory.sandbox.java.home", "/usr/lib/jvm/default-java"),
-  
-  // Used to enable verbose JVM GC logging
-  ENABLE_VERBOSE_GC_LOG("heron.config.enable.verbose.gc.log", false),
 
   //keys for heron configuration files on the cluster
   OVERRIDE_YAML("heron.config.file.override.yaml",  "${HERON_CONF}/override.yaml"),

@@ -279,7 +279,8 @@ public final class SchedulerUtils {
     args.add(createCommandArg(ExecutorFlag.TopologyBinaryFile,
         Context.topologyBinaryFile(config)));
     args.add(createCommandArg(ExecutorFlag.HeronJavaHome, Context.clusterJavaHome(config)));
-    args.add(createCommandArg(ExecutorFlag.EnableVerboseGCLog, Context.enableVerboseGCLog(config)));
+    if(Context.verboseGC(config))
+      args.add(ExecutorFlag.EnableVerboseGCLog.getFlag());
     args.add(createCommandArg(ExecutorFlag.HeronShellBinary, Context.shellBinary(config)));
     args.add(createCommandArg(ExecutorFlag.Cluster, Context.cluster(config)));
     args.add(createCommandArg(ExecutorFlag.Role, Context.role(config)));
