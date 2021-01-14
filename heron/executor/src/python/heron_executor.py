@@ -102,7 +102,7 @@ Log = log.Log
 @click.option("--topology-defn-file", required=True)
 @click.option("--topology-id", required=True)
 @click.option("--topology-name", required=True)
-@click.option("--verbose-gc-log", is_flag=True)
+@click.option("--verbose-gc", is_flag=True)
 @click.option("--jvm-remote-debugger-ports",
               help="comma separated list of ports to be used"
                    " by a remote debugger for JVM instances")
@@ -343,7 +343,7 @@ class HeronExecutor:
     self.health_manager_mode = parsed_args.health_manager_mode
     self.health_manager_classpath = '%s:%s'\
         % (self.scheduler_classpath, parsed_args.health_manager_classpath)
-    self.verbose_gc_log = parsed_args.verbose_gc_log
+    self.verbose_gc = parsed_args.verbose_gc
     self.jvm_remote_debugger_ports = \
       parsed_args.jvm_remote_debugger_ports.split(",") \
         if parsed_args.jvm_remote_debugger_ports else None
@@ -584,7 +584,7 @@ class HeronExecutor:
         '-XX:InitiatingHeapOccupancyPercent=30',
         '-XX:+HeapDumpOnOutOfMemoryError',
         '-XX:ParallelGCThreads=4']
-    if self.verbose_gc_log:
+    if self.verbose_gc:
       gc_cmd += ['-Xlog:gc*,safepoint=info:file=' + self.log_dir + '/gc.' + gc_name +
                  '.log:tags,time,uptime,level:filecount=5,filesize=100M']
     try:
