@@ -54,7 +54,7 @@ def add_verbose_gc(parser):
     :return:
     '''
     parser.add_argument(
-        '--verbose_gc',
+        '--verbose-gc',
         default=False,
         action='store_true',
         help='Produce JVM GC logging')
