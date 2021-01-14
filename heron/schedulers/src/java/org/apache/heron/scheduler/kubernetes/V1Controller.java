@@ -315,7 +315,8 @@ public class V1Controller extends KubernetesController {
     return service;
   }
 
-  private V1StatefulSet createStatefulSet(ContainerResourcePair containerResource, int numberOfInstances) {
+  private V1StatefulSet createStatefulSet(ContainerResourcePair containerResource,
+                                          int numberOfInstances) {
     final String topologyName = getTopologyName();
     final Config runtimeConfiguration = getRuntimeConfiguration();
 
@@ -464,13 +465,16 @@ public class V1Controller extends KubernetesController {
     requests.put(KubernetesConstants.MEMORY,
         Quantity.fromString(KubernetesUtils.Megabytes(resource.getRequiredResource().getRam())));
     requests.put(KubernetesConstants.CPU,
-         Quantity.fromString(Double.toString(roundDecimal(resource.getRequiredResource().getCpu(), 3))));
+         Quantity.fromString(Double.toString(roundDecimal(resource.getRequiredResource().getCpu(),
+                 3))));
     resourceRequirements.setRequests(requests);
     final Map<String, Quantity> limits = new HashMap<>();
     limits.put(KubernetesConstants.MEMORY,
-            Quantity.fromString(KubernetesUtils.Megabytes(resource.getScheduledResource().getRam())));
+            Quantity.fromString(KubernetesUtils.Megabytes(
+                    resource.getScheduledResource().getRam())));
     limits.put(KubernetesConstants.CPU,
-            Quantity.fromString(Double.toString(roundDecimal(resource.getScheduledResource().getCpu(), 3))));
+            Quantity.fromString(Double.toString(roundDecimal(
+                    resource.getScheduledResource().getCpu(), 3))));
     resourceRequirements.setLimits(limits);
     container.setResources(resourceRequirements);
 
