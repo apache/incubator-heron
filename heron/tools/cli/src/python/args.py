@@ -56,6 +56,7 @@ def add_verbose_gc(parser):
     parser.add_argument(
         '--verbose_gc',
         default=False,
+        action='store_true',
         help='Produce JVM GC logging')
     return parser
 
