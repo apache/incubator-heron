@@ -100,7 +100,7 @@ public class V1Controller extends KubernetesController {
       throw new TopologySubmissionException("K8S scheduler does not allow upper case topologies.");
     }
 
-    final Resource resource = getContainerResource(packingPlan);
+    final Resource containerResource = getContainerResource(packingPlan);
 
     final V1Service topologyService = createTopologyyService();
     try {
@@ -118,7 +118,7 @@ public class V1Controller extends KubernetesController {
     for (PackingPlan.ContainerPlan containerPlan : packingPlan.getContainers()) {
       numberOfInstances = Math.max(numberOfInstances, containerPlan.getInstances().size());
     }
-    final V1StatefulSet statefulSet = createStatefulSet(resource, numberOfInstances);
+    final V1StatefulSet statefulSet = createStatefulSet(containerResource, numberOfInstances);
 
     try {
       final V1StatefulSet response =
@@ -316,8 +316,7 @@ public class V1Controller extends KubernetesController {
     return service;
   }
 
-  private V1StatefulSet createStatefulSet(Resource containerResource,
-                                          int numberOfInstances) {
+  private V1StatefulSet createStatefulSet(Resource containerResource, int numberOfInstances) {
     final String topologyName = getTopologyName();
     final Config runtimeConfiguration = getRuntimeConfiguration();
 
@@ -471,10 +470,10 @@ public class V1Controller extends KubernetesController {
             Quantity.fromString(Double.toString(roundDecimal(
                     resource.getCpu(), 3))));
     resourceRequirements.setLimits(limits);
-    KubernetesContext.KubernetesRequestMode requestMode =
+    KubernetesContext.KubernetesResourceRequestMode requestMode =
             KubernetesContext.getKubernetesRequestMode(configuration);
     // Set the Kubernetes container resource request
-    if (requestMode == KubernetesContext.KubernetesRequestMode.EQUAL_TO_LIMIT) {
+    if (requestMode == KubernetesContext.KubernetesResourceRequestMode.EQUAL_TO_LIMIT) {
       LOG.log(Level.CONFIG, "Setting K8s Request equal to Limit");
       resourceRequirements.setRequests(limits);
     } else {
