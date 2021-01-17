@@ -161,6 +161,7 @@ spec:
               -D heron.class.packing.algorithm=org.apache.heron.packing.binpacking.FirstFitDecreasingPacking
               -D heron.class.repacking.algorithm=org.apache.heron.packing.binpacking.FirstFitDecreasingPacking
               {{- end }}
+              -D heron.kubernetes.resource.request.mode={{ .Values.topologyResourceRequestMode }}
           envFrom:
             - configMapRef:
                 name: {{ .Release.Name }}-tools-config
