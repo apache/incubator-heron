@@ -51,7 +51,8 @@ public final class KubernetesContext extends Context {
    * The format of this flag is the string encoded values of the
    * underlying KubernetesRequestMode value.
    */
-  public static final String KUBERNETES_RESOURCE_REQUEST_MODE = "heron.kubernetes.resource.request.mode";
+  public static final String KUBERNETES_RESOURCE_REQUEST_MODE =
+          "heron.kubernetes.resource.request.mode";
 
   public static final String HERON_KUBERNETES_VOLUME_NAME = "heron.kubernetes.volume.name";
   public static final String HERON_KUBERNETES_VOLUME_TYPE = "heron.kubernetes.volume.type";
@@ -107,7 +108,8 @@ public final class KubernetesContext extends Context {
   }
 
   public static KubernetesResourceRequestMode getKubernetesRequestMode(Config config) {
-    return KubernetesResourceRequestMode.valueOf(config.getStringValue(KUBERNETES_RESOURCE_REQUEST_MODE));
+    return KubernetesResourceRequestMode.valueOf(
+            config.getStringValue(KUBERNETES_RESOURCE_REQUEST_MODE));
   }
 
   static String getVolumeType(Config config) {
