@@ -34,7 +34,7 @@ heron.scheduler.is.service:                  False
 heron.executor.docker.image:                'heron/heron:latest'
 
 # logic to be used for calculating the Kubernetes resource request and limits
-# value can be "Empty", "Limit"
-# "Empty" will not set a K8s request
-# "Limit" will set the K8s request to the same values as the K8s limit
-heron.kubernetes.resource.request.mode:  Limit
+# value can be "NOT_SET", "EQUAL_TO_LIMIT"
+# "NOT_SET" will not set a K8s request
+# "EQUAL_TO_LIMIT" will set the K8s request to the same values as the K8s limit
+heron.kubernetes.resource.request.mode:  EQUAL_TO_LIMIT
