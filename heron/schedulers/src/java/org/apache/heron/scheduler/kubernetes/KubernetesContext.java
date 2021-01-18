@@ -33,6 +33,26 @@ public final class KubernetesContext extends Context {
   public static final String HERON_KUBERNETES_SCHEDULER_IMAGE_PULL_POLICY =
       "heron.kubernetes.scheduler.imagePullPolicy";
 
+  public enum KubernetesResourceRequestMode {
+    /**
+     * The Kubernetes Request will not be set by the Heron Kubernetes Scheduler.
+     * The generated pods will use the Kubernetes default values.
+     */
+    NOT_SET,
+    /**
+     * The Kubernetes Pod Resource Request will be set to the same values as
+     * provided in the Resource Limit. This mode effectively guarantees the
+     * cpu and memory will be reserved.
+     */
+    EQUAL_TO_LIMIT;
+  }
+  /**
+   * This config item is used to determine how to configure the K8s Resource Request.
+   * The format of this flag is the string encoded values of the
+   * underlying KubernetesRequestMode value.
+   */
+  public static final String KUBERNETES_RESOURCE_REQUEST_MODE =
+          "heron.kubernetes.resource.request.mode";
 
   public static final String HERON_KUBERNETES_VOLUME_NAME = "heron.kubernetes.volume.name";
   public static final String HERON_KUBERNETES_VOLUME_TYPE = "heron.kubernetes.volume.type";
@@ -85,6 +105,11 @@ public final class KubernetesContext extends Context {
   public static boolean hasImagePullPolicy(Config config) {
     final String imagePullPolicy = getKubernetesImagePullPolicy(config);
     return isNotEmpty(imagePullPolicy);
+  }
+
+  public static KubernetesResourceRequestMode getKubernetesRequestMode(Config config) {
+    return KubernetesResourceRequestMode.valueOf(
+            config.getStringValue(KUBERNETES_RESOURCE_REQUEST_MODE));
   }
 
   static String getVolumeType(Config config) {

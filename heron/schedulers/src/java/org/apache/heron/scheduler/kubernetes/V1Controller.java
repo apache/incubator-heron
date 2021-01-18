@@ -483,12 +483,24 @@ public class V1Controller extends KubernetesController {
 
     // set container resources
     final V1ResourceRequirements resourceRequirements = new V1ResourceRequirements();
-    final Map<String, Quantity> requests = new HashMap<>();
-    requests.put(KubernetesConstants.MEMORY,
-        Quantity.fromString(KubernetesUtils.Megabytes(resource.getRam())));
-    requests.put(KubernetesConstants.CPU,
-         Quantity.fromString(Double.toString(roundDecimal(resource.getCpu(), 3))));
-    resourceRequirements.setRequests(requests);
+    // Set the Kubernetes container resource limit
+    final Map<String, Quantity> limits = new HashMap<>();
+    limits.put(KubernetesConstants.MEMORY,
+            Quantity.fromString(KubernetesUtils.Megabytes(
+                    resource.getRam())));
+    limits.put(KubernetesConstants.CPU,
+            Quantity.fromString(Double.toString(roundDecimal(
+                    resource.getCpu(), 3))));
+    resourceRequirements.setLimits(limits);
+    KubernetesContext.KubernetesResourceRequestMode requestMode =
+            KubernetesContext.getKubernetesRequestMode(configuration);
+    // Set the Kubernetes container resource request
+    if (requestMode == KubernetesContext.KubernetesResourceRequestMode.EQUAL_TO_LIMIT) {
+      LOG.log(Level.CONFIG, "Setting K8s Request equal to Limit");
+      resourceRequirements.setRequests(limits);
+    } else {
+      LOG.log(Level.CONFIG, "Not setting K8s request because config was NOT_SET");
+    }
     container.setResources(resourceRequirements);
 
     // set container ports

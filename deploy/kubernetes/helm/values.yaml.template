@@ -42,6 +42,10 @@ heron:
   # set to `-` to set base-url to the default k8s proxy URL
   # set to `null` to remove the use of base_url
   url: "-"
+
+# Can be EQUAL_TO_LIMIT or NOT_SET
+topologyResourceRequestMode: EQUAL_TO_LIMIT
+
 # Topologies uploader
 uploader:
   class: dlog # s3
