@@ -226,7 +226,7 @@ void TManagerClient::OnReConnectTimer() {
 }
 
 void TManagerClient::OnHeartbeatTimer() {
-  LOG(INFO) << "Sending heartbeat" << std::endl;
+  DLOG(INFO) << "Sending heartbeat" << std::endl;
   // The timer has triggered the callback, so reset the timer_id;
   heartbeat_timer_id = 0;
   SendHeartbeatRequest();
