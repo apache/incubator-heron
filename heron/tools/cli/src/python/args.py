@@ -49,16 +49,16 @@ def add_verbose(parser):
   return parser
 
 def add_verbose_gc(parser):
-    '''
-    :param parser:
-    :return:
-    '''
-    parser.add_argument(
-        '--verbose_gc',
-        default=False,
-        action='store_true',
-        help='Produce JVM GC logging')
-    return parser
+  '''
+  :param parser:
+  :return:
+  '''
+  parser.add_argument(
+      '--verbose_gc',
+      default=False,
+      action='store_true',
+      help='Produce JVM GC logging')
+  return parser
 
 def add_topology(parser):
   '''
