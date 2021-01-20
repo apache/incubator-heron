@@ -127,8 +127,8 @@ def launch_a_topology(cl_args, tmp_dir, topology_file, topology_defn_file, topol
   if Log.getEffectiveLevel() == logging.DEBUG:
     args.append("--verbose")
 
-  if cl_args['verbose-gc']:
-    args.append("--verbose-gc")
+  if cl_args["verbose_gc"]:
+    args.append("--verbose_gc")
 
   if cl_args['dry_run']:
     args.append("--dry_run")
@@ -187,8 +187,8 @@ def launch_topology_server(cl_args, topology_file, topology_defn_file, topology_
   if cl_args['dry_run']:
     data["dry_run"] = True
 
-  if cl_args['verbose-gc']:
-    data['verbose-gc'] = True
+  if cl_args['verbose_gc']:
+    data['verbose_gc'] = True
 
   files = dict(
       definition=open(topology_defn_file, 'rb'),

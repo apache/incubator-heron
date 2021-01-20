@@ -212,7 +212,7 @@ public class SubmitterMain {
 
     Option verboseGC = Option.builder("vgc")
             .desc("Enable verbose JVM GC logs")
-            .longOpt("verboseGC")
+            .longOpt("verbose_gc")
             .build();
 
     options.addOption(cluster);
