@@ -107,6 +107,10 @@ public class KeysTest {
         Key.VERBOSE
     );
     assertEquals(
+         "heron.config.verbose_gc",
+         Key.VERBOSE_GC
+    );
+    assertEquals(
         "heron.config.property",
         Key.CONFIG_PROPERTY
     );

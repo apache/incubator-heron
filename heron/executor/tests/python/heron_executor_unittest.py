@@ -82,7 +82,7 @@ class MockExecutor(HeronExecutor):
     return popen
 
   def _get_jvm_version(self):
-    return "1.8.y.x"
+    return "11.0.6"
 
 
 class HeronExecutorTest(unittest.TestCase):
@@ -105,50 +105,41 @@ class HeronExecutorTest(unittest.TestCase):
         instance_plan.component_index = int(component_index)
     return packing_plan
 
-  # pylint: disable=no-self-argument
+    # pylint: disable=no-self-argument
   def get_expected_metricsmgr_command(container_id):
     return "heron_java_home/bin/java -Xmx1024M -XX:+PrintCommandLineFlags " \
-           "-Djava.net.preferIPv4Stack=true -verbosegc " \
-           "-XX:+UseConcMarkSweepGC -XX:+CMSScavengeBeforeRemark -XX:TargetSurvivorRatio=90 " \
-           "-XX:+PrintGCDetails -XX:+PrintGCTimeStamps -XX:+PrintGCDateStamps " \
-           "-XX:+PrintGCCause -XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=5 " \
-           "-XX:GCLogFileSize=100M -XX:+PrintPromotionFailure -XX:+PrintTenuringDistribution " \
-           "-XX:+PrintHeapAtGC -XX:+HeapDumpOnOutOfMemoryError -XX:ParallelGCThreads=4 " \
-           "-Xloggc:log-files/gc.metricsmgr-%d.log " \
+           "-Djava.net.preferIPv4Stack=true " \
+           "-XX:+UseG1GC -XX:+ParallelRefProcEnabled -XX:+UseStringDeduplication " \
+           "-XX:MaxGCPauseMillis=100 -XX:InitiatingHeapOccupancyPercent=30 " \
+           "-XX:+HeapDumpOnOutOfMemoryError -XX:ParallelGCThreads=4 " \
            "-cp metricsmgr_classpath org.apache.heron.metricsmgr.MetricsManager " \
            "--id=metricsmgr-%d --port=metricsmgr_port " \
            "--topology=topname --cluster=cluster --role=role --environment=environ " \
            "--topology-id=topid " \
            "--system-config-file=%s --override-config-file=%s " \
-           "--sink-config-file=metrics_sinks_config_file" %\
-           (container_id, container_id, INTERNAL_CONF_PATH, OVERRIDE_PATH)
+           "--sink-config-file=metrics_sinks_config_file" % \
+           (container_id, INTERNAL_CONF_PATH, OVERRIDE_PATH)
 
   def get_expected_metricscachemgr_command():
     return "heron_java_home/bin/java -Xmx1024M -XX:+PrintCommandLineFlags " \
-           "-Djava.net.preferIPv4Stack=true -verbosegc " \
-           "-XX:+UseConcMarkSweepGC -XX:+CMSScavengeBeforeRemark -XX:TargetSurvivorRatio=90 " \
-           "-XX:+PrintGCDetails -XX:+PrintGCTimeStamps -XX:+PrintGCDateStamps " \
-           "-XX:+PrintGCCause -XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=5 " \
-           "-XX:GCLogFileSize=100M -XX:+PrintPromotionFailure -XX:+PrintTenuringDistribution " \
-           "-XX:+PrintHeapAtGC -XX:+HeapDumpOnOutOfMemoryError -XX:ParallelGCThreads=4 " \
-           "-Xloggc:log-files/gc.metricscache.log " \
+           "-Djava.net.preferIPv4Stack=true " \
+           "-XX:+UseG1GC -XX:+ParallelRefProcEnabled -XX:+UseStringDeduplication " \
+           "-XX:MaxGCPauseMillis=100 -XX:InitiatingHeapOccupancyPercent=30 " \
+           "-XX:+HeapDumpOnOutOfMemoryError -XX:ParallelGCThreads=4 " \
            "-cp metricscachemgr_classpath org.apache.heron.metricscachemgr.MetricsCacheManager " \
            "--metricscache_id metricscache-0 --server_port metricscachemgr_serverport " \
            "--stats_port metricscachemgr_statsport --topology_name topname --topology_id topid " \
            "--system_config_file %s --override_config_file %s " \
            "--sink_config_file metrics_sinks_config_file " \
-           "--cluster cluster --role role --environment environ" %\
-           (INTERNAL_CONF_PATH, OVERRIDE_PATH)
+           "--cluster cluster --role role --environment environ" \
+           % (INTERNAL_CONF_PATH, OVERRIDE_PATH)
 
   def get_expected_healthmgr_command():
     return "heron_java_home/bin/java -Xmx1024M -XX:+PrintCommandLineFlags " \
-           "-Djava.net.preferIPv4Stack=true -verbosegc " \
-           "-XX:+UseConcMarkSweepGC -XX:+CMSScavengeBeforeRemark -XX:TargetSurvivorRatio=90 " \
-           "-XX:+PrintGCDetails -XX:+PrintGCTimeStamps -XX:+PrintGCDateStamps " \
-           "-XX:+PrintGCCause -XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=5 " \
-           "-XX:GCLogFileSize=100M -XX:+PrintPromotionFailure -XX:+PrintTenuringDistribution " \
-           "-XX:+PrintHeapAtGC -XX:+HeapDumpOnOutOfMemoryError -XX:ParallelGCThreads=4 " \
-           "-Xloggc:log-files/gc.healthmgr.log " \
+           "-Djava.net.preferIPv4Stack=true " \
+           "-XX:+UseG1GC -XX:+ParallelRefProcEnabled -XX:+UseStringDeduplication " \
+           "-XX:MaxGCPauseMillis=100 -XX:InitiatingHeapOccupancyPercent=30 " \
+           "-XX:+HeapDumpOnOutOfMemoryError -XX:ParallelGCThreads=4 " \
            "-cp scheduler_classpath:healthmgr_classpath " \
            "org.apache.heron.healthmgr.HealthManager --cluster cluster --role role " \
            "--environment environ --topology_name topname --metricsmgr_port metricsmgr_port"
@@ -157,19 +148,16 @@ class HeronExecutorTest(unittest.TestCase):
     instance_name = "container_%d_%s_%d" % (container_id, component_name, instance_id)
     return "heron_java_home/bin/java -Xmx320M -Xms320M -Xmn160M -XX:MaxMetaspaceSize=128M " \
            "-XX:MetaspaceSize=128M -XX:ReservedCodeCacheSize=64M -XX:+PrintCommandLineFlags " \
-           "-Djava.net.preferIPv4Stack=true -verbosegc " \
-           "-XX:+UseConcMarkSweepGC -XX:+CMSScavengeBeforeRemark -XX:TargetSurvivorRatio=90 " \
-           "-XX:+PrintGCDetails -XX:+PrintGCTimeStamps -XX:+PrintGCDateStamps " \
-           "-XX:+PrintGCCause -XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=5 " \
-           "-XX:GCLogFileSize=100M -XX:+PrintPromotionFailure -XX:+PrintTenuringDistribution " \
-           "-XX:+PrintHeapAtGC -XX:+HeapDumpOnOutOfMemoryError -XX:ParallelGCThreads=4 " \
-           "-Xloggc:log-files/gc.%s.log " \
+           "-Djava.net.preferIPv4Stack=true " \
+           "-XX:+UseG1GC -XX:+ParallelRefProcEnabled -XX:+UseStringDeduplication " \
+           "-XX:MaxGCPauseMillis=100 -XX:InitiatingHeapOccupancyPercent=30 " \
+           "-XX:+HeapDumpOnOutOfMemoryError -XX:ParallelGCThreads=4 " \
            "-cp instance_classpath:classpath -XX:+HeapDumpOnOutOfMemoryError " \
            "org.apache.heron.instance.HeronInstance -topology_name topname -topology_id topid " \
            "-instance_id %s -component_name %s -task_id %d -component_index 0 -stmgr_id stmgr-%d " \
            "-stmgr_port tmanager_controller_port -metricsmgr_port metricsmgr_port " \
            "-system_config_file %s -override_config_file %s" \
-           % (instance_name, instance_name, component_name, instance_id,
+           % (instance_name, component_name, instance_id,
               container_id, INTERNAL_CONF_PATH, OVERRIDE_PATH)
 
   MockPOpen.set_next_pid(37)
@@ -391,103 +379,3 @@ class HeronExecutorTest(unittest.TestCase):
     self.assertEqual(expected_process.command, found_processes[pid].command_str)
     self.assertEqual(1, found_processes[pid].attempts)
 
-
-class MockExecutorJDK11(HeronExecutor):
-  """
-  mock executor that overrides methods that don't apply to unit tests, like running processes
-  """
-  def __init__(self, args):
-    self.processes = []
-    super(MockExecutorJDK11, self).__init__(args, None)
-
-  # pylint: disable=no-self-use
-  def _load_logging_dir(self, heron_internals_config_file):
-    return "log-files"
-
-  def _run_process(self, name, cmd, env=None):
-    popen = MockPOpen()
-    self.processes.append(ProcessInfo(popen, name, cmd))
-    return popen
-
-  def _get_jvm_version(self):
-    return "11.0.6"
-
-
-class HeronExecutorJDK11Test(unittest.TestCase):
-  """Unittest for Heron Executor"""
-
-  def __init__(self, args):
-    super(HeronExecutorJDK11Test, self).__init__(args, None)
-
-  # pylint: disable=no-self-argument
-  def get_expected_metricsmgr_command(container_id):
-    return "heron_java_home/bin/java -Xmx1024M -XX:+PrintCommandLineFlags " \
-           "-Djava.net.preferIPv4Stack=true -verbosegc " \
-           "-XX:+UseG1GC -XX:+ParallelRefProcEnabled -XX:+UseStringDeduplication " \
-           "-XX:MaxGCPauseMillis=100 -XX:InitiatingHeapOccupancyPercent=30 " \
-           "-XX:+HeapDumpOnOutOfMemoryError -XX:ParallelGCThreads=4 " \
-           "-Xlog:gc*,safepoint=info:file=log-files/gc.metricsmgr-%d.log:tags,time,uptime," \
-           "level:filecount=5,filesize=100M " \
-           "-cp metricsmgr_classpath org.apache.heron.metricsmgr.MetricsManager " \
-           "--id=metricsmgr-%d --port=metricsmgr_port " \
-           "--topology=topname --cluster=cluster --role=role --environment=environ " \
-           "--topology-id=topid " \
-           "--system-config-file=%s --override-config-file=%s " \
-           "--sink-config-file=metrics_sinks_config_file" % \
-           (container_id, container_id, INTERNAL_CONF_PATH, OVERRIDE_PATH)
-
-  def get_expected_metricscachemgr_command():
-    return "heron_java_home/bin/java -Xmx1024M -XX:+PrintCommandLineFlags " \
-           "-Djava.net.preferIPv4Stack=true -verbosegc " \
-           "-XX:+UseG1GC -XX:+ParallelRefProcEnabled -XX:+UseStringDeduplication " \
-           "-XX:MaxGCPauseMillis=100 -XX:InitiatingHeapOccupancyPercent=30 " \
-           "-XX:+HeapDumpOnOutOfMemoryError -XX:ParallelGCThreads=4 " \
-           " -Xlog:gc*,safepoint=info:file=log-files/gc.metricscache.log:tags,time,uptime," \
-           "level:filecount=5,filesize=100M " \
-           "-cp metricscachemgr_classpath org.apache.heron.metricscachemgr.MetricsCacheManager " \
-           "--metricscache_id metricscache-0 --server_port metricscachemgr_serverport " \
-           "--stats_port metricscachemgr_statsport --topology_name topname --topology_id topid " \
-           "--system_config_file %s --override_config_file %s " \
-           "--sink_config_file metrics_sinks_config_file " \
-           "--cluster cluster --role role --environment environ" % \
-           (INTERNAL_CONF_PATH, OVERRIDE_PATH)
-
-  def get_expected_healthmgr_command():
-    return "heron_java_home/bin/java -Xmx1024M -XX:+PrintCommandLineFlags " \
-           "-Djava.net.preferIPv4Stack=true -verbosegc " \
-           "-XX:+UseG1GC -XX:+ParallelRefProcEnabled -XX:+UseStringDeduplication " \
-           "-XX:MaxGCPauseMillis=100 -XX:InitiatingHeapOccupancyPercent=30 " \
-           "-XX:+HeapDumpOnOutOfMemoryError -XX:ParallelGCThreads=4 " \
-           " -Xlog:gc*,safepoint=info:file=log-files/gc.healthmgr.log:tags,time,uptime," \
-           "level:filecount=5,filesize=100M " \
-           "-cp scheduler_classpath:healthmgr_classpath " \
-           "org.apache.heron.healthmgr.HealthManager --cluster cluster --role role " \
-           "--environment environ --topology_name topname --metricsmgr_port metricsmgr_port"
-
-  def get_expected_instance_command(component_name, instance_id, container_id):
-    instance_name = "container_%d_%s_%d" % (container_id, component_name, instance_id)
-    return "heron_java_home/bin/java -Xmx320M -Xms320M -Xmn160M -XX:MaxMetaspaceSize=128M " \
-           "-XX:MetaspaceSize=128M -XX:ReservedCodeCacheSize=64M -XX:+PrintCommandLineFlags " \
-           "-Djava.net.preferIPv4Stack=true -verbosegc " \
-           "-XX:+UseG1GC -XX:+ParallelRefProcEnabled -XX:+UseStringDeduplication " \
-           "-XX:MaxGCPauseMillis=100 -XX:InitiatingHeapOccupancyPercent=30 " \
-           "-XX:+HeapDumpOnOutOfMemoryError -XX:ParallelGCThreads=4 " \
-           "-Xloggc:log-files/gc.%s.log " \
-           "-cp instance_classpath:classpath -XX:+HeapDumpOnOutOfMemoryError " \
-           "org.apache.heron.instance.HeronInstance -topology_name topname -topology_id topid " \
-           "-instance_id %s -component_name %s -task_id %d -component_index 0 -stmgr_id stmgr-%d " \
-           "-stmgr_port tmanager_controller_port -metricsmgr_port metricsmgr_port " \
-           "-system_config_file %s -override_config_file %s" \
-           % (instance_name, instance_name, component_name, instance_id,
-              container_id, INTERNAL_CONF_PATH, OVERRIDE_PATH)
-
-  def setUp(self):
-    MockPOpen.set_next_pid(37)
-    self.maxDiff = None
-    self.executor_0 = MockExecutorJDK11(self.get_args(0))
-    self.executor_1 = MockExecutorJDK11(self.get_args(1))
-    self.executor_7 = MockExecutorJDK11(self.get_args(7))
-    self.packing_plan_expected = self.build_packing_plan({
-        1:[('word', '3', '0'), ('exclaim1', '2', '0'), ('exclaim1', '1', '0')],
-        7:[('word', '11', '0'), ('exclaim1', '210', '0')],
-    })

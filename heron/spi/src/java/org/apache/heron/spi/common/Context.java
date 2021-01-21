@@ -58,6 +58,10 @@ public class Context {
     return cfg.getBooleanValue(Key.VERBOSE);
   }
 
+  public static Boolean verboseGC(Config cfg) {
+    return cfg.getBooleanValue(Key.VERBOSE_GC);
+  }
+
   public static String buildVersion(Config cfg) {
     return cfg.getStringValue(Key.BUILD_VERSION);
   }

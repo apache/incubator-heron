@@ -175,6 +175,10 @@ public class TopologyResource extends HeronResource {
 
       final boolean isDryRun = form.getFields().containsKey(PARAM_DRY_RUN);
 
+      final boolean isVerbose = form.getFields().containsKey("verbose");
+
+      final boolean isVerboseGC = form.getFields().containsKey("verbose_gc");
+
       // copy configuration files to the sandbox config location
       // topology-dir/<default-heron-sandbox-config>
       FileHelper.copyDirectory(
@@ -217,7 +221,9 @@ public class TopologyResource extends HeronResource {
           Pair.create(Key.ROLE.value(), role),
           Pair.create(Key.ENVIRON.value(), environment),
           Pair.create(Key.SUBMIT_USER.value(), user),
-          Pair.create(Key.DRY_RUN.value(), isDryRun)
+          Pair.create(Key.DRY_RUN.value(), isDryRun),
+          Pair.create(Key.VERBOSE.value(), isVerbose),
+          Pair.create(Key.VERBOSE_GC.value(), isVerboseGC)
       ));
       final Config config = createConfig(val, submitOverrides);
 
@@ -550,7 +556,6 @@ public class TopologyResource extends HeronResource {
     }
     overrides.forEach(builder::put);
 
-    builder.put(Key.VERBOSE, Logging.isVerbose());
     return isLocalMode()
         ? Config.toLocalMode(builder.build()) : Config.toClusterMode(builder.build());
   }
