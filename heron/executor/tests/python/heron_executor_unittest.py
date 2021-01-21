@@ -111,7 +111,7 @@ class HeronExecutorTest(unittest.TestCase):
            "-Djava.net.preferIPv4Stack=true " \
            "-XX:+UseG1GC -XX:+ParallelRefProcEnabled -XX:+UseStringDeduplication " \
            "-XX:MaxGCPauseMillis=100 -XX:InitiatingHeapOccupancyPercent=30 " \
-           "-XX:+HeapDumpOnOutOfMemoryError -XX:ParallelGCThreads=4 " \
+           "-XX:ParallelGCThreads=4 " \
            "-cp metricsmgr_classpath org.apache.heron.metricsmgr.MetricsManager " \
            "--id=metricsmgr-%d --port=metricsmgr_port " \
            "--topology=topname --cluster=cluster --role=role --environment=environ " \
@@ -125,7 +125,7 @@ class HeronExecutorTest(unittest.TestCase):
            "-Djava.net.preferIPv4Stack=true " \
            "-XX:+UseG1GC -XX:+ParallelRefProcEnabled -XX:+UseStringDeduplication " \
            "-XX:MaxGCPauseMillis=100 -XX:InitiatingHeapOccupancyPercent=30 " \
-           "-XX:+HeapDumpOnOutOfMemoryError -XX:ParallelGCThreads=4 " \
+           "-XX:ParallelGCThreads=4 " \
            "-cp metricscachemgr_classpath org.apache.heron.metricscachemgr.MetricsCacheManager " \
            "--metricscache_id metricscache-0 --server_port metricscachemgr_serverport " \
            "--stats_port metricscachemgr_statsport --topology_name topname --topology_id topid " \
@@ -139,7 +139,7 @@ class HeronExecutorTest(unittest.TestCase):
            "-Djava.net.preferIPv4Stack=true " \
            "-XX:+UseG1GC -XX:+ParallelRefProcEnabled -XX:+UseStringDeduplication " \
            "-XX:MaxGCPauseMillis=100 -XX:InitiatingHeapOccupancyPercent=30 " \
-           "-XX:+HeapDumpOnOutOfMemoryError -XX:ParallelGCThreads=4 " \
+           "-XX:ParallelGCThreads=4 " \
            "-cp scheduler_classpath:healthmgr_classpath " \
            "org.apache.heron.healthmgr.HealthManager --cluster cluster --role role " \
            "--environment environ --topology_name topname --metricsmgr_port metricsmgr_port"
@@ -151,7 +151,7 @@ class HeronExecutorTest(unittest.TestCase):
            "-Djava.net.preferIPv4Stack=true " \
            "-XX:+UseG1GC -XX:+ParallelRefProcEnabled -XX:+UseStringDeduplication " \
            "-XX:MaxGCPauseMillis=100 -XX:InitiatingHeapOccupancyPercent=30 " \
-           "-XX:+HeapDumpOnOutOfMemoryError -XX:ParallelGCThreads=4 " \
+           "-XX:ParallelGCThreads=4 " \
            "-cp instance_classpath:classpath -XX:+HeapDumpOnOutOfMemoryError " \
            "org.apache.heron.instance.HeronInstance -topology_name topname -topology_id topid " \
            "-instance_id %s -component_name %s -task_id %d -component_index 0 -stmgr_id stmgr-%d " \
