@@ -61,7 +61,6 @@ import org.apache.heron.apiserver.actions.ActionType;
 import org.apache.heron.apiserver.actions.Keys;
 import org.apache.heron.apiserver.utils.ConfigUtils;
 import org.apache.heron.apiserver.utils.FileHelper;
-import org.apache.heron.apiserver.utils.Logging;
 import org.apache.heron.apiserver.utils.Utils;
 import org.apache.heron.common.basics.DryRunFormatType;
 import org.apache.heron.common.basics.FileUtils;

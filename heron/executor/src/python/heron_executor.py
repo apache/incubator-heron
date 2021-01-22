@@ -582,7 +582,6 @@ class HeronExecutor:
         '-XX:+UseStringDeduplication',
         '-XX:MaxGCPauseMillis=100',
         '-XX:InitiatingHeapOccupancyPercent=30',
-        '-XX:+HeapDumpOnOutOfMemoryError',
         '-XX:ParallelGCThreads=4']
     if self.verbose_gc:
       gc_cmd += ['-Xlog:gc*,safepoint=info:file=' + self.log_dir + '/gc.' + gc_name +
