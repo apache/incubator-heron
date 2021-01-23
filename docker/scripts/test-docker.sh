@@ -45,7 +45,7 @@ verify_dockerfile_exists $DOCKER_FILE
 copy_bazel_rc_to  $SCRATCH_DIR/bazelrc
 
 echo "Building heron-compiler container"
-docker build -t heron-compiler:$TARGET_PLATFORM -f $DOCKER_FILE $SCRATCH_DIR
+docker buildx build -t heron-compiler:$TARGET_PLATFORM -f $DOCKER_FILE $SCRATCH_DIR
 
 echo "Running build in container"
 docker run \

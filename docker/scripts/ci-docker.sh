@@ -80,9 +80,9 @@ build_exec_image() {
   # build the image
   echo "Building docker image with tag:$DOCKER_TAG"
   if [ "$HERON_VERSION" == "nightly" ]; then
-    docker build -t "$DOCKER_TAG" -f "$DOCKER_FILE" "$SCRATCH_DIR"
+    docker buildx build -t "$DOCKER_TAG" -f "$DOCKER_FILE" "$SCRATCH_DIR"
   else
-    docker build -t "$DOCKER_TAG" -t "$DOCKER_LATEST_TAG" -f "$DOCKER_FILE" "$SCRATCH_DIR"
+    docker buildx build -t "$DOCKER_TAG" -t "$DOCKER_LATEST_TAG" -f "$DOCKER_FILE" "$SCRATCH_DIR"
   fi
 
   # save the image as a tar file
