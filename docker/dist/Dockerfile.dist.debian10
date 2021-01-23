@@ -15,6 +15,7 @@
 #  specific language governing permissions and limitations
 #  under the License.
 
+#syntax=docker/dockerfile:1.2
 FROM openjdk:11-jdk-slim-buster
 
 ENV LC_ALL C.UTF-8

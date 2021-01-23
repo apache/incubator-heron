@@ -15,7 +15,6 @@
 #  specific language governing permissions and limitations
 #  under the License.
 
-
 #syntax=docker/dockerfile:1.2
 FROM centos:centos7
 
