@@ -32,13 +32,8 @@ RUN apt-get update \
     && apt-get clean
 
 # run Heron installer
-RUN --mount=type=bind,source=artifacts,target=/tmp/heron /tmp/heron/heron-install.sh && \
-    rm -f /usr/local/heron/dist/heron-core.tar.gz && \
-    rm -f /usr/local/heron/dist/heron-core/lib/scheduler/heron-local-scheduler.jar && \
-    rm -f /usr/local/heron/dist/heron-core/lib/scheduler/heron-marathon-scheduler.jar && \
-    rm -f /usr/local/heron/dist/heron-core/lib/scheduler/heron-mesos-scheduler.jar && \
-    rm -f /usr/local/heron/dist/heron-core/lib/scheduler/heron-nomad-scheduler.jar && \
-    rm -f /usr/local/heron/dist/heron-core/lib/scheduler/heron-slurm-scheduler.jar
+RUN --mount=type=bind,source=artifacts,target=/tmp/heron /tmp/heron/heron-install.sh \
+    && rm -f /usr/local/heron/dist/heron-core.tar.gz
 
 WORKDIR /heron
 
