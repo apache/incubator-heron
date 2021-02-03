@@ -111,7 +111,6 @@ const siteConfig = {
   // Ignores CSS files found in the static folder.
   // Any CSS files not listed here will be added to the Docusaurus main.css
   separateCss: [
-      `${baseUrl}static/css/custom.css`,
       `${baseUrl}static/api/java/jquery/jquery-ui.css`,
       `${baseUrl}static/api/java/jquery/jquery-ui.min.css`,
       `${baseUrl}static/api/java/jquery/jquery-ui.structure.min.css`,
