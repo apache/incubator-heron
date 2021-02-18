@@ -13,6 +13,7 @@ pex_library(
         "jinja2==2.11.2",
         "aiofiles==0.5.0",
         "uvicorn==0.11.7",
+        "uvloop==0.14.0",
     ],
     deps = [
         "//heron/common/src/python:common-py",
