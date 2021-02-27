@@ -102,7 +102,7 @@ public class RoundRobinPacking implements IPacking, IRepacking {
 
   @VisibleForTesting
   static final ByteAmount DEFAULT_DAEMON_PROCESS_RAM_PADDING = ByteAmount.fromGigabytes(1);
-  private static final ByteAmount MIN_RAM_PER_INSTANCE = ByteAmount.fromMegabytes(192);
+  private static final ByteAmount MIN_RAM_PER_INSTANCE = ByteAmount.fromMegabytes(16);
 
   // Use as a stub as default number value when getting config value
   private static final ByteAmount NOT_SPECIFIED_BYTE_AMOUNT = ByteAmount.fromBytes(-1);
