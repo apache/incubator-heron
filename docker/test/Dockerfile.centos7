@@ -32,7 +32,6 @@ RUN yum -y install \
       git \
       kernel-devel \
       libtool \
-      cppunit-devel \
       make \
       patch \
       python3-devel \

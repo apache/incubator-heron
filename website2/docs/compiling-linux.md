@@ -40,7 +40,7 @@ $ sudo apt-get upgrade -y
 
 ```bash
 $ sudo apt-get install git build-essential automake cmake libtool-bin zip ant \
-  libunwind-setjmp0-dev zlib1g-dev unzip pkg-config python3-setuptools libcppunit-dev -y
+  libunwind-setjmp0-dev zlib1g-dev unzip pkg-config python3-setuptools -y
 ```
 
 #### Step 3 --- Set the following environment variables
@@ -154,7 +154,7 @@ To build Heron on a fresh CentOS 7 installation:
 ### Step 1 --- Install the required dependencies
 
 ```bash
-$ sudo yum install gcc gcc-c++ kernel-devel wget unzip zlib-devel zip git automake cmake patch libtool cppunit-devel ant pkg-config -y
+$ sudo yum install gcc gcc-c++ kernel-devel wget unzip zlib-devel zip git automake cmake patch libtool ant pkg-config -y
 ```
 
 ### Step 2 --- Install libunwind from source
