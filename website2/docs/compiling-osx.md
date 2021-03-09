@@ -46,7 +46,6 @@ brew install automake
 brew install cmake
 brew install libtool
 brew install ant
-brew install cppunit
 brew install pkg-config
 ```
 

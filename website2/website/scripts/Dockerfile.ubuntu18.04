@@ -28,7 +28,6 @@ RUN apt-get update && apt-get -y install \
       curl \
       g++ \
       git \
-      libcppunit-dev \
       libtool-bin \
       libunwind8 \
       openjdk-11-jdk-headless \

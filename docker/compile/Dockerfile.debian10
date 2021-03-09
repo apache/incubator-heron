@@ -27,7 +27,6 @@ RUN apt-get update && apt-get -y install \
       cmake \
       curl \
       git \
-      libcppunit-dev \
       libssl-dev \
       libtool \
       libtool-bin \
