@@ -20,13 +20,14 @@
 
 ![logo](website2/docs/assets/HeronTextLogo.png)
 
-Heron is realtime analytics platform developed by Twitter.  It has a wide array of architectural improvements over it's predecessor.
+Heron is a realtime analytics platform developed by Twitter.  It has a wide array of architectural improvements over it's predecessor.
 
 [Heron in Apache Incubation](http://incubator.apache.org/projects/heron.html)
 
 ### Documentation
 
 [https://heron.incubator.apache.org/](https://heron.incubator.apache.org/)
+</br>
 Confluence: https://cwiki.apache.org/confluence/display/HERON
 
 #### Heron Requirements:
