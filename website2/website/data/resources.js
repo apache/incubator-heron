@@ -96,7 +96,7 @@ module.exports = {
             forum_link: 'https://blog.twitter.com/engineering/',
             presenter: 'Karthik Ramasamy',
             date: 'May 2016',
-            title: 'Leaving the Nest: Heron donated to Apache Software Foundation',
+            title: 'Open Sourcing Twitter Heron',
             link: 'https://blog.twitter.com/2016/open-sourcing-twitter-heron'
           },
           {
