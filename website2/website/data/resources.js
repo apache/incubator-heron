@@ -1,10 +1,10 @@
 module.exports = {
     publications: [
       {
-        forum: 'O’Reilly',
-        forum_link: 'http://shop.oreilly.com/product/0636920203131.do',
-        title: 'Stream Processing with Heron',
-        link: 'http://shop.oreilly.com/product/0636920203131.do'
+        forum: 'Springer',
+        forum_link: 'https://www.springer.com/us/book/9783030600938',
+        title: 'Heron Streaming: Fundamentals, Applications, Operations, and Insights',
+        link: 'https://www.springer.com/us/book/9783030600938'
       },
       {
         forum: '',
