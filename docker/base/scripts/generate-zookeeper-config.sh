@@ -98,6 +98,8 @@ function create_config() {
   echo "maxSessionTimeout=$ZK_MAX_SESSION_TIMEOUT" >> $ZK_CONFIG_FILE
   echo "autopurge.snapRetainCount=$ZK_SNAP_RETAIN_COUNT" >> $ZK_CONFIG_FILE
   echo "autopurge.purgeInteval=$ZK_PURGE_INTERVAL" >> $ZK_CONFIG_FILE
+  echo "# Enable all four letter word commands by default" >> $ZK_CONFIG_FILE
+  echo "4lw.commands.whitelist=*" >> $ZK_CONFIG_FILE
 
   if [ $ZK_REPLICAS -gt 1 ]; then
     print_servers >> $ZK_CONFIG_FILE
