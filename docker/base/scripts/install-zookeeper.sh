@@ -40,10 +40,10 @@ rm -rf \
 # copy zk scripts
 mkdir -p /opt/zookeeper/scripts
 cp /opt/heron-docker/scripts/generate-zookeeper-config.sh /opt/zookeeper/scripts/
-chmod +x /opt/heron-docker/scripts/generate-zookeeper-config.sh
+chmod +x /opt/zookeeper/scripts/generate-zookeeper-config.sh
 cp /opt/heron-docker/scripts/zookeeper-ruok.sh /opt/zookeeper/scripts/
-chmod +x /opt/heron-docker/scripts/zookeeper-ruok.sh
+chmod +x /opt/zookeeper/scripts/zookeeper-ruok.sh
 cp /opt/heron-docker/scripts/start-zookeeper.sh /opt/zookeeper/scripts/
-chmod +x /opt/heron-docker/scripts/start-zookeeper.sh
+chmod +x /opt/zookeeper/scripts/start-zookeeper.sh
 cp /opt/heron-docker/scripts/wait-for-zookeeper.sh /opt/zookeeper/scripts/
-chmod +x /opt/heron-docker/scripts/wait-for-zookeeper.sh
+chmod +x /opt/zookeeper/scripts/wait-for-zookeeper.sh
