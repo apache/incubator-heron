@@ -472,6 +472,11 @@ pkg_tar(
 )
 
 pkg_tar(
+    name = "disclaimers",
+    srcs = ["//:disclaimers"],
+)
+
+pkg_tar(
     name = "heron",
     srcs = generated_release_files,
     extension = "tar.gz",
@@ -499,6 +504,7 @@ pkg_tar(
         ":heron-lib-third_party",
         ":heron-lib-uploader",
         ":heron-simulator",
+        ":disclaimers",
     ],
 )
 
