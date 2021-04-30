@@ -171,58 +171,85 @@ py_repositories()
 # pip_repositories()
 
 # for pex repos
-PEX_WHEEL = "https://pypi.python.org/packages/18/92/99270775cfc5ddb60c19588de1c475f9ff2837a6e0bbd5eaa5286a6a472b/pex-2.1.9-py2.py3-none-any.whl"
+PEX_PKG = "https://files.pythonhosted.org/packages/7a/52/666d2a5bcb56b260d6f4fb8ce253845fbae9cb4f97806c190e6e61c3a81b/pex-2.1.21-py2.py3-none-any.whl"
 
-PY_WHEEL = "https://pypi.python.org/packages/53/67/9620edf7803ab867b175e4fd23c7b8bd8eba11cb761514dcd2e726ef07da/py-1.4.34-py2.py3-none-any.whl"
+PYTEST_PKG = "https://files.pythonhosted.org/packages/b1/ee/53945d50284906adb1e613fabf2e1b8b25926e8676854bb25b93564c0ce7/pytest-6.1.2-py3-none-any.whl"
 
-PYTEST_WHEEL = "https://pypi.python.org/packages/fd/3e/d326a05d083481746a769fc051ae8d25f574ef140ad4fe7f809a2b63c0f0/pytest-3.1.3-py2.py3-none-any.whl"
+REQUESTS_PKG = "https://files.pythonhosted.org/packages/39/fc/f91eac5a39a65f75a7adb58eac7fa78871ea9872283fb9c44e6545998134/requests-2.25.0-py2.py3-none-any.whl"
 
-REQUESTS_SRC = "https://pypi.python.org/packages/d9/03/155b3e67fe35fe5b6f4227a8d9e96a14fda828b18199800d161bcefc1359/requests-2.12.3.tar.gz"
+SETUPTOOLS_PKG = "https://files.pythonhosted.org/packages/3d/f2/1489d3b6c72d68bf79cd0fba6b6c7497df4ebf7d40970e2d7eceb8d0ea9c/setuptools-51.0.0-py3-none-any.whl"
 
-SETUPTOOLS_WHEEL = "https://pypi.python.org/packages/a0/df/635cdb901ee4a8a42ec68e480c49f85f4c59e8816effbf57d9e6ee8b3588/setuptools-46.1.3-py3-none-any.whl"
+WHEEL_PKG = "https://files.pythonhosted.org/packages/d4/cf/732e05dce1e37b63d54d1836160b6e24fb36eeff2313e93315ad047c7d90/wheel-0.36.1.tar.gz"
 
-WHEEL_SRC = "https://pypi.python.org/packages/c9/1d/bd19e691fd4cfe908c76c429fe6e4436c9e83583c4414b54f6c85471954a/wheel-0.29.0.tar.gz"
+CHARDET_PKG = "https://files.pythonhosted.org/packages/bc/a9/01ffebfb562e4274b6487b4bb1ddec7ca55ec7510b22e4c51f14098443b8/chardet-3.0.4-py2.py3-none-any.whl"
+
+IDNA_PKG = "https://files.pythonhosted.org/packages/a2/38/928ddce2273eaa564f6f50de919327bf3a00f091b5baba8dfa9460f3a8a8/idna-2.10-py2.py3-none-any.whl"
+
+CERTIFI_PKG = "https://files.pythonhosted.org/packages/5e/a0/5f06e1e1d463903cf0c0eebeb751791119ed7a4b3737fdc9a77f1cdfb51f/certifi-2020.12.5-py2.py3-none-any.whl"
+
+URLLIB3_PKG = "https://files.pythonhosted.org/packages/f5/71/45d36a8df68f3ebb098d6861b2c017f3d094538c0fb98fa61d4dc43e69b9/urllib3-1.26.2-py2.py3-none-any.whl"
 
 http_file(
-    name = "pytest_whl",
-    downloaded_file_path = "pytest-3.1.3-py2.py3-none-any.whl",
-    sha256 = "2a4f483468954621fcc8f74784f3b42531e5b5008d49fc609b37bc4dbc6dead1",
-    urls = [PYTEST_WHEEL],
+    name = "urllib3_pkg",
+    downloaded_file_path = "urllib3-1.26.2-py2.py3-none-any.whl",
+    sha256 = "d8ff90d979214d7b4f8ce956e80f4028fc6860e4431f731ea4a8c08f23f99473",
+    urls = [URLLIB3_PKG],
 )
 
 http_file(
-    name = "py_whl",
-    downloaded_file_path = "py-1.4.34-py2.py3-none-any.whl",
-    sha256 = "2ccb79b01769d99115aa600d7eed99f524bf752bba8f041dc1c184853514655a",
-    urls = [PY_WHEEL],
+    name = "certifi_pkg",
+    downloaded_file_path = "certifi-2020.12.5-py2.py3-none-any.whl",
+    sha256 = "719a74fb9e33b9bd44cc7f3a8d94bc35e4049deebe19ba7d8e108280cfd59830",
+    urls = [CERTIFI_PKG],
 )
 
 http_file(
-    name = "wheel_src",
-    downloaded_file_path = "wheel-0.29.0.tar.gz",
-    sha256 = "1ebb8ad7e26b448e9caa4773d2357849bf80ff9e313964bcaf79cbf0201a1648",
-    urls = [WHEEL_SRC],
+    name = "idna_pkg",
+    downloaded_file_path = "idna-2.10-py2.py3-none-any.whl",
+    sha256 = "b97d804b1e9b523befed77c48dacec60e6dcb0b5391d57af6a65a312a90648c0",
+    urls = [IDNA_PKG],
 )
 
 http_file(
-    name = "pex_src",
-    downloaded_file_path = "pex-2.1.9-py2.py3-none-any.whl",
-    sha256 = "5cad8d960c187541f71682fc938a843ef9092aab46f27b33ace7e570325e2626",
-    urls = [PEX_WHEEL],
+    name = "chardet_pkg",
+    downloaded_file_path = "chardet-3.0.4-py2.py3-none-any.whl",
+    sha256 = "fc323ffcaeaed0e0a02bf4d117757b98aed530d9ed4531e3e15460124c106691",
+    urls = [CHARDET_PKG],
 )
 
 http_file(
-    name = "requests_src",
-    downloaded_file_path = "requests-2.12.3.tar.gz",
-    sha256 = "de5d266953875e9647e37ef7bfe6ef1a46ff8ddfe61b5b3652edf7ea717ee2b2",
-    urls = [REQUESTS_SRC],
+    name = "pytest_pkg",
+    downloaded_file_path = "pytest-6.1.2-py3-none-any.whl",
+    sha256 = "4288fed0d9153d9646bfcdf0c0428197dba1ecb27a33bb6e031d002fa88653fe",
+    urls = [PYTEST_PKG],
 )
 
 http_file(
-    name = "setuptools_wheel",
-    downloaded_file_path = "setuptools-46.1.3-py3-none-any.whl",
-    sha256 = "4fe404eec2738c20ab5841fa2d791902d2a645f32318a7850ef26f8d7215a8ee",
-    urls = [SETUPTOOLS_WHEEL],
+    name = "wheel_pkg",
+    downloaded_file_path = "wheel-0.36.1.tar.gz",
+    #sha256 = "906864fb722c0ab5f2f9c35b2c65e3af3c009402c108a709c0aca27bc2c9187b",
+    urls = [WHEEL_PKG],
+)
+
+http_file(
+    name = "pex_pkg",
+    downloaded_file_path = "pex-2.1.21-py2.py3-none-any.whl",
+    sha256 = "c53ae65103b3fbfeb67ecbde0d87ce9faf87331201fea28d45f55f99ba4b1577",
+    urls = [PEX_PKG],
+)
+
+http_file(
+    name = "requests_pkg",
+    downloaded_file_path = "requests-2.25.0-py2.py3-none-any.whl",
+    sha256 = "e786fa28d8c9154e6a4de5d46a1d921b8749f8b74e28bde23768e5e16eece998",
+    urls = [REQUESTS_PKG],
+)
+
+http_file(
+    name = "setuptools_pkg",
+    downloaded_file_path = "setuptools-51.0.0-py3-none-any.whl",
+    sha256 = "8c177936215945c9a37ef809ada0fab365191952f7a123618432bbfac353c529",
+    urls = [SETUPTOOLS_PKG],
 )
 
 # end pex repos
