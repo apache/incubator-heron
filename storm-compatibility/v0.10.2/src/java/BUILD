@@ -67,9 +67,8 @@ java_binary(
     ],
 )
 
-jarjar_binary(
+jar_jar(
     name = "heron-storm",
-    src = ":storm-compatibility-unshaded_deploy.jar",
-    shade = "shade.conf",
-    deps = ["@maven//:org_sonatype_plugins_jarjar_maven_plugin"],
+    input_jar = ":storm-compatibility-unshaded_deploy.jar",
+    rules = "shade.conf"
 )

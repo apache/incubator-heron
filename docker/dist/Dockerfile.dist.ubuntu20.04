@@ -57,7 +57,7 @@ ENV HERON_HOME /heron/heron-core/
 RUN export HERON_HOME
 
 # install Zookeeper
-ARG ZK_DIST=zookeeper-3.5.8
+ARG ZK_DIST=zookeeper-3.6.3
 
 RUN --mount=type=bind,source=dist,target=/opt/heron-docker/ sh /opt/heron-docker/scripts/install-zookeeper.sh $ZK_DIST
 

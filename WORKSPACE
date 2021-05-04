@@ -19,9 +19,8 @@ workspace(name = "org_apache_heron")
 
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive", "http_file")
 
-RULES_JVM_EXTERNAL_TAG = "3.1"
-
-RULES_JVM_EXTERNAL_SHA = "e246373de2353f3d34d35814947aa8b7d0dd1a58c2f7a6c41cfeaff3007c2d14"
+RULES_JVM_EXTERNAL_TAG = "4.0"
+RULES_JVM_EXTERNAL_SHA = "31701ad93dbfe544d597dbe62c9a1fdd76d81d8a9150c2bf1ecf928ecdf97169"
 
 http_archive(
     name = "rules_jvm_external",
@@ -33,7 +32,7 @@ http_archive(
 # versions shared across artifacts that should be upgraded together
 aws_version = "1.11.58"
 
-curator_version = "2.9.0"
+curator_version = "5.1.0"
 
 google_client_version = "1.22.0"
 
@@ -45,7 +44,7 @@ reef_version = "0.14.0"
 
 slf4j_version = "1.7.30"
 
-distributedlog_version = "4.11.0"
+distributedlog_version = "4.13.0"
 
 http_client_version = "4.5.2"
 
@@ -66,7 +65,7 @@ maven_install(
     name = "maven",
     artifacts = [
         "antlr:antlr:2.7.7",
-        "org.apache.zookeeper:zookeeper:3.5.8",
+        "org.apache.zookeeper:zookeeper:3.6.3",
         "io.kubernetes:client-java:" + kubernetes_client_version,
         "com.esotericsoftware:kryo:5.0.4",
         "org.apache.avro:avro:1.7.4",
@@ -97,12 +96,14 @@ maven_install(
         "org.glassfish.jersey.media:jersey-media-json-jackson:" + jersey_version,
         "org.glassfish.jersey.media:jersey-media-multipart:" + jersey_version,
         "org.glassfish.jersey.containers:jersey-container-servlet:" + jersey_version,
-        "org.apache.distributedlog:distributedlog-core-shaded:" + distributedlog_version,
-        "io.netty:netty-all:4.1.22.Final",
+        # "org.apache.distributedlog:distributedlog-core-shaded:" + distributedlog_version,
+        "org.apache.distributedlog:distributedlog-core:" + distributedlog_version,
+        # "org.apache.distributedlog:distributedlog-protocol:" + distributedlog_version,
+        "io.netty:netty-all:4.1.50.Final",
         "aopalliance:aopalliance:1.0",
         "org.roaringbitmap:RoaringBitmap:0.6.51",
-        "com.google.guava:guava:18.0",
-        "io.gsonfire:gson-fire:1.8.3",
+        "com.google.guava:guava:30.0-jre",
+        "io.gsonfire:gson-fire:1.8.5",
         "org.apache.curator:curator-framework:" + curator_version,
         "org.apache.curator:curator-recipes:" + curator_version,
         "org.apache.curator:curator-client:" + curator_version,
@@ -126,7 +127,6 @@ maven_install(
         "javax.xml.bind:jaxb-api:2.3.0",
         "javax.activation:activation:1.1.1",
         "org.mockito:mockito-all:1.10.19",
-        "org.sonatype.plugins:jarjar-maven-plugin:1.9",
         "org.powermock:powermock-api-mockito:" + powermock_version,
         "org.powermock:powermock-module-junit4:" + powermock_version,
         "com.puppycrawl.tools:checkstyle:6.17",
@@ -155,6 +155,21 @@ maven_install(
 load("@maven//:defs.bzl", "pinned_maven_install")
 
 pinned_maven_install()
+
+load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
+
+git_repository(
+    name = "com_github_johnynek_bazel_jar_jar",
+    commit = "171f268569384c57c19474b04aebe574d85fde0d", # Latest commit SHA as at 2019/02/13
+    remote = "git://github.com/johnynek/bazel_jar_jar.git",
+    shallow_since = "1594234634 -1000",
+)
+
+load(
+    "@com_github_johnynek_bazel_jar_jar//:jar_jar.bzl",
+    "jar_jar_repositories",
+)
+jar_jar_repositories()
 
 http_archive(
     name = "rules_python",
@@ -263,9 +278,11 @@ http_archive(
 http_archive(
     name = "org_apache_zookeeper",
     build_file = "@//:third_party/zookeeper/BUILD",
-    sha256 = "bafc0abe7da696a2020ba11b8ce7d06f6e28e9bf1e5504de09be25b8b589777d",
-    strip_prefix = "apache-zookeeper-3.5.8",
-    urls = ["https://archive.apache.org/dist/zookeeper/zookeeper-3.5.8/apache-zookeeper-3.5.8.tar.gz"],
+    patch_args = ["-p1"],
+    patches = ["//third_party/zookeeper:zookeeper_jute.patch"],
+    sha256 = "1c52a4ea012c12c87e49298343eae44f89ce0d61133f7e07384d5fb64f8eaa77",
+    strip_prefix = "apache-zookeeper-3.6.3",
+    urls = ["https://downloads.apache.org/zookeeper/zookeeper-3.6.3/apache-zookeeper-3.6.3.tar.gz"],
 )
 
 http_archive(

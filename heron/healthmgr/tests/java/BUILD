@@ -75,7 +75,7 @@ java_tests(
         "org.apache.heron.healthmgr.sensors.BufferSizeSensorTest",
         "org.apache.heron.healthmgr.sensors.ExecuteCountSensorTest",
         "org.apache.heron.healthmgr.sensors.MetricsCacheMetricsProviderTest",
-        #        "org.apache.heron.healthmgr.sensors.TrackerMetricsProviderTest",
+        "org.apache.heron.healthmgr.sensors.TrackerMetricsProviderTest",
     ],
     runtime_deps = [
         ":healthmgr-tests",
