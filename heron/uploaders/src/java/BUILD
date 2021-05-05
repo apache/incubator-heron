@@ -24,8 +24,6 @@ gcs_deps_files = \
 
 dlog_deps_files = \
     uploader_spi_files + [
-        "@maven//:org_apache_distributedlog_distributedlog_core_shaded",
-        "@maven//:io_netty_netty_all",
         "//heron/io/dlog/src/java:dlog-lib",
     ]
 
@@ -99,6 +97,9 @@ java_library(
     name = "dlog-uploader-java",
     srcs = glob(["**/dlog/**/*.java"]),
     deps = dlog_deps_files,
+    exports = [
+        "//heron/io/dlog/src/java:dlog-lib",
+    ]
 )
 
 java_binary(

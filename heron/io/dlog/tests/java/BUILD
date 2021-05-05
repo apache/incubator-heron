@@ -7,9 +7,7 @@ common_deps_files = [
 
 dlog_test_deps_files = \
     common_deps_files + [
-        "@maven//:com_google_guava_guava",
-        "@maven//:org_apache_distributedlog_distributedlog_core_shaded",
-        "@maven//:io_netty_netty_all",
+        "//third_party/java:guava",
         "//heron/io/dlog/src/java:dlog-lib",
     ]
 

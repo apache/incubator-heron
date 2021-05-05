@@ -4,7 +4,7 @@ test_deps_files = [
     "//third_party/java:powermock",
     "//third_party/java:mockito",
     "//third_party/java:junit4",
-    "@maven//:com_google_guava_guava",
+    "//third_party/java:guava",
 ]
 
 spi_deps_files = [

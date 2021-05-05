@@ -3,8 +3,6 @@ load("@rules_java//java:defs.bzl", "java_binary", "java_library")
 package(default_visibility = ["//visibility:public"])
 
 dlog_deps = [
-    "@maven//:org_apache_distributedlog_distributedlog_core_shaded",
-    "@maven//:io_netty_netty_all",
     "//third_party/java:dlog-java",
 ]
 
@@ -12,6 +10,9 @@ java_library(
     name = "dlog-lib",
     srcs = glob(["**/dlog/DL*.java"]),
     deps = dlog_deps,
+    exports = [
+        "//third_party/java:dlog-java",
+    ]
 )
 
 java_binary(

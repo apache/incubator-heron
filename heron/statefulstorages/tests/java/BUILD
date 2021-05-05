@@ -57,8 +57,6 @@ dlog_deps_files = [
     "//heron/statefulstorages/src/java:dlog-statefulstorage-java",
     "//heron/io/dlog/src/java:dlog-lib",
     "@maven//:com_google_guava_guava",
-    "@maven//:org_apache_distributedlog_distributedlog_core_shaded",
-    "@maven//:io_netty_netty_all",
 ]
 
 java_library(
