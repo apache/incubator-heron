@@ -143,7 +143,7 @@ public class SocketChannelHelper {
     // 1. We spent too much time
     // 2. We have read large enough data
     while ((System.nanoTime() - startOfCycle - readReadBatchTime.toNanos()) < 0
-        && (bytesRead < readBatchSize.asBytes())) {
+        && bytesRead < readBatchSize.asBytes()) {
       int readState = incomingPacket.readFromChannel(socketChannel, maximumPacketSize.asBytes());
 
       if (readState > 0) {
@@ -181,7 +181,7 @@ public class SocketChannelHelper {
     long nPacketsWritten = 0;
 
     while ((System.nanoTime() - startOfCycle - writeBatchTime.toNanos()) < 0
-        && (bytesWritten < writeBatchSize.asBytes())) {
+        && bytesWritten < writeBatchSize.asBytes()) {
       OutgoingPacket outgoingPacket = outgoingPacketsToWrite.peek();
       if (outgoingPacket == null) {
         break;

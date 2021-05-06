@@ -203,9 +203,10 @@ under the License.
       <module name="IllegalImport"/> <!-- defaults to sun.* packages -->
       <module name="RedundantImport"/>
       <module name="UnusedImports"/>
+
       <module name="ImportOrder">
         <property name="groups"
-                  value="/^javax?\./,scala,com,net,org,org.apache"/>
+                  value="/^java\./,javax,scala,com,net,org,org.apache"/>
         <property name="ordered" value="true"/>
         <property name="separated" value="true"/>
         <property name="option" value="bottom"/>
@@ -319,6 +320,7 @@ org.apache. Each group should be separated by a single blank line. Static import
       <module name="InterfaceIsType"/>
       <module name="VisibilityModifier">
         <property name="protectedAllowed" value="true"/>
+        <property name="allowPublicImmutableFields" value="true"/>
         <!-- Allow public members at the coder's discretion, for struct-like things. -->
         <property name="publicMemberPattern" value="^.*$" />
       </module>

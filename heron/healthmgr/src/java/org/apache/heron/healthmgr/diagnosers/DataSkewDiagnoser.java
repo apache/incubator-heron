@@ -75,8 +75,8 @@ public class DataSkewDiagnoser extends BaseDiagnoser {
       MeasurementsTable instanceMeasurements = measurements.instance(instance);
       double waitQSize = instanceMeasurements.type(METRIC_WAIT_Q_SIZE.text()).mean();
       double processingRate = instanceMeasurements.type(METRIC_EXE_COUNT.text()).mean();
-      if ((measurements.type(METRIC_WAIT_Q_SIZE.text()).max() < waitQSize * 2)
-          && (measurements.type(METRIC_EXE_COUNT.text()).max() < 1.10 * processingRate)) {
+      if (measurements.type(METRIC_WAIT_Q_SIZE.text()).max() < waitQSize * 2
+          && measurements.type(METRIC_EXE_COUNT.text()).max() < 1.10 * processingRate) {
         assignments.add(instance);
         LOG.info(String.format("DataSkew: %s back-pressure, high execution count: %s and "
             + "high buffer size %s", instance, processingRate, waitQSize));

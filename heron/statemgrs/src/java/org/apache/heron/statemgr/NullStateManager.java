@@ -20,6 +20,7 @@
 package org.apache.heron.statemgr;
 
 import java.util.logging.Logger;
+
 import javax.naming.OperationNotSupportedException;
 
 import com.google.common.util.concurrent.ListenableFuture;

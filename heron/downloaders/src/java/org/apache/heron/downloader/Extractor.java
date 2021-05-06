@@ -36,10 +36,10 @@ final class Extractor {
 
   static void extract(InputStream in, Path destination) throws IOException {
     try (
-        final BufferedInputStream bufferedInputStream = new BufferedInputStream(in);
-        final GzipCompressorInputStream gzipInputStream =
+        BufferedInputStream bufferedInputStream = new BufferedInputStream(in);
+        GzipCompressorInputStream gzipInputStream =
             new GzipCompressorInputStream(bufferedInputStream);
-        final TarArchiveInputStream tarInputStream = new TarArchiveInputStream(gzipInputStream)
+        TarArchiveInputStream tarInputStream = new TarArchiveInputStream(gzipInputStream)
     ) {
       final String destinationAbsolutePath = destination.toFile().getAbsolutePath();
 

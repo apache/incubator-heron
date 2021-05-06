@@ -57,10 +57,10 @@ public final class SchedulerConfigUtils {
   /**
    * Load the config parameters from the command line
    *
-   * @param cluster, name of the cluster
-   * @param role, user role
-   * @param environ, user provided environment/tag
-   * @return config, the command line config
+   * @param cluster name of the cluster
+   * @param role user role
+   * @param environ user provided environment/tag
+   * @return config the command line config
    */
   private static Config commandLineConfigs(String cluster, String role,
                                            String environ, Boolean verbose) {

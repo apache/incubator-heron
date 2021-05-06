@@ -31,7 +31,6 @@ import com.microsoft.dhalion.core.MeasurementsTable;
 import com.microsoft.dhalion.core.Symptom;
 
 import org.apache.commons.math3.stat.regression.SimpleRegression;
-
 import org.apache.heron.healthmgr.HealthPolicyConfig;
 
 import static org.apache.heron.healthmgr.detectors.BaseDetector.SymptomType.SYMPTOM_GROWING_WAIT_Q;

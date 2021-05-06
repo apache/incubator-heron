@@ -126,7 +126,7 @@ public class TopologyResource extends HeronResource {
   @POST
   @Consumes(MediaType.MULTIPART_FORM_DATA)
   @Produces(MediaType.APPLICATION_JSON)
-  @SuppressWarnings({"IllegalCatch", "JavadocMethod"})
+  @SuppressWarnings({"IllegalCatch", "MissingJavadocMethod"})
   public Response submit(FormDataMultiPart form) throws IOException {
     // verify that all we have all the required params
     final List<String> missingDataKeys =
