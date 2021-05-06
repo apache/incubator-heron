@@ -151,13 +151,8 @@ under the License.
         <property name="minLineCount" value="40"/>
         <!-- javadoc doesn't need one @param, @return, @throws tags -->
         <property name="scope" value="public"/>
-        <!-- <property name="allowMissingParamTags" value="true"/> -->
-        <!-- <property name="allowMissingThrowsTags" value="true"/> -->
-        <!-- <property name="allowMissingReturnTag" value="true"/> -->
         <!-- simple set/get methods don't need javadoc comments -->
         <property name="allowMissingPropertyJavadoc" value="true" />
-        <!-- Allow tags for runtime exceptions that are not explicitly declared -->
-        <!-- <property name="allowUndeclaredRTE" value="true" /> -->
         <property name="ignoreMethodNamesRegex" value="^main$" />
       </module>
       <module name="JavadocType">
