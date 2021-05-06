@@ -61,7 +61,6 @@ import org.apache.heron.streamlet.impl.streamlets.FilterStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.FlatMapStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.GeneralReduceByKeyStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.JoinStreamlet;
-import org.apache.heron.streamlet.impl.streamlets.KVStreamletShadow;
 import org.apache.heron.streamlet.impl.streamlets.KeyByStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.MapStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.ReduceByKeyAndWindowStreamlet;
@@ -115,9 +114,9 @@ public class StreamletImplTest {
     Streamlet<Double> positiveStream = multiStreams.withStream("positive");
     Streamlet<Double> negativeStream = multiStreams.withStream("negative");
 
-    Streamlet<Double> allMap = multiStreams.withStream("all").map((num) -> num * 10);
-    Streamlet<Double> positiveMap = positiveStream.map((num) -> num * 10);
-    Streamlet<Double> negativeMap = negativeStream.map((num) -> num * 10);
+    Streamlet<Double> allMap = multiStreams.withStream("all").map(num -> num * 10);
+    Streamlet<Double> positiveMap = positiveStream.map(num -> num * 10);
+    Streamlet<Double> negativeMap = negativeStream.map(num -> num * 10);
 
     // Original streamlet should still have the default strean id eventhough the id
     // is not available. Other shadow streamlets should have the correct stream ids.
@@ -185,7 +184,7 @@ public class StreamletImplTest {
   @SuppressWarnings("unchecked")
   public void testMapStreamlet() {
     Streamlet<Double> baseStreamlet = builder.newSource(() -> Math.random());
-    Streamlet<Double> streamlet = baseStreamlet.setNumPartitions(20).map((num) -> num * 10);
+    Streamlet<Double> streamlet = baseStreamlet.setNumPartitions(20).map(num -> num * 10);
     assertTrue(streamlet instanceof MapStreamlet);
     MapStreamlet<Double, Double> mStreamlet = (MapStreamlet<Double, Double>) streamlet;
     assertEquals(20, mStreamlet.getNumPartitions());
@@ -199,7 +198,7 @@ public class StreamletImplTest {
   public void testFlatMapStreamlet() {
     Streamlet<Double> baseStreamlet = builder.newSource(() -> Math.random());
     Streamlet<Double> streamlet = baseStreamlet.setNumPartitions(20)
-                                               .flatMap((num) -> Arrays.asList(num * 10));
+                                               .flatMap(num -> Arrays.asList(num * 10));
     assertTrue(streamlet instanceof FlatMapStreamlet);
     FlatMapStreamlet<Double, Double> mStreamlet = (FlatMapStreamlet<Double, Double>) streamlet;
     assertEquals(20, mStreamlet.getNumPartitions());
@@ -212,7 +211,7 @@ public class StreamletImplTest {
   @SuppressWarnings("unchecked")
   public void testFilterStreamlet() {
     Streamlet<Double> baseStreamlet = builder.newSource(() -> Math.random());
-    Streamlet<Double> streamlet = baseStreamlet.setNumPartitions(20).filter((num) -> num != 0);
+    Streamlet<Double> streamlet = baseStreamlet.setNumPartitions(20).filter(num -> num != 0);
     assertTrue(streamlet instanceof FilterStreamlet);
     FilterStreamlet<Double> mStreamlet = (FilterStreamlet<Double>) streamlet;
     assertEquals(20, mStreamlet.getNumPartitions());
@@ -649,8 +648,8 @@ public class StreamletImplTest {
 
     // set duplicate streamlet name and expect thrown exception
     supplierStreamlet
-        .map((content) -> content.toUpperCase()).setName("MyMapStreamlet")
-        .map((content) -> content + "_test_suffix").setName("MyMapStreamlet");
+        .map(content -> content.toUpperCase()).setName("MyMapStreamlet")
+        .map(content -> content + "_test_suffix").setName("MyMapStreamlet");
 
     // build SupplierStreamlet
     assertFalse(supplierStreamlet.isBuilt());

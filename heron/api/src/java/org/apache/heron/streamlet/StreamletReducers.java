@@ -22,7 +22,7 @@ package org.apache.heron.streamlet;
 /**
  * This class contains a few standard reduces that can be used with
  * Streamlet reduce functions such as reduceByKeyAndWindow.
- * Example, assuming s is a Stringlet<T> object and each tuple has these functions:
+ * Example, assuming s is a {@code Stringlet<T>} object and each tuple has these functions:
  *   - Integer getKey() and
  *   - Double getValue()
  * To get streams of sum, min and max of all values upto the current one:

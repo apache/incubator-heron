@@ -202,8 +202,8 @@ public class RuntimeManagerRunner {
         + "; newContainerNumber " + newContainerNumber);
 
     // parallelism and runtime config can not be updated at the same time.
-    if (((newParallelism != null && !newParallelism.isEmpty())
-        || (newContainerNumber != null && !newContainerNumber.isEmpty()))
+    if ((newParallelism != null && !newParallelism.isEmpty()
+        || newContainerNumber != null && !newContainerNumber.isEmpty())
         && userRuntimeConfig != null && !userRuntimeConfig.isEmpty()) {
       throw new TopologyRuntimeManagementException(
           "parallelism or container number "

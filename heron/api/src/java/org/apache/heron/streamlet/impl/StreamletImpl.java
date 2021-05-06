@@ -52,7 +52,6 @@ import org.apache.heron.streamlet.impl.streamlets.FlatMapStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.GeneralReduceByKeyAndWindowStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.GeneralReduceByKeyStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.JoinStreamlet;
-import org.apache.heron.streamlet.impl.streamlets.KVStreamletShadow;
 import org.apache.heron.streamlet.impl.streamlets.KeyByStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.LogStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.MapStreamlet;
@@ -61,7 +60,6 @@ import org.apache.heron.streamlet.impl.streamlets.ReduceByKeyStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.RemapStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.SinkStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.SplitStreamlet;
-import org.apache.heron.streamlet.impl.streamlets.StreamletShadow;
 import org.apache.heron.streamlet.impl.streamlets.TransformStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.UnionStreamlet;
 
@@ -218,7 +216,7 @@ public abstract class StreamletImpl<R>
   */
   @Override
   public Streamlet<R> repartition(int numPartitions) {
-    return this.map((a) -> a).setNumPartitions(numPartitions);
+    return this.map(a -> a).setNumPartitions(numPartitions);
   }
 
   /**
@@ -532,16 +530,16 @@ public abstract class StreamletImpl<R>
   }
 
   /**
-   * Return a new KVStreamlet<K, R> by applying key extractor to each element of this Streamlet
+   * Return a new {@code KVStreamlet<K, R>} by applying key extractor to each element of this Streamlet
    * @param keyExtractor The function applied to a tuple of this streamlet to get the key
    */
   @Override
   public <K> KVStreamlet<K, R> keyBy(SerializableFunction<R, K> keyExtractor) {
-    return keyBy(keyExtractor, (a) -> a);
+    return keyBy(keyExtractor, a -> a);
   }
 
   /**
-   * Return a new KVStreamlet<K, V> by applying key and value extractor to each element of this
+   * Return a new {@code KVStreamlet<K, V>} by applying key and value extractor to each element of this
    * Streamlet
    * @param keyExtractor The function applied to a tuple of this streamlet to get the key
    * @param valueExtractor The function applied to a tuple of this streamlet to extract the value
@@ -558,7 +556,7 @@ public abstract class StreamletImpl<R>
   }
 
   /**
-   * Returns a new stream of <key, count> by counting tuples in this stream on each key.
+   * Returns a new stream of {@code <key, count>} by counting tuples in this stream on each key.
    * @param keyExtractor The function applied to a tuple of this streamlet to get the key
    */
   @Override
@@ -573,7 +571,7 @@ public abstract class StreamletImpl<R>
 
 
   /**
-   * Returns a new stream of <key, count> by counting tuples over a window in this stream on each key.
+   * Returns a new stream of {@code <key, count>} by counting tuples over a window in this stream on each key.
    * @param keyExtractor The function applied to a tuple of this streamlet to get the key
    * @param windowCfg This is a specification of what kind of windowing strategy you like to have.
    * Typical windowing strategies are sliding windows and tumbling windows

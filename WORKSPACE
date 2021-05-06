@@ -125,7 +125,7 @@ maven_install(
         "org.mockito:mockito-all:1.10.19",
         "org.powermock:powermock-api-mockito:" + powermock_version,
         "org.powermock:powermock-module-junit4:" + powermock_version,
-        "com.puppycrawl.tools:checkstyle:6.17",
+        "com.puppycrawl.tools:checkstyle:8.42",
         "com.googlecode.json-simple:json-simple:1.1",
         maven.artifact(
             group = "org.apache.httpcomponents",

@@ -32,8 +32,6 @@ import com.microsoft.dhalion.core.MeasurementsTable;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-
-
 import org.apache.heron.proto.system.Common.Status;
 import org.apache.heron.proto.system.Common.StatusCode;
 import org.apache.heron.proto.tmanager.TopologyManager;
@@ -43,6 +41,7 @@ import org.apache.heron.proto.tmanager.TopologyManager.MetricResponse.Individual
 import org.apache.heron.proto.tmanager.TopologyManager.MetricResponse.TaskMetric;
 import org.apache.heron.proto.tmanager.TopologyManager.MetricsCacheLocation;
 import org.apache.heron.spi.statemgr.SchedulerStateManagerAdaptor;
+
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;

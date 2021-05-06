@@ -17,21 +17,22 @@
  * under the License.
  */
 
-package org.apache.heron.streamlet.impl.streamlets;
+package org.apache.heron.streamlet.impl;
 
 import org.apache.heron.streamlet.KVStreamlet;
 import org.apache.heron.streamlet.KeyValue;
-import org.apache.heron.streamlet.impl.StreamletImpl;
 
 /**
- * KVStreamletShadow is a decorator for StreamletImpl<KeyValue<?, ?>> objects.
+ * KVStreamletShadow is a decorator for {@literal StreamletImpl<KeyValue<?, ?>>} objects.
  * Please check StreamShadow comments for more details.
  *
  * Usage:
  * To create a shadow object that selecting "test" stream from an existing
+ * <pre>{@code
  * StreamletImpl<KeyValue<K, V>> object(stream):
  *
  * KVStreamlet<K, V> kv = new KVStreamletShadow<K, V>(stream)
+ * }</pre>
  *
  */
 public class KVStreamletShadow<K, V>

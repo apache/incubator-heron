@@ -42,9 +42,9 @@ public class Resource {
   public boolean equals(Object obj) {
     if (obj instanceof Resource) {
       Resource r = (Resource) obj;
-      return (this.getCpu() == r.getCpu())
-          && (this.getRam().equals(r.getRam()))
-          && (this.getDisk().equals(r.getDisk()));
+      return this.getCpu() == r.getCpu()
+          && this.getRam().equals(r.getRam())
+          && this.getDisk().equals(r.getDisk());
     } else {
       return false;
     }

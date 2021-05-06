@@ -104,7 +104,7 @@ public class WatermarkTimeTriggerPolicy<T extends Serializable> extends
    */
   private long getNextAlignedWindowTs(long startTs, long endTs) {
     long nextTs = windowManager.getEarliestEventTs(startTs, endTs);
-    if (nextTs == Long.MAX_VALUE || (nextTs % slidingIntervalMs == 0)) {
+    if (nextTs == Long.MAX_VALUE || nextTs % slidingIntervalMs == 0) {
       return nextTs;
     }
     return nextTs + (slidingIntervalMs - (nextTs % slidingIntervalMs));

@@ -74,7 +74,7 @@ public class SpoutInstance
 
     long startOfCycle = System.nanoTime();
 
-    while (!ackEnabled || (maxSpoutPending > collector.numInFlight())) {
+    while (!ackEnabled || maxSpoutPending > collector.numInFlight()) {
       // Delegate to the use defined spout
       long startTime = System.nanoTime();
       spout.nextTuple();

@@ -235,7 +235,7 @@ public interface Streamlet<R> extends StreamletBase<R> {
    * This allows the transform Function to do any kind of initialization/loading, etc.
    * @param serializableTransformer The transformation function to be applied
    * @param <T> The return type of the transform
-   * @return Streamlet containing the output of the transformFunction
+   * @returns Streamlet containing the output of the transformFunction
    */
   <T> Streamlet<T> transform(
       SerializableTransformer<R, ? extends T> serializableTransformer);
@@ -244,7 +244,7 @@ public interface Streamlet<R> extends StreamletBase<R> {
    * Returns a new Streamlet by applying the operator on each element of this streamlet.
    * @param operator The operator to be applied
    * @param <T> The return type of the transform
-   * @return Streamlet containing the output of the operation
+   * @returns Streamlet containing the output of the operation
    */
   <T> Streamlet<T> applyOperator(IStreamletOperator<R, T> operator);
 
@@ -253,7 +253,7 @@ public interface Streamlet<R> extends StreamletBase<R> {
    * @param operator The operator to be applied
    * @param grouper The grouper to be applied with the operator
    * @param <T> The return type of the transform
-   * @return Streamlet containing the output of the operation
+   * @returns Streamlet containing the output of the operation
    */
   <T> Streamlet<T> applyOperator(IStreamletOperator<R, T> operator, StreamGrouping grouper);
 
@@ -265,28 +265,29 @@ public interface Streamlet<R> extends StreamletBase<R> {
   Streamlet<R> split(Map<String, SerializablePredicate<R>> splitFns);
 
   /**
-   * Return a new KVStreamlet<K, R> by applying key extractor to each element of this Streamlet
+   * Apply key extractor to each element of this Streamlet
    * @param keyExtractor The function applied to a tuple of this streamlet to get the key
+   * @returns Returned Streamlet
    */
   <K> KVStreamlet<K, R> keyBy(SerializableFunction<R, K> keyExtractor);
 
   /**
-   * Return a new KVStreamlet<K, V> by applying key and value extractor to each element of this
-   * Streamlet
+   * Apply key and value extractor to each element of this Streamlet
    * @param keyExtractor The function applied to a tuple of this streamlet to get the key
    * @param valueExtractor The function applied to a tuple of this streamlet to extract the value
+   * @returns KVStreamlet Returned Streamlet
    */
   <K, V> KVStreamlet<K, V> keyBy(SerializableFunction<R, K> keyExtractor,
                                  SerializableFunction<R, V> valueExtractor);
 
   /**
-   * Returns a new stream of <key, count> by counting tuples in this stream on each key.
+   * Returns a new stream of {@code <key, count>} by counting tuples in this stream on each key.
    * @param keyExtractor The function applied to a tuple of this streamlet to get the key
    */
   <K> KVStreamlet<K, Long> countByKey(SerializableFunction<R, K> keyExtractor);
 
   /**
-   * Returns a new stream of <key, count> by counting tuples over a window in this stream on each key.
+   * Returns a new stream of {@code <key, count>} by counting tuples over a window in this stream on each key.
    * @param keyExtractor The function applied to a tuple of this streamlet to get the key
    * @param windowCfg This is a specification of what kind of windowing strategy you like to have.
    * Typical windowing strategies are sliding windows and tumbling windows

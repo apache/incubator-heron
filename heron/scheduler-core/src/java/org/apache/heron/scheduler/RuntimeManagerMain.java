@@ -488,7 +488,7 @@ public class RuntimeManagerMain {
       Config runtime,
       ISchedulerClient schedulerClient,
       boolean potentialStaleExecutionData)
-    throws TopologyRuntimeManagementException, TManagerException, PackingException {
+      throws TopologyRuntimeManagementException, TManagerException, PackingException {
     // create an instance of the runner class
     RuntimeManagerRunner runtimeManagerRunner =
         new RuntimeManagerRunner(config, runtime, command, schedulerClient,

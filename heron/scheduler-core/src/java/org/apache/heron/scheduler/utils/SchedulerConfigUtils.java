@@ -36,9 +36,9 @@ public final class SchedulerConfigUtils {
   /**
    * Load the topology config
    *
-   * @param topologyBinaryFile, name of the user submitted topology jar/tar/pex file
-   * @param topologyDefnFile, name of the topology defintion file
-   * @param topology, proto in memory version of topology definition
+   * @param topologyBinaryFile name of the user submitted topology jar/tar/pex file
+   * @param topologyDefnFile name of the topology defintion file
+   * @param topology proto in memory version of topology definition
    * @return config, the topology config
    */
   private static Config topologyConfigs(String topologyBinaryFile,

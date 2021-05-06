@@ -173,7 +173,7 @@ public class CacheCore {
    * Bucket id is made of two integers:
    * 1. the higher part is from idxComponentInstance locator:int
    * 2. the lower part is from idxMetricName locator:int
-   * The metric bucket id is considered as union hash index of <component-instance, metricName>
+   * The metric bucket id is considered as union hash index of {@literal <component-instance, metricName>}
    *
    * @param hi index of [component-instance]
    * @param lo index of metric name

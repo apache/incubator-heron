@@ -16,12 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.heron.streamlet.impl.streamlets;
+package org.apache.heron.streamlet.impl;
 
 import org.junit.Test;
 import org.mockito.Mock;
-
-import org.apache.heron.streamlet.impl.StreamletImpl;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.doNothing;

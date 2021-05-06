@@ -72,29 +72,6 @@ under the License.
                value="Invalid header. See header template in tools/java/src/org/apache/bazel/checkstyle/heron_header.txt"/>
     </module>
 
-    <!-- Allows the ability to turn off/on checkstyles for a chunk of code. Better to use the 1 line suppress method
-    shows in SuppressWithNearbyCommentFilter if you can.
-         // CHECKSTYLE:OFF CheckNameHere
-         // CHECKSTYLE:ON CheckNameHere
-    -->
-    <module name="SuppressionCommentFilter">
-      <property name="offCommentFormat" value="CHECKSTYLE\:OFF ([\w\|]+)"/>
-      <property name="onCommentFormat" value="CHECKSTYLE\:ON ([\w\|]+)"/>
-      <property name="checkFormat" value="$1"/>
-    </module>
-
-    <!-- allow suppression (via comments) of a specified check +/- 1 line from
-      a in-code comment "// SUPPRESS CHECKSTYLE CheckNameHere"
-      C style comments are allowed as well
-    -->
-    <module name="SuppressWithNearbyCommentFilter">
-      <property name="influenceFormat" value="1"/>
-    </module>
-    <!-- now again for one line before the comment -->
-    <module name="SuppressWithNearbyCommentFilter">
-      <property name="influenceFormat" value="-1"/>
-    </module>
-
     <!-- Checks whether files end with a new line.                        -->
     <!-- See http://checkstyle.sf.net/config_misc.html#NewlineAtEndOfFile -->
     <module name="NewlineAtEndOfFile"/>
@@ -119,6 +96,13 @@ under the License.
     <!-- allows us to use annotations to supress, like this: @SuppressWarnings("checkstyle:methodlength") -->
     <module name="SuppressWarningsFilter" />
 
+    <!-- Checks for Size Violations.                    -->
+    <!-- See http://checkstyle.sf.net/config_sizes.html -->
+    <module name="LineLength">
+      <property name="max" value="100"/>
+      <property name="ignorePattern" value="^import.*$|^ *\*( |[^/]) *.*$"/>
+    </module>
+    
     <module name="TreeWalker">
       <property name="tabWidth" value="2"/>
       <module name="Indentation">
@@ -126,8 +110,28 @@ under the License.
         <property name="caseIndent" value="2"/>
       </module>
 
-      <!-- needed for SuppressWithNearbyCommentFilter -->
-      <module name="FileContentsHolder"/>
+      <!-- Allows the ability to turn off/on checkstyles for a chunk of code. Better to use the 1 line suppress method
+      shows in SuppressWithNearbyCommentFilter if you can.
+          // CHECKSTYLE:OFF CheckNameHere
+          // CHECKSTYLE:ON CheckNameHere
+      -->
+      <module name="SuppressionCommentFilter">
+        <property name="offCommentFormat" value="CHECKSTYLE\:OFF ([\w\|]+)"/>
+        <property name="onCommentFormat" value="CHECKSTYLE\:ON ([\w\|]+)"/>
+        <property name="checkFormat" value="$1"/>
+      </module>
+    
+      <!-- allow suppression (via comments) of a specified check +/- 1 line from
+        a in-code comment "// SUPPRESS CHECKSTYLE CheckNameHere"
+        C style comments are allowed as well
+      -->
+      <module name="SuppressWithNearbyCommentFilter">
+        <property name="influenceFormat" value="1"/>
+      </module>
+      <!-- now again for one line before the comment -->
+      <module name="SuppressWithNearbyCommentFilter">
+        <property name="influenceFormat" value="-1"/>
+      </module>
 
       <!-- allows the use of SuppressWarningsFilter from above -->
       <module name="SuppressWarningsHolder" />
@@ -140,20 +144,20 @@ under the License.
 
       <!-- Checks for Javadoc comments.                     -->
       <!-- See http://checkstyle.sf.net/config_javadoc.html -->
-      <module name="JavadocMethod">
+      <module name="MissingJavadocMethod">
         <!-- don't require javadoc for methods shorter than or equal to
         this many lines (including opening & closing brace lines)
         -->
         <property name="minLineCount" value="40"/>
         <!-- javadoc doesn't need one @param, @return, @throws tags -->
         <property name="scope" value="public"/>
-        <property name="allowMissingParamTags" value="true"/>
-        <property name="allowMissingThrowsTags" value="true"/>
-        <property name="allowMissingReturnTag" value="true"/>
+        <!-- <property name="allowMissingParamTags" value="true"/> -->
+        <!-- <property name="allowMissingThrowsTags" value="true"/> -->
+        <!-- <property name="allowMissingReturnTag" value="true"/> -->
         <!-- simple set/get methods don't need javadoc comments -->
         <property name="allowMissingPropertyJavadoc" value="true" />
         <!-- Allow tags for runtime exceptions that are not explicitly declared -->
-        <property name="allowUndeclaredRTE" value="true" />
+        <!-- <property name="allowUndeclaredRTE" value="true" /> -->
         <property name="ignoreMethodNamesRegex" value="^main$" />
       </module>
       <module name="JavadocType">
@@ -211,12 +215,6 @@ under the License.
 org.apache. Each group should be separated by a single blank line. Static imports at the bottom." />
       </module>
 
-      <!-- Checks for Size Violations.                    -->
-      <!-- See http://checkstyle.sf.net/config_sizes.html -->
-      <module name="LineLength">
-        <property name="max" value="100"/>
-        <property name="ignorePattern" value="^import.*$|^ *\*( |[^/]) *.*$"/>
-      </module>
       <module name="OuterTypeNumber"/>
 
       <!-- Checks for whitespace                               -->
@@ -289,7 +287,7 @@ org.apache. Each group should be separated by a single blank line. Static import
       -->
       <module name="IllegalType">
         <property name="illegalClassNames" value="java.text.SimpleDateFormat"/>
-        <property name="format" value="^_DISABLE$"/>
+        <property name="illegalAbstractClassNameFormat" value="^_DISABLE$"/>
       </module>
       <module name="MissingSwitchDefault"/>
       <module name="ModifiedControlVariable"/>

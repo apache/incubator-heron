@@ -17,14 +17,12 @@
  * under the License.
  */
 
-package org.apache.heron.streamlet.impl.streamlets;
+package org.apache.heron.streamlet.impl;
 
 import java.util.List;
 import java.util.Set;
 
 import org.apache.heron.api.topology.TopologyBuilder;
-import org.apache.heron.streamlet.impl.StreamletBaseImpl;
-import org.apache.heron.streamlet.impl.StreamletImpl;
 
 /**
  * StreamletShadow is a special kind of StreamletImpl object:

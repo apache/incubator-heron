@@ -31,7 +31,7 @@ import org.apache.heron.streamlet.SerializableFunction;
 /**
  * ReduceByKeyOperator is the class that implements the reduce functionality.
  * It takes in the key and value extractors, an initial value, and a reduceFunction
- * function as the input. The result are key value pairs of <K, T>.
+ * function as the input. The result are key value pairs of {@literal <K, T>}.
  * R: Input data type, K, Key type, T, Value type.
  * TODO: make it stateful or create a new stateful operator. The tricky part is how
  * to convert K and T to State<> which needs to be serializable.

@@ -34,7 +34,7 @@ public interface IStatefulStorage {
    * @param topologyName The name of the topology.
    * @param conf An unmodifiableMap containing basic configuration
    */
-  void init(String topologyName, final Map<String, Object> conf)
+  void init(String topologyName, Map<String, Object> conf)
       throws StatefulStorageException;
 
   /**
@@ -47,7 +47,7 @@ public interface IStatefulStorage {
    * @param info The information (reference key) for the checkpoint partition.
    * @param checkpoint The checkpoint data.
    */
-  void storeCheckpoint(final CheckpointInfo info, final Checkpoint checkpoint)
+  void storeCheckpoint(CheckpointInfo info, Checkpoint checkpoint)
       throws StatefulStorageException;
 
   /**
@@ -55,7 +55,7 @@ public interface IStatefulStorage {
    * @param info The information (reference key) for the checkpoint partition.
    * @return The checkpoint data from the specified blob id.
    */
-  Checkpoint restoreCheckpoint(final CheckpointInfo info)
+  Checkpoint restoreCheckpoint(CheckpointInfo info)
         throws StatefulStorageException;
 
   /**
@@ -65,7 +65,7 @@ public interface IStatefulStorage {
    * @param info The information (reference key) for the checkpoint partition.
    * @param metadata The checkpoint metadata from a component.
    */
-  void storeComponentMetaData(final CheckpointInfo info, final CheckpointMetadata metadata)
+  void storeComponentMetaData(CheckpointInfo info, CheckpointMetadata metadata)
       throws StatefulStorageException;
 
   /**
@@ -73,7 +73,7 @@ public interface IStatefulStorage {
    * @param info The information (reference key) for the checkpoint partition.
    * @return The checkpoint metadata for the component.
    */
-  CheckpointMetadata restoreComponentMetadata(final CheckpointInfo info)
+  CheckpointMetadata restoreComponentMetadata(CheckpointInfo info)
       throws StatefulStorageException;
 
   /**

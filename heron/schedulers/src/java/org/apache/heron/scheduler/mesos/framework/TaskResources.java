@@ -73,9 +73,9 @@ public class TaskResources {
   // Whether this resource can satisfy the TaskResources needed from parameter
   public boolean canSatisfy(TaskResources needed) {
     return this.ports >= needed.ports
-        && (this.cpu >= needed.cpu)
-        && (this.mem >= needed.mem)
-        && (this.disk >= needed.disk);
+        && this.cpu >= needed.cpu
+        && this.mem >= needed.mem
+        && this.disk >= needed.disk;
   }
 
   public void consume(TaskResources needed) {

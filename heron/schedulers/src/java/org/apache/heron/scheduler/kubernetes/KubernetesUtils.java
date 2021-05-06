@@ -30,7 +30,6 @@ import org.apache.heron.spi.common.Config;
 import org.apache.heron.spi.common.Context;
 
 import io.kubernetes.client.openapi.ApiException;
-
 import okhttp3.Response;
 
 final class KubernetesUtils {

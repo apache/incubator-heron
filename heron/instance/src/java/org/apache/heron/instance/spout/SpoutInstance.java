@@ -342,13 +342,13 @@ public class SpoutInstance implements IInstance {
     long maxSpoutPending = TypeUtils.getLong(config.get(Config.TOPOLOGY_MAX_SPOUT_PENDING));
     return helper.getTopologyState().equals(TopologyAPI.TopologyState.RUNNING)
         &&
-        ((!ackEnabled && collector.isOutQueuesAvailable())
+        (!ackEnabled && collector.isOutQueuesAvailable()
             ||
-            (ackEnabled
+            ackEnabled
                 && collector.isOutQueuesAvailable()
-                && collector.numInFlight() < maxSpoutPending)
+                && collector.numInFlight() < maxSpoutPending
             ||
-            (ackEnabled && !streamInQueue.isEmpty()));
+            ackEnabled && !streamInQueue.isEmpty());
   }
 
   /**
@@ -380,7 +380,7 @@ public class SpoutInstance implements IInstance {
     // We would reuse the System.nanoTime()
     long currentTime = startOfCycle;
 
-    while (!ackEnabled || (maxSpoutPending > collector.numInFlight())) {
+    while (!ackEnabled || maxSpoutPending > collector.numInFlight()) {
       // Delegate to the use defined spout
       spout.nextTuple();
 
