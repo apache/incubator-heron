@@ -59,7 +59,7 @@ public class EcoSubmitterTest {
         any(String.class), any(Config.class), any(StormTopology.class));
 
     subject.submitStormTopology("name", config, topology);
-    PowerMockito.verifyStatic(times(1));
+    PowerMockito.verifyStatic(StormSubmitter.class, times(1));
     StormSubmitter.submitTopology(anyString(), any(Config.class), any(StormTopology.class));
 
   }
@@ -74,7 +74,7 @@ public class EcoSubmitterTest {
         any(String.class), any(Config.class), any(HeronTopology.class));
 
     subject.submitHeronTopology("name", config, topology);
-    PowerMockito.verifyStatic(times(1));
+    PowerMockito.verifyStatic(HeronSubmitter.class, times(1));
     HeronSubmitter.submitTopology(anyString(), any(Config.class), any(HeronTopology.class));
 
   }

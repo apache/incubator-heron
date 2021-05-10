@@ -10,8 +10,8 @@ java_library(
         "//heron/common/src/java:utils-java",
         "//heron/instance/src/java:instance-java",
         "//heron/simulator/src/java:simulator-java",
-        "//third_party/java:mockito",
-        "//third_party/java:junit4",
+        "@maven//:org_mockito_mockito_all",
+        "@maven//:junit_junit",
     ],
 )
 

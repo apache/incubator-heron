@@ -109,7 +109,7 @@ public class SchedulerUtilsTest {
     Assert.assertTrue(SchedulerUtils.curlAndExtractPackage(
         WORKING_DIR, TOPOLOGY_URI, TOPOLOGY_DEST, isToDeletePackage, IS_VERBOSE));
     // deleteFile should not be invoked
-    PowerMockito.verifyStatic(Mockito.never());
+    PowerMockito.verifyStatic(FileUtils.class, Mockito.never());
     FileUtils.deleteFile(Mockito.anyString());
 
     // the whole process should success even if failed to delete the package
@@ -118,7 +118,7 @@ public class SchedulerUtilsTest {
     Assert.assertTrue(SchedulerUtils.curlAndExtractPackage(
         WORKING_DIR, TOPOLOGY_URI, TOPOLOGY_DEST, true, IS_VERBOSE));
     // deleteFile should be invoked once
-    PowerMockito.verifyStatic(Mockito.times(1));
+    PowerMockito.verifyStatic(FileUtils.class, Mockito.times(1));
     FileUtils.deleteFile(Mockito.anyString());
   }
 

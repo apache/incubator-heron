@@ -108,7 +108,7 @@ public class DLDownloaderTest {
     verify(nsBuilder, times(1)).conf(eq(CONF));
     verify(nsBuilder, times(1)).uri(parentUri);
 
-    PowerMockito.verifyStatic(times(1));
+    PowerMockito.verifyStatic(Extractor.class, times(1));
     Extractor.extract(any(InputStream.class), eq(path));
 
     verify(ns, times(1)).openLog(eq(logName));

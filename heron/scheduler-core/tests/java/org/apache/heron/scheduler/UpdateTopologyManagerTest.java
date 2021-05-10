@@ -189,13 +189,13 @@ public class UpdateTopologyManagerTest {
     verify(lock).tryLock(any(Long.class), any(TimeUnit.class));
     verify(lock).unlock();
 
-    PowerMockito.verifyStatic(times(1));
+    PowerMockito.verifyStatic(TManagerUtils.class, times(1));
     TManagerUtils.transitionTopologyState(eq(TOPOLOGY_NAME),
         eq(TManagerUtils.TManagerCommand.DEACTIVATE), eq(mockStateMgr),
         eq(TopologyAPI.TopologyState.RUNNING), eq(TopologyAPI.TopologyState.PAUSED),
         any(NetworkUtils.TunnelConfig.class));
 
-    PowerMockito.verifyStatic(times(1));
+    PowerMockito.verifyStatic(TManagerUtils.class, times(1));
     TManagerUtils.transitionTopologyState(eq(TOPOLOGY_NAME),
         eq(TManagerUtils.TManagerCommand.ACTIVATE), eq(mockStateMgr),
         eq(TopologyAPI.TopologyState.PAUSED), eq(TopologyAPI.TopologyState.RUNNING),

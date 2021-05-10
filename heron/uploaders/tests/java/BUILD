@@ -3,8 +3,8 @@ load("@rules_java//java:defs.bzl", "java_library", "java_test")
 common_deps_files = [
     "//third_party/java:powermock",
     "@maven//:commons_io_commons_io",
-    "//third_party/java:mockito",
-    "//third_party/java:junit4",
+    "@maven//:org_mockito_mockito_all",
+    "@maven//:junit_junit",
 ]
 
 spi_deps_files = [

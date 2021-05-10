@@ -4,8 +4,8 @@ test_deps_files = \
     heron_java_proto_files() + [
         "//heron/spi/src/java:statefulstorage-spi-java",
         "//third_party/java:powermock",
-        "//third_party/java:mockito",
-        "//third_party/java:junit4",
+        "@maven//:org_mockito_mockito_all",
+        "@maven//:junit_junit",
     ]
 
 localfs_deps_files = [

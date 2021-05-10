@@ -1,14 +1,14 @@
 load("@rules_java//java:defs.bzl", "java_library")
 
 common_deps_files = [
-    "@maven//:com_google_guava_guava",
-    "//third_party/java:powermock",
     "//heron/api/src/java:api-java-low-level",
     "//heron/common/src/java:basics-java",
     "//heron/common/src/java:utils-java",
     "//heron/scheduler-core/src/java:scheduler-java",
-    "//third_party/java:junit4",
-    "//third_party/java:mockito",
+    "//third_party/java:guava",
+    "@maven//:junit_junit",
+    "@maven//:org_mockito_mockito_all",
+    "//third_party/java:powermock",
 ]
 
 spi_deps_files = [

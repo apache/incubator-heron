@@ -7,7 +7,7 @@ common_deps_files = \
         "//heron/spi/src/java:common-spi-java",
         "//heron/spi/src/java:statemgr-spi-java",
         "//heron/spi/src/java:network-utils-java",
-        "@maven//:com_google_guava_guava",
+        "//third_party/java:guava",
     ]
 
 localfs_deps_files = \

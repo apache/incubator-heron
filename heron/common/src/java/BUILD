@@ -58,8 +58,8 @@ java_library(
     deps = [
         ":basics-java",
         ":network-java",
-        "//third_party/java:junit4",
-        "//third_party/java:mockito",
+        "@maven//:junit_junit",
+        "@maven//:org_mockito_mockito_all",
         "@com_google_protobuf//:protobuf_java",
     ],
 )

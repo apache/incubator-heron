@@ -23,11 +23,11 @@ metricscachemgr_deps_files = [
 ]
 
 test_deps_files = [
-    "//third_party/java:junit4",
+    "@maven//:junit_junit",
     "//heron/spi/src/java:utils-spi-java",
     "@maven//:com_google_guava_guava",
     "//third_party/java:powermock",
-    "//third_party/java:mockito",
+    "@maven//:org_mockito_mockito_all",
 ]
 
 java_library(

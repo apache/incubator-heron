@@ -12,7 +12,7 @@ java_library(
         "@maven//:com_amazonaws_aws_java_sdk_s3",
     ],
     deps = [
-        "//third_party/java:joda_time",
+        "@maven//:joda_time_joda_time",
         "@maven//:com_amazonaws_aws_java_sdk_core",
         "@maven//:com_amazonaws_aws_java_sdk_s3",
         "@maven//:com_fasterxml_jackson_core_jackson_annotations",
@@ -142,20 +142,15 @@ java_library(
     name = "powermock",
     srcs = ["Empty.java"],
     exports = [
-        "@maven//:org_powermock_powermock_api_mockito",
+        "@maven//:org_powermock_powermock_api_mockito2",
         "@maven//:org_powermock_powermock_api_support",
         "@maven//:org_powermock_powermock_core",
         "@maven//:org_powermock_powermock_module_junit4",
         "@maven//:org_powermock_powermock_module_junit4_common",
     ],
     deps = [
-        "@maven//:org_javassist_javassist",
-        "@maven//:org_powermock_powermock_api_mockito",
-        "@maven//:org_powermock_powermock_api_support",
-        "@maven//:org_powermock_powermock_core",
+        "@maven//:org_powermock_powermock_api_mockito2",
         "@maven//:org_powermock_powermock_module_junit4",
-        "@maven//:org_powermock_powermock_module_junit4_common",
-        "@maven//:org_powermock_powermock_reflect",
     ],
 )
 
@@ -167,27 +162,6 @@ java_library(
     neverlink = 1,
     exports = ["@maven//:com_puppycrawl_tools_checkstyle"],
     deps = ["@com_google_protobuf//:protobuf_java"],
-)
-
-java_library(
-    name = "joda_time",
-    srcs = ["Empty.java"],
-    exports = ["@maven//:joda_time_joda_time"],
-    deps = ["@maven//:joda_time_joda_time"],
-)
-
-java_library(
-    name = "junit4",
-    srcs = ["Empty.java"],
-    exports = ["@maven//:junit_junit"],
-    deps = ["@maven//:junit_junit"],
-)
-
-java_library(
-    name = "mockito",
-    srcs = ["Empty.java"],
-    exports = ["@maven//:org_mockito_mockito_all"],
-    deps = ["@maven//:org_mockito_mockito_all"],
 )
 
 java_library(
@@ -214,50 +188,15 @@ java_library(
 )
 
 java_library(
-    name = "apache-pulsar-client",
-    srcs = ["Empty.java"],
-    exports = [
-        "@maven//:org_apache_pulsar_pulsar_client_shaded",
-    ],
-    deps = [
-        "@maven//:org_apache_pulsar_pulsar_client_shaded",
-    ],
-)
-
-java_library(
     name = "kubernetes-java-client",
     srcs = ["Empty.java"],
     exports = [
-        "//third_party/java:joda_time",
-        "@maven//:com_google_code_gson_gson",
-        "@maven//:com_squareup_okhttp3_logging_interceptor",
         "@maven//:com_squareup_okhttp3_okhttp",
-        "@maven//:com_squareup_okio_okio",
-        "@maven//:commons_codec_commons_codec",
-        "@maven//:commons_lang_commons_lang",
-        "@maven//:io_gsonfire_gson_fire",
         "@maven//:io_kubernetes_client_java",
         "@maven//:io_kubernetes_client_java_api",
-        "@maven//:io_kubernetes_client_java_proto",
-        "@maven//:io_swagger_swagger_annotations",
-        "@maven//:log4j_log4j",
-        "@maven//:org_yaml_snakeyaml",
     ],
     deps = [
-        "//third_party/java:joda_time",
-        "@maven//:com_google_code_gson_gson",
-        "@maven//:com_squareup_okhttp3_logging_interceptor",
-        "@maven//:com_squareup_okhttp3_okhttp",
-        "@maven//:com_squareup_okio_okio",
-        "@maven//:commons_codec_commons_codec",
-        "@maven//:commons_lang_commons_lang",
-        "@maven//:io_gsonfire_gson_fire",
         "@maven//:io_kubernetes_client_java",
-        "@maven//:io_kubernetes_client_java_api",
-        "@maven//:io_kubernetes_client_java_proto",
-        "@maven//:io_swagger_swagger_annotations",
-        "@maven//:log4j_log4j",
-        "@maven//:org_yaml_snakeyaml",
     ],
 )
 

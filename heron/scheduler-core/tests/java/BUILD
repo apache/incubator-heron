@@ -8,8 +8,8 @@ common_deps_files = [
     "//heron/common/src/java:basics-java",
     "//heron/common/src/java:utils-java",
     "//heron/scheduler-core/src/java:scheduler-java",
-    "//third_party/java:junit4",
-    "//third_party/java:mockito",
+    "@maven//:junit_junit",
+    "@maven//:org_mockito_mockito_all",
 ]
 
 spi_deps_files = [

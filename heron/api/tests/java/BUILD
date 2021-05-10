@@ -5,7 +5,7 @@ local_api_deps_files = [
     "//heron/api/src/java:api-java",
     "//heron/common/src/java:utils-java",
     "//heron/common/src/java:basics-java",
-    "//third_party/java:junit4",
+    "@maven//:junit_junit",
     "//third_party/java:powermock",
     "//third_party/java:kryo",
     "@maven//:org_mockito_mockito_all",

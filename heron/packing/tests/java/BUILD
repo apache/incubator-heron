@@ -11,8 +11,8 @@ packing_deps_files = [
 ]
 
 test_deps_files = [
-    "//third_party/java:junit4",
-    "//third_party/java:mockito",
+    "@maven//:junit_junit",
+    "@maven//:org_mockito_mockito_all",
 ]
 
 roundrobin_deps_files = \
@@ -56,7 +56,7 @@ java_library(
         "//heron/spi/src/java:common-spi-java",
         "//heron/spi/src/java:packing-spi-java",
         "//heron/spi/src/java:utils-spi-java",
-        "//third_party/java:junit4",
+        "@maven//:junit_junit",
     ],
 )
 

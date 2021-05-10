@@ -162,7 +162,7 @@ public class FileUtilsTest {
 
     FileUtils.deleteDir(parent.toFile(), true);
 
-    PowerMockito.verifyStatic(times(4));
+    PowerMockito.verifyStatic(Files.class, times(4));
 
     Assert.assertFalse(parent.toFile().exists());
     Assert.assertFalse(child1.toFile().exists());

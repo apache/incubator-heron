@@ -92,7 +92,7 @@ public class LocalFileSystemStorageTest {
         StatefulStorageTestContext.CHECKPOINT_ID, instance);
     localFileSystemStorage.storeCheckpoint(info, mockCheckpoint);
 
-    PowerMockito.verifyStatic(times(1));
+    PowerMockito.verifyStatic(FileUtils.class, times(1));
     FileUtils.writeToFile(anyString(), eq(checkpoint.toByteArray()), eq(true));
   }
 
@@ -112,7 +112,7 @@ public class LocalFileSystemStorageTest {
 
     localFileSystemStorage.cleanCheckpoints(mockRootFile, 1);
 
-    PowerMockito.verifyStatic(times(1));
+    PowerMockito.verifyStatic(FileUtils.class, times(1));
     FileUtils.deleteDir(new File(String.format("%s%s%s", fakeRootPath, File.separator, "1")), true);
     FileUtils.deleteDir(new File(String.format("%s%s%s", fakeRootPath, File.separator, "2")), true);
   }
@@ -139,7 +139,7 @@ public class LocalFileSystemStorageTest {
 
     localFileSystemStorage.dispose("", true);
 
-    PowerMockito.verifyStatic(times(1));
+    PowerMockito.verifyStatic(FileUtils.class, times(1));
     FileUtils.deleteDir(anyString());
     FileUtils.isDirectoryExists(anyString());
   }

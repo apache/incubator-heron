@@ -9,9 +9,9 @@ test_deps_files = \
         "//heron/common/src/java:utils-java",
         "//heron/common/src/java:test-helpers-java",
         "//heron/instance/src/java:instance-java",
-        "//third_party/java:junit4",
+        "@maven//:junit_junit",
         "//third_party/java:kryo",
-        "//third_party/java:mockito",
+        "@maven//:org_mockito_mockito_all",
     ]
 
 java_library(

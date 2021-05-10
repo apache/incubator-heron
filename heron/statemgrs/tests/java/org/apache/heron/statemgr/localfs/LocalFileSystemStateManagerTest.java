@@ -24,6 +24,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.concurrent.TimeUnit;
 
+import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 
 import org.junit.After;
@@ -58,6 +59,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.powermock.api.mockito.PowerMockito.when;
 
 /**
  * LocalFileSystemStateManager Tester.
@@ -108,7 +110,7 @@ public class LocalFileSystemStateManagerTest {
   public void testInitialize() throws Exception {
     initMocks();
 
-    PowerMockito.verifyStatic(atLeastOnce());
+    PowerMockito.verifyStatic(FileUtils.class, atLeastOnce());
     FileUtils.createDirectory(anyString());
   }
 
@@ -137,8 +139,11 @@ public class LocalFileSystemStateManagerTest {
    */
   @Test
   public void testSetSchedulerLocation() throws Exception {
-    doReturn(mock(ListenableFuture.class)).when(manager)
-        .setData(anyString(), any(byte[].class), anyBoolean());
+    ListenableFuture<Boolean> response = Futures.immediateFuture(true);
+    LocalFileSystemStateManager mockManager = mock(LocalFileSystemStateManager.class);
+
+    when(mockManager.setData(anyString(), any(byte[].class), anyBoolean()))
+            .thenReturn(response);
 
     manager.setSchedulerLocation(Scheduler.SchedulerLocation.getDefaultInstance(), "");
     verify(manager).setData(anyString(), any(byte[].class), eq(true));
@@ -260,12 +265,12 @@ public class LocalFileSystemStateManagerTest {
   }
 
   private static void assertWriteToFile(String path, byte[] bytes, boolean overwrite) {
-    PowerMockito.verifyStatic(times(1));
+    PowerMockito.verifyStatic(FileUtils.class, times(1));
     FileUtils.writeToFile(eq(path), eq(bytes), eq(overwrite));
   }
 
   private static void assertDeleteFile(String path) {
-    PowerMockito.verifyStatic(times(1));
+    PowerMockito.verifyStatic(FileUtils.class, times(1));
     FileUtils.deleteFile(eq(path));
   }
 }

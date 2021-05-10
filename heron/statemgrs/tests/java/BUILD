@@ -2,8 +2,8 @@ load("@rules_java//java:defs.bzl", "java_test")
 
 test_deps_files = [
     "//third_party/java:powermock",
-    "//third_party/java:mockito",
-    "//third_party/java:junit4",
+    "@maven//:org_mockito_mockito_all",
+    "@maven//:junit_junit",
     "//third_party/java:guava",
 ]
 

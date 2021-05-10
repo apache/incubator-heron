@@ -38,7 +38,7 @@ google_client_version = "1.22.0"
 
 jackson_version = "2.8.8"
 
-powermock_version = "1.6.2"
+powermock_version = "2.0.9"
 
 reef_version = "0.14.0"
 
@@ -123,7 +123,7 @@ maven_install(
         "javax.xml.bind:jaxb-api:2.3.0",
         "javax.activation:activation:1.1.1",
         "org.mockito:mockito-all:1.10.19",
-        "org.powermock:powermock-api-mockito:" + powermock_version,
+        "org.powermock:powermock-api-mockito2:" + powermock_version,
         "org.powermock:powermock-module-junit4:" + powermock_version,
         "com.puppycrawl.tools:checkstyle:8.42",
         "com.googlecode.json-simple:json-simple:1.1",

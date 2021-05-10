@@ -5,8 +5,8 @@ common_deps_files = [
     "//heron/common/src/java:config-java",
     "//heron/spi/src/java:common-spi-java",
     "//third_party/java:powermock",
-    "//third_party/java:junit4",
-    "//third_party/java:mockito",
+    "@maven//:junit_junit",
+    "@maven//:org_mockito_mockito_all",
 ]
 
 util_deps_files = \
@@ -66,7 +66,7 @@ java_library(
     srcs = glob(["**/metrics/*.java"]),
     deps = [
         "//heron/spi/src/java:metricsmgr-spi-java",
-        "//third_party/java:junit4",
+        "@maven//:junit_junit",
     ],
 )
 
