@@ -214,8 +214,8 @@ public class KafkaSpout<K, V> extends BaseRichSpout
     //the ack is for a message that has already been acknowledged.
     //This happens when a failed tuple has caused
     //Kafka consumer to seek back to earlier position, and some messages are replayed.
-    if ((offset >= floorBottom && offset <= floorTop)
-        || (offset >= ceilingBottom && offset <= ceilingTop)) {
+    if (offset >= floorBottom && offset <= floorTop
+        || offset >= ceilingBottom && offset <= ceilingTop) {
       return;
     }
     if (ceilingBottom - floorTop == 2) {
