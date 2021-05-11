@@ -163,7 +163,7 @@ public class MarathonControllerTest {
     PowerMockito.doReturn(httpURLConnection)
         .when(NetworkUtils.class, "getHttpConnection", Mockito.anyString());
     Assert.assertFalse(controller.restartApp(appId));
-    PowerMockito.verifyStatic(NetworkUtils.class, atLeastOnce());
+    PowerMockito.verifyStatic(NetworkUtils.class);
     NetworkUtils.getHttpConnection(Mockito.anyString());
 
     // Failed to send request
