@@ -173,7 +173,7 @@ public class IntegrationTestSpout implements IRichSpout {
   }
 
   private static boolean isTestMessageId(Object messageId) {
-    return  (messageId instanceof String) && ((String) messageId)
+    return  messageId instanceof String && ((String) messageId)
         .startsWith(Constants.INTEGRATION_TEST_MOCK_MESSAGE_ID);
   }
 

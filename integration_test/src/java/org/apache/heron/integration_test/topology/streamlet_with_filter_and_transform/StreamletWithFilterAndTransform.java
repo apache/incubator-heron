@@ -45,12 +45,12 @@ class StreamletWithFilterAndTransform extends AbstractTestTopology {
 
     Builder streamletBuilder = Builder.newBuilder();
     streamletBuilder
-      .newSource(() -> atomicInteger.getAndIncrement())
-      .setName("incremented-numbers")
-      .filter(i -> i <= 7)
-      .setName("numbers-lower-than-8")
-      .transform(new TextTransformer())
-      .setName("numbers-transformed-to-text");
+        .newSource(() -> atomicInteger.getAndIncrement())
+        .setName("incremented-numbers")
+        .filter(i -> i <= 7)
+        .setName("numbers-lower-than-8")
+        .transform(new TextTransformer())
+        .setName("numbers-transformed-to-text");
 
     BuilderImpl streamletBuilderImpl = (BuilderImpl) streamletBuilder;
     TestTopologyBuilder topology =

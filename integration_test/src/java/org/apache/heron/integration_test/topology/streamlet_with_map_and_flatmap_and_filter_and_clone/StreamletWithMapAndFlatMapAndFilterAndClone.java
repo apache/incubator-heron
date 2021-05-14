@@ -51,7 +51,7 @@ class StreamletWithMapAndFlatMapAndFilterAndClone extends AbstractTestTopology {
         .setName("months-text")
         .flatMap((String m) -> Arrays.asList(m.split(" - ")))
         .setName("months")
-        .filter((month) ->
+        .filter(month ->
             SUMMER_MONTHS.contains(month.toLowerCase()) && incomingMonths.add(month.toLowerCase()))
         .setName("summer-months")
         .map((String word) -> word.substring(0, 3))

@@ -59,7 +59,7 @@ class StreamletWithKeybyCountAndReduce extends AbstractTestTopology {
         .flatMap((String m) -> Arrays.asList(m.split(" - ")))
         .setName("months")
         // Make sure each month is emitted only once
-        .filter((month) -> incomingMonths.add(month.toLowerCase()))
+        .filter(month -> incomingMonths.add(month.toLowerCase()))
         .setName("unique-months");
 
     SerializableFunction<String, String> getSeason = month -> {

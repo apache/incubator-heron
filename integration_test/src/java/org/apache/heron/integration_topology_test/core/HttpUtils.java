@@ -46,7 +46,7 @@ public final class HttpUtils {
   }
 
   public static void postToHttpServer(String postUrl, String data, String dataName)
-    throws RuntimeException {
+      throws RuntimeException {
     try {
       int responseCode = -1;
       for (int attempts = 0; attempts < 2; attempts++) {
