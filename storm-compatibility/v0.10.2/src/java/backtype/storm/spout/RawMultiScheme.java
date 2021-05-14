@@ -22,6 +22,7 @@ package backtype.storm.spout;
 import java.util.List;
 
 import backtype.storm.tuple.Fields;
+
 import static backtype.storm.utils.Utils.tuple;
 import static java.util.Arrays.asList;
 

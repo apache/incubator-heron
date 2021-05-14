@@ -80,11 +80,11 @@ public class Eco {
       System.out.println("topology type is Storm");
       org.apache.heron.eco.builder.storm.EcoBuilder ecoBuilder =
           new org.apache.heron.eco.builder.storm.EcoBuilder(
-            new org.apache.heron.eco.builder.storm.SpoutBuilder(),
-            new BoltBuilder(),
-            new org.apache.heron.eco.builder.storm.StreamBuilder(),
-            new ComponentBuilder(),
-            new ConfigBuilder());
+              new org.apache.heron.eco.builder.storm.SpoutBuilder(),
+              new BoltBuilder(),
+              new org.apache.heron.eco.builder.storm.StreamBuilder(),
+              new ComponentBuilder(),
+              new ConfigBuilder());
 
       Config topologyConfig = ecoBuilder
           .buildConfig(topologyDefinition);
@@ -104,11 +104,11 @@ public class Eco {
       System.out.println("topology type is Heron");
       org.apache.heron.eco.builder.heron.EcoBuilder ecoBuilder =
           new org.apache.heron.eco.builder.heron.EcoBuilder(
-            new org.apache.heron.eco.builder.heron.SpoutBuilder(),
-            new BoltBuilder(),
-            new org.apache.heron.eco.builder.heron.StreamBuilder(),
-            new ComponentBuilder(),
-            new ConfigBuilder());
+              new org.apache.heron.eco.builder.heron.SpoutBuilder(),
+              new BoltBuilder(),
+              new org.apache.heron.eco.builder.heron.StreamBuilder(),
+              new ComponentBuilder(),
+              new ConfigBuilder());
 
       Config topologyConfig = ecoBuilder
           .buildConfig(topologyDefinition);

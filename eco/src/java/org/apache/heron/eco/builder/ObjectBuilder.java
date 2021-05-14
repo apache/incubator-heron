@@ -185,7 +185,7 @@ public class ObjectBuilder {
       } else {
         String msg = String
             .format("Unable to find configuration method '%s' in class '%s' with arguments %s.",
-            new Object[]{methodName, clazz.getName(), args});
+                new Object[]{methodName, clazz.getName(), args});
         throw new IllegalArgumentException(msg);
       }
     }

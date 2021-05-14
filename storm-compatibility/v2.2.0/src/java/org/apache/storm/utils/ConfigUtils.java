@@ -82,10 +82,10 @@ public final class ConfigUtils {
     // configs are used here instead of translating to the Heron configs. Storm relies on Kryo but
     // Heron abstracts serailizers differently. KryoSerializer is one of the PluggableSerializer.
     if (heronConfig.containsKey(org.apache.storm.Config.TOPOLOGY_FALL_BACK_ON_JAVA_SERIALIZATION)
-        && (heronConfig.get(org.apache.storm.Config.TOPOLOGY_FALL_BACK_ON_JAVA_SERIALIZATION)
-        instanceof Boolean)
-        && ((Boolean)
-        heronConfig.get(org.apache.storm.Config.TOPOLOGY_FALL_BACK_ON_JAVA_SERIALIZATION))) {
+        && heronConfig.get(org.apache.storm.Config.TOPOLOGY_FALL_BACK_ON_JAVA_SERIALIZATION)
+        instanceof Boolean
+        && (Boolean)
+        heronConfig.get(org.apache.storm.Config.TOPOLOGY_FALL_BACK_ON_JAVA_SERIALIZATION)) {
       org.apache.heron.api.Config.setSerializationClassName(heronConfig,
           "org.apache.heron.api.serializer.JavaSerializer");
     } else {

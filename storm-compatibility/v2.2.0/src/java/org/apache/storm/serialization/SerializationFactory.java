@@ -32,7 +32,6 @@ import java.util.logging.Logger;
 
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.Serializer;
-import com.esotericsoftware.kryo.serializers.CollectionSerializer;
 import com.esotericsoftware.kryo.serializers.DefaultSerializers.BigIntegerSerializer;
 
 import org.apache.storm.Config;
@@ -165,7 +164,8 @@ public final class SerializationFactory {
 
     try {
       return serializerClass.getDeclaredConstructor().newInstance();
-    } catch (NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException ex) {
+    } catch (NoSuchMethodException | InstantiationException | IllegalAccessException
+            | InvocationTargetException ex) {
       // do nothing
     }
 
