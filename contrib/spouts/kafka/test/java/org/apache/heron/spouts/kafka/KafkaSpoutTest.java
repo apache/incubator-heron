@@ -30,7 +30,6 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -58,11 +57,9 @@ import org.apache.kafka.common.TopicPartition;
 import static org.apache.heron.api.Config.TopologyReliabilityMode.ATLEAST_ONCE;
 import static org.apache.heron.api.Config.TopologyReliabilityMode.ATMOST_ONCE;
 import static org.apache.heron.api.Config.TopologyReliabilityMode.EFFECTIVELY_ONCE;
-
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doReturn;
