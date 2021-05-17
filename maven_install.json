@@ -892,6 +892,32 @@
                 "sha256": "da4d787939dc8de214724a20d88614b70ef8c3a4931d9c694300b5d9098ed9bc"
             },
             {
+                "coord": "com.google.errorprone:error_prone_annotations:2.1.3",
+                "file": "v1/https/jcenter.bintray.com/com/google/errorprone/error_prone_annotations/2.1.3/error_prone_annotations-2.1.3.jar",
+                "directDependencies": [],
+                "dependencies": [],
+                "url": "https://jcenter.bintray.com/com/google/errorprone/error_prone_annotations/2.1.3/error_prone_annotations-2.1.3.jar",
+                "mirror_urls": [
+                    "https://jcenter.bintray.com/com/google/errorprone/error_prone_annotations/2.1.3/error_prone_annotations-2.1.3.jar",
+                    "https://maven.google.com/com/google/errorprone/error_prone_annotations/2.1.3/error_prone_annotations-2.1.3.jar",
+                    "https://repo1.maven.org/maven2/com/google/errorprone/error_prone_annotations/2.1.3/error_prone_annotations-2.1.3.jar"
+                ],
+                "sha256": "03d0329547c13da9e17c634d1049ea2ead093925e290567e1a364fd6b1fc7ff8"
+            },
+            {
+                "coord": "com.google.errorprone:error_prone_annotations:jar:sources:2.1.3",
+                "file": "v1/https/jcenter.bintray.com/com/google/errorprone/error_prone_annotations/2.1.3/error_prone_annotations-2.1.3-sources.jar",
+                "directDependencies": [],
+                "dependencies": [],
+                "url": "https://jcenter.bintray.com/com/google/errorprone/error_prone_annotations/2.1.3/error_prone_annotations-2.1.3-sources.jar",
+                "mirror_urls": [
+                    "https://jcenter.bintray.com/com/google/errorprone/error_prone_annotations/2.1.3/error_prone_annotations-2.1.3-sources.jar",
+                    "https://maven.google.com/com/google/errorprone/error_prone_annotations/2.1.3/error_prone_annotations-2.1.3-sources.jar",
+                    "https://repo1.maven.org/maven2/com/google/errorprone/error_prone_annotations/2.1.3/error_prone_annotations-2.1.3-sources.jar"
+                ],
+                "sha256": "f6ef2b585876b007051df3947b080e0d64cdd5a58b59bc69debeb26bfc0432d7"
+            },
+            {
                 "coord": "com.google.guava:guava-jdk5:17.0",
                 "file": "v1/https/jcenter.bintray.com/com/google/guava/guava-jdk5/17.0/guava-jdk5-17.0.jar",
                 "directDependencies": [],
@@ -918,30 +944,54 @@
                 "sha256": "70777456f41c7cf275e6e51a3b20a7cdf2f19efc8e7704b65275da38ad9cb9a4"
             },
             {
-                "coord": "com.google.guava:guava:18.0",
-                "file": "v1/https/jcenter.bintray.com/com/google/guava/guava/18.0/guava-18.0.jar",
-                "directDependencies": [],
-                "dependencies": [],
-                "url": "https://jcenter.bintray.com/com/google/guava/guava/18.0/guava-18.0.jar",
-                "mirror_urls": [
-                    "https://jcenter.bintray.com/com/google/guava/guava/18.0/guava-18.0.jar",
-                    "https://maven.google.com/com/google/guava/guava/18.0/guava-18.0.jar",
-                    "https://repo1.maven.org/maven2/com/google/guava/guava/18.0/guava-18.0.jar"
+                "coord": "com.google.guava:guava:23.6-jre",
+                "file": "v1/https/jcenter.bintray.com/com/google/guava/guava/23.6-jre/guava-23.6-jre.jar",
+                "directDependencies": [
+                    "org.checkerframework:checker-compat-qual:2.0.0",
+                    "com.google.code.findbugs:jsr305:3.0.2",
+                    "org.codehaus.mojo:animal-sniffer-annotations:1.14",
+                    "com.google.j2objc:j2objc-annotations:1.1",
+                    "com.google.errorprone:error_prone_annotations:2.1.3"
                 ],
-                "sha256": "d664fbfc03d2e5ce9cab2a44fb01f1d0bf9dfebeccc1a473b1f9ea31f79f6f99"
+                "dependencies": [
+                    "org.checkerframework:checker-compat-qual:2.0.0",
+                    "com.google.code.findbugs:jsr305:3.0.2",
+                    "org.codehaus.mojo:animal-sniffer-annotations:1.14",
+                    "com.google.j2objc:j2objc-annotations:1.1",
+                    "com.google.errorprone:error_prone_annotations:2.1.3"
+                ],
+                "url": "https://jcenter.bintray.com/com/google/guava/guava/23.6-jre/guava-23.6-jre.jar",
+                "mirror_urls": [
+                    "https://jcenter.bintray.com/com/google/guava/guava/23.6-jre/guava-23.6-jre.jar",
+                    "https://maven.google.com/com/google/guava/guava/23.6-jre/guava-23.6-jre.jar",
+                    "https://repo1.maven.org/maven2/com/google/guava/guava/23.6-jre/guava-23.6-jre.jar"
+                ],
+                "sha256": "7d48e30849cb452629c53c41776f96db201145147bb71ac2c94e7345675faff7"
             },
             {
-                "coord": "com.google.guava:guava:jar:sources:18.0",
-                "file": "v1/https/jcenter.bintray.com/com/google/guava/guava/18.0/guava-18.0-sources.jar",
-                "directDependencies": [],
-                "dependencies": [],
-                "url": "https://jcenter.bintray.com/com/google/guava/guava/18.0/guava-18.0-sources.jar",
-                "mirror_urls": [
-                    "https://jcenter.bintray.com/com/google/guava/guava/18.0/guava-18.0-sources.jar",
-                    "https://maven.google.com/com/google/guava/guava/18.0/guava-18.0-sources.jar",
-                    "https://repo1.maven.org/maven2/com/google/guava/guava/18.0/guava-18.0-sources.jar"
+                "coord": "com.google.guava:guava:jar:sources:23.6-jre",
+                "file": "v1/https/jcenter.bintray.com/com/google/guava/guava/23.6-jre/guava-23.6-jre-sources.jar",
+                "directDependencies": [
+                    "com.google.code.findbugs:jsr305:jar:sources:3.0.2",
+                    "com.google.errorprone:error_prone_annotations:jar:sources:2.1.3",
+                    "org.checkerframework:checker-compat-qual:jar:sources:2.0.0",
+                    "org.codehaus.mojo:animal-sniffer-annotations:jar:sources:1.14",
+                    "com.google.j2objc:j2objc-annotations:jar:sources:1.1"
                 ],
-                "sha256": "0f3381ce4caa3a01602cdf0d0f4437b9ad8f347ddabbd873ded4d498e19d9590"
+                "dependencies": [
+                    "com.google.code.findbugs:jsr305:jar:sources:3.0.2",
+                    "com.google.errorprone:error_prone_annotations:jar:sources:2.1.3",
+                    "org.checkerframework:checker-compat-qual:jar:sources:2.0.0",
+                    "org.codehaus.mojo:animal-sniffer-annotations:jar:sources:1.14",
+                    "com.google.j2objc:j2objc-annotations:jar:sources:1.1"
+                ],
+                "url": "https://jcenter.bintray.com/com/google/guava/guava/23.6-jre/guava-23.6-jre-sources.jar",
+                "mirror_urls": [
+                    "https://jcenter.bintray.com/com/google/guava/guava/23.6-jre/guava-23.6-jre-sources.jar",
+                    "https://maven.google.com/com/google/guava/guava/23.6-jre/guava-23.6-jre-sources.jar",
+                    "https://repo1.maven.org/maven2/com/google/guava/guava/23.6-jre/guava-23.6-jre-sources.jar"
+                ],
+                "sha256": "feecffc0b37020c080f71d17b5ec9c08c0cd6635e2db27dd61b288121f61cfde"
             },
             {
                 "coord": "com.google.http-client:google-http-client-jackson2:1.22.0",
@@ -1042,10 +1092,15 @@
                     "com.google.inject:guice:4.0"
                 ],
                 "dependencies": [
-                    "com.google.guava:guava:18.0",
+                    "com.google.inject:guice:4.0",
+                    "org.checkerframework:checker-compat-qual:2.0.0",
+                    "com.google.code.findbugs:jsr305:3.0.2",
+                    "com.google.guava:guava:23.6-jre",
                     "aopalliance:aopalliance:1.0",
-                    "javax.inject:javax.inject:1",
-                    "com.google.inject:guice:4.0"
+                    "org.codehaus.mojo:animal-sniffer-annotations:1.14",
+                    "com.google.j2objc:j2objc-annotations:1.1",
+                    "com.google.errorprone:error_prone_annotations:2.1.3",
+                    "javax.inject:javax.inject:1"
                 ],
                 "url": "https://jcenter.bintray.com/com/google/inject/extensions/guice-assistedinject/4.0/guice-assistedinject-4.0.jar",
                 "mirror_urls": [
@@ -1062,10 +1117,15 @@
                     "com.google.inject:guice:jar:sources:4.0"
                 ],
                 "dependencies": [
+                    "com.google.code.findbugs:jsr305:jar:sources:3.0.2",
+                    "com.google.guava:guava:jar:sources:23.6-jre",
+                    "com.google.errorprone:error_prone_annotations:jar:sources:2.1.3",
+                    "org.checkerframework:checker-compat-qual:jar:sources:2.0.0",
                     "aopalliance:aopalliance:jar:sources:1.0",
+                    "org.codehaus.mojo:animal-sniffer-annotations:jar:sources:1.14",
                     "com.google.inject:guice:jar:sources:4.0",
                     "javax.inject:javax.inject:jar:sources:1",
-                    "com.google.guava:guava:jar:sources:18.0"
+                    "com.google.j2objc:j2objc-annotations:jar:sources:1.1"
                 ],
                 "url": "https://jcenter.bintray.com/com/google/inject/extensions/guice-assistedinject/4.0/guice-assistedinject-4.0-sources.jar",
                 "mirror_urls": [
@@ -1080,12 +1140,17 @@
                 "file": "v1/https/jcenter.bintray.com/com/google/inject/guice/4.0/guice-4.0.jar",
                 "directDependencies": [
                     "aopalliance:aopalliance:1.0",
-                    "com.google.guava:guava:18.0",
+                    "com.google.guava:guava:23.6-jre",
                     "javax.inject:javax.inject:1"
                 ],
                 "dependencies": [
-                    "com.google.guava:guava:18.0",
+                    "org.checkerframework:checker-compat-qual:2.0.0",
+                    "com.google.code.findbugs:jsr305:3.0.2",
+                    "com.google.guava:guava:23.6-jre",
                     "aopalliance:aopalliance:1.0",
+                    "org.codehaus.mojo:animal-sniffer-annotations:1.14",
+                    "com.google.j2objc:j2objc-annotations:1.1",
+                    "com.google.errorprone:error_prone_annotations:2.1.3",
                     "javax.inject:javax.inject:1"
                 ],
                 "url": "https://jcenter.bintray.com/com/google/inject/guice/4.0/guice-4.0.jar",
@@ -1101,13 +1166,18 @@
                 "file": "v1/https/jcenter.bintray.com/com/google/inject/guice/4.0/guice-4.0-sources.jar",
                 "directDependencies": [
                     "aopalliance:aopalliance:jar:sources:1.0",
-                    "com.google.guava:guava:jar:sources:18.0",
+                    "com.google.guava:guava:jar:sources:23.6-jre",
                     "javax.inject:javax.inject:jar:sources:1"
                 ],
                 "dependencies": [
+                    "com.google.code.findbugs:jsr305:jar:sources:3.0.2",
+                    "com.google.guava:guava:jar:sources:23.6-jre",
+                    "com.google.errorprone:error_prone_annotations:jar:sources:2.1.3",
+                    "org.checkerframework:checker-compat-qual:jar:sources:2.0.0",
                     "aopalliance:aopalliance:jar:sources:1.0",
+                    "org.codehaus.mojo:animal-sniffer-annotations:jar:sources:1.14",
                     "javax.inject:javax.inject:jar:sources:1",
-                    "com.google.guava:guava:jar:sources:18.0"
+                    "com.google.j2objc:j2objc-annotations:jar:sources:1.1"
                 ],
                 "url": "https://jcenter.bintray.com/com/google/inject/guice/4.0/guice-4.0-sources.jar",
                 "mirror_urls": [
@@ -1116,6 +1186,32 @@
                     "https://repo1.maven.org/maven2/com/google/inject/guice/4.0/guice-4.0-sources.jar"
                 ],
                 "sha256": "5ae16a56d478312ecee129b241a3df0fc9016b241bd4a0cbcd6b33f900a1eba6"
+            },
+            {
+                "coord": "com.google.j2objc:j2objc-annotations:1.1",
+                "file": "v1/https/jcenter.bintray.com/com/google/j2objc/j2objc-annotations/1.1/j2objc-annotations-1.1.jar",
+                "directDependencies": [],
+                "dependencies": [],
+                "url": "https://jcenter.bintray.com/com/google/j2objc/j2objc-annotations/1.1/j2objc-annotations-1.1.jar",
+                "mirror_urls": [
+                    "https://jcenter.bintray.com/com/google/j2objc/j2objc-annotations/1.1/j2objc-annotations-1.1.jar",
+                    "https://maven.google.com/com/google/j2objc/j2objc-annotations/1.1/j2objc-annotations-1.1.jar",
+                    "https://repo1.maven.org/maven2/com/google/j2objc/j2objc-annotations/1.1/j2objc-annotations-1.1.jar"
+                ],
+                "sha256": "2994a7eb78f2710bd3d3bfb639b2c94e219cedac0d4d084d516e78c16dddecf6"
+            },
+            {
+                "coord": "com.google.j2objc:j2objc-annotations:jar:sources:1.1",
+                "file": "v1/https/jcenter.bintray.com/com/google/j2objc/j2objc-annotations/1.1/j2objc-annotations-1.1-sources.jar",
+                "directDependencies": [],
+                "dependencies": [],
+                "url": "https://jcenter.bintray.com/com/google/j2objc/j2objc-annotations/1.1/j2objc-annotations-1.1-sources.jar",
+                "mirror_urls": [
+                    "https://jcenter.bintray.com/com/google/j2objc/j2objc-annotations/1.1/j2objc-annotations-1.1-sources.jar",
+                    "https://maven.google.com/com/google/j2objc/j2objc-annotations/1.1/j2objc-annotations-1.1-sources.jar",
+                    "https://repo1.maven.org/maven2/com/google/j2objc/j2objc-annotations/1.1/j2objc-annotations-1.1-sources.jar"
+                ],
+                "sha256": "2cd9022a77151d0b574887635cdfcdf3b78155b602abc89d7f8e62aba55cfb4f"
             },
             {
                 "coord": "com.google.oauth-client:google-oauth-client:1.22.0",
@@ -1327,18 +1423,23 @@
                 ],
                 "dependencies": [
                     "com.google.inject:guice:4.0",
+                    "org.checkerframework:checker-compat-qual:2.0.0",
                     "com.google.inject.extensions:guice-assistedinject:4.0",
                     "org.yaml:snakeyaml:1.15",
                     "commons-logging:commons-logging:1.2",
+                    "com.google.code.findbugs:jsr305:3.0.2",
+                    "com.google.guava:guava:23.6-jre",
                     "aopalliance:aopalliance:1.0",
                     "com.google.code.gson:gson:2.8.6",
                     "it.unimi.dsi:fastutil:8.1.1",
+                    "org.codehaus.mojo:animal-sniffer-annotations:1.14",
                     "org.apache.commons:commons-math3:3.6.1",
                     "commons-cli:commons-cli:1.3.1",
                     "tech.tablesaw:tablesaw-core:0.11.4",
-                    "com.google.guava:guava:18.0",
+                    "com.google.j2objc:j2objc-annotations:1.1",
                     "org.apache.commons:commons-text:1.1",
                     "org.apache.commons:commons-lang3:3.11",
+                    "com.google.errorprone:error_prone_annotations:2.1.3",
                     "javax.inject:javax.inject:1",
                     "org.jsoup:jsoup:1.11.2",
                     "commons-beanutils:commons-beanutils:1.9.3",
@@ -1366,19 +1467,24 @@
                     "commons-cli:commons-cli:jar:sources:1.3.1"
                 ],
                 "dependencies": [
+                    "com.google.code.findbugs:jsr305:jar:sources:3.0.2",
                     "com.opencsv:opencsv:jar:sources:4.1",
                     "org.jsoup:jsoup:jar:sources:1.11.2",
                     "org.apache.commons:commons-lang3:jar:sources:3.11",
+                    "com.google.guava:guava:jar:sources:23.6-jre",
                     "org.apache.commons:commons-text:jar:sources:1.1",
+                    "com.google.errorprone:error_prone_annotations:jar:sources:2.1.3",
                     "commons-logging:commons-logging:jar:sources:1.2",
                     "org.roaringbitmap:RoaringBitmap:jar:sources:0.6.51",
+                    "org.checkerframework:checker-compat-qual:jar:sources:2.0.0",
                     "org.yaml:snakeyaml:jar:sources:1.15",
                     "aopalliance:aopalliance:jar:sources:1.0",
+                    "org.codehaus.mojo:animal-sniffer-annotations:jar:sources:1.14",
                     "com.google.inject:guice:jar:sources:4.0",
                     "it.unimi.dsi:fastutil:jar:sources:8.1.1",
-                    "com.google.guava:guava:jar:sources:18.0",
                     "javax.inject:javax.inject:jar:sources:1",
                     "org.apache.commons:commons-math3:jar:sources:3.6.1",
+                    "com.google.j2objc:j2objc-annotations:jar:sources:1.1",
                     "com.google.code.gson:gson:jar:sources:2.8.6",
                     "commons-collections:commons-collections:jar:sources:3.2.1",
                     "tech.tablesaw:tablesaw-core:jar:sources:0.11.4",
@@ -1446,17 +1552,22 @@
                 "file": "v1/https/jcenter.bintray.com/com/puppycrawl/tools/checkstyle/6.17/checkstyle-6.17.jar",
                 "directDependencies": [
                     "org.antlr:antlr4-runtime:4.5.2-1",
+                    "com.google.guava:guava:23.6-jre",
                     "antlr:antlr:2.7.7",
                     "commons-cli:commons-cli:1.3.1",
-                    "com.google.guava:guava:18.0",
                     "commons-beanutils:commons-beanutils:1.9.3"
                 ],
                 "dependencies": [
+                    "org.checkerframework:checker-compat-qual:2.0.0",
                     "commons-logging:commons-logging:1.2",
+                    "com.google.code.findbugs:jsr305:3.0.2",
                     "org.antlr:antlr4-runtime:4.5.2-1",
+                    "com.google.guava:guava:23.6-jre",
                     "antlr:antlr:2.7.7",
+                    "org.codehaus.mojo:animal-sniffer-annotations:1.14",
                     "commons-cli:commons-cli:1.3.1",
-                    "com.google.guava:guava:18.0",
+                    "com.google.j2objc:j2objc-annotations:1.1",
+                    "com.google.errorprone:error_prone_annotations:2.1.3",
                     "commons-beanutils:commons-beanutils:1.9.3",
                     "commons-collections:commons-collections:3.2.1"
                 ],
@@ -1472,15 +1583,20 @@
                 "coord": "com.puppycrawl.tools:checkstyle:jar:sources:6.17",
                 "file": "v1/https/jcenter.bintray.com/com/puppycrawl/tools/checkstyle/6.17/checkstyle-6.17-sources.jar",
                 "directDependencies": [
-                    "com.google.guava:guava:jar:sources:18.0",
+                    "com.google.guava:guava:jar:sources:23.6-jre",
                     "org.antlr:antlr4-runtime:jar:sources:4.5.2-1",
                     "antlr:antlr:jar:sources:2.7.7",
                     "commons-beanutils:commons-beanutils:jar:sources:1.9.3",
                     "commons-cli:commons-cli:jar:sources:1.3.1"
                 ],
                 "dependencies": [
+                    "com.google.code.findbugs:jsr305:jar:sources:3.0.2",
+                    "com.google.guava:guava:jar:sources:23.6-jre",
+                    "com.google.errorprone:error_prone_annotations:jar:sources:2.1.3",
                     "commons-logging:commons-logging:jar:sources:1.2",
-                    "com.google.guava:guava:jar:sources:18.0",
+                    "org.checkerframework:checker-compat-qual:jar:sources:2.0.0",
+                    "org.codehaus.mojo:animal-sniffer-annotations:jar:sources:1.14",
+                    "com.google.j2objc:j2objc-annotations:jar:sources:1.1",
                     "commons-collections:commons-collections:jar:sources:3.2.1",
                     "org.antlr:antlr4-runtime:jar:sources:4.5.2-1",
                     "antlr:antlr:jar:sources:2.7.7",
@@ -3437,26 +3553,31 @@
                     "org.apache.bookkeeper:cpu-affinity:4.13.0",
                     "org.slf4j:slf4j-api:1.7.30",
                     "org.jctools:jctools-core:2.1.2",
+                    "com.google.guava:guava:23.6-jre",
                     "commons-configuration:commons-configuration:1.10",
                     "org.apache.bookkeeper.stats:bookkeeper-stats-api:4.13.0",
                     "io.netty:netty-common:4.1.63.Final",
-                    "com.google.guava:guava:18.0",
                     "com.fasterxml.jackson.core:jackson-databind:2.8.8",
                     "com.fasterxml.jackson.core:jackson-core:2.8.8"
                 ],
                 "dependencies": [
                     "com.fasterxml.jackson.core:jackson-annotations:2.8.8",
+                    "org.checkerframework:checker-compat-qual:2.0.0",
                     "org.apache.bookkeeper:cpu-affinity:4.13.0",
                     "commons-logging:commons-logging:1.2",
+                    "com.google.code.findbugs:jsr305:3.0.2",
                     "org.slf4j:slf4j-api:1.7.30",
                     "org.jctools:jctools-core:2.1.2",
                     "commons-lang:commons-lang:2.6",
+                    "com.google.guava:guava:23.6-jre",
                     "commons-configuration:commons-configuration:1.10",
+                    "org.codehaus.mojo:animal-sniffer-annotations:1.14",
                     "org.apache.bookkeeper.stats:bookkeeper-stats-api:4.13.0",
                     "io.netty:netty-common:4.1.63.Final",
-                    "com.google.guava:guava:18.0",
+                    "com.google.j2objc:j2objc-annotations:1.1",
                     "com.fasterxml.jackson.core:jackson-databind:2.8.8",
                     "org.apache.commons:commons-lang3:3.11",
+                    "com.google.errorprone:error_prone_annotations:2.1.3",
                     "com.fasterxml.jackson.core:jackson-core:2.8.8"
                 ],
                 "url": "https://jcenter.bintray.com/org/apache/bookkeeper/bookkeeper-common/4.13.0/bookkeeper-common-4.13.0.jar",
@@ -3471,29 +3592,34 @@
                 "coord": "org.apache.bookkeeper:bookkeeper-common:jar:sources:4.13.0",
                 "file": "v1/https/jcenter.bintray.com/org/apache/bookkeeper/bookkeeper-common/4.13.0/bookkeeper-common-4.13.0-sources.jar",
                 "directDependencies": [
+                    "com.google.guava:guava:jar:sources:23.6-jre",
                     "commons-configuration:commons-configuration:jar:sources:1.10",
                     "com.fasterxml.jackson.core:jackson-annotations:jar:sources:2.8.8",
                     "org.slf4j:slf4j-api:jar:sources:1.7.30",
                     "io.netty:netty-common:jar:sources:4.1.63.Final",
                     "com.fasterxml.jackson.core:jackson-core:jar:sources:2.8.8",
-                    "com.google.guava:guava:jar:sources:18.0",
                     "com.fasterxml.jackson.core:jackson-databind:jar:sources:2.8.8",
                     "org.apache.bookkeeper:cpu-affinity:jar:sources:4.13.0",
                     "org.jctools:jctools-core:jar:sources:2.1.2",
                     "org.apache.bookkeeper.stats:bookkeeper-stats-api:jar:sources:4.13.0"
                 ],
                 "dependencies": [
+                    "com.google.code.findbugs:jsr305:jar:sources:3.0.2",
                     "org.apache.commons:commons-lang3:jar:sources:3.11",
+                    "com.google.guava:guava:jar:sources:23.6-jre",
+                    "com.google.errorprone:error_prone_annotations:jar:sources:2.1.3",
                     "commons-lang:commons-lang:jar:sources:2.6",
                     "commons-configuration:commons-configuration:jar:sources:1.10",
                     "commons-logging:commons-logging:jar:sources:1.2",
                     "com.fasterxml.jackson.core:jackson-annotations:jar:sources:2.8.8",
                     "org.slf4j:slf4j-api:jar:sources:1.7.30",
                     "io.netty:netty-common:jar:sources:4.1.63.Final",
+                    "org.checkerframework:checker-compat-qual:jar:sources:2.0.0",
+                    "org.codehaus.mojo:animal-sniffer-annotations:jar:sources:1.14",
                     "com.fasterxml.jackson.core:jackson-core:jar:sources:2.8.8",
-                    "com.google.guava:guava:jar:sources:18.0",
                     "com.fasterxml.jackson.core:jackson-databind:jar:sources:2.8.8",
                     "org.apache.bookkeeper:cpu-affinity:jar:sources:4.13.0",
+                    "com.google.j2objc:j2objc-annotations:jar:sources:1.1",
                     "org.jctools:jctools-core:jar:sources:2.1.2",
                     "org.apache.bookkeeper.stats:bookkeeper-stats-api:jar:sources:4.13.0"
                 ],
@@ -3585,10 +3711,12 @@
                     "org.rocksdb:rocksdbjni:6.10.2",
                     "org.apache.bookkeeper:circe-checksum:4.13.0",
                     "org.slf4j:slf4j-log4j12:1.7.25",
+                    "org.checkerframework:checker-compat-qual:2.0.0",
                     "org.apache.bookkeeper:cpu-affinity:4.13.0",
                     "io.netty:netty-codec:4.1.63.Final",
                     "org.bouncycastle:bcprov-ext-jdk15on:1.66",
                     "commons-logging:commons-logging:1.2",
+                    "com.google.code.findbugs:jsr305:3.0.2",
                     "io.netty:netty-handler:4.1.63.Final",
                     "io.netty:netty-transport-native-epoll:jar:linux-x86_64:4.1.63.Final",
                     "org.slf4j:slf4j-api:1.7.30",
@@ -3597,6 +3725,7 @@
                     "org.apache.zookeeper:zookeeper-jute:3.6.3",
                     "commons-lang:commons-lang:2.6",
                     "io.netty:netty-resolver:4.1.63.Final",
+                    "com.google.guava:guava:23.6-jre",
                     "org.bouncycastle:bcprov-jdk15on:jar:1.66",
                     "com.google.protobuf:protobuf-java:3.14.0",
                     "io.netty:netty-buffer:4.1.63.Final",
@@ -3605,6 +3734,7 @@
                     "commons-configuration:commons-configuration:1.10",
                     "io.netty:netty-transport-native-unix-common:4.1.63.Final",
                     "org.bouncycastle:bcpkix-jdk15on:1.66",
+                    "org.codehaus.mojo:animal-sniffer-annotations:1.14",
                     "org.apache.bookkeeper.stats:bookkeeper-stats-api:4.13.0",
                     "commons-cli:commons-cli:1.3.1",
                     "io.netty:netty-common:4.1.63.Final",
@@ -3612,16 +3742,17 @@
                     "org.apache.yetus:audience-annotations:0.5.0",
                     "org.apache.bookkeeper:bookkeeper-proto:4.13.0",
                     "org.apache.bookkeeper:bookkeeper-common:4.13.0",
-                    "com.google.guava:guava:18.0",
                     "commons-codec:commons-codec:1.15",
                     "org.apache.httpcomponents:httpclient:4.5.2",
                     "org.apache.zookeeper:zookeeper:3.6.3",
                     "net.java.dev.jna:jna:3.2.7",
+                    "com.google.j2objc:j2objc-annotations:1.1",
                     "io.netty:netty-transport:4.1.63.Final",
                     "com.fasterxml.jackson.core:jackson-databind:2.8.8",
                     "org.apache.commons:commons-lang3:3.11",
                     "org.apache.commons:commons-collections4:4.4",
                     "org.apache.bookkeeper:bookkeeper-tools-framework:4.13.0",
+                    "com.google.errorprone:error_prone_annotations:2.1.3",
                     "org.apache.httpcomponents:httpcore:4.4.4",
                     "com.beust:jcommander:1.78",
                     "org.apache.bookkeeper:bookkeeper-common-allocator:4.13.0",
@@ -3667,6 +3798,7 @@
                 "dependencies": [
                     "org.apache.zookeeper:zookeeper-jute:jar:sources:3.6.3",
                     "io.netty:netty-tcnative-boringssl-static:jar:sources:2.0.31.Final",
+                    "com.google.code.findbugs:jsr305:jar:sources:3.0.2",
                     "org.rocksdb:rocksdbjni:jar:sources:6.10.2",
                     "org.apache.bookkeeper:bookkeeper-proto:jar:sources:4.13.0",
                     "io.netty:netty-transport-native-unix-common:jar:sources:4.1.63.Final",
@@ -3674,6 +3806,8 @@
                     "org.apache.commons:commons-collections4:jar:sources:4.4",
                     "org.apache.zookeeper:zookeeper:jar:sources:3.6.3",
                     "org.apache.commons:commons-lang3:jar:sources:3.11",
+                    "com.google.guava:guava:jar:sources:23.6-jre",
+                    "com.google.errorprone:error_prone_annotations:jar:sources:2.1.3",
                     "commons-lang:commons-lang:jar:sources:2.6",
                     "com.beust:jcommander:jar:sources:1.78",
                     "commons-codec:commons-codec:jar:sources:1.15",
@@ -3682,10 +3816,11 @@
                     "com.fasterxml.jackson.core:jackson-annotations:jar:sources:2.8.8",
                     "org.slf4j:slf4j-api:jar:sources:1.7.30",
                     "io.netty:netty-common:jar:sources:4.1.63.Final",
+                    "org.checkerframework:checker-compat-qual:jar:sources:2.0.0",
                     "org.bouncycastle:bcpkix-jdk15on:jar:sources:1.66",
+                    "org.codehaus.mojo:animal-sniffer-annotations:jar:sources:1.14",
                     "com.google.protobuf:protobuf-java:jar:sources:3.14.0",
                     "com.fasterxml.jackson.core:jackson-core:jar:sources:2.8.8",
-                    "com.google.guava:guava:jar:sources:18.0",
                     "io.netty:netty-resolver:jar:sources:4.1.63.Final",
                     "org.bouncycastle:bcprov-jdk15on:jar:sources:1.66",
                     "com.fasterxml.jackson.core:jackson-databind:jar:sources:2.8.8",
@@ -3693,6 +3828,7 @@
                     "io.netty:netty-buffer:jar:sources:4.1.63.Final",
                     "org.apache.bookkeeper:cpu-affinity:jar:sources:4.13.0",
                     "org.apache.bookkeeper.http:http-server:jar:sources:4.13.0",
+                    "com.google.j2objc:j2objc-annotations:jar:sources:1.1",
                     "org.apache.bookkeeper:bookkeeper-common-allocator:jar:sources:4.13.0",
                     "org.apache.yetus:audience-annotations:jar:sources:0.5.0",
                     "org.apache.bookkeeper:bookkeeper-tools-framework:jar:sources:4.13.0",
@@ -3730,18 +3866,23 @@
                 ],
                 "dependencies": [
                     "com.fasterxml.jackson.core:jackson-annotations:2.8.8",
+                    "org.checkerframework:checker-compat-qual:2.0.0",
                     "org.apache.bookkeeper:cpu-affinity:4.13.0",
                     "commons-logging:commons-logging:1.2",
+                    "com.google.code.findbugs:jsr305:3.0.2",
                     "org.slf4j:slf4j-api:1.7.30",
                     "org.jctools:jctools-core:2.1.2",
                     "commons-lang:commons-lang:2.6",
+                    "com.google.guava:guava:23.6-jre",
                     "commons-configuration:commons-configuration:1.10",
+                    "org.codehaus.mojo:animal-sniffer-annotations:1.14",
                     "org.apache.bookkeeper.stats:bookkeeper-stats-api:4.13.0",
                     "io.netty:netty-common:4.1.63.Final",
                     "org.apache.bookkeeper:bookkeeper-common:4.13.0",
-                    "com.google.guava:guava:18.0",
+                    "com.google.j2objc:j2objc-annotations:1.1",
                     "com.fasterxml.jackson.core:jackson-databind:2.8.8",
                     "org.apache.commons:commons-lang3:3.11",
+                    "com.google.errorprone:error_prone_annotations:2.1.3",
                     "com.beust:jcommander:1.78",
                     "com.fasterxml.jackson.core:jackson-core:2.8.8"
                 ],
@@ -3763,7 +3904,10 @@
                     "org.slf4j:slf4j-api:jar:sources:1.7.30"
                 ],
                 "dependencies": [
+                    "com.google.code.findbugs:jsr305:jar:sources:3.0.2",
                     "org.apache.commons:commons-lang3:jar:sources:3.11",
+                    "com.google.guava:guava:jar:sources:23.6-jre",
+                    "com.google.errorprone:error_prone_annotations:jar:sources:2.1.3",
                     "commons-lang:commons-lang:jar:sources:2.6",
                     "com.beust:jcommander:jar:sources:1.78",
                     "commons-configuration:commons-configuration:jar:sources:1.10",
@@ -3771,10 +3915,12 @@
                     "com.fasterxml.jackson.core:jackson-annotations:jar:sources:2.8.8",
                     "org.slf4j:slf4j-api:jar:sources:1.7.30",
                     "io.netty:netty-common:jar:sources:4.1.63.Final",
+                    "org.checkerframework:checker-compat-qual:jar:sources:2.0.0",
+                    "org.codehaus.mojo:animal-sniffer-annotations:jar:sources:1.14",
                     "com.fasterxml.jackson.core:jackson-core:jar:sources:2.8.8",
-                    "com.google.guava:guava:jar:sources:18.0",
                     "com.fasterxml.jackson.core:jackson-databind:jar:sources:2.8.8",
                     "org.apache.bookkeeper:cpu-affinity:jar:sources:4.13.0",
+                    "com.google.j2objc:j2objc-annotations:jar:sources:1.1",
                     "org.apache.bookkeeper:bookkeeper-common:jar:sources:4.13.0",
                     "org.jctools:jctools-core:jar:sources:2.1.2",
                     "org.apache.bookkeeper.stats:bookkeeper-stats-api:jar:sources:4.13.0"
@@ -3791,19 +3937,24 @@
                 "coord": "org.apache.bookkeeper:circe-checksum:4.13.0",
                 "file": "v1/https/jcenter.bintray.com/org/apache/bookkeeper/circe-checksum/4.13.0/circe-checksum-4.13.0.jar",
                 "directDependencies": [
-                    "com.google.guava:guava:18.0",
+                    "com.google.guava:guava:23.6-jre",
                     "commons-configuration:commons-configuration:1.10",
                     "io.netty:netty-buffer:4.1.63.Final",
                     "org.slf4j:slf4j-api:1.7.30"
                 ],
                 "dependencies": [
+                    "org.checkerframework:checker-compat-qual:2.0.0",
                     "commons-logging:commons-logging:1.2",
+                    "com.google.code.findbugs:jsr305:3.0.2",
                     "org.slf4j:slf4j-api:1.7.30",
                     "commons-lang:commons-lang:2.6",
+                    "com.google.guava:guava:23.6-jre",
                     "io.netty:netty-buffer:4.1.63.Final",
                     "commons-configuration:commons-configuration:1.10",
+                    "org.codehaus.mojo:animal-sniffer-annotations:1.14",
                     "io.netty:netty-common:4.1.63.Final",
-                    "com.google.guava:guava:18.0"
+                    "com.google.j2objc:j2objc-annotations:1.1",
+                    "com.google.errorprone:error_prone_annotations:2.1.3"
                 ],
                 "url": "https://jcenter.bintray.com/org/apache/bookkeeper/circe-checksum/4.13.0/circe-checksum-4.13.0.jar",
                 "mirror_urls": [
@@ -3817,19 +3968,24 @@
                 "coord": "org.apache.bookkeeper:circe-checksum:jar:sources:4.13.0",
                 "file": "v1/https/jcenter.bintray.com/org/apache/bookkeeper/circe-checksum/4.13.0/circe-checksum-4.13.0-sources.jar",
                 "directDependencies": [
-                    "com.google.guava:guava:jar:sources:18.0",
+                    "com.google.guava:guava:jar:sources:23.6-jre",
                     "commons-configuration:commons-configuration:jar:sources:1.10",
                     "io.netty:netty-buffer:jar:sources:4.1.63.Final",
                     "org.slf4j:slf4j-api:jar:sources:1.7.30"
                 ],
                 "dependencies": [
+                    "com.google.code.findbugs:jsr305:jar:sources:3.0.2",
+                    "com.google.guava:guava:jar:sources:23.6-jre",
+                    "com.google.errorprone:error_prone_annotations:jar:sources:2.1.3",
                     "commons-lang:commons-lang:jar:sources:2.6",
                     "commons-configuration:commons-configuration:jar:sources:1.10",
                     "commons-logging:commons-logging:jar:sources:1.2",
                     "org.slf4j:slf4j-api:jar:sources:1.7.30",
                     "io.netty:netty-common:jar:sources:4.1.63.Final",
-                    "com.google.guava:guava:jar:sources:18.0",
-                    "io.netty:netty-buffer:jar:sources:4.1.63.Final"
+                    "org.checkerframework:checker-compat-qual:jar:sources:2.0.0",
+                    "org.codehaus.mojo:animal-sniffer-annotations:jar:sources:1.14",
+                    "io.netty:netty-buffer:jar:sources:4.1.63.Final",
+                    "com.google.j2objc:j2objc-annotations:jar:sources:1.1"
                 ],
                 "url": "https://jcenter.bintray.com/org/apache/bookkeeper/circe-checksum/4.13.0/circe-checksum-4.13.0-sources.jar",
                 "mirror_urls": [
@@ -3843,18 +3999,23 @@
                 "coord": "org.apache.bookkeeper:cpu-affinity:4.13.0",
                 "file": "v1/https/jcenter.bintray.com/org/apache/bookkeeper/cpu-affinity/4.13.0/cpu-affinity-4.13.0.jar",
                 "directDependencies": [
-                    "com.google.guava:guava:18.0",
+                    "com.google.guava:guava:23.6-jre",
                     "commons-configuration:commons-configuration:1.10",
                     "org.apache.commons:commons-lang3:3.11",
                     "org.slf4j:slf4j-api:1.7.30"
                 ],
                 "dependencies": [
+                    "org.checkerframework:checker-compat-qual:2.0.0",
                     "commons-logging:commons-logging:1.2",
+                    "com.google.code.findbugs:jsr305:3.0.2",
                     "org.slf4j:slf4j-api:1.7.30",
                     "commons-lang:commons-lang:2.6",
+                    "com.google.guava:guava:23.6-jre",
                     "commons-configuration:commons-configuration:1.10",
-                    "com.google.guava:guava:18.0",
-                    "org.apache.commons:commons-lang3:3.11"
+                    "org.codehaus.mojo:animal-sniffer-annotations:1.14",
+                    "com.google.j2objc:j2objc-annotations:1.1",
+                    "org.apache.commons:commons-lang3:3.11",
+                    "com.google.errorprone:error_prone_annotations:2.1.3"
                 ],
                 "url": "https://jcenter.bintray.com/org/apache/bookkeeper/cpu-affinity/4.13.0/cpu-affinity-4.13.0.jar",
                 "mirror_urls": [
@@ -3868,18 +4029,23 @@
                 "coord": "org.apache.bookkeeper:cpu-affinity:jar:sources:4.13.0",
                 "file": "v1/https/jcenter.bintray.com/org/apache/bookkeeper/cpu-affinity/4.13.0/cpu-affinity-4.13.0-sources.jar",
                 "directDependencies": [
-                    "com.google.guava:guava:jar:sources:18.0",
+                    "com.google.guava:guava:jar:sources:23.6-jre",
                     "commons-configuration:commons-configuration:jar:sources:1.10",
                     "org.apache.commons:commons-lang3:jar:sources:3.11",
                     "org.slf4j:slf4j-api:jar:sources:1.7.30"
                 ],
                 "dependencies": [
+                    "com.google.code.findbugs:jsr305:jar:sources:3.0.2",
                     "org.apache.commons:commons-lang3:jar:sources:3.11",
+                    "com.google.guava:guava:jar:sources:23.6-jre",
+                    "com.google.errorprone:error_prone_annotations:jar:sources:2.1.3",
                     "commons-lang:commons-lang:jar:sources:2.6",
                     "commons-configuration:commons-configuration:jar:sources:1.10",
                     "commons-logging:commons-logging:jar:sources:1.2",
                     "org.slf4j:slf4j-api:jar:sources:1.7.30",
-                    "com.google.guava:guava:jar:sources:18.0"
+                    "org.checkerframework:checker-compat-qual:jar:sources:2.0.0",
+                    "org.codehaus.mojo:animal-sniffer-annotations:jar:sources:1.14",
+                    "com.google.j2objc:j2objc-annotations:jar:sources:1.1"
                 ],
                 "url": "https://jcenter.bintray.com/org/apache/bookkeeper/cpu-affinity/4.13.0/cpu-affinity-4.13.0-sources.jar",
                 "mirror_urls": [
@@ -4031,25 +4197,30 @@
                 "coord": "org.apache.curator:curator-client:5.1.0",
                 "file": "v1/https/jcenter.bintray.com/org/apache/curator/curator-client/5.1.0/curator-client-5.1.0.jar",
                 "directDependencies": [
-                    "com.google.guava:guava:18.0",
+                    "com.google.guava:guava:23.6-jre",
                     "org.apache.zookeeper:zookeeper:3.6.3",
                     "org.slf4j:slf4j-api:1.7.30"
                 ],
                 "dependencies": [
+                    "org.checkerframework:checker-compat-qual:2.0.0",
                     "io.netty:netty-codec:4.1.63.Final",
                     "io.netty:netty-transport-native-epoll:4.1.63.Final",
+                    "com.google.code.findbugs:jsr305:3.0.2",
                     "io.netty:netty-handler:4.1.63.Final",
                     "org.slf4j:slf4j-api:1.7.30",
                     "org.apache.zookeeper:zookeeper-jute:3.6.3",
                     "io.netty:netty-resolver:4.1.63.Final",
+                    "com.google.guava:guava:23.6-jre",
                     "io.netty:netty-buffer:4.1.63.Final",
                     "log4j:log4j:1.2.17",
                     "io.netty:netty-transport-native-unix-common:4.1.63.Final",
+                    "org.codehaus.mojo:animal-sniffer-annotations:1.14",
                     "io.netty:netty-common:4.1.63.Final",
                     "org.apache.yetus:audience-annotations:0.5.0",
-                    "com.google.guava:guava:18.0",
                     "org.apache.zookeeper:zookeeper:3.6.3",
-                    "io.netty:netty-transport:4.1.63.Final"
+                    "com.google.j2objc:j2objc-annotations:1.1",
+                    "io.netty:netty-transport:4.1.63.Final",
+                    "com.google.errorprone:error_prone_annotations:2.1.3"
                 ],
                 "url": "https://jcenter.bintray.com/org/apache/curator/curator-client/5.1.0/curator-client-5.1.0.jar",
                 "mirror_urls": [
@@ -4063,20 +4234,25 @@
                 "coord": "org.apache.curator:curator-client:jar:sources:5.1.0",
                 "file": "v1/https/jcenter.bintray.com/org/apache/curator/curator-client/5.1.0/curator-client-5.1.0-sources.jar",
                 "directDependencies": [
-                    "com.google.guava:guava:jar:sources:18.0",
+                    "com.google.guava:guava:jar:sources:23.6-jre",
                     "org.apache.zookeeper:zookeeper:jar:sources:3.6.3",
                     "org.slf4j:slf4j-api:jar:sources:1.7.30"
                 ],
                 "dependencies": [
                     "org.apache.zookeeper:zookeeper-jute:jar:sources:3.6.3",
+                    "com.google.code.findbugs:jsr305:jar:sources:3.0.2",
                     "io.netty:netty-transport-native-unix-common:jar:sources:4.1.63.Final",
                     "io.netty:netty-transport:jar:sources:4.1.63.Final",
                     "org.apache.zookeeper:zookeeper:jar:sources:3.6.3",
+                    "com.google.guava:guava:jar:sources:23.6-jre",
+                    "com.google.errorprone:error_prone_annotations:jar:sources:2.1.3",
                     "org.slf4j:slf4j-api:jar:sources:1.7.30",
                     "io.netty:netty-common:jar:sources:4.1.63.Final",
-                    "com.google.guava:guava:jar:sources:18.0",
+                    "org.checkerframework:checker-compat-qual:jar:sources:2.0.0",
+                    "org.codehaus.mojo:animal-sniffer-annotations:jar:sources:1.14",
                     "io.netty:netty-resolver:jar:sources:4.1.63.Final",
                     "io.netty:netty-buffer:jar:sources:4.1.63.Final",
+                    "com.google.j2objc:j2objc-annotations:jar:sources:1.1",
                     "org.apache.yetus:audience-annotations:jar:sources:0.5.0",
                     "io.netty:netty-transport-native-epoll:jar:sources:4.1.63.Final",
                     "log4j:log4j:jar:sources:1.2.17",
@@ -4098,21 +4274,26 @@
                     "org.apache.curator:curator-client:5.1.0"
                 ],
                 "dependencies": [
+                    "org.checkerframework:checker-compat-qual:2.0.0",
                     "io.netty:netty-codec:4.1.63.Final",
                     "io.netty:netty-transport-native-epoll:4.1.63.Final",
+                    "com.google.code.findbugs:jsr305:3.0.2",
                     "io.netty:netty-handler:4.1.63.Final",
                     "org.slf4j:slf4j-api:1.7.30",
                     "org.apache.zookeeper:zookeeper-jute:3.6.3",
                     "io.netty:netty-resolver:4.1.63.Final",
+                    "com.google.guava:guava:23.6-jre",
                     "io.netty:netty-buffer:4.1.63.Final",
                     "log4j:log4j:1.2.17",
                     "org.apache.curator:curator-client:5.1.0",
                     "io.netty:netty-transport-native-unix-common:4.1.63.Final",
+                    "org.codehaus.mojo:animal-sniffer-annotations:1.14",
                     "io.netty:netty-common:4.1.63.Final",
                     "org.apache.yetus:audience-annotations:0.5.0",
-                    "com.google.guava:guava:18.0",
                     "org.apache.zookeeper:zookeeper:3.6.3",
-                    "io.netty:netty-transport:4.1.63.Final"
+                    "com.google.j2objc:j2objc-annotations:1.1",
+                    "io.netty:netty-transport:4.1.63.Final",
+                    "com.google.errorprone:error_prone_annotations:2.1.3"
                 ],
                 "url": "https://jcenter.bintray.com/org/apache/curator/curator-framework/5.1.0/curator-framework-5.1.0.jar",
                 "mirror_urls": [
@@ -4130,14 +4311,19 @@
                 ],
                 "dependencies": [
                     "org.apache.zookeeper:zookeeper-jute:jar:sources:3.6.3",
+                    "com.google.code.findbugs:jsr305:jar:sources:3.0.2",
                     "io.netty:netty-transport-native-unix-common:jar:sources:4.1.63.Final",
                     "io.netty:netty-transport:jar:sources:4.1.63.Final",
                     "org.apache.zookeeper:zookeeper:jar:sources:3.6.3",
+                    "com.google.guava:guava:jar:sources:23.6-jre",
+                    "com.google.errorprone:error_prone_annotations:jar:sources:2.1.3",
                     "org.slf4j:slf4j-api:jar:sources:1.7.30",
                     "io.netty:netty-common:jar:sources:4.1.63.Final",
-                    "com.google.guava:guava:jar:sources:18.0",
+                    "org.checkerframework:checker-compat-qual:jar:sources:2.0.0",
+                    "org.codehaus.mojo:animal-sniffer-annotations:jar:sources:1.14",
                     "io.netty:netty-resolver:jar:sources:4.1.63.Final",
                     "io.netty:netty-buffer:jar:sources:4.1.63.Final",
+                    "com.google.j2objc:j2objc-annotations:jar:sources:1.1",
                     "org.apache.yetus:audience-annotations:jar:sources:0.5.0",
                     "io.netty:netty-transport-native-epoll:jar:sources:4.1.63.Final",
                     "org.apache.curator:curator-client:jar:sources:5.1.0",
@@ -4160,22 +4346,27 @@
                     "org.apache.curator:curator-framework:5.1.0"
                 ],
                 "dependencies": [
+                    "org.checkerframework:checker-compat-qual:2.0.0",
                     "io.netty:netty-codec:4.1.63.Final",
                     "io.netty:netty-transport-native-epoll:4.1.63.Final",
+                    "com.google.code.findbugs:jsr305:3.0.2",
                     "io.netty:netty-handler:4.1.63.Final",
                     "org.slf4j:slf4j-api:1.7.30",
                     "org.apache.zookeeper:zookeeper-jute:3.6.3",
                     "io.netty:netty-resolver:4.1.63.Final",
+                    "com.google.guava:guava:23.6-jre",
                     "io.netty:netty-buffer:4.1.63.Final",
                     "log4j:log4j:1.2.17",
                     "org.apache.curator:curator-client:5.1.0",
                     "io.netty:netty-transport-native-unix-common:4.1.63.Final",
+                    "org.codehaus.mojo:animal-sniffer-annotations:1.14",
                     "io.netty:netty-common:4.1.63.Final",
                     "org.apache.yetus:audience-annotations:0.5.0",
-                    "com.google.guava:guava:18.0",
                     "org.apache.curator:curator-framework:5.1.0",
                     "org.apache.zookeeper:zookeeper:3.6.3",
-                    "io.netty:netty-transport:4.1.63.Final"
+                    "com.google.j2objc:j2objc-annotations:1.1",
+                    "io.netty:netty-transport:4.1.63.Final",
+                    "com.google.errorprone:error_prone_annotations:2.1.3"
                 ],
                 "url": "https://jcenter.bintray.com/org/apache/curator/curator-recipes/5.1.0/curator-recipes-5.1.0.jar",
                 "mirror_urls": [
@@ -4194,14 +4385,19 @@
                 "dependencies": [
                     "org.apache.zookeeper:zookeeper-jute:jar:sources:3.6.3",
                     "org.apache.curator:curator-framework:jar:sources:5.1.0",
+                    "com.google.code.findbugs:jsr305:jar:sources:3.0.2",
                     "io.netty:netty-transport-native-unix-common:jar:sources:4.1.63.Final",
                     "io.netty:netty-transport:jar:sources:4.1.63.Final",
                     "org.apache.zookeeper:zookeeper:jar:sources:3.6.3",
+                    "com.google.guava:guava:jar:sources:23.6-jre",
+                    "com.google.errorprone:error_prone_annotations:jar:sources:2.1.3",
                     "org.slf4j:slf4j-api:jar:sources:1.7.30",
                     "io.netty:netty-common:jar:sources:4.1.63.Final",
-                    "com.google.guava:guava:jar:sources:18.0",
+                    "org.checkerframework:checker-compat-qual:jar:sources:2.0.0",
+                    "org.codehaus.mojo:animal-sniffer-annotations:jar:sources:1.14",
                     "io.netty:netty-resolver:jar:sources:4.1.63.Final",
                     "io.netty:netty-buffer:jar:sources:4.1.63.Final",
+                    "com.google.j2objc:j2objc-annotations:jar:sources:1.1",
                     "org.apache.yetus:audience-annotations:jar:sources:0.5.0",
                     "io.netty:netty-transport-native-epoll:jar:sources:4.1.63.Final",
                     "org.apache.curator:curator-client:jar:sources:5.1.0",
@@ -4223,31 +4419,36 @@
                 "directDependencies": [
                     "org.slf4j:slf4j-api:1.7.30",
                     "commons-lang:commons-lang:2.6",
+                    "com.google.guava:guava:23.6-jre",
                     "io.netty:netty-buffer:4.1.63.Final",
                     "commons-configuration:commons-configuration:1.10",
                     "org.apache.bookkeeper.stats:bookkeeper-stats-api:4.13.0",
                     "org.apache.bookkeeper:bookkeeper-common:4.13.0",
-                    "com.google.guava:guava:18.0",
                     "commons-codec:commons-codec:1.15",
                     "org.apache.commons:commons-lang3:3.11",
                     "net.jpountz.lz4:lz4:1.3.0"
                 ],
                 "dependencies": [
                     "com.fasterxml.jackson.core:jackson-annotations:2.8.8",
+                    "org.checkerframework:checker-compat-qual:2.0.0",
                     "org.apache.bookkeeper:cpu-affinity:4.13.0",
                     "commons-logging:commons-logging:1.2",
+                    "com.google.code.findbugs:jsr305:3.0.2",
                     "org.slf4j:slf4j-api:1.7.30",
                     "org.jctools:jctools-core:2.1.2",
                     "commons-lang:commons-lang:2.6",
+                    "com.google.guava:guava:23.6-jre",
                     "io.netty:netty-buffer:4.1.63.Final",
                     "commons-configuration:commons-configuration:1.10",
+                    "org.codehaus.mojo:animal-sniffer-annotations:1.14",
                     "org.apache.bookkeeper.stats:bookkeeper-stats-api:4.13.0",
                     "io.netty:netty-common:4.1.63.Final",
                     "org.apache.bookkeeper:bookkeeper-common:4.13.0",
-                    "com.google.guava:guava:18.0",
                     "commons-codec:commons-codec:1.15",
+                    "com.google.j2objc:j2objc-annotations:1.1",
                     "com.fasterxml.jackson.core:jackson-databind:2.8.8",
                     "org.apache.commons:commons-lang3:3.11",
+                    "com.google.errorprone:error_prone_annotations:2.1.3",
                     "com.fasterxml.jackson.core:jackson-core:2.8.8",
                     "net.jpountz.lz4:lz4:1.3.0"
                 ],
@@ -4265,18 +4466,21 @@
                 "directDependencies": [
                     "net.jpountz.lz4:lz4:jar:sources:1.3.0",
                     "org.apache.commons:commons-lang3:jar:sources:3.11",
+                    "com.google.guava:guava:jar:sources:23.6-jre",
                     "commons-lang:commons-lang:jar:sources:2.6",
                     "commons-codec:commons-codec:jar:sources:1.15",
                     "commons-configuration:commons-configuration:jar:sources:1.10",
                     "org.slf4j:slf4j-api:jar:sources:1.7.30",
-                    "com.google.guava:guava:jar:sources:18.0",
                     "io.netty:netty-buffer:jar:sources:4.1.63.Final",
                     "org.apache.bookkeeper:bookkeeper-common:jar:sources:4.13.0",
                     "org.apache.bookkeeper.stats:bookkeeper-stats-api:jar:sources:4.13.0"
                 ],
                 "dependencies": [
+                    "com.google.code.findbugs:jsr305:jar:sources:3.0.2",
                     "net.jpountz.lz4:lz4:jar:sources:1.3.0",
                     "org.apache.commons:commons-lang3:jar:sources:3.11",
+                    "com.google.guava:guava:jar:sources:23.6-jre",
+                    "com.google.errorprone:error_prone_annotations:jar:sources:2.1.3",
                     "commons-lang:commons-lang:jar:sources:2.6",
                     "commons-codec:commons-codec:jar:sources:1.15",
                     "commons-configuration:commons-configuration:jar:sources:1.10",
@@ -4284,11 +4488,13 @@
                     "com.fasterxml.jackson.core:jackson-annotations:jar:sources:2.8.8",
                     "org.slf4j:slf4j-api:jar:sources:1.7.30",
                     "io.netty:netty-common:jar:sources:4.1.63.Final",
+                    "org.checkerframework:checker-compat-qual:jar:sources:2.0.0",
+                    "org.codehaus.mojo:animal-sniffer-annotations:jar:sources:1.14",
                     "com.fasterxml.jackson.core:jackson-core:jar:sources:2.8.8",
-                    "com.google.guava:guava:jar:sources:18.0",
                     "com.fasterxml.jackson.core:jackson-databind:jar:sources:2.8.8",
                     "io.netty:netty-buffer:jar:sources:4.1.63.Final",
                     "org.apache.bookkeeper:cpu-affinity:jar:sources:4.13.0",
+                    "com.google.j2objc:j2objc-annotations:jar:sources:1.1",
                     "org.apache.bookkeeper:bookkeeper-common:jar:sources:4.13.0",
                     "org.jctools:jctools-core:jar:sources:2.1.2",
                     "org.apache.bookkeeper.stats:bookkeeper-stats-api:jar:sources:4.13.0"
@@ -4317,11 +4523,13 @@
                     "org.rocksdb:rocksdbjni:6.10.2",
                     "org.apache.bookkeeper:circe-checksum:4.13.0",
                     "org.slf4j:slf4j-log4j12:1.7.25",
+                    "org.checkerframework:checker-compat-qual:2.0.0",
                     "org.apache.bookkeeper:cpu-affinity:4.13.0",
                     "org.apache.bookkeeper:bookkeeper-server:4.13.0",
                     "io.netty:netty-codec:4.1.63.Final",
                     "org.bouncycastle:bcprov-ext-jdk15on:1.66",
                     "commons-logging:commons-logging:1.2",
+                    "com.google.code.findbugs:jsr305:3.0.2",
                     "io.netty:netty-handler:4.1.63.Final",
                     "io.netty:netty-transport-native-epoll:jar:linux-x86_64:4.1.63.Final",
                     "org.slf4j:slf4j-api:1.7.30",
@@ -4331,6 +4539,7 @@
                     "org.apache.zookeeper:zookeeper-jute:3.6.3",
                     "commons-lang:commons-lang:2.6",
                     "io.netty:netty-resolver:4.1.63.Final",
+                    "com.google.guava:guava:23.6-jre",
                     "org.bouncycastle:bcprov-jdk15on:jar:1.66",
                     "com.google.protobuf:protobuf-java:3.14.0",
                     "io.netty:netty-buffer:4.1.63.Final",
@@ -4339,6 +4548,7 @@
                     "commons-configuration:commons-configuration:1.10",
                     "io.netty:netty-transport-native-unix-common:4.1.63.Final",
                     "org.bouncycastle:bcpkix-jdk15on:1.66",
+                    "org.codehaus.mojo:animal-sniffer-annotations:1.14",
                     "org.apache.bookkeeper.stats:bookkeeper-stats-api:4.13.0",
                     "org.apache.thrift:libthrift:0.12.0",
                     "commons-cli:commons-cli:1.3.1",
@@ -4347,16 +4557,17 @@
                     "org.apache.yetus:audience-annotations:0.5.0",
                     "org.apache.bookkeeper:bookkeeper-proto:4.13.0",
                     "org.apache.bookkeeper:bookkeeper-common:4.13.0",
-                    "com.google.guava:guava:18.0",
                     "commons-codec:commons-codec:1.15",
                     "org.apache.httpcomponents:httpclient:4.5.2",
                     "org.apache.zookeeper:zookeeper:3.6.3",
                     "net.java.dev.jna:jna:3.2.7",
+                    "com.google.j2objc:j2objc-annotations:1.1",
                     "io.netty:netty-transport:4.1.63.Final",
                     "com.fasterxml.jackson.core:jackson-databind:2.8.8",
                     "org.apache.commons:commons-lang3:3.11",
                     "org.apache.commons:commons-collections4:4.4",
                     "org.apache.bookkeeper:bookkeeper-tools-framework:4.13.0",
+                    "com.google.errorprone:error_prone_annotations:2.1.3",
                     "org.apache.httpcomponents:httpcore:4.4.4",
                     "org.apache.distributedlog:distributedlog-common:4.13.0",
                     "com.beust:jcommander:1.78",
@@ -4386,6 +4597,7 @@
                 "dependencies": [
                     "org.apache.zookeeper:zookeeper-jute:jar:sources:3.6.3",
                     "io.netty:netty-tcnative-boringssl-static:jar:sources:2.0.31.Final",
+                    "com.google.code.findbugs:jsr305:jar:sources:3.0.2",
                     "net.jpountz.lz4:lz4:jar:sources:1.3.0",
                     "org.rocksdb:rocksdbjni:jar:sources:6.10.2",
                     "org.apache.bookkeeper:bookkeeper-proto:jar:sources:4.13.0",
@@ -4396,6 +4608,8 @@
                     "org.apache.zookeeper:zookeeper:jar:sources:3.6.3",
                     "org.apache.distributedlog:distributedlog-protocol:jar:sources:4.13.0",
                     "org.apache.commons:commons-lang3:jar:sources:3.11",
+                    "com.google.guava:guava:jar:sources:23.6-jre",
+                    "com.google.errorprone:error_prone_annotations:jar:sources:2.1.3",
                     "commons-lang:commons-lang:jar:sources:2.6",
                     "com.beust:jcommander:jar:sources:1.78",
                     "commons-codec:commons-codec:jar:sources:1.15",
@@ -4404,10 +4618,11 @@
                     "com.fasterxml.jackson.core:jackson-annotations:jar:sources:2.8.8",
                     "org.slf4j:slf4j-api:jar:sources:1.7.30",
                     "io.netty:netty-common:jar:sources:4.1.63.Final",
+                    "org.checkerframework:checker-compat-qual:jar:sources:2.0.0",
                     "org.bouncycastle:bcpkix-jdk15on:jar:sources:1.66",
+                    "org.codehaus.mojo:animal-sniffer-annotations:jar:sources:1.14",
                     "com.google.protobuf:protobuf-java:jar:sources:3.14.0",
                     "com.fasterxml.jackson.core:jackson-core:jar:sources:2.8.8",
-                    "com.google.guava:guava:jar:sources:18.0",
                     "io.netty:netty-resolver:jar:sources:4.1.63.Final",
                     "org.bouncycastle:bcprov-jdk15on:jar:sources:1.66",
                     "com.fasterxml.jackson.core:jackson-databind:jar:sources:2.8.8",
@@ -4416,6 +4631,7 @@
                     "org.apache.bookkeeper:cpu-affinity:jar:sources:4.13.0",
                     "org.apache.bookkeeper.http:http-server:jar:sources:4.13.0",
                     "org.apache.distributedlog:distributedlog-common:jar:sources:4.13.0",
+                    "com.google.j2objc:j2objc-annotations:jar:sources:1.1",
                     "org.apache.bookkeeper:bookkeeper-common-allocator:jar:sources:4.13.0",
                     "org.apache.yetus:audience-annotations:jar:sources:0.5.0",
                     "org.apache.bookkeeper:bookkeeper-tools-framework:jar:sources:4.13.0",
@@ -4454,20 +4670,25 @@
                 ],
                 "dependencies": [
                     "com.fasterxml.jackson.core:jackson-annotations:2.8.8",
+                    "org.checkerframework:checker-compat-qual:2.0.0",
                     "org.apache.bookkeeper:cpu-affinity:4.13.0",
                     "commons-logging:commons-logging:1.2",
+                    "com.google.code.findbugs:jsr305:3.0.2",
                     "org.slf4j:slf4j-api:1.7.30",
                     "org.jctools:jctools-core:2.1.2",
                     "commons-lang:commons-lang:2.6",
+                    "com.google.guava:guava:23.6-jre",
                     "io.netty:netty-buffer:4.1.63.Final",
                     "commons-configuration:commons-configuration:1.10",
+                    "org.codehaus.mojo:animal-sniffer-annotations:1.14",
                     "org.apache.bookkeeper.stats:bookkeeper-stats-api:4.13.0",
                     "io.netty:netty-common:4.1.63.Final",
                     "org.apache.bookkeeper:bookkeeper-common:4.13.0",
-                    "com.google.guava:guava:18.0",
                     "commons-codec:commons-codec:1.15",
+                    "com.google.j2objc:j2objc-annotations:1.1",
                     "com.fasterxml.jackson.core:jackson-databind:2.8.8",
                     "org.apache.commons:commons-lang3:3.11",
+                    "com.google.errorprone:error_prone_annotations:2.1.3",
                     "org.apache.distributedlog:distributedlog-common:4.13.0",
                     "com.fasterxml.jackson.core:jackson-core:2.8.8",
                     "net.jpountz.lz4:lz4:1.3.0"
@@ -4490,8 +4711,11 @@
                     "org.slf4j:slf4j-api:jar:sources:1.7.30"
                 ],
                 "dependencies": [
+                    "com.google.code.findbugs:jsr305:jar:sources:3.0.2",
                     "net.jpountz.lz4:lz4:jar:sources:1.3.0",
                     "org.apache.commons:commons-lang3:jar:sources:3.11",
+                    "com.google.guava:guava:jar:sources:23.6-jre",
+                    "com.google.errorprone:error_prone_annotations:jar:sources:2.1.3",
                     "commons-lang:commons-lang:jar:sources:2.6",
                     "commons-codec:commons-codec:jar:sources:1.15",
                     "commons-configuration:commons-configuration:jar:sources:1.10",
@@ -4499,12 +4723,14 @@
                     "com.fasterxml.jackson.core:jackson-annotations:jar:sources:2.8.8",
                     "org.slf4j:slf4j-api:jar:sources:1.7.30",
                     "io.netty:netty-common:jar:sources:4.1.63.Final",
+                    "org.checkerframework:checker-compat-qual:jar:sources:2.0.0",
+                    "org.codehaus.mojo:animal-sniffer-annotations:jar:sources:1.14",
                     "com.fasterxml.jackson.core:jackson-core:jar:sources:2.8.8",
-                    "com.google.guava:guava:jar:sources:18.0",
                     "com.fasterxml.jackson.core:jackson-databind:jar:sources:2.8.8",
                     "io.netty:netty-buffer:jar:sources:4.1.63.Final",
                     "org.apache.bookkeeper:cpu-affinity:jar:sources:4.13.0",
                     "org.apache.distributedlog:distributedlog-common:jar:sources:4.13.0",
+                    "com.google.j2objc:j2objc-annotations:jar:sources:1.1",
                     "org.apache.bookkeeper:bookkeeper-common:jar:sources:4.13.0",
                     "org.jctools:jctools-core:jar:sources:2.1.2",
                     "org.apache.bookkeeper.stats:bookkeeper-stats-api:jar:sources:4.13.0"
@@ -4786,14 +5012,19 @@
                 "coord": "org.apache.pulsar:pulsar-checksum:1.19.0-incubating",
                 "file": "v1/https/jcenter.bintray.com/org/apache/pulsar/pulsar-checksum/1.19.0-incubating/pulsar-checksum-1.19.0-incubating.jar",
                 "directDependencies": [
-                    "com.google.guava:guava:18.0",
+                    "com.google.guava:guava:23.6-jre",
                     "io.netty:netty-all:4.1.50.Final",
                     "org.slf4j:slf4j-api:1.7.30"
                 ],
                 "dependencies": [
-                    "com.google.guava:guava:18.0",
+                    "org.checkerframework:checker-compat-qual:2.0.0",
+                    "io.netty:netty-all:4.1.50.Final",
+                    "com.google.code.findbugs:jsr305:3.0.2",
                     "org.slf4j:slf4j-api:1.7.30",
-                    "io.netty:netty-all:4.1.50.Final"
+                    "com.google.guava:guava:23.6-jre",
+                    "org.codehaus.mojo:animal-sniffer-annotations:1.14",
+                    "com.google.j2objc:j2objc-annotations:1.1",
+                    "com.google.errorprone:error_prone_annotations:2.1.3"
                 ],
                 "url": "https://jcenter.bintray.com/org/apache/pulsar/pulsar-checksum/1.19.0-incubating/pulsar-checksum-1.19.0-incubating.jar",
                 "mirror_urls": [
@@ -4807,14 +5038,19 @@
                 "coord": "org.apache.pulsar:pulsar-checksum:jar:sources:1.19.0-incubating",
                 "file": "v1/https/jcenter.bintray.com/org/apache/pulsar/pulsar-checksum/1.19.0-incubating/pulsar-checksum-1.19.0-incubating-sources.jar",
                 "directDependencies": [
-                    "com.google.guava:guava:jar:sources:18.0",
+                    "com.google.guava:guava:jar:sources:23.6-jre",
                     "io.netty:netty-all:jar:sources:4.1.50.Final",
                     "org.slf4j:slf4j-api:jar:sources:1.7.30"
                 ],
                 "dependencies": [
+                    "com.google.code.findbugs:jsr305:jar:sources:3.0.2",
+                    "com.google.guava:guava:jar:sources:23.6-jre",
+                    "com.google.errorprone:error_prone_annotations:jar:sources:2.1.3",
                     "org.slf4j:slf4j-api:jar:sources:1.7.30",
+                    "org.checkerframework:checker-compat-qual:jar:sources:2.0.0",
+                    "org.codehaus.mojo:animal-sniffer-annotations:jar:sources:1.14",
                     "io.netty:netty-all:jar:sources:4.1.50.Final",
-                    "com.google.guava:guava:jar:sources:18.0"
+                    "com.google.j2objc:j2objc-annotations:jar:sources:1.1"
                 ],
                 "url": "https://jcenter.bintray.com/org/apache/pulsar/pulsar-checksum/1.19.0-incubating/pulsar-checksum-1.19.0-incubating-sources.jar",
                 "mirror_urls": [
@@ -4838,19 +5074,24 @@
                 "dependencies": [
                     "com.fasterxml.jackson.core:jackson-annotations:2.8.8",
                     "org.apache.pulsar:pulsar-checksum:1.19.0-incubating",
+                    "org.checkerframework:checker-compat-qual:2.0.0",
                     "io.netty:netty-all:4.1.50.Final",
                     "org.asynchttpclient:netty-codec-dns:2.0.31",
                     "org.asynchttpclient:netty-resolver:2.0.31",
+                    "com.google.code.findbugs:jsr305:3.0.2",
                     "org.slf4j:slf4j-api:1.7.30",
+                    "com.google.guava:guava:23.6-jre",
                     "com.google.protobuf:protobuf-java:3.14.0",
                     "org.reactivestreams:reactive-streams:1.0.0",
+                    "org.codehaus.mojo:animal-sniffer-annotations:1.14",
                     "com.typesafe.netty:netty-reactive-streams:1.0.8",
-                    "com.google.guava:guava:18.0",
                     "org.asynchttpclient:netty-resolver-dns:2.0.31",
                     "commons-codec:commons-codec:1.15",
+                    "com.google.j2objc:j2objc-annotations:1.1",
                     "org.apache.pulsar:pulsar-common:1.19.0-incubating",
                     "com.fasterxml.jackson.core:jackson-databind:2.8.8",
                     "org.apache.commons:commons-lang3:3.11",
+                    "com.google.errorprone:error_prone_annotations:2.1.3",
                     "com.yahoo.datasketches:sketches-core:0.6.0",
                     "org.asynchttpclient:async-http-client:2.0.31",
                     "org.asynchttpclient:async-http-client-netty-utils:2.0.31",
@@ -4877,23 +5118,28 @@
                     "org.apache.pulsar:pulsar-common:jar:sources:1.19.0-incubating"
                 ],
                 "dependencies": [
+                    "com.google.code.findbugs:jsr305:jar:sources:3.0.2",
                     "org.asynchttpclient:netty-resolver-dns:jar:sources:2.0.31",
                     "net.jpountz.lz4:lz4:jar:sources:1.3.0",
                     "org.asynchttpclient:async-http-client:jar:sources:2.0.31",
                     "com.yahoo.datasketches:sketches-core:jar:sources:0.6.0",
                     "org.apache.commons:commons-lang3:jar:sources:3.11",
+                    "com.google.guava:guava:jar:sources:23.6-jre",
+                    "com.google.errorprone:error_prone_annotations:jar:sources:2.1.3",
                     "commons-codec:commons-codec:jar:sources:1.15",
                     "com.fasterxml.jackson.core:jackson-annotations:jar:sources:2.8.8",
                     "org.slf4j:slf4j-api:jar:sources:1.7.30",
                     "org.apache.pulsar:pulsar-common:jar:sources:1.19.0-incubating",
+                    "org.checkerframework:checker-compat-qual:jar:sources:2.0.0",
                     "org.asynchttpclient:netty-resolver:jar:sources:2.0.31",
+                    "org.codehaus.mojo:animal-sniffer-annotations:jar:sources:1.14",
                     "com.google.protobuf:protobuf-java:jar:sources:3.14.0",
                     "com.fasterxml.jackson.core:jackson-core:jar:sources:2.8.8",
-                    "com.google.guava:guava:jar:sources:18.0",
                     "org.asynchttpclient:netty-codec-dns:jar:sources:2.0.31",
                     "org.apache.pulsar:pulsar-checksum:jar:sources:1.19.0-incubating",
                     "com.fasterxml.jackson.core:jackson-databind:jar:sources:2.8.8",
                     "io.netty:netty-all:jar:sources:4.1.50.Final",
+                    "com.google.j2objc:j2objc-annotations:jar:sources:1.1",
                     "org.asynchttpclient:async-http-client-netty-utils:jar:sources:2.0.31",
                     "org.reactivestreams:reactive-streams:jar:sources:1.0.0",
                     "com.typesafe.netty:netty-reactive-streams:jar:sources:1.0.8"
@@ -4913,19 +5159,24 @@
                     "org.apache.pulsar:pulsar-checksum:1.19.0-incubating",
                     "io.netty:netty-all:4.1.50.Final",
                     "org.slf4j:slf4j-api:1.7.30",
+                    "com.google.guava:guava:23.6-jre",
                     "com.google.protobuf:protobuf-java:3.14.0",
-                    "com.google.guava:guava:18.0",
                     "com.fasterxml.jackson.core:jackson-databind:2.8.8",
                     "net.jpountz.lz4:lz4:1.3.0"
                 ],
                 "dependencies": [
                     "com.fasterxml.jackson.core:jackson-annotations:2.8.8",
                     "org.apache.pulsar:pulsar-checksum:1.19.0-incubating",
+                    "org.checkerframework:checker-compat-qual:2.0.0",
                     "io.netty:netty-all:4.1.50.Final",
+                    "com.google.code.findbugs:jsr305:3.0.2",
                     "org.slf4j:slf4j-api:1.7.30",
+                    "com.google.guava:guava:23.6-jre",
                     "com.google.protobuf:protobuf-java:3.14.0",
-                    "com.google.guava:guava:18.0",
+                    "org.codehaus.mojo:animal-sniffer-annotations:1.14",
+                    "com.google.j2objc:j2objc-annotations:1.1",
                     "com.fasterxml.jackson.core:jackson-databind:2.8.8",
+                    "com.google.errorprone:error_prone_annotations:2.1.3",
                     "com.fasterxml.jackson.core:jackson-core:2.8.8",
                     "net.jpountz.lz4:lz4:1.3.0"
                 ],
@@ -4942,23 +5193,28 @@
                 "file": "v1/https/jcenter.bintray.com/org/apache/pulsar/pulsar-common/1.19.0-incubating/pulsar-common-1.19.0-incubating-sources.jar",
                 "directDependencies": [
                     "net.jpountz.lz4:lz4:jar:sources:1.3.0",
+                    "com.google.guava:guava:jar:sources:23.6-jre",
                     "org.slf4j:slf4j-api:jar:sources:1.7.30",
                     "com.google.protobuf:protobuf-java:jar:sources:3.14.0",
-                    "com.google.guava:guava:jar:sources:18.0",
                     "org.apache.pulsar:pulsar-checksum:jar:sources:1.19.0-incubating",
                     "com.fasterxml.jackson.core:jackson-databind:jar:sources:2.8.8",
                     "io.netty:netty-all:jar:sources:4.1.50.Final"
                 ],
                 "dependencies": [
+                    "com.google.code.findbugs:jsr305:jar:sources:3.0.2",
                     "net.jpountz.lz4:lz4:jar:sources:1.3.0",
+                    "com.google.guava:guava:jar:sources:23.6-jre",
+                    "com.google.errorprone:error_prone_annotations:jar:sources:2.1.3",
                     "com.fasterxml.jackson.core:jackson-annotations:jar:sources:2.8.8",
                     "org.slf4j:slf4j-api:jar:sources:1.7.30",
+                    "org.checkerframework:checker-compat-qual:jar:sources:2.0.0",
+                    "org.codehaus.mojo:animal-sniffer-annotations:jar:sources:1.14",
                     "com.google.protobuf:protobuf-java:jar:sources:3.14.0",
                     "com.fasterxml.jackson.core:jackson-core:jar:sources:2.8.8",
-                    "com.google.guava:guava:jar:sources:18.0",
                     "org.apache.pulsar:pulsar-checksum:jar:sources:1.19.0-incubating",
                     "com.fasterxml.jackson.core:jackson-databind:jar:sources:2.8.8",
-                    "io.netty:netty-all:jar:sources:4.1.50.Final"
+                    "io.netty:netty-all:jar:sources:4.1.50.Final",
+                    "com.google.j2objc:j2objc-annotations:jar:sources:1.1"
                 ],
                 "url": "https://jcenter.bintray.com/org/apache/pulsar/pulsar-common/1.19.0-incubating/pulsar-common-1.19.0-incubating-sources.jar",
                 "mirror_urls": [
@@ -6035,6 +6291,32 @@
                 "sha256": "76643e5519aaaf6930d733a096d16afcb4c48165aae172e2d4c0b5be86fe6480"
             },
             {
+                "coord": "org.checkerframework:checker-compat-qual:2.0.0",
+                "file": "v1/https/jcenter.bintray.com/org/checkerframework/checker-compat-qual/2.0.0/checker-compat-qual-2.0.0.jar",
+                "directDependencies": [],
+                "dependencies": [],
+                "url": "https://jcenter.bintray.com/org/checkerframework/checker-compat-qual/2.0.0/checker-compat-qual-2.0.0.jar",
+                "mirror_urls": [
+                    "https://jcenter.bintray.com/org/checkerframework/checker-compat-qual/2.0.0/checker-compat-qual-2.0.0.jar",
+                    "https://maven.google.com/org/checkerframework/checker-compat-qual/2.0.0/checker-compat-qual-2.0.0.jar",
+                    "https://repo1.maven.org/maven2/org/checkerframework/checker-compat-qual/2.0.0/checker-compat-qual-2.0.0.jar"
+                ],
+                "sha256": "a40b2ce6d8551e5b90b1bf637064303f32944d61b52ab2014e38699df573941b"
+            },
+            {
+                "coord": "org.checkerframework:checker-compat-qual:jar:sources:2.0.0",
+                "file": "v1/https/jcenter.bintray.com/org/checkerframework/checker-compat-qual/2.0.0/checker-compat-qual-2.0.0-sources.jar",
+                "directDependencies": [],
+                "dependencies": [],
+                "url": "https://jcenter.bintray.com/org/checkerframework/checker-compat-qual/2.0.0/checker-compat-qual-2.0.0-sources.jar",
+                "mirror_urls": [
+                    "https://jcenter.bintray.com/org/checkerframework/checker-compat-qual/2.0.0/checker-compat-qual-2.0.0-sources.jar",
+                    "https://maven.google.com/org/checkerframework/checker-compat-qual/2.0.0/checker-compat-qual-2.0.0-sources.jar",
+                    "https://repo1.maven.org/maven2/org/checkerframework/checker-compat-qual/2.0.0/checker-compat-qual-2.0.0-sources.jar"
+                ],
+                "sha256": "8e287b29415fac2c0b9eb04f30224d9d2ad33c23b7a7ce8d23d1f197f0eb5074"
+            },
+            {
                 "coord": "org.codehaus.jackson:jackson-core-asl:1.8.8",
                 "file": "v1/https/jcenter.bintray.com/org/codehaus/jackson/jackson-core-asl/1.8.8/jackson-core-asl-1.8.8.jar",
                 "directDependencies": [],
@@ -6093,6 +6375,32 @@
                     "https://repo1.maven.org/maven2/org/codehaus/jackson/jackson-mapper-asl/1.8.8/jackson-mapper-asl-1.8.8-sources.jar"
                 ],
                 "sha256": "15817a2897fe38a58f7bfa4effeee5a8215358902c210c8a4afa0889c0b7ae2d"
+            },
+            {
+                "coord": "org.codehaus.mojo:animal-sniffer-annotations:1.14",
+                "file": "v1/https/jcenter.bintray.com/org/codehaus/mojo/animal-sniffer-annotations/1.14/animal-sniffer-annotations-1.14.jar",
+                "directDependencies": [],
+                "dependencies": [],
+                "url": "https://jcenter.bintray.com/org/codehaus/mojo/animal-sniffer-annotations/1.14/animal-sniffer-annotations-1.14.jar",
+                "mirror_urls": [
+                    "https://jcenter.bintray.com/org/codehaus/mojo/animal-sniffer-annotations/1.14/animal-sniffer-annotations-1.14.jar",
+                    "https://maven.google.com/org/codehaus/mojo/animal-sniffer-annotations/1.14/animal-sniffer-annotations-1.14.jar",
+                    "https://repo1.maven.org/maven2/org/codehaus/mojo/animal-sniffer-annotations/1.14/animal-sniffer-annotations-1.14.jar"
+                ],
+                "sha256": "2068320bd6bad744c3673ab048f67e30bef8f518996fa380033556600669905d"
+            },
+            {
+                "coord": "org.codehaus.mojo:animal-sniffer-annotations:jar:sources:1.14",
+                "file": "v1/https/jcenter.bintray.com/org/codehaus/mojo/animal-sniffer-annotations/1.14/animal-sniffer-annotations-1.14-sources.jar",
+                "directDependencies": [],
+                "dependencies": [],
+                "url": "https://jcenter.bintray.com/org/codehaus/mojo/animal-sniffer-annotations/1.14/animal-sniffer-annotations-1.14-sources.jar",
+                "mirror_urls": [
+                    "https://jcenter.bintray.com/org/codehaus/mojo/animal-sniffer-annotations/1.14/animal-sniffer-annotations-1.14-sources.jar",
+                    "https://maven.google.com/org/codehaus/mojo/animal-sniffer-annotations/1.14/animal-sniffer-annotations-1.14-sources.jar",
+                    "https://repo1.maven.org/maven2/org/codehaus/mojo/animal-sniffer-annotations/1.14/animal-sniffer-annotations-1.14-sources.jar"
+                ],
+                "sha256": "d821ae1f706db2c1b9c88d4b7b0746b01039dac63762745ef3fe5579967dd16b"
             },
             {
                 "coord": "org.eclipse.jdt:core:3.1.1",
@@ -8237,10 +8545,10 @@
                 "coord": "tech.tablesaw:tablesaw-core:0.11.4",
                 "file": "v1/https/jcenter.bintray.com/tech/tablesaw/tablesaw-core/0.11.4/tablesaw-core-0.11.4.jar",
                 "directDependencies": [
+                    "com.google.guava:guava:23.6-jre",
                     "com.google.code.gson:gson:2.8.6",
                     "it.unimi.dsi:fastutil:8.1.1",
                     "org.apache.commons:commons-math3:3.6.1",
-                    "com.google.guava:guava:18.0",
                     "org.apache.commons:commons-lang3:3.11",
                     "org.jsoup:jsoup:1.11.2",
                     "org.roaringbitmap:RoaringBitmap:0.6.51",
@@ -8248,13 +8556,18 @@
                     "com.opencsv:opencsv:4.1"
                 ],
                 "dependencies": [
+                    "org.checkerframework:checker-compat-qual:2.0.0",
                     "commons-logging:commons-logging:1.2",
+                    "com.google.code.findbugs:jsr305:3.0.2",
+                    "com.google.guava:guava:23.6-jre",
                     "com.google.code.gson:gson:2.8.6",
                     "it.unimi.dsi:fastutil:8.1.1",
+                    "org.codehaus.mojo:animal-sniffer-annotations:1.14",
                     "org.apache.commons:commons-math3:3.6.1",
-                    "com.google.guava:guava:18.0",
+                    "com.google.j2objc:j2objc-annotations:1.1",
                     "org.apache.commons:commons-text:1.1",
                     "org.apache.commons:commons-lang3:3.11",
+                    "com.google.errorprone:error_prone_annotations:2.1.3",
                     "org.jsoup:jsoup:1.11.2",
                     "commons-beanutils:commons-beanutils:1.9.3",
                     "org.roaringbitmap:RoaringBitmap:0.6.51",
@@ -8277,23 +8590,28 @@
                     "com.opencsv:opencsv:jar:sources:4.1",
                     "org.jsoup:jsoup:jar:sources:1.11.2",
                     "org.apache.commons:commons-lang3:jar:sources:3.11",
+                    "com.google.guava:guava:jar:sources:23.6-jre",
                     "org.roaringbitmap:RoaringBitmap:jar:sources:0.6.51",
                     "it.unimi.dsi:fastutil:jar:sources:8.1.1",
-                    "com.google.guava:guava:jar:sources:18.0",
                     "org.apache.commons:commons-math3:jar:sources:3.6.1",
                     "com.google.code.gson:gson:jar:sources:2.8.6",
                     "org.iq80.snappy:snappy:jar:sources:0.4"
                 ],
                 "dependencies": [
+                    "com.google.code.findbugs:jsr305:jar:sources:3.0.2",
                     "com.opencsv:opencsv:jar:sources:4.1",
                     "org.jsoup:jsoup:jar:sources:1.11.2",
                     "org.apache.commons:commons-lang3:jar:sources:3.11",
+                    "com.google.guava:guava:jar:sources:23.6-jre",
                     "org.apache.commons:commons-text:jar:sources:1.1",
+                    "com.google.errorprone:error_prone_annotations:jar:sources:2.1.3",
                     "commons-logging:commons-logging:jar:sources:1.2",
                     "org.roaringbitmap:RoaringBitmap:jar:sources:0.6.51",
+                    "org.checkerframework:checker-compat-qual:jar:sources:2.0.0",
+                    "org.codehaus.mojo:animal-sniffer-annotations:jar:sources:1.14",
                     "it.unimi.dsi:fastutil:jar:sources:8.1.1",
-                    "com.google.guava:guava:jar:sources:18.0",
                     "org.apache.commons:commons-math3:jar:sources:3.6.1",
+                    "com.google.j2objc:j2objc-annotations:jar:sources:1.1",
                     "com.google.code.gson:gson:jar:sources:2.8.6",
                     "commons-collections:commons-collections:jar:sources:3.2.1",
                     "org.iq80.snappy:snappy:jar:sources:0.4",
@@ -8348,6 +8666,6 @@
             }
         ],
         "version": "0.1.0",
-        "__AUTOGENERATED_FILE_DO_NOT_MODIFY_THIS_FILE_MANUALLY": -1189707719
+        "__AUTOGENERATED_FILE_DO_NOT_MODIFY_THIS_FILE_MANUALLY": 1228079693
     }
 }

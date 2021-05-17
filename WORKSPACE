@@ -99,7 +99,7 @@ maven_install(
         "io.netty:netty-all:4.1.50.Final",
         "aopalliance:aopalliance:1.0",
         "org.roaringbitmap:RoaringBitmap:0.6.51",
-        "com.google.guava:guava:18.0",
+        "com.google.guava:guava:23.6-jre",
         "io.gsonfire:gson-fire:1.8.3",
         "org.apache.curator:curator-framework:" + curator_version,
         "org.apache.curator:curator-recipes:" + curator_version,
