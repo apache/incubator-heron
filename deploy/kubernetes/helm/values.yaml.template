@@ -28,7 +28,7 @@
 platform: minikube
 
 # Heron image to use
-image: heron/heron:VERSION
+image: apache/heron:VERSION
 
 # Heron image pull policy
 imagePullPolicy: IfNotPresent

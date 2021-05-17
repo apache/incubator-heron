@@ -43,6 +43,6 @@ container_push(
     format = "Docker",
     image = ":heron",
     registry = "index.docker.io",
-    repository = "heron/heron",
+    repository = "apache/heron",
     tag = "{BUILD_USER}",
 )

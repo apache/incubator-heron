@@ -48,7 +48,7 @@ spec:
           tolerationSeconds: 10
       containers:
         - name: heron-tracker
-          image: heron/heron:latest
+          image: apache/heron:latest
           ports:
             - containerPort: 8888
               name: api-port
@@ -68,7 +68,7 @@ spec:
               cpu: "400m"
               memory: "512M"
         - name: heron-ui
-          image: heron/heron:latest
+          image: apache/heron:latest
           ports:
             - containerPort: 8889
               name: app-port
