@@ -91,7 +91,7 @@ action "Loading heron docker image"
 kind load image-archive "$heron_archive"
 #image_heron="docker.io/bazel/scripts/images:heron"
 #image_heron="$heron_image"
-image_heron="heron/heron:$TAG"
+image_heron="apache/heron:$TAG"
 
 action "Loading bookkeeper image"
 image_bookkeeper="docker.io/apache/bookkeeper:4.11.0"

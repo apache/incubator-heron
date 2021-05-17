@@ -74,7 +74,7 @@ public class NomadContext extends Context {
   }
 
   public static String getHeronExecutorDockerImage(Config config) {
-    return config.getStringValue(HERON_EXECUTOR_DOCKER_IMAGE, "heron/heron:latest");
+    return config.getStringValue(HERON_EXECUTOR_DOCKER_IMAGE, "apache/heron:latest");
   }
 
   public static boolean getHeronNomadMetricsServiceRegister(Config config) {

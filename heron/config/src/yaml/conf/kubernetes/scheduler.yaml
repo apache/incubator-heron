@@ -31,7 +31,7 @@ heron.kubernetes.scheduler.uri:             <kubernetes_api_addr>
 heron.scheduler.is.service:                  False
 
 # docker repo for executor
-heron.executor.docker.image:                'heron/heron:latest'
+heron.executor.docker.image:                'apache/heron:latest'
 
 # logic to be used for calculating the Kubernetes resource request and limits
 # value can be "NOT_SET", "EQUAL_TO_LIMIT"

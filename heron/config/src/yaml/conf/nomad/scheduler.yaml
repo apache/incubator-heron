@@ -42,7 +42,7 @@ heron.nomad.core.freq.mapping: 2000
 heron.nomad.driver: "docker"
 
 # The docker image to use for heron if the docker driver is used,
-heron.executor.docker.image: 'heron/heron:latest'
+heron.executor.docker.image: 'apache/heron:latest'
 
 # Set networking mode networking when driver is docker
 heron.nomad.network.mode: "default"

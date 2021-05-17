@@ -20,7 +20,7 @@
 """
 This script cooridnates other scripts to put together a release.
 
-Generated images will have a label in the form heron/heron:<tag> and will be placed in the //distro/ directory.
+Generated images will have a label in the form apache/heron:<tag> and will be placed in the //distro/ directory.
 
 ## Examples
 
