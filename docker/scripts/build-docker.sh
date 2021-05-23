@@ -61,8 +61,8 @@ run_build() {
   echo $DOCKER_SQUASH
 
   DOCKER_FILE="$SCRATCH_DIR/dist/Dockerfile.dist.$TARGET_PLATFORM"
-  DOCKER_TAG="heron/heron:$HERON_VERSION"
-  DOCKER_LATEST_TAG="heron/heron:latest"
+  DOCKER_TAG="apache/heron:$HERON_VERSION"
+  DOCKER_LATEST_TAG="apache/heron:latest"
 
   setup_scratch_dir $SCRATCH_DIR
 
