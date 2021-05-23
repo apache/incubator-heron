@@ -77,7 +77,7 @@ spec:
       terminationGracePeriodSeconds: 0
       containers:
         - name: bookie
-          image: apache/bookkeeper:4.11.0
+          image: apache/bookkeeper:4.13.0
           resources:
             requests:
               memory: "3Gi"
@@ -168,7 +168,7 @@ spec:
     spec:
       containers:
         - name: replication-worker
-          image: apache/bookkeeper:4.11.0
+          image: apache/bookkeeper:4.13.0
           command: [ "/bin/bash", "/opt/bookkeeper/scripts/entrypoint.sh" ]
           args: ["/opt/bookkeeper/bin/bookkeeper", "autorecovery"]
           envFrom:
