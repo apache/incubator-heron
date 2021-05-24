@@ -31,9 +31,8 @@ java_binary(
     deps = instance_deps_files,
 )
 
-jarjar_binary(
+jar_jar(
     name = "heron-instance",
-    src = ":instance-unshaded_deploy.jar",
-    shade = "shade.conf",
-    deps = ["@maven//:org_sonatype_plugins_jarjar_maven_plugin"],
+    input_jar = ":instance-unshaded_deploy.jar",
+    rules = "shade.conf",
 )

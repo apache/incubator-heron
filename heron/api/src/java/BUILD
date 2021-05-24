@@ -67,11 +67,10 @@ java_binary(
     ],
 )
 
-jarjar_binary(
+jar_jar(
     name = "api-shaded",
-    src = ":api-unshaded_deploy.jar",
-    shade = "shade.conf",
-    deps = ["@maven//:org_sonatype_plugins_jarjar_maven_plugin"],
+    input_jar = ":api-unshaded_deploy.jar",
+    rules = "shade.conf",
 )
 
 genrule(

@@ -14,7 +14,7 @@ downloader_deps = [
     "//heron/spi/src/java:common-spi-java",
     "//third_party/java:commons-compress",
     "@maven//:commons_cli_commons_cli",
-    "@maven//:org_apache_distributedlog_distributedlog_core_shaded",
+    "//third_party/java:dlog-java",
     "@maven//:io_netty_netty_all",
 ]
 

@@ -29,8 +29,8 @@ load(
 )
 
 load(
-    "@//tools/rules:jarjar_rules.bzl",
-    "jarjar_binary",
+    "@com_github_johnynek_bazel_jar_jar//:jar_jar.bzl",
+    "jar_jar",
 )
 
 load(
