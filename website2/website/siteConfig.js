@@ -65,6 +65,7 @@ const siteConfig = {
   // For github.io type URLs, you would set the url and baseUrl like:
   url: url,
   baseUrl: baseUrl, // Base URL for your project */
+  gaTrackingId: "G-TY5B0S76DP",
 
   // Used for publishing and more
   projectName: 'incubator-heron',

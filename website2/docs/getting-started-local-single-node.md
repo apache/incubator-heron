@@ -21,37 +21,41 @@ sidebar_label: Local (Single Node)
 -->
 
 > The current version of Heron is {{heron:version}}
+For other platforms, you need to build from source. Please refer to the [guide to compiling Heron](compiling-overview).
 
-The current way to get started learning Heron is to build from source. 
-Please refer to the [guide to compiling Heron](compiling-overview). The Heron community is working to add release scripts and Heron
-binaries available from Apache mirrors soon.
+## Step 1 --- Download the Heron tools
 
-* [MacOS](#macos-homebrew)
-* [Ubuntu 18.04](#using-installation-scripts)
-* [CentOS](#using-installation-scripts)
+Heron tools can be installed using [installation scripts](#using-installation-scripts).
 
-## Building installation scripts
+> Note: As of version  0.20.4-incubating, there is a python compatibility on OSX.
+> The supported platforms are CentOS7, Debian10, and Ubuntu18.04.
 
-The only way to obtain the installation scripts at this time are to compile from source.  We are working to add release scripts and Heron
-binaries available from Apache mirrors soon.
+## Using installation scripts
 
-See how to get setup building Heron see the notes [here](compiling-overview.md)
-
-If you already have Bazel and the other required tools installed for your platform you can execute the following:
+To install Heron binaries directly, using installation scripts, go to Heron's [releases page](https://github.com/apache/incubator-heron/releases) on GitHub
+and see a full listing of Heron releases for each available platform. The installation script for macOS (`darwin`), for example, is named
+`heron-install-{{% heronVersion %}}-darwin.sh`.
 
 ```bash
-$ bazel build --config=[platform] scripts/packages:binpkgs
-```
-Options for the config flag are:
-* `debian` (Debian10)
-* `ubuntu` (Ubuntu)
-* `darwin` (OSX)
+$ wget https://github.com/apache/incubator-heron/releases/download/{{% heronVersion %}}/heron-install-{{% heronVersion %}}-darwin.sh
 
-This command will take approximately 45 minutes to compile based on your machine settings. 
- It will output a script called `heron-install.sh`  You will be able to find it relative to the Heron root folder:
- 
- ```bash
-$ ./bazel-bin/scripts/packages/heron-install.sh 
+
+```
+
+Download the for your platform either from the releases page or using [`wget`](https://www.gnu.org/software/wget/). Here's a `wget` example for Ubuntu:
+
+```bash
+$ wget https://github.com/apache/incubator-heron/releases/download/{{% heronVersion %}}/heron-install-{{% heronVersion %}}-ubuntu18.04.sh
+```
+Debian10
+```bash
+$ wget https://github.com/apache/incubator-heron/releases/download/{{% heronVersion %}}/heron-install-{{% heronVersion %}}-debian.sh
+```
+
+Once you've downloaded the script, make it executable using [chmod](https://en.wikipedia.org/wiki/Chmod):
+
+```bash
+$ chmod +x heron-*.sh
 ```
 
 Now run the [Heron client](user-manuals-heron-cli) installation script with the `--user` flag set. Here's an example:
@@ -59,7 +63,7 @@ Now run the [Heron client](user-manuals-heron-cli) installation script with the 
 > The script will install executables in the `~/bin` folder. You should add that folder to your `PATH` using `export PATH=~/bin:$PATH`.
 
 ```bash
-$ ./heron-install.sh --user
+$ ./heron-install-{{% heronVersion %}}-ubuntu.sh --user
 Heron installer
 ---------------
 
