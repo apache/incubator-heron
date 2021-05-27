@@ -33,10 +33,6 @@ Heron tools can be installed using [installation scripts](#using-installation-sc
 
 ## Using installation scripts
 
-To install Heron binaries directly, using installation scripts, go to Heron's [releases page](https://github.com/apache/incubator-heron/releases) on GitHub
-and see a full listing of Heron releases for each available platform. The installation script for macOS (`darwin`), for example, is named
-`heron-install-{{% heronVersion %}}-darwin.sh`.
-
 To install Heron binaries directly, using installation scripts, go to Heron's [download page](https://heron.apache.org/download)
 and see a full listing of Heron releases for each available platform. The installation script for macOS (`debian10`), for example, is named
 `heron-install-{{% heronVersion %}}-debian10.sh`.
