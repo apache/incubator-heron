@@ -32,25 +32,9 @@ Heron tools can be installed using [installation scripts](#using-installation-sc
 
 ## Using installation scripts
 
-To install Heron binaries directly, using installation scripts, go to Heron's [releases page](https://github.com/apache/incubator-heron/releases) on GitHub
-and see a full listing of Heron releases for each available platform. The installation script for macOS (`darwin`), for example, is named
-`heron-install-{{% heronVersion %}}-darwin.sh`.
-
-```bash
-$ wget https://github.com/apache/incubator-heron/releases/download/{{% heronVersion %}}/heron-install-{{% heronVersion %}}-darwin.sh
-
-
-```
-
-Download the for your platform either from the releases page or using [`wget`](https://www.gnu.org/software/wget/). Here's a `wget` example for Ubuntu:
-
-```bash
-$ wget https://github.com/apache/incubator-heron/releases/download/{{% heronVersion %}}/heron-install-{{% heronVersion %}}-ubuntu18.04.sh
-```
-Debian10
-```bash
-$ wget https://github.com/apache/incubator-heron/releases/download/{{% heronVersion %}}/heron-install-{{% heronVersion %}}-debian.sh
-```
+To install Heron binaries directly, using installation scripts, go to Heron's [download page](https://heron.apache.org/download)
+and see a full listing of Heron releases for each available platform. The installation script for macOS (`debian10`), for example, is named
+`heron-install-{{% heronVersion %}}-debian10.sh`.
 
 Once you've downloaded the script, make it executable using [chmod](https://en.wikipedia.org/wiki/Chmod):
 
@@ -218,7 +202,7 @@ Available commands:
     submit             Submit a topology
     version            Print version of heron-cli
 
-For detailed documentation, go to https://heron.incubator.apache.org
+For detailed documentation, go to https://heron.apache.org
 ```
 
 To invoke help output for a command, run `heron help COMMAND`. Here's an

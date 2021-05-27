@@ -53,7 +53,7 @@ const createVariableInjectionPlugin = variables => {
   };
 };
 
-const url = 'https://heron.incubator.apache.org';
+const url = 'https://heron.apache.org';
 const baseUrl = '/';
 
 const siteVariables = {
