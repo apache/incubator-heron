@@ -78,7 +78,7 @@ const siteConfig = {
     {doc: 'getting-started-local-single-node', label: 'Docs'},
     {page: 'download', label: "Downloads"},
     {href: '#community', label: 'Community'},
-    //{blog: true, label: 'Blog'},
+    {blog: true, label: 'Blog'},
     {href: '#apache', label: 'Apache'},
     // {page: 'download', label: 'Download'},
     // Drop down for languages

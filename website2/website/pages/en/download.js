@@ -88,6 +88,13 @@ class Download extends React.Component {
               <hr />
             </header>
 
+             <h2>Release notes</h2>
+              <div>
+                <p>
+                  <a href="https://heron.apache.org/release-notes">Release notes</a> for all of Heron's versions
+                </p>
+              </div>
+
             <h2 id="latest">Current version (Stable) {latestHeronVersion}</h2>
             <table className="versions" style={{width:'100%'}}>
               <thead>
