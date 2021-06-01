@@ -83,13 +83,13 @@ In order to run a Java topology in a Heron cluster, you'll need to package your 
 Once your `pom.xml` is properly set up, you can compile the JAR with dependencies using this command:
 
 ```bash
-$ mvn assembly:assembly
+$ mvn package
 ```
 
 By default, this will add a JAR in your project's `target` folder with the name `PROJECT-NAME-VERSION-jar-with-dependencies.jar`. Here's an example topology submission command using a compiled JAR:
 
 ```bash
-$ mvn assembly:assembly
+$ mvn package
 $ heron submit local \
   target/my-project-1.2.3-jar-with-dependencies.jar \
   com.example.Main \
