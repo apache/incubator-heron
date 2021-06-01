@@ -84,8 +84,6 @@ const siteConfig = {
     // Drop down for languages
     // { languages: true }
   ],
-  // explicitly set the flag to allow for indexing of the site.
-  noIndex: 'false',
 
   /* path to images for header/footer */
   headerIcon: 'img/HeronTextLogo-small.png',
