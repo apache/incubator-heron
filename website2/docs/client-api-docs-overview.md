@@ -20,6 +20,6 @@ sidebar_label: Client API Docs
     under the License.
 -->
 
-You can view JavaDocs [here](http://heron.incubator.apache.org/api/java)
+You can view JavaDocs [here](http://heron.apache.org/api/java)
 
-You can view Pydocs [here](http://heron.incubator.apache.org/api/python)
+You can view Pydocs [here](http://heron.apache.org/api/python)

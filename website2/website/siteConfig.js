@@ -53,7 +53,7 @@ const createVariableInjectionPlugin = variables => {
   };
 };
 
-const url = 'https://heron.incubator.apache.org';
+const url = 'https://heron.apache.org';
 const baseUrl = '/';
 
 const siteVariables = {
@@ -65,6 +65,7 @@ const siteConfig = {
   // For github.io type URLs, you would set the url and baseUrl like:
   url: url,
   baseUrl: baseUrl, // Base URL for your project */
+  gaTrackingId: "UA-198017384-1",
 
   // Used for publishing and more
   projectName: 'incubator-heron',
@@ -77,14 +78,12 @@ const siteConfig = {
     {doc: 'getting-started-local-single-node', label: 'Docs'},
     {page: 'download', label: "Downloads"},
     {href: '#community', label: 'Community'},
-    //{blog: true, label: 'Blog'},
+    {blog: true, label: 'Blog'},
     {href: '#apache', label: 'Apache'},
     // {page: 'download', label: 'Download'},
     // Drop down for languages
     // { languages: true }
   ],
-  // explicitly set the flag to allow for indexing of the site.
-  noIndex: 'false',
 
   /* path to images for header/footer */
   headerIcon: 'img/HeronTextLogo-small.png',

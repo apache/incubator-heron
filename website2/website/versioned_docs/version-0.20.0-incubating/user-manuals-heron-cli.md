@@ -43,7 +43,7 @@ Heron is now installed!
 
 Make sure you have "/Users/$USER/bin" in your path.
 
-See https://heron.incubator.apache.org/docs/getting-started-local-single-node/ on how to use Heron!
+See https://heron.apache.org/docs/getting-started-local-single-node/ on how to use Heron!
 
 ....
 ```

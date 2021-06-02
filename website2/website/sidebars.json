@@ -4,6 +4,7 @@
     "Getting Started": [
       "getting-started-local-single-node",
       "getting-started-migrate-storm-topologies",
+      "getting-started-docker",
       "getting-started-troubleshooting-guide"
     ],
     "Deployment": [

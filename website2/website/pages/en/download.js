@@ -8,37 +8,69 @@ const GridBlock = CompLibrary.GridBlock;
 const CWD = process.cwd();
 
 const siteConfig = require(`${CWD}/siteConfig.js`);
-const releases = require(`${CWD}/releases.json`);
 const heronReleases = require(`${CWD}/heron-release.json`)
 
 function getLatestArchiveMirrorUrl(version, type) {
-    return `https://www.apache.org/dyn/mirrors/mirrors.cgi?action=download&filename=incubator/heron/heron-${version}/heron-${version}-${type}.tar.gz`
+    return `http://www.apache.org/dyn/closer.cgi/incubator/heron/heron-${version}/heron-${version}-${type}.tar.gz?action=download`
+}
+
+function getTarUrl(version, type) {
+   return `https://downloads.apache.org/incubator/heron/heron-${version}/heron-${version}-${type}.tar.gz`
+}
+
+function getInstallScriptCryptoUrl(version, osType) {
+   return `https://downloads.apache.org/incubator/heron/heron-${version}/heron-install-${version}-${osType}.sh`
 }
 
 function distUrl(version, type) {
-    return `https://www.apache.org/dist/incubator/heron/heron-${version}/heron-${version}-${type}.tar.gz`
+    return `http://www.apache.org/dyn/closer.cgi/incubator/heron/heron-${version}/heron-${version}-${type}.tar.gz?action=download`
+}
+
+function getInstallScriptMirrorUrl(version, type) {
+    return `http://www.apache.org/dyn/closer.cgi/incubator/heron/heron-${version}/heron-install-${version}-${type}.sh`
 }
 
 function archiveUrl(version, type) {
     if (version.includes('incubating')) {
-        return `https://archive.apache.org/dist/incubator/heron/heron-${version}/apache-heron-v-${version}-${type}.tar.gz`
+
+        return `https://www.apache.org/dyn/mirrors/mirrors.cgi?action=download&filename=/incubator/heron/heron-${version}/` + getProperEndpoint(version, type)
     } else {
-        return `https://archive.apache.org/dist/heron/heron-${version}/apache-heron-v-${version}-${type}.tar.gz`
+        return `https://www.apache.org/dyn/mirrors/mirrors.cgi?action=download&filename=heron/heron-${version}/` + getProperEndpoint(version, type)
     }
+}
+
+function getProperEndpoint(version, type) {
+
+  if (version == "0.20.0-incubating") {
+   return `apache-heron-v-${version}-${type}.tar.gz`
+  }
+  if (type == "source") {
+    type = "src";
+  }
+  return `heron-${version}-${type}.tar.gz`
 }
 
 
 
 class Download extends React.Component {
   render() {
-    const latestVersion = releases[0];
     const latestHeronVersion = heronReleases[0];
-    const latestArchiveMirrorUrl = getLatestArchiveMirrorUrl(latestVersion, 'bin');
-    const latestSrcArchiveMirrorUrl = getLatestArchiveMirrorUrl(latestVersion, 'src');
-    const latestArchiveUrl = distUrl(latestVersion, 'bin');
-    const latestSrcArchiveUrl = distUrl(latestVersion, 'src')
+    const latestArchiveMirrorUrl = getLatestArchiveMirrorUrl(latestHeronVersion, 'bin');
+    const latestSrcArchiveMirrorUrl = getLatestArchiveMirrorUrl(latestHeronVersion, 'src');
+    const latestSrcUrl = getTarUrl(latestHeronVersion, "src");
+    const latestDebian10TarUrl =  getTarUrl(latestHeronVersion, "debian10");
+    const latestArchiveUrl = distUrl(latestHeronVersion, 'bin');
+    const latestSrcArchiveUrl = distUrl(latestHeronVersion, 'src')
+    const centos7InstallUrl = getInstallScriptMirrorUrl(latestHeronVersion, "centos7")
+    const centos7InstallCryptoUrl = getInstallScriptCryptoUrl(latestHeronVersion, "centos7")
+    const debian10InstallUrl = getInstallScriptMirrorUrl(latestHeronVersion, "debian10")
+    const debian10InstallCryptoUrl = getInstallScriptCryptoUrl(latestHeronVersion, "debian10")
+    const ubuntu1804InstallUrl = getInstallScriptMirrorUrl(latestHeronVersion, "ubuntu18.04")
+    const ubuntu1804InstallCryptoUrl = getInstallScriptCryptoUrl(latestHeronVersion, "ubuntu18.04")
 
-    const releaseInfo = releases.map(version => {
+
+
+    const releaseInfo = heronReleases.map(version => {
       return {
         version: version,
         binArchiveUrl: archiveUrl(version, 'bin'),
@@ -56,19 +88,19 @@ class Download extends React.Component {
               <hr />
             </header>
 
-            <h2>Release notes</h2>
-            <div>
-              <p>
-                <a href={`${siteConfig.baseUrl}${this.props.language}/release-notes`}>Release notes</a> for all Heron's versions
-              </p>
-            </div>
+             <h2>Release notes</h2>
+              <div>
+                <p>
+                  <a href="https://heron.apache.org/release-notes">Release notes</a> for all of Heron's versions
+                </p>
+              </div>
 
             <h2 id="latest">Current version (Stable) {latestHeronVersion}</h2>
             <table className="versions" style={{width:'100%'}}>
               <thead>
                 <tr>
                   <th>Release</th>
-                  <th>Link</th>
+                  <th>Direct Download Link</th>
                   <th>Crypto files</th>
                 </tr>
               </thead>
@@ -78,15 +110,76 @@ class Download extends React.Component {
                 <tr key={'source'}>
                   <th>Source</th>
                   <td>
-                    <a href={latestSrcArchiveMirrorUrl}>apache-heron-{latestVersion}-src.tar.gz</a>
+                    <a href={latestSrcArchiveMirrorUrl}>heron-{latestHeronVersion}-src.tar.gz</a>
                   </td>
                   <td>
-                    <a href={`${latestSrcArchiveUrl}.asc`}>asc</a>,&nbsp;
-                    <a href={`${latestSrcArchiveUrl}.sha512`}>sha512</a>
+                    <a href={`${latestSrcUrl}.asc`}>asc</a>,&nbsp;
+                    <a href={`${latestSrcUrl}.sha512`}>sha512</a>
+                  </td>
+                </tr>
+                <tr key={'binary'}>
+                  <th>Debian10 Binary</th>
+                  <td>
+                    <a href={latestSrcArchiveMirrorUrl}>heron-{latestHeronVersion}-debian10.tar.gz</a>
+                  </td>
+                  <td>
+                    <a href={`${latestDebian10TarUrl}.asc`}>asc</a>,&nbsp;
+                    <a href={`${latestDebian10TarUrl}.sha512`}>sha512</a>
                   </td>
                 </tr>
                 </tbody>
               </table>
+
+              <h2 id="latest">Heron Install Scripts</h2>
+              <h3 style={{color:"red"}}> READ BEFORE DOWNLOADING </h3>
+              <p>
+                To download the Heron self-extracting install scripts: click a link below for the Operating System of your choice that will show the closest mirror for you to download from.
+                 Once you are on the page with the closest mirror right click on the link and select “save as” to download the install script.
+                  If you do not right click the link will only bring you to view the script in the browser and will not start a download.
+              </p>
+              <table className="versions" style={{width:'100%'}}>
+                <thead>
+                  <tr>
+                    <th>Release</th>
+                    <th>Link to find the closest mirror</th>
+                    <th>Crypto files</th>
+                  </tr>
+                </thead>
+                <tbody>
+
+
+                  <tr key={'centos-install'}>
+                    <th>CentOS7</th>
+                    <td>
+                      <a href={`${centos7InstallUrl}`}> heron-install-0.20.4-incubating-centos7.sh</a>
+                    </td>
+                    <td>
+                      <a href={`${centos7InstallCryptoUrl}.asc`}>asc</a>,&nbsp;
+                      <a href={`${centos7InstallCryptoUrl}.sha512`}>sha512</a>
+                    </td>
+                  </tr>
+                  <tr key={'debian10-install'}>
+                    <th>Debian10</th>
+                    <td>
+                      <a href={`${debian10InstallUrl}`}> heron-install-0.20.4-incubating-debian10.sh</a>
+                    </td>
+                    <td>
+                      <a href={`${debian10InstallCryptoUrl}.asc`}>asc</a>,&nbsp;
+                      <a href={`${debian10InstallCryptoUrl}.sha512`}>sha512</a>
+                    </td>
+                  </tr>
+                   <tr key={'ubuntu18.04-install'}>
+                    <th>Ubuntu18.04</th>
+                    <td>
+                     <a href={`${ubuntu1804InstallUrl}`}> heron-install-0.20.4-incubating-ubuntu18.04.sh</a>
+                    </td>
+                    <td>
+                      <a href={`${ubuntu1804InstallCryptoUrl}.asc`}>asc</a>,&nbsp;
+                      <a href={`${ubuntu1804InstallCryptoUrl}.sha512`}>sha512</a>
+                    </td>
+                  </tr>
+                  </tbody>
+                </table>
 
 
             <h2>Release Integrity</h2>
@@ -125,10 +218,8 @@ class Download extends React.Component {
                 {releaseInfo.map(
                   info => {
                         var sha = "sha512"
-                        if (info.version.includes('1.19.0-incubating') || info.version.includes('1.20.0-incubating')) {
-                            sha = "sha"
-                        }
-                        return info.version !== latestVersion && (
+
+                        return info.version !== latestHeronVersion && (
                             <tr key={info.version}>
                         <th>{info.version}</th>
 

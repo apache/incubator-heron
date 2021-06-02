@@ -26,7 +26,7 @@ Heron is a realtime analytics platform developed by Twitter.  It has a wide arra
 
 ### Documentation
 
-[https://heron.incubator.apache.org/](https://heron.incubator.apache.org/)
+[https://heron.incubator.apache.org/](https://heron.apache.org/)
 </br>
 Confluence: https://cwiki.apache.org/confluence/display/HERON
 
@@ -54,8 +54,8 @@ Confluence: https://cwiki.apache.org/confluence/display/HERON
 
 ## For more information:
 
-* Official Heron documentation located at [https://heron.incubator.apache.org/](https://heron.incubator.apache.org/)
-* Official Heron resources, including Conference & Journal Papers, Videos, Blog Posts and selected Press located at [Heron Resources](https://heron.incubator.apache.org/resources)
+* Official Heron documentation located at [https://heron.apache.org/](https://heron.apache.org/)
+* Official Heron resources, including Conference & Journal Papers, Videos, Blog Posts and selected Press located at [Heron Resources](https://heron.apache.org/resources)
 * [Twitter Heron: Stream Processing at Scale](http://dl.acm.org/citation.cfm?id=2742788) (academic paper)
 * [Twitter Heron: Stream Processing at Scale](https://www.youtube.com/watch?v=pUaFOuGgmco) (YouTube video)
 * [Flying Faster with Twitter Heron](https://blog.twitter.com/2015/flying-faster-with-twitter-heron) (blog post)

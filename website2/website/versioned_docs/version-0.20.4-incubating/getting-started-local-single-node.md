@@ -1,7 +1,8 @@
 ---
-id: getting-started-local-single-node
+id: version-0.20.4-incubating-getting-started-local-single-node
 title: Local (Single Node)
 sidebar_label: Local (Single Node)
+original_id: getting-started-local-single-node
 ---
 <!--
     Licensed to the Apache Software Foundation (ASF) under one

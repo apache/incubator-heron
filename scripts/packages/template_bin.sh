@@ -15,7 +15,7 @@
 # Heron self-extractable installer for client package
 
 # Set help URL
-getting_started_url=https://heron.incubator.apache.org/docs/getting-started-local-single-node/
+getting_started_url=https://heron.apache.org/docs/getting-started-local-single-node/
 
 # Installation and etc prefix can be overriden from command line
 install_prefix=${1:-"/usr/local/heron"}
