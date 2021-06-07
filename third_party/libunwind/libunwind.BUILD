@@ -8,13 +8,15 @@ out_files = [
     "include/libunwind-dynamic.h",
     "include/libunwind.h",
     "include/libunwind-ptrace.h",
-    "include/libunwind-x86_64.h",
+#    "include/libunwind-x86_64.h",
+    "include/libunwind-aarch64.h",
     "include/unwind.h",
     "lib/libunwind.a",
     "lib/libunwind-coredump.a",
     "lib/libunwind-ptrace.a",
     "lib/libunwind-setjmp.a",
-    "lib/libunwind-x86_64.a",
+#    "lib/libunwind-x86_64.a",
+    "lib/libunwind-aarch64.a",
 ]
 
 genrule(

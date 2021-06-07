@@ -64,7 +64,7 @@ bazel clean
 echo "Creating packages"
 bazel build -c opt --jobs 25 --config=$CONFIG_PLATFORM scripts/packages:tarpkgs
 bazel build -c opt --jobs 25 --config=$CONFIG_PLATFORM scripts/packages:binpkgs
-bazel build -c opt --jobs 25 --config=$CONFIG_PLATFORM scripts/images:heron.tar
+#bazel build -c opt --jobs 25 --config=$CONFIG_PLATFORM scripts/images:heron.tar
 
 echo "Moving packages to /$OUTPUT_DIRECTORY"
 for file in ./bazel-bin/scripts/packages/*.tar.gz; do

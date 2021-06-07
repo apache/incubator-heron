@@ -158,9 +158,8 @@ pinned_maven_install()
 
 http_archive(
     name = "rules_python",
-    sha256 = "b5668cde8bb6e3515057ef465a35ad712214962f0b3a314e551204266c7be90c",
-    strip_prefix = "rules_python-0.0.2",
-    url = "https://github.com/bazelbuild/rules_python/releases/download/0.0.2/rules_python-0.0.2.tar.gz",
+    url = "https://github.com/bazelbuild/rules_python/releases/download/0.1.0/rules_python-0.1.0.tar.gz",
+    sha256 = "b6d46438523a3ec0f3cead544190ee13223a52f6a6765a29eae7b7cc24cc83a0"
 )
 
 load("@rules_python//python:repositories.bzl", "py_repositories")
@@ -341,9 +340,9 @@ http_archive(
 http_archive(
     name = "helm_mac",
     build_file = "@//:third_party/helm/helm.BUILD",
-    sha256 = "05c7748da0ea8d5f85576491cd3c615f94063f20986fd82a0f5658ddc286cdb1",
-    strip_prefix = "darwin-amd64",
-    urls = ["https://get.helm.sh/helm-v3.0.2-darwin-amd64.tar.gz"],
+#    sha256 = "05c7748da0ea8d5f85576491cd3c615f94063f20986fd82a0f5658ddc286cdb1",
+    strip_prefix = "darwin-arm64",
+    urls = ["https://get.helm.sh/helm-v3.0.2-darwin-arm64.tar.gz"],
 )
 
 http_archive(
@@ -356,11 +355,11 @@ http_archive(
 # end helm
 
 # for docker image building
-DOCKER_RULES_VERSION = "0.14.4"
+DOCKER_RULES_VERSION = "0.16.0"
 
 http_archive(
     name = "io_bazel_rules_docker",
-    sha256 = "4521794f0fba2e20f3bf15846ab5e01d5332e587e9ce81629c7f96c793bb7036",
+    sha256 = "95d39fd84ff4474babaf190450ee034d958202043e366b9fc38f438c9e6c3334",
     strip_prefix = "rules_docker-%s" % DOCKER_RULES_VERSION,
     urls = ["https://github.com/bazelbuild/rules_docker/archive/v%s.tar.gz" % DOCKER_RULES_VERSION],
 )
@@ -375,22 +374,22 @@ load("@io_bazel_rules_docker//repositories:deps.bzl", container_deps = "deps")
 
 container_deps()
 
-load("@io_bazel_rules_docker//repositories:pip_repositories.bzl", "pip_deps")
+# load("@io_bazel_rules_docker//repositories:pip_repositories.bzl", "pip_deps")
 
-pip_deps()
+# pip_deps()
 
 load(
     "@io_bazel_rules_docker//container:container.bzl",
     "container_pull",
 )
 
-container_pull(
-    name = "heron-base",
-    digest = "sha256:495800e9eb001dfd2fb41d1941155203bb9be06b716b0f8b1b0133eb12ea813c",
-    registry = "index.docker.io",
-    repository = "heron/base",
-    tag = "0.5.0",
-)
+#container_pull(
+#    name = "heron-base",
+#    digest = "sha256:495800e9eb001dfd2fb41d1941155203bb9be06b716b0f8b1b0133eb12ea813c",
+#    registry = "index.docker.io",
+#    repository = "heron/base",
+#    tag = "0.5.0",
+#)
 # end docker image building
 
 http_archive(
