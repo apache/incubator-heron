@@ -42,7 +42,7 @@ RUN apt-get update && apt-get -y install \
       tree \
       openjdk-11-jdk-headless
 
-ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk-amd64
+ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk-arm64
 
 ENV bazelVersion 3.7.2
 
