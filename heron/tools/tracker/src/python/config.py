@@ -50,13 +50,14 @@ class Config:
       for extra_link in self.configs[EXTRA_LINKS_KEY]:
         self.extra_links.append(self.validate_extra_link(extra_link))
 
-  def validate_extra_link(self, extra_link: dict) -> None:
+  def validate_extra_link(self, extra_link: dict):
     """validate extra link"""
     if EXTRA_LINK_NAME_KEY not in extra_link or EXTRA_LINK_FORMATTER_KEY not in extra_link:
       raise Exception("Invalid extra.links format. " +
                       "Extra link must include a 'name' and 'formatter' field")
 
     self.validated_formatter(extra_link[EXTRA_LINK_FORMATTER_KEY])
+    return extra_link
 
   def validated_formatter(self, url_format: str) -> None:
     """Check visualization url format has no unrecongnised parameters."""
@@ -97,4 +98,4 @@ class Config:
   @staticmethod
   def config_str(config):
     keys = ("type", "name", "hostport", "rootpath", "tunnelhost")
-    return "".join("\t{k}: {config[k]}\n" for k in keys if k in config).rstrip()
+    return "".join("\t{}: {}\n".format(k, config[k]) for k in keys if k in config).rstrip()
