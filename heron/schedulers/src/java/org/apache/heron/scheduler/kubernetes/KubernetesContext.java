@@ -89,7 +89,7 @@ public final class KubernetesContext extends Context {
       "heron.kubernetes.container.volumeMount.path";
 
   public static final String HERON_KUBERNETES_POD_ANNOTATION =
-      "heron.kubernetes.container.annotation.";
+      "heron.kubernetes.pod.annotation.";
   public static final String HERON_KUBERNETES_SERVICE_ANNOTATION =
           "heron.kubernetes.service.annotation.";
 
