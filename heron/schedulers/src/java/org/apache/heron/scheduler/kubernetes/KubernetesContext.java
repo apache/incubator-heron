@@ -1,26 +1,29 @@
-/**
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+/*
+  Licensed to the Apache Software Foundation (ASF) under one
+  or more contributor license agreements.  See the NOTICE file
+  distributed with this work for additional information
+  regarding copyright ownership.  The ASF licenses this file
+  to you under the Apache License, Version 2.0 (the
+  "License"); you may not use this file except in compliance
+  with the License.  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing,
+  software distributed under the License is distributed on an
+  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  KIND, either express or implied.  See the License for the
+  specific language governing permissions and limitations
+  under the License.
  */
 
 package org.apache.heron.scheduler.kubernetes;
 
 import org.apache.heron.spi.common.Config;
 import org.apache.heron.spi.common.Context;
+
+import java.util.HashSet;
+import java.util.Set;
 
 public final class KubernetesContext extends Context {
   public static final String HERON_EXECUTOR_DOCKER_IMAGE = "heron.executor.docker.image";
@@ -44,7 +47,7 @@ public final class KubernetesContext extends Context {
      * provided in the Resource Limit. This mode effectively guarantees the
      * cpu and memory will be reserved.
      */
-    EQUAL_TO_LIMIT;
+    EQUAL_TO_LIMIT
   }
   /**
    * This config item is used to determine how to configure the K8s Resource Request.
@@ -82,6 +85,9 @@ public final class KubernetesContext extends Context {
       "heron.kubernetes.container.volumeMount.name";
   public static final String HERON_KUBERNETES_CONTAINER_VOLUME_MOUNT_PATH =
       "heron.kubernetes.container.volumeMount.path";
+
+  public static final String HERON_KUBERNETES_CONTAINER_ANNOTATION =
+      "heron.kubernetes.container.annotation.";
 
   private KubernetesContext() {
   }
@@ -150,6 +156,20 @@ public final class KubernetesContext extends Context {
 
   static String getContainerVolumeMountPath(Config config) {
     return config.getStringValue(HERON_KUBERNETES_CONTAINER_VOLUME_MOUNT_PATH);
+  }
+
+  static Set<String> getConfigKeys(Config config, String key) {
+    Set<String> annotations = new HashSet<>();
+    for (String s : config.getKeySet()) {
+      if (s.startsWith(key)) {
+        annotations.add(s);
+      }
+    }
+    return annotations;
+  }
+
+  static Set<String> getContainerAnnotationKeys(Config config) {
+    return getConfigKeys(config, HERON_KUBERNETES_CONTAINER_ANNOTATION);
   }
 
   public static boolean hasContainerVolume(Config config) {
