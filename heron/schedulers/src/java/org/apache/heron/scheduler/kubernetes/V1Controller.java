@@ -326,6 +326,7 @@ public class V1Controller extends KubernetesController {
     // setup service metadata
     final V1ObjectMeta objectMeta = new V1ObjectMeta();
     objectMeta.name(topologyName);
+    objectMeta.annotations(getServiceAnnotations());
     service.setMetadata(objectMeta);
 
     // create the headless service
@@ -388,12 +389,13 @@ public class V1Controller extends KubernetesController {
 
   private Map<String, String> getPodAnnotations() {
     Config config = getConfiguration();
-    final Map<String, String> annotations = new HashMap<>();
-    final Set<String> keys = KubernetesContext.getContainerAnnotationKeys(config);
-    for (String s : keys) {
-      String value = config.getStringValue(s);
-      annotations.put(s.replaceFirst(KubernetesContext.HERON_KUBERNETES_CONTAINER_ANNOTATION, ""), value);
-    }
+    final Map<String, String> annotations = KubernetesContext.getPodAnnotations(config);
+    return annotations;
+  }
+
+  private Map<String, String> getServiceAnnotations() {
+    Config config = getConfiguration();
+    final Map<String, String> annotations = KubernetesContext.getServiceAnnotations(config);
     return annotations;
   }
 

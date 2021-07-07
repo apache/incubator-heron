@@ -22,7 +22,9 @@ package org.apache.heron.scheduler.kubernetes;
 import org.apache.heron.spi.common.Config;
 import org.apache.heron.spi.common.Context;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 public final class KubernetesContext extends Context {
@@ -86,8 +88,10 @@ public final class KubernetesContext extends Context {
   public static final String HERON_KUBERNETES_CONTAINER_VOLUME_MOUNT_PATH =
       "heron.kubernetes.container.volumeMount.path";
 
-  public static final String HERON_KUBERNETES_CONTAINER_ANNOTATION =
+  public static final String HERON_KUBERNETES_POD_ANNOTATION =
       "heron.kubernetes.container.annotation.";
+  public static final String HERON_KUBERNETES_SERVICE_ANNOTATION =
+          "heron.kubernetes.service.annotation.";
 
   private KubernetesContext() {
   }
@@ -168,8 +172,24 @@ public final class KubernetesContext extends Context {
     return annotations;
   }
 
-  static Set<String> getContainerAnnotationKeys(Config config) {
-    return getConfigKeys(config, HERON_KUBERNETES_CONTAINER_ANNOTATION);
+  public static Map<String, String> getPodAnnotations(Config config) {
+    final Map<String, String> annotations = new HashMap<>();
+    final Set<String> keys = getConfigKeys(config, HERON_KUBERNETES_POD_ANNOTATION);
+    for (String s : keys) {
+      String value = config.getStringValue(s);
+      annotations.put(s.replaceFirst(KubernetesContext.HERON_KUBERNETES_POD_ANNOTATION, ""), value);
+    }
+    return annotations;
+  }
+
+  public static Map<String, String> getServiceAnnotations(Config config) {
+    final Map<String, String> annotations = new HashMap<>();
+    final Set<String> keys = getConfigKeys(config, HERON_KUBERNETES_SERVICE_ANNOTATION);
+    for (String s : keys) {
+      String value = config.getStringValue(s);
+      annotations.put(s.replaceFirst(KubernetesContext.HERON_KUBERNETES_SERVICE_ANNOTATION, ""), value);
+    }
+    return annotations;
   }
 
   public static boolean hasContainerVolume(Config config) {
