@@ -104,7 +104,7 @@ public class V1Controller extends KubernetesController {
 
     final Resource containerResource = getContainerResource(packingPlan);
 
-    final V1Service topologyService = createTopologyyService();
+    final V1Service topologyService = createTopologyService();
     try {
       final V1Service response =
           coreClient.createNamespacedService(getNamespace(), topologyService, null,
@@ -163,7 +163,7 @@ public class V1Controller extends KubernetesController {
     final int newContainerCount = currentContainerCount + containersToAdd.size();
 
     try {
-      patchStatefulsetReplicas(newContainerCount);
+      patchStatefulSetReplicas(newContainerCount);
     } catch (ApiException ae) {
       throw new TopologyRuntimeManagementException(
           ae.getMessage() + "\ndetails\n" + ae.getResponseBody());
@@ -185,14 +185,14 @@ public class V1Controller extends KubernetesController {
     final int newContainerCount = currentContainerCount - containersToRemove.size();
 
     try {
-      patchStatefulsetReplicas(newContainerCount);
+      patchStatefulSetReplicas(newContainerCount);
     } catch (ApiException e) {
       throw new TopologyRuntimeManagementException(
           e.getMessage() + "\ndetails\n" + e.getResponseBody());
     }
   }
 
-  private void patchStatefulsetReplicas(int replicas) throws ApiException {
+  private void patchStatefulSetReplicas(int replicas) throws ApiException {
     final String body =
             String.format(JSON_PATCH_STATEFUL_SET_REPLICAS_FORMAT,
                     replicas);
@@ -317,7 +317,7 @@ public class V1Controller extends KubernetesController {
     return String.format("%s=${POD_NAME##*-} && echo shardId=${%s}", ENV_SHARD_ID, ENV_SHARD_ID);
   }
 
-  private V1Service createTopologyyService() {
+  private V1Service createTopologyService() {
     final String topologyName = getTopologyName();
     final Config runtimeConfiguration = getRuntimeConfiguration();
 
@@ -326,6 +326,7 @@ public class V1Controller extends KubernetesController {
     // setup service metadata
     final V1ObjectMeta objectMeta = new V1ObjectMeta();
     objectMeta.name(topologyName);
+    objectMeta.annotations(getServiceAnnotations());
     service.setMetadata(objectMeta);
 
     // create the headless service
@@ -370,7 +371,10 @@ public class V1Controller extends KubernetesController {
 
     // set up pod meta
     final V1ObjectMeta templateMetaData = new V1ObjectMeta().labels(getLabels(topologyName));
-    templateMetaData.annotations(getPrometheusAnnotations());
+    Map<String, String> annotations = new HashMap<>();
+    annotations.putAll(getPodAnnotations());
+    annotations.putAll(getPrometheusAnnotations());
+    templateMetaData.annotations(annotations);
     podTemplateSpec.setMetadata(templateMetaData);
 
     final List<String> command = getExecutorCommand("$" + ENV_SHARD_ID);
@@ -381,6 +385,18 @@ public class V1Controller extends KubernetesController {
     statefulSet.spec(statefulSetSpec);
 
     return statefulSet;
+  }
+
+  private Map<String, String> getPodAnnotations() {
+    Config config = getConfiguration();
+    final Map<String, String> annotations = KubernetesContext.getPodAnnotations(config);
+    return annotations;
+  }
+
+  private Map<String, String> getServiceAnnotations() {
+    Config config = getConfiguration();
+    final Map<String, String> annotations = KubernetesContext.getServiceAnnotations(config);
+    return annotations;
   }
 
   private Map<String, String> getPrometheusAnnotations() {
@@ -529,7 +545,7 @@ public class V1Controller extends KubernetesController {
     if (remoteDebugEnabled) {
       IntStream.range(0, numberOfInstances).forEach(i -> {
         final String portName =
-            KubernetesConstants.JVM_REMOTE_DEBUGGER_PORT_NAME + "-" + String.valueOf(i);
+            KubernetesConstants.JVM_REMOTE_DEBUGGER_PORT_NAME + "-" + i;
         final V1ContainerPort port = new V1ContainerPort();
         port.setName(portName);
         port.setContainerPort(KubernetesConstants.JVM_REMOTE_DEBUGGER_PORT + i);
