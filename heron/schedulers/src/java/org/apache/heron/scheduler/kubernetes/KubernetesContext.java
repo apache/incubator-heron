@@ -92,6 +92,11 @@ public final class KubernetesContext extends Context {
       "heron.kubernetes.pod.annotation.";
   public static final String HERON_KUBERNETES_SERVICE_ANNOTATION =
       "heron.kubernetes.service.annotation.";
+  public static final String HERON_KUBERNETES_POD_LABEL =
+          "heron.kubernetes.pod.annotation.";
+  public static final String HERON_KUBERNETES_SERVICE_LABEL =
+          "heron.kubernetes.service.annotation.";
+
 
   private KubernetesContext() {
   }
@@ -162,6 +167,22 @@ public final class KubernetesContext extends Context {
     return config.getStringValue(HERON_KUBERNETES_CONTAINER_VOLUME_MOUNT_PATH);
   }
 
+  public static Map<String, String> getPodLabels(Config config) {
+    return getConfigItemsByPrefix(config, HERON_KUBERNETES_POD_LABEL);
+  }
+
+  public static Map<String, String> getServiceLabels(Config config) {
+    return getConfigItemsByPrefix(config, HERON_KUBERNETES_SERVICE_LABEL);
+  }
+
+  public static Map<String, String> getPodAnnotations(Config config) {
+    return getConfigItemsByPrefix(config, HERON_KUBERNETES_POD_ANNOTATION);
+  }
+
+  public static Map<String, String> getServiceAnnotations(Config config) {
+    return getConfigItemsByPrefix(config, HERON_KUBERNETES_SERVICE_ANNOTATION);
+  }
+
   static Set<String> getConfigKeys(Config config, String keyPrefix) {
     Set<String> annotations = new HashSet<>();
     for (String s : config.getKeySet()) {
@@ -172,26 +193,14 @@ public final class KubernetesContext extends Context {
     return annotations;
   }
 
-  public static Map<String, String> getPodAnnotations(Config config) {
-    final Map<String, String> annotations = new HashMap<>();
-    final Set<String> keys = getConfigKeys(config, HERON_KUBERNETES_POD_ANNOTATION);
+  private static Map<String, String> getConfigItemsByPrefix(Config config, String keyPrefix) {
+    final Map<String, String> results = new HashMap<>();
+    final Set<String> keys = getConfigKeys(config, keyPrefix);
     for (String s : keys) {
       String value = config.getStringValue(s);
-      annotations.put(s.replaceFirst(KubernetesContext.HERON_KUBERNETES_POD_ANNOTATION,
-              ""), value);
+      results.put(s.replaceFirst(keyPrefix, ""), value);
     }
-    return annotations;
-  }
-
-  public static Map<String, String> getServiceAnnotations(Config config) {
-    final Map<String, String> annotations = new HashMap<>();
-    final Set<String> keys = getConfigKeys(config, HERON_KUBERNETES_SERVICE_ANNOTATION);
-    for (String s : keys) {
-      String value = config.getStringValue(s);
-      annotations.put(s.replaceFirst(KubernetesContext.HERON_KUBERNETES_SERVICE_ANNOTATION,
-              ""), value);
-    }
-    return annotations;
+    return results;
   }
 
   public static boolean hasContainerVolume(Config config) {
