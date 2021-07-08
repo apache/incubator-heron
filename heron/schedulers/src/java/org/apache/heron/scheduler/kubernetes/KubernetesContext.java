@@ -93,9 +93,9 @@ public final class KubernetesContext extends Context {
   public static final String HERON_KUBERNETES_SERVICE_ANNOTATION =
       "heron.kubernetes.service.annotation.";
   public static final String HERON_KUBERNETES_POD_LABEL =
-          "heron.kubernetes.pod.annotation.";
+          "heron.kubernetes.pod.label.";
   public static final String HERON_KUBERNETES_SERVICE_LABEL =
-          "heron.kubernetes.service.annotation.";
+          "heron.kubernetes.service.label.";
 
 
   private KubernetesContext() {
