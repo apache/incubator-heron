@@ -20,13 +20,7 @@
 package org.apache.heron.scheduler.kubernetes;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -161,7 +155,8 @@ public class V1Controller extends KubernetesController {
       final String message = ae.getMessage() + "\ndetails:" + ae.getResponseBody();
       throw new TopologyRuntimeManagementException(message, ae);
     }
-    final int currentContainerCount = statefulSet.getSpec().getReplicas();
+    final V1StatefulSetSpec v1StatefulSet = Objects.requireNonNull(statefulSet.getSpec());
+    final int currentContainerCount = Objects.requireNonNull(v1StatefulSet.getReplicas());
     final int newContainerCount = currentContainerCount + containersToAdd.size();
 
     try {
@@ -183,7 +178,9 @@ public class V1Controller extends KubernetesController {
       final String message = ae.getMessage() + "\ndetails:" + ae.getResponseBody();
       throw new TopologyRuntimeManagementException(message, ae);
     }
-    final int currentContainerCount = statefulSet.getSpec().getReplicas();
+
+    final V1StatefulSetSpec v1StatefulSet = Objects.requireNonNull(statefulSet.getSpec());
+    final int currentContainerCount = Objects.requireNonNull(v1StatefulSet.getReplicas());
     final int newContainerCount = currentContainerCount - containersToRemove.size();
 
     try {
@@ -321,7 +318,6 @@ public class V1Controller extends KubernetesController {
 
   private V1Service createTopologyService() {
     final String topologyName = getTopologyName();
-    final Config runtimeConfiguration = getRuntimeConfiguration();
 
     final V1Service service = new V1Service();
 
@@ -392,14 +388,12 @@ public class V1Controller extends KubernetesController {
 
   private Map<String, String> getPodAnnotations() {
     Config config = getConfiguration();
-    final Map<String, String> annotations = KubernetesContext.getPodAnnotations(config);
-    return annotations;
+    return KubernetesContext.getPodAnnotations(config);
   }
 
   private Map<String, String> getServiceAnnotations() {
     Config config = getConfiguration();
-    final Map<String, String> annotations = KubernetesContext.getServiceAnnotations(config);
-    return annotations;
+    return KubernetesContext.getServiceAnnotations(config);
   }
 
   private Map<String, String> getPrometheusAnnotations() {
@@ -603,8 +597,10 @@ public class V1Controller extends KubernetesController {
     for (Map.Entry<String, String> secret : podSecretKeyRefs.entrySet()) {
       final String[] keyRefParts = secret.getValue().split(":");
       if (keyRefParts.length != 2) {
-        LOG.log(Level.SEVERE, "SecretKeyRef must be in the form name:key. <" + keyRefParts + ">");
-        throw new TopologyRuntimeManagementException("SecretKeyRef must be in the form name:key. <" + keyRefParts + ">");
+        LOG.log(Level.SEVERE,
+                "SecretKeyRef must be in the form name:key. <" + secret.getValue() + ">");
+        throw new TopologyRuntimeManagementException(
+                "SecretKeyRef must be in the form name:key. <" + secret.getValue() + ">");
       }
       String name = keyRefParts[0];
       String key = keyRefParts[1];
