@@ -53,7 +53,6 @@ import io.kubernetes.client.openapi.apis.CoreV1Api;
 import io.kubernetes.client.openapi.models.V1Container;
 import io.kubernetes.client.openapi.models.V1ContainerPort;
 import io.kubernetes.client.openapi.models.V1EnvVar;
-import io.kubernetes.client.openapi.models.V1EnvVarBuilder;
 import io.kubernetes.client.openapi.models.V1EnvVarSource;
 import io.kubernetes.client.openapi.models.V1LabelSelector;
 import io.kubernetes.client.openapi.models.V1ObjectFieldSelector;
@@ -61,6 +60,7 @@ import io.kubernetes.client.openapi.models.V1ObjectMeta;
 import io.kubernetes.client.openapi.models.V1PodSpec;
 import io.kubernetes.client.openapi.models.V1PodTemplateSpec;
 import io.kubernetes.client.openapi.models.V1ResourceRequirements;
+import io.kubernetes.client.openapi.models.V1SecretKeySelector;
 import io.kubernetes.client.openapi.models.V1SecretVolumeSourceBuilder;
 import io.kubernetes.client.openapi.models.V1Service;
 import io.kubernetes.client.openapi.models.V1ServiceSpec;
@@ -524,7 +524,8 @@ public class V1Controller extends KubernetesController {
         .valueFrom(new V1EnvVarSource()
             .fieldRef(new V1ObjectFieldSelector()
                 .fieldPath(KubernetesConstants.POD_NAME)));
-    container.setEnv(Arrays.asList(envVarHost, envVarPodName));
+    container.addEnvItem(envVarHost);
+    container.addEnvItem(envVarPodName);
 
     setSecretKeyRefs(container);
 
@@ -611,14 +612,12 @@ public class V1Controller extends KubernetesController {
       }
       String name = keyRefParts[0];
       String key = keyRefParts[1];
-      V1EnvVar envVar = new V1EnvVarBuilder()
-              .withName(secret.getKey())
-              .withNewValueFrom()
-                .withNewSecretKeyRef()
-                  .withKey(key)
-                  .withName(name)
-                .endSecretKeyRef()
-              .endValueFrom().build();
+      final V1EnvVar envVar = new V1EnvVar()
+              .name(secret.getKey())
+                .valueFrom(new V1EnvVarSource()
+                  .secretKeyRef(new V1SecretKeySelector()
+                          .key(key)
+                          .name(name)));
       container.addEnvItem(envVar);
     }
   }
