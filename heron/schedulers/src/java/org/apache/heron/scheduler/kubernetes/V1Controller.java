@@ -52,6 +52,7 @@ import io.kubernetes.client.openapi.apis.CoreV1Api;
 import io.kubernetes.client.openapi.models.V1Container;
 import io.kubernetes.client.openapi.models.V1ContainerPort;
 import io.kubernetes.client.openapi.models.V1EnvVar;
+import io.kubernetes.client.openapi.models.V1EnvVarBuilder;
 import io.kubernetes.client.openapi.models.V1EnvVarSource;
 import io.kubernetes.client.openapi.models.V1LabelSelector;
 import io.kubernetes.client.openapi.models.V1ObjectFieldSelector;
@@ -59,6 +60,7 @@ import io.kubernetes.client.openapi.models.V1ObjectMeta;
 import io.kubernetes.client.openapi.models.V1PodSpec;
 import io.kubernetes.client.openapi.models.V1PodTemplateSpec;
 import io.kubernetes.client.openapi.models.V1ResourceRequirements;
+import io.kubernetes.client.openapi.models.V1SecretVolumeSourceBuilder;
 import io.kubernetes.client.openapi.models.V1Service;
 import io.kubernetes.client.openapi.models.V1ServiceSpec;
 import io.kubernetes.client.openapi.models.V1StatefulSet;
@@ -444,6 +446,8 @@ public class V1Controller extends KubernetesController {
 
     addVolumesIfPresent(podSpec);
 
+    mountSecretsAsVolumes(podSpec);
+
     return podSpec;
   }
 
@@ -469,6 +473,25 @@ public class V1Controller extends KubernetesController {
       if (volume != null) {
         LOG.fine("Adding volume: " + volume.toString());
         spec.volumes(Collections.singletonList(volume));
+      }
+    }
+  }
+
+  private void mountSecretsAsVolumes(V1PodSpec podSpec) {
+    final Config config = getConfiguration();
+    final Map<String, String> secrets = KubernetesContext.getPodSecretsToMount(config);
+    for (Map.Entry<String, String> secret : secrets.entrySet()) {
+      final V1VolumeMount mount = new V1VolumeMount()
+              .name(secret.getKey())
+              .mountPath(secret.getValue());
+      final V1Volume secretVolume = new V1Volume()
+              .name(secret.getKey())
+              .secret(new V1SecretVolumeSourceBuilder()
+                      .withSecretName(secret.getKey())
+                      .build());
+      podSpec.addVolumesItem(secretVolume);
+      for (V1Container container : podSpec.getContainers()) {
+        container.addVolumeMountsItem(mount);
       }
     }
   }
@@ -502,6 +525,7 @@ public class V1Controller extends KubernetesController {
                 .fieldPath(KubernetesConstants.POD_NAME)));
     container.setEnv(Arrays.asList(envVarHost, envVarPodName));
 
+    setSecretKeyRefs(container);
 
     // set container resources
     final V1ResourceRequirements resourceRequirements = new V1ResourceRequirements();
@@ -570,6 +594,29 @@ public class V1Controller extends KubernetesController {
               .name(KubernetesContext.getContainerVolumeName(config))
               .mountPath(KubernetesContext.getContainerVolumeMountPath(config));
       container.volumeMounts(Collections.singletonList(mount));
+    }
+  }
+
+  private void setSecretKeyRefs(V1Container container) {
+    final Config config = getConfiguration();
+    final Map<String, String> podSecretKeyRefs = KubernetesContext.getPodSecretKeyRefs(config);
+    for (Map.Entry<String, String> secret : podSecretKeyRefs.entrySet()) {
+      final String[] keyRefParts = secret.getValue().split(":");
+      if (keyRefParts.length != 2) {
+        LOG.log(Level.SEVERE, "SecretKeyRef must be in the form name:key. <" + keyRefParts + ">");
+        throw new TopologyRuntimeManagementException("SecretKeyRef must be in the form name:key. <" + keyRefParts + ">");
+      }
+      String name = keyRefParts[0];
+      String key = keyRefParts[1];
+      V1EnvVar envVar = new V1EnvVarBuilder()
+              .withName(secret.getKey())
+              .withNewValueFrom()
+                .withNewSecretKeyRef()
+                  .withKey(key)
+                  .withName(name)
+                .endSecretKeyRef()
+              .endValueFrom().build();
+      container.addEnvItem(envVar);
     }
   }
 
