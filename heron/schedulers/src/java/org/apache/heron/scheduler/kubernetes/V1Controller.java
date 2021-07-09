@@ -327,12 +327,13 @@ public class V1Controller extends KubernetesController {
     final V1ObjectMeta objectMeta = new V1ObjectMeta();
     objectMeta.name(topologyName);
     objectMeta.annotations(getServiceAnnotations());
+    objectMeta.setLabels(getServiceLabels());
     service.setMetadata(objectMeta);
 
     // create the headless service
     final V1ServiceSpec serviceSpec = new V1ServiceSpec();
     serviceSpec.clusterIP("None");
-    serviceSpec.setSelector(getMatchLabels(topologyName));
+    serviceSpec.setSelector(getPodMatchLabels(topologyName));
 
     service.setSpec(serviceSpec);
 
@@ -363,14 +364,14 @@ public class V1Controller extends KubernetesController {
     // add selector match labels "app=heron" and "topology=topology-name"
     // so the we know which pods to manage
     final V1LabelSelector selector = new V1LabelSelector();
-    selector.matchLabels(getMatchLabels(topologyName));
+    selector.matchLabels(getPodMatchLabels(topologyName));
     statefulSetSpec.selector(selector);
 
     // create a pod template
     final V1PodTemplateSpec podTemplateSpec = new V1PodTemplateSpec();
 
     // set up pod meta
-    final V1ObjectMeta templateMetaData = new V1ObjectMeta().labels(getLabels(topologyName));
+    final V1ObjectMeta templateMetaData = new V1ObjectMeta().labels(getPodLabels(topologyName));
     Map<String, String> annotations = new HashMap<>();
     annotations.putAll(getPodAnnotations());
     annotations.putAll(getPrometheusAnnotations());
@@ -408,18 +409,23 @@ public class V1Controller extends KubernetesController {
     return annotations;
   }
 
-  private Map<String, String> getMatchLabels(String topologyName) {
+  private Map<String, String> getPodMatchLabels(String topologyName) {
     final Map<String, String> labels = new HashMap<>();
     labels.put(KubernetesConstants.LABEL_APP, KubernetesConstants.LABEL_APP_VALUE);
     labels.put(KubernetesConstants.LABEL_TOPOLOGY, topologyName);
     return labels;
   }
 
-  private Map<String, String> getLabels(String topologyName) {
+  private Map<String, String> getPodLabels(String topologyName) {
     final Map<String, String> labels = new HashMap<>();
     labels.put(KubernetesConstants.LABEL_APP, KubernetesConstants.LABEL_APP_VALUE);
     labels.put(KubernetesConstants.LABEL_TOPOLOGY, topologyName);
+    labels.putAll(KubernetesContext.getPodLabels(getConfiguration()));
     return labels;
+  }
+
+  private Map<String, String> getServiceLabels() {
+    return KubernetesContext.getServiceLabels(getConfiguration());
   }
 
   private V1PodSpec getPodSpec(List<String> executorCommand, Resource resource,
