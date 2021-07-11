@@ -418,6 +418,18 @@ http_archive(
 load("@rules_pkg//:deps.bzl", "rules_pkg_dependencies")
 rules_pkg_dependencies()
 
+# for twitter connector
+TWITTER_CONNECTOR_VERSION = "4.0.6"
+maven_jar(
+  name = "org_twitter4j_core",
+  artifact = "org.twitter4j:twitter4j-core:" + TWITTER_CONNECTOR_VERSION,
+)
+
+maven_jar(
+  name = "org_twitter4j_stream",
+  artifact = "org.twitter4j:twitter4j-stream:" + TWITTER_CONNECTOR_VERSION,
+)
+
 # scala integration
 rules_scala_version = "358ab829626c6c2d34ec27f856485d3121e299c7"  # Jan 15 2020 - update this as needed
 

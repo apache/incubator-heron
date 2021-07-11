@@ -357,3 +357,16 @@ java_library(
         "@maven//:org_slf4j_slf4j_jdk14",
     ],
 )
+
+java_library(
+    name = "twitter4j",
+    srcs = [ "Empty.java" ],
+    exports = [
+        "@org_twitter4j_stream//jar",
+        "@org_twitter4j_core//jar",
+    ],
+    deps = [
+        "@org_twitter4j_stream//jar",
+        "@org_twitter4j_core//jar",
+    ],
+)
