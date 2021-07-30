@@ -68,7 +68,7 @@ public final class KubernetesConstants {
   public static final int CHECKPOINT_MGR_PORT = 6009;
   // port number the start with when more than one port needed for remote debugging
   public static final int JVM_REMOTE_DEBUGGER_PORT = 6010;
-  public static final String JVM_REMOTE_DEBUGGER_PORT_NAME = "remote-debugger";
+  public static final String JVM_REMOTE_DEBUGGER_PORT_NAME = "rmt-debug";
 
   public static final Map<ExecutorPort, Integer> EXECUTOR_PORTS = new HashMap<>();
   static {
