@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -109,8 +110,7 @@ public class V1Controller extends KubernetesController {
 
     final V1Service topologyService = createTopologyService();
     try {
-      final V1Service response =
-          coreClient.createNamespacedService(getNamespace(), topologyService, null,
+      coreClient.createNamespacedService(getNamespace(), topologyService, null,
               null, null);
     } catch (ApiException e) {
       KubernetesUtils.logExceptionWithDetails(LOG, "Error creating topology service", e);
@@ -126,8 +126,7 @@ public class V1Controller extends KubernetesController {
     final V1StatefulSet statefulSet = createStatefulSet(containerResource, numberOfInstances);
 
     try {
-      final V1StatefulSet response =
-          appsClient.createNamespacedStatefulSet(getNamespace(), statefulSet, null,
+      appsClient.createNamespacedStatefulSet(getNamespace(), statefulSet, null,
               null, null);
     } catch (ApiException e) {
       KubernetesUtils.logExceptionWithDetails(LOG, "Error creating topology", e);
@@ -297,15 +296,26 @@ public class V1Controller extends KubernetesController {
             + "] in namespace [" + getNamespace() + "] is deleted.");
   }
 
-  protected List<String> getExecutorCommand(String containerId) {
+  protected List<String> getExecutorCommand(String containerId, int numOfInstances) {
+    final Config configuration = getConfiguration();
+    final Config runtimeConfiguration = getRuntimeConfiguration();
     final Map<ExecutorPort, String> ports =
         KubernetesConstants.EXECUTOR_PORTS.entrySet()
             .stream()
             .collect(Collectors.toMap(Map.Entry::getKey,
                 e -> e.getValue().toString()));
 
-    final Config configuration = getConfiguration();
-    final Config runtimeConfiguration = getRuntimeConfiguration();
+    if (TopologyUtils.getTopologyRemoteDebuggingEnabled(Runtime.topology(runtimeConfiguration))
+            && numOfInstances != 0) {
+      List<String> remoteDebuggingPorts = new LinkedList<>();
+      IntStream.range(0, numOfInstances).forEach(i -> {
+        int port = KubernetesConstants.JVM_REMOTE_DEBUGGER_PORT + i;
+        remoteDebuggingPorts.add(String.valueOf(port));
+      });
+      ports.put(ExecutorPort.JVM_REMOTE_DEBUGGER_PORTS,
+              String.join(",", remoteDebuggingPorts));
+    }
+
     final String[] executorCommand =
         SchedulerUtils.getExecutorCommand(configuration, runtimeConfiguration,
             containerId, ports);
@@ -383,7 +393,7 @@ public class V1Controller extends KubernetesController {
     templateMetaData.annotations(annotations);
     podTemplateSpec.setMetadata(templateMetaData);
 
-    final List<String> command = getExecutorCommand("$" + ENV_SHARD_ID);
+    final List<String> command = getExecutorCommand("$" + ENV_SHARD_ID, numberOfInstances);
     podTemplateSpec.spec(getPodSpec(command, containerResource, numberOfInstances));
 
     statefulSetSpec.setTemplate(podTemplateSpec);
@@ -572,7 +582,6 @@ public class V1Controller extends KubernetesController {
       port.setContainerPort(v);
       ports.add(port);
     });
-
 
     if (remoteDebugEnabled) {
       IntStream.range(0, numberOfInstances).forEach(i -> {
