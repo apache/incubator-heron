@@ -28,5 +28,4 @@ github:
   labels:
     - heron
     - streaming
-    - real time
     - messaging
