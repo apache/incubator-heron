@@ -687,6 +687,7 @@ genrule(
         "export HERON_VERSION=$$(grep version $$RELEASE_FILE_DIR/$(location :release.yaml) | awk '{print $$3}')",
         'export HERON_VERSION=$$(echo $$HERON_VERSION | sed -e "s/^\'//" -e "s/\'$$//")',
         "export HERON_VERSION=$$(echo $$HERON_VERSION | grep \"[0-9]*\\.[0-9]*\\.[0-9]*\")",
+        'export HERON_VERSION=$$([[ ! -z $$HERON_VERSION_EXT ]] && echo $$HERON_VERSION_EXT || echo $$HERON_VERSION)',
         'export HERON_VERSION=$$([[ -z $$HERON_VERSION ]] && echo "0.0.0" || echo $$HERON_VERSION)',
         "mkdir -p $$TMP_DIR $$HELM_DIR heron-charts",
         "cp $(SRCS) $$HELM_DIR",
