@@ -51,10 +51,12 @@ import io.kubernetes.client.openapi.ApiException;
 import io.kubernetes.client.openapi.Configuration;
 import io.kubernetes.client.openapi.apis.AppsV1Api;
 import io.kubernetes.client.openapi.apis.CoreV1Api;
+import io.kubernetes.client.openapi.models.V1ConfigMapVolumeSource;
 import io.kubernetes.client.openapi.models.V1Container;
 import io.kubernetes.client.openapi.models.V1ContainerPort;
 import io.kubernetes.client.openapi.models.V1EnvVar;
 import io.kubernetes.client.openapi.models.V1EnvVarSource;
+import io.kubernetes.client.openapi.models.V1KeyToPath;
 import io.kubernetes.client.openapi.models.V1LabelSelector;
 import io.kubernetes.client.openapi.models.V1ObjectFieldSelector;
 import io.kubernetes.client.openapi.models.V1ObjectMeta;
@@ -634,5 +636,33 @@ public class V1Controller extends KubernetesController {
   public static double roundDecimal(double value, int places) {
     double scale = Math.pow(10, places);
     return Math.round(value * scale) / scale;
+  }
+
+  private V1PodSpec createConfigMapVolumeMount() {
+    /*
+      Configure the items <key, path>. Create ConfigMap, set its name, and then add the items list.
+      Configure the volumes name, set ConfigMap, and then add it to the V1PodSpec. Desired YAML schema as such:
+      volumes:
+        - name: pod-template-name  # from <POD_TEMPLATE_VOLUME>.
+          configMap:
+            name: configmap-name  # from <configmapName>.
+            items:
+            - key: pod-template-key  # from <POD_TEMPLATE_KEY>.
+              path: executor-pod-spec-template-file-name # from <EXECUTOR_POD_SPEC_TEMPLATE_FILE_NAME>.
+     */
+    V1KeyToPath items = new V1KeyToPath()
+            .key(KubernetesConstants.POD_TEMPLATE_KEY)
+            .path(KubernetesConstants.EXECUTOR_POD_SPEC_TEMPLATE_FILE_NAME);
+
+    V1ConfigMapVolumeSource configmap = new V1ConfigMapVolumeSource()
+            .name("CONFIGMAP_NAME") // TODO: get from <config-property> on cli.
+            .items(Collections.singletonList(items));
+
+    V1Volume volumes = new V1Volume()
+            .name(KubernetesConstants.POD_TEMPLATE_VOLUME_NAME)
+            .configMap(configmap);
+
+    return new V1PodSpec()
+            .volumes(Collections.singletonList(volumes));
   }
 }
