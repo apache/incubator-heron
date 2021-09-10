@@ -647,14 +647,15 @@ public class V1Controller extends KubernetesController {
   private V1PodSpec createPodTemplateConfigMapVolume(String configmapName) {
     /*
       Configure the items <key, path>. Create ConfigMap, set its name, and then add the items list.
-      Configure the volumes name, set ConfigMap, and then add it to the V1PodSpec. Desired YAML schema as such:
+      Configure the volumes name, set ConfigMap, and then add it to the V1PodSpec.
+      Desired YAML schema as such:
       volumes:
-        - name: pod-template-name  # from <POD_TEMPLATE_VOLUME>.
+        - name: pod-template-name  # <POD_TEMPLATE_VOLUME>.
           configMap:
-            name: configmap-name  # from <configmapName>.
+            name: configmap-name  # <configmapName>.
             items:
-            - key: pod-template-key  # from <POD_TEMPLATE_KEY>.
-              path: executor-pod-spec-template-file-name # from <EXECUTOR_POD_SPEC_TEMPLATE_FILE_NAME>.
+            - key: pod-template-key  # <POD_TEMPLATE_KEY>.
+              path: executor-pod-spec-template-file-name # <EXECUTOR_POD_SPEC_TEMPLATE_FILE_NAME>.
      */
     V1KeyToPath items = new V1KeyToPath()
             .key(KubernetesConstants.POD_TEMPLATE_KEY)
