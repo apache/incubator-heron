@@ -62,6 +62,10 @@ public abstract class KubernetesController implements IScalable {
     return KubernetesContext.getSchedulerURI(configuration);
   }
 
+  protected String getPodTemplateConfigName() {
+    return KubernetesContext.getPodTemplateConfigMapName(configuration);
+  };
+
   Resource getContainerResource(PackingPlan packingPlan) {
     // Align resources to maximal requested resource
     PackingPlan updatedPackingPlan = packingPlan.cloneWithHomogeneousScheduledResource();
