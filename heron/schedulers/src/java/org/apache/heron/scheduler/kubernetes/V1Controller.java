@@ -387,6 +387,12 @@ public class V1Controller extends KubernetesController {
     // create a pod template
     final V1PodTemplateSpec podTemplateSpec = new V1PodTemplateSpec();
 
+    // setup pod template configmap if it exists
+    final String podTemplateConfigMapName = getPodTemplateConfigName();
+    if (podTemplateConfigMapName != null) {
+      podTemplateSpec.setSpec(createPodTemplateConfigMapVolume(podTemplateConfigMapName));
+    }
+
     // set up pod meta
     final V1ObjectMeta templateMetaData = new V1ObjectMeta().labels(getPodLabels(topologyName));
     Map<String, String> annotations = new HashMap<>();
