@@ -638,7 +638,7 @@ public class V1Controller extends KubernetesController {
     return Math.round(value * scale) / scale;
   }
 
-  private V1PodSpec createConfigMapVolumeMount() {
+  private V1PodSpec createPodTemplateConfigMapVolume(String configmapName) {
     /*
       Configure the items <key, path>. Create ConfigMap, set its name, and then add the items list.
       Configure the volumes name, set ConfigMap, and then add it to the V1PodSpec. Desired YAML schema as such:
@@ -655,7 +655,7 @@ public class V1Controller extends KubernetesController {
             .path(KubernetesConstants.EXECUTOR_POD_SPEC_TEMPLATE_FILE_NAME);
 
     V1ConfigMapVolumeSource configmap = new V1ConfigMapVolumeSource()
-            .name("CONFIGMAP_NAME") // TODO: get from <config-property> on cli.
+            .name(configmapName)
             .items(Collections.singletonList(items));
 
     V1Volume volumes = new V1Volume()
