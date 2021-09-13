@@ -19,9 +19,10 @@
 
 package org.apache.heron.scheduler.kubernetes;
 
-import org.apache.heron.spi.common.Config;
 import org.junit.Assert;
 import org.junit.Test;
+
+import org.apache.heron.spi.common.Config;
 
 public class KubernetesContextTest {
 
@@ -30,9 +31,9 @@ public class KubernetesContextTest {
   private static final String POD_TEMPLATE_CONFIGMAP_NAME = "pod-template-configmap-name";
   private final Config config = Config.newBuilder().build();
   private final Config configWithPodTemplateConfigMap = Config.newBuilder()
-          .put(KubernetesContext.KUBERNETES_POD_TEMPLATE_CONFIGMAP_NAME,
-              POD_TEMPLATE_CONFIGMAP_NAME)
-          .build();
+      .put(KubernetesContext.KUBERNETES_POD_TEMPLATE_CONFIGMAP_NAME,
+          POD_TEMPLATE_CONFIGMAP_NAME)
+      .build();
 
   @Test
   public void testPodTemplateConfigMapContext() {
@@ -40,7 +41,7 @@ public class KubernetesContextTest {
         KUBERNETES_POD_TEMPLATE_CONFIGMAP_NAME);
     Assert.assertEquals(
         KubernetesContext.getPodTemplateConfigMapName(configWithPodTemplateConfigMap),
-            POD_TEMPLATE_CONFIGMAP_NAME);
+        POD_TEMPLATE_CONFIGMAP_NAME);
     Assert.assertNull(KubernetesContext.getPodTemplateConfigMapName(config));
   }
 }

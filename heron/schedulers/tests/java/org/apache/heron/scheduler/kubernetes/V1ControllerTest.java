@@ -20,6 +20,7 @@
 package org.apache.heron.scheduler.kubernetes;
 
 import org.junit.Test;
+
 import org.apache.heron.spi.common.Config;
 import org.apache.heron.spi.common.Key;
 
