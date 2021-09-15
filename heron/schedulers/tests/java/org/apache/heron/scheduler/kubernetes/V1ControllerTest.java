@@ -19,10 +19,18 @@
 
 package org.apache.heron.scheduler.kubernetes;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+
+import org.junit.Assert;
 import org.junit.Test;
 
 import org.apache.heron.spi.common.Config;
 import org.apache.heron.spi.common.Key;
+
+import io.kubernetes.client.openapi.models.V1ConfigMapVolumeSource;
+import io.kubernetes.client.openapi.models.V1KeyToPath;
+import io.kubernetes.client.openapi.models.V1PodSpec;
 
 public class V1ControllerTest {
 
@@ -31,16 +39,37 @@ public class V1ControllerTest {
 
   private final Config config = Config.newBuilder().build();
   private final Config runtime = Config.newBuilder()
-      .put(Key.TOPOLOGY_NAME, TOPOLOGY_NAME).build();
+      .put(Key.TOPOLOGY_NAME, TOPOLOGY_NAME)
+      .build();
 
-  private class Accessor extends V1Controller {
-    Accessor() {
-      super(config, runtime);
-    }
-  }
+  private final V1Controller v1Controller = new V1Controller(config, runtime);
 
   @Test
-  public void testPodTemplateConfigMapVolume() {
-    Accessor accessor = new Accessor();
+  public void testPodTemplateConfigMapVolume() throws NoSuchMethodException,
+      InvocationTargetException, IllegalAccessException {
+    Method createPodTemplateConfigMapVolume = V1Controller.class
+        .getDeclaredMethod("createPodTemplateConfigMapVolume", String.class);
+    createPodTemplateConfigMapVolume.setAccessible(true);
+
+    final V1PodSpec podSpec = (V1PodSpec) createPodTemplateConfigMapVolume
+        .invoke(v1Controller, CONFIGMAP_NAME);
+
+    checkPodTemplateConfigMap(podSpec);
+  }
+
+  private void checkPodTemplateConfigMap(V1PodSpec podSpec) {
+    Assert.assertNotNull(podSpec);
+    Assert.assertFalse(podSpec.getVolumes().isEmpty());
+
+    Assert.assertEquals(podSpec.getVolumes().get(0).getName(),
+        KubernetesConstants.POD_TEMPLATE_VOLUME_NAME);
+
+    final V1ConfigMapVolumeSource configMap = podSpec.getVolumes().get(0).getConfigMap();
+    Assert.assertEquals(configMap.getName(), CONFIGMAP_NAME);
+
+    final V1KeyToPath items = configMap.getItems().get(0);
+
+    Assert.assertEquals(items.getKey(), KubernetesConstants.POD_TEMPLATE_KEY);
+    Assert.assertEquals(items.getPath(), KubernetesConstants.EXECUTOR_POD_SPEC_TEMPLATE_FILE_NAME);
   }
 }
