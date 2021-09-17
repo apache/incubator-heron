@@ -11,7 +11,7 @@ const siteConfig = require(`${CWD}/siteConfig.js`);
 const heronReleases = require(`${CWD}/heron-release.json`)
 
 function getLatestArchiveMirrorUrl(version, type) {
-    return `http://www.apache.org/dyn/closer.cgi/incubator/heron/heron-${version}/heron-${version}-${type}.tar.gz?action=download`
+    return `http://www.apache.org/dyn/closer.lua/incubator/heron/heron-${version}/heron-${version}-${type}.tar.gz?action=download`
 }
 
 function getTarUrl(version, type) {
@@ -23,11 +23,11 @@ function getInstallScriptCryptoUrl(version, osType) {
 }
 
 function distUrl(version, type) {
-    return `http://www.apache.org/dyn/closer.cgi/incubator/heron/heron-${version}/heron-${version}-${type}.tar.gz?action=download`
+    return `http://www.apache.org/dyn/closer.lua/incubator/heron/heron-${version}/heron-${version}-${type}.tar.gz?action=download`
 }
 
 function getInstallScriptMirrorUrl(version, type) {
-    return `http://www.apache.org/dyn/closer.cgi/incubator/heron/heron-${version}/heron-install-${version}-${type}.sh`
+    return `http://www.apache.org/dyn/closer.lua/incubator/heron/heron-${version}/heron-install-${version}-${type}.sh`
 }
 
 function archiveUrl(version, type) {
