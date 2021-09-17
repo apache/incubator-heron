@@ -205,39 +205,7 @@ class Download extends React.Component {
 
 
             <h2 id="archive">Older releases</h2>
-            <table className="versions">
-              <thead>
-                <tr>
-                  <th>Release</th>
-
-                  <th>Source</th>
-                  <th>Release notes</th>
-                </tr>
-              </thead>
-              <tbody>
-                {releaseInfo.map(
-                  info => {
-                        var sha = "sha512"
-
-                        return info.version !== latestHeronVersion && (
-                            <tr key={info.version}>
-                        <th>{info.version}</th>
-
-                          <td>
-                          <a href={info.srcArchiveUrl}>apache-heron-{info.version}-source.tar.gz</a>
-                              &nbsp;
-                          (<a href={`${info.srcArchiveUrl}.asc`}>asc</a>,&nbsp;
-                          <a href={`${info.srcArchiveUrl}.${sha}`}>{`${sha}`}</a>)
-                          </td>
-                          <td>
-                          <a href={`${siteConfig.baseUrl}${this.props.language}/release-notes#${info.version}`}>Release Notes</a>
-                          </td>
-                          </tr>
-                      )
-                    }
-                )}
-              </tbody>
-            </table>
+            <p>Older releases can be found at <a href="https://archive.apache.org/dist/incubator/heron/"> the archive page.</a></p>
           </div>
         </Container>
       </div>
