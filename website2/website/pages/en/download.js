@@ -205,7 +205,7 @@ class Download extends React.Component {
 
 
             <h2 id="archive">Older releases</h2>
-            <p>Older releses can be found at <a href="https://archive.apache.org/dist/incubator/heron/"> the archive page.</a></p>
+            <p>Older releases can be found at <a href="https://archive.apache.org/dist/incubator/heron/"> the archive page.</a></p>
           </div>
         </Container>
       </div>
