@@ -43,11 +43,6 @@ public final class KubernetesConstants {
 
   public static final String DEFAULT_NAMESPACE = "default";
 
-  // ConfigMap setup constants
-  public static final String POD_TEMPLATE_VOLUME_NAME = "pod-template-volume";
-  public static final String POD_TEMPLATE_KEY = "podspec-configmap-key";
-  public static final String EXECUTOR_POD_SPEC_TEMPLATE_FILE_NAME = "pod-spec-template.yml";
-
   // https://kubernetes.io/docs/concepts/workloads/controllers/garbage-collection/
   public static final String DELETE_OPTIONS_PROPAGATION_POLICY = "Foreground";
 
