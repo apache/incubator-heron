@@ -52,6 +52,7 @@ import io.kubernetes.client.openapi.Configuration;
 import io.kubernetes.client.openapi.apis.AppsV1Api;
 import io.kubernetes.client.openapi.apis.CoreV1Api;
 import io.kubernetes.client.openapi.models.V1ConfigMap;
+import io.kubernetes.client.openapi.models.V1ConfigMapList;
 import io.kubernetes.client.openapi.models.V1Container;
 import io.kubernetes.client.openapi.models.V1ContainerPort;
 import io.kubernetes.client.openapi.models.V1EnvVar;
@@ -73,6 +74,7 @@ import io.kubernetes.client.openapi.models.V1Volume;
 import io.kubernetes.client.openapi.models.V1VolumeMount;
 import io.kubernetes.client.util.PatchUtils;
 
+import io.kubernetes.client.util.Yaml;
 import okhttp3.Response;
 
 import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
@@ -640,10 +642,46 @@ public class V1Controller extends KubernetesController {
   private V1PodTemplateSpec loadPodFromTemplate() {
     final String podTemplateConfigMapName = getPodTemplateConfigName();
 
+    // Attempt to locate ConfigMap with provided Pod Template name.
     if (podTemplateConfigMapName != null) {
-      return new V1PodTemplateSpec();
-    } else {
-      return new V1PodTemplateSpec();
+      try {
+        List<V1ConfigMap> configMapList = coreClient
+            .listNamespacedConfigMap(
+                KubernetesConstants.DEFAULT_NAMESPACE,
+                "false",
+                false,
+                null,
+                null,
+                null,
+                KubernetesConstants.REQUEST_RESPONSE_WINDOW_SIZE,
+                null,
+                null,
+                KubernetesConstants.REQUEST_RESPONSE_TIMEOUT,
+                false)
+            .getItems();
+
+        // Probe ConfigMaps for the specified Pod Template name.
+        for (V1ConfigMap configMap : configMapList) {
+          final String podTemplate = configMap.getData().get(podTemplateConfigMapName);
+          if (podTemplate != null) {
+            return (V1PodTemplateSpec) Yaml.load(podTemplate);
+          }
+        }
+
+        // Failure to locate Pod Template with provided name.
+        throw new ApiException();
+      } catch (ApiException e) {
+        KubernetesUtils.logExceptionWithDetails(LOG, "Error retrieving Pod Template " +
+            podTemplateConfigMapName, e);
+        throw new TopologySubmissionException(e.getMessage());
+      } catch (IOException e) {
+        KubernetesUtils.logExceptionWithDetails(LOG, "Error parsing Pod Template " +
+            podTemplateConfigMapName, e);
+        throw new TopologySubmissionException(e.getMessage());
+      }
     }
+
+    // Default Pod Template.
+    return new V1PodTemplateSpec();
   }
 }

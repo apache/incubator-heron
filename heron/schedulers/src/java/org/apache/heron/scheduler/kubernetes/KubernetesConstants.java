@@ -34,6 +34,8 @@ public final class KubernetesConstants {
 
   public static final String MEMORY = "memory";
   public static final String CPU = "cpu";
+  public static final int REQUEST_RESPONSE_WINDOW_SIZE = 10;
+  public static final int REQUEST_RESPONSE_TIMEOUT = 5;
 
   // container env constants
   public static final String ENV_HOST = "HOST";
