@@ -21,14 +21,25 @@ package org.apache.heron.scheduler.kubernetes;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.List;
 
+import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 
 import org.apache.heron.spi.common.Config;
 import org.apache.heron.spi.common.Key;
 
+import io.kubernetes.client.openapi.models.V1ConfigMap;
 import io.kubernetes.client.openapi.models.V1PodTemplateSpec;
 
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Mockito.when;
+
+@RunWith(MockitoJUnitRunner.class)
 public class V1ControllerTest {
 
   private static final String TOPOLOGY_NAME = "topology-name";
@@ -39,7 +50,21 @@ public class V1ControllerTest {
       .put(Key.TOPOLOGY_NAME, TOPOLOGY_NAME)
       .build();
 
-  private final V1Controller v1Controller = new V1Controller(config, runtime);
+  @InjectMocks
+  private V1Controller v1Controller = new V1Controller(config, runtime);
+
+  @Mock
+  private KubernetesController mockController;
+  @Mock
+  private List<V1ConfigMap> mockConfigMapList;
+
+  @Before
+  public void setUp() {
+    when(mockController.getPodTemplateConfigName())
+        .thenReturn(CONFIGMAP_NAME,null, "", "Nothing");
+
+    when(mockConfigMapList.get(anyInt())).thenReturn(new V1ConfigMap());
+  }
 
   @Test
   public void testLoadPodFromTemplate() throws NoSuchMethodException,
