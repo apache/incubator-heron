@@ -61,7 +61,7 @@ public class V1ControllerTest {
   @Before
   public void setUp() {
     when(mockController.getPodTemplateConfigName())
-        .thenReturn(CONFIGMAP_NAME,null, "", "Nothing");
+        .thenReturn(CONFIGMAP_NAME, null, "", "Nothing");
 
     when(mockConfigMapList.get(anyInt())).thenReturn(new V1ConfigMap());
   }

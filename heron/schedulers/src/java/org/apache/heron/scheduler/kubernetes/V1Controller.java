@@ -52,7 +52,6 @@ import io.kubernetes.client.openapi.Configuration;
 import io.kubernetes.client.openapi.apis.AppsV1Api;
 import io.kubernetes.client.openapi.apis.CoreV1Api;
 import io.kubernetes.client.openapi.models.V1ConfigMap;
-import io.kubernetes.client.openapi.models.V1ConfigMapList;
 import io.kubernetes.client.openapi.models.V1Container;
 import io.kubernetes.client.openapi.models.V1ContainerPort;
 import io.kubernetes.client.openapi.models.V1EnvVar;
@@ -73,7 +72,6 @@ import io.kubernetes.client.openapi.models.V1Toleration;
 import io.kubernetes.client.openapi.models.V1Volume;
 import io.kubernetes.client.openapi.models.V1VolumeMount;
 import io.kubernetes.client.util.PatchUtils;
-
 import io.kubernetes.client.util.Yaml;
 import okhttp3.Response;
 
@@ -671,12 +669,12 @@ public class V1Controller extends KubernetesController {
         // Failure to locate Pod Template with provided name.
         throw new ApiException();
       } catch (ApiException e) {
-        KubernetesUtils.logExceptionWithDetails(LOG, "Error retrieving Pod Template " +
-            podTemplateConfigMapName, e);
+        KubernetesUtils.logExceptionWithDetails(LOG, "Error retrieving Pod Template "
+            + podTemplateConfigMapName, e);
         throw new TopologySubmissionException(e.getMessage());
       } catch (IOException e) {
-        KubernetesUtils.logExceptionWithDetails(LOG, "Error parsing Pod Template " +
-            podTemplateConfigMapName, e);
+        KubernetesUtils.logExceptionWithDetails(LOG, "Error parsing Pod Template "
+            + podTemplateConfigMapName, e);
         throw new TopologySubmissionException(e.getMessage());
       }
     }
