@@ -24,7 +24,9 @@ import java.lang.reflect.Method;
 
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -61,9 +63,9 @@ public class V1ControllerTest {
   private V1ConfigMapList mockConfigMapList;
 
   @InjectMocks
-  private Method loadPodFromTemplateNoPodTemplate = V1Controller.class
+  private final Method loadPodFromTemplateNoPodTemplate = V1Controller.class
       .getDeclaredMethod("loadPodFromTemplate");
-  private Method loadPodFromTemplateWithPodTemplate = V1Controller.class
+  private final Method loadPodFromTemplateWithPodTemplate = V1Controller.class
       .getDeclaredMethod("loadPodFromTemplate");
 
   public V1ControllerTest() throws NoSuchMethodException {
@@ -83,5 +85,18 @@ public class V1ControllerTest {
         .invoke(v1ControllerNoPodTemplate);
 
     Assert.assertEquals(podSpec.toString(), POD_TEMPLATE_DEFAULT);
+  }
+
+  @Rule
+  public ExpectedException noConfigMapsExceptionRule = ExpectedException.none();
+
+  @Test
+  public void testLoadPodFromTemplateNoConfigMaps()
+      throws InvocationTargetException, IllegalAccessException {
+//    noConfigMapsExceptionRule.expect(TopologySubmissionException.class);
+//    noConfigMapsExceptionRule.expectMessage("No ConfigMaps set");
+//
+//    final V1PodTemplateSpec podSpec = (V1PodTemplateSpec) loadPodFromTemplateWithPodTemplate
+//        .invoke(v1ControllerWithPodTemplate);
   }
 }

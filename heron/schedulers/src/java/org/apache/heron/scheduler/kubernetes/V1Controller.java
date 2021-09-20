@@ -659,6 +659,10 @@ public class V1Controller extends KubernetesController {
                 false)
             .getItems();
 
+        if (configMapList == null) {
+          throw new ApiException("No ConfigMaps set");
+        }
+
         // Probe ConfigMaps for the specified Pod Template name.
         for (V1ConfigMap configMap : configMapList) {
           final String podTemplate = configMap.getData().get(podTemplateConfigMapName);
