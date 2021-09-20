@@ -33,7 +33,6 @@ public class KubernetesControllerTest {
   private static final String K8S_URI = "http://k8s.uri:8080";
   private static final String NAMESPACE = "ns1";
   private static final String TOPOLOGY_NAME = "topology-name";
-  private static final String POD_TEMPLATE_CONFIGMAP_NAME = "pod-template-configmap-name";
 
   private Config config = Config.newBuilder()
       .put(KubernetesContext.HERON_KUBERNETES_SCHEDULER_URI, K8S_URI).build();
@@ -44,26 +43,12 @@ public class KubernetesControllerTest {
   private Config runtime = Config.newBuilder()
       .put(Key.TOPOLOGY_NAME, TOPOLOGY_NAME).build();
 
-  private Config configWithPodTemplateConfigMap = Config.newBuilder()
-      .put(KubernetesContext.HERON_KUBERNETES_SCHEDULER_URI, K8S_URI)
-      .put(KubernetesContext.KUBERNETES_POD_TEMPLATE_CONFIGMAP_NAME,
-          POD_TEMPLATE_CONFIGMAP_NAME)
-      .build();
-
-  private Config configWithNSPodTemplateConfigMap = Config.newBuilder()
-      .putAll(configWithPodTemplateConfigMap)
-      .put(KubernetesContext.HERON_KUBERNETES_SCHEDULER_NAMESPACE, NAMESPACE)
-      .put(KubernetesContext.KUBERNETES_POD_TEMPLATE_CONFIGMAP_NAME,
-          POD_TEMPLATE_CONFIGMAP_NAME)
-      .build();
-
   @Test
   public void testControllerSetup() {
     final KubernetesController controller = create(config, runtime);
     Assert.assertEquals(K8S_URI, controller.getKubernetesUri());
     Assert.assertEquals("default", controller.getNamespace());
     Assert.assertEquals(TOPOLOGY_NAME, controller.getTopologyName());
-    Assert.assertNull(controller.getPodTemplateConfigName());
   }
 
   @Test
@@ -72,16 +57,6 @@ public class KubernetesControllerTest {
     Assert.assertEquals(K8S_URI, controller.getKubernetesUri());
     Assert.assertEquals(NAMESPACE, controller.getNamespace());
     Assert.assertEquals(TOPOLOGY_NAME, controller.getTopologyName());
-    Assert.assertNull(controller.getPodTemplateConfigName());
-  }
-
-  @Test
-  public void testControllerWithPodTemplateConfigMap() {
-    final KubernetesController controller = create(configWithPodTemplateConfigMap, runtime);
-    Assert.assertEquals(POD_TEMPLATE_CONFIGMAP_NAME, controller.getPodTemplateConfigName());
-
-    final KubernetesController controllerNS = create(configWithNSPodTemplateConfigMap, runtime);
-    Assert.assertEquals(POD_TEMPLATE_CONFIGMAP_NAME, controllerNS.getPodTemplateConfigName());
   }
 
   private KubernetesController create(Config c, Config r) {

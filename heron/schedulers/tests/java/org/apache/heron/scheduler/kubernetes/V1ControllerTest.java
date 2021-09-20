@@ -36,9 +36,6 @@ import org.apache.heron.spi.common.Key;
 import io.kubernetes.client.openapi.models.V1ConfigMap;
 import io.kubernetes.client.openapi.models.V1PodTemplateSpec;
 
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Mockito.when;
-
 @RunWith(MockitoJUnitRunner.class)
 public class V1ControllerTest {
 
@@ -60,10 +57,6 @@ public class V1ControllerTest {
 
   @Before
   public void setUp() {
-    when(mockController.getPodTemplateConfigName())
-        .thenReturn(CONFIGMAP_NAME, null, "", "Nothing");
-
-    when(mockConfigMapList.get(anyInt())).thenReturn(new V1ConfigMap());
   }
 
   @Test

@@ -638,7 +638,8 @@ public class V1Controller extends KubernetesController {
   }
 
   private V1PodTemplateSpec loadPodFromTemplate() {
-    final String podTemplateConfigMapName = getPodTemplateConfigName();
+    final String podTemplateConfigMapName = KubernetesContext
+        .getPodTemplateConfigMapName(super.getConfiguration());
 
     // Attempt to locate ConfigMap with provided Pod Template name.
     if (podTemplateConfigMapName != null) {
