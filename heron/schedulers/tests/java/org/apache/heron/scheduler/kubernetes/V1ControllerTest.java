@@ -32,6 +32,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import org.apache.heron.api.exception.TopologySubmissionException;
 import org.apache.heron.spi.common.Config;
 import org.apache.heron.spi.common.Key;
 
@@ -63,15 +64,15 @@ public class V1ControllerTest {
   private V1ConfigMapList mockConfigMapList;
 
   @InjectMocks
-  private final Method loadPodFromTemplateNoPodTemplate = V1Controller.class
-      .getDeclaredMethod("loadPodFromTemplate");
-  private final Method loadPodFromTemplateWithPodTemplate = V1Controller.class
+  private final Method loadPodFromTemplate = V1Controller.class
       .getDeclaredMethod("loadPodFromTemplate");
 
   public V1ControllerTest() throws NoSuchMethodException {
-    loadPodFromTemplateNoPodTemplate.setAccessible(true);
-    loadPodFromTemplateWithPodTemplate.setAccessible(true);
+    loadPodFromTemplate.setAccessible(true);
   }
+
+  @Rule
+  public final ExpectedException exceptionRule = ExpectedException.none();
 
   @Before
   public void setUp() {
@@ -81,22 +82,19 @@ public class V1ControllerTest {
   @Test
   public void testLoadPodFromTemplateDefault()
       throws InvocationTargetException, IllegalAccessException {
-    final V1PodTemplateSpec podSpec = (V1PodTemplateSpec) loadPodFromTemplateNoPodTemplate
+    final V1PodTemplateSpec podSpec = (V1PodTemplateSpec) loadPodFromTemplate
         .invoke(v1ControllerNoPodTemplate);
 
     Assert.assertEquals(podSpec.toString(), POD_TEMPLATE_DEFAULT);
   }
 
-  @Rule
-  public ExpectedException noConfigMapsExceptionRule = ExpectedException.none();
-
   @Test
   public void testLoadPodFromTemplateNoConfigMaps()
       throws InvocationTargetException, IllegalAccessException {
-//    noConfigMapsExceptionRule.expect(TopologySubmissionException.class);
-//    noConfigMapsExceptionRule.expectMessage("No ConfigMaps set");
-//
-//    final V1PodTemplateSpec podSpec = (V1PodTemplateSpec) loadPodFromTemplateWithPodTemplate
-//        .invoke(v1ControllerWithPodTemplate);
+    exceptionRule.expect(TopologySubmissionException.class);
+    exceptionRule.expectMessage("No ConfigMaps set");
+
+    final V1PodTemplateSpec podSpec = (V1PodTemplateSpec) loadPodFromTemplate
+        .invoke(v1ControllerWithPodTemplate);
   }
 }
