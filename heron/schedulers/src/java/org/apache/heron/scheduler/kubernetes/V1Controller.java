@@ -668,7 +668,8 @@ public class V1Controller extends KubernetesController {
         }
 
         // Failure to locate Pod Template with provided name.
-        throw new ApiException();
+        throw new ApiException("Failed to locate Pod Template " + podTemplateConfigMapName
+            + " in ConfigMaps");
       } catch (ApiException e) {
         KubernetesUtils.logExceptionWithDetails(LOG, "Error retrieving Pod Template "
             + podTemplateConfigMapName, e);
