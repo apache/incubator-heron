@@ -21,8 +21,8 @@ package org.apache.heron.scheduler.kubernetes;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.List;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -33,40 +33,55 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.apache.heron.spi.common.Config;
 import org.apache.heron.spi.common.Key;
 
-import io.kubernetes.client.openapi.models.V1ConfigMap;
+import io.kubernetes.client.openapi.models.V1ConfigMapList;
 import io.kubernetes.client.openapi.models.V1PodTemplateSpec;
+
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class V1ControllerTest {
 
   private static final String TOPOLOGY_NAME = "topology-name";
   private static final String CONFIGMAP_NAME = "configmap-name";
+  private static final String POD_TEMPLATE_DEFAULT = new V1PodTemplateSpec().toString();
 
   private final Config config = Config.newBuilder().build();
+  private final Config configWithPodTemplate = Config.newBuilder()
+      .put(KubernetesContext.KUBERNETES_POD_TEMPLATE_CONFIGMAP_NAME, CONFIGMAP_NAME)
+      .build();
   private final Config runtime = Config.newBuilder()
       .put(Key.TOPOLOGY_NAME, TOPOLOGY_NAME)
       .build();
 
-  @InjectMocks
-  private V1Controller v1Controller = new V1Controller(config, runtime);
+  private final V1Controller v1ControllerNoPodTemplate = new V1Controller(config, runtime);
+  private final V1Controller v1ControllerWithPodTemplate =
+      new V1Controller(configWithPodTemplate, runtime);
 
   @Mock
-  private KubernetesController mockController;
-  @Mock
-  private List<V1ConfigMap> mockConfigMapList;
+  private V1ConfigMapList mockConfigMapList;
+
+  @InjectMocks
+  private Method loadPodFromTemplateNoPodTemplate = V1Controller.class
+      .getDeclaredMethod("loadPodFromTemplate");
+  private Method loadPodFromTemplateWithPodTemplate = V1Controller.class
+      .getDeclaredMethod("loadPodFromTemplate");
+
+  public V1ControllerTest() throws NoSuchMethodException {
+    loadPodFromTemplateNoPodTemplate.setAccessible(true);
+    loadPodFromTemplateWithPodTemplate.setAccessible(true);
+  }
 
   @Before
   public void setUp() {
+    when(mockConfigMapList.getItems()).thenReturn(null);
   }
 
   @Test
-  public void testLoadPodFromTemplate() throws NoSuchMethodException,
-      InvocationTargetException, IllegalAccessException {
-    Method loadPodFromTemplate = V1Controller.class
-        .getDeclaredMethod("loadPodFromTemplate");
-    loadPodFromTemplate.setAccessible(true);
+  public void testLoadPodFromTemplateDefault()
+      throws InvocationTargetException, IllegalAccessException {
+    final V1PodTemplateSpec podSpec = (V1PodTemplateSpec) loadPodFromTemplateNoPodTemplate
+        .invoke(v1ControllerNoPodTemplate);
 
-    final V1PodTemplateSpec podSpec = (V1PodTemplateSpec) loadPodFromTemplate
-        .invoke(v1Controller);
+    Assert.assertEquals(podSpec.toString(), POD_TEMPLATE_DEFAULT);
   }
 }
