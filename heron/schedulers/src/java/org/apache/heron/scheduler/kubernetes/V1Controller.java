@@ -652,6 +652,10 @@ public class V1Controller extends KubernetesController {
 
         // Probe ConfigMaps for the specified Pod Template name.
         for (V1ConfigMap configMap : configMapLists) {
+          if (configMap == null) {
+            continue;
+          }
+
           final Map<String, String> configMapData = configMap.getData();
 
           if (configMapData != null && configMapData.containsKey(podTemplateConfigMapName)) {
@@ -666,10 +670,10 @@ public class V1Controller extends KubernetesController {
         KubernetesUtils.logExceptionWithDetails(LOG, "Error retrieving Pod Template "
             + podTemplateConfigMapName, e);
         throw new TopologySubmissionException(e.getMessage());
-      } catch (IOException e) {
-        KubernetesUtils.logExceptionWithDetails(LOG, "Error parsing Pod Template "
-            + podTemplateConfigMapName, e);
-        throw new TopologySubmissionException(e.getMessage());
+      } catch (IOException | ClassCastException e) {
+        final String message = "Error parsing Pod Template " + podTemplateConfigMapName;
+        KubernetesUtils.logExceptionWithDetails(LOG, message, e);
+        throw new TopologySubmissionException(message);
       }
     }
 
@@ -677,7 +681,7 @@ public class V1Controller extends KubernetesController {
     return new V1PodTemplateSpec();
   }
 
-  private List<V1ConfigMap> getConfigMaps() {
+  protected List<V1ConfigMap> getConfigMaps() {
     try {
       V1ConfigMapList configMapList = coreClient
           .listNamespacedConfigMap(
