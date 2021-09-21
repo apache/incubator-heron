@@ -52,6 +52,7 @@ import io.kubernetes.client.openapi.Configuration;
 import io.kubernetes.client.openapi.apis.AppsV1Api;
 import io.kubernetes.client.openapi.apis.CoreV1Api;
 import io.kubernetes.client.openapi.models.V1ConfigMap;
+import io.kubernetes.client.openapi.models.V1ConfigMapList;
 import io.kubernetes.client.openapi.models.V1Container;
 import io.kubernetes.client.openapi.models.V1ContainerPort;
 import io.kubernetes.client.openapi.models.V1EnvVar;
@@ -644,30 +645,17 @@ public class V1Controller extends KubernetesController {
     // Attempt to locate ConfigMap with provided Pod Template name.
     if (podTemplateConfigMapName != null) {
       try {
-        List<V1ConfigMap> configMapList = coreClient
-            .listNamespacedConfigMap(
-                KubernetesConstants.DEFAULT_NAMESPACE,
-                "false",
-                false,
-                null,
-                null,
-                null,
-                KubernetesConstants.REQUEST_RESPONSE_WINDOW_SIZE,
-                null,
-                null,
-                KubernetesConstants.REQUEST_RESPONSE_TIMEOUT,
-                false)
-            .getItems();
-
-        if (configMapList == null) {
-          throw new ApiException("No ConfigMaps set but Pod Template name supplied");
+        List<V1ConfigMap> configMapLists = getConfigMaps();
+        if (configMapLists == null) {
+          throw new ApiException("No ConfigMaps returned by K8s client");
         }
 
         // Probe ConfigMaps for the specified Pod Template name.
-        for (V1ConfigMap configMap : configMapList) {
-          final String podTemplate = configMap.getData().get(podTemplateConfigMapName);
-          if (podTemplate != null) {
-            return (V1PodTemplateSpec) Yaml.load(podTemplate);
+        for (V1ConfigMap configMap : configMapLists) {
+          final Map<String, String> configMapData = configMap.getData();
+
+          if (configMapData != null && configMapData.containsKey(podTemplateConfigMapName)) {
+            return (V1PodTemplateSpec) Yaml.load(configMapData.get(podTemplateConfigMapName));
           }
         }
 
@@ -687,5 +675,32 @@ public class V1Controller extends KubernetesController {
 
     // Default Pod Template.
     return new V1PodTemplateSpec();
+  }
+
+  private List<V1ConfigMap> getConfigMaps() {
+    try {
+      V1ConfigMapList configMapList = coreClient
+          .listNamespacedConfigMap(
+              KubernetesConstants.DEFAULT_NAMESPACE,
+              "false",
+              false,
+              null,
+              null,
+              null,
+              KubernetesConstants.REQUEST_RESPONSE_WINDOW_SIZE,
+              null,
+              null,
+              KubernetesConstants.REQUEST_RESPONSE_TIMEOUT,
+              false);
+
+      if (configMapList == null) {
+        throw new ApiException("No ConfigMaps returned by K8s client");
+      }
+
+      return configMapList.getItems();
+    } catch (ApiException e) {
+      KubernetesUtils.logExceptionWithDetails(LOG, "Error retrieving ConfigMaps", e);
+      throw new TopologySubmissionException(e.getMessage());
+    }
   }
 }
