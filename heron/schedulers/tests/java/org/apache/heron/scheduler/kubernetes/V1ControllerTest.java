@@ -58,6 +58,7 @@ public class V1ControllerTest {
   private final LinkedList<V1ConfigMap> dummyConfigMapList;
   private final LinkedList<V1ConfigMap> invalidPodConfigMapList;
   private final LinkedList<V1ConfigMap> emptyPodConfigMapList;
+  private final LinkedList<V1ConfigMap> validPodConfigMapList;
 
   private final V1Controller v1ControllerNoPodTemplate = new V1Controller(config, runtime);
   @Spy
@@ -79,20 +80,50 @@ public class V1ControllerTest {
     // ConfigMap List with empty and non-target maps.
     V1ConfigMap configMapWithNonTargetData = new V1ConfigMap();
     configMapWithNonTargetData.putDataItem("Dummy Key", "Dummy Value");
-    dummyConfigMapList = new LinkedList<V1ConfigMap>(emptyConfigMapList);
+    dummyConfigMapList = new LinkedList<>(emptyConfigMapList);
     dummyConfigMapList.add(configMapWithNonTargetData);
 
     // ConfigMap List with empty and invalid target maps.
     V1ConfigMap configMapInvalidPod = new V1ConfigMap();
     configMapInvalidPod.putDataItem(CONFIGMAP_NAME, "Dummy Value");
-    invalidPodConfigMapList = new LinkedList<V1ConfigMap>(
+    invalidPodConfigMapList = new LinkedList<>(
         Arrays.asList(configMapWithNonTargetData, configMapInvalidPod));
 
     // ConfigMap List with empty and empty target maps.
     V1ConfigMap configMapEmptyPod = new V1ConfigMap();
     configMapEmptyPod.putDataItem(CONFIGMAP_NAME, "");
-    emptyPodConfigMapList = new LinkedList<V1ConfigMap>(
+    emptyPodConfigMapList = new LinkedList<>(
         Arrays.asList(configMapWithNonTargetData, configMapEmptyPod));
+
+    // ConfigMap List with valid Pod Template.
+    final String validPodTemplate =
+        "apiVersion: apps/v1\n"
+        + "kind: PodTemplate\n"
+        + "metadata:\n"
+        + "  name: heron-tracker\n"
+        + "  namespace: default\n"
+        + "template:\n"
+        + "  metadata:\n"
+        + "    labels:\n"
+        + "      app: heron-tracker\n"
+        + "  spec:\n"
+        + "    containers:\n"
+        + "      - name: heron-tracker\n"
+        + "        image: apache/heron:latest\n"
+        + "        ports:\n"
+        + "          - containerPort: 8888\n"
+        + "            name: api-port\n"
+        + "        resources:\n"
+        + "          requests:\n"
+        + "            cpu: \"100m\"\n"
+        + "            memory: \"200M\"\n"
+        + "          limits:\n"
+        + "            cpu: \"400m\"\n"
+        + "            memory: \"512M\"";
+    V1ConfigMap configMapValidPod = new V1ConfigMap();
+    configMapValidPod.putDataItem(CONFIGMAP_NAME, validPodTemplate);
+    validPodConfigMapList = new LinkedList<>(
+        Arrays.asList(configMapWithNonTargetData, configMapValidPod));
   }
 
   @Test
@@ -174,5 +205,52 @@ public class V1ControllerTest {
       message = e.getCause().getMessage();
     }
     Assert.assertTrue(message.contains(expected));
+  }
+
+  @Test
+  public void testLoadPodFromTemplateValidConfigMaps()
+      throws IllegalAccessException, InvocationTargetException {
+    final String expected =
+        "        containers: [class V1Container {\n"
+        + "            args: null\n"
+        + "            command: null\n"
+        + "            env: null\n"
+        + "            envFrom: null\n"
+        + "            image: apache/heron:latest\n"
+        + "            imagePullPolicy: null\n"
+        + "            lifecycle: null\n"
+        + "            livenessProbe: null\n"
+        + "            name: heron-tracker\n"
+        + "            ports: [class V1ContainerPort {\n"
+        + "                containerPort: 8888\n"
+        + "                hostIP: null\n"
+        + "                hostPort: null\n"
+        + "                name: api-port\n"
+        + "                protocol: null\n"
+        + "            }]\n"
+        + "            readinessProbe: null\n"
+        + "            resources: class V1ResourceRequirements {\n"
+        + "                limits: {cpu=Quantity{number=0.400, format=DECIMAL_SI}, "
+        + "memory=Quantity{number=512000000, format=DECIMAL_SI}}\n"
+        + "                requests: {cpu=Quantity{number=0.100, format=DECIMAL_SI}, "
+        + "memory=Quantity{number=200000000, format=DECIMAL_SI}}\n"
+        + "            }\n"
+        + "            securityContext: null\n"
+        + "            startupProbe: null\n"
+        + "            stdin: null\n"
+        + "            stdinOnce: null\n"
+        + "            terminationMessagePath: null\n"
+        + "            terminationMessagePolicy: null\n"
+        + "            tty: null\n"
+        + "            volumeDevices: null\n"
+        + "            volumeMounts: null\n"
+        + "            workingDir: null\n"
+        + "        }]";
+
+    doReturn(validPodConfigMapList).when(v1ControllerWithPodTemplate).getConfigMaps();
+    V1PodTemplateSpec podTemplateSpec =
+        (V1PodTemplateSpec) loadPodFromTemplate.invoke(v1ControllerWithPodTemplate);
+
+    Assert.assertTrue(podTemplateSpec.toString().contains(expected));
   }
 }
