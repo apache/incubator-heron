@@ -658,8 +658,13 @@ public class V1Controller extends KubernetesController {
           }
 
           final Map<String, String> configMapData = configMap.getData();
-
           if (configMapData != null && configMapData.containsKey(podTemplateConfigMapName)) {
+
+            final String podTemplateStr = configMapData.get(podTemplateConfigMapName);
+            if (podTemplateStr == null || podTemplateStr.isEmpty()) {
+              throw new IllegalArgumentException("Pod Template is empty");
+            }
+
             return ((V1PodTemplate) Yaml.load(configMapData.get(podTemplateConfigMapName)))
                 .getTemplate();
           }
@@ -672,7 +677,7 @@ public class V1Controller extends KubernetesController {
         KubernetesUtils.logExceptionWithDetails(LOG, "Error retrieving Pod Template "
             + podTemplateConfigMapName, e);
         throw new TopologySubmissionException(e.getMessage());
-      } catch (IOException | ClassCastException e) {
+      } catch (IOException | ClassCastException | IllegalArgumentException e) {
         final String message = "Error parsing Pod Template " + podTemplateConfigMapName;
         KubernetesUtils.logExceptionWithDetails(LOG, message, e);
         throw new TopologySubmissionException(message);

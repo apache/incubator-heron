@@ -56,7 +56,8 @@ public class V1ControllerTest {
 
   private final LinkedList<V1ConfigMap> emptyConfigMapList;
   private final LinkedList<V1ConfigMap> dummyConfigMapList;
-  private final LinkedList<V1ConfigMap> badConfigMapList;
+  private final LinkedList<V1ConfigMap> invalidPodConfigMapList;
+  private final LinkedList<V1ConfigMap> emptyPodConfigMapList;
 
   private final V1Controller v1ControllerNoPodTemplate = new V1Controller(config, runtime);
   @Spy
@@ -81,11 +82,17 @@ public class V1ControllerTest {
     dummyConfigMapList = new LinkedList<V1ConfigMap>(emptyConfigMapList);
     dummyConfigMapList.add(configMapWithNonTargetData);
 
-    // ConfigMap List with empty and non-target maps.
-    V1ConfigMap configMapBadData = new V1ConfigMap();
-    configMapBadData.putDataItem(CONFIGMAP_NAME, "Dummy Value");
-    badConfigMapList = new LinkedList<V1ConfigMap>(
-        Arrays.asList(configMapWithNonTargetData, configMapBadData));
+    // ConfigMap List with empty and invalid target maps.
+    V1ConfigMap configMapInvalidPod = new V1ConfigMap();
+    configMapInvalidPod.putDataItem(CONFIGMAP_NAME, "Dummy Value");
+    invalidPodConfigMapList = new LinkedList<V1ConfigMap>(
+        Arrays.asList(configMapWithNonTargetData, configMapInvalidPod));
+
+    // ConfigMap List with empty and empty target maps.
+    V1ConfigMap configMapEmptyPod = new V1ConfigMap();
+    configMapEmptyPod.putDataItem(CONFIGMAP_NAME, "");
+    emptyPodConfigMapList = new LinkedList<V1ConfigMap>(
+        Arrays.asList(configMapWithNonTargetData, configMapEmptyPod));
   }
 
   @Test
@@ -152,7 +159,15 @@ public class V1ControllerTest {
     final String expected = "Error parsing";
     String message = "";
 
-    doReturn(badConfigMapList).when(v1ControllerWithPodTemplate).getConfigMaps();
+    doReturn(invalidPodConfigMapList).when(v1ControllerWithPodTemplate).getConfigMaps();
+    try {
+      loadPodFromTemplate.invoke(v1ControllerWithPodTemplate);
+    } catch (InvocationTargetException e) {
+      message = e.getCause().getMessage();
+    }
+    Assert.assertTrue(message.contains(expected));
+
+    doReturn(emptyPodConfigMapList).when(v1ControllerWithPodTemplate).getConfigMaps();
     try {
       loadPodFromTemplate.invoke(v1ControllerWithPodTemplate);
     } catch (InvocationTargetException e) {
