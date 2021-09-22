@@ -61,6 +61,7 @@ import io.kubernetes.client.openapi.models.V1LabelSelector;
 import io.kubernetes.client.openapi.models.V1ObjectFieldSelector;
 import io.kubernetes.client.openapi.models.V1ObjectMeta;
 import io.kubernetes.client.openapi.models.V1PodSpec;
+import io.kubernetes.client.openapi.models.V1PodTemplate;
 import io.kubernetes.client.openapi.models.V1PodTemplateSpec;
 import io.kubernetes.client.openapi.models.V1ResourceRequirements;
 import io.kubernetes.client.openapi.models.V1SecretKeySelector;
@@ -659,7 +660,8 @@ public class V1Controller extends KubernetesController {
           final Map<String, String> configMapData = configMap.getData();
 
           if (configMapData != null && configMapData.containsKey(podTemplateConfigMapName)) {
-            return (V1PodTemplateSpec) Yaml.load(configMapData.get(podTemplateConfigMapName));
+            return ((V1PodTemplate) Yaml.load(configMapData.get(podTemplateConfigMapName)))
+                .getTemplate();
           }
         }
 
