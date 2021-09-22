@@ -57,9 +57,7 @@ public class V1ControllerTest {
 
   private final LinkedList<V1ConfigMap> emptyConfigMapList;
   private final LinkedList<V1ConfigMap> dummyConfigMapList;
-  private final LinkedList<V1ConfigMap> invalidPodConfigMapList;
-  private final LinkedList<V1ConfigMap> emptyPodConfigMapList;
-  private final LinkedList<V1ConfigMap> validPodConfigMapList;
+  private final V1ConfigMap configMapWithNonTargetData;
 
   private final V1Controller v1ControllerNoPodTemplate = new V1Controller(config, runtime);
   @Spy
@@ -79,52 +77,10 @@ public class V1ControllerTest {
         Arrays.asList(emptyConfigMap, emptyConfigMap, null, emptyConfigMap, emptyConfigMap));
 
     // ConfigMap List with empty and non-target maps.
-    V1ConfigMap configMapWithNonTargetData = new V1ConfigMap();
+    configMapWithNonTargetData = new V1ConfigMap();
     configMapWithNonTargetData.putDataItem("Dummy Key", "Dummy Value");
     dummyConfigMapList = new LinkedList<>(emptyConfigMapList);
     dummyConfigMapList.add(configMapWithNonTargetData);
-
-    // ConfigMap List with empty and invalid target maps.
-    V1ConfigMap configMapInvalidPod = new V1ConfigMap();
-    configMapInvalidPod.putDataItem(CONFIGMAP_NAME, "Dummy Value");
-    invalidPodConfigMapList = new LinkedList<>(
-        Arrays.asList(configMapWithNonTargetData, configMapInvalidPod));
-
-    // ConfigMap List with empty and empty target maps.
-    V1ConfigMap configMapEmptyPod = new V1ConfigMap();
-    configMapEmptyPod.putDataItem(CONFIGMAP_NAME, "");
-    emptyPodConfigMapList = new LinkedList<>(
-        Arrays.asList(configMapWithNonTargetData, configMapEmptyPod));
-
-    // ConfigMap List with valid Pod Template.
-    final String validPodTemplate =
-        "apiVersion: apps/v1\n"
-        + "kind: PodTemplate\n"
-        + "metadata:\n"
-        + "  name: heron-tracker\n"
-        + "  namespace: default\n"
-        + "template:\n"
-        + "  metadata:\n"
-        + "    labels:\n"
-        + "      app: heron-tracker\n"
-        + "  spec:\n"
-        + "    containers:\n"
-        + "      - name: heron-tracker\n"
-        + "        image: apache/heron:latest\n"
-        + "        ports:\n"
-        + "          - containerPort: 8888\n"
-        + "            name: api-port\n"
-        + "        resources:\n"
-        + "          requests:\n"
-        + "            cpu: \"100m\"\n"
-        + "            memory: \"200M\"\n"
-        + "          limits:\n"
-        + "            cpu: \"400m\"\n"
-        + "            memory: \"512M\"";
-    V1ConfigMap configMapValidPod = new V1ConfigMap();
-    configMapValidPod.putDataItem(CONFIGMAP_NAME, validPodTemplate);
-    validPodConfigMapList = new LinkedList<>(
-        Arrays.asList(configMapWithNonTargetData, configMapValidPod));
   }
 
   @Test
@@ -191,6 +147,13 @@ public class V1ControllerTest {
     final String expected = "Error parsing";
     String message = "";
 
+    // ConfigMap List with empty and invalid target maps.
+    final LinkedList<V1ConfigMap> invalidPodConfigMapList;
+    V1ConfigMap configMapInvalidPod = new V1ConfigMap();
+    configMapInvalidPod.putDataItem(CONFIGMAP_NAME, "Dummy Value");
+    invalidPodConfigMapList = new LinkedList<>(
+        Arrays.asList(configMapWithNonTargetData, configMapInvalidPod));
+
     doReturn(invalidPodConfigMapList).when(v1ControllerWithPodTemplate).getConfigMaps();
     try {
       loadPodFromTemplate.invoke(v1ControllerWithPodTemplate);
@@ -198,6 +161,13 @@ public class V1ControllerTest {
       message = e.getCause().getMessage();
     }
     Assert.assertTrue(message.contains(expected));
+
+    // ConfigMap List with empty and empty target maps.
+    final LinkedList<V1ConfigMap> emptyPodConfigMapList;
+    V1ConfigMap configMapEmptyPod = new V1ConfigMap();
+    configMapEmptyPod.putDataItem(CONFIGMAP_NAME, "");
+    emptyPodConfigMapList = new LinkedList<>(
+        Arrays.asList(configMapWithNonTargetData, configMapEmptyPod));
 
     doReturn(emptyPodConfigMapList).when(v1ControllerWithPodTemplate).getConfigMaps();
     try {
@@ -247,6 +217,38 @@ public class V1ControllerTest {
         + "            volumeMounts: null\n"
         + "            workingDir: null\n"
         + "        }]";
+
+
+    // ConfigMap List with valid Pod Template.
+    final String validPodTemplate =
+        "apiVersion: apps/v1\n"
+            + "kind: PodTemplate\n"
+            + "metadata:\n"
+            + "  name: heron-tracker\n"
+            + "  namespace: default\n"
+            + "template:\n"
+            + "  metadata:\n"
+            + "    labels:\n"
+            + "      app: heron-tracker\n"
+            + "  spec:\n"
+            + "    containers:\n"
+            + "      - name: heron-tracker\n"
+            + "        image: apache/heron:latest\n"
+            + "        ports:\n"
+            + "          - containerPort: 8888\n"
+            + "            name: api-port\n"
+            + "        resources:\n"
+            + "          requests:\n"
+            + "            cpu: \"100m\"\n"
+            + "            memory: \"200M\"\n"
+            + "          limits:\n"
+            + "            cpu: \"400m\"\n"
+            + "            memory: \"512M\"";
+    final LinkedList<V1ConfigMap> validPodConfigMapList;
+    V1ConfigMap configMapValidPod = new V1ConfigMap();
+    configMapValidPod.putDataItem(CONFIGMAP_NAME, validPodTemplate);
+    validPodConfigMapList = new LinkedList<>(
+        Arrays.asList(configMapWithNonTargetData, configMapValidPod));
 
     doReturn(validPodConfigMapList).when(v1ControllerWithPodTemplate).getConfigMaps();
     V1PodTemplateSpec podTemplateSpec =
