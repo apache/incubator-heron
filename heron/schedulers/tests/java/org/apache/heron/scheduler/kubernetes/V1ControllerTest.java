@@ -22,6 +22,7 @@ package org.apache.heron.scheduler.kubernetes;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedList;
 
 import org.junit.Assert;
@@ -252,5 +253,36 @@ public class V1ControllerTest {
         (V1PodTemplateSpec) loadPodFromTemplate.invoke(v1ControllerWithPodTemplate);
 
     Assert.assertTrue(podTemplateSpec.toString().contains(expected));
+  }
+
+  @Test
+  public void testLoadPodFromTemplateInvalidConfigMaps() throws IllegalAccessException {
+    // ConfigMap List with valid Pod Template.
+    final String invalidPodTemplate =
+        "apiVersion: apps/v1\n"
+            + "kind: PottyTemplate\n"
+            + "metadata:\n"
+            + "  name: heron-tracker\n"
+            + "  namespace: default\n"
+            + "template:\n"
+            + "  metadata:\n"
+            + "    labels:\n"
+            + "      app: heron-tracker\n"
+            + "  spec:\n";
+    V1ConfigMap configMap = new V1ConfigMap();
+    configMap.putDataItem(CONFIGMAP_NAME, invalidPodTemplate);
+    LinkedList<V1ConfigMap> configMapList =
+        new LinkedList<>(Collections.singletonList(configMap));
+
+    final String expected = "Error parsing";
+    String message = "";
+
+    doReturn(configMapList).when(v1ControllerWithPodTemplate).getConfigMaps();
+    try {
+      loadPodFromTemplate.invoke(v1ControllerWithPodTemplate);
+    } catch (InvocationTargetException e) {
+      message = e.getCause().getMessage();
+    }
+    Assert.assertTrue(message.contains(expected));
   }
 }
