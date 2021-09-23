@@ -693,16 +693,16 @@ public class V1Controller extends KubernetesController {
       V1ConfigMapList configMapList = coreClient
           .listNamespacedConfigMap(
               KubernetesConstants.DEFAULT_NAMESPACE,
-              "false",
-              false,
               null,
               null,
               null,
-              KubernetesConstants.REQUEST_RESPONSE_WINDOW_SIZE,
               null,
               null,
-              KubernetesConstants.REQUEST_RESPONSE_TIMEOUT,
-              false);
+              null,
+              null,
+              null,
+              null,
+              null);
 
       if (configMapList == null) {
         throw new ApiException("No ConfigMaps returned by K8s client");
