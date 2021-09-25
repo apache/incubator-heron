@@ -312,25 +312,22 @@ public class V1ControllerTest {
   }
 
   @Test
-  public void testGetPodTemplateLocationFailing() {
+  public void testGetPodTemplateLocationNoConfigMap() {
     expectedException.expect(TopologySubmissionException.class);
-    Config.Builder configBuilder = Config.newBuilder();
-    V1Controller v1Controller;
-
-    // Empty config
-    v1Controller = new V1Controller(configBuilder.build(), runtime);
+    final Config testConfig = Config.newBuilder()
+        .put(KubernetesContext.KUBERNETES_POD_TEMPLATE_CONFIGMAP_NAME,
+        ".POD-TEMPLATE-NAME").build();
+    V1Controller v1Controller = new V1Controller(testConfig, runtime);
     v1Controller.getPodTemplateLocation();
+  }
 
-    // No ConfigMap
-    configBuilder.put(KubernetesContext.KUBERNETES_POD_TEMPLATE_CONFIGMAP_NAME,
-        ".POD-TEMPLATE-NAME");
-    v1Controller = new V1Controller(configBuilder.build(), runtime);
-    v1Controller.getPodTemplateLocation();
-
-    // No Pod Template
-    configBuilder.put(KubernetesContext.KUBERNETES_POD_TEMPLATE_CONFIGMAP_NAME,
-        "CONFIGMAP-NAME.");
-    v1Controller = new V1Controller(configBuilder.build(), runtime);
+  @Test
+  public void testGetPodTemplateLocationNoPodTemplate() {
+    expectedException.expect(TopologySubmissionException.class);
+    final Config testConfig = Config.newBuilder()
+        .put(KubernetesContext.KUBERNETES_POD_TEMPLATE_CONFIGMAP_NAME,
+        "CONFIGMAP-NAME.").build();
+    V1Controller v1Controller = new V1Controller(testConfig, runtime);
     v1Controller.getPodTemplateLocation();
   }
 }
