@@ -26,12 +26,16 @@ import java.util.Collections;
 import java.util.LinkedList;
 
 import org.junit.Assert;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import org.apache.heron.common.basics.Pair;
+import org.apache.heron.scheduler.TopologySubmissionException;
 import org.apache.heron.spi.common.Config;
 import org.apache.heron.spi.common.Key;
 
@@ -44,12 +48,14 @@ import static org.mockito.Mockito.doReturn;
 public class V1ControllerTest {
 
   private static final String TOPOLOGY_NAME = "topology-name";
-  private static final String CONFIGMAP_NAME = "configmap-name";
+  private static final String CONFIGMAP_POD_TEMPLATE_NAME = "CONFIG-MAP-NAME.POD-TEMPLATE-NAME";
+  private static final String CONFIGMAP_NAME = "CONFIG-MAP-NAME";
+  private static final String POD_TEMPLATE_NAME = "POD-TEMPLATE-NAME";
   private static final String POD_TEMPLATE_DEFAULT = new V1PodTemplateSpec().toString();
 
   private final Config config = Config.newBuilder().build();
   private final Config configWithPodTemplate = Config.newBuilder()
-      .put(KubernetesContext.KUBERNETES_POD_TEMPLATE_CONFIGMAP_NAME, CONFIGMAP_NAME)
+      .put(KubernetesContext.KUBERNETES_POD_TEMPLATE_CONFIGMAP_NAME, CONFIGMAP_POD_TEMPLATE_NAME)
       .build();
   private final Config runtime = Config.newBuilder()
       .put(Key.TOPOLOGY_NAME, TOPOLOGY_NAME)
@@ -67,6 +73,9 @@ public class V1ControllerTest {
   @InjectMocks
   private final Method loadPodFromTemplate = V1Controller.class
       .getDeclaredMethod("loadPodFromTemplate");
+
+  @Rule
+  public final ExpectedException expectedException = ExpectedException.none();
 
   public V1ControllerTest() throws NoSuchMethodException {
     loadPodFromTemplate.setAccessible(true);
@@ -150,7 +159,7 @@ public class V1ControllerTest {
     // ConfigMap List with empty and invalid target maps.
     final LinkedList<V1ConfigMap> invalidPodConfigMapList;
     V1ConfigMap configMapInvalidPod = new V1ConfigMap();
-    configMapInvalidPod.putDataItem(CONFIGMAP_NAME, "Dummy Value");
+    configMapInvalidPod.putDataItem(CONFIGMAP_POD_TEMPLATE_NAME, "Dummy Value");
     invalidPodConfigMapList = new LinkedList<>(
         Arrays.asList(configMapWithNonTargetData, configMapInvalidPod));
 
@@ -165,7 +174,7 @@ public class V1ControllerTest {
     // ConfigMap List with empty and empty target maps.
     final LinkedList<V1ConfigMap> emptyPodConfigMapList;
     V1ConfigMap configMapEmptyPod = new V1ConfigMap();
-    configMapEmptyPod.putDataItem(CONFIGMAP_NAME, "");
+    configMapEmptyPod.putDataItem(CONFIGMAP_POD_TEMPLATE_NAME, "");
     emptyPodConfigMapList = new LinkedList<>(
         Arrays.asList(configMapWithNonTargetData, configMapEmptyPod));
 
@@ -246,7 +255,7 @@ public class V1ControllerTest {
             + "            memory: \"512M\"";
     final LinkedList<V1ConfigMap> validPodConfigMapList;
     V1ConfigMap configMapValidPod = new V1ConfigMap();
-    configMapValidPod.putDataItem(CONFIGMAP_NAME, validPodTemplate);
+    configMapValidPod.putDataItem(CONFIGMAP_POD_TEMPLATE_NAME, validPodTemplate);
     validPodConfigMapList = new LinkedList<>(
         Arrays.asList(configMapWithNonTargetData, configMapValidPod));
 
@@ -272,7 +281,7 @@ public class V1ControllerTest {
             + "      app: heron-tracker\n"
             + "  spec:\n";
     V1ConfigMap configMap = new V1ConfigMap();
-    configMap.putDataItem(CONFIGMAP_NAME, invalidPodTemplate);
+    configMap.putDataItem(CONFIGMAP_POD_TEMPLATE_NAME, invalidPodTemplate);
     LinkedList<V1ConfigMap> configMapList =
         new LinkedList<>(Collections.singletonList(configMap));
 
@@ -286,5 +295,42 @@ public class V1ControllerTest {
       message = e.getCause().getMessage();
     }
     Assert.assertTrue(message.contains(expected));
+  }
+
+  @Test
+  public void testGetPodTemplateLocationPassing() {
+    final Config testConfig = Config.newBuilder()
+        .put(KubernetesContext.KUBERNETES_POD_TEMPLATE_CONFIGMAP_NAME, CONFIGMAP_POD_TEMPLATE_NAME)
+        .build();
+    final V1Controller v1Controller = new V1Controller(testConfig, runtime);
+    final Pair<String, String> expected = new Pair<>(CONFIGMAP_NAME, POD_TEMPLATE_NAME);
+    Pair<String, String> actual;
+
+    // Correct parsing
+    actual = v1Controller.getPodTemplateLocation();
+    Assert.assertTrue(actual.equals(expected));
+  }
+
+  @Test
+  public void testGetPodTemplateLocationFailing() {
+    expectedException.expect(TopologySubmissionException.class);
+    Config.Builder configBuilder = Config.newBuilder();
+    V1Controller v1Controller;
+
+    // Empty config
+    v1Controller = new V1Controller(configBuilder.build(), runtime);
+    v1Controller.getPodTemplateLocation();
+
+    // No ConfigMap
+    configBuilder.put(KubernetesContext.KUBERNETES_POD_TEMPLATE_CONFIGMAP_NAME,
+        ".POD-TEMPLATE-NAME");
+    v1Controller = new V1Controller(configBuilder.build(), runtime);
+    v1Controller.getPodTemplateLocation();
+
+    // No Pod Template
+    configBuilder.put(KubernetesContext.KUBERNETES_POD_TEMPLATE_CONFIGMAP_NAME,
+        "CONFIGMAP-NAME.");
+    v1Controller = new V1Controller(configBuilder.build(), runtime);
+    v1Controller.getPodTemplateLocation();
   }
 }
