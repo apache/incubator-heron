@@ -670,6 +670,7 @@ public class V1Controller extends KubernetesController {
 
     // Default Pod Template.
     if (podTemplateConfigMapName == null) {
+      LOG.log(Level.INFO, "Configuring cluster with the Default Pod Template");
       return new V1PodTemplateSpec();
     }
 
@@ -698,8 +699,10 @@ public class V1Controller extends KubernetesController {
           if (podTemplateStr == null || podTemplateStr.isEmpty()) {
             throw new IllegalArgumentException("Pod Template is empty");
           }
-
-          return ((V1PodTemplate) Yaml.load(podTemplateStr)).getTemplate();
+          V1PodTemplateSpec podTemplate = ((V1PodTemplate) Yaml.load(podTemplateStr)).getTemplate();
+          LOG.log(Level.INFO, String.format("Configuring cluster with the %s.%s Pod Template",
+              configMapName, podTemplateName));
+          return podTemplate;
         }
       }
 
