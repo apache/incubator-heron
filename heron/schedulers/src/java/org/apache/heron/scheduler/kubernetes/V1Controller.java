@@ -35,6 +35,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.apache.heron.api.utils.TopologyUtils;
+import org.apache.heron.common.basics.Pair;
 import org.apache.heron.scheduler.TopologyRuntimeManagementException;
 import org.apache.heron.scheduler.TopologySubmissionException;
 import org.apache.heron.scheduler.utils.Runtime;
@@ -639,9 +640,33 @@ public class V1Controller extends KubernetesController {
     return Math.round(value * scale) / scale;
   }
 
-  private V1PodTemplateSpec loadPodFromTemplate() {
+  protected Pair<String, String> getPodTemplateLocation() {
     final String podTemplateConfigMapName = KubernetesContext
         .getPodTemplateConfigMapName(super.getConfiguration());
+
+    if (podTemplateConfigMapName == null) {
+      return null;
+    }
+
+    try {
+      final int splitPoint = podTemplateConfigMapName.indexOf(".");
+      final String configMapName = podTemplateConfigMapName.substring(0, splitPoint);
+      final String podTemplateName = podTemplateConfigMapName.substring(splitPoint + 1);
+
+      if (configMapName.isEmpty() || podTemplateName.isEmpty()) {
+        throw new IllegalArgumentException("Empty ConfigMap or Pod Template name");
+      }
+
+      return new Pair<>(configMapName, podTemplateName);
+    } catch (NullPointerException | IllegalArgumentException e) {
+      KubernetesUtils.logExceptionWithDetails(LOG, "Invalid ConfigMap/Pod Template "
+          + "name", e);
+      throw new TopologySubmissionException(e.getMessage());
+    }
+  }
+
+  private V1PodTemplateSpec loadPodFromTemplate() {
+    final Pair<String, String> podTemplateConfigMapName = getPodTemplateLocation();
 
     // Default Pod Template.
     if (podTemplateConfigMapName == null) {
@@ -655,22 +680,26 @@ public class V1Controller extends KubernetesController {
         throw new ApiException("No ConfigMaps returned by K8s client");
       }
 
+      final String configMapName = podTemplateConfigMapName.first;
+      final String podTemplateName = podTemplateConfigMapName.second;
+
       // Probe ConfigMaps for the specified Pod Template name.
       for (V1ConfigMap configMap : configMapLists) {
-        if (configMap == null) {
+        // kubectl will set the name filed in metadata automatically for ConfigMaps using the
+        // parameters on the command line. Hence, name field in the metadata cannot be null.
+        if (configMap == null || !configMap.getMetadata().getName().equals(configMapName)) {
           continue;
         }
 
         final Map<String, String> configMapData = configMap.getData();
-        if (configMapData != null && configMapData.containsKey(podTemplateConfigMapName)) {
+        if (configMapData != null && configMapData.containsKey(podTemplateName)) {
 
-          final String podTemplateStr = configMapData.get(podTemplateConfigMapName);
+          final String podTemplateStr = configMapData.get(podTemplateName);
           if (podTemplateStr == null || podTemplateStr.isEmpty()) {
             throw new IllegalArgumentException("Pod Template is empty");
           }
 
-          return ((V1PodTemplate) Yaml.load(configMapData.get(podTemplateConfigMapName)))
-              .getTemplate();
+          return ((V1PodTemplate) Yaml.load(podTemplateStr)).getTemplate();
         }
       }
 
