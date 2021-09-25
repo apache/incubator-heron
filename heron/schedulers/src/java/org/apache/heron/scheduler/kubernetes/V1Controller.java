@@ -654,7 +654,7 @@ public class V1Controller extends KubernetesController {
       }
 
       return new Pair<>(configMapName, podTemplateName);
-    } catch (NullPointerException e) {
+    } catch (NullPointerException | IllegalArgumentException e) {
       KubernetesUtils.logExceptionWithDetails(LOG, "Invalid ConfigMap/Pod Template "
           + "name", e);
       throw new TopologySubmissionException(e.getMessage());
