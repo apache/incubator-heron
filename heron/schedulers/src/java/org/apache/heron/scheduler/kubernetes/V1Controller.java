@@ -35,6 +35,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.apache.heron.api.utils.TopologyUtils;
+import org.apache.heron.common.basics.Pair;
 import org.apache.heron.scheduler.TopologyRuntimeManagementException;
 import org.apache.heron.scheduler.TopologySubmissionException;
 import org.apache.heron.scheduler.utils.Runtime;
@@ -637,6 +638,27 @@ public class V1Controller extends KubernetesController {
   public static double roundDecimal(double value, int places) {
     double scale = Math.pow(10, places);
     return Math.round(value * scale) / scale;
+  }
+
+  protected Pair<String, String> getPodTemplateLocation() {
+    final String podTemplateConfigMapName = KubernetesContext
+        .getPodTemplateConfigMapName(super.getConfiguration());
+
+    try {
+      final int splitPoint = podTemplateConfigMapName.indexOf(".");
+      final String configMapName = podTemplateConfigMapName.substring(0, splitPoint);
+      final String podTemplateName = podTemplateConfigMapName.substring(splitPoint + 1);
+
+      if (configMapName.isEmpty() || podTemplateName.isEmpty()) {
+        throw new IllegalArgumentException("Empty ConfigMap or Pod Template name");
+      }
+
+      return new Pair<>(configMapName, podTemplateName);
+    } catch (NullPointerException e) {
+      KubernetesUtils.logExceptionWithDetails(LOG, "Invalid ConfigMap/Pod Template "
+          + "name", e);
+      throw new TopologySubmissionException(e.getMessage());
+    }
   }
 
   private V1PodTemplateSpec loadPodFromTemplate() {
