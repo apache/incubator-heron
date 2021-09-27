@@ -32,7 +32,7 @@ To deploy a custom Pod Template to Kubernetes with your topology, you must provi
 
 * `POD-TEMPLATE-NAME`: This is the name of the Pod Template's YAML definition file. This is ***not*** a reserved variable name.
 * `CONFIG-MAP-NAME`: This is the name which will be used by the Configuration Map in which the Pod Template will be embedded by `kubectl`. This is ***not*** a reserved variable name.
-* `heron.kubernetes.pod.template.configmap.name`: Variable name used as the key passed to `kubectl` on the CLI. This ***is*** a reserved variable name.
+* `heron.kubernetes.pod.template.configmap.name`: This variable name used as the key passed to Heron for the `--config-property` on the CLI. This ***is*** a reserved variable name.
 
 ***NOTE***: Please do ***not*** use the `.` (period character) in the names of the `CONFIG-MAP-NAME` and `POD-TEMPLATE-NAME`s. This character will be used as a delineation when submitting your topologies.
 
@@ -75,7 +75,7 @@ You would need to save this file as `POD-TEMPLATE-NAME`. Once you have a valid P
 To generate a `ConfigMap` you will need to run the following command:
 
 ```bash
-kubectl create configmap CONFIG-MAP-NAME --from-file=path/to/POD-TEMPLATE-NAME
+kubectl create configmap CONFIG-MAP-NAME --from-file path/to/POD-TEMPLATE-NAME
 ```
 
 You may then want to verify the contents of the `ConfigMap` by running the following command:
@@ -88,15 +88,8 @@ The `ConfigMap` should appear similar to the one below for our example:
 
 ```yaml
 apiVersion: v1
-kind: ConfigMap
-metadata:
-  creationTimestamp: 2021-09-24T18:52:05Z
-  name: CONFIG-MAP-NAME
-  namespace: default
-  resourceVersion: "516"
-  uid: b4952dc3-d670-11e5-8cd0-68f728db1985
 data:
-  POD-TEMPLATE-NAME: |
+  POD-TEMPLATE-NAME: |-
     apiVersion: apps/v1
     kind: PodTemplate
     metadata:
@@ -121,6 +114,13 @@ data:
                 cpu: "400m"
                 memory: "512M"
   SOME-OTHER-KEY: some_other_data_item
+kind: ConfigMap
+metadata:
+  creationTimestamp: "2021-09-27T21:55:30Z"
+  name: CONFIG-MAP-NAME
+  namespace: default
+  resourceVersion: "1313"
+  uid: ba001653-03d9-4ac8-804c-d2c55c974281
 ```
 
 ## Submitting
