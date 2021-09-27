@@ -658,9 +658,8 @@ public class V1Controller extends KubernetesController {
       }
 
       return new Pair<>(configMapName, podTemplateName);
-    } catch (NullPointerException | IllegalArgumentException e) {
-      KubernetesUtils.logExceptionWithDetails(LOG, "Invalid ConfigMap/Pod Template "
-          + "name", e);
+    } catch (IndexOutOfBoundsException | IllegalArgumentException e) {
+      KubernetesUtils.logExceptionWithDetails(LOG, "Invalid ConfigMap and/or Pod Template name", e);
       throw new TopologySubmissionException(e.getMessage());
     }
   }
@@ -670,8 +669,12 @@ public class V1Controller extends KubernetesController {
 
     // Default Pod Template.
     if (podTemplateConfigMapName == null) {
+      LOG.log(Level.INFO, "Configuring cluster with the Default Pod Template");
       return new V1PodTemplateSpec();
     }
+
+    final String configMapName = podTemplateConfigMapName.first;
+    final String podTemplateName = podTemplateConfigMapName.second;
 
     // Attempt to locate ConfigMap with provided Pod Template name.
     try {
@@ -679,9 +682,6 @@ public class V1Controller extends KubernetesController {
       if (configMapLists == null) {
         throw new ApiException("No ConfigMaps returned by K8s client");
       }
-
-      final String configMapName = podTemplateConfigMapName.first;
-      final String podTemplateName = podTemplateConfigMapName.second;
 
       // Probe ConfigMaps for the specified Pod Template name.
       for (V1ConfigMap configMap : configMapLists) {
@@ -698,20 +698,22 @@ public class V1Controller extends KubernetesController {
           if (podTemplateStr == null || podTemplateStr.isEmpty()) {
             throw new IllegalArgumentException("Pod Template is empty");
           }
-
-          return ((V1PodTemplate) Yaml.load(podTemplateStr)).getTemplate();
+          V1PodTemplateSpec podTemplate = ((V1PodTemplate) Yaml.load(podTemplateStr)).getTemplate();
+          LOG.log(Level.INFO, String.format("Configuring cluster with the %s.%s Pod Template",
+              configMapName, podTemplateName));
+          return podTemplate;
         }
       }
 
       // Failure to locate Pod Template with provided name.
-      throw new ApiException("Failed to locate Pod Template " + podTemplateConfigMapName
-          + " in ConfigMaps");
+      throw new ApiException(String.format("Failed to locate Pod Template %s in ConfigMap %s",
+          podTemplateName, configMapName));
     } catch (ApiException e) {
-      KubernetesUtils.logExceptionWithDetails(LOG, "Error retrieving Pod Template "
-          + podTemplateConfigMapName, e);
+      KubernetesUtils.logExceptionWithDetails(LOG, e.getMessage(), e);
       throw new TopologySubmissionException(e.getMessage());
     } catch (IOException | ClassCastException | IllegalArgumentException e) {
-      final String message = "Error parsing Pod Template " + podTemplateConfigMapName;
+      final String message = String.format("Error parsing Pod Template %s in ConfigMap %s",
+          podTemplateName, configMapName);
       KubernetesUtils.logExceptionWithDetails(LOG, message, e);
       throw new TopologySubmissionException(message);
     }
