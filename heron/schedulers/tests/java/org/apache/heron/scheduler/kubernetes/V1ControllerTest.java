@@ -348,4 +348,14 @@ public class V1ControllerTest {
     V1Controller v1Controller = new V1Controller(testConfig, runtime);
     v1Controller.getPodTemplateLocation();
   }
+
+  @Test
+  public void testGetPodTemplateLocationNoDelimiter() {
+    expectedException.expect(TopologySubmissionException.class);
+    final Config testConfig = Config.newBuilder()
+        .put(KubernetesContext.KUBERNETES_POD_TEMPLATE_CONFIGMAP_NAME,
+        "CONFIGMAP-NAMEPOD-TEMPLATE-NAME").build();
+    V1Controller v1Controller = new V1Controller(testConfig, runtime);
+    v1Controller.getPodTemplateLocation();
+  }
 }
