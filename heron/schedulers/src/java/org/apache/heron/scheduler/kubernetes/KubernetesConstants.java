@@ -34,6 +34,7 @@ public final class KubernetesConstants {
 
   public static final String MEMORY = "memory";
   public static final String CPU = "cpu";
+  public static final String KUBERNETES_ROLE_NAME = "heron-kubernetes-role";
 
   // container env constants
   public static final String ENV_HOST = "HOST";
