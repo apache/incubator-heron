@@ -52,6 +52,8 @@ import io.kubernetes.client.openapi.ApiException;
 import io.kubernetes.client.openapi.Configuration;
 import io.kubernetes.client.openapi.apis.AppsV1Api;
 import io.kubernetes.client.openapi.apis.CoreV1Api;
+import io.kubernetes.client.openapi.apis.RbacAuthorizationV1Api;
+import io.kubernetes.client.openapi.auth.ApiKeyAuth;
 import io.kubernetes.client.openapi.models.V1ConfigMap;
 import io.kubernetes.client.openapi.models.V1ConfigMapList;
 import io.kubernetes.client.openapi.models.V1Container;
@@ -64,7 +66,9 @@ import io.kubernetes.client.openapi.models.V1ObjectMeta;
 import io.kubernetes.client.openapi.models.V1PodSpec;
 import io.kubernetes.client.openapi.models.V1PodTemplate;
 import io.kubernetes.client.openapi.models.V1PodTemplateSpec;
+import io.kubernetes.client.openapi.models.V1PolicyRule;
 import io.kubernetes.client.openapi.models.V1ResourceRequirements;
+import io.kubernetes.client.openapi.models.V1Role;
 import io.kubernetes.client.openapi.models.V1SecretKeySelector;
 import io.kubernetes.client.openapi.models.V1SecretVolumeSourceBuilder;
 import io.kubernetes.client.openapi.models.V1Service;
@@ -723,7 +727,7 @@ public class V1Controller extends KubernetesController {
     try {
       V1ConfigMapList configMapList = coreClient
           .listNamespacedConfigMap(
-              KubernetesConstants.DEFAULT_NAMESPACE,
+              getNamespace(),
               null,
               null,
               null,
@@ -742,6 +746,43 @@ public class V1Controller extends KubernetesController {
       return configMapList.getItems();
     } catch (ApiException e) {
       KubernetesUtils.logExceptionWithDetails(LOG, "Error retrieving ConfigMaps", e);
+      throw new TopologySubmissionException(e.getMessage());
+    }
+  }
+
+  private void configureRBAC() {
+    final ApiClient defaultAPIClient = Configuration.getDefaultApiClient();
+
+    // TODO: Get API Key.
+    final String apiKey = "";
+
+    // Configure API key.
+    ApiKeyAuth bearerToken = (ApiKeyAuth) defaultAPIClient.getAuthentication("BearerToken");
+    bearerToken.setApiKey(apiKey);
+
+    // Generate role.
+    V1Role body = new V1Role();
+    body.setMetadata(new V1ObjectMeta().name(KubernetesConstants.KUBERNETES_ROLE_NAME));
+
+    V1PolicyRule policyRule = new V1PolicyRule();
+    policyRule.setApiGroups(Collections.singletonList(""));
+    policyRule.setResources(Collections.singletonList("configmaps"));
+    policyRule.setVerbs(Arrays.asList("get", "watch", "list"));
+
+    body.setRules(Collections.singletonList(policyRule));
+
+    // Submit role to K8s cluster.
+    RbacAuthorizationV1Api apiInstance = new RbacAuthorizationV1Api(defaultAPIClient);
+    try {
+      apiInstance.createNamespacedRole(
+          getNamespace(),
+          body,
+          null,
+          null,
+          "Apache Heron");
+      LOG.log(Level.INFO, "Configured Role-Based Access Control for K8s cluster");
+    } catch (ApiException e) {
+      KubernetesUtils.logExceptionWithDetails(LOG, "Error configuring RBAC", e);
       throw new TopologySubmissionException(e.getMessage());
     }
   }
