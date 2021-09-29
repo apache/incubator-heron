@@ -723,7 +723,7 @@ public class V1Controller extends KubernetesController {
     try {
       V1ConfigMapList configMapList = coreClient
           .listNamespacedConfigMap(
-              KubernetesConstants.DEFAULT_NAMESPACE,
+              getNamespace(),
               null,
               null,
               null,
