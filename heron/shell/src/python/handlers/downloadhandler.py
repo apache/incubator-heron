@@ -23,6 +23,7 @@
 import os
 import logging
 import tornado.web
+import anticrlf
 
 from heron.shell.src.python import utils
 
@@ -34,7 +35,14 @@ class DownloadHandler(tornado.web.RequestHandler):
   def get(self, path):
     """ get method """
 
-    logging.debug("request to download: %s", path)
+    handler = logging.StreamHandler()
+    handler.setFormatter(anticrlf.LogFormatter('%(levelname)s:%(name)s:%(message)s'))
+    logger = logging.getLogger(__name__)
+    logger.addHandler(handler)
+    logger.setLevel(logging.DEBUG)
+
+    logger.debug("request to download: %s", path)
+
     # If the file is large, we want to abandon downloading
     # if user cancels the requests.
     # pylint: disable=attribute-defined-outside-init
