@@ -761,8 +761,12 @@ public class V1Controller extends KubernetesController {
     bearerToken.setApiKey(apiKey);
 
     // Generate role.
-    V1Role body = new V1Role();
-    body.setMetadata(new V1ObjectMeta().name(KubernetesConstants.KUBERNETES_ROLE_NAME));
+    V1Role body = new V1Role()
+        .apiVersion("rbac.authorization.k8s.io/v1")
+        .kind("Role");
+    body.setMetadata(new V1ObjectMeta()
+        .name(KubernetesConstants.KUBERNETES_ROLE_NAME)
+        .namespace(getNamespace()));
 
     V1PolicyRule policyRule = new V1PolicyRule();
     policyRule.setApiGroups(Collections.singletonList(""));
@@ -777,13 +781,13 @@ public class V1Controller extends KubernetesController {
       apiInstance.createNamespacedRole(
           getNamespace(),
           body,
-          null,
+          "pretty",
           null,
           "Apache Heron");
       LOG.log(Level.INFO, "Configured Role-Based Access Control for K8s cluster");
     } catch (ApiException e) {
       KubernetesUtils.logExceptionWithDetails(LOG,
-          String.format("Error configuring RBAC%nStatus code: %s%n Reason: %s%nResponse: %s%n",
+          String.format("Error configuring RBAC%nStatus code: %s%nReason: %s%nResponse: %s",
               e.getCode(), e.getResponseBody(), e.getResponseHeaders()),
           e);
       throw new TopologySubmissionException(e.getMessage());
