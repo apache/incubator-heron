@@ -782,7 +782,10 @@ public class V1Controller extends KubernetesController {
           "Apache Heron");
       LOG.log(Level.INFO, "Configured Role-Based Access Control for K8s cluster");
     } catch (ApiException e) {
-      KubernetesUtils.logExceptionWithDetails(LOG, "Error configuring RBAC", e);
+      KubernetesUtils.logExceptionWithDetails(LOG,
+          String.format("Error configuring RBAC%nStatus code: %s%n Reason: %s%nResponse: %s%n",
+              e.getCode(), e.getResponseBody(), e.getResponseHeaders()),
+          e);
       throw new TopologySubmissionException(e.getMessage());
     }
   }
