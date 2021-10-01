@@ -697,25 +697,21 @@ public class V1Controller extends KubernetesController {
 
         final Map<String, String> configMapData = configMap.getData();
         if (configMapData != null && configMapData.containsKey(podTemplateName)) {
-
-          final String podTemplateStr = configMapData.get(podTemplateName);
-          if (podTemplateStr == null || podTemplateStr.isEmpty()) {
-            throw new IllegalArgumentException("Pod Template is empty");
-          }
-          V1PodTemplateSpec podTemplate = ((V1PodTemplate) Yaml.load(podTemplateStr)).getTemplate();
+          // NullPointerException when Pod Template is empty.
+          V1PodTemplateSpec podTemplate = ((V1PodTemplate)
+              Yaml.load(configMapData.get(podTemplateName))).getTemplate();
           LOG.log(Level.INFO, String.format("Configuring cluster with the %s.%s Pod Template",
               configMapName, podTemplateName));
           return podTemplate;
         }
       }
-
       // Failure to locate Pod Template with provided name.
       throw new ApiException(String.format("Failed to locate Pod Template %s in ConfigMap %s",
           podTemplateName, configMapName));
     } catch (ApiException e) {
       KubernetesUtils.logExceptionWithDetails(LOG, e.getMessage(), e);
       throw new TopologySubmissionException(e.getMessage());
-    } catch (IOException | ClassCastException | IllegalArgumentException e) {
+    } catch (IOException | ClassCastException | NullPointerException e) {
       final String message = String.format("Error parsing Pod Template %s in ConfigMap %s",
           podTemplateName, configMapName);
       KubernetesUtils.logExceptionWithDetails(LOG, message, e);
