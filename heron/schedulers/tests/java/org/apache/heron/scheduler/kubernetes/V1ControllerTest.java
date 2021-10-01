@@ -40,6 +40,7 @@ import org.apache.heron.spi.common.Config;
 import org.apache.heron.spi.common.Key;
 
 import io.kubernetes.client.openapi.models.V1ConfigMap;
+import io.kubernetes.client.openapi.models.V1ConfigMapBuilder;
 import io.kubernetes.client.openapi.models.V1ObjectMeta;
 import io.kubernetes.client.openapi.models.V1PodTemplateSpec;
 
@@ -65,7 +66,6 @@ public class V1ControllerTest {
   private final LinkedList<V1ConfigMap> nonTargetConfigMapList;
   private final V1ConfigMap configMapWithNonTargetData;
 
-  private final V1Controller v1ControllerNoPodTemplate = new V1Controller(config, runtime);
   @Spy
   private final V1Controller v1ControllerWithPodTemplate =
       new V1Controller(configWithPodTemplate, runtime);
@@ -103,6 +103,7 @@ public class V1ControllerTest {
   @Test
   public void testLoadPodFromTemplateDefault()
       throws InvocationTargetException, IllegalAccessException {
+    final V1Controller v1ControllerNoPodTemplate = new V1Controller(config, runtime);
     final V1PodTemplateSpec podSpec = (V1PodTemplateSpec) loadPodFromTemplate
         .invoke(v1ControllerNoPodTemplate);
 
@@ -165,11 +166,13 @@ public class V1ControllerTest {
     String message = "";
 
     // ConfigMap List without target ConfigMaps and an invalid Pod Template.
-    final LinkedList<V1ConfigMap> invalidPodConfigMapList;
-    V1ConfigMap configMapInvalidPod = new V1ConfigMap();
-    configMapInvalidPod.setMetadata(new V1ObjectMeta().name(CONFIGMAP_NAME));
-    configMapInvalidPod.putDataItem(POD_TEMPLATE_NAME, "Dummy Value");
-    invalidPodConfigMapList = new LinkedList<>(
+    V1ConfigMap configMapInvalidPod = new V1ConfigMapBuilder()
+        .withNewMetadata()
+          .withName(CONFIGMAP_NAME)
+        .endMetadata()
+        .addToData(POD_TEMPLATE_NAME, "Dummy Value")
+        .build();
+    final LinkedList<V1ConfigMap> invalidPodConfigMapList = new LinkedList<>(
         Arrays.asList(configMapWithNonTargetData, configMapInvalidPod));
 
     doReturn(invalidPodConfigMapList).when(v1ControllerWithPodTemplate).getConfigMaps();
@@ -181,11 +184,13 @@ public class V1ControllerTest {
     Assert.assertTrue(message.contains(expected));
 
     // ConfigMap List without target ConfigMaps and an empty Pod Template.
-    final LinkedList<V1ConfigMap> emptyPodConfigMapList;
-    V1ConfigMap configMapEmptyPod = new V1ConfigMap();
-    configMapEmptyPod.setMetadata(new V1ObjectMeta().name(CONFIGMAP_NAME));
-    configMapEmptyPod.putDataItem(POD_TEMPLATE_NAME, "");
-    emptyPodConfigMapList = new LinkedList<>(
+    V1ConfigMap configMapEmptyPod = new V1ConfigMapBuilder()
+        .withNewMetadata()
+          .withName(CONFIGMAP_NAME)
+        .endMetadata()
+        .addToData(POD_TEMPLATE_NAME, "")
+        .build();
+    final LinkedList<V1ConfigMap> emptyPodConfigMapList = new LinkedList<>(
         Arrays.asList(configMapWithNonTargetData, configMapEmptyPod));
 
     doReturn(emptyPodConfigMapList).when(v1ControllerWithPodTemplate).getConfigMaps();
@@ -263,11 +268,13 @@ public class V1ControllerTest {
             + "          limits:\n"
             + "            cpu: \"400m\"\n"
             + "            memory: \"512M\"";
-    final LinkedList<V1ConfigMap> validPodConfigMapList;
-    V1ConfigMap configMapValidPod = new V1ConfigMap();
-    configMapValidPod.setMetadata(new V1ObjectMeta().name(CONFIGMAP_NAME));
-    configMapValidPod.putDataItem(POD_TEMPLATE_NAME, validPodTemplate);
-    validPodConfigMapList = new LinkedList<>(
+    V1ConfigMap configMapValidPod = new V1ConfigMapBuilder()
+        .withNewMetadata()
+          .withName(CONFIGMAP_NAME)
+        .endMetadata()
+        .addToData(POD_TEMPLATE_NAME, validPodTemplate)
+        .build();
+    final LinkedList<V1ConfigMap> validPodConfigMapList = new LinkedList<>(
         Arrays.asList(configMapWithNonTargetData, configMapValidPod));
 
     doReturn(validPodConfigMapList).when(v1ControllerWithPodTemplate).getConfigMaps();
@@ -291,10 +298,13 @@ public class V1ControllerTest {
             + "    labels:\n"
             + "      app: heron-tracker\n"
             + "  spec:\n";
-    V1ConfigMap configMap = new V1ConfigMap();
-    configMap.setMetadata(new V1ObjectMeta().name(CONFIGMAP_NAME));
-    configMap.putDataItem(POD_TEMPLATE_NAME, invalidPodTemplate);
-    LinkedList<V1ConfigMap> configMapList =
+    V1ConfigMap configMap = new V1ConfigMapBuilder()
+        .withNewMetadata()
+          .withName(CONFIGMAP_NAME)
+        .endMetadata()
+        .addToData(POD_TEMPLATE_NAME, invalidPodTemplate)
+        .build();
+    final LinkedList<V1ConfigMap> configMapList =
         new LinkedList<>(Collections.singletonList(configMap));
 
     final String expected = "Error parsing";
