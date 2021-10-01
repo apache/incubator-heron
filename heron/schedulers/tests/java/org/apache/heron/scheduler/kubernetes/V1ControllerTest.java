@@ -19,8 +19,6 @@
 
 package org.apache.heron.scheduler.kubernetes;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -30,7 +28,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 
@@ -70,15 +67,10 @@ public class V1ControllerTest {
   private final V1Controller v1ControllerWithPodTemplate =
       new V1Controller(configWithPodTemplate, runtime);
 
-  @InjectMocks
-  private final Method loadPodFromTemplate = V1Controller.class
-      .getDeclaredMethod("loadPodFromTemplate");
-
   @Rule
   public final ExpectedException expectedException = ExpectedException.none();
 
-  public V1ControllerTest() throws NoSuchMethodException {
-    loadPodFromTemplate.setAccessible(true);
+  public V1ControllerTest() {
 
     // ConfigMap List with empty and null data.
     V1ConfigMap emptyConfigMap = new V1ConfigMap();
@@ -101,67 +93,65 @@ public class V1ControllerTest {
   }
 
   @Test
-  public void testLoadPodFromTemplateDefault()
-      throws InvocationTargetException, IllegalAccessException {
+  public void testLoadPodFromTemplateDefault() {
     final V1Controller v1ControllerNoPodTemplate = new V1Controller(config, runtime);
-    final V1PodTemplateSpec podSpec = (V1PodTemplateSpec) loadPodFromTemplate
-        .invoke(v1ControllerNoPodTemplate);
+    final V1PodTemplateSpec podSpec = v1ControllerNoPodTemplate.loadPodFromTemplate();
 
     Assert.assertEquals(podSpec.toString(), new V1PodTemplateSpec().toString());
   }
 
   @Test
-  public void testLoadPodFromTemplateNullConfigMaps() throws IllegalAccessException {
+  public void testLoadPodFromTemplateNullConfigMaps() {
     final String expected = "No ConfigMaps";
     String message = "";
 
     doReturn(null).when(v1ControllerWithPodTemplate).getConfigMaps();
     try {
-      loadPodFromTemplate.invoke(v1ControllerWithPodTemplate);
-    } catch (InvocationTargetException e) {
-      message = e.getCause().getMessage();
+      v1ControllerWithPodTemplate.loadPodFromTemplate();
+    } catch (TopologySubmissionException e) {
+      message = e.getMessage();
     }
     Assert.assertTrue(message.contains(expected));
   }
 
   @Test
-  public void testLoadPodFromTemplateNoConfigMaps() throws IllegalAccessException {
+  public void testLoadPodFromTemplateNoConfigMaps() {
     final String expected = "Failed to locate Pod Template";
     String message = "";
 
     doReturn(new LinkedList<V1ConfigMap>()).when(v1ControllerWithPodTemplate).getConfigMaps();
     try {
-      loadPodFromTemplate.invoke(v1ControllerWithPodTemplate);
-    } catch (InvocationTargetException e) {
-      message = e.getCause().getMessage();
+      v1ControllerWithPodTemplate.loadPodFromTemplate();
+    } catch (TopologySubmissionException e) {
+      message = e.getMessage();
     }
     Assert.assertTrue(message.contains(expected));
   }
 
   @Test
-  public void testLoadPodFromTemplateNoTargetConfigMaps() throws IllegalAccessException {
+  public void testLoadPodFromTemplateNoTargetConfigMaps() {
     final String expected = "Failed to locate Pod Template";
     String message = "";
 
     doReturn(emptyConfigMapList).when(v1ControllerWithPodTemplate).getConfigMaps();
     try {
-      loadPodFromTemplate.invoke(v1ControllerWithPodTemplate);
-    } catch (InvocationTargetException e) {
-      message = e.getCause().getMessage();
+      v1ControllerWithPodTemplate.loadPodFromTemplate();
+    } catch (TopologySubmissionException e) {
+      message = e.getMessage();
     }
     Assert.assertTrue(message.contains(expected));
 
     doReturn(nonTargetConfigMapList).when(v1ControllerWithPodTemplate).getConfigMaps();
     try {
-      loadPodFromTemplate.invoke(v1ControllerWithPodTemplate);
-    } catch (InvocationTargetException e) {
-      message = e.getCause().getMessage();
+      v1ControllerWithPodTemplate.loadPodFromTemplate();
+    } catch (TopologySubmissionException e) {
+      message = e.getMessage();
     }
     Assert.assertTrue(message.contains(expected));
   }
 
   @Test
-  public void testLoadPodFromTemplateBadTargetConfigMaps() throws IllegalAccessException {
+  public void testLoadPodFromTemplateBadTargetConfigMaps() {
     final String expected = "Error parsing";
     String message = "";
 
@@ -177,9 +167,9 @@ public class V1ControllerTest {
 
     doReturn(invalidPodConfigMapList).when(v1ControllerWithPodTemplate).getConfigMaps();
     try {
-      loadPodFromTemplate.invoke(v1ControllerWithPodTemplate);
-    } catch (InvocationTargetException e) {
-      message = e.getCause().getMessage();
+      v1ControllerWithPodTemplate.loadPodFromTemplate();
+    } catch (TopologySubmissionException e) {
+      message = e.getMessage();
     }
     Assert.assertTrue(message.contains(expected));
 
@@ -195,16 +185,15 @@ public class V1ControllerTest {
 
     doReturn(emptyPodConfigMapList).when(v1ControllerWithPodTemplate).getConfigMaps();
     try {
-      loadPodFromTemplate.invoke(v1ControllerWithPodTemplate);
-    } catch (InvocationTargetException e) {
-      message = e.getCause().getMessage();
+      v1ControllerWithPodTemplate.loadPodFromTemplate();
+    } catch (TopologySubmissionException e) {
+      message = e.getMessage();
     }
     Assert.assertTrue(message.contains(expected));
   }
 
   @Test
-  public void testLoadPodFromTemplateValidConfigMaps()
-      throws IllegalAccessException, InvocationTargetException {
+  public void testLoadPodFromTemplateValidConfigMaps() {
     final String expected =
         "        containers: [class V1Container {\n"
         + "            args: null\n"
@@ -278,14 +267,13 @@ public class V1ControllerTest {
         Arrays.asList(configMapWithNonTargetData, configMapValidPod));
 
     doReturn(validPodConfigMapList).when(v1ControllerWithPodTemplate).getConfigMaps();
-    V1PodTemplateSpec podTemplateSpec =
-        (V1PodTemplateSpec) loadPodFromTemplate.invoke(v1ControllerWithPodTemplate);
+    V1PodTemplateSpec podTemplateSpec = v1ControllerWithPodTemplate.loadPodFromTemplate();
 
     Assert.assertTrue(podTemplateSpec.toString().contains(expected));
   }
 
   @Test
-  public void testLoadPodFromTemplateInvalidConfigMaps() throws IllegalAccessException {
+  public void testLoadPodFromTemplateInvalidConfigMaps() {
     // ConfigMap List with an invalid Pod Template.
     final String invalidPodTemplate =
         "apiVersion: apps/v1\n"
@@ -312,9 +300,9 @@ public class V1ControllerTest {
 
     doReturn(configMapList).when(v1ControllerWithPodTemplate).getConfigMaps();
     try {
-      loadPodFromTemplate.invoke(v1ControllerWithPodTemplate);
-    } catch (InvocationTargetException e) {
-      message = e.getCause().getMessage();
+      v1ControllerWithPodTemplate.loadPodFromTemplate();
+    } catch (TopologySubmissionException e) {
+      message = e.getMessage();
     }
     Assert.assertTrue(message.contains(expected));
   }
@@ -330,7 +318,7 @@ public class V1ControllerTest {
 
     // Correct parsing
     actual = v1Controller.getPodTemplateLocation();
-    Assert.assertTrue(actual.equals(expected));
+    Assert.assertEquals(actual, expected);
   }
 
   @Test

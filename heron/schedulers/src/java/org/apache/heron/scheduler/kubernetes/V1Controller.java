@@ -668,7 +668,7 @@ public class V1Controller extends KubernetesController {
     }
   }
 
-  private V1PodTemplateSpec loadPodFromTemplate() {
+  protected V1PodTemplateSpec loadPodFromTemplate() {
     final Pair<String, String> podTemplateConfigMapName = getPodTemplateLocation();
 
     // Default Pod Template.
