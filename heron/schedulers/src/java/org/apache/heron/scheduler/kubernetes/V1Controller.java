@@ -66,9 +66,9 @@ import io.kubernetes.client.openapi.models.V1ObjectMeta;
 import io.kubernetes.client.openapi.models.V1PodSpec;
 import io.kubernetes.client.openapi.models.V1PodTemplate;
 import io.kubernetes.client.openapi.models.V1PodTemplateSpec;
-import io.kubernetes.client.openapi.models.V1PolicyRule;
 import io.kubernetes.client.openapi.models.V1ResourceRequirements;
 import io.kubernetes.client.openapi.models.V1Role;
+import io.kubernetes.client.openapi.models.V1RoleBuilder;
 import io.kubernetes.client.openapi.models.V1SecretKeySelector;
 import io.kubernetes.client.openapi.models.V1SecretVolumeSourceBuilder;
 import io.kubernetes.client.openapi.models.V1Service;
@@ -757,19 +757,19 @@ public class V1Controller extends KubernetesController {
     bearerToken.setApiKey(apiKey);
 
     // Generate role.
-    V1Role body = new V1Role()
-        .apiVersion("rbac.authorization.k8s.io/v1")
-        .kind("Role");
-    body.setMetadata(new V1ObjectMeta()
-        .name(KubernetesConstants.KUBERNETES_ROLE_NAME)
-        .namespace(getNamespace()));
-
-    V1PolicyRule policyRule = new V1PolicyRule();
-    policyRule.setApiGroups(Collections.singletonList(""));
-    policyRule.setResources(Collections.singletonList("configmaps"));
-    policyRule.setVerbs(Arrays.asList("get", "watch", "list"));
-
-    body.setRules(Collections.singletonList(policyRule));
+    V1Role body = new V1RoleBuilder()
+        .withApiVersion("rbac.authorization.k8s.io/v1")
+        .withKind("Role")
+        .withNewMetadata()
+          .withName(KubernetesConstants.KUBERNETES_ROLE_NAME)
+          .withNamespace(getNamespace())
+        .endMetadata()
+        .addNewRule()
+          .addAllToApiGroups(Collections.singletonList(""))
+          .addAllToResources(Collections.singletonList("configmaps"))
+          .addAllToVerbs(Arrays.asList("get", "watch", "list"))
+        .endRule()
+        .build();
 
     // Submit role to K8s cluster.
     RbacAuthorizationV1Api apiInstance = new RbacAuthorizationV1Api(defaultAPIClient);
