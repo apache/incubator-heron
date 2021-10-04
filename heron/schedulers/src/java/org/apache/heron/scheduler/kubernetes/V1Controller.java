@@ -659,8 +659,9 @@ public class V1Controller extends KubernetesController {
 
       return new Pair<>(configMapName, podTemplateName);
     } catch (IndexOutOfBoundsException | IllegalArgumentException e) {
-      KubernetesUtils.logExceptionWithDetails(LOG, "Invalid ConfigMap and/or Pod Template name", e);
-      throw new TopologySubmissionException(e.getMessage());
+      final String message = "Invalid ConfigMap and/or Pod Template name";
+      KubernetesUtils.logExceptionWithDetails(LOG, message, e);
+      throw new TopologySubmissionException(message);
     }
   }
 
