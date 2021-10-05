@@ -92,6 +92,10 @@ public class V1Controller extends KubernetesController {
 
   V1Controller(Config configuration, Config runtimeConfiguration) {
     super(configuration, runtimeConfiguration);
+
+    LOG.log(Level.WARNING, String.format("Custom Pod Templates are %s",
+        KubernetesContext.getPodTemplateConfigMapDisabled(configuration) ? "DISABLED" : "ENABLED"));
+
     try {
       final ApiClient apiClient = io.kubernetes.client.util.Config.defaultClient();
       Configuration.setDefaultApiClient(apiClient);
@@ -669,8 +673,9 @@ public class V1Controller extends KubernetesController {
   protected V1PodTemplateSpec loadPodFromTemplate() {
     final Pair<String, String> podTemplateConfigMapName = getPodTemplateLocation();
 
-    // Default Pod Template.
-    if (podTemplateConfigMapName == null) {
+    // Default Pod Template. Check if Pod Templates are disabled.
+    if (podTemplateConfigMapName == null
+        || KubernetesContext.getPodTemplateConfigMapDisabled(super.getConfiguration())) {
       LOG.log(Level.INFO, "Configuring cluster with the Default Pod Template");
       return new V1PodTemplateSpec();
     }
