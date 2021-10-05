@@ -398,7 +398,7 @@ public class V1Controller extends KubernetesController {
     podTemplateSpec.setMetadata(templateMetaData);
 
     final List<String> command = getExecutorCommand("$" + ENV_SHARD_ID, numberOfInstances);
-    podTemplateSpec.spec(getPodSpec(command, containerResource, numberOfInstances));
+    finalizePodSpec(podTemplateSpec, command, containerResource, numberOfInstances);
 
     statefulSetSpec.setTemplate(podTemplateSpec);
 
@@ -445,9 +445,12 @@ public class V1Controller extends KubernetesController {
     return KubernetesContext.getServiceLabels(getConfiguration());
   }
 
-  private V1PodSpec getPodSpec(List<String> executorCommand, Resource resource,
-      int numberOfInstances) {
-    final V1PodSpec podSpec = new V1PodSpec();
+  private void finalizePodSpec(V1PodTemplateSpec podTemplateSpec, List<String> executorCommand,
+                               Resource resource, int numberOfInstances) {
+    if (podTemplateSpec.getSpec() == null) {
+      podTemplateSpec.spec(new V1PodSpec());
+    }
+    final V1PodSpec podSpec = podTemplateSpec.getSpec();
 
     // set the termination period to 0 so pods can be deleted quickly
     podSpec.setTerminationGracePeriodSeconds(0L);
@@ -456,14 +459,12 @@ public class V1Controller extends KubernetesController {
     // https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/#taint-based-evictions
     podSpec.setTolerations(getTolerations());
 
-    podSpec.containers(Collections.singletonList(
+    podSpec.setContainers(Collections.singletonList(
         getContainer(executorCommand, resource, numberOfInstances)));
 
     addVolumesIfPresent(podSpec);
 
     mountSecretsAsVolumes(podSpec);
-
-    return podSpec;
   }
 
   private List<V1Toleration> getTolerations() {
