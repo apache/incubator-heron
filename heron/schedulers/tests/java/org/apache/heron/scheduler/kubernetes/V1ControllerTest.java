@@ -50,6 +50,31 @@ public class V1ControllerTest {
   private static final String CONFIGMAP_POD_TEMPLATE_NAME = "CONFIG-MAP-NAME.POD-TEMPLATE-NAME";
   private static final String CONFIGMAP_NAME = "CONFIG-MAP-NAME";
   private static final String POD_TEMPLATE_NAME = "POD-TEMPLATE-NAME";
+  private static final String POD_TEMPLATE_DEFAULT = new V1PodTemplateSpec().toString();
+  private static final String POD_TEMPLATE_VALID =
+      "apiVersion: apps/v1\n"
+          + "kind: PodTemplate\n"
+          + "metadata:\n"
+          + "  name: heron-tracker\n"
+          + "  namespace: default\n"
+          + "template:\n"
+          + "  metadata:\n"
+          + "    labels:\n"
+          + "      app: heron-tracker\n"
+          + "  spec:\n"
+          + "    containers:\n"
+          + "      - name: heron-tracker\n"
+          + "        image: apache/heron:latest\n"
+          + "        ports:\n"
+          + "          - containerPort: 8888\n"
+          + "            name: api-port\n"
+          + "        resources:\n"
+          + "          requests:\n"
+          + "            cpu: \"100m\"\n"
+          + "            memory: \"200M\"\n"
+          + "          limits:\n"
+          + "            cpu: \"400m\"\n"
+          + "            memory: \"512M\"";
 
   private final Config config = Config.newBuilder().build();
   private final Config configWithPodTemplate = Config.newBuilder()
@@ -57,6 +82,10 @@ public class V1ControllerTest {
       .build();
   private final Config runtime = Config.newBuilder()
       .put(Key.TOPOLOGY_NAME, TOPOLOGY_NAME)
+      .build();
+  private final Config configDisabledPodTemplate = Config.newBuilder()
+      .put(KubernetesContext.KUBERNETES_POD_TEMPLATE_CONFIGMAP_NAME, CONFIGMAP_POD_TEMPLATE_NAME)
+      .put(KubernetesContext.KUBERNETES_POD_TEMPLATE_CONFIGMAP_DISABLED, "true")
       .build();
 
   private final LinkedList<V1ConfigMap> emptyConfigMapList;
@@ -66,6 +95,10 @@ public class V1ControllerTest {
   @Spy
   private final V1Controller v1ControllerWithPodTemplate =
       new V1Controller(configWithPodTemplate, runtime);
+
+  @Spy
+  private final V1Controller v1ControllerPodTemplate =
+      new V1Controller(configDisabledPodTemplate, runtime);
 
   @Rule
   public final ExpectedException expectedException = ExpectedException.none();
@@ -97,7 +130,7 @@ public class V1ControllerTest {
     final V1Controller v1ControllerNoPodTemplate = new V1Controller(config, runtime);
     final V1PodTemplateSpec podSpec = v1ControllerNoPodTemplate.loadPodFromTemplate();
 
-    Assert.assertEquals(podSpec.toString(), new V1PodTemplateSpec().toString());
+    Assert.assertEquals(podSpec.toString(), POD_TEMPLATE_DEFAULT);
   }
 
   @Test
@@ -233,35 +266,11 @@ public class V1ControllerTest {
 
 
     // ConfigMap List with valid Pod Template.
-    final String validPodTemplate =
-        "apiVersion: apps/v1\n"
-            + "kind: PodTemplate\n"
-            + "metadata:\n"
-            + "  name: heron-tracker\n"
-            + "  namespace: default\n"
-            + "template:\n"
-            + "  metadata:\n"
-            + "    labels:\n"
-            + "      app: heron-tracker\n"
-            + "  spec:\n"
-            + "    containers:\n"
-            + "      - name: heron-tracker\n"
-            + "        image: apache/heron:latest\n"
-            + "        ports:\n"
-            + "          - containerPort: 8888\n"
-            + "            name: api-port\n"
-            + "        resources:\n"
-            + "          requests:\n"
-            + "            cpu: \"100m\"\n"
-            + "            memory: \"200M\"\n"
-            + "          limits:\n"
-            + "            cpu: \"400m\"\n"
-            + "            memory: \"512M\"";
     V1ConfigMap configMapValidPod = new V1ConfigMapBuilder()
         .withNewMetadata()
           .withName(CONFIGMAP_NAME)
         .endMetadata()
-        .addToData(POD_TEMPLATE_NAME, validPodTemplate)
+        .addToData(POD_TEMPLATE_NAME, POD_TEMPLATE_VALID)
         .build();
     final LinkedList<V1ConfigMap> validPodConfigMapList = new LinkedList<>(
         Arrays.asList(configMapWithNonTargetData, configMapValidPod));
@@ -305,6 +314,24 @@ public class V1ControllerTest {
       message = e.getMessage();
     }
     Assert.assertTrue(message.contains(expected));
+  }
+
+  @Test
+  public void testDisablePodTemplates() {
+    // ConfigMap List with valid Pod Template.
+    V1ConfigMap configMapValidPod = new V1ConfigMapBuilder()
+        .withNewMetadata()
+          .withName(CONFIGMAP_NAME)
+        .endMetadata()
+        .addToData(POD_TEMPLATE_NAME, POD_TEMPLATE_VALID)
+        .build();
+    final LinkedList<V1ConfigMap> validPodConfigMapList = new LinkedList<>(
+        Arrays.asList(configMapWithNonTargetData, configMapValidPod));
+
+    doReturn(validPodConfigMapList).when(v1ControllerPodTemplate).getConfigMaps();
+    V1PodTemplateSpec podTemplateSpec = v1ControllerPodTemplate.loadPodFromTemplate();
+
+    Assert.assertEquals(podTemplateSpec.toString(), POD_TEMPLATE_DEFAULT);
   }
 
   @Test
