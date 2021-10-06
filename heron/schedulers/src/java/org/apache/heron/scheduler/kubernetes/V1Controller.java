@@ -87,14 +87,17 @@ public class V1Controller extends KubernetesController {
 
   private static final String ENV_SHARD_ID = "SHARD_ID";
 
+  private final boolean isPodTemplateDisabled;
+
   private final AppsV1Api appsClient;
   private final CoreV1Api coreClient;
 
   V1Controller(Config configuration, Config runtimeConfiguration) {
     super(configuration, runtimeConfiguration);
 
+    isPodTemplateDisabled = KubernetesContext.getPodTemplateConfigMapDisabled(configuration);
     LOG.log(Level.WARNING, String.format("Custom Pod Templates are %s",
-        KubernetesContext.getPodTemplateConfigMapDisabled(configuration) ? "DISABLED" : "ENABLED"));
+        isPodTemplateDisabled ? "DISABLED" : "ENABLED"));
 
     try {
       final ApiClient apiClient = io.kubernetes.client.util.Config.defaultClient();
@@ -674,8 +677,7 @@ public class V1Controller extends KubernetesController {
     final Pair<String, String> podTemplateConfigMapName = getPodTemplateLocation();
 
     // Default Pod Template. Check if Pod Templates are disabled.
-    if (podTemplateConfigMapName == null
-        || KubernetesContext.getPodTemplateConfigMapDisabled(super.getConfiguration())) {
+    if (podTemplateConfigMapName == null || isPodTemplateDisabled) {
       LOG.log(Level.INFO, "Configuring cluster with the Default Pod Template");
       return new V1PodTemplateSpec();
     }
