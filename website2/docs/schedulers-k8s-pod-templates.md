@@ -158,3 +158,30 @@ heron kill kubernetes \
 ```
 
 This is a temporary workaround as we work towards as solution where a failure to deploy on Kubernetes will remove the toloogoy as well.
+
+## Heron Configured Items in Pod Templates
+
+### Metadata
+
+All metadata in the Pods is overwritten by Heron.
+
+| name | description | default |
+|---|---|---|
+| Annotation: `prometheus.io/scrape` | Flag to indicate whether Prometheus logs can be scraped. | `true` |
+| Annotation `prometheus.io/port` | Port address placef Prometheus scraping. | `8080`  <br> *Can be customized from `KubernetesConstants`.*
+| Annotation: Pod | General annotations for the Pod. | Loaded from Configs.
+| Annotation: Service | Service annotations for the Pod | Loaded from Configs.
+| Label: `app` | | `Heron` <br> *Can be customized from `KubernetesConstants`.*
+| Label: `Topology`| The name of topology which was provided when submitting. | User defined, supplied on the CLI.
+
+### Container
+
+The following items will be set in the Pod Templates `spec` by Heron.
+
+| name | description | default |
+|---|---|---|
+`terminationGracePeriodSeconds` | Grace period to wait before shutting down the Pod after a `SIGTERM` signal. | `0`
+| `tolerations` | Ensures that Pods with `tolerations` are scheduled onto Nodes with matching `Taints` | Keys:<br>`node.kubernetes.io/not-ready` <br> `node.alpha.kubernetes.io/notReady` <br> `node.alpha.kubernetes.io/unreachable`. <br> Common values set:<br> `operator: "Exists"`<br> `effect: NoExecute`<br> `tolerationSeconds: 10L`
+| `containers` | Docker container image to be used on the executor Pods. | Configured by Heron based on configs.
+| `volumes` | Volumes to be mounted within the container. | Loaded from the Heron configs if present.
+| `secretVolumes` | Secret volumes to be mounted within the container. | Loaded from the Heron configs if present.
