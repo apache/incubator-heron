@@ -22,28 +22,36 @@ sidebar_label:  Kubernetes Pod Templates
 
 > This document demonstrates how you can utilize custom [Pod Templates](https://kubernetes.io/docs/concepts/workloads/pods/#pod-templates) embedded in [Configuration Maps](https://kubernetes.io/docs/concepts/configuration/configmap/) for your computation nodes - i.e., Spouts and Bolts. You may specify different Pod Templates for different topologies.
 
+<br/>
+
 When you deploy a topology to Heron on Kubernetes, you may specify a Pod Template to be used on the computation nodes. This can be achieved by providing a valid Pod Template, and embedding the Pod Template within a Configuration Map. By default, Heron will use a minimally configured Pod Template which is adequate to deploy a topology.
 
-Pod Templates will allow you to configure all aspects of the Pods where the computations occur. For instance, it might be desirable to set tighter security parameters in case of sensitive topologies or configure the metadata for the Pods to facilitate easier monitoring in `kubectl`. The use cases are boundless.
+Pod Templates will allow you to configure most aspects of the Pods where the computations occur, with some exceptions. There are some aspects of Pods for which Heron will have the final say, and which will not be user-customizable. Please view the tables at the end of this document to identify what is set by Heron.
+
+<br>
+
+> System Administrators: You may wish to disable the ability to load custom Pod Templates. To achieve this, you must pass the `-D heron.kubernetes.pod.template.configmap.disabled=true` to the Heron API Server on the command line during boot. This command has been added to the Kubernetes configuration files to deploy the Heron API Server and can be uncommented. Please take care to ensure that the indentation is correct.
+
+<br/>
 
 ## Preparation
 
 To deploy a custom Pod Template to Kubernetes with your topology, you must provide a valid Pod Template embedded in a valid Configuration Map. We will be using the following variables throughout this document, some of which are reserved variable names:
 
-* `POD-TEMPLATE-NAME`: This is the name of the Pod Template's YAML definition file. This is ***not*** a reserved variable name.
-* `CONFIG-MAP-NAME`: This is the name which will be used by the Configuration Map in which the Pod Template will be embedded by `kubectl`. This is ***not*** a reserved variable name.
+* `POD-TEMPLATE-NAME`: This is the name of the Pod Template's YAML definition file. This is ***not*** a reserved variable and is a place-holder name.
+* `CONFIG-MAP-NAME`: This is the name which will be used by the Configuration Map in which the Pod Template will be embedded by `kubectl`. This is ***not*** a reserved variable and is a place-holder name.
 * `heron.kubernetes.pod.template.configmap.name`: This variable name used as the key passed to Heron for the `--config-property` on the CLI. This ***is*** a reserved variable name.
 
-***NOTE***: Please do ***not*** use the `.` (period character) in the names of the `CONFIG-MAP-NAME` and `POD-TEMPLATE-NAME`s. This character will be used as a delineation when submitting your topologies.
+***NOTE***: Please do ***not*** use the `.` (period character) in the name of the `CONFIG-MAP-NAME`. This character will be used as a delimiter when submitting your topologies.
 
-It is highly advised that you validate your Pod Templates before placing them in a `ConfigMap` to isolate any validity issues.
+It is highly advised that you validate your Pod Templates before placing them in a `ConfigMap` to isolate any validity issues using a tool such as [Kubeval](https://kubeval.instrumenta.dev/).
 
 ### Pod Templates
 
 An example of a Pod Template is provided below, and is derived from the configuration for the Heron Tracker Pod:
 
 ```yaml
-apiVersion: apps/v1
+apiVersion: v1
 kind: PodTemplate
 metadata:
   name: heron-tracker
@@ -89,8 +97,8 @@ The `ConfigMap` should appear similar to the one below for our example:
 ```yaml
 apiVersion: v1
 data:
-  POD-TEMPLATE-NAME: |-
-    apiVersion: apps/v1
+  POD-TEMPLATE-NAME: |
+    apiVersion: v1
     kind: PodTemplate
     metadata:
       name: heron-tracker
@@ -113,7 +121,6 @@ data:
               limits:
                 cpu: "400m"
                 memory: "512M"
-  SOME-OTHER-KEY: some_other_data_item
 kind: ConfigMap
 metadata:
   creationTimestamp: "2021-09-27T21:55:30Z"
@@ -141,3 +148,40 @@ heron submit kubernetes \
   org.apache.heron.examples.api.AckingTopology acking \
   --config-property heron.kubernetes.pod.template.configmap.name=CONFIG-MAP-NAME.POD-TEMPLATE-NAME
 ```
+
+If a topology fails to be submitted to the Kubernetes cluster due to a misconfigured Pod Template or invalid location, you must issue the `kill` command to remove it from the Topology manager. As in the example preceding:
+
+```bash
+heron kill kubernetes \
+  --service-url=http://localhost:8001/api/v1/namespaces/default/services/heron-apiserver:9000/proxy \
+  acking
+```
+
+This is a temporary workaround as we work towards as solution where a failure to deploy on Kubernetes will remove the topology as well.
+
+## Heron Configured Items in Pod Templates
+
+### Metadata
+
+All metadata in the Pods is overwritten by Heron.
+
+| name | description | default |
+|---|---|---|
+| Annotation: `prometheus.io/scrape` | Flag to indicate whether Prometheus logs can be scraped. | `true` |
+| Annotation `prometheus.io/port` | Port address for Prometheus log scraping. | `8080`  <br> *Can be customized from `KubernetesConstants`.*
+| Annotation: Pod | Pod's revision/version hash.  | Automatically set.
+| Annotation: Service | Labels services can use to attach to the Pod. | Automatically set.
+| Label: `app` | Name of the application lauching the Pod. | `Heron` <br> *Can be customized from `KubernetesConstants`.*
+| Label: `topology`| The name of topology which was provided when submitting. | User defined and supplied on the CLI.
+
+### Container
+
+The following items will be set in the Pod Template's `spec` by Heron.
+
+| name | description | default |
+|---|---|---|
+`terminationGracePeriodSeconds` | Grace period to wait before shutting down the Pod after a `SIGTERM` signal. | `0` seconds.
+| `tolerations` | Attempts to colocate Pods with `tolerations` and `taints` onto nodes hosting Pods with matching `tolerations` and `taints`. | Keys:<br>`node.kubernetes.io/not-ready` <br> `node.alpha.kubernetes.io/notReady` <br> `node.alpha.kubernetes.io/unreachable`. <br> Values (common):<br> `operator: "Exists"`<br> `effect: NoExecute`<br> `tolerationSeconds: 10L`
+| `containers` | Docker container image to be used on the executor Pods. | Configured by Heron based on configs.
+| `volumes` | Volumes to be mounted within the container. | Loaded from the Heron configs if present.
+| `secretVolumes` | Secrets to be mounted as volumes within the container. | Loaded from the Heron configs if present.
