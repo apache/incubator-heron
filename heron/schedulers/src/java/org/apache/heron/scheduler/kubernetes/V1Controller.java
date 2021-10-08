@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -550,7 +551,7 @@ public class V1Controller extends KubernetesController {
       container.setImagePullPolicy(KubernetesContext.getKubernetesImagePullPolicy(configuration));
     }
 
-    // setup the environment variables for the container
+    // Setup the environment variables for the container. Heron overwrites provided values.
     final V1EnvVar envVarHost = new V1EnvVar();
     envVarHost.name(KubernetesConstants.ENV_HOST)
         .valueFrom(new V1EnvVarSource()
@@ -562,13 +563,26 @@ public class V1Controller extends KubernetesController {
         .valueFrom(new V1EnvVarSource()
             .fieldRef(new V1ObjectFieldSelector()
                 .fieldPath(KubernetesConstants.POD_NAME)));
-    container.addEnvItem(envVarHost);
-    container.addEnvItem(envVarPodName);
+
+    if (container.getEnv() != null) {
+      Set<V1EnvVar> envVars = new HashSet<>();
+      envVars.add(envVarHost);
+      envVars.add(envVarPodName);
+      envVars.addAll(container.getEnv());
+      container.setEnv(new LinkedList<>(envVars));
+    } else {
+      container.addEnvItem(envVarHost);
+      container.addEnvItem(envVarPodName);
+    }
 
     setSecretKeyRefs(container);
 
-    // set container resources
-    final V1ResourceRequirements resourceRequirements = new V1ResourceRequirements();
+    // Set container resources
+    if (container.getResources() == null) {
+      container.setResources(new V1ResourceRequirements());
+    }
+    final V1ResourceRequirements resourceRequirements = container.getResources();
+
     // Set the Kubernetes container resource limit
     final Map<String, Quantity> limits = new HashMap<>();
     limits.put(KubernetesConstants.MEMORY,
@@ -580,6 +594,7 @@ public class V1Controller extends KubernetesController {
     resourceRequirements.setLimits(limits);
     KubernetesContext.KubernetesResourceRequestMode requestMode =
             KubernetesContext.getKubernetesRequestMode(configuration);
+
     // Set the Kubernetes container resource request
     if (requestMode == KubernetesContext.KubernetesResourceRequestMode.EQUAL_TO_LIMIT) {
       LOG.log(Level.CONFIG, "Setting K8s Request equal to Limit");
