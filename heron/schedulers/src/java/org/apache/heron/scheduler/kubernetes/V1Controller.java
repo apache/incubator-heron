@@ -551,7 +551,7 @@ public class V1Controller extends KubernetesController {
       container.setImagePullPolicy(KubernetesContext.getKubernetesImagePullPolicy(configuration));
     }
 
-    // Setup the environment variables for the container. Heron overwrites provided values.
+    // Setup the environment variables for the container. Heron defaults take precedence.
     final V1EnvVar envVarHost = new V1EnvVar();
     envVarHost.name(KubernetesConstants.ENV_HOST)
         .valueFrom(new V1EnvVarSource()
@@ -583,8 +583,11 @@ public class V1Controller extends KubernetesController {
     }
     final V1ResourceRequirements resourceRequirements = container.getResources();
 
-    // Set the Kubernetes container resource limit
-    final Map<String, Quantity> limits = new HashMap<>();
+    // Set the Kubernetes container resource limit. Heron defaults take precedence.
+    if (resourceRequirements.getLimits() == null) {
+      resourceRequirements.setLimits(new HashMap<>());
+    }
+    final Map<String, Quantity> limits = resourceRequirements.getLimits();
     limits.put(KubernetesConstants.MEMORY,
             Quantity.fromString(KubernetesUtils.Megabytes(
                     resource.getRam())));
