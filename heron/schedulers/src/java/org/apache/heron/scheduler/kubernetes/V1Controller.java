@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -87,11 +88,18 @@ public class V1Controller extends KubernetesController {
 
   private static final String ENV_SHARD_ID = "SHARD_ID";
 
+  private final boolean isPodTemplateDisabled;
+
   private final AppsV1Api appsClient;
   private final CoreV1Api coreClient;
 
   V1Controller(Config configuration, Config runtimeConfiguration) {
     super(configuration, runtimeConfiguration);
+
+    isPodTemplateDisabled = KubernetesContext.getPodTemplateConfigMapDisabled(configuration);
+    LOG.log(Level.WARNING, String.format("Custom Pod Templates are %s",
+        isPodTemplateDisabled ? "DISABLED" : "ENABLED"));
+
     try {
       final ApiClient apiClient = io.kubernetes.client.util.Config.defaultClient();
       Configuration.setDefaultApiClient(apiClient);
@@ -459,8 +467,25 @@ public class V1Controller extends KubernetesController {
     // https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/#taint-based-evictions
     podSpec.setTolerations(getTolerations());
 
+    // Get <executor> container and discard all others.
+    V1Container executorContainer = null;
+    final List<V1Container> containers = podSpec.getContainers();
+    if (containers != null) {
+      for (V1Container container : containers) {
+        final String name = container.getName();
+        if (name != null && name.equals(KubernetesConstants.EXECUTOR_NAME)) {
+          executorContainer = container;
+          break;
+        }
+      }
+    }
+
+    if (executorContainer == null) {
+      executorContainer = new V1Container().name(KubernetesConstants.EXECUTOR_NAME);
+    }
+
     podSpec.setContainers(Collections.singletonList(
-        getContainer(executorCommand, resource, numberOfInstances)));
+        getContainer(executorCommand, resource, numberOfInstances, executorContainer)));
 
     addVolumesIfPresent(podSpec);
 
@@ -513,9 +538,8 @@ public class V1Controller extends KubernetesController {
   }
 
   private V1Container getContainer(List<String> executorCommand, Resource resource,
-      int numberOfInstances) {
+      int numberOfInstances, final V1Container container) {
     final Config configuration = getConfiguration();
-    final V1Container container = new V1Container().name("executor");
 
     // set up the container images
     container.setImage(KubernetesContext.getExecutorDockerImage(configuration));
@@ -527,7 +551,7 @@ public class V1Controller extends KubernetesController {
       container.setImagePullPolicy(KubernetesContext.getKubernetesImagePullPolicy(configuration));
     }
 
-    // setup the environment variables for the container
+    // Setup the environment variables for the container. Heron defaults take precedence.
     final V1EnvVar envVarHost = new V1EnvVar();
     envVarHost.name(KubernetesConstants.ENV_HOST)
         .valueFrom(new V1EnvVarSource()
@@ -539,15 +563,31 @@ public class V1Controller extends KubernetesController {
         .valueFrom(new V1EnvVarSource()
             .fieldRef(new V1ObjectFieldSelector()
                 .fieldPath(KubernetesConstants.POD_NAME)));
-    container.addEnvItem(envVarHost);
-    container.addEnvItem(envVarPodName);
+
+    if (container.getEnv() != null) {
+      Set<V1EnvVar> envVars = new HashSet<>();
+      envVars.add(envVarHost);
+      envVars.add(envVarPodName);
+      envVars.addAll(container.getEnv());
+      container.setEnv(new LinkedList<>(envVars));
+    } else {
+      container.addEnvItem(envVarHost);
+      container.addEnvItem(envVarPodName);
+    }
 
     setSecretKeyRefs(container);
 
-    // set container resources
-    final V1ResourceRequirements resourceRequirements = new V1ResourceRequirements();
-    // Set the Kubernetes container resource limit
-    final Map<String, Quantity> limits = new HashMap<>();
+    // Set container resources
+    if (container.getResources() == null) {
+      container.setResources(new V1ResourceRequirements());
+    }
+    final V1ResourceRequirements resourceRequirements = container.getResources();
+
+    // Set the Kubernetes container resource limit. Heron defaults take precedence.
+    if (resourceRequirements.getLimits() == null) {
+      resourceRequirements.setLimits(new HashMap<>());
+    }
+    final Map<String, Quantity> limits = resourceRequirements.getLimits();
     limits.put(KubernetesConstants.MEMORY,
             Quantity.fromString(KubernetesUtils.Megabytes(
                     resource.getRam())));
@@ -557,6 +597,7 @@ public class V1Controller extends KubernetesController {
     resourceRequirements.setLimits(limits);
     KubernetesContext.KubernetesResourceRequestMode requestMode =
             KubernetesContext.getKubernetesRequestMode(configuration);
+
     // Set the Kubernetes container resource request
     if (requestMode == KubernetesContext.KubernetesResourceRequestMode.EQUAL_TO_LIMIT) {
       LOG.log(Level.CONFIG, "Setting K8s Request equal to Limit");
@@ -669,8 +710,8 @@ public class V1Controller extends KubernetesController {
   protected V1PodTemplateSpec loadPodFromTemplate() {
     final Pair<String, String> podTemplateConfigMapName = getPodTemplateLocation();
 
-    // Default Pod Template.
-    if (podTemplateConfigMapName == null) {
+    // Default Pod Template. Check if Pod Templates are disabled.
+    if (podTemplateConfigMapName == null || isPodTemplateDisabled) {
       LOG.log(Level.INFO, "Configuring cluster with the Default Pod Template");
       return new V1PodTemplateSpec();
     }

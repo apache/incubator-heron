@@ -21,6 +21,7 @@ package org.apache.heron.scheduler.kubernetes;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -82,9 +83,11 @@ public final class KubernetesContext extends Context {
   public static final String KUBERNETES_VOLUME_AWS_EBS_FS_TYPE =
       "heron.kubernetes.volume.awsElasticBlockStore.fsType";
 
-  // pod template configmap name keys (<--config-property> on cli)
+  // pod template configmap
   public static final String KUBERNETES_POD_TEMPLATE_CONFIGMAP_NAME =
       "heron.kubernetes.pod.template.configmap.name";
+  public static final String KUBERNETES_POD_TEMPLATE_CONFIGMAP_DISABLED =
+      "heron.kubernetes.pod.template.configmap.disabled";
 
   // container mount volume mount keys
   public static final String KUBERNETES_CONTAINER_VOLUME_MOUNT_NAME =
@@ -178,6 +181,11 @@ public final class KubernetesContext extends Context {
 
   public static String getPodTemplateConfigMapName(Config config) {
     return config.getStringValue(KUBERNETES_POD_TEMPLATE_CONFIGMAP_NAME);
+  }
+
+  public static boolean getPodTemplateConfigMapDisabled(Config config) {
+    final String disabled = config.getStringValue(KUBERNETES_POD_TEMPLATE_CONFIGMAP_DISABLED);
+    return disabled != null && disabled.toLowerCase(Locale.ROOT).equals("true");
   }
 
   public static Map<String, String> getPodLabels(Config config) {
