@@ -466,8 +466,25 @@ public class V1Controller extends KubernetesController {
     // https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/#taint-based-evictions
     podSpec.setTolerations(getTolerations());
 
+    // Get <executor> container and discard all others.
+    V1Container executorContainer = null;
+    final List<V1Container> containers = podSpec.getContainers();
+    if (containers != null) {
+      for (V1Container container : containers) {
+        final String name = container.getName();
+        if (name != null && name.equals(KubernetesConstants.EXECUTOR_NAME)) {
+          executorContainer = container;
+          break;
+        }
+      }
+    }
+
+    if (executorContainer == null) {
+      executorContainer = new V1Container().name(KubernetesConstants.EXECUTOR_NAME);
+    }
+
     podSpec.setContainers(Collections.singletonList(
-        getContainer(executorCommand, resource, numberOfInstances)));
+        getContainer(executorCommand, resource, numberOfInstances, executorContainer)));
 
     addVolumesIfPresent(podSpec);
 
@@ -520,9 +537,8 @@ public class V1Controller extends KubernetesController {
   }
 
   private V1Container getContainer(List<String> executorCommand, Resource resource,
-      int numberOfInstances) {
+      int numberOfInstances, final V1Container container) {
     final Config configuration = getConfiguration();
-    final V1Container container = new V1Container().name("executor");
 
     // set up the container images
     container.setImage(KubernetesContext.getExecutorDockerImage(configuration));
