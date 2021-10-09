@@ -28,7 +28,7 @@ metadata:
   namespace: default
 
 ---
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
   name: heron-apiserver
@@ -82,6 +82,7 @@ spec:
               -D heron.uploader.dlog.topologies.namespace.uri=distributedlog://zookeeper:2181/heronbkdl
               -D heron.statefulstorage.classname=org.apache.heron.statefulstorage.dlog.DlogStorage
               -D heron.statefulstorage.dlog.namespace.uri=distributedlog://zookeeper:2181/heronbkdl
+            # -D heron.kubernetes.pod.template.configmap.disabled=true
 
 ---
 apiVersion: v1
