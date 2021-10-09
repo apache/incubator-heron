@@ -469,7 +469,7 @@ public class V1Controller extends KubernetesController {
 
     // Get <executor> container and discard all others.
     V1Container executorContainer = null;
-    final List<V1Container> containers = podSpec.getContainers();
+    List<V1Container> containers = podSpec.getContainers();
     if (containers != null) {
       for (V1Container container : containers) {
         final String name = container.getName();
@@ -478,14 +478,18 @@ public class V1Controller extends KubernetesController {
           break;
         }
       }
+    } else {
+      containers = new LinkedList<>();
     }
 
     if (executorContainer == null) {
       executorContainer = new V1Container().name(KubernetesConstants.EXECUTOR_NAME);
+      containers.add(executorContainer);
     }
 
-    podSpec.setContainers(Collections.singletonList(
-        getContainer(executorCommand, resource, numberOfInstances, executorContainer)));
+    configureExecutorContainer(executorCommand, resource, numberOfInstances, executorContainer);
+
+    podSpec.setContainers(containers);
 
     addVolumesIfPresent(podSpec);
 
@@ -537,7 +541,7 @@ public class V1Controller extends KubernetesController {
     }
   }
 
-  private V1Container getContainer(List<String> executorCommand, Resource resource,
+  private void configureExecutorContainer(List<String> executorCommand, Resource resource,
       int numberOfInstances, final V1Container container) {
     final Config configuration = getConfiguration();
 
@@ -615,8 +619,6 @@ public class V1Controller extends KubernetesController {
 
     // setup volume mounts
     mountVolumeIfPresent(container);
-
-    return container;
   }
 
   private List<V1ContainerPort> getContainerPorts(boolean remoteDebugEnabled,
