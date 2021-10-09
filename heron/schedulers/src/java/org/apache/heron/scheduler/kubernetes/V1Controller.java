@@ -710,10 +710,14 @@ public class V1Controller extends KubernetesController {
   protected V1PodTemplateSpec loadPodFromTemplate() {
     final Pair<String, String> podTemplateConfigMapName = getPodTemplateLocation();
 
-    // Default Pod Template. Check if Pod Templates are disabled.
-    if (podTemplateConfigMapName == null || isPodTemplateDisabled) {
+    // Default Pod Template.
+    if (podTemplateConfigMapName == null) {
       LOG.log(Level.INFO, "Configuring cluster with the Default Pod Template");
       return new V1PodTemplateSpec();
+    }
+
+    if (isPodTemplateDisabled) {
+      throw new TopologySubmissionException("Custom executor Pod Templates are disabled");
     }
 
     final String configMapName = podTemplateConfigMapName.first;
