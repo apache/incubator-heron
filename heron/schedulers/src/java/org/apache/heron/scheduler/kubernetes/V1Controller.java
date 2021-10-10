@@ -514,13 +514,27 @@ public class V1Controller extends KubernetesController {
     return tolerations;
   }
 
-  private void addVolumesIfPresent(V1PodSpec spec) {
+  private void addVolumesIfPresent(final V1PodSpec spec) {
     final Config config = getConfiguration();
     if (KubernetesContext.hasVolume(config)) {
-      final V1Volume volume = Volumes.get().create(config);
-      if (volume != null) {
-        LOG.fine("Adding volume: " + volume.toString());
-        spec.volumes(Collections.singletonList(volume));
+      final V1Volume volumeFromConfig = Volumes.get().create(config);
+      if (volumeFromConfig != null) {
+        // Merge volumes. Deduplicate using volume's name with Heron defaults taking precedence.
+        if (spec.getVolumes() != null) {
+          try {
+            Set<V1Volume> volumeSet = new TreeSet<>(Comparator.comparing(V1Volume::getName));
+            volumeSet.add(volumeFromConfig);
+            volumeSet.addAll(spec.getVolumes());
+            spec.setVolumes(new LinkedList<>(volumeSet));
+          } catch (NullPointerException e) {
+            final String message = "Executor Pod Template is missing a <Volume> name";
+            LOG.log(Level.INFO, message);
+            throw new TopologySubmissionException(message);
+          }
+        } else {
+          spec.setVolumes(Collections.singletonList(volumeFromConfig));
+        }
+        LOG.fine("Adding volume: " + volumeFromConfig);
       }
     }
   }
