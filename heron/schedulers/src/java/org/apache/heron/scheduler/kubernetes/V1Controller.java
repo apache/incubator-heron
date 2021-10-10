@@ -546,10 +546,10 @@ public class V1Controller extends KubernetesController {
       int numberOfInstances, final V1Container container) {
     final Config configuration = getConfiguration();
 
-    // set up the container images
+    // Set up the container images.
     container.setImage(KubernetesContext.getExecutorDockerImage(configuration));
 
-    // set up the container command
+    // Set up the container command.
     container.setCommand(executorCommand);
 
     if (KubernetesContext.hasImagePullPolicy(configuration)) {
@@ -598,10 +598,10 @@ public class V1Controller extends KubernetesController {
             Quantity.fromString(Double.toString(roundDecimal(
                     resource.getCpu(), 3))));
     resourceRequirements.setLimits(limits);
-    KubernetesContext.KubernetesResourceRequestMode requestMode =
-            KubernetesContext.getKubernetesRequestMode(configuration);
 
-    // Set the Kubernetes container resource request
+    // Set the Kubernetes container resource request.
+    KubernetesContext.KubernetesResourceRequestMode requestMode =
+        KubernetesContext.getKubernetesRequestMode(configuration);
     if (requestMode == KubernetesContext.KubernetesResourceRequestMode.EQUAL_TO_LIMIT) {
       LOG.log(Level.CONFIG, "Setting K8s Request equal to Limit");
       resourceRequirements.setRequests(limits);
@@ -610,11 +610,19 @@ public class V1Controller extends KubernetesController {
     }
     container.setResources(resourceRequirements);
 
-    // set container ports
+    // Set container ports. Deduplicate ports with Heron defaults take precedence.
     final boolean debuggingEnabled =
         TopologyUtils.getTopologyRemoteDebuggingEnabled(
             Runtime.topology(getRuntimeConfiguration()));
-    container.setPorts(getContainerPorts(debuggingEnabled, numberOfInstances));
+    if (container.getPorts() != null) {
+      Set<V1ContainerPort> portSet = new TreeSet<>(
+          Comparator.comparing(V1ContainerPort::getContainerPort));
+      portSet.addAll(getContainerPorts(debuggingEnabled, numberOfInstances));
+      portSet.addAll(container.getPorts());
+      container.setPorts(new LinkedList<>(portSet));
+    } else {
+      container.setPorts(getContainerPorts(debuggingEnabled, numberOfInstances));
+    }
 
     // setup volume mounts
     mountVolumeIfPresent(container);
