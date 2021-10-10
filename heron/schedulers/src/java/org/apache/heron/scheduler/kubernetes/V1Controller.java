@@ -664,11 +664,17 @@ public class V1Controller extends KubernetesController {
 
       // Merge volume mounts. Deduplicate using mount's name with Heron defaults taking precedence.
       if (container.getVolumeMounts() != null) {
-        Set<V1VolumeMount> volumeMountSet = new TreeSet<>(
-            Comparator.comparing(V1VolumeMount::getName));
-        volumeMountSet.add(mount);
-        volumeMountSet.addAll(container.getVolumeMounts());
-        container.volumeMounts(new LinkedList<>(volumeMountSet));
+        try {
+          Set<V1VolumeMount> volumeMountSet = new TreeSet<>(
+              Comparator.comparing(V1VolumeMount::getName));
+          volumeMountSet.add(mount);
+          volumeMountSet.addAll(container.getVolumeMounts());
+          container.volumeMounts(new LinkedList<>(volumeMountSet));
+        } catch (NullPointerException e) {
+          final String message = "Executor Pod Template is missing a <Volume Mount> name";
+          LOG.log(Level.INFO, message);
+          throw new TopologySubmissionException(message);
+        }
       } else {
         container.setVolumeMounts(Collections.singletonList(mount));
       }
