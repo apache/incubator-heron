@@ -454,8 +454,10 @@ public class V1Controller extends KubernetesController {
     return KubernetesContext.getServiceLabels(getConfiguration());
   }
 
-  private void finalizePodSpec(V1PodTemplateSpec podTemplateSpec, List<String> executorCommand,
-                               Resource resource, int numberOfInstances) {
+  private void finalizePodSpec(final V1PodTemplateSpec podTemplateSpec,
+                               List<String> executorCommand,
+                               Resource resource,
+                               int numberOfInstances) {
     if (podTemplateSpec.getSpec() == null) {
       podTemplateSpec.spec(new V1PodSpec());
     }
@@ -556,7 +558,7 @@ public class V1Controller extends KubernetesController {
       container.setImagePullPolicy(KubernetesContext.getKubernetesImagePullPolicy(configuration));
     }
 
-    // Setup the environment variables for the container. Heron defaults take precedence.
+    // Configure environment vars. Deduplicate on var name with Heron defaults take precedence.
     final V1EnvVar envVarHost = new V1EnvVar();
     envVarHost.name(KubernetesConstants.ENV_HOST)
         .valueFrom(new V1EnvVarSource()
@@ -586,7 +588,7 @@ public class V1Controller extends KubernetesController {
     }
     final V1ResourceRequirements resourceRequirements = container.getResources();
 
-    // Set the Kubernetes container resource limit. Heron defaults take precedence.
+    // Configure resource limits. Deduplicate on limit name with Heron defaults taking precedence.
     if (resourceRequirements.getLimits() == null) {
       resourceRequirements.setLimits(new HashMap<>());
     }
@@ -610,7 +612,7 @@ public class V1Controller extends KubernetesController {
     }
     container.setResources(resourceRequirements);
 
-    // Set container ports. Deduplicate ports with Heron defaults take precedence.
+    // Set container ports. Deduplicate using port number with Heron defaults taking precedence.
     final boolean debuggingEnabled =
         TopologyUtils.getTopologyRemoteDebuggingEnabled(
             Runtime.topology(getRuntimeConfiguration()));
@@ -660,7 +662,7 @@ public class V1Controller extends KubernetesController {
               .name(KubernetesContext.getContainerVolumeName(config))
               .mountPath(KubernetesContext.getContainerVolumeMountPath(config));
 
-      // Merge volume mounts. Deduplicate using mount's name with Heron defaults take precedence.
+      // Merge volume mounts. Deduplicate using mount's name with Heron defaults taking precedence.
       if (container.getVolumeMounts() != null) {
         Set<V1VolumeMount> volumeMountSet = new TreeSet<>(
             Comparator.comparing(V1VolumeMount::getName));
@@ -703,7 +705,7 @@ public class V1Controller extends KubernetesController {
 
   protected Pair<String, String> getPodTemplateLocation() {
     final String podTemplateConfigMapName = KubernetesContext
-        .getPodTemplateConfigMapName(super.getConfiguration());
+        .getPodTemplateConfigMapName(getConfiguration());
 
     if (podTemplateConfigMapName == null) {
       return null;
