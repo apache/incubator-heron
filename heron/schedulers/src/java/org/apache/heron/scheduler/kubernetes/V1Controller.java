@@ -652,14 +652,24 @@ public class V1Controller extends KubernetesController {
     return ports;
   }
 
-  private void mountVolumeIfPresent(V1Container container) {
+  private void mountVolumeIfPresent(final V1Container container) {
     final Config config = getConfiguration();
     if (KubernetesContext.hasContainerVolume(config)) {
       final V1VolumeMount mount =
           new V1VolumeMount()
               .name(KubernetesContext.getContainerVolumeName(config))
               .mountPath(KubernetesContext.getContainerVolumeMountPath(config));
-      container.volumeMounts(Collections.singletonList(mount));
+
+      // Merge volume mounts. Deduplicate using mount's name with Heron defaults take precedence.
+      if (container.getVolumeMounts() != null) {
+        Set<V1VolumeMount> volumeMountSet = new TreeSet<>(
+            Comparator.comparing(V1VolumeMount::getName));
+        volumeMountSet.add(mount);
+        volumeMountSet.addAll(container.getVolumeMounts());
+        container.volumeMounts(new LinkedList<>(volumeMountSet));
+      } else {
+        container.setVolumeMounts(Collections.singletonList(mount));
+      }
     }
   }
 
