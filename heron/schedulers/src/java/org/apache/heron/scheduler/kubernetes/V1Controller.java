@@ -599,7 +599,6 @@ public class V1Controller extends KubernetesController {
     limits.put(KubernetesConstants.CPU,
             Quantity.fromString(Double.toString(roundDecimal(
                     resource.getCpu(), 3))));
-    resourceRequirements.setLimits(limits);
 
     // Set the Kubernetes container resource request.
     KubernetesContext.KubernetesResourceRequestMode requestMode =
