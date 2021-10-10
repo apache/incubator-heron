@@ -23,13 +23,14 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -569,14 +570,12 @@ public class V1Controller extends KubernetesController {
                 .fieldPath(KubernetesConstants.POD_NAME)));
 
     if (container.getEnv() != null) {
-      Set<V1EnvVar> envVars = new HashSet<>();
-      envVars.add(envVarHost);
-      envVars.add(envVarPodName);
+      Set<V1EnvVar> envVars = new TreeSet<>(Comparator.comparing(V1EnvVar::getName));
+      envVars.addAll(Arrays.asList(envVarHost, envVarPodName));
       envVars.addAll(container.getEnv());
       container.setEnv(new LinkedList<>(envVars));
     } else {
-      container.addEnvItem(envVarHost);
-      container.addEnvItem(envVarPodName);
+      container.setEnv(Arrays.asList(envVarHost, envVarPodName));
     }
 
     setSecretKeyRefs(container);
