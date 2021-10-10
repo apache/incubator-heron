@@ -612,26 +612,18 @@ public class V1Controller extends KubernetesController {
     }
     container.setResources(resourceRequirements);
 
-    // Set container ports. Deduplicate using port number with Heron defaults taking precedence.
+    // Set container ports.
     final boolean debuggingEnabled =
         TopologyUtils.getTopologyRemoteDebuggingEnabled(
             Runtime.topology(getRuntimeConfiguration()));
-    if (container.getPorts() != null) {
-      Set<V1ContainerPort> portSet = new TreeSet<>(
-          Comparator.comparing(V1ContainerPort::getContainerPort));
-      portSet.addAll(getContainerPorts(debuggingEnabled, numberOfInstances));
-      portSet.addAll(container.getPorts());
-      container.setPorts(new LinkedList<>(portSet));
-    } else {
-      container.setPorts(getContainerPorts(debuggingEnabled, numberOfInstances));
-    }
+    configureContainerPorts(debuggingEnabled, numberOfInstances, container);
 
     // setup volume mounts
     mountVolumeIfPresent(container);
   }
 
-  private List<V1ContainerPort> getContainerPorts(boolean remoteDebugEnabled,
-      int numberOfInstances) {
+  private void configureContainerPorts(boolean remoteDebugEnabled, int numberOfInstances,
+                                       final V1Container container) {
     List<V1ContainerPort> ports = new ArrayList<>();
     KubernetesConstants.EXECUTOR_PORTS.forEach((p, v) -> {
       final V1ContainerPort port = new V1ContainerPort();
@@ -651,7 +643,22 @@ public class V1Controller extends KubernetesController {
       });
     }
 
-    return ports;
+    // Set container ports. Deduplicate using port number with Heron defaults taking precedence.
+    if (container.getPorts() != null) {
+      try {
+        Set<V1ContainerPort> portSet = new TreeSet<>(
+            Comparator.comparing(V1ContainerPort::getContainerPort));
+        portSet.addAll(ports);
+        portSet.addAll(container.getPorts());
+        container.setPorts(new LinkedList<>(portSet));
+      } catch (NullPointerException e) {
+        final String message = "Executor Pod Template is missing a <Container Port>";
+        LOG.log(Level.INFO, message);
+        throw new TopologySubmissionException(message);
+      }
+    } else {
+      container.setPorts(ports);
+    }
   }
 
   private void mountVolumeIfPresent(final V1Container container) {
