@@ -50,7 +50,6 @@ public class V1ControllerTest {
   private static final String CONFIGMAP_POD_TEMPLATE_NAME = "CONFIG-MAP-NAME.POD-TEMPLATE-NAME";
   private static final String CONFIGMAP_NAME = "CONFIG-MAP-NAME";
   private static final String POD_TEMPLATE_NAME = "POD-TEMPLATE-NAME";
-  private static final String POD_TEMPLATE_DEFAULT = new V1PodTemplateSpec().toString();
   private static final String POD_TEMPLATE_VALID =
       "apiVersion: apps/v1\n"
           + "kind: PodTemplate\n"
@@ -130,7 +129,7 @@ public class V1ControllerTest {
     final V1Controller v1ControllerNoPodTemplate = new V1Controller(config, runtime);
     final V1PodTemplateSpec podSpec = v1ControllerNoPodTemplate.loadPodFromTemplate();
 
-    Assert.assertEquals(podSpec.toString(), POD_TEMPLATE_DEFAULT);
+    Assert.assertEquals(podSpec.toString(), new V1PodTemplateSpec().toString());
   }
 
   @Test
@@ -327,11 +326,14 @@ public class V1ControllerTest {
         .build();
     final LinkedList<V1ConfigMap> validPodConfigMapList = new LinkedList<>(
         Arrays.asList(configMapWithNonTargetData, configMapValidPod));
-
+    final String expected = "Pod Templates are disabled";
     doReturn(validPodConfigMapList).when(v1ControllerPodTemplate).getConfigMaps();
-    V1PodTemplateSpec podTemplateSpec = v1ControllerPodTemplate.loadPodFromTemplate();
 
-    Assert.assertEquals(podTemplateSpec.toString(), POD_TEMPLATE_DEFAULT);
+    try {
+      v1ControllerPodTemplate.loadPodFromTemplate();
+    } catch (TopologySubmissionException e) {
+      Assert.assertTrue(e.getMessage().contains(expected));
+    }
   }
 
   @Test

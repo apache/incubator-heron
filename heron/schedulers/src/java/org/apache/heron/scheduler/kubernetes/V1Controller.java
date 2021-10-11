@@ -23,13 +23,14 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -453,8 +454,10 @@ public class V1Controller extends KubernetesController {
     return KubernetesContext.getServiceLabels(getConfiguration());
   }
 
-  private void finalizePodSpec(V1PodTemplateSpec podTemplateSpec, List<String> executorCommand,
-                               Resource resource, int numberOfInstances) {
+  private void finalizePodSpec(final V1PodTemplateSpec podTemplateSpec,
+                               List<String> executorCommand,
+                               Resource resource,
+                               int numberOfInstances) {
     if (podTemplateSpec.getSpec() == null) {
       podTemplateSpec.spec(new V1PodSpec());
     }
@@ -469,7 +472,7 @@ public class V1Controller extends KubernetesController {
 
     // Get <executor> container and discard all others.
     V1Container executorContainer = null;
-    final List<V1Container> containers = podSpec.getContainers();
+    List<V1Container> containers = podSpec.getContainers();
     if (containers != null) {
       for (V1Container container : containers) {
         final String name = container.getName();
@@ -478,14 +481,18 @@ public class V1Controller extends KubernetesController {
           break;
         }
       }
+    } else {
+      containers = new LinkedList<>();
     }
 
     if (executorContainer == null) {
       executorContainer = new V1Container().name(KubernetesConstants.EXECUTOR_NAME);
+      containers.add(executorContainer);
     }
 
-    podSpec.setContainers(Collections.singletonList(
-        getContainer(executorCommand, resource, numberOfInstances, executorContainer)));
+    configureExecutorContainer(executorCommand, resource, numberOfInstances, executorContainer);
+
+    podSpec.setContainers(containers);
 
     addVolumesIfPresent(podSpec);
 
@@ -507,13 +514,27 @@ public class V1Controller extends KubernetesController {
     return tolerations;
   }
 
-  private void addVolumesIfPresent(V1PodSpec spec) {
+  private void addVolumesIfPresent(final V1PodSpec spec) {
     final Config config = getConfiguration();
     if (KubernetesContext.hasVolume(config)) {
-      final V1Volume volume = Volumes.get().create(config);
-      if (volume != null) {
-        LOG.fine("Adding volume: " + volume.toString());
-        spec.volumes(Collections.singletonList(volume));
+      final V1Volume volumeFromConfig = Volumes.get().create(config);
+      if (volumeFromConfig != null) {
+        // Merge volumes. Deduplicate using volume's name with Heron defaults taking precedence.
+        if (spec.getVolumes() != null) {
+          try {
+            Set<V1Volume> volumeSet = new TreeSet<>(Comparator.comparing(V1Volume::getName));
+            volumeSet.add(volumeFromConfig);
+            volumeSet.addAll(spec.getVolumes());
+            spec.setVolumes(new LinkedList<>(volumeSet));
+          } catch (NullPointerException e) {
+            final String message = "Executor Pod Template is missing a <Volume> name";
+            LOG.log(Level.INFO, message);
+            throw new TopologySubmissionException(message);
+          }
+        } else {
+          spec.setVolumes(Collections.singletonList(volumeFromConfig));
+        }
+        LOG.fine("Adding volume: " + volumeFromConfig);
       }
     }
   }
@@ -537,21 +558,21 @@ public class V1Controller extends KubernetesController {
     }
   }
 
-  private V1Container getContainer(List<String> executorCommand, Resource resource,
+  private void configureExecutorContainer(List<String> executorCommand, Resource resource,
       int numberOfInstances, final V1Container container) {
     final Config configuration = getConfiguration();
 
-    // set up the container images
+    // Set up the container images.
     container.setImage(KubernetesContext.getExecutorDockerImage(configuration));
 
-    // set up the container command
+    // Set up the container command.
     container.setCommand(executorCommand);
 
     if (KubernetesContext.hasImagePullPolicy(configuration)) {
       container.setImagePullPolicy(KubernetesContext.getKubernetesImagePullPolicy(configuration));
     }
 
-    // Setup the environment variables for the container. Heron defaults take precedence.
+    // Configure environment vars. Deduplicate on var name with Heron defaults take precedence.
     final V1EnvVar envVarHost = new V1EnvVar();
     envVarHost.name(KubernetesConstants.ENV_HOST)
         .valueFrom(new V1EnvVarSource()
@@ -565,14 +586,12 @@ public class V1Controller extends KubernetesController {
                 .fieldPath(KubernetesConstants.POD_NAME)));
 
     if (container.getEnv() != null) {
-      Set<V1EnvVar> envVars = new HashSet<>();
-      envVars.add(envVarHost);
-      envVars.add(envVarPodName);
+      Set<V1EnvVar> envVars = new TreeSet<>(Comparator.comparing(V1EnvVar::getName));
+      envVars.addAll(Arrays.asList(envVarHost, envVarPodName));
       envVars.addAll(container.getEnv());
       container.setEnv(new LinkedList<>(envVars));
     } else {
-      container.addEnvItem(envVarHost);
-      container.addEnvItem(envVarPodName);
+      container.setEnv(Arrays.asList(envVarHost, envVarPodName));
     }
 
     setSecretKeyRefs(container);
@@ -583,22 +602,25 @@ public class V1Controller extends KubernetesController {
     }
     final V1ResourceRequirements resourceRequirements = container.getResources();
 
-    // Set the Kubernetes container resource limit. Heron defaults take precedence.
+    // Configure resource limits. Deduplicate on limit name with user values taking precedence.
     if (resourceRequirements.getLimits() == null) {
       resourceRequirements.setLimits(new HashMap<>());
     }
     final Map<String, Quantity> limits = resourceRequirements.getLimits();
-    limits.put(KubernetesConstants.MEMORY,
-            Quantity.fromString(KubernetesUtils.Megabytes(
-                    resource.getRam())));
-    limits.put(KubernetesConstants.CPU,
-            Quantity.fromString(Double.toString(roundDecimal(
-                    resource.getCpu(), 3))));
-    resourceRequirements.setLimits(limits);
-    KubernetesContext.KubernetesResourceRequestMode requestMode =
-            KubernetesContext.getKubernetesRequestMode(configuration);
+    if (!limits.containsKey(KubernetesConstants.MEMORY)) {
+      limits.put(KubernetesConstants.MEMORY,
+          Quantity.fromString(KubernetesUtils.Megabytes(
+              resource.getRam())));
+    }
+    if (!limits.containsKey(KubernetesConstants.CPU)) {
+      limits.put(KubernetesConstants.CPU,
+          Quantity.fromString(Double.toString(roundDecimal(
+              resource.getCpu(), 3))));
+    }
 
-    // Set the Kubernetes container resource request
+    // Set the Kubernetes container resource request.
+    KubernetesContext.KubernetesResourceRequestMode requestMode =
+        KubernetesContext.getKubernetesRequestMode(configuration);
     if (requestMode == KubernetesContext.KubernetesResourceRequestMode.EQUAL_TO_LIMIT) {
       LOG.log(Level.CONFIG, "Setting K8s Request equal to Limit");
       resourceRequirements.setRequests(limits);
@@ -607,20 +629,18 @@ public class V1Controller extends KubernetesController {
     }
     container.setResources(resourceRequirements);
 
-    // set container ports
+    // Set container ports.
     final boolean debuggingEnabled =
         TopologyUtils.getTopologyRemoteDebuggingEnabled(
             Runtime.topology(getRuntimeConfiguration()));
-    container.setPorts(getContainerPorts(debuggingEnabled, numberOfInstances));
+    configureContainerPorts(debuggingEnabled, numberOfInstances, container);
 
     // setup volume mounts
     mountVolumeIfPresent(container);
-
-    return container;
   }
 
-  private List<V1ContainerPort> getContainerPorts(boolean remoteDebugEnabled,
-      int numberOfInstances) {
+  private void configureContainerPorts(boolean remoteDebugEnabled, int numberOfInstances,
+                                       final V1Container container) {
     List<V1ContainerPort> ports = new ArrayList<>();
     KubernetesConstants.EXECUTOR_PORTS.forEach((p, v) -> {
       final V1ContainerPort port = new V1ContainerPort();
@@ -640,17 +660,48 @@ public class V1Controller extends KubernetesController {
       });
     }
 
-    return ports;
+    // Set container ports. Deduplicate using port number with Heron defaults taking precedence.
+    if (container.getPorts() != null) {
+      try {
+        Set<V1ContainerPort> portSet = new TreeSet<>(
+            Comparator.comparing(V1ContainerPort::getContainerPort));
+        portSet.addAll(ports);
+        portSet.addAll(container.getPorts());
+        container.setPorts(new LinkedList<>(portSet));
+      } catch (NullPointerException e) {
+        final String message = "Executor Pod Template is missing a <Container Port>";
+        LOG.log(Level.INFO, message);
+        throw new TopologySubmissionException(message);
+      }
+    } else {
+      container.setPorts(ports);
+    }
   }
 
-  private void mountVolumeIfPresent(V1Container container) {
+  private void mountVolumeIfPresent(final V1Container container) {
     final Config config = getConfiguration();
     if (KubernetesContext.hasContainerVolume(config)) {
       final V1VolumeMount mount =
           new V1VolumeMount()
               .name(KubernetesContext.getContainerVolumeName(config))
               .mountPath(KubernetesContext.getContainerVolumeMountPath(config));
-      container.volumeMounts(Collections.singletonList(mount));
+
+      // Merge volume mounts. Deduplicate using mount's name with Heron defaults taking precedence.
+      if (container.getVolumeMounts() != null) {
+        try {
+          Set<V1VolumeMount> volumeMountSet = new TreeSet<>(
+              Comparator.comparing(V1VolumeMount::getName));
+          volumeMountSet.add(mount);
+          volumeMountSet.addAll(container.getVolumeMounts());
+          container.volumeMounts(new LinkedList<>(volumeMountSet));
+        } catch (NullPointerException e) {
+          final String message = "Executor Pod Template is missing a <Volume Mount> name";
+          LOG.log(Level.INFO, message);
+          throw new TopologySubmissionException(message);
+        }
+      } else {
+        container.setVolumeMounts(Collections.singletonList(mount));
+      }
     }
   }
 
@@ -684,7 +735,7 @@ public class V1Controller extends KubernetesController {
 
   protected Pair<String, String> getPodTemplateLocation() {
     final String podTemplateConfigMapName = KubernetesContext
-        .getPodTemplateConfigMapName(super.getConfiguration());
+        .getPodTemplateConfigMapName(getConfiguration());
 
     if (podTemplateConfigMapName == null) {
       return null;
@@ -710,10 +761,14 @@ public class V1Controller extends KubernetesController {
   protected V1PodTemplateSpec loadPodFromTemplate() {
     final Pair<String, String> podTemplateConfigMapName = getPodTemplateLocation();
 
-    // Default Pod Template. Check if Pod Templates are disabled.
-    if (podTemplateConfigMapName == null || isPodTemplateDisabled) {
+    // Default Pod Template.
+    if (podTemplateConfigMapName == null) {
       LOG.log(Level.INFO, "Configuring cluster with the Default Pod Template");
       return new V1PodTemplateSpec();
+    }
+
+    if (isPodTemplateDisabled) {
+      throw new TopologySubmissionException("Custom executor Pod Templates are disabled");
     }
 
     final String configMapName = podTemplateConfigMapName.first;
