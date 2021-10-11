@@ -161,27 +161,34 @@ This is a temporary workaround as we work towards as solution where a failure to
 
 ## Heron Configured Items in Pod Templates
 
-### Metadata
+Heron will locate the container named `executor` in the Pod Template and customize it as outlined below. All other containers within the Pod Template will remain unchanged.
 
-All metadata in the Pods is overwritten by Heron.
+### Executor Container
 
-| name | description | default |
+All metadata for the `executor` container will be overwritten by Heron. In some other cases, values from the Pod Template for the `executor` will be overwritten by Heron as outline below.
+
+| Name | Description | Policy |
 |---|---|---|
-| Annotation: `prometheus.io/scrape` | Flag to indicate whether Prometheus logs can be scraped. | `true` |
-| Annotation `prometheus.io/port` | Port address for Prometheus log scraping. | `8080`  <br> *Can be customized from `KubernetesConstants`.*
-| Annotation: Pod | Pod's revision/version hash.  | Automatically set.
+| `image` | The `executor` container's image. | Overwritten by Heron using values form the config.
+| `env` | Environment variables are made available within the container. The `HOST` and `POD_NAME` keys are required by Heron and are thus reserved. | Merged with Heron's values taking precedence. Deduplication is based on `name`.
+| `ports` | Port numbers opened within the container. Some of these port number are required by Heron and are thus reserved. The reserved ports are defined in Heron's constants as [`6001`-`6010`]. | Merged with Heron's values taking precedence. Deduplication is based on the `containerPort` value.
+| `limits` | Heron will attempt to load values for `cpu` and `memory` from its configs. If these values are not provided in the containers specs, Heron will place values from its configs. | User input takes precedence over Heron's values. This allows for per job custom resource limits.
+| `volumeMounts` | These are the mount points within the `executor` container for the `volumes` available in the Pod. | Merged with Heron's values taking precedence. Deduplication is based on the `name` value.
+| Annotation: `prometheus.io/scrape` | Flag to indicate whether Prometheus logs can be scraped and is set to `true`. | Value is overridden by Heron. |
+| Annotation `prometheus.io/port` | Port address for Prometheus log scraping and is set to `8080`. | Values are overridden by Heron.
+| Annotation: Pod | Pod's revision/version hash. | Automatically set.
 | Annotation: Service | Labels services can use to attach to the Pod. | Automatically set.
-| Label: `app` | Name of the application lauching the Pod. | `Heron` <br> *Can be customized from `KubernetesConstants`.*
+| Label: `app` | Name of the application lauching the Pod and is set to `Heron`. | Values are overridden by Heron.
 | Label: `topology`| The name of topology which was provided when submitting. | User defined and supplied on the CLI.
 
-### Container
+### Pod
 
 The following items will be set in the Pod Template's `spec` by Heron.
 
-| name | description | default |
+| Name | Description | Policy |
 |---|---|---|
-`terminationGracePeriodSeconds` | Grace period to wait before shutting down the Pod after a `SIGTERM` signal. | `0` seconds.
-| `tolerations` | Attempts to colocate Pods with `tolerations` and `taints` onto nodes hosting Pods with matching `tolerations` and `taints`. | Keys:<br>`node.kubernetes.io/not-ready` <br> `node.alpha.kubernetes.io/notReady` <br> `node.alpha.kubernetes.io/unreachable`. <br> Values (common):<br> `operator: "Exists"`<br> `effect: NoExecute`<br> `tolerationSeconds: 10L`
-| `containers` | Docker container image to be used on the executor Pods. | Configured by Heron based on configs.
-| `volumes` | Volumes to be mounted within the container. | Loaded from the Heron configs if present.
-| `secretVolumes` | Secrets to be mounted as volumes within the container. | Loaded from the Heron configs if present.
+`terminationGracePeriodSeconds` | Grace period to wait before shutting down the Pod after a `SIGTERM` signal and is set to `0` seconds. | Values are overridden by Heron.
+| `tolerations` | Attempts to colocate Pods with `tolerations` and `taints` onto nodes hosting Pods with matching `tolerations` and `taints`. <br>  Keys:<br>`node.kubernetes.io/not-ready` <br> `node.alpha.kubernetes.io/notReady` <br> `node.alpha.kubernetes.io/unreachable`. <br> Values (common):<br> `operator: "Exists"`<br> `effect: NoExecute`<br> `tolerationSeconds: 10L` | Values are overridden by Heron.
+| `containers` | Configurations for containers to be launched within the Pod. | All `containers`, excluding the `executor`, are loaded as-is.
+| `volumes` | Volumes to be made available to the entire Pod. | Merged with Heron's values taking precedence. Deduplication is based on the `name` value.
+| `secretVolumes` | Secrets to be mounted as volumes within the Pod. | Loaded from the Heron configs if present.
