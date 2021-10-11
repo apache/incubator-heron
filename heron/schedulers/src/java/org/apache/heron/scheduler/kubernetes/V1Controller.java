@@ -602,17 +602,21 @@ public class V1Controller extends KubernetesController {
     }
     final V1ResourceRequirements resourceRequirements = container.getResources();
 
-    // Configure resource limits. Deduplicate on limit name with Heron defaults taking precedence.
+    // Configure resource limits. Deduplicate on limit name with user values taking precedence.
     if (resourceRequirements.getLimits() == null) {
       resourceRequirements.setLimits(new HashMap<>());
     }
     final Map<String, Quantity> limits = resourceRequirements.getLimits();
-    limits.put(KubernetesConstants.MEMORY,
-            Quantity.fromString(KubernetesUtils.Megabytes(
-                    resource.getRam())));
-    limits.put(KubernetesConstants.CPU,
-            Quantity.fromString(Double.toString(roundDecimal(
-                    resource.getCpu(), 3))));
+    if (!limits.containsKey(KubernetesConstants.MEMORY)) {
+      limits.put(KubernetesConstants.MEMORY,
+          Quantity.fromString(KubernetesUtils.Megabytes(
+              resource.getRam())));
+    }
+    if (!limits.containsKey(KubernetesConstants.CPU)) {
+      limits.put(KubernetesConstants.CPU,
+          Quantity.fromString(Double.toString(roundDecimal(
+              resource.getCpu(), 3))));
+    }
 
     // Set the Kubernetes container resource request.
     KubernetesContext.KubernetesResourceRequestMode requestMode =
