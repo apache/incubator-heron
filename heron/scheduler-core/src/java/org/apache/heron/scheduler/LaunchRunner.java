@@ -19,11 +19,15 @@
 
 package org.apache.heron.scheduler;
 
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.heron.api.generated.TopologyAPI;
+import org.apache.heron.proto.scheduler.Scheduler;
 import org.apache.heron.proto.system.ExecutionEnvironment;
 import org.apache.heron.proto.system.PackingPlans;
+import org.apache.heron.scheduler.client.ISchedulerClient;
+import org.apache.heron.scheduler.client.SchedulerClientFactory;
 import org.apache.heron.scheduler.dryrun.SubmitDryRunResponse;
 import org.apache.heron.scheduler.utils.LauncherUtils;
 import org.apache.heron.scheduler.utils.Runtime;
@@ -169,13 +173,45 @@ public class LaunchRunner {
           "Failed to set execution state for topology '%s'", topologyName));
     }
 
-    // launch the topology, clear the state if it fails
-    if (!launcher.launch(packedPlan)) {
+    // Launch the topology, clear the state if it fails. Some schedulers throw exceptions instead of
+    // returning false. In some cases the scheduler needs to have the topology deleted.
+    try {
+      if (!launcher.launch(packedPlan)) {
+        throw new TopologySubmissionException(null);
+      }
+    } catch (TopologySubmissionException e) {
+      // Compile error message to throw.
+      final StringBuilder errorMessage = new StringBuilder(
+          String.format("Failed to launch topology '%s'", topologyName));
+      if (e.getMessage() != null) {
+        errorMessage.append(String.format("%n%s", e.getMessage()));
+      }
+
+      try {
+        // Clear state from the Scheduler via RPC.
+        Scheduler.KillTopologyRequest killTopologyRequest = Scheduler.KillTopologyRequest
+            .newBuilder()
+            .setTopologyName(topologyName).build();
+
+        ISchedulerClient schedulerClient = new SchedulerClientFactory(config, runtime)
+            .getSchedulerClient();
+        if (!schedulerClient.killTopology(killTopologyRequest)) {
+          final String logMessage =
+              String.format("Failed to remove topology '%s' from scheduler after failed submit. "
+                  + "Please re-try the kill command.", topologyName);
+          errorMessage.append(String.format("%n%s", logMessage));
+          LOG.log(Level.SEVERE, logMessage);
+        }
+      // SUPPRESS CHECKSTYLE IllegalCatch
+      } catch (Exception ignored){
+        // The above call to clear the Scheduler may fail. This situation can be ignored.
+      }
+
+      // Clear state from the State Manager.
       statemgr.deleteExecutionState(topologyName);
       statemgr.deletePackingPlan(topologyName);
       statemgr.deleteTopology(topologyName);
-      throw new LauncherException(String.format(
-          "Failed to launch topology '%s'", topologyName));
+      throw new LauncherException(errorMessage.toString());
     }
   }
 }
