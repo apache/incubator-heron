@@ -36,6 +36,8 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import com.google.common.annotations.VisibleForTesting;
+
 import org.apache.heron.api.utils.TopologyUtils;
 import org.apache.heron.common.basics.Pair;
 import org.apache.heron.scheduler.TopologyRuntimeManagementException;
@@ -407,7 +409,7 @@ public class V1Controller extends KubernetesController {
     podTemplateSpec.setMetadata(templateMetaData);
 
     final List<String> command = getExecutorCommand("$" + ENV_SHARD_ID, numberOfInstances);
-    finalizePodSpec(podTemplateSpec, command, containerResource, numberOfInstances);
+    configurePodSpec(podTemplateSpec, command, containerResource, numberOfInstances);
 
     statefulSetSpec.setTemplate(podTemplateSpec);
 
@@ -454,10 +456,10 @@ public class V1Controller extends KubernetesController {
     return KubernetesContext.getServiceLabels(getConfiguration());
   }
 
-  private void finalizePodSpec(final V1PodTemplateSpec podTemplateSpec,
-                               List<String> executorCommand,
-                               Resource resource,
-                               int numberOfInstances) {
+  private void configurePodSpec(final V1PodTemplateSpec podTemplateSpec,
+                                List<String> executorCommand,
+                                Resource resource,
+                                int numberOfInstances) {
     if (podTemplateSpec.getSpec() == null) {
       podTemplateSpec.spec(new V1PodSpec());
     }
@@ -559,7 +561,7 @@ public class V1Controller extends KubernetesController {
   }
 
   private void configureExecutorContainer(List<String> executorCommand, Resource resource,
-      int numberOfInstances, final V1Container container) {
+                                          int numberOfInstances, final V1Container container) {
     final Config configuration = getConfiguration();
 
     // Set up the container images.
@@ -733,6 +735,7 @@ public class V1Controller extends KubernetesController {
     return Math.round(value * scale) / scale;
   }
 
+  @VisibleForTesting
   protected Pair<String, String> getPodTemplateLocation() {
     final String podTemplateConfigMapName = KubernetesContext
         .getPodTemplateConfigMapName(getConfiguration());
@@ -758,6 +761,7 @@ public class V1Controller extends KubernetesController {
     }
   }
 
+  @VisibleForTesting
   protected V1PodTemplateSpec loadPodFromTemplate() {
     final Pair<String, String> podTemplateConfigMapName = getPodTemplateLocation();
 
@@ -813,6 +817,7 @@ public class V1Controller extends KubernetesController {
     }
   }
 
+  @VisibleForTesting
   protected List<V1ConfigMap> getConfigMaps() {
     try {
       V1ConfigMapList configMapList = coreClient

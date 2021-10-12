@@ -129,7 +129,7 @@ public class V1ControllerTest {
     final V1Controller v1ControllerNoPodTemplate = new V1Controller(config, runtime);
     final V1PodTemplateSpec podSpec = v1ControllerNoPodTemplate.loadPodFromTemplate();
 
-    Assert.assertEquals(podSpec.toString(), new V1PodTemplateSpec().toString());
+    Assert.assertEquals(podSpec, new V1PodTemplateSpec());
   }
 
   @Test
