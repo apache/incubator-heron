@@ -149,16 +149,6 @@ heron submit kubernetes \
   --config-property heron.kubernetes.pod.template.configmap.name=CONFIG-MAP-NAME.POD-TEMPLATE-NAME
 ```
 
-If a topology fails to be submitted to the Kubernetes cluster due to a misconfigured Pod Template or invalid location, you must issue the `kill` command to remove it from the Topology manager. As in the example preceding:
-
-```bash
-heron kill kubernetes \
-  --service-url=http://localhost:8001/api/v1/namespaces/default/services/heron-apiserver:9000/proxy \
-  acking
-```
-
-This is a temporary workaround as we work towards as solution where a failure to deploy on Kubernetes will remove the topology as well.
-
 ## Heron Configured Items in Pod Templates
 
 Heron will locate the container named `executor` in the Pod Template and customize it as outlined below. All other containers within the Pod Template will remain unchanged.
