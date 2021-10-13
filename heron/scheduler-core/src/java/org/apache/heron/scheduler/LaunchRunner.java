@@ -184,7 +184,7 @@ public class LaunchRunner {
       final StringBuilder errorMessage = new StringBuilder(
           String.format("Failed to launch topology '%s'", topologyName));
       if (e.getMessage() != null) {
-        errorMessage.append(String.format("%n%s", e.getMessage()));
+        errorMessage.append("\n").append(e.getMessage());
       }
 
       try {
@@ -199,12 +199,15 @@ public class LaunchRunner {
           final String logMessage =
               String.format("Failed to remove topology '%s' from scheduler after failed submit. "
                   + "Please re-try the kill command.", topologyName);
-          errorMessage.append(String.format("%n%s", logMessage));
+          errorMessage.append("\n").append(logMessage);
           LOG.log(Level.SEVERE, logMessage);
         }
       // SUPPRESS CHECKSTYLE IllegalCatch
       } catch (Exception ignored){
         // The above call to clear the Scheduler may fail. This situation can be ignored.
+        LOG.log(Level.FINE,
+            String.format("Failure clearing failed topology `%s` from Scheduler during `submit`",
+                topologyName));
       }
 
       // Clear state from the State Manager.
