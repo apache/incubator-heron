@@ -641,8 +641,9 @@ public class V1Controller extends KubernetesController {
     mountVolumeIfPresent(container);
   }
 
-  private void configureContainerPorts(boolean remoteDebugEnabled, int numberOfInstances,
-                                       final V1Container container) {
+  @VisibleForTesting
+  protected void configureContainerPorts(boolean remoteDebugEnabled, int numberOfInstances,
+                                         final V1Container container) {
     List<V1ContainerPort> ports = new ArrayList<>();
     KubernetesConstants.EXECUTOR_PORTS.forEach((p, v) -> {
       final V1ContainerPort port = new V1ContainerPort();

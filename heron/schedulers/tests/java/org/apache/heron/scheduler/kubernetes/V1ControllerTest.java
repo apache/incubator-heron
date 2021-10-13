@@ -22,6 +22,7 @@ package org.apache.heron.scheduler.kubernetes;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
+import java.util.List;
 
 import org.junit.Assert;
 import org.junit.Rule;
@@ -31,13 +32,18 @@ import org.junit.runner.RunWith;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.heron.common.basics.Pair;
 import org.apache.heron.scheduler.TopologySubmissionException;
+import org.apache.heron.scheduler.utils.SchedulerUtils;
 import org.apache.heron.spi.common.Config;
 import org.apache.heron.spi.common.Key;
 
 import io.kubernetes.client.openapi.models.V1ConfigMap;
 import io.kubernetes.client.openapi.models.V1ConfigMapBuilder;
+import io.kubernetes.client.openapi.models.V1Container;
+import io.kubernetes.client.openapi.models.V1ContainerBuilder;
+import io.kubernetes.client.openapi.models.V1ContainerPort;
 import io.kubernetes.client.openapi.models.V1ObjectMeta;
 import io.kubernetes.client.openapi.models.V1PodTemplateSpec;
 
@@ -378,5 +384,47 @@ public class V1ControllerTest {
         "CONFIGMAP-NAMEPOD-TEMPLATE-NAME").build();
     V1Controller v1Controller = new V1Controller(testConfig, runtime);
     v1Controller.getPodTemplateLocation();
+  }
+
+  @Test
+  public void testConfigureContainerPorts() {
+    final List<V1ContainerPort> expectedPorts = new LinkedList<V1ContainerPort>();
+    KubernetesConstants.EXECUTOR_PORTS.forEach((p, v) -> {
+      expectedPorts.add(new V1ContainerPort().name(p.getName()).containerPort(v));
+    });
+
+    // Null ports. This is the default case.
+    final V1Container inputContainerWithNullPorts = new V1ContainerBuilder().build();
+    v1ControllerWithPodTemplate.configureContainerPorts(false, 0, inputContainerWithNullPorts);
+    Assert.assertTrue("Server and/or shell ports for container null ports did not match",
+        CollectionUtils.containsAll(inputContainerWithNullPorts.getPorts(), expectedPorts));
+
+    // Empty ports.
+    final V1Container inputContainerWithEmptyPorts = new V1ContainerBuilder()
+        .withPorts(new LinkedList<>())
+        .build();
+    v1ControllerWithPodTemplate.configureContainerPorts(false, 0, inputContainerWithEmptyPorts);
+    Assert.assertTrue("Server and/or shell ports for container empty ports did not match",
+        CollectionUtils.containsAll(inputContainerWithEmptyPorts.getPorts(), expectedPorts));
+
+    // Port overriding.
+    final List<V1ContainerPort> inputPorts = new LinkedList<V1ContainerPort>() {
+      {
+        add(new V1ContainerPort()
+            .name("server-port-to-replace").containerPort(KubernetesConstants.SERVER_PORT));
+        add(new V1ContainerPort()
+            .name("shell-port-to-replace").containerPort(KubernetesConstants.SHELL_PORT));
+        add(new V1ContainerPort()
+            .name("random-port-to-be-kept").containerPort(1111));
+      }
+    };
+    final V1Container inputContainerWithPorts = new V1ContainerBuilder()
+        .withPorts(inputPorts)
+        .build();
+    expectedPorts.add(new V1ContainerPort().name("random-port-to-be-kept").containerPort(1111));
+
+    v1ControllerWithPodTemplate.configureContainerPorts(false, 0, inputContainerWithPorts);
+    Assert.assertTrue("Server and/or shell ports for container were not overwritten.",
+        CollectionUtils.containsAll(inputContainerWithPorts.getPorts(), expectedPorts));
   }
 }
