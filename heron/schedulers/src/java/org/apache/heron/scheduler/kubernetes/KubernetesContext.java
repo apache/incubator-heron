@@ -21,7 +21,6 @@ package org.apache.heron.scheduler.kubernetes;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -185,7 +184,7 @@ public final class KubernetesContext extends Context {
 
   public static boolean getPodTemplateConfigMapDisabled(Config config) {
     final String disabled = config.getStringValue(KUBERNETES_POD_TEMPLATE_CONFIGMAP_DISABLED);
-    return disabled != null && disabled.toLowerCase(Locale.ROOT).equals("true");
+    return "true".equalsIgnoreCase(disabled);
   }
 
   public static Map<String, String> getPodLabels(Config config) {

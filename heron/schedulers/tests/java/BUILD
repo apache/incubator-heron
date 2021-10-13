@@ -192,7 +192,9 @@ java_tests(
 java_library(
     name = "kubernetes-tests",
     srcs = glob(["**/kubernetes/*.java"]),
-    deps = scheduler_deps_files + kubernetes_deps_files,
+    deps = scheduler_deps_files + kubernetes_deps_files + [
+        "@maven//:org_apache_commons_commons_collections4",
+    ],
 )
 
 java_tests(

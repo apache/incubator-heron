@@ -82,7 +82,7 @@ spec:
               -D heron.uploader.dlog.topologies.namespace.uri=distributedlog://zookeeper:2181/heronbkdl
               -D heron.statefulstorage.classname=org.apache.heron.statefulstorage.dlog.DlogStorage
               -D heron.statefulstorage.dlog.namespace.uri=distributedlog://zookeeper:2181/heronbkdl
-            # -D heron.kubernetes.pod.template.configmap.disabled=true
+              -D heron.kubernetes.pod.template.configmap.disabled=false
 
 ---
 apiVersion: v1
