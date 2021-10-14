@@ -23,6 +23,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.IntStream;
 
 import org.junit.Assert;
 import org.junit.Rule;
@@ -413,7 +414,7 @@ public class V1ControllerTest {
     Assert.assertTrue("Server and/or shell ports for container empty ports did not match",
         CollectionUtils.containsAll(inputContainerWithEmptyPorts.getPorts(), expectedPorts));
 
-    // Port overriding.
+    // Port overriding. Builds <expected> on prior <expected> results.
     final List<V1ContainerPort> inputPorts = new LinkedList<V1ContainerPort>() {
       {
         add(new V1ContainerPort()
@@ -432,6 +433,37 @@ public class V1ControllerTest {
     v1ControllerWithPodTemplate.configureContainerPorts(false, 0, inputContainerWithPorts);
     Assert.assertTrue("Server and/or shell ports for container were not overwritten.",
         CollectionUtils.containsAll(inputContainerWithPorts.getPorts(), expectedPorts));
+
+    // Port overriding with debug ports. Builds <expected> on prior <expected> results.
+    final int numInstances = 3;
+    final List<V1ContainerPort> debugPorts = new LinkedList<>();
+    IntStream.range(0, numInstances).forEach(i -> {
+      final V1ContainerPort port = new V1ContainerPort()
+          .name(KubernetesConstants.JVM_REMOTE_DEBUGGER_PORT_NAME + "-" + i)
+          .containerPort(KubernetesConstants.JVM_REMOTE_DEBUGGER_PORT + i);
+      debugPorts.add(port);
+    });
+    final List<V1ContainerPort> inputPortsWithDebug = new LinkedList<V1ContainerPort>(inputPorts) {
+      {
+        add(new V1ContainerPort()
+            .name("server-port-to-replace").containerPort(KubernetesConstants.SERVER_PORT));
+        add(new V1ContainerPort()
+            .name("shell-port-to-replace").containerPort(KubernetesConstants.SHELL_PORT));
+        add(new V1ContainerPort()
+            .name("random-port-to-be-kept").containerPort(1111));
+      }
+    };
+    inputPortsWithDebug.addAll(debugPorts);
+    final V1Container inputContainerWithDebug = new V1ContainerBuilder()
+        .withPorts(inputPortsWithDebug)
+        .build();
+
+    expectedPorts.addAll(debugPorts);
+
+    v1ControllerWithPodTemplate.configureContainerPorts(
+        true, numInstances, inputContainerWithDebug);
+    Assert.assertTrue("Server and/or shell ports for container were not overwritten.",
+        CollectionUtils.containsAll(inputContainerWithDebug.getPorts(), expectedPorts));
   }
 
   @Test
