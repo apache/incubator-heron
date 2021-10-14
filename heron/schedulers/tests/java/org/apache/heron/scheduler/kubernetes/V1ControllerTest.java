@@ -33,11 +33,14 @@ import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.heron.common.basics.ByteAmount;
 import org.apache.heron.common.basics.Pair;
 import org.apache.heron.scheduler.TopologySubmissionException;
 import org.apache.heron.spi.common.Config;
 import org.apache.heron.spi.common.Key;
+import org.apache.heron.spi.packing.Resource;
 
+import io.kubernetes.client.custom.Quantity;
 import io.kubernetes.client.openapi.models.V1ConfigMap;
 import io.kubernetes.client.openapi.models.V1ConfigMapBuilder;
 import io.kubernetes.client.openapi.models.V1Container;
@@ -48,6 +51,7 @@ import io.kubernetes.client.openapi.models.V1EnvVarSource;
 import io.kubernetes.client.openapi.models.V1ObjectFieldSelector;
 import io.kubernetes.client.openapi.models.V1ObjectMeta;
 import io.kubernetes.client.openapi.models.V1PodTemplateSpec;
+import io.kubernetes.client.openapi.models.V1ResourceRequirements;
 
 import static org.mockito.Mockito.doReturn;
 
@@ -489,5 +493,77 @@ public class V1ControllerTest {
     v1ControllerWithPodTemplate.configureContainerEnvVars(containerWithEnvVars);
     Assert.assertTrue("ENV_HOST & ENV_POD_NAME in container with Env Vars did not match",
         CollectionUtils.containsAll(containerWithEnvVars.getEnv(), heronEnvVars));
+  }
+
+  @Test
+  public void testConfigureContainerResources() {
+    final Resource resourceDefault = new Resource(
+        9, ByteAmount.fromGigabytes(19), ByteAmount.fromGigabytes(99));
+    final Resource resourceCustom = new Resource(
+        4, ByteAmount.fromGigabytes(34), ByteAmount.fromGigabytes(400));
+    final Config configNoLimit = Config.newBuilder()
+        .put(KubernetesContext.KUBERNETES_RESOURCE_REQUEST_MODE, "NOT_SET")
+        .build();
+    final Config configWithLimit = Config.newBuilder()
+        .put(KubernetesContext.KUBERNETES_RESOURCE_REQUEST_MODE, "EQUAL_TO_LIMIT")
+        .build();
+
+    final V1ResourceRequirements expectDefaultRequirements = new V1ResourceRequirements()
+        .putLimitsItem(KubernetesConstants.MEMORY,
+            Quantity.fromString(KubernetesUtils.Megabytes(
+                resourceDefault.getRam())))
+        .putLimitsItem(KubernetesConstants.CPU,
+            Quantity.fromString(Double.toString(V1Controller.roundDecimal(
+                resourceDefault.getCpu(), 3))));
+
+    final V1ResourceRequirements expectCustomRequirements = new V1ResourceRequirements()
+        .putLimitsItem(KubernetesConstants.MEMORY,
+            Quantity.fromString(KubernetesUtils.Megabytes(
+                resourceCustom.getRam())))
+        .putLimitsItem(KubernetesConstants.CPU,
+            Quantity.fromString(Double.toString(V1Controller.roundDecimal(
+                resourceCustom.getCpu(), 3))))
+        .putLimitsItem("disk",
+            Quantity.fromString(Double.toString(V1Controller.roundDecimal(
+                resourceCustom.getDisk().getValue(), 3))));
+
+    // Default. Null resources.
+    V1Container containerNull = new V1ContainerBuilder().build();
+    v1ControllerWithPodTemplate.configureContainerResources(
+        containerNull, configNoLimit, resourceDefault);
+    Assert.assertTrue("Default LIMITS not set in container with null LIMITS",
+        containerNull.getResources().getLimits().entrySet()
+            .containsAll(expectDefaultRequirements.getLimits().entrySet()));
+
+    // Empty resources.
+    V1Container containerEmpty = new V1ContainerBuilder().withNewResources().endResources().build();
+    v1ControllerWithPodTemplate.configureContainerResources(
+        containerEmpty, configNoLimit, resourceDefault);
+    Assert.assertTrue("Default LIMITS not set in container with empty LIMITS",
+        containerNull.getResources().getLimits().entrySet()
+            .containsAll(expectDefaultRequirements.getLimits().entrySet()));
+
+    // Custom resources.
+    V1Container containerCustom = new V1ContainerBuilder()
+        .withResources(expectCustomRequirements)
+        .build();
+    v1ControllerWithPodTemplate.configureContainerResources(
+        containerCustom, configNoLimit, resourceDefault);
+    Assert.assertTrue("Custom LIMITS not set in container with custom LIMITS",
+        containerCustom.getResources().getLimits().entrySet()
+            .containsAll(expectCustomRequirements.getLimits().entrySet()));
+
+    // Custom resources with request.
+    V1Container containerRequests = new V1ContainerBuilder()
+        .withResources(expectCustomRequirements)
+        .build();
+    v1ControllerWithPodTemplate.configureContainerResources(
+        containerRequests, configWithLimit, resourceDefault);
+    Assert.assertTrue("Custom LIMITS not set in container with custom LIMITS and REQUEST",
+        containerRequests.getResources().getLimits().entrySet()
+            .containsAll(expectCustomRequirements.getLimits().entrySet()));
+    Assert.assertTrue("Custom REQUEST not set in container with custom LIMITS and REQUEST",
+        containerRequests.getResources().getRequests().entrySet()
+            .containsAll(expectCustomRequirements.getLimits().entrySet()));
   }
 }
