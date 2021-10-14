@@ -695,7 +695,8 @@ public class V1Controller extends KubernetesController {
     }
   }
 
-  private void mountVolumeIfPresent(final V1Container container) {
+  @VisibleForTesting
+  protected void mountVolumeIfPresent(final V1Container container) {
     final Config config = getConfiguration();
     if (KubernetesContext.hasContainerVolume(config)) {
       final V1VolumeMount mount =
