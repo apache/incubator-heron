@@ -51,8 +51,12 @@ import io.kubernetes.client.openapi.models.V1EnvVar;
 import io.kubernetes.client.openapi.models.V1EnvVarSource;
 import io.kubernetes.client.openapi.models.V1ObjectFieldSelector;
 import io.kubernetes.client.openapi.models.V1ObjectMeta;
+import io.kubernetes.client.openapi.models.V1PodSpec;
+import io.kubernetes.client.openapi.models.V1PodSpecBuilder;
 import io.kubernetes.client.openapi.models.V1PodTemplateSpec;
 import io.kubernetes.client.openapi.models.V1ResourceRequirements;
+import io.kubernetes.client.openapi.models.V1Volume;
+import io.kubernetes.client.openapi.models.V1VolumeBuilder;
 
 import static org.mockito.Mockito.doReturn;
 
@@ -597,5 +601,75 @@ public class V1ControllerTest {
     Assert.assertTrue("Custom REQUEST not set in container with custom LIMITS and REQUEST",
         containerRequests.getResources().getRequests().entrySet()
             .containsAll(expectCustomRequirements.getLimits().entrySet()));
+  }
+
+  @Test
+  public void testAddVolumesIfPresent() {
+    final String pathDefault = "config-host-volume-path";
+    final String pathNameDefault = "config-host-volume-name";
+    final Config configWithVolumes = Config.newBuilder()
+        .put(KubernetesContext.KUBERNETES_VOLUME_NAME, pathNameDefault)
+        .put(KubernetesContext.KUBERNETES_VOLUME_TYPE, Volumes.HOST_PATH)
+        .put(KubernetesContext.KUBERNETES_VOLUME_HOSTPATH_PATH, pathDefault)
+        .build();
+    final V1Controller controllerWithVol = new V1Controller(configWithVolumes, runtime);
+
+    final V1Volume volumeDefault = new V1VolumeBuilder()
+        .withName(pathNameDefault)
+        .withNewHostPath()
+          .withNewPath(pathDefault)
+        .endHostPath()
+        .build();
+    final V1Volume volumeToBeKept = new V1VolumeBuilder()
+        .withName("volume-to-be-kept-name")
+        .withNewHostPath()
+          .withNewPath("volume-to-be-kept-path")
+        .endHostPath()
+        .build();
+
+    final List<V1Volume> customVolumeList = new LinkedList<V1Volume>() {
+      {
+        add(new V1VolumeBuilder()
+            .withName(pathNameDefault)
+            .withNewHostPath()
+              .withNewPath("this-path-must-be-replaced")
+            .endHostPath()
+            .build());
+        add(volumeToBeKept);
+      }
+    };
+    final List<V1Volume> expectedDefault = new LinkedList<V1Volume>() {
+      {
+        add(volumeDefault);
+      }
+    };
+    final List<V1Volume> expectedCustom = new LinkedList<V1Volume>() {
+      {
+        add(volumeDefault);
+        add(volumeToBeKept);
+      }
+    };
+
+    // Default. Null Volumes.
+    V1PodSpec podSpecNull = new V1PodSpecBuilder().build();
+    controllerWithVol.addVolumesIfPresent(podSpecNull);
+    Assert.assertTrue("Default VOLUMES not set in container with null VOLUMES",
+        CollectionUtils.containsAll(expectedDefault, podSpecNull.getVolumes()));
+
+    // Empty Volumes list
+    V1PodSpec podSpecEmpty = new V1PodSpecBuilder()
+        .withVolumes(new LinkedList<>())
+        .build();
+    controllerWithVol.addVolumesIfPresent(podSpecEmpty);
+    Assert.assertTrue("Default VOLUMES not set in container with empty VOLUMES",
+        CollectionUtils.containsAll(expectedDefault, podSpecEmpty.getVolumes()));
+
+    // Custom Volumes list
+    V1PodSpec podSpecCustom = new V1PodSpecBuilder()
+        .withVolumes(customVolumeList)
+        .build();
+    controllerWithVol.addVolumesIfPresent(podSpecCustom);
+    Assert.assertTrue("Default VOLUMES not set in container with custom VOLUMES",
+        CollectionUtils.containsAll(expectedCustom, podSpecCustom.getVolumes()));
   }
 }
