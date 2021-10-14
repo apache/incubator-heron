@@ -35,7 +35,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.heron.common.basics.Pair;
 import org.apache.heron.scheduler.TopologySubmissionException;
-import org.apache.heron.scheduler.utils.SchedulerUtils;
 import org.apache.heron.spi.common.Config;
 import org.apache.heron.spi.common.Key;
 
@@ -44,6 +43,9 @@ import io.kubernetes.client.openapi.models.V1ConfigMapBuilder;
 import io.kubernetes.client.openapi.models.V1Container;
 import io.kubernetes.client.openapi.models.V1ContainerBuilder;
 import io.kubernetes.client.openapi.models.V1ContainerPort;
+import io.kubernetes.client.openapi.models.V1EnvVar;
+import io.kubernetes.client.openapi.models.V1EnvVarSource;
+import io.kubernetes.client.openapi.models.V1ObjectFieldSelector;
 import io.kubernetes.client.openapi.models.V1ObjectMeta;
 import io.kubernetes.client.openapi.models.V1PodTemplateSpec;
 
@@ -426,5 +428,66 @@ public class V1ControllerTest {
     v1ControllerWithPodTemplate.configureContainerPorts(false, 0, inputContainerWithPorts);
     Assert.assertTrue("Server and/or shell ports for container were not overwritten.",
         CollectionUtils.containsAll(inputContainerWithPorts.getPorts(), expectedPorts));
+  }
+
+  @Test
+  public void testConfigureContainerEnvVars() {
+    final List<V1EnvVar> heronEnvVars = new LinkedList<V1EnvVar>() {
+      {
+        add(new V1EnvVar()
+            .name(KubernetesConstants.ENV_HOST)
+              .valueFrom(new V1EnvVarSource()
+                .fieldRef(new V1ObjectFieldSelector()
+                  .fieldPath(KubernetesConstants.POD_IP))));
+        add(new V1EnvVar()
+            .name(KubernetesConstants.ENV_POD_NAME)
+              .valueFrom(new V1EnvVarSource()
+                .fieldRef(new V1ObjectFieldSelector()
+                  .fieldPath(KubernetesConstants.POD_NAME))));
+      }
+    };
+
+    // Null env vars. This is the default case.
+    V1Container containerWithNullEnvVars = new V1ContainerBuilder().build();
+    v1ControllerWithPodTemplate.configureContainerEnvVars(containerWithNullEnvVars);
+    Assert.assertTrue("ENV_HOST & ENV_POD_NAME in container with null Env Vars did not match",
+        CollectionUtils.containsAll(containerWithNullEnvVars.getEnv(), heronEnvVars));
+
+    // Empty env vars.
+    V1Container containerWithEmptyEnvVars = new V1ContainerBuilder()
+        .withEnv(new LinkedList<>())
+        .build();
+    v1ControllerWithPodTemplate.configureContainerEnvVars(containerWithEmptyEnvVars);
+    Assert.assertTrue("ENV_HOST & ENV_POD_NAME in container with empty Env Vars did not match",
+        CollectionUtils.containsAll(containerWithEmptyEnvVars.getEnv(), heronEnvVars));
+
+    // Env Var overriding.
+    final V1EnvVar additionEnvVar = new V1EnvVar()
+        .name("env-variable-to-be-kept")
+          .valueFrom(new V1EnvVarSource()
+            .fieldRef(new V1ObjectFieldSelector()
+                .fieldPath("env-variable-was-kept")));
+    final List<V1EnvVar> inputEnvVars = new LinkedList<V1EnvVar>() {
+      {
+        add(new V1EnvVar()
+            .name(KubernetesConstants.ENV_HOST)
+            .valueFrom(new V1EnvVarSource()
+                .fieldRef(new V1ObjectFieldSelector()
+                    .fieldPath("env-host-to-be-replaced"))));
+        add(new V1EnvVar()
+            .name(KubernetesConstants.ENV_POD_NAME)
+            .valueFrom(new V1EnvVarSource()
+                .fieldRef(new V1ObjectFieldSelector()
+                    .fieldPath("pod-name-to-be-replaced"))));
+        add(additionEnvVar);
+      }
+    };
+    heronEnvVars.add(additionEnvVar);
+    V1Container containerWithEnvVars = new V1ContainerBuilder()
+        .withEnv(inputEnvVars)
+        .build();
+    v1ControllerWithPodTemplate.configureContainerEnvVars(containerWithEnvVars);
+    Assert.assertTrue("ENV_HOST & ENV_POD_NAME in container with Env Vars did not match",
+        CollectionUtils.containsAll(containerWithEnvVars.getEnv(), heronEnvVars));
   }
 }
