@@ -516,7 +516,8 @@ public class V1Controller extends KubernetesController {
     return tolerations;
   }
 
-  private void addVolumesIfPresent(final V1PodSpec spec) {
+  @VisibleForTesting
+  protected void addVolumesIfPresent(final V1PodSpec spec) {
     final Config config = getConfiguration();
     if (KubernetesContext.hasVolume(config)) {
       final V1Volume volumeFromConfig = Volumes.get().create(config);
