@@ -642,6 +642,31 @@ public class V1Controller extends KubernetesController {
   }
 
   @VisibleForTesting
+  protected void configureContainerEnvVars(final V1Container container) {
+    final V1EnvVar envVarHost = new V1EnvVar();
+    envVarHost.name(KubernetesConstants.ENV_HOST)
+        .valueFrom(new V1EnvVarSource()
+            .fieldRef(new V1ObjectFieldSelector()
+                .fieldPath(KubernetesConstants.POD_IP)));
+
+    final V1EnvVar envVarPodName = new V1EnvVar();
+    envVarPodName.name(KubernetesConstants.ENV_POD_NAME)
+        .valueFrom(new V1EnvVarSource()
+            .fieldRef(new V1ObjectFieldSelector()
+                .fieldPath(KubernetesConstants.POD_NAME)));
+
+    // Deduplicate on var name with Heron defaults take precedence.
+    if (container.getEnv() != null) {
+      Set<V1EnvVar> envVars = new TreeSet<>(Comparator.comparing(V1EnvVar::getName));
+      envVars.addAll(Arrays.asList(envVarHost, envVarPodName));
+      envVars.addAll(container.getEnv());
+      container.setEnv(new LinkedList<>(envVars));
+    } else {
+      container.setEnv(Arrays.asList(envVarHost, envVarPodName));
+    }
+  }
+
+  @VisibleForTesting
   protected void configureContainerPorts(boolean remoteDebugEnabled, int numberOfInstances,
                                          final V1Container container) {
     List<V1ContainerPort> ports = new ArrayList<>();
