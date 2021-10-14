@@ -581,37 +581,7 @@ public class V1Controller extends KubernetesController {
     setSecretKeyRefs(container);
 
     // Set container resources
-    if (container.getResources() == null) {
-      container.setResources(new V1ResourceRequirements());
-    }
-    final V1ResourceRequirements resourceRequirements = container.getResources();
-
-    // Configure resource limits. Deduplicate on limit name with user values taking precedence.
-    if (resourceRequirements.getLimits() == null) {
-      resourceRequirements.setLimits(new HashMap<>());
-    }
-    final Map<String, Quantity> limits = resourceRequirements.getLimits();
-    if (!limits.containsKey(KubernetesConstants.MEMORY)) {
-      limits.put(KubernetesConstants.MEMORY,
-          Quantity.fromString(KubernetesUtils.Megabytes(
-              resource.getRam())));
-    }
-    if (!limits.containsKey(KubernetesConstants.CPU)) {
-      limits.put(KubernetesConstants.CPU,
-          Quantity.fromString(Double.toString(roundDecimal(
-              resource.getCpu(), 3))));
-    }
-
-    // Set the Kubernetes container resource request.
-    KubernetesContext.KubernetesResourceRequestMode requestMode =
-        KubernetesContext.getKubernetesRequestMode(configuration);
-    if (requestMode == KubernetesContext.KubernetesResourceRequestMode.EQUAL_TO_LIMIT) {
-      LOG.log(Level.CONFIG, "Setting K8s Request equal to Limit");
-      resourceRequirements.setRequests(limits);
-    } else {
-      LOG.log(Level.CONFIG, "Not setting K8s request because config was NOT_SET");
-    }
-    container.setResources(resourceRequirements);
+    configureContainerResources(container, configuration, resource);
 
     // Set container ports.
     final boolean debuggingEnabled =
