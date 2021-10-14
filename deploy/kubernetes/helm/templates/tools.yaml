@@ -162,6 +162,7 @@ spec:
               -D heron.class.repacking.algorithm=org.apache.heron.packing.binpacking.FirstFitDecreasingPacking
               {{- end }}
               -D heron.kubernetes.resource.request.mode={{ .Values.topologyResourceRequestMode }}
+              -D heron.kubernetes.pod.template.configmap.disabled={{ .Values.disablePodTemplates }}
           envFrom:
             - configMapRef:
                 name: {{ .Release.Name }}-tools-config

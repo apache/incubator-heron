@@ -58,6 +58,9 @@ uploader:
 # Packing algorithms
 packing: RoundRobin # ResourceCompliantRR, FirstFitDecreasing
 
+# Support for ConfigMap mounted PodTemplates
+disablePodTemplates: false
+
 # Number of replicas for storage bookies, memory and storage requirements
 bookieReplicas: 3
 bookieCpuMin: 100m
