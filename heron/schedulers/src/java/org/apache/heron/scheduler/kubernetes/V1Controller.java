@@ -574,28 +574,10 @@ public class V1Controller extends KubernetesController {
       container.setImagePullPolicy(KubernetesContext.getKubernetesImagePullPolicy(configuration));
     }
 
-    // Configure environment vars. Deduplicate on var name with Heron defaults take precedence.
-    final V1EnvVar envVarHost = new V1EnvVar();
-    envVarHost.name(KubernetesConstants.ENV_HOST)
-        .valueFrom(new V1EnvVarSource()
-            .fieldRef(new V1ObjectFieldSelector()
-                .fieldPath(KubernetesConstants.POD_IP)));
+    // Configure environment variables.
+    configureContainerEnvVars(container);
 
-    final V1EnvVar envVarPodName = new V1EnvVar();
-    envVarPodName.name(KubernetesConstants.ENV_POD_NAME)
-        .valueFrom(new V1EnvVarSource()
-            .fieldRef(new V1ObjectFieldSelector()
-                .fieldPath(KubernetesConstants.POD_NAME)));
-
-    if (container.getEnv() != null) {
-      Set<V1EnvVar> envVars = new TreeSet<>(Comparator.comparing(V1EnvVar::getName));
-      envVars.addAll(Arrays.asList(envVarHost, envVarPodName));
-      envVars.addAll(container.getEnv());
-      container.setEnv(new LinkedList<>(envVars));
-    } else {
-      container.setEnv(Arrays.asList(envVarHost, envVarPodName));
-    }
-
+    // Set secret keys.
     setSecretKeyRefs(container);
 
     // Set container resources
