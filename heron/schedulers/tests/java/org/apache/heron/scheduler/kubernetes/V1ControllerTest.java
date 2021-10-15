@@ -23,7 +23,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.stream.IntStream;
 
 import org.junit.Assert;
 import org.junit.Rule;
@@ -401,10 +400,7 @@ public class V1ControllerTest {
 
   @Test
   public void testConfigureContainerPorts() {
-    final List<V1ContainerPort> expectedPorts = new LinkedList<V1ContainerPort>();
-    KubernetesConstants.EXECUTOR_PORTS.forEach((p, v) -> {
-      expectedPorts.add(new V1ContainerPort().name(p.getName()).containerPort(v));
-    });
+    final List<V1ContainerPort> expectedPorts = new LinkedList<>(V1Controller.getExecutorPorts());
 
     // Null ports. This is the default case.
     final V1Container inputContainerWithNullPorts = new V1ContainerBuilder().build();
@@ -442,13 +438,9 @@ public class V1ControllerTest {
 
     // Port overriding with debug ports. Builds <expected> on prior <expected> results.
     final int numInstances = 3;
-    final List<V1ContainerPort> debugPorts = new LinkedList<>();
-    IntStream.range(0, numInstances).forEach(i -> {
-      final V1ContainerPort port = new V1ContainerPort()
-          .name(KubernetesConstants.JVM_REMOTE_DEBUGGER_PORT_NAME + "-" + i)
-          .containerPort(KubernetesConstants.JVM_REMOTE_DEBUGGER_PORT + i);
-      debugPorts.add(port);
-    });
+    final List<V1ContainerPort> debugPorts =
+        new LinkedList<>(V1Controller.getDebuggingPorts(numInstances));
+
     final List<V1ContainerPort> inputPortsWithDebug = new LinkedList<V1ContainerPort>(inputPorts) {
       {
         add(new V1ContainerPort()
@@ -474,20 +466,7 @@ public class V1ControllerTest {
 
   @Test
   public void testConfigureContainerEnvVars() {
-    final List<V1EnvVar> heronEnvVars = new LinkedList<V1EnvVar>() {
-      {
-        add(new V1EnvVar()
-            .name(KubernetesConstants.ENV_HOST)
-              .valueFrom(new V1EnvVarSource()
-                .fieldRef(new V1ObjectFieldSelector()
-                  .fieldPath(KubernetesConstants.POD_IP))));
-        add(new V1EnvVar()
-            .name(KubernetesConstants.ENV_POD_NAME)
-              .valueFrom(new V1EnvVarSource()
-                .fieldRef(new V1ObjectFieldSelector()
-                  .fieldPath(KubernetesConstants.POD_NAME))));
-      }
-    };
+    final List<V1EnvVar> heronEnvVars = new LinkedList<>(V1Controller.getExecutorEnvVars());
 
     // Null env vars. This is the default case.
     V1Container containerWithNullEnvVars = new V1ContainerBuilder().build();
