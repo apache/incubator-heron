@@ -516,7 +516,8 @@ public class V1Controller extends KubernetesController {
     return tolerations;
   }
 
-  private void addVolumesIfPresent(final V1PodSpec spec) {
+  @VisibleForTesting
+  protected void addVolumesIfPresent(final V1PodSpec spec) {
     final Config config = getConfiguration();
     if (KubernetesContext.hasVolume(config)) {
       final V1Volume volumeFromConfig = Volumes.get().create(config);
@@ -581,6 +582,21 @@ public class V1Controller extends KubernetesController {
     setSecretKeyRefs(container);
 
     // Set container resources
+    configureContainerResources(container, configuration, resource);
+
+    // Set container ports.
+    final boolean debuggingEnabled =
+        TopologyUtils.getTopologyRemoteDebuggingEnabled(
+            Runtime.topology(getRuntimeConfiguration()));
+    configureContainerPorts(debuggingEnabled, numberOfInstances, container);
+
+    // setup volume mounts
+    mountVolumeIfPresent(container);
+  }
+
+  @VisibleForTesting
+  protected void configureContainerResources(final V1Container container,
+                                             final Config configuration, final Resource resource) {
     if (container.getResources() == null) {
       container.setResources(new V1ResourceRequirements());
     }
@@ -612,15 +628,6 @@ public class V1Controller extends KubernetesController {
       LOG.log(Level.CONFIG, "Not setting K8s request because config was NOT_SET");
     }
     container.setResources(resourceRequirements);
-
-    // Set container ports.
-    final boolean debuggingEnabled =
-        TopologyUtils.getTopologyRemoteDebuggingEnabled(
-            Runtime.topology(getRuntimeConfiguration()));
-    configureContainerPorts(debuggingEnabled, numberOfInstances, container);
-
-    // setup volume mounts
-    mountVolumeIfPresent(container);
   }
 
   @VisibleForTesting
@@ -688,7 +695,8 @@ public class V1Controller extends KubernetesController {
     }
   }
 
-  private void mountVolumeIfPresent(final V1Container container) {
+  @VisibleForTesting
+  protected void mountVolumeIfPresent(final V1Container container) {
     final Config config = getConfiguration();
     if (KubernetesContext.hasContainerVolume(config)) {
       final V1VolumeMount mount =

@@ -23,6 +23,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.IntStream;
 
 import org.junit.Assert;
 import org.junit.Rule;
@@ -33,11 +34,14 @@ import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.heron.common.basics.ByteAmount;
 import org.apache.heron.common.basics.Pair;
 import org.apache.heron.scheduler.TopologySubmissionException;
 import org.apache.heron.spi.common.Config;
 import org.apache.heron.spi.common.Key;
+import org.apache.heron.spi.packing.Resource;
 
+import io.kubernetes.client.custom.Quantity;
 import io.kubernetes.client.openapi.models.V1ConfigMap;
 import io.kubernetes.client.openapi.models.V1ConfigMapBuilder;
 import io.kubernetes.client.openapi.models.V1Container;
@@ -47,7 +51,14 @@ import io.kubernetes.client.openapi.models.V1EnvVar;
 import io.kubernetes.client.openapi.models.V1EnvVarSource;
 import io.kubernetes.client.openapi.models.V1ObjectFieldSelector;
 import io.kubernetes.client.openapi.models.V1ObjectMeta;
+import io.kubernetes.client.openapi.models.V1PodSpec;
+import io.kubernetes.client.openapi.models.V1PodSpecBuilder;
 import io.kubernetes.client.openapi.models.V1PodTemplateSpec;
+import io.kubernetes.client.openapi.models.V1ResourceRequirements;
+import io.kubernetes.client.openapi.models.V1Volume;
+import io.kubernetes.client.openapi.models.V1VolumeBuilder;
+import io.kubernetes.client.openapi.models.V1VolumeMount;
+import io.kubernetes.client.openapi.models.V1VolumeMountBuilder;
 
 import static org.mockito.Mockito.doReturn;
 
@@ -409,7 +420,7 @@ public class V1ControllerTest {
     Assert.assertTrue("Server and/or shell ports for container empty ports did not match",
         CollectionUtils.containsAll(inputContainerWithEmptyPorts.getPorts(), expectedPorts));
 
-    // Port overriding.
+    // Port overriding. Builds <expected> on prior <expected> results.
     final List<V1ContainerPort> inputPorts = new LinkedList<V1ContainerPort>() {
       {
         add(new V1ContainerPort()
@@ -428,6 +439,37 @@ public class V1ControllerTest {
     v1ControllerWithPodTemplate.configureContainerPorts(false, 0, inputContainerWithPorts);
     Assert.assertTrue("Server and/or shell ports for container were not overwritten.",
         CollectionUtils.containsAll(inputContainerWithPorts.getPorts(), expectedPorts));
+
+    // Port overriding with debug ports. Builds <expected> on prior <expected> results.
+    final int numInstances = 3;
+    final List<V1ContainerPort> debugPorts = new LinkedList<>();
+    IntStream.range(0, numInstances).forEach(i -> {
+      final V1ContainerPort port = new V1ContainerPort()
+          .name(KubernetesConstants.JVM_REMOTE_DEBUGGER_PORT_NAME + "-" + i)
+          .containerPort(KubernetesConstants.JVM_REMOTE_DEBUGGER_PORT + i);
+      debugPorts.add(port);
+    });
+    final List<V1ContainerPort> inputPortsWithDebug = new LinkedList<V1ContainerPort>(inputPorts) {
+      {
+        add(new V1ContainerPort()
+            .name("server-port-to-replace").containerPort(KubernetesConstants.SERVER_PORT));
+        add(new V1ContainerPort()
+            .name("shell-port-to-replace").containerPort(KubernetesConstants.SHELL_PORT));
+        add(new V1ContainerPort()
+            .name("random-port-to-be-kept").containerPort(1111));
+      }
+    };
+    inputPortsWithDebug.addAll(debugPorts);
+    final V1Container inputContainerWithDebug = new V1ContainerBuilder()
+        .withPorts(inputPortsWithDebug)
+        .build();
+
+    expectedPorts.addAll(debugPorts);
+
+    v1ControllerWithPodTemplate.configureContainerPorts(
+        true, numInstances, inputContainerWithDebug);
+    Assert.assertTrue("Server and/or shell ports for container were not overwritten.",
+        CollectionUtils.containsAll(inputContainerWithDebug.getPorts(), expectedPorts));
   }
 
   @Test
@@ -489,5 +531,203 @@ public class V1ControllerTest {
     v1ControllerWithPodTemplate.configureContainerEnvVars(containerWithEnvVars);
     Assert.assertTrue("ENV_HOST & ENV_POD_NAME in container with Env Vars did not match",
         CollectionUtils.containsAll(containerWithEnvVars.getEnv(), heronEnvVars));
+  }
+
+  @Test
+  public void testConfigureContainerResources() {
+    final Resource resourceDefault = new Resource(
+        9, ByteAmount.fromGigabytes(19), ByteAmount.fromGigabytes(99));
+    final Resource resourceCustom = new Resource(
+        4, ByteAmount.fromGigabytes(34), ByteAmount.fromGigabytes(400));
+    final Config configNoLimit = Config.newBuilder()
+        .put(KubernetesContext.KUBERNETES_RESOURCE_REQUEST_MODE, "NOT_SET")
+        .build();
+    final Config configWithLimit = Config.newBuilder()
+        .put(KubernetesContext.KUBERNETES_RESOURCE_REQUEST_MODE, "EQUAL_TO_LIMIT")
+        .build();
+
+    final V1ResourceRequirements expectDefaultRequirements = new V1ResourceRequirements()
+        .putLimitsItem(KubernetesConstants.MEMORY,
+            Quantity.fromString(KubernetesUtils.Megabytes(
+                resourceDefault.getRam())))
+        .putLimitsItem(KubernetesConstants.CPU,
+            Quantity.fromString(Double.toString(V1Controller.roundDecimal(
+                resourceDefault.getCpu(), 3))));
+
+    final V1ResourceRequirements expectCustomRequirements = new V1ResourceRequirements()
+        .putLimitsItem(KubernetesConstants.MEMORY,
+            Quantity.fromString(KubernetesUtils.Megabytes(
+                resourceCustom.getRam())))
+        .putLimitsItem(KubernetesConstants.CPU,
+            Quantity.fromString(Double.toString(V1Controller.roundDecimal(
+                resourceCustom.getCpu(), 3))))
+        .putLimitsItem("disk",
+            Quantity.fromString(Double.toString(V1Controller.roundDecimal(
+                resourceCustom.getDisk().getValue(), 3))));
+
+    // Default. Null resources.
+    V1Container containerNull = new V1ContainerBuilder().build();
+    v1ControllerWithPodTemplate.configureContainerResources(
+        containerNull, configNoLimit, resourceDefault);
+    Assert.assertTrue("Default LIMITS not set in container with null LIMITS",
+        containerNull.getResources().getLimits().entrySet()
+            .containsAll(expectDefaultRequirements.getLimits().entrySet()));
+
+    // Empty resources.
+    V1Container containerEmpty = new V1ContainerBuilder().withNewResources().endResources().build();
+    v1ControllerWithPodTemplate.configureContainerResources(
+        containerEmpty, configNoLimit, resourceDefault);
+    Assert.assertTrue("Default LIMITS not set in container with empty LIMITS",
+        containerNull.getResources().getLimits().entrySet()
+            .containsAll(expectDefaultRequirements.getLimits().entrySet()));
+
+    // Custom resources.
+    V1Container containerCustom = new V1ContainerBuilder()
+        .withResources(expectCustomRequirements)
+        .build();
+    v1ControllerWithPodTemplate.configureContainerResources(
+        containerCustom, configNoLimit, resourceDefault);
+    Assert.assertTrue("Custom LIMITS not set in container with custom LIMITS",
+        containerCustom.getResources().getLimits().entrySet()
+            .containsAll(expectCustomRequirements.getLimits().entrySet()));
+
+    // Custom resources with request.
+    V1Container containerRequests = new V1ContainerBuilder()
+        .withResources(expectCustomRequirements)
+        .build();
+    v1ControllerWithPodTemplate.configureContainerResources(
+        containerRequests, configWithLimit, resourceDefault);
+    Assert.assertTrue("Custom LIMITS not set in container with custom LIMITS and REQUEST",
+        containerRequests.getResources().getLimits().entrySet()
+            .containsAll(expectCustomRequirements.getLimits().entrySet()));
+    Assert.assertTrue("Custom REQUEST not set in container with custom LIMITS and REQUEST",
+        containerRequests.getResources().getRequests().entrySet()
+            .containsAll(expectCustomRequirements.getLimits().entrySet()));
+  }
+
+  @Test
+  public void testAddVolumesIfPresent() {
+    final String pathDefault = "config-host-volume-path";
+    final String pathNameDefault = "config-host-volume-name";
+    final Config configWithVolumes = Config.newBuilder()
+        .put(KubernetesContext.KUBERNETES_VOLUME_NAME, pathNameDefault)
+        .put(KubernetesContext.KUBERNETES_VOLUME_TYPE, Volumes.HOST_PATH)
+        .put(KubernetesContext.KUBERNETES_VOLUME_HOSTPATH_PATH, pathDefault)
+        .build();
+    final V1Controller controllerWithVol = new V1Controller(configWithVolumes, runtime);
+
+    final V1Volume volumeDefault = new V1VolumeBuilder()
+        .withName(pathNameDefault)
+        .withNewHostPath()
+          .withNewPath(pathDefault)
+        .endHostPath()
+        .build();
+    final V1Volume volumeToBeKept = new V1VolumeBuilder()
+        .withName("volume-to-be-kept-name")
+        .withNewHostPath()
+          .withNewPath("volume-to-be-kept-path")
+        .endHostPath()
+        .build();
+
+    final List<V1Volume> customVolumeList = new LinkedList<V1Volume>() {
+      {
+        add(new V1VolumeBuilder()
+            .withName(pathNameDefault)
+            .withNewHostPath()
+              .withNewPath("this-path-must-be-replaced")
+            .endHostPath()
+            .build());
+        add(volumeToBeKept);
+      }
+    };
+    final List<V1Volume> expectedDefault = Collections.singletonList(volumeDefault);
+    final List<V1Volume> expectedCustom = Arrays.asList(volumeDefault, volumeToBeKept);
+
+    // No Volumes set.
+    V1Controller controllerDoNotSetVolumes = new V1Controller(Config.newBuilder().build(), runtime);
+    V1PodSpec podSpecNoSetVolumes = new V1PodSpec();
+    controllerDoNotSetVolumes.addVolumesIfPresent(podSpecNoSetVolumes);
+    Assert.assertNull(podSpecNoSetVolumes.getVolumes());
+
+    // Default. Null Volumes.
+    V1PodSpec podSpecNull = new V1PodSpecBuilder().build();
+    controllerWithVol.addVolumesIfPresent(podSpecNull);
+    Assert.assertTrue("Default VOLUMES not set in container with null VOLUMES",
+        CollectionUtils.containsAll(expectedDefault, podSpecNull.getVolumes()));
+
+    // Empty Volumes list
+    V1PodSpec podSpecEmpty = new V1PodSpecBuilder()
+        .withVolumes(new LinkedList<>())
+        .build();
+    controllerWithVol.addVolumesIfPresent(podSpecEmpty);
+    Assert.assertTrue("Default VOLUMES not set in container with empty VOLUMES",
+        CollectionUtils.containsAll(expectedDefault, podSpecEmpty.getVolumes()));
+
+    // Custom Volumes list
+    V1PodSpec podSpecCustom = new V1PodSpecBuilder()
+        .withVolumes(customVolumeList)
+        .build();
+    controllerWithVol.addVolumesIfPresent(podSpecCustom);
+    Assert.assertTrue("Default VOLUMES not set in container with custom VOLUMES",
+        CollectionUtils.containsAll(expectedCustom, podSpecCustom.getVolumes()));
+  }
+
+  @Test
+  public void testMountVolumeIfPresent() {
+    final String pathDefault = "config-host-volume-path";
+    final String pathNameDefault = "config-host-volume-name";
+    final Config configWithVolumes = Config.newBuilder()
+        .put(KubernetesContext.KUBERNETES_CONTAINER_VOLUME_MOUNT_NAME, pathNameDefault)
+        .put(KubernetesContext.KUBERNETES_CONTAINER_VOLUME_MOUNT_PATH, pathDefault)
+        .build();
+    final V1Controller controllerWithMounts = new V1Controller(configWithVolumes, runtime);
+    final V1VolumeMount volumeDefault = new V1VolumeMountBuilder()
+        .withName(pathNameDefault)
+        .withMountPath(pathDefault)
+        .build();
+    final V1VolumeMount volumeCustom = new V1VolumeMountBuilder()
+        .withName("custom-volume-mount")
+        .withMountPath("should-be-kept")
+        .build();
+
+    final List<V1VolumeMount> expectedMountsDefault = Collections.singletonList(volumeDefault);
+    final List<V1VolumeMount> expectedMountsCustom = Arrays.asList(volumeCustom, volumeDefault);
+    final List<V1VolumeMount> volumeMountsCustomList = new LinkedList<V1VolumeMount>() {
+      {
+        add(volumeCustom);
+        add(new V1VolumeMountBuilder()
+            .withName(pathNameDefault)
+            .withMountPath("should-be-replaced")
+            .build());
+      }
+    };
+
+    // No Volume Mounts set.
+    V1Controller controllerDoNotSetMounts = new V1Controller(Config.newBuilder().build(), runtime);
+    V1Container containerNoSetMounts = new V1Container();
+    controllerDoNotSetMounts.mountVolumeIfPresent(containerNoSetMounts);
+    Assert.assertNull(containerNoSetMounts.getVolumeMounts());
+
+    // Default. Null Volume Mounts.
+    V1Container containerNull = new V1ContainerBuilder().build();
+    controllerWithMounts.mountVolumeIfPresent(containerNull);
+    Assert.assertTrue("Default VOLUME MOUNTS not set in container with null VOLUMES MOUNTS",
+        CollectionUtils.containsAll(expectedMountsDefault, containerNull.getVolumeMounts()));
+
+    // Empty Volume Mounts.
+    V1Container containerEmpty = new V1ContainerBuilder()
+        .withVolumeMounts(new LinkedList<>())
+        .build();
+    controllerWithMounts.mountVolumeIfPresent(containerEmpty);
+    Assert.assertTrue("Default VOLUME MOUNTS not set in container with empty VOLUMES MOUNTS",
+        CollectionUtils.containsAll(expectedMountsDefault, containerEmpty.getVolumeMounts()));
+
+    // Custom Volume Mounts.
+    V1Container containerCustom = new V1ContainerBuilder()
+        .withVolumeMounts(volumeMountsCustomList)
+        .build();
+    controllerWithMounts.mountVolumeIfPresent(containerCustom);
+    Assert.assertTrue("Default VOLUME MOUNTS not set in container with custom VOLUMES MOUNTS",
+        CollectionUtils.containsAll(expectedMountsCustom, containerCustom.getVolumeMounts()));
   }
 }
