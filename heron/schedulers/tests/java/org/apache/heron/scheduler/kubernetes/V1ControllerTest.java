@@ -57,6 +57,8 @@ import io.kubernetes.client.openapi.models.V1PodTemplateSpec;
 import io.kubernetes.client.openapi.models.V1ResourceRequirements;
 import io.kubernetes.client.openapi.models.V1Volume;
 import io.kubernetes.client.openapi.models.V1VolumeBuilder;
+import io.kubernetes.client.openapi.models.V1VolumeMount;
+import io.kubernetes.client.openapi.models.V1VolumeMountBuilder;
 
 import static org.mockito.Mockito.doReturn;
 
@@ -671,5 +673,58 @@ public class V1ControllerTest {
     controllerWithVol.addVolumesIfPresent(podSpecCustom);
     Assert.assertTrue("Default VOLUMES not set in container with custom VOLUMES",
         CollectionUtils.containsAll(expectedCustom, podSpecCustom.getVolumes()));
+  }
+
+  @Test
+  public void testMountVolumeIfPresent() {
+    final String pathDefault = "config-host-volume-path";
+    final String pathNameDefault = "config-host-volume-name";
+    final Config configWithVolumes = Config.newBuilder()
+        .put(KubernetesContext.KUBERNETES_CONTAINER_VOLUME_MOUNT_NAME, pathNameDefault)
+        .put(KubernetesContext.KUBERNETES_CONTAINER_VOLUME_MOUNT_PATH, pathDefault)
+        .build();
+    final V1Controller controllerWithMounts = new V1Controller(configWithVolumes, runtime);
+    final V1VolumeMount volumeDefault = new V1VolumeMountBuilder()
+        .withName(pathNameDefault)
+        .withMountPath(pathDefault)
+        .build();
+    final V1VolumeMount volumeCustom = new V1VolumeMountBuilder()
+        .withName("custom-volume-mount")
+        .withMountPath("should-be-kept")
+        .build();
+
+    final List<V1VolumeMount> expectedMountsDefault = Collections.singletonList(volumeDefault);
+    final List<V1VolumeMount> expectedMountsCustom = Arrays.asList(volumeCustom, volumeDefault);
+    final List<V1VolumeMount> volumeMountsCustomList = new LinkedList<V1VolumeMount>() {
+      {
+        add(volumeCustom);
+        add(new V1VolumeMountBuilder()
+            .withName(pathNameDefault)
+            .withMountPath("should-be-replaced")
+            .build());
+      }
+    };
+
+    // Default. Null Volume Mounts.
+    V1Container containerNull = new V1ContainerBuilder().build();
+    controllerWithMounts.mountVolumeIfPresent(containerNull);
+    Assert.assertTrue("Default VOLUME MOUNTS not set in container with null VOLUMES MOUNTS",
+        CollectionUtils.containsAll(expectedMountsDefault, containerNull.getVolumeMounts()));
+
+    // Empty Volume Mounts.
+    V1Container containerEmpty = new V1ContainerBuilder()
+        .withVolumeMounts(new LinkedList<>())
+        .build();
+    controllerWithMounts.mountVolumeIfPresent(containerEmpty);
+    Assert.assertTrue("Default VOLUME MOUNTS not set in container with empty VOLUMES MOUNTS",
+        CollectionUtils.containsAll(expectedMountsDefault, containerEmpty.getVolumeMounts()));
+
+    // Custom Volume Mounts.
+    V1Container containerCustom = new V1ContainerBuilder()
+        .withVolumeMounts(volumeMountsCustomList)
+        .build();
+    controllerWithMounts.mountVolumeIfPresent(containerCustom);
+    Assert.assertTrue("Default VOLUME MOUNTS not set in container with custom VOLUMES MOUNTS",
+        CollectionUtils.containsAll(expectedMountsCustom, containerCustom.getVolumeMounts()));
   }
 }
