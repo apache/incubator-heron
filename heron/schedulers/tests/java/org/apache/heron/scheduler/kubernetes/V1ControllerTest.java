@@ -643,6 +643,12 @@ public class V1ControllerTest {
     final List<V1Volume> expectedDefault = Collections.singletonList(volumeDefault);
     final List<V1Volume> expectedCustom = Arrays.asList(volumeDefault, volumeToBeKept);
 
+    // No Volumes set.
+    V1Controller controllerDoNotSetVolumes = new V1Controller(Config.newBuilder().build(), runtime);
+    V1PodSpec podSpecNoSetVolumes = new V1PodSpec();
+    controllerDoNotSetVolumes.addVolumesIfPresent(podSpecNoSetVolumes);
+    Assert.assertNull(podSpecNoSetVolumes.getVolumes());
+
     // Default. Null Volumes.
     V1PodSpec podSpecNull = new V1PodSpecBuilder().build();
     controllerWithVol.addVolumesIfPresent(podSpecNull);
