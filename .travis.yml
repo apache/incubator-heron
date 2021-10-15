@@ -35,7 +35,7 @@ before_install:
   - ./bazel-${BAZEL_VERSION}-installer-linux-x86_64.sh --user
 
 install:
-  - sudo apt-get install python3-pip python3-setuptools
+  - sudo apt-get install python3-pip python3-setuptools python3-wheel
   - pip3 install travis-wait-improved
 
 script:
