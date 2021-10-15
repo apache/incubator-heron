@@ -696,6 +696,12 @@ public class V1ControllerTest {
       }
     };
 
+    // No Volume Mounts set.
+    V1Controller controllerDoNotSetMounts = new V1Controller(Config.newBuilder().build(), runtime);
+    V1Container containerNoSetMounts = new V1Container();
+    controllerDoNotSetMounts.mountVolumeIfPresent(containerNoSetMounts);
+    Assert.assertNull(containerNoSetMounts.getVolumeMounts());
+
     // Default. Null Volume Mounts.
     V1Container containerNull = new V1ContainerBuilder().build();
     controllerWithMounts.mountVolumeIfPresent(containerNull);
