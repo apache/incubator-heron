@@ -640,17 +640,8 @@ public class V1ControllerTest {
         add(volumeToBeKept);
       }
     };
-    final List<V1Volume> expectedDefault = new LinkedList<V1Volume>() {
-      {
-        add(volumeDefault);
-      }
-    };
-    final List<V1Volume> expectedCustom = new LinkedList<V1Volume>() {
-      {
-        add(volumeDefault);
-        add(volumeToBeKept);
-      }
-    };
+    final List<V1Volume> expectedDefault = Collections.singletonList(volumeDefault);
+    final List<V1Volume> expectedCustom = Arrays.asList(volumeDefault, volumeToBeKept);
 
     // Default. Null Volumes.
     V1PodSpec podSpecNull = new V1PodSpecBuilder().build();
