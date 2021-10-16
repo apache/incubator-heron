@@ -23,7 +23,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.stream.IntStream;
 
 import org.junit.Assert;
 import org.junit.Rule;
@@ -401,16 +400,28 @@ public class V1ControllerTest {
 
   @Test
   public void testConfigureContainerPorts() {
-    final List<V1ContainerPort> expectedPorts = new LinkedList<V1ContainerPort>();
-    KubernetesConstants.EXECUTOR_PORTS.forEach((p, v) -> {
-      expectedPorts.add(new V1ContainerPort().name(p.getName()).containerPort(v));
-    });
+    final String portNamekept = "random-port-to-be-kept";
+    final int portNumberkept = 1111;
+    final int numInstances = 3;
+    final List<V1ContainerPort> expectedPortsBase =
+        Collections.unmodifiableList(V1Controller.getExecutorPorts());
+    final List<V1ContainerPort> debugPorts =
+        Collections.unmodifiableList(V1Controller.getDebuggingPorts(numInstances));
+    final List<V1ContainerPort> inputPortsBase = Collections.unmodifiableList(
+        Arrays.asList(
+            new V1ContainerPort()
+                .name("server-port-to-replace").containerPort(KubernetesConstants.SERVER_PORT),
+            new V1ContainerPort()
+                .name("shell-port-to-replace").containerPort(KubernetesConstants.SHELL_PORT),
+            new V1ContainerPort().name(portNamekept).containerPort(portNumberkept)
+        )
+    );
 
     // Null ports. This is the default case.
     final V1Container inputContainerWithNullPorts = new V1ContainerBuilder().build();
     v1ControllerWithPodTemplate.configureContainerPorts(false, 0, inputContainerWithNullPorts);
     Assert.assertTrue("Server and/or shell ports for container null ports did not match",
-        CollectionUtils.containsAll(inputContainerWithNullPorts.getPorts(), expectedPorts));
+        CollectionUtils.containsAll(inputContainerWithNullPorts.getPorts(), expectedPortsBase));
 
     // Empty ports.
     final V1Container inputContainerWithEmptyPorts = new V1ContainerBuilder()
@@ -418,76 +429,59 @@ public class V1ControllerTest {
         .build();
     v1ControllerWithPodTemplate.configureContainerPorts(false, 0, inputContainerWithEmptyPorts);
     Assert.assertTrue("Server and/or shell ports for container empty ports did not match",
-        CollectionUtils.containsAll(inputContainerWithEmptyPorts.getPorts(), expectedPorts));
+        CollectionUtils.containsAll(inputContainerWithEmptyPorts.getPorts(), expectedPortsBase));
 
-    // Port overriding. Builds <expected> on prior <expected> results.
-    final List<V1ContainerPort> inputPorts = new LinkedList<V1ContainerPort>() {
-      {
-        add(new V1ContainerPort()
-            .name("server-port-to-replace").containerPort(KubernetesConstants.SERVER_PORT));
-        add(new V1ContainerPort()
-            .name("shell-port-to-replace").containerPort(KubernetesConstants.SHELL_PORT));
-        add(new V1ContainerPort()
-            .name("random-port-to-be-kept").containerPort(1111));
-      }
-    };
+    // Port overriding.
+    final List<V1ContainerPort> inputPorts = new LinkedList<>(inputPortsBase);
     final V1Container inputContainerWithPorts = new V1ContainerBuilder()
         .withPorts(inputPorts)
         .build();
-    expectedPorts.add(new V1ContainerPort().name("random-port-to-be-kept").containerPort(1111));
+    final List<V1ContainerPort> expectedPortsOverriding = new LinkedList<>(expectedPortsBase);
+    expectedPortsOverriding
+        .add(new V1ContainerPort().name(portNamekept).containerPort(portNumberkept));
 
     v1ControllerWithPodTemplate.configureContainerPorts(false, 0, inputContainerWithPorts);
     Assert.assertTrue("Server and/or shell ports for container were not overwritten.",
-        CollectionUtils.containsAll(inputContainerWithPorts.getPorts(), expectedPorts));
+        CollectionUtils.containsAll(inputContainerWithPorts.getPorts(), expectedPortsOverriding));
 
-    // Port overriding with debug ports. Builds <expected> on prior <expected> results.
-    final int numInstances = 3;
-    final List<V1ContainerPort> debugPorts = new LinkedList<>();
-    IntStream.range(0, numInstances).forEach(i -> {
-      final V1ContainerPort port = new V1ContainerPort()
-          .name(KubernetesConstants.JVM_REMOTE_DEBUGGER_PORT_NAME + "-" + i)
-          .containerPort(KubernetesConstants.JVM_REMOTE_DEBUGGER_PORT + i);
-      debugPorts.add(port);
-    });
-    final List<V1ContainerPort> inputPortsWithDebug = new LinkedList<V1ContainerPort>(inputPorts) {
-      {
-        add(new V1ContainerPort()
-            .name("server-port-to-replace").containerPort(KubernetesConstants.SERVER_PORT));
-        add(new V1ContainerPort()
-            .name("shell-port-to-replace").containerPort(KubernetesConstants.SHELL_PORT));
-        add(new V1ContainerPort()
-            .name("random-port-to-be-kept").containerPort(1111));
-      }
-    };
-    inputPortsWithDebug.addAll(debugPorts);
+    // Port overriding with debug ports.
+    final List<V1ContainerPort> inputPortsWithDebug = new LinkedList<>(debugPorts);
+    inputPortsWithDebug.addAll(inputPortsBase);
     final V1Container inputContainerWithDebug = new V1ContainerBuilder()
         .withPorts(inputPortsWithDebug)
         .build();
-
-    expectedPorts.addAll(debugPorts);
+    final List<V1ContainerPort> expectedPortsDebug = new LinkedList<>(expectedPortsBase);
+    expectedPortsDebug.add(new V1ContainerPort().name(portNamekept).containerPort(portNumberkept));
+    expectedPortsDebug.addAll(debugPorts);
 
     v1ControllerWithPodTemplate.configureContainerPorts(
         true, numInstances, inputContainerWithDebug);
     Assert.assertTrue("Server and/or shell ports for container were not overwritten.",
-        CollectionUtils.containsAll(inputContainerWithDebug.getPorts(), expectedPorts));
+        CollectionUtils.containsAll(inputContainerWithDebug.getPorts(), expectedPortsDebug));
   }
 
   @Test
   public void testConfigureContainerEnvVars() {
-    final List<V1EnvVar> heronEnvVars = new LinkedList<V1EnvVar>() {
-      {
-        add(new V1EnvVar()
+    final List<V1EnvVar> heronEnvVars =
+        Collections.unmodifiableList(V1Controller.getExecutorEnvVars());
+    final V1EnvVar additionEnvVar = new V1EnvVar()
+        .name("env-variable-to-be-kept")
+        .valueFrom(new V1EnvVarSource()
+            .fieldRef(new V1ObjectFieldSelector()
+                .fieldPath("env-variable-was-kept")));
+    final List<V1EnvVar> inputEnvVars = Arrays.asList(
+        new V1EnvVar()
             .name(KubernetesConstants.ENV_HOST)
-              .valueFrom(new V1EnvVarSource()
+            .valueFrom(new V1EnvVarSource()
                 .fieldRef(new V1ObjectFieldSelector()
-                  .fieldPath(KubernetesConstants.POD_IP))));
-        add(new V1EnvVar()
+                    .fieldPath("env-host-to-be-replaced"))),
+        new V1EnvVar()
             .name(KubernetesConstants.ENV_POD_NAME)
-              .valueFrom(new V1EnvVarSource()
+            .valueFrom(new V1EnvVarSource()
                 .fieldRef(new V1ObjectFieldSelector()
-                  .fieldPath(KubernetesConstants.POD_NAME))));
-      }
-    };
+                    .fieldPath("pod-name-to-be-replaced"))),
+        additionEnvVar
+    );
 
     // Null env vars. This is the default case.
     V1Container containerWithNullEnvVars = new V1ContainerBuilder().build();
@@ -504,33 +498,14 @@ public class V1ControllerTest {
         CollectionUtils.containsAll(containerWithEmptyEnvVars.getEnv(), heronEnvVars));
 
     // Env Var overriding.
-    final V1EnvVar additionEnvVar = new V1EnvVar()
-        .name("env-variable-to-be-kept")
-          .valueFrom(new V1EnvVarSource()
-            .fieldRef(new V1ObjectFieldSelector()
-                .fieldPath("env-variable-was-kept")));
-    final List<V1EnvVar> inputEnvVars = new LinkedList<V1EnvVar>() {
-      {
-        add(new V1EnvVar()
-            .name(KubernetesConstants.ENV_HOST)
-            .valueFrom(new V1EnvVarSource()
-                .fieldRef(new V1ObjectFieldSelector()
-                    .fieldPath("env-host-to-be-replaced"))));
-        add(new V1EnvVar()
-            .name(KubernetesConstants.ENV_POD_NAME)
-            .valueFrom(new V1EnvVarSource()
-                .fieldRef(new V1ObjectFieldSelector()
-                    .fieldPath("pod-name-to-be-replaced"))));
-        add(additionEnvVar);
-      }
-    };
-    heronEnvVars.add(additionEnvVar);
+    final List<V1EnvVar> expectedOverriding = new LinkedList<>(heronEnvVars);
+    expectedOverriding.add(additionEnvVar);
     V1Container containerWithEnvVars = new V1ContainerBuilder()
         .withEnv(inputEnvVars)
         .build();
     v1ControllerWithPodTemplate.configureContainerEnvVars(containerWithEnvVars);
     Assert.assertTrue("ENV_HOST & ENV_POD_NAME in container with Env Vars did not match",
-        CollectionUtils.containsAll(containerWithEnvVars.getEnv(), heronEnvVars));
+        CollectionUtils.containsAll(containerWithEnvVars.getEnv(), expectedOverriding));
   }
 
   @Test
@@ -629,17 +604,15 @@ public class V1ControllerTest {
         .endHostPath()
         .build();
 
-    final List<V1Volume> customVolumeList = new LinkedList<V1Volume>() {
-      {
-        add(new V1VolumeBuilder()
+    final List<V1Volume> customVolumeList = Arrays.asList(
+        new V1VolumeBuilder()
             .withName(pathNameDefault)
             .withNewHostPath()
               .withNewPath("this-path-must-be-replaced")
             .endHostPath()
-            .build());
-        add(volumeToBeKept);
-      }
-    };
+            .build(),
+        volumeToBeKept
+    );
     final List<V1Volume> expectedDefault = Collections.singletonList(volumeDefault);
     final List<V1Volume> expectedCustom = Arrays.asList(volumeDefault, volumeToBeKept);
 
@@ -692,15 +665,13 @@ public class V1ControllerTest {
 
     final List<V1VolumeMount> expectedMountsDefault = Collections.singletonList(volumeDefault);
     final List<V1VolumeMount> expectedMountsCustom = Arrays.asList(volumeCustom, volumeDefault);
-    final List<V1VolumeMount> volumeMountsCustomList = new LinkedList<V1VolumeMount>() {
-      {
-        add(volumeCustom);
-        add(new V1VolumeMountBuilder()
+    final List<V1VolumeMount> volumeMountsCustomList = Arrays.asList(
+        new V1VolumeMountBuilder()
             .withName(pathNameDefault)
             .withMountPath("should-be-replaced")
-            .build());
-      }
-    };
+            .build(),
+        volumeCustom
+    );
 
     // No Volume Mounts set.
     V1Controller controllerDoNotSetMounts = new V1Controller(Config.newBuilder().build(), runtime);
