@@ -178,7 +178,7 @@ The following items will be set in the Pod Template's `spec` by Heron.
 | Name | Description | Policy |
 |---|---|---|
 `terminationGracePeriodSeconds` | Grace period to wait before shutting down the Pod after a `SIGTERM` signal and is set to `0` seconds. | Values are overridden by Heron.
-| `tolerations` | Attempts to colocate Pods with `tolerations` and `taints` onto nodes hosting Pods with matching `tolerations` and `taints`. <br>  Keys:<br>`node.kubernetes.io/not-ready` <br> `node.alpha.kubernetes.io/notReady` <br> `node.alpha.kubernetes.io/unreachable`. <br> Values (common):<br> `operator: "Exists"`<br> `effect: NoExecute`<br> `tolerationSeconds: 10L` | Values are overridden by Heron.
+| `tolerations` | Attempts to schedule Pods with `taints` onto nodes hosting Pods with matching `taints`. <br>  Keys:<br>`node.kubernetes.io/not-ready` <br> `node.alpha.kubernetes.io/notReady` <br> `node.alpha.kubernetes.io/unreachable`. <br> Values (common):<br> `operator: "Exists"`<br> `effect: NoExecute`<br> `tolerationSeconds: 10L` | Values are overridden by Heron.
 | `containers` | Configurations for containers to be launched within the Pod. | All `containers`, excluding the `executor`, are loaded as-is.
 | `volumes` | Volumes to be made available to the entire Pod. | Merged with Heron's values taking precedence. Deduplication is based on the `name` value.
 | `secretVolumes` | Secrets to be mounted as volumes within the Pod. | Loaded from the Heron configs if present.
