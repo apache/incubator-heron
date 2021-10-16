@@ -21,6 +21,7 @@ addons:
       - python3-pip
       - python3-setuptools
       - python3-wheel
+      - python3-venv
       - wget
       - zip
       - zlib1g-dev
