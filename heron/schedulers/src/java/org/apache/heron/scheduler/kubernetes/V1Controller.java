@@ -30,7 +30,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -523,20 +522,12 @@ public class V1Controller extends KubernetesController {
       final V1Volume volumeFromConfig = Volumes.get().create(config);
       if (volumeFromConfig != null) {
         // Merge volumes. Deduplicate using volume's name with Heron defaults taking precedence.
-        if (spec.getVolumes() != null) {
-          try {
-            Set<V1Volume> volumeSet = new TreeSet<>(Comparator.comparing(V1Volume::getName));
-            volumeSet.add(volumeFromConfig);
-            volumeSet.addAll(spec.getVolumes());
-            spec.setVolumes(new LinkedList<>(volumeSet));
-          } catch (NullPointerException e) {
-            final String message = "Executor Pod Template is missing a <Volume> name";
-            LOG.log(Level.INFO, message);
-            throw new TopologySubmissionException(message);
-          }
-        } else {
-          spec.setVolumes(Collections.singletonList(volumeFromConfig));
-        }
+        KubernetesUtils.V1ControllerUtils<V1Volume> utils =
+            new KubernetesUtils.V1ControllerUtils<>();
+        spec.setVolumes(
+            utils.mergeListsDedupe(Collections.singletonList(volumeFromConfig), spec.getVolumes(),
+                Comparator.comparing(V1Volume::getName), "Pod Template Volumes")
+        );
         LOG.fine("Adding volume: " + volumeFromConfig);
       }
     }
@@ -633,14 +624,11 @@ public class V1Controller extends KubernetesController {
   @VisibleForTesting
   protected void configureContainerEnvVars(final V1Container container) {
     // Deduplicate on var name with Heron defaults take precedence.
-    if (container.getEnv() != null) {
-      Set<V1EnvVar> envVars = new TreeSet<>(Comparator.comparing(V1EnvVar::getName));
-      envVars.addAll(getExecutorEnvVars());
-      envVars.addAll(container.getEnv());
-      container.setEnv(new LinkedList<>(envVars));
-    } else {
-      container.setEnv(getExecutorEnvVars());
-    }
+    KubernetesUtils.V1ControllerUtils<V1EnvVar> utils = new KubernetesUtils.V1ControllerUtils<>();
+    container.setEnv(
+        utils.mergeListsDedupe(getExecutorEnvVars(), container.getEnv(),
+          Comparator.comparing(V1EnvVar::getName), "Pod Template Environment Variables")
+    );
   }
 
   @VisibleForTesting
@@ -670,21 +658,12 @@ public class V1Controller extends KubernetesController {
     }
 
     // Set container ports. Deduplicate using port number with Heron defaults taking precedence.
-    if (container.getPorts() != null) {
-      try {
-        Set<V1ContainerPort> portSet = new TreeSet<>(
-            Comparator.comparing(V1ContainerPort::getContainerPort));
-        portSet.addAll(ports);
-        portSet.addAll(container.getPorts());
-        container.setPorts(new LinkedList<>(portSet));
-      } catch (NullPointerException e) {
-        final String message = "Executor Pod Template is missing a <Container Port>";
-        LOG.log(Level.INFO, message);
-        throw new TopologySubmissionException(message);
-      }
-    } else {
-      container.setPorts(ports);
-    }
+    KubernetesUtils.V1ControllerUtils<V1ContainerPort> utils =
+        new KubernetesUtils.V1ControllerUtils<>();
+    container.setPorts(
+        utils.mergeListsDedupe(getExecutorPorts(), container.getPorts(),
+            Comparator.comparing(V1ContainerPort::getContainerPort), "Pod Template Ports")
+    );
   }
 
   @VisibleForTesting
@@ -723,21 +702,12 @@ public class V1Controller extends KubernetesController {
               .mountPath(KubernetesContext.getContainerVolumeMountPath(config));
 
       // Merge volume mounts. Deduplicate using mount's name with Heron defaults taking precedence.
-      if (container.getVolumeMounts() != null) {
-        try {
-          Set<V1VolumeMount> volumeMountSet = new TreeSet<>(
-              Comparator.comparing(V1VolumeMount::getName));
-          volumeMountSet.add(mount);
-          volumeMountSet.addAll(container.getVolumeMounts());
-          container.volumeMounts(new LinkedList<>(volumeMountSet));
-        } catch (NullPointerException e) {
-          final String message = "Executor Pod Template is missing a <Volume Mount> name";
-          LOG.log(Level.INFO, message);
-          throw new TopologySubmissionException(message);
-        }
-      } else {
-        container.setVolumeMounts(Collections.singletonList(mount));
-      }
+      KubernetesUtils.V1ControllerUtils<V1VolumeMount> utils =
+          new KubernetesUtils.V1ControllerUtils<>();
+      container.setVolumeMounts(
+          utils.mergeListsDedupe(Collections.singletonList(mount), container.getVolumeMounts(),
+              Comparator.comparing(V1VolumeMount::getName), "Pod Template Volume Mounts")
+      );
     }
   }
 
