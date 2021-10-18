@@ -500,7 +500,18 @@ public class V1Controller extends KubernetesController {
     mountSecretsAsVolumes(podSpec);
   }
 
-  private List<V1Toleration> getTolerations() {
+  @VisibleForTesting
+  protected void configureTolerations(final V1PodSpec spec) {
+    KubernetesUtils.V1ControllerUtils<V1Toleration> utils =
+        new KubernetesUtils.V1ControllerUtils<>();
+    spec.setTolerations(
+        utils.mergeListsDedupe(getTolerations(), spec.getTolerations(),
+            Comparator.comparing(V1Toleration::getKey), "Pod Specification Tolerations")
+    );
+  }
+
+  @VisibleForTesting
+  protected static List<V1Toleration> getTolerations() {
     final List<V1Toleration> tolerations = new ArrayList<>();
     KubernetesConstants.TOLERATIONS.forEach(t -> {
       final V1Toleration toleration =
