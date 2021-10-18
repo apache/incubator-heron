@@ -206,6 +206,7 @@ java_tests(
         "org.apache.heron.scheduler.kubernetes.VolumesTests",
         "org.apache.heron.scheduler.kubernetes.KubernetesContextTest",
         "org.apache.heron.scheduler.kubernetes.V1ControllerTest",
+        "org.apache.heron.scheduler.kubernetes.KubernetesUtilsTest",
     ],
     runtime_deps = [":kubernetes-tests"],
 )

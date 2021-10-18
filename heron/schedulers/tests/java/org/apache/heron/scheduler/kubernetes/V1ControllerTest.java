@@ -54,6 +54,7 @@ import io.kubernetes.client.openapi.models.V1PodSpec;
 import io.kubernetes.client.openapi.models.V1PodSpecBuilder;
 import io.kubernetes.client.openapi.models.V1PodTemplateSpec;
 import io.kubernetes.client.openapi.models.V1ResourceRequirements;
+import io.kubernetes.client.openapi.models.V1Toleration;
 import io.kubernetes.client.openapi.models.V1Volume;
 import io.kubernetes.client.openapi.models.V1VolumeBuilder;
 import io.kubernetes.client.openapi.models.V1VolumeMount;
@@ -700,5 +701,54 @@ public class V1ControllerTest {
     controllerWithMounts.mountVolumeIfPresent(containerCustom);
     Assert.assertTrue("Default VOLUME MOUNTS not set in container with custom VOLUMES MOUNTS",
         CollectionUtils.containsAll(expectedMountsCustom, containerCustom.getVolumeMounts()));
+  }
+
+  @Test
+  public void testConfigureTolerations() {
+    final V1Toleration keptToleration = new V1Toleration()
+        .key("kept toleration")
+        .operator("Some Operator")
+        .effect("Some Effect")
+        .tolerationSeconds(5L);
+    final List<V1Toleration> expectedTolerationBase =
+        Collections.unmodifiableList(V1Controller.getTolerations());
+    final List<V1Toleration> inputTolerationsBase = Collections.unmodifiableList(
+        Arrays.asList(
+            new V1Toleration()
+                .key(KubernetesConstants.TOLERATIONS.get(0)).operator("replace").effect("replace"),
+            new V1Toleration()
+                .key(KubernetesConstants.TOLERATIONS.get(1)).operator("replace").effect("replace"),
+            keptToleration
+        )
+    );
+
+    // Null Tolerations. This is the default case.
+    final V1PodSpec podSpecNullTolerations = new V1PodSpecBuilder().build();
+    v1ControllerWithPodTemplate.configureTolerations(podSpecNullTolerations);
+    Assert.assertTrue("Pod Spec has <null> Tolerations and should be set to Heron's defaults",
+        CollectionUtils.containsAll(podSpecNullTolerations.getTolerations(),
+            expectedTolerationBase));
+
+    // Empty Tolerations.
+    final V1PodSpec podSpecWithEmptyTolerations = new V1PodSpecBuilder()
+        .withTolerations(new LinkedList<>())
+        .build();
+    v1ControllerWithPodTemplate.configureTolerations(podSpecWithEmptyTolerations);
+    Assert.assertTrue("Pod Spec has empty Tolerations and should be set to Heron's defaults",
+        CollectionUtils.containsAll(podSpecWithEmptyTolerations.getTolerations(),
+            expectedTolerationBase));
+
+    // Toleration overriding.
+    final V1PodSpec podSpecWithTolerations = new V1PodSpecBuilder()
+        .withTolerations(inputTolerationsBase)
+        .build();
+    final List<V1Toleration> expectedTolerationsOverriding =
+        new LinkedList<>(expectedTolerationBase);
+    expectedTolerationsOverriding.add(keptToleration);
+
+    v1ControllerWithPodTemplate.configureTolerations(podSpecWithTolerations);
+    Assert.assertTrue("Pod Spec has Tolerations and should be overriden with Heron's defaults",
+        CollectionUtils.containsAll(podSpecWithTolerations.getTolerations(),
+            expectedTolerationsOverriding));
   }
 }

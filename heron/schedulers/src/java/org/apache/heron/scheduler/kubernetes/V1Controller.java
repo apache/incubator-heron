@@ -30,7 +30,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -353,17 +352,17 @@ public class V1Controller extends KubernetesController {
 
     final V1Service service = new V1Service();
 
-    // setup service metadata
-    final V1ObjectMeta objectMeta = new V1ObjectMeta();
-    objectMeta.name(topologyName);
-    objectMeta.annotations(getServiceAnnotations());
-    objectMeta.setLabels(getServiceLabels());
+    // Setup service metadata.
+    final V1ObjectMeta objectMeta = new V1ObjectMeta()
+        .name(topologyName)
+        .annotations(getServiceAnnotations())
+        .labels(getServiceLabels());
     service.setMetadata(objectMeta);
 
-    // create the headless service
-    final V1ServiceSpec serviceSpec = new V1ServiceSpec();
-    serviceSpec.clusterIP("None");
-    serviceSpec.setSelector(getPodMatchLabels(topologyName));
+    // Create the headless service.
+    final V1ServiceSpec serviceSpec = new V1ServiceSpec()
+        .clusterIP("None")
+        .selector(getPodMatchLabels(topologyName));
 
     service.setSpec(serviceSpec);
 
@@ -376,26 +375,26 @@ public class V1Controller extends KubernetesController {
 
     final V1StatefulSet statefulSet = new V1StatefulSet();
 
-    // setup stateful set metadata
-    final V1ObjectMeta objectMeta = new V1ObjectMeta();
-    objectMeta.name(topologyName);
-    statefulSet.metadata(objectMeta);
+    // Setup StatefulSet's metadata.
+    final V1ObjectMeta objectMeta = new V1ObjectMeta()
+        .name(topologyName);
+    statefulSet.setMetadata(objectMeta);
 
-    // create the stateful set spec
-    final V1StatefulSetSpec statefulSetSpec = new V1StatefulSetSpec();
-    statefulSetSpec.serviceName(topologyName);
-    statefulSetSpec.setReplicas(Runtime.numContainers(runtimeConfiguration).intValue());
+    // Create the stateful set spec.
+    final V1StatefulSetSpec statefulSetSpec = new V1StatefulSetSpec()
+        .serviceName(topologyName)
+        .replicas(Runtime.numContainers(runtimeConfiguration).intValue());
 
     // Parallel pod management tells the StatefulSet controller to launch or terminate
     // all Pods in parallel, and not to wait for Pods to become Running and Ready or completely
     // terminated prior to launching or terminating another Pod.
     statefulSetSpec.setPodManagementPolicy("Parallel");
 
-    // add selector match labels "app=heron" and "topology=topology-name"
-    // so the we know which pods to manage
-    final V1LabelSelector selector = new V1LabelSelector();
-    selector.matchLabels(getPodMatchLabels(topologyName));
-    statefulSetSpec.selector(selector);
+    // Add selector match labels "app=heron" and "topology=topology-name"
+    // so we know which pods to manage.
+    final V1LabelSelector selector = new V1LabelSelector()
+        .matchLabels(getPodMatchLabels(topologyName));
+    statefulSetSpec.setSelector(selector);
 
     // create a pod template
     final V1PodTemplateSpec podTemplateSpec = loadPodFromTemplate();
@@ -405,7 +404,7 @@ public class V1Controller extends KubernetesController {
     Map<String, String> annotations = new HashMap<>();
     annotations.putAll(getPodAnnotations());
     annotations.putAll(getPrometheusAnnotations());
-    templateMetaData.annotations(annotations);
+    templateMetaData.setAnnotations(annotations);
     podTemplateSpec.setMetadata(templateMetaData);
 
     final List<String> command = getExecutorCommand("$" + ENV_SHARD_ID, numberOfInstances);
@@ -413,7 +412,7 @@ public class V1Controller extends KubernetesController {
 
     statefulSetSpec.setTemplate(podTemplateSpec);
 
-    statefulSet.spec(statefulSetSpec);
+    statefulSet.setSpec(statefulSetSpec);
 
     return statefulSet;
   }
@@ -461,7 +460,7 @@ public class V1Controller extends KubernetesController {
                                 Resource resource,
                                 int numberOfInstances) {
     if (podTemplateSpec.getSpec() == null) {
-      podTemplateSpec.spec(new V1PodSpec());
+      podTemplateSpec.setSpec(new V1PodSpec());
     }
     final V1PodSpec podSpec = podTemplateSpec.getSpec();
 
@@ -470,7 +469,7 @@ public class V1Controller extends KubernetesController {
 
     // set the pod tolerations so pods are rescheduled when nodes go down
     // https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/#taint-based-evictions
-    podSpec.setTolerations(getTolerations());
+    configureTolerations(podSpec);
 
     // Get <executor> container and discard all others.
     V1Container executorContainer = null;
@@ -501,7 +500,18 @@ public class V1Controller extends KubernetesController {
     mountSecretsAsVolumes(podSpec);
   }
 
-  private List<V1Toleration> getTolerations() {
+  @VisibleForTesting
+  protected void configureTolerations(final V1PodSpec spec) {
+    KubernetesUtils.V1ControllerUtils<V1Toleration> utils =
+        new KubernetesUtils.V1ControllerUtils<>();
+    spec.setTolerations(
+        utils.mergeListsDedupe(getTolerations(), spec.getTolerations(),
+            Comparator.comparing(V1Toleration::getKey), "Pod Specification Tolerations")
+    );
+  }
+
+  @VisibleForTesting
+  protected static List<V1Toleration> getTolerations() {
     final List<V1Toleration> tolerations = new ArrayList<>();
     KubernetesConstants.TOLERATIONS.forEach(t -> {
       final V1Toleration toleration =
@@ -523,20 +533,12 @@ public class V1Controller extends KubernetesController {
       final V1Volume volumeFromConfig = Volumes.get().create(config);
       if (volumeFromConfig != null) {
         // Merge volumes. Deduplicate using volume's name with Heron defaults taking precedence.
-        if (spec.getVolumes() != null) {
-          try {
-            Set<V1Volume> volumeSet = new TreeSet<>(Comparator.comparing(V1Volume::getName));
-            volumeSet.add(volumeFromConfig);
-            volumeSet.addAll(spec.getVolumes());
-            spec.setVolumes(new LinkedList<>(volumeSet));
-          } catch (NullPointerException e) {
-            final String message = "Executor Pod Template is missing a <Volume> name";
-            LOG.log(Level.INFO, message);
-            throw new TopologySubmissionException(message);
-          }
-        } else {
-          spec.setVolumes(Collections.singletonList(volumeFromConfig));
-        }
+        KubernetesUtils.V1ControllerUtils<V1Volume> utils =
+            new KubernetesUtils.V1ControllerUtils<>();
+        spec.setVolumes(
+            utils.mergeListsDedupe(Collections.singletonList(volumeFromConfig), spec.getVolumes(),
+                Comparator.comparing(V1Volume::getName), "Pod Template Volumes")
+        );
         LOG.fine("Adding volume: " + volumeFromConfig);
       }
     }
@@ -633,14 +635,11 @@ public class V1Controller extends KubernetesController {
   @VisibleForTesting
   protected void configureContainerEnvVars(final V1Container container) {
     // Deduplicate on var name with Heron defaults take precedence.
-    if (container.getEnv() != null) {
-      Set<V1EnvVar> envVars = new TreeSet<>(Comparator.comparing(V1EnvVar::getName));
-      envVars.addAll(getExecutorEnvVars());
-      envVars.addAll(container.getEnv());
-      container.setEnv(new LinkedList<>(envVars));
-    } else {
-      container.setEnv(getExecutorEnvVars());
-    }
+    KubernetesUtils.V1ControllerUtils<V1EnvVar> utils = new KubernetesUtils.V1ControllerUtils<>();
+    container.setEnv(
+        utils.mergeListsDedupe(getExecutorEnvVars(), container.getEnv(),
+          Comparator.comparing(V1EnvVar::getName), "Pod Template Environment Variables")
+    );
   }
 
   @VisibleForTesting
@@ -670,30 +669,21 @@ public class V1Controller extends KubernetesController {
     }
 
     // Set container ports. Deduplicate using port number with Heron defaults taking precedence.
-    if (container.getPorts() != null) {
-      try {
-        Set<V1ContainerPort> portSet = new TreeSet<>(
-            Comparator.comparing(V1ContainerPort::getContainerPort));
-        portSet.addAll(ports);
-        portSet.addAll(container.getPorts());
-        container.setPorts(new LinkedList<>(portSet));
-      } catch (NullPointerException e) {
-        final String message = "Executor Pod Template is missing a <Container Port>";
-        LOG.log(Level.INFO, message);
-        throw new TopologySubmissionException(message);
-      }
-    } else {
-      container.setPorts(ports);
-    }
+    KubernetesUtils.V1ControllerUtils<V1ContainerPort> utils =
+        new KubernetesUtils.V1ControllerUtils<>();
+    container.setPorts(
+        utils.mergeListsDedupe(getExecutorPorts(), container.getPorts(),
+            Comparator.comparing(V1ContainerPort::getContainerPort), "Pod Template Ports")
+    );
   }
 
   @VisibleForTesting
   protected static List<V1ContainerPort> getExecutorPorts() {
     List<V1ContainerPort> ports = new LinkedList<>();
     KubernetesConstants.EXECUTOR_PORTS.forEach((p, v) -> {
-      final V1ContainerPort port = new V1ContainerPort();
-      port.setName(p.getName());
-      port.setContainerPort(v);
+      final V1ContainerPort port = new V1ContainerPort()
+          .name(p.getName())
+          .containerPort(v);
       ports.add(port);
     });
     return ports;
@@ -705,9 +695,9 @@ public class V1Controller extends KubernetesController {
     IntStream.range(0, numberOfInstances).forEach(i -> {
       final String portName =
           KubernetesConstants.JVM_REMOTE_DEBUGGER_PORT_NAME + "-" + i;
-      final V1ContainerPort port = new V1ContainerPort();
-      port.setName(portName);
-      port.setContainerPort(KubernetesConstants.JVM_REMOTE_DEBUGGER_PORT + i);
+      final V1ContainerPort port = new V1ContainerPort()
+          .name(portName)
+          .containerPort(KubernetesConstants.JVM_REMOTE_DEBUGGER_PORT + i);
       ports.add(port);
     });
     return ports;
@@ -723,21 +713,12 @@ public class V1Controller extends KubernetesController {
               .mountPath(KubernetesContext.getContainerVolumeMountPath(config));
 
       // Merge volume mounts. Deduplicate using mount's name with Heron defaults taking precedence.
-      if (container.getVolumeMounts() != null) {
-        try {
-          Set<V1VolumeMount> volumeMountSet = new TreeSet<>(
-              Comparator.comparing(V1VolumeMount::getName));
-          volumeMountSet.add(mount);
-          volumeMountSet.addAll(container.getVolumeMounts());
-          container.volumeMounts(new LinkedList<>(volumeMountSet));
-        } catch (NullPointerException e) {
-          final String message = "Executor Pod Template is missing a <Volume Mount> name";
-          LOG.log(Level.INFO, message);
-          throw new TopologySubmissionException(message);
-        }
-      } else {
-        container.setVolumeMounts(Collections.singletonList(mount));
-      }
+      KubernetesUtils.V1ControllerUtils<V1VolumeMount> utils =
+          new KubernetesUtils.V1ControllerUtils<>();
+      container.setVolumeMounts(
+          utils.mergeListsDedupe(Collections.singletonList(mount), container.getVolumeMounts(),
+              Comparator.comparing(V1VolumeMount::getName), "Pod Template Volume Mounts")
+      );
     }
   }
 
