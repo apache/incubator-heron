@@ -469,7 +469,7 @@ public class V1Controller extends KubernetesController {
 
     // set the pod tolerations so pods are rescheduled when nodes go down
     // https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/#taint-based-evictions
-    podSpec.setTolerations(getTolerations());
+    configureTolerations(podSpec);
 
     // Get <executor> container and discard all others.
     V1Container executorContainer = null;
