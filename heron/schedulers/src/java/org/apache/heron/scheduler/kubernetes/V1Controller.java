@@ -352,17 +352,17 @@ public class V1Controller extends KubernetesController {
 
     final V1Service service = new V1Service();
 
-    // setup service metadata
-    final V1ObjectMeta objectMeta = new V1ObjectMeta();
-    objectMeta.name(topologyName);
-    objectMeta.annotations(getServiceAnnotations());
-    objectMeta.setLabels(getServiceLabels());
+    // Setup service metadata.
+    final V1ObjectMeta objectMeta = new V1ObjectMeta()
+        .name(topologyName)
+        .annotations(getServiceAnnotations())
+        .labels(getServiceLabels());
     service.setMetadata(objectMeta);
 
-    // create the headless service
-    final V1ServiceSpec serviceSpec = new V1ServiceSpec();
-    serviceSpec.clusterIP("None");
-    serviceSpec.setSelector(getPodMatchLabels(topologyName));
+    // Create the headless service.
+    final V1ServiceSpec serviceSpec = new V1ServiceSpec()
+        .clusterIP("None")
+        .selector(getPodMatchLabels(topologyName));
 
     service.setSpec(serviceSpec);
 
@@ -375,26 +375,26 @@ public class V1Controller extends KubernetesController {
 
     final V1StatefulSet statefulSet = new V1StatefulSet();
 
-    // setup stateful set metadata
-    final V1ObjectMeta objectMeta = new V1ObjectMeta();
-    objectMeta.name(topologyName);
-    statefulSet.metadata(objectMeta);
+    // Setup StatefulSet's metadata.
+    final V1ObjectMeta objectMeta = new V1ObjectMeta()
+        .name(topologyName);
+    statefulSet.setMetadata(objectMeta);
 
-    // create the stateful set spec
-    final V1StatefulSetSpec statefulSetSpec = new V1StatefulSetSpec();
-    statefulSetSpec.serviceName(topologyName);
-    statefulSetSpec.setReplicas(Runtime.numContainers(runtimeConfiguration).intValue());
+    // Create the stateful set spec.
+    final V1StatefulSetSpec statefulSetSpec = new V1StatefulSetSpec()
+        .serviceName(topologyName)
+        .replicas(Runtime.numContainers(runtimeConfiguration).intValue());
 
     // Parallel pod management tells the StatefulSet controller to launch or terminate
     // all Pods in parallel, and not to wait for Pods to become Running and Ready or completely
     // terminated prior to launching or terminating another Pod.
     statefulSetSpec.setPodManagementPolicy("Parallel");
 
-    // add selector match labels "app=heron" and "topology=topology-name"
-    // so the we know which pods to manage
-    final V1LabelSelector selector = new V1LabelSelector();
-    selector.matchLabels(getPodMatchLabels(topologyName));
-    statefulSetSpec.selector(selector);
+    // Add selector match labels "app=heron" and "topology=topology-name"
+    // so we know which pods to manage.
+    final V1LabelSelector selector = new V1LabelSelector()
+        .matchLabels(getPodMatchLabels(topologyName));
+    statefulSetSpec.setSelector(selector);
 
     // create a pod template
     final V1PodTemplateSpec podTemplateSpec = loadPodFromTemplate();
@@ -404,7 +404,7 @@ public class V1Controller extends KubernetesController {
     Map<String, String> annotations = new HashMap<>();
     annotations.putAll(getPodAnnotations());
     annotations.putAll(getPrometheusAnnotations());
-    templateMetaData.annotations(annotations);
+    templateMetaData.setAnnotations(annotations);
     podTemplateSpec.setMetadata(templateMetaData);
 
     final List<String> command = getExecutorCommand("$" + ENV_SHARD_ID, numberOfInstances);
@@ -412,7 +412,7 @@ public class V1Controller extends KubernetesController {
 
     statefulSetSpec.setTemplate(podTemplateSpec);
 
-    statefulSet.spec(statefulSetSpec);
+    statefulSet.setSpec(statefulSetSpec);
 
     return statefulSet;
   }
@@ -460,7 +460,7 @@ public class V1Controller extends KubernetesController {
                                 Resource resource,
                                 int numberOfInstances) {
     if (podTemplateSpec.getSpec() == null) {
-      podTemplateSpec.spec(new V1PodSpec());
+      podTemplateSpec.setSpec(new V1PodSpec());
     }
     final V1PodSpec podSpec = podTemplateSpec.getSpec();
 
@@ -670,9 +670,9 @@ public class V1Controller extends KubernetesController {
   protected static List<V1ContainerPort> getExecutorPorts() {
     List<V1ContainerPort> ports = new LinkedList<>();
     KubernetesConstants.EXECUTOR_PORTS.forEach((p, v) -> {
-      final V1ContainerPort port = new V1ContainerPort();
-      port.setName(p.getName());
-      port.setContainerPort(v);
+      final V1ContainerPort port = new V1ContainerPort()
+          .name(p.getName())
+          .containerPort(v);
       ports.add(port);
     });
     return ports;
@@ -684,9 +684,9 @@ public class V1Controller extends KubernetesController {
     IntStream.range(0, numberOfInstances).forEach(i -> {
       final String portName =
           KubernetesConstants.JVM_REMOTE_DEBUGGER_PORT_NAME + "-" + i;
-      final V1ContainerPort port = new V1ContainerPort();
-      port.setName(portName);
-      port.setContainerPort(KubernetesConstants.JVM_REMOTE_DEBUGGER_PORT + i);
+      final V1ContainerPort port = new V1ContainerPort()
+          .name(portName)
+          .containerPort(KubernetesConstants.JVM_REMOTE_DEBUGGER_PORT + i);
       ports.add(port);
     });
     return ports;
