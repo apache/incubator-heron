@@ -472,14 +472,18 @@ public class V1Controller extends KubernetesController {
     configureTolerations(podSpec);
 
     // Get <executor> container and discard all others.
+    final String executorName = KubernetesConstants.EXECUTOR_NAME;
     V1Container executorContainer = null;
     List<V1Container> containers = podSpec.getContainers();
     if (containers != null) {
       for (V1Container container : containers) {
         final String name = container.getName();
-        if (name != null && name.equals(KubernetesConstants.EXECUTOR_NAME)) {
+        if (name != null && name.equals(executorName)) {
+          if (executorContainer != null) {
+            throw new TopologySubmissionException(
+                String.format("Multiple configurations found for %s container", executorName));
+          }
           executorContainer = container;
-          break;
         }
       }
     } else {
@@ -487,7 +491,7 @@ public class V1Controller extends KubernetesController {
     }
 
     if (executorContainer == null) {
-      executorContainer = new V1Container().name(KubernetesConstants.EXECUTOR_NAME);
+      executorContainer = new V1Container().name(executorName);
       containers.add(executorContainer);
     }
 
