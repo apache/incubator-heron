@@ -103,9 +103,7 @@ public class KubernetesUtilsTest {
     Assert.assertTrue("<primaryList> and <secondaryList> merged and deduplicated",
         expectedEnvVars.containsAll(
             v1ControllerUtils.mergeListsDedupe(heronEnvVars, inputEnvVars,
-                Comparator.comparing(V1EnvVar::getName), description)
-        )
-    );
+                Comparator.comparing(V1EnvVar::getName), description)));
 
     // Expect thrown error.
     String errorMessage = "";
