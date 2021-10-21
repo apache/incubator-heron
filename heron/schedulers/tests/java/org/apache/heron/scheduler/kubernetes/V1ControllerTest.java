@@ -66,9 +66,10 @@ import static org.mockito.Mockito.doReturn;
 public class V1ControllerTest {
 
   private static final String TOPOLOGY_NAME = "topology-name";
-  private static final String CONFIGMAP_POD_TEMPLATE_NAME = "CONFIG-MAP-NAME.POD-TEMPLATE-NAME";
   private static final String CONFIGMAP_NAME = "CONFIG-MAP-NAME";
   private static final String POD_TEMPLATE_NAME = "POD-TEMPLATE-NAME";
+  private static final String CONFIGMAP_POD_TEMPLATE_NAME =
+      String.format("%s.%s", CONFIGMAP_NAME, POD_TEMPLATE_NAME);
   private static final String POD_TEMPLATE_VALID =
       "apiVersion: apps/v1\n"
           + "kind: PodTemplate\n"
