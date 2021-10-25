@@ -285,7 +285,10 @@ spec:
     - port: 9000
       targetPort: 9000
       protocol: TCP
-  {{- if eq .Values.apiserver.NodePort true }}
+      {{- if not (empty .Values.apiserver.NodePort) }}
+      nodePort: {{ .Values.apiserver.NodePort }}
+      {{- end }}
+  {{- if not (empty .Values.apiserver.NodePort) }}
   type: NodePort
   {{- else }}
   type: ClusterIP
