@@ -43,6 +43,9 @@ heron:
   # set to `null` to remove the use of base_url
   url: "-"
 
+apiserver:
+  NodePort: true
+
 # Can be EQUAL_TO_LIMIT or NOT_SET
 topologyResourceRequestMode: EQUAL_TO_LIMIT
 
