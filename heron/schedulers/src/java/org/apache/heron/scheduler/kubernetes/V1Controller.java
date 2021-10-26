@@ -56,7 +56,6 @@ import io.kubernetes.client.openapi.Configuration;
 import io.kubernetes.client.openapi.apis.AppsV1Api;
 import io.kubernetes.client.openapi.apis.CoreV1Api;
 import io.kubernetes.client.openapi.models.V1ConfigMap;
-import io.kubernetes.client.openapi.models.V1ConfigMapList;
 import io.kubernetes.client.openapi.models.V1Container;
 import io.kubernetes.client.openapi.models.V1ContainerPort;
 import io.kubernetes.client.openapi.models.V1EnvVar;
@@ -755,6 +754,55 @@ public class V1Controller extends KubernetesController {
   }
 
   @VisibleForTesting
+  protected V1PodTemplateSpec loadPodFromTemplate() {
+    final Pair<String, String> podTemplateConfigMapName = getPodTemplateLocation();
+
+    // Default Pod Template.
+    if (podTemplateConfigMapName == null) {
+      LOG.log(Level.INFO, "Configuring cluster with the Default Pod Template");
+      return new V1PodTemplateSpec();
+    }
+
+    if (isPodTemplateDisabled) {
+      throw new TopologySubmissionException("Custom Pod Templates are disabled");
+    }
+
+    final String configMapName = podTemplateConfigMapName.first;
+    final String podTemplateName = podTemplateConfigMapName.second;
+
+    // Attempt to locate ConfigMap with provided Pod Template name.
+    try {
+      V1ConfigMap configMap = getConfigMap(configMapName);
+      if (configMap == null) {
+        throw new ApiException(
+            String.format("K8s client unable to locate ConfigMap '%s'", configMapName));
+      }
+
+      final Map<String, String> configMapData = configMap.getData();
+      if (configMapData != null && configMapData.containsKey(podTemplateName)) {
+        // NullPointerException when Pod Template is empty.
+        V1PodTemplateSpec podTemplate = ((V1PodTemplate)
+            Yaml.load(configMapData.get(podTemplateName))).getTemplate();
+        LOG.log(Level.INFO, String.format("Configuring cluster with the %s.%s Pod Template",
+            configMapName, podTemplateName));
+        return podTemplate;
+      }
+
+      // Failure to locate Pod Template with provided name.
+      throw new ApiException(String.format("Failed to locate Pod Template '%s' in ConfigMap '%s'",
+          podTemplateName, configMapName));
+    } catch (ApiException e) {
+      KubernetesUtils.logExceptionWithDetails(LOG, e.getMessage(), e);
+      throw new TopologySubmissionException(e.getMessage());
+    } catch (IOException | ClassCastException | NullPointerException e) {
+      final String message = String.format("Error parsing Pod Template '%s' in ConfigMap '%s'",
+          podTemplateName, configMapName);
+      KubernetesUtils.logExceptionWithDetails(LOG, message, e);
+      throw new TopologySubmissionException(message);
+    }
+  }
+
+  @VisibleForTesting
   protected Pair<String, String> getPodTemplateLocation() {
     final String podTemplateConfigMapName = KubernetesContext
         .getPodTemplateConfigMapName(getConfiguration());
@@ -781,86 +829,18 @@ public class V1Controller extends KubernetesController {
   }
 
   @VisibleForTesting
-  protected V1PodTemplateSpec loadPodFromTemplate() {
-    final Pair<String, String> podTemplateConfigMapName = getPodTemplateLocation();
-
-    // Default Pod Template.
-    if (podTemplateConfigMapName == null) {
-      LOG.log(Level.INFO, "Configuring cluster with the Default Pod Template");
-      return new V1PodTemplateSpec();
-    }
-
-    if (isPodTemplateDisabled) {
-      throw new TopologySubmissionException("Custom executor Pod Templates are disabled");
-    }
-
-    final String configMapName = podTemplateConfigMapName.first;
-    final String podTemplateName = podTemplateConfigMapName.second;
-
-    // Attempt to locate ConfigMap with provided Pod Template name.
+  protected V1ConfigMap getConfigMap(String configMapName) {
     try {
-      List<V1ConfigMap> configMapLists = getConfigMaps();
-      if (configMapLists == null) {
-        throw new ApiException("No ConfigMaps returned by K8s client");
-      }
-
-      // Probe ConfigMaps for the specified Pod Template name.
-      for (V1ConfigMap configMap : configMapLists) {
-        // kubectl will set the name filed in metadata automatically for ConfigMaps using the
-        // parameters on the command line. Hence, name field in the metadata cannot be null.
-        if (configMap == null || !configMap.getMetadata().getName().equals(configMapName)) {
-          continue;
-        }
-
-        final Map<String, String> configMapData = configMap.getData();
-        if (configMapData != null && configMapData.containsKey(podTemplateName)) {
-          // NullPointerException when Pod Template is empty.
-          V1PodTemplateSpec podTemplate = ((V1PodTemplate)
-              Yaml.load(configMapData.get(podTemplateName))).getTemplate();
-          LOG.log(Level.INFO, String.format("Configuring cluster with the %s.%s Pod Template",
-              configMapName, podTemplateName));
-          return podTemplate;
-        }
-      }
-      // Failure to locate Pod Template with provided name.
-      throw new ApiException(String.format("Failed to locate Pod Template %s in ConfigMap %s",
-          podTemplateName, configMapName));
+      return coreClient.readNamespacedConfigMap(
+          configMapName,
+          getNamespace(),
+          null,
+          null,
+          null);
     } catch (ApiException e) {
-      KubernetesUtils.logExceptionWithDetails(LOG, e.getMessage(), e);
-      throw new TopologySubmissionException(e.getMessage());
-    } catch (IOException | ClassCastException | NullPointerException e) {
-      final String message = String.format("Error parsing Pod Template %s in ConfigMap %s",
-          podTemplateName, configMapName);
+      final String message = "Error retrieving ConfigMaps";
       KubernetesUtils.logExceptionWithDetails(LOG, message, e);
-      throw new TopologySubmissionException(message);
-    }
-  }
-
-  @VisibleForTesting
-  protected List<V1ConfigMap> getConfigMaps() {
-    try {
-      V1ConfigMapList configMapList = coreClient
-          .listNamespacedConfigMap(
-              getNamespace(),
-              null,
-              null,
-              null,
-              null,
-              null,
-              null,
-              null,
-              null,
-              null,
-              null);
-
-      if (configMapList == null) {
-        throw new ApiException("No ConfigMaps returned by K8s client");
-      }
-
-      return configMapList.getItems();
-    } catch (ApiException e) {
-      KubernetesUtils.logExceptionWithDetails(LOG, "Error retrieving ConfigMaps", e);
-      throw new TopologySubmissionException(e.getMessage());
+      throw new TopologySubmissionException(String.format("%s:%n%s", message, e.getMessage()));
     }
   }
 }
