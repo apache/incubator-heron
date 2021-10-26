@@ -30,9 +30,24 @@ Pod Templates will allow you to configure most aspects of the Pods where the com
 
 <br>
 
-> System Administrators: You may wish to disable the ability to load custom Pod Templates. To achieve this, you must pass the `-D heron.kubernetes.pod.template.configmap.disabled=true` to the Heron API Server on the command line during boot. This command has been added to the Kubernetes configuration files to deploy the Heron API Server and can be uncommented. Please take care to ensure that the indentation is correct.
+> ***System Administrators:***
+>
+> * You may wish to disable the ability to load custom Pod Templates. To achieve this, you must pass the define option `-D heron.kubernetes.pod.template.configmap.disabled=true` to the Heron API Server on the command line during boot. This command has been added to the Kubernetes configuration files to deploy the Heron API Server and is set to `false` by default.
+> * If you have a custom `Role`/`ClusterRole` for the Heron API Server you will need to ensure the `ServiceAccount` attached to the API server has the correct permissions to access the `ConfigMaps`:
+>
+>```yaml
+>rules:
+>- apiGroups: 
+>  - ""
+>  resources: 
+>  - configmaps
+>  verbs: 
+>  - get
+>  - watch
+>  - list
+>```
 
-<br/>
+<br>
 
 ## Preparation
 
@@ -79,6 +94,8 @@ template:
 You would need to save this file as `POD-TEMPLATE-NAME`. Once you have a valid Pod Template you may proceed to generate a `ConfigMap`.
 
 ### Configuration Maps
+
+> You must place the `ConfigMap` in the same namespace as the Heron API Server using the `--namespace` option in the commands below if the server is not in the `default` namespace.
 
 To generate a `ConfigMap` you will need to run the following command:
 
@@ -178,7 +195,7 @@ The following items will be set in the Pod Template's `spec` by Heron.
 | Name | Description | Policy |
 |---|---|---|
 `terminationGracePeriodSeconds` | Grace period to wait before shutting down the Pod after a `SIGTERM` signal and is set to `0` seconds. | Values are overridden by Heron.
-| `tolerations` | Attempts to schedule Pods with `taints` onto nodes hosting Pods with matching `taints`. The entries below are included by default. <br>  Keys:<br>`node.kubernetes.io/not-ready` <br> `node.alpha.kubernetes.io/notReady` <br> `node.alpha.kubernetes.io/unreachable`. <br> Values (common):<br> `operator: "Exists"`<br> `effect: NoExecute`<br> `tolerationSeconds: 10L` | Merged with Heron's values taking precedence. Deduplication is based on the `key` value.
+| `tolerations` | Attempts to schedule Pods with `taints` onto nodes hosting Pods with matching `taints`. The entries below are included by default. <br>  Keys:<br>`node.kubernetes.io/not-ready` <br> `node.kubernetes.io/unreachable` <br> Values (common):<br> `operator: Exists`<br> `effect: NoExecute`<br> `tolerationSeconds: 10L` | Merged with Heron's values taking precedence. Deduplication is based on the `key` value.
 | `containers` | Configurations for containers to be launched within the Pod. | All `containers`, excluding the `executor`, are loaded as-is.
 | `volumes` | Volumes to be made available to the entire Pod. | Merged with Heron's values taking precedence. Deduplication is based on the `name` value.
 | `secretVolumes` | Secrets to be mounted as volumes within the Pod. | Loaded from the Heron configs if present.
