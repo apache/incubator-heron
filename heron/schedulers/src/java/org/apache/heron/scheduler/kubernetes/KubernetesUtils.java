@@ -94,13 +94,13 @@ final class KubernetesUtils {
     private static final Logger LOG = Logger.getLogger(V1Controller.class.getName());
 
     /**
-     * Merge two lists by keeping all values in the "primaryList" and de-duplicating values in
-     * "secondaryList" using the "comparator".
+     * Merge two lists by keeping all values in the <code>primaryList</code> and de-duplicating values in
+     * <code>secondaryList</code> using the <code>comparator</code>.
      * @param primaryList All the values in this will be retained.
-     * @param secondaryList The values in this list will be deduplicated against "primaryList".
-     * @param comparator Used to compare keys in the TreeSet to find their insertion position.
-     * @param description Description of the list merge operation and used for error messages.
-     * @return A de-duplicated list of all the values in both input lists using the comparator.
+     * @param secondaryList The values in this list will be deduplicated against <code>primaryList</code>.
+     * @param comparator Used to compare keys in the <code>TreeSet</code> to find their insertion position.
+     * @param description Description of the list merge operation which is used for error messages.
+     * @return A de-duplicated list of all the values in both input lists using the <code>comparator</code>.
      */
     protected List<T> mergeListsDedupe(List<T> primaryList, List<T> secondaryList,
                                        Comparator<T> comparator, String description) {
