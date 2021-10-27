@@ -76,25 +76,25 @@ public class KubernetesUtilsTest {
              Comparator.comparing(V1EnvVar::getName), description));
 
     // <primaryList> is <null>.
-    Assert.assertEquals("<primaryList> is null and <secondaryList> should have been returned",
+    Assert.assertEquals("<primaryList> is null and <secondaryList> should be returned",
         inputEnvVars,
         v1ControllerUtils.mergeListsDedupe(null, inputEnvVars,
             Comparator.comparing(V1EnvVar::getName), description));
 
     // <primaryList> is empty.
-    Assert.assertEquals("<primaryList> is empty and <secondaryList> should have been returned",
+    Assert.assertEquals("<primaryList> is empty and <secondaryList> should be returned",
         inputEnvVars,
         v1ControllerUtils.mergeListsDedupe(new LinkedList<>(), inputEnvVars,
             Comparator.comparing(V1EnvVar::getName), description));
 
     // <secondaryList> is <null>.
-    Assert.assertEquals("<secondaryList> is null and <primaryList> should have been returned",
+    Assert.assertEquals("<secondaryList> is null and <primaryList> should be returned",
         heronEnvVars,
         v1ControllerUtils.mergeListsDedupe(heronEnvVars, null,
             Comparator.comparing(V1EnvVar::getName), description));
 
     // <secondaryList> is empty.
-    Assert.assertEquals("<secondaryList> is empty and <primaryList> should have been returned",
+    Assert.assertEquals("<secondaryList> is empty and <primaryList> should be returned",
         heronEnvVars,
         v1ControllerUtils.mergeListsDedupe(heronEnvVars, new LinkedList<>(),
             Comparator.comparing(V1EnvVar::getName), description));
@@ -115,6 +115,5 @@ public class KubernetesUtilsTest {
     }
     Assert.assertTrue("Expecting error to be thrown for null deduplication key",
         errorMessage.contains(description));
-
   }
 }

@@ -840,7 +840,7 @@ public class V1Controller extends KubernetesController {
     } catch (ApiException e) {
       final String message = "Error retrieving ConfigMaps";
       KubernetesUtils.logExceptionWithDetails(LOG, message, e);
-      throw new TopologySubmissionException(String.format("%s:%n%s", message, e.getMessage()));
+      throw new TopologySubmissionException(String.format("%s: %s", message, e.getMessage()));
     }
   }
 }
