@@ -400,7 +400,7 @@ public class V1ControllerTest {
     // Null ports. This is the default case.
     final V1Container inputContainerWithNullPorts = new V1ContainerBuilder().build();
     v1ControllerWithPodTemplate.configureContainerPorts(false, 0, inputContainerWithNullPorts);
-    Assert.assertTrue("Server and/or shell ports for container null ports did not match",
+    Assert.assertTrue("Server and/or shell PORTS for container with null ports list",
         CollectionUtils.containsAll(inputContainerWithNullPorts.getPorts(), expectedPortsBase));
 
     // Empty ports.
@@ -408,7 +408,7 @@ public class V1ControllerTest {
         .withPorts(new LinkedList<>())
         .build();
     v1ControllerWithPodTemplate.configureContainerPorts(false, 0, inputContainerWithEmptyPorts);
-    Assert.assertTrue("Server and/or shell ports for container empty ports did not match",
+    Assert.assertTrue("Server and/or shell PORTS for container with empty ports list",
         CollectionUtils.containsAll(inputContainerWithEmptyPorts.getPorts(), expectedPortsBase));
 
     // Port overriding.
@@ -421,7 +421,7 @@ public class V1ControllerTest {
         .add(new V1ContainerPort().name(portNamekept).containerPort(portNumberkept));
 
     v1ControllerWithPodTemplate.configureContainerPorts(false, 0, inputContainerWithPorts);
-    Assert.assertTrue("Server and/or shell ports for container were not overwritten.",
+    Assert.assertTrue("Server and/or shell PORTS for container should be overwritten.",
         CollectionUtils.containsAll(inputContainerWithPorts.getPorts(), expectedPortsOverriding));
 
     // Port overriding with debug ports.
@@ -436,7 +436,7 @@ public class V1ControllerTest {
 
     v1ControllerWithPodTemplate.configureContainerPorts(
         true, numInstances, inputContainerWithDebug);
-    Assert.assertTrue("Server and/or shell ports for container were not overwritten.",
+    Assert.assertTrue("Server and/or shell with debug PORTS for container should be overwritten.",
         CollectionUtils.containsAll(inputContainerWithDebug.getPorts(), expectedPortsDebug));
   }
 
@@ -466,7 +466,7 @@ public class V1ControllerTest {
     // Null env vars. This is the default case.
     V1Container containerWithNullEnvVars = new V1ContainerBuilder().build();
     v1ControllerWithPodTemplate.configureContainerEnvVars(containerWithNullEnvVars);
-    Assert.assertTrue("ENV_HOST & ENV_POD_NAME in container with null Env Vars did not match",
+    Assert.assertTrue("ENV_HOST & ENV_POD_NAME in container with null Env Vars should match",
         CollectionUtils.containsAll(containerWithNullEnvVars.getEnv(), heronEnvVars));
 
     // Empty env vars.
@@ -474,7 +474,7 @@ public class V1ControllerTest {
         .withEnv(new LinkedList<>())
         .build();
     v1ControllerWithPodTemplate.configureContainerEnvVars(containerWithEmptyEnvVars);
-    Assert.assertTrue("ENV_HOST & ENV_POD_NAME in container with empty Env Vars did not match",
+    Assert.assertTrue("ENV_HOST & ENV_POD_NAME in container with empty Env Vars should match",
         CollectionUtils.containsAll(containerWithEmptyEnvVars.getEnv(), heronEnvVars));
 
     // Env Var overriding.
@@ -484,7 +484,7 @@ public class V1ControllerTest {
         .withEnv(inputEnvVars)
         .build();
     v1ControllerWithPodTemplate.configureContainerEnvVars(containerWithEnvVars);
-    Assert.assertTrue("ENV_HOST & ENV_POD_NAME in container with Env Vars did not match",
+    Assert.assertTrue("ENV_HOST & ENV_POD_NAME in container with Env Vars should be overridden",
         CollectionUtils.containsAll(containerWithEnvVars.getEnv(), expectedOverriding));
   }
 
@@ -524,7 +524,7 @@ public class V1ControllerTest {
     V1Container containerNull = new V1ContainerBuilder().build();
     v1ControllerWithPodTemplate.configureContainerResources(
         containerNull, configNoLimit, resourceDefault);
-    Assert.assertTrue("Default LIMITS not set in container with null LIMITS",
+    Assert.assertTrue("Default LIMITS should be set in container with null LIMITS",
         containerNull.getResources().getLimits().entrySet()
             .containsAll(expectDefaultRequirements.getLimits().entrySet()));
 
@@ -532,7 +532,7 @@ public class V1ControllerTest {
     V1Container containerEmpty = new V1ContainerBuilder().withNewResources().endResources().build();
     v1ControllerWithPodTemplate.configureContainerResources(
         containerEmpty, configNoLimit, resourceDefault);
-    Assert.assertTrue("Default LIMITS not set in container with empty LIMITS",
+    Assert.assertTrue("Default LIMITS should be set in container with empty LIMITS",
         containerNull.getResources().getLimits().entrySet()
             .containsAll(expectDefaultRequirements.getLimits().entrySet()));
 
@@ -542,7 +542,7 @@ public class V1ControllerTest {
         .build();
     v1ControllerWithPodTemplate.configureContainerResources(
         containerCustom, configNoLimit, resourceDefault);
-    Assert.assertTrue("Custom LIMITS not set in container with custom LIMITS",
+    Assert.assertTrue("Custom LIMITS should be set in container with custom LIMITS",
         containerCustom.getResources().getLimits().entrySet()
             .containsAll(expectCustomRequirements.getLimits().entrySet()));
 
@@ -552,10 +552,10 @@ public class V1ControllerTest {
         .build();
     v1ControllerWithPodTemplate.configureContainerResources(
         containerRequests, configWithLimit, resourceDefault);
-    Assert.assertTrue("Custom LIMITS not set in container with custom LIMITS and REQUEST",
+    Assert.assertTrue("Custom LIMITS should be set in container with custom LIMITS and REQUEST",
         containerRequests.getResources().getLimits().entrySet()
             .containsAll(expectCustomRequirements.getLimits().entrySet()));
-    Assert.assertTrue("Custom REQUEST not set in container with custom LIMITS and REQUEST",
+    Assert.assertTrue("Custom REQUEST should be set in container with custom LIMITS and REQUEST",
         containerRequests.getResources().getRequests().entrySet()
             .containsAll(expectCustomRequirements.getLimits().entrySet()));
   }
@@ -605,7 +605,7 @@ public class V1ControllerTest {
     // Default. Null Volumes.
     V1PodSpec podSpecNull = new V1PodSpecBuilder().build();
     controllerWithVol.addVolumesIfPresent(podSpecNull);
-    Assert.assertTrue("Default VOLUMES not set in container with null VOLUMES",
+    Assert.assertTrue("Default VOLUMES should be set in container with null VOLUMES",
         CollectionUtils.containsAll(expectedDefault, podSpecNull.getVolumes()));
 
     // Empty Volumes list
@@ -613,7 +613,7 @@ public class V1ControllerTest {
         .withVolumes(new LinkedList<>())
         .build();
     controllerWithVol.addVolumesIfPresent(podSpecEmpty);
-    Assert.assertTrue("Default VOLUMES not set in container with empty VOLUMES",
+    Assert.assertTrue("Default VOLUMES should be set in container with empty VOLUMES",
         CollectionUtils.containsAll(expectedDefault, podSpecEmpty.getVolumes()));
 
     // Custom Volumes list
@@ -621,7 +621,7 @@ public class V1ControllerTest {
         .withVolumes(customVolumeList)
         .build();
     controllerWithVol.addVolumesIfPresent(podSpecCustom);
-    Assert.assertTrue("Default VOLUMES not set in container with custom VOLUMES",
+    Assert.assertTrue("Default VOLUMES should be set in container with custom VOLUMES",
         CollectionUtils.containsAll(expectedCustom, podSpecCustom.getVolumes()));
   }
 
@@ -662,7 +662,7 @@ public class V1ControllerTest {
     // Default. Null Volume Mounts.
     V1Container containerNull = new V1ContainerBuilder().build();
     controllerWithMounts.mountVolumeIfPresent(containerNull);
-    Assert.assertTrue("Default VOLUME MOUNTS not set in container with null VOLUMES MOUNTS",
+    Assert.assertTrue("Default VOLUME MOUNTS should be set in container with null VOLUME MOUNTS",
         CollectionUtils.containsAll(expectedMountsDefault, containerNull.getVolumeMounts()));
 
     // Empty Volume Mounts.
@@ -670,7 +670,7 @@ public class V1ControllerTest {
         .withVolumeMounts(new LinkedList<>())
         .build();
     controllerWithMounts.mountVolumeIfPresent(containerEmpty);
-    Assert.assertTrue("Default VOLUME MOUNTS not set in container with empty VOLUMES MOUNTS",
+    Assert.assertTrue("Default VOLUME MOUNTS should be set in container with empty VOLUME MOUNTS",
         CollectionUtils.containsAll(expectedMountsDefault, containerEmpty.getVolumeMounts()));
 
     // Custom Volume Mounts.
@@ -678,7 +678,7 @@ public class V1ControllerTest {
         .withVolumeMounts(volumeMountsCustomList)
         .build();
     controllerWithMounts.mountVolumeIfPresent(containerCustom);
-    Assert.assertTrue("Default VOLUME MOUNTS not set in container with custom VOLUMES MOUNTS",
+    Assert.assertTrue("Default VOLUME MOUNTS should be set in container with custom VOLUME MOUNTS",
         CollectionUtils.containsAll(expectedMountsCustom, containerCustom.getVolumeMounts()));
   }
 
@@ -704,7 +704,7 @@ public class V1ControllerTest {
     // Null Tolerations. This is the default case.
     final V1PodSpec podSpecNullTolerations = new V1PodSpecBuilder().build();
     v1ControllerWithPodTemplate.configureTolerations(podSpecNullTolerations);
-    Assert.assertTrue("Pod Spec has <null> Tolerations and should be set to Heron's defaults",
+    Assert.assertTrue("Pod Spec has null TOLERATIONS and should be set to Heron's defaults",
         CollectionUtils.containsAll(podSpecNullTolerations.getTolerations(),
             expectedTolerationBase));
 
@@ -713,7 +713,7 @@ public class V1ControllerTest {
         .withTolerations(new LinkedList<>())
         .build();
     v1ControllerWithPodTemplate.configureTolerations(podSpecWithEmptyTolerations);
-    Assert.assertTrue("Pod Spec has empty Tolerations and should be set to Heron's defaults",
+    Assert.assertTrue("Pod Spec has empty TOLERATIONS and should be set to Heron's defaults",
         CollectionUtils.containsAll(podSpecWithEmptyTolerations.getTolerations(),
             expectedTolerationBase));
 
@@ -726,7 +726,7 @@ public class V1ControllerTest {
     expectedTolerationsOverriding.add(keptToleration);
 
     v1ControllerWithPodTemplate.configureTolerations(podSpecWithTolerations);
-    Assert.assertTrue("Pod Spec has Tolerations and should be overriden with Heron's defaults",
+    Assert.assertTrue("Pod Spec has TOLERATIONS and should be overridden with Heron's defaults",
         CollectionUtils.containsAll(podSpecWithTolerations.getTolerations(),
             expectedTolerationsOverriding));
   }
