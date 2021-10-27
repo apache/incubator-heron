@@ -49,7 +49,6 @@ import io.kubernetes.client.openapi.models.V1ContainerPort;
 import io.kubernetes.client.openapi.models.V1EnvVar;
 import io.kubernetes.client.openapi.models.V1EnvVarSource;
 import io.kubernetes.client.openapi.models.V1ObjectFieldSelector;
-import io.kubernetes.client.openapi.models.V1ObjectMeta;
 import io.kubernetes.client.openapi.models.V1PodSpec;
 import io.kubernetes.client.openapi.models.V1PodSpecBuilder;
 import io.kubernetes.client.openapi.models.V1PodTemplateSpec;
@@ -60,6 +59,7 @@ import io.kubernetes.client.openapi.models.V1VolumeBuilder;
 import io.kubernetes.client.openapi.models.V1VolumeMount;
 import io.kubernetes.client.openapi.models.V1VolumeMountBuilder;
 
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doReturn;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -107,10 +107,6 @@ public class V1ControllerTest {
       .put(KubernetesContext.KUBERNETES_POD_TEMPLATE_CONFIGMAP_DISABLED, "true")
       .build();
 
-  private final LinkedList<V1ConfigMap> emptyConfigMapList;
-  private final LinkedList<V1ConfigMap> nonTargetConfigMapList;
-  private final V1ConfigMap configMapWithNonTargetData;
-
   @Spy
   private final V1Controller v1ControllerWithPodTemplate =
       new V1Controller(configWithPodTemplate, runtime);
@@ -122,28 +118,6 @@ public class V1ControllerTest {
   @Rule
   public final ExpectedException expectedException = ExpectedException.none();
 
-  public V1ControllerTest() {
-
-    // ConfigMap List with empty and null data.
-    V1ConfigMap emptyConfigMap = new V1ConfigMap();
-    emptyConfigMapList = new LinkedList<>(
-        Arrays.asList(emptyConfigMap, emptyConfigMap, null, emptyConfigMap, null, emptyConfigMap));
-    int index = 0;
-    for (V1ConfigMap configMap : emptyConfigMapList) {
-      if (configMap == null) {
-        continue;
-      }
-      configMap.setMetadata(new V1ObjectMeta().name("some-config-map-name" + (++index)));
-    }
-
-    // ConfigMap List with empty and non-target maps.
-    configMapWithNonTargetData = new V1ConfigMap();
-    configMapWithNonTargetData.setMetadata(new V1ObjectMeta().name(CONFIGMAP_NAME));
-    configMapWithNonTargetData.putDataItem("Dummy Key", "Dummy Value");
-    nonTargetConfigMapList = new LinkedList<>(emptyConfigMapList);
-    nonTargetConfigMapList.add(configMapWithNonTargetData);
-  }
-
   @Test
   public void testLoadPodFromTemplateDefault() {
     final V1Controller v1ControllerNoPodTemplate = new V1Controller(config, runtime);
@@ -153,11 +127,13 @@ public class V1ControllerTest {
   }
 
   @Test
-  public void testLoadPodFromTemplateNullConfigMaps() {
-    final String expected = "No ConfigMaps";
+  public void testLoadPodFromTemplateNullConfigMap() {
+    final String expected = "unable to locate";
     String message = "";
 
-    doReturn(null).when(v1ControllerWithPodTemplate).getConfigMaps();
+    doReturn(null)
+        .when(v1ControllerWithPodTemplate)
+        .getConfigMap(anyString());
     try {
       v1ControllerWithPodTemplate.loadPodFromTemplate();
     } catch (TopologySubmissionException e) {
@@ -167,11 +143,13 @@ public class V1ControllerTest {
   }
 
   @Test
-  public void testLoadPodFromTemplateNoConfigMaps() {
+  public void testLoadPodFromTemplateNoConfigMap() {
     final String expected = "Failed to locate Pod Template";
     String message = "";
 
-    doReturn(new LinkedList<V1ConfigMap>()).when(v1ControllerWithPodTemplate).getConfigMaps();
+    doReturn(new V1ConfigMap())
+        .when(v1ControllerWithPodTemplate)
+        .getConfigMap(anyString());
     try {
       v1ControllerWithPodTemplate.loadPodFromTemplate();
     } catch (TopologySubmissionException e) {
@@ -181,19 +159,19 @@ public class V1ControllerTest {
   }
 
   @Test
-  public void testLoadPodFromTemplateNoTargetConfigMaps() {
+  public void testLoadPodFromTemplateNoTargetConfigMap() {
     final String expected = "Failed to locate Pod Template";
     String message = "";
+    V1ConfigMap configMapNoTargetData = new V1ConfigMapBuilder()
+        .withNewMetadata()
+          .withName(CONFIGMAP_NAME)
+        .endMetadata()
+        .addToData("Dummy Key", "Dummy Value")
+        .build();
 
-    doReturn(emptyConfigMapList).when(v1ControllerWithPodTemplate).getConfigMaps();
-    try {
-      v1ControllerWithPodTemplate.loadPodFromTemplate();
-    } catch (TopologySubmissionException e) {
-      message = e.getMessage();
-    }
-    Assert.assertTrue(message.contains(expected));
-
-    doReturn(nonTargetConfigMapList).when(v1ControllerWithPodTemplate).getConfigMaps();
+    doReturn(configMapNoTargetData)
+        .when(v1ControllerWithPodTemplate)
+        .getConfigMap(anyString());
     try {
       v1ControllerWithPodTemplate.loadPodFromTemplate();
     } catch (TopologySubmissionException e) {
@@ -203,49 +181,49 @@ public class V1ControllerTest {
   }
 
   @Test
-  public void testLoadPodFromTemplateBadTargetConfigMaps() {
+  public void testLoadPodFromTemplateBadTargetConfigMap() {
     final String expected = "Error parsing";
     String message = "";
 
-    // ConfigMap List without target ConfigMaps and an invalid Pod Template.
+    // ConfigMap with target ConfigMap and an invalid Pod Template.
     V1ConfigMap configMapInvalidPod = new V1ConfigMapBuilder()
         .withNewMetadata()
           .withName(CONFIGMAP_NAME)
         .endMetadata()
         .addToData(POD_TEMPLATE_NAME, "Dummy Value")
         .build();
-    final LinkedList<V1ConfigMap> invalidPodConfigMapList = new LinkedList<>(
-        Arrays.asList(configMapWithNonTargetData, configMapInvalidPod));
 
-    doReturn(invalidPodConfigMapList).when(v1ControllerWithPodTemplate).getConfigMaps();
+    doReturn(configMapInvalidPod)
+        .when(v1ControllerWithPodTemplate)
+        .getConfigMap(anyString());
     try {
       v1ControllerWithPodTemplate.loadPodFromTemplate();
     } catch (TopologySubmissionException e) {
       message = e.getMessage();
     }
-    Assert.assertTrue(message.contains(expected));
+    Assert.assertTrue("Invalid Pod Template parsing should fail", message.contains(expected));
 
-    // ConfigMap List without target ConfigMaps and an empty Pod Template.
+    // ConfigMap with target ConfigMaps and an empty Pod Template.
     V1ConfigMap configMapEmptyPod = new V1ConfigMapBuilder()
         .withNewMetadata()
           .withName(CONFIGMAP_NAME)
         .endMetadata()
         .addToData(POD_TEMPLATE_NAME, "")
         .build();
-    final LinkedList<V1ConfigMap> emptyPodConfigMapList = new LinkedList<>(
-        Arrays.asList(configMapWithNonTargetData, configMapEmptyPod));
 
-    doReturn(emptyPodConfigMapList).when(v1ControllerWithPodTemplate).getConfigMaps();
+    doReturn(configMapEmptyPod)
+        .when(v1ControllerWithPodTemplate)
+        .getConfigMap(anyString());
     try {
       v1ControllerWithPodTemplate.loadPodFromTemplate();
     } catch (TopologySubmissionException e) {
       message = e.getMessage();
     }
-    Assert.assertTrue(message.contains(expected));
+    Assert.assertTrue("Empty Pod Template parsing should fail", message.contains(expected));
   }
 
   @Test
-  public void testLoadPodFromTemplateValidConfigMaps() {
+  public void testLoadPodFromTemplateValidConfigMap() {
     final String expected =
         "        containers: [class V1Container {\n"
         + "            args: null\n"
@@ -284,25 +262,24 @@ public class V1ControllerTest {
         + "        }]";
 
 
-    // ConfigMap List with valid Pod Template.
+    // ConfigMap with valid Pod Template.
     V1ConfigMap configMapValidPod = new V1ConfigMapBuilder()
         .withNewMetadata()
           .withName(CONFIGMAP_NAME)
         .endMetadata()
         .addToData(POD_TEMPLATE_NAME, POD_TEMPLATE_VALID)
         .build();
-    final LinkedList<V1ConfigMap> validPodConfigMapList = new LinkedList<>(
-        Arrays.asList(configMapWithNonTargetData, configMapValidPod));
-
-    doReturn(validPodConfigMapList).when(v1ControllerWithPodTemplate).getConfigMaps();
+    doReturn(configMapValidPod)
+        .when(v1ControllerWithPodTemplate)
+        .getConfigMap(anyString());
     V1PodTemplateSpec podTemplateSpec = v1ControllerWithPodTemplate.loadPodFromTemplate();
 
     Assert.assertTrue(podTemplateSpec.toString().contains(expected));
   }
 
   @Test
-  public void testLoadPodFromTemplateInvalidConfigMaps() {
-    // ConfigMap List with an invalid Pod Template.
+  public void testLoadPodFromTemplateInvalidConfigMap() {
+    // ConfigMap with an invalid Pod Template.
     final String invalidPodTemplate =
         "apiVersion: apps/v1\n"
             + "kind: InvalidTemplate\n"
@@ -320,13 +297,12 @@ public class V1ControllerTest {
         .endMetadata()
         .addToData(POD_TEMPLATE_NAME, invalidPodTemplate)
         .build();
-    final LinkedList<V1ConfigMap> configMapList =
-        new LinkedList<>(Collections.singletonList(configMap));
-
     final String expected = "Error parsing";
     String message = "";
 
-    doReturn(configMapList).when(v1ControllerWithPodTemplate).getConfigMaps();
+    doReturn(configMap)
+        .when(v1ControllerWithPodTemplate)
+        .getConfigMap(anyString());
     try {
       v1ControllerWithPodTemplate.loadPodFromTemplate();
     } catch (TopologySubmissionException e) {
@@ -337,23 +313,25 @@ public class V1ControllerTest {
 
   @Test
   public void testDisablePodTemplates() {
-    // ConfigMap List with valid Pod Template.
+    // ConfigMap with valid Pod Template.
     V1ConfigMap configMapValidPod = new V1ConfigMapBuilder()
         .withNewMetadata()
           .withName(CONFIGMAP_NAME)
         .endMetadata()
         .addToData(POD_TEMPLATE_NAME, POD_TEMPLATE_VALID)
         .build();
-    final LinkedList<V1ConfigMap> validPodConfigMapList = new LinkedList<>(
-        Arrays.asList(configMapWithNonTargetData, configMapValidPod));
     final String expected = "Pod Templates are disabled";
-    doReturn(validPodConfigMapList).when(v1ControllerPodTemplate).getConfigMaps();
+    String message = "";
+    doReturn(configMapValidPod)
+        .when(v1ControllerPodTemplate)
+        .getConfigMap(anyString());
 
     try {
       v1ControllerPodTemplate.loadPodFromTemplate();
     } catch (TopologySubmissionException e) {
-      Assert.assertTrue(e.getMessage().contains(expected));
+      message = e.getMessage();
     }
+    Assert.assertTrue(message.contains(expected));
   }
 
   @Test
