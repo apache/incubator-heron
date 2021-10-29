@@ -179,7 +179,7 @@ All metadata for the `executor` container will be overwritten by Heron. In some 
 | `image` | The `executor` container's image. | Overwritten by Heron using values form the config.
 | `env` | Environment variables are made available within the container. The `HOST` and `POD_NAME` keys are required by Heron and are thus reserved. | Merged with Heron's values taking precedence. Deduplication is based on `name`.
 | `ports` | Port numbers opened within the container. Some of these port number are required by Heron and are thus reserved. The reserved ports are defined in Heron's constants as [`6001`-`6010`]. | Merged with Heron's values taking precedence. Deduplication is based on the `containerPort` value.
-| `limits` | Heron will attempt to load values for `cpu` and `memory` from its configs. If these values are not provided in the containers specs, Heron will place values from its configs. | User input takes precedence over Heron's values. This allows for per job custom resource limits.
+| `limits` | Heron will attempt to load values for `cpu` and `memory` from configs. If these values are not provided in the Configs, then values from the Pod Templates will be used. | Heron's values take precedence over those in the Pod Templates.
 | `volumeMounts` | These are the mount points within the `executor` container for the `volumes` available in the Pod. | Merged with Heron's values taking precedence. Deduplication is based on the `name` value.
 | Annotation: `prometheus.io/scrape` | Flag to indicate whether Prometheus logs can be scraped and is set to `true`. | Value is overridden by Heron. |
 | Annotation `prometheus.io/port` | Port address for Prometheus log scraping and is set to `8080`. | Values are overridden by Heron.
