@@ -612,16 +612,12 @@ public class V1Controller extends KubernetesController {
       resourceRequirements.setLimits(new HashMap<>());
     }
     final Map<String, Quantity> limits = resourceRequirements.getLimits();
-    if (!limits.containsKey(KubernetesConstants.MEMORY)) {
-      limits.put(KubernetesConstants.MEMORY,
-          Quantity.fromString(KubernetesUtils.Megabytes(
-              resource.getRam())));
-    }
-    if (!limits.containsKey(KubernetesConstants.CPU)) {
-      limits.put(KubernetesConstants.CPU,
-          Quantity.fromString(Double.toString(roundDecimal(
-              resource.getCpu(), 3))));
-    }
+    limits.put(KubernetesConstants.MEMORY,
+        Quantity.fromString(KubernetesUtils.Megabytes(
+            resource.getRam())));
+    limits.put(KubernetesConstants.CPU,
+        Quantity.fromString(Double.toString(roundDecimal(
+            resource.getCpu(), 3))));
 
     // Set the Kubernetes container resource request.
     KubernetesContext.KubernetesResourceRequestMode requestMode =
