@@ -56,11 +56,7 @@ spec:
           operator: "Equal"
           effect: "NoExecute"
           tolerationSeconds: 10
-        - key: "node.alpha.kubernetes.io/notReady"
-          operator: "Equal"
-          effect: "NoExecute"
-          tolerationSeconds: 10
-        - key: "node.alpha.kubernetes.io/unreachable"
+        - key: "node.kubernetes.io/unreachable"
           operator: "Equal"
           effect: "NoExecute"
           tolerationSeconds: 10
