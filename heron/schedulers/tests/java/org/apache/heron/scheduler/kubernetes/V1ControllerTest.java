@@ -494,6 +494,18 @@ public class V1ControllerTest {
         9, ByteAmount.fromGigabytes(19), ByteAmount.fromGigabytes(99));
     final Resource resourceCustom = new Resource(
         4, ByteAmount.fromGigabytes(34), ByteAmount.fromGigabytes(400));
+
+    final Quantity defaultRAM = Quantity.fromString(
+        KubernetesUtils.Megabytes(resourceDefault.getRam()));
+    final Quantity defaultCPU = Quantity.fromString(
+        Double.toString(V1Controller.roundDecimal(resourceDefault.getCpu(), 3)));
+    final Quantity customRAM = Quantity.fromString(
+        KubernetesUtils.Megabytes(resourceCustom.getRam()));
+    final Quantity customCPU = Quantity.fromString(
+        Double.toString(V1Controller.roundDecimal(resourceCustom.getCpu(), 3)));
+    final Quantity customDisk = Quantity.fromString(
+        Double.toString(V1Controller.roundDecimal(resourceCustom.getDisk().getValue(), 3)));
+
     final Config configNoLimit = Config.newBuilder()
         .put(KubernetesContext.KUBERNETES_RESOURCE_REQUEST_MODE, "NOT_SET")
         .build();
@@ -502,23 +514,18 @@ public class V1ControllerTest {
         .build();
 
     final V1ResourceRequirements expectDefaultRequirements = new V1ResourceRequirements()
-        .putLimitsItem(KubernetesConstants.MEMORY,
-            Quantity.fromString(KubernetesUtils.Megabytes(
-                resourceDefault.getRam())))
-        .putLimitsItem(KubernetesConstants.CPU,
-            Quantity.fromString(Double.toString(V1Controller.roundDecimal(
-                resourceDefault.getCpu(), 3))));
+        .putLimitsItem(KubernetesConstants.MEMORY, defaultRAM)
+        .putLimitsItem(KubernetesConstants.CPU, defaultCPU);
 
     final V1ResourceRequirements expectCustomRequirements = new V1ResourceRequirements()
-        .putLimitsItem(KubernetesConstants.MEMORY,
-            Quantity.fromString(KubernetesUtils.Megabytes(
-                resourceCustom.getRam())))
-        .putLimitsItem(KubernetesConstants.CPU,
-            Quantity.fromString(Double.toString(V1Controller.roundDecimal(
-                resourceCustom.getCpu(), 3))))
-        .putLimitsItem("disk",
-            Quantity.fromString(Double.toString(V1Controller.roundDecimal(
-                resourceCustom.getDisk().getValue(), 3))));
+        .putLimitsItem(KubernetesConstants.MEMORY, defaultRAM)
+        .putLimitsItem(KubernetesConstants.CPU, defaultCPU)
+        .putLimitsItem("disk", customDisk);
+
+    final V1ResourceRequirements customRequirements = new V1ResourceRequirements()
+        .putLimitsItem(KubernetesConstants.MEMORY, customRAM)
+        .putLimitsItem(KubernetesConstants.CPU, customCPU)
+        .putLimitsItem("disk", customDisk);
 
     // Default. Null resources.
     V1Container containerNull = new V1ContainerBuilder().build();
@@ -538,7 +545,7 @@ public class V1ControllerTest {
 
     // Custom resources.
     V1Container containerCustom = new V1ContainerBuilder()
-        .withResources(expectCustomRequirements)
+        .withResources(customRequirements)
         .build();
     v1ControllerWithPodTemplate.configureContainerResources(
         containerCustom, configNoLimit, resourceDefault);
@@ -548,7 +555,7 @@ public class V1ControllerTest {
 
     // Custom resources with request.
     V1Container containerRequests = new V1ContainerBuilder()
-        .withResources(expectCustomRequirements)
+        .withResources(customRequirements)
         .build();
     v1ControllerWithPodTemplate.configureContainerResources(
         containerRequests, configWithLimit, resourceDefault);
