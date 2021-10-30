@@ -107,4 +107,14 @@ public final class KubernetesConstants {
           "node.kubernetes.io/unreachable"
       )
   );
+
+  enum PersistentVolumeClaimOptions {
+    claimName,
+    storageClass,
+    sizeLimit,
+    path,
+    subPath,
+    readOnly,
+    writeOnly
+  }
 }
