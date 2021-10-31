@@ -23,6 +23,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+
+import com.google.common.collect.ImmutableMap;
 
 import org.junit.Assert;
 import org.junit.Rule;
@@ -49,6 +52,9 @@ import io.kubernetes.client.openapi.models.V1ContainerPort;
 import io.kubernetes.client.openapi.models.V1EnvVar;
 import io.kubernetes.client.openapi.models.V1EnvVarSource;
 import io.kubernetes.client.openapi.models.V1ObjectFieldSelector;
+import io.kubernetes.client.openapi.models.V1PersistentVolumeClaim;
+import io.kubernetes.client.openapi.models.V1PersistentVolumeClaimBuilder;
+import io.kubernetes.client.openapi.models.V1PersistentVolumeClaimList;
 import io.kubernetes.client.openapi.models.V1PodSpec;
 import io.kubernetes.client.openapi.models.V1PodSpecBuilder;
 import io.kubernetes.client.openapi.models.V1PodTemplateSpec;
@@ -59,6 +65,7 @@ import io.kubernetes.client.openapi.models.V1VolumeBuilder;
 import io.kubernetes.client.openapi.models.V1VolumeMount;
 import io.kubernetes.client.openapi.models.V1VolumeMountBuilder;
 
+import static org.apache.heron.scheduler.kubernetes.KubernetesConstants.PersistentVolumeClaimOptions;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doReturn;
 
@@ -736,5 +743,70 @@ public class V1ControllerTest {
     Assert.assertTrue("Pod Spec has TOLERATIONS and should be overridden with Heron's defaults",
         CollectionUtils.containsAll(podSpecWithTolerations.getTolerations(),
             expectedTolerationsOverriding));
+  }
+
+  @Test
+  public void testConfigurePersistentVolumeClaims() {
+    final String volumeNameOne = "VolumeNameOne";
+    final String volumeNameTwo = "VolumeNameTwo";
+    final String claimName = "ClaimName";
+    final String storageClassName = "StorageClassName";
+    final String sizeLimit = "555Gi";
+    final String accessModesList = "ReadWriteOnce,ReadOnlyMany,ReadWriteMany";
+    final String accessModes = "ReadOnlyMany";
+    final String volumeMode = "VolumeMode";
+    Map<String, List<Pair<PersistentVolumeClaimOptions, String>>> mapPVCOpts =
+        ImmutableMap.of(
+            volumeNameOne, Arrays.asList(
+                new Pair<>(PersistentVolumeClaimOptions.claimName, claimName),
+                new Pair<>(PersistentVolumeClaimOptions.storageClassName, storageClassName),
+                new Pair<>(PersistentVolumeClaimOptions.sizeLimit, sizeLimit),
+                new Pair<>(PersistentVolumeClaimOptions.accessModes, accessModesList),
+                new Pair<>(PersistentVolumeClaimOptions.volumeMode, volumeMode)),
+            volumeNameTwo, Arrays.asList(
+                new Pair<>(PersistentVolumeClaimOptions.claimName, claimName),
+                new Pair<>(PersistentVolumeClaimOptions.storageClassName, storageClassName),
+                new Pair<>(PersistentVolumeClaimOptions.sizeLimit, sizeLimit),
+                new Pair<>(PersistentVolumeClaimOptions.accessModes, accessModes),
+                new Pair<>(PersistentVolumeClaimOptions.volumeMode, volumeMode))
+        );
+
+    V1PersistentVolumeClaim claimOne = new V1PersistentVolumeClaimBuilder()
+        .withNewMetadata()
+          .withName(claimName)
+        .endMetadata()
+        .withNewSpec()
+          .withNewVolumeName(volumeNameOne)
+          .withStorageClassName(storageClassName)
+          .withAccessModes(Arrays.asList(accessModesList.split(",")))
+          .withVolumeMode(volumeMode)
+          .withNewResources()
+            .addToRequests("storage", new Quantity(sizeLimit))
+          .endResources()
+        .endSpec()
+        .build();
+
+    V1PersistentVolumeClaim claimTwo = new V1PersistentVolumeClaimBuilder()
+        .withNewMetadata()
+          .withName(claimName)
+        .endMetadata()
+        .withNewSpec()
+          .withNewVolumeName(volumeNameOne)
+          .withStorageClassName(storageClassName)
+          .withAccessModes(Collections.singletonList(accessModes))
+          .withVolumeMode(volumeMode)
+          .withNewResources()
+            .addToRequests("storage", new Quantity(sizeLimit))
+          .endResources()
+        .endSpec()
+        .build();
+
+    V1PersistentVolumeClaimList expectedClaims = new V1PersistentVolumeClaimList()
+        .addItemsItem(claimOne)
+        .addItemsItem(claimTwo);
+
+    v1ControllerWithPodTemplate.configurePersistentVolumeClaims(mapPVCOpts);
+
+    Assert.assertTrue(expectedClaims.getItems().containsAll(Arrays.asList(claimOne, claimTwo)));
   }
 }
