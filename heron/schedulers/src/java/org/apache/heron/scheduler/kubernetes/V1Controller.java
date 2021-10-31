@@ -63,6 +63,9 @@ import io.kubernetes.client.openapi.models.V1EnvVarSource;
 import io.kubernetes.client.openapi.models.V1LabelSelector;
 import io.kubernetes.client.openapi.models.V1ObjectFieldSelector;
 import io.kubernetes.client.openapi.models.V1ObjectMeta;
+import io.kubernetes.client.openapi.models.V1PersistentVolumeClaim;
+import io.kubernetes.client.openapi.models.V1PersistentVolumeClaimBuilder;
+import io.kubernetes.client.openapi.models.V1PersistentVolumeClaimList;
 import io.kubernetes.client.openapi.models.V1PodSpec;
 import io.kubernetes.client.openapi.models.V1PodTemplate;
 import io.kubernetes.client.openapi.models.V1PodTemplateSpec;
@@ -838,5 +841,58 @@ public class V1Controller extends KubernetesController {
       KubernetesUtils.logExceptionWithDetails(LOG, message, e);
       throw new TopologySubmissionException(String.format("%s: %s", message, e.getMessage()));
     }
+  }
+
+  @VisibleForTesting
+  protected V1PersistentVolumeClaimList configurePersistentVolumeClaims(
+      final Map<String, List<Pair<KubernetesConstants.PersistentVolumeClaimOptions, String>>>
+        mapPVCOpts) {
+
+    V1PersistentVolumeClaimList listOfPVCs = new V1PersistentVolumeClaimList();
+
+    // Iterate over all the PVC mounts.
+    for (Map.Entry<String, List<Pair<KubernetesConstants.PersistentVolumeClaimOptions, String>>> pvc
+        : mapPVCOpts.entrySet()) {
+
+      V1PersistentVolumeClaim claim = new V1PersistentVolumeClaimBuilder()
+          .withNewMetadata()
+          .endMetadata()
+          .withNewSpec()
+            .withNewVolumeName(pvc.getKey())
+          .endSpec()
+          .build();
+
+      // Populate PVC options.
+      for (Pair<KubernetesConstants.PersistentVolumeClaimOptions, String> option : pvc.getValue()) {
+        String optionValue = option.second;
+        switch(option.first) {
+          case claimName:
+            claim.getMetadata().setName(optionValue);
+            break;
+          case storageClassName:
+            claim.getSpec().setStorageClassName(optionValue);
+            break;
+          case sizeLimit:
+            claim.getSpec().setResources(
+                    new V1ResourceRequirements()
+                        .putRequestsItem("storage", new Quantity(optionValue)));
+            break;
+          case accessModes:
+            claim.getSpec().setAccessModes(Arrays.asList(optionValue.split(",")));
+            break;
+          case volumeMode:
+            claim.getSpec().setVolumeMode(optionValue);
+            break;
+          default:
+            throw new TopologySubmissionException(
+                String.format("Invalid Persistent Volume Claim type option for '%s'",
+                    option.second));
+        }
+      }
+
+      listOfPVCs.addItemsItem(claim);
+    }
+
+    return listOfPVCs;
   }
 }
