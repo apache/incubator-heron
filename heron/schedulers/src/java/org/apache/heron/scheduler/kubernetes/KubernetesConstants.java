@@ -110,11 +110,11 @@ public final class KubernetesConstants {
 
   enum PersistentVolumeClaimOptions {
     claimName,
-    storageClass,
+    storageClassName,
     sizeLimit,
-    path,
-    subPath,
-    readOnly,
-    writeOnly
+    accessModes,
+    volumeMode,
+    path,     // Added to container.
+    subPath,  // Added to container.
   }
 }

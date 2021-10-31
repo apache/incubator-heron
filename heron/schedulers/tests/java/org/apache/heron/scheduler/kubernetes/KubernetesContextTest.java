@@ -96,7 +96,7 @@ public class KubernetesContextTest {
     List<String> expectedKeys = Arrays.asList(volumeNameOne, volumeNameTwo);
     List<KubernetesConstants.PersistentVolumeClaimOptions> expectedOptionKeys = Arrays.asList(
         KubernetesConstants.PersistentVolumeClaimOptions.claimName,
-        KubernetesConstants.PersistentVolumeClaimOptions.storageClass);
+        KubernetesConstants.PersistentVolumeClaimOptions.storageClassName);
     List<String> expectedOptionValues = Arrays.asList(expectedClaimName, expectedStorageClass);
 
     Map<String, Map<KubernetesConstants.PersistentVolumeClaimOptions, String>> actual =
