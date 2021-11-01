@@ -65,7 +65,6 @@ import io.kubernetes.client.openapi.models.V1ObjectFieldSelector;
 import io.kubernetes.client.openapi.models.V1ObjectMeta;
 import io.kubernetes.client.openapi.models.V1PersistentVolumeClaim;
 import io.kubernetes.client.openapi.models.V1PersistentVolumeClaimBuilder;
-import io.kubernetes.client.openapi.models.V1PersistentVolumeClaimList;
 import io.kubernetes.client.openapi.models.V1PodSpec;
 import io.kubernetes.client.openapi.models.V1PodTemplate;
 import io.kubernetes.client.openapi.models.V1PodTemplateSpec;
@@ -844,11 +843,11 @@ public class V1Controller extends KubernetesController {
   }
 
   @VisibleForTesting
-  protected V1PersistentVolumeClaimList configurePersistentVolumeClaims(
+  protected List<V1PersistentVolumeClaim> createPersistentVolumeClaims(
       final Map<String, List<Pair<KubernetesConstants.PersistentVolumeClaimOptions, String>>>
         mapPVCOpts) {
 
-    V1PersistentVolumeClaimList listOfPVCs = new V1PersistentVolumeClaimList();
+    List<V1PersistentVolumeClaim> listOfPVCs = new LinkedList<>();
 
     // Iterate over all the PVC mounts.
     for (Map.Entry<String, List<Pair<KubernetesConstants.PersistentVolumeClaimOptions, String>>> pvc
@@ -889,10 +888,8 @@ public class V1Controller extends KubernetesController {
                     option.second));
         }
       }
-
-      listOfPVCs.addItemsItem(claim);
+      listOfPVCs.add(claim);
     }
-
     return listOfPVCs;
   }
 }

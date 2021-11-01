@@ -54,7 +54,6 @@ import io.kubernetes.client.openapi.models.V1EnvVarSource;
 import io.kubernetes.client.openapi.models.V1ObjectFieldSelector;
 import io.kubernetes.client.openapi.models.V1PersistentVolumeClaim;
 import io.kubernetes.client.openapi.models.V1PersistentVolumeClaimBuilder;
-import io.kubernetes.client.openapi.models.V1PersistentVolumeClaimList;
 import io.kubernetes.client.openapi.models.V1PodSpec;
 import io.kubernetes.client.openapi.models.V1PodSpecBuilder;
 import io.kubernetes.client.openapi.models.V1PodTemplateSpec;
@@ -746,7 +745,7 @@ public class V1ControllerTest {
   }
 
   @Test
-  public void testConfigurePersistentVolumeClaims() {
+  public void testCreatePersistentVolumeClaims() {
     final String volumeNameOne = "VolumeNameOne";
     final String volumeNameTwo = "VolumeNameTwo";
     final String claimName = "ClaimName";
@@ -801,12 +800,11 @@ public class V1ControllerTest {
         .endSpec()
         .build();
 
-    V1PersistentVolumeClaimList expectedClaims = new V1PersistentVolumeClaimList()
-        .addItemsItem(claimOne)
-        .addItemsItem(claimTwo);
+    List<V1PersistentVolumeClaim> expectedClaims =
+        new LinkedList<>(Arrays.asList(claimOne, claimTwo));
 
-    v1ControllerWithPodTemplate.configurePersistentVolumeClaims(mapPVCOpts);
+    v1ControllerWithPodTemplate.createPersistentVolumeClaims(mapPVCOpts);
 
-    Assert.assertTrue(expectedClaims.getItems().containsAll(Arrays.asList(claimOne, claimTwo)));
+    Assert.assertTrue(expectedClaims.containsAll(Arrays.asList(claimOne, claimTwo)));
   }
 }
