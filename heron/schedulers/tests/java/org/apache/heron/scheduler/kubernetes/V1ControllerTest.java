@@ -21,6 +21,7 @@ package org.apache.heron.scheduler.kubernetes;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -806,5 +807,39 @@ public class V1ControllerTest {
     v1ControllerWithPodTemplate.createPersistentVolumeClaims(mapPVCOpts);
 
     Assert.assertTrue(expectedClaims.containsAll(Arrays.asList(claimOne, claimTwo)));
+  }
+
+  @Test
+  public void testCreatePersistentVolumeClaimVolumes() {
+    final String volumeNameOne = "VolumeNameONE";
+    final String claimNameOne = "ClaimNameONE";
+    final String volumeNameTwo = "VolumeNameTWO";
+    final String claimNameTwo = "ClaimNameTWO";
+    Map<String, Map<PersistentVolumeClaimOptions, String>> mapPVCOpts =
+        ImmutableMap.of(
+            volumeNameOne, ImmutableMap.of(PersistentVolumeClaimOptions.claimName, claimNameOne),
+            volumeNameTwo, ImmutableMap.of(PersistentVolumeClaimOptions.claimName, claimNameTwo)
+        );
+    final V1Volume volumeOne = new V1VolumeBuilder()
+        .withName(volumeNameOne)
+        .withNewPersistentVolumeClaim()
+          .withClaimName(claimNameOne)
+        .endPersistentVolumeClaim()
+        .build();
+    final V1Volume volumeTwo = new V1VolumeBuilder()
+        .withName(volumeNameTwo)
+        .withNewPersistentVolumeClaim()
+          .withClaimName(claimNameTwo)
+        .endPersistentVolumeClaim()
+        .build();
+
+    final List<V1Volume> expectedFull = new LinkedList<>(Arrays.asList(volumeOne, volumeTwo));
+    final List<V1Volume> actualFull =
+        v1ControllerPodTemplate.createPersistentVolumeClaimVolumes(mapPVCOpts);
+    Assert.assertTrue("Generated a list of Volumes", expectedFull.containsAll(actualFull));
+
+    final List<V1Volume> actualEmpty =
+        v1ControllerPodTemplate.createPersistentVolumeClaimVolumes(new HashMap<>());
+    Assert.assertTrue("Generated an empty list of Volumes", actualEmpty.isEmpty());
   }
 }
