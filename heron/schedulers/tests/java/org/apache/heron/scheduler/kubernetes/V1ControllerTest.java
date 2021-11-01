@@ -810,15 +810,23 @@ public class V1ControllerTest {
   }
 
   @Test
-  public void testCreatePersistentVolumeClaimVolumes() {
+  public void testCreatePersistentVolumeClaimVolumesAndMounts() {
     final String volumeNameOne = "VolumeNameONE";
     final String claimNameOne = "ClaimNameONE";
     final String volumeNameTwo = "VolumeNameTWO";
     final String claimNameTwo = "ClaimNameTWO";
+    final String mountPathOne = "/mount/path/ONE";
+    final String mountPathTwo = "/mount/path/TWO";
+    final String mountSubPathTwo = "/mount/sub/path/TWO";
     Map<String, Map<PersistentVolumeClaimOptions, String>> mapPVCOpts =
         ImmutableMap.of(
-            volumeNameOne, ImmutableMap.of(PersistentVolumeClaimOptions.claimName, claimNameOne),
-            volumeNameTwo, ImmutableMap.of(PersistentVolumeClaimOptions.claimName, claimNameTwo)
+            volumeNameOne, ImmutableMap.of(
+                PersistentVolumeClaimOptions.claimName, claimNameOne,
+                PersistentVolumeClaimOptions.path, mountPathOne),
+            volumeNameTwo, ImmutableMap.of(
+                PersistentVolumeClaimOptions.claimName, claimNameTwo,
+                PersistentVolumeClaimOptions.path, mountPathTwo,
+                PersistentVolumeClaimOptions.subPath, mountSubPathTwo)
         );
     final V1Volume volumeOne = new V1VolumeBuilder()
         .withName(volumeNameOne)
@@ -832,14 +840,31 @@ public class V1ControllerTest {
           .withClaimName(claimNameTwo)
         .endPersistentVolumeClaim()
         .build();
+    final V1VolumeMount volumeMountOne = new V1VolumeMountBuilder()
+        .withName(volumeNameOne)
+        .withMountPath(mountPathOne)
+        .build();
+    final V1VolumeMount volumeMountTwo = new V1VolumeMountBuilder()
+        .withName(volumeNameTwo)
+        .withMountPath(mountPathTwo)
+        .withSubPath(mountSubPathTwo)
+        .build();
 
-    final List<V1Volume> expectedFull = new LinkedList<>(Arrays.asList(volumeOne, volumeTwo));
-    final List<V1Volume> actualFull =
-        v1ControllerPodTemplate.createPersistentVolumeClaimVolumes(mapPVCOpts);
-    Assert.assertTrue("Generated a list of Volumes", expectedFull.containsAll(actualFull));
 
-    final List<V1Volume> actualEmpty =
-        v1ControllerPodTemplate.createPersistentVolumeClaimVolumes(new HashMap<>());
-    Assert.assertTrue("Generated an empty list of Volumes", actualEmpty.isEmpty());
+    final Pair<List<V1Volume>, List<V1VolumeMount>> expectedFull =
+        new Pair<>(
+            new LinkedList<>(Arrays.asList(volumeOne, volumeTwo)),
+            new LinkedList<>(Arrays.asList(volumeMountOne, volumeMountTwo)));
+    final Pair<List<V1Volume>, List<V1VolumeMount>> actualFull =
+        v1ControllerPodTemplate.createPersistentVolumeClaimVolumesAndMounts(mapPVCOpts);
+    Assert.assertTrue("Generated a list of Volumes",
+        expectedFull.first.containsAll(actualFull.first));
+    Assert.assertTrue("Generated a list of Volumes Mounts",
+        expectedFull.second.containsAll(actualFull.second));
+
+    final Pair<List<V1Volume>, List<V1VolumeMount>> actualEmpty =
+        v1ControllerPodTemplate.createPersistentVolumeClaimVolumesAndMounts(new HashMap<>());
+    Assert.assertTrue("Generated an empty list of Volumes", actualEmpty.first.isEmpty());
+    Assert.assertTrue("Generated an empty list of Volumes Mounts", actualEmpty.second.isEmpty());
   }
 }
