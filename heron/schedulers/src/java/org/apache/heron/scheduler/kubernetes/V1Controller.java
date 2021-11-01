@@ -79,6 +79,7 @@ import io.kubernetes.client.openapi.models.V1Toleration;
 import io.kubernetes.client.openapi.models.V1Volume;
 import io.kubernetes.client.openapi.models.V1VolumeBuilder;
 import io.kubernetes.client.openapi.models.V1VolumeMount;
+import io.kubernetes.client.openapi.models.V1VolumeMountBuilder;
 import io.kubernetes.client.util.PatchUtils;
 import io.kubernetes.client.util.Yaml;
 import okhttp3.Response;
@@ -908,17 +909,26 @@ public class V1Controller extends KubernetesController {
   }
 
   @VisibleForTesting
-  protected List<V1Volume> createPersistentVolumeClaimVolumes(
+  protected Pair<List<V1Volume>, List<V1VolumeMount>> createPersistentVolumeClaimVolumesAndMounts(
       final Map<String, Map<KubernetesConstants.PersistentVolumeClaimOptions, String>> mapPVCOpts) {
     List<V1Volume> volumeList = new LinkedList<>();
+    List<V1VolumeMount> mountList = new LinkedList<>();
     for (Map.Entry<String, Map<KubernetesConstants.PersistentVolumeClaimOptions, String>> volumeInfo
         : mapPVCOpts.entrySet()) {
       final String volumeName = volumeInfo.getKey();
       final String claimName = volumeInfo.getValue()
           .get(KubernetesConstants.PersistentVolumeClaimOptions.claimName);
+      final String path = volumeInfo.getValue()
+          .get(KubernetesConstants.PersistentVolumeClaimOptions.path);
+      final String subPath = volumeInfo.getValue()
+          .get(KubernetesConstants.PersistentVolumeClaimOptions.subPath);
       if (claimName == null || claimName.isEmpty()) {
         throw new TopologySubmissionException(
             String.format("Claim name is missing from '%s'", volumeName));
+      }
+      if (path == null || path.isEmpty()) {
+        throw new TopologySubmissionException(
+            String.format("Mount path is missing from '%s'", volumeName));
       }
 
       final V1Volume volume = new V1VolumeBuilder()
@@ -928,7 +938,15 @@ public class V1Controller extends KubernetesController {
           .endPersistentVolumeClaim()
           .build();
       volumeList.add(volume);
+
+      final V1VolumeMountBuilder volumeMount = new V1VolumeMountBuilder()
+          .withName(volumeName)
+          .withMountPath(path);
+      if (subPath != null && !subPath.isEmpty()) {
+        volumeMount.withSubPath(subPath);
+      }
+      mountList.add(volumeMount.build());
     }
-    return volumeList;
+    return new Pair<>(volumeList, mountList);
   }
 }
