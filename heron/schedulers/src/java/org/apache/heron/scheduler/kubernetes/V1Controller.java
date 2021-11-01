@@ -513,6 +513,10 @@ public class V1Controller extends KubernetesController {
       containers.add(executorContainer);
     }
 
+    if (persistentVolumeClaimConfigs != null && !persistentVolumeClaimConfigs.isEmpty()) {
+      configurePodWithPersistentVolumeClaims(podSpec, executorContainer);
+    }
+
     configureExecutorContainer(executorCommand, resource, numberOfInstances, executorContainer);
 
     podSpec.setContainers(containers);
