@@ -26,7 +26,6 @@ import java.util.Map;
 import org.junit.Assert;
 import org.junit.Test;
 
-import org.apache.heron.common.basics.Pair;
 import org.apache.heron.spi.common.Config;
 
 import static org.apache.heron.scheduler.kubernetes.KubernetesConstants.PersistentVolumeClaimOptions;
@@ -98,27 +97,26 @@ public class KubernetesContextTest {
         .build();
 
     List<String> expectedKeys = Arrays.asList(volumeNameOne, volumeNameTwo);
-    List<Pair<PersistentVolumeClaimOptions, String>> expectedOptions =
-        Arrays.asList(
-            new Pair<>(PersistentVolumeClaimOptions.storageClassName.claimName,
-                expectedClaimName),
-            new Pair<>(PersistentVolumeClaimOptions.storageClassName.storageClassName,
-                expectedStorageClass)
-        );
+    List<PersistentVolumeClaimOptions> expectedOptionsKeys =
+        Arrays.asList(PersistentVolumeClaimOptions.claimName,
+            PersistentVolumeClaimOptions.storageClassName);
+    List<String> expectedOptionsValues = Arrays.asList(expectedClaimName, expectedStorageClass);
 
     // List of provided PVC options.
-    Map<String, List<Pair<PersistentVolumeClaimOptions, String>>> listOfPVC =
+    Map<String, Map<PersistentVolumeClaimOptions, String>> mapOfPVC =
         KubernetesContext.getPersistentVolumeClaims(configPVC);
 
     Assert.assertTrue("Contains all provided Volumes",
-        listOfPVC.keySet().containsAll(expectedKeys));
-    for (List<Pair<PersistentVolumeClaimOptions, String>> items : listOfPVC.values()) {
-      Assert.assertTrue("Contains all provided option keys and values",
-          items.containsAll(expectedOptions));
+        mapOfPVC.keySet().containsAll(expectedKeys));
+    for (Map<PersistentVolumeClaimOptions, String> items : mapOfPVC.values()) {
+      Assert.assertTrue("Contains all provided option keys",
+          items.keySet().containsAll(expectedOptionsKeys));
+      Assert.assertTrue("Contains all provided option values",
+          items.values().containsAll(expectedOptionsValues));
     }
 
     // Empty PVC.
-    Map<String, List<Pair<PersistentVolumeClaimOptions, String>>> emptyPVC =
+    Map<String, Map<PersistentVolumeClaimOptions, String>> emptyPVC =
         KubernetesContext.getPersistentVolumeClaims(Config.newBuilder().build());
     Assert.assertTrue("Empty PVC is returned when no options provided", emptyPVC.isEmpty());
 

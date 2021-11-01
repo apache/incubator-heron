@@ -133,7 +133,7 @@ public class V1Controller extends KubernetesController {
     }
 
     // Get and then create Persistent Volume Claims from the CLI.
-    final Map<String, List<Pair<KubernetesConstants.PersistentVolumeClaimOptions, String>>>
+    final Map<String, Map<KubernetesConstants.PersistentVolumeClaimOptions, String>>
         mapOfPVCOptions = KubernetesContext.getPersistentVolumeClaims(getConfiguration());
     final List<V1PersistentVolumeClaim> persistentVolumeClaims =
         createPersistentVolumeClaims(mapOfPVCOptions);
@@ -857,13 +857,12 @@ public class V1Controller extends KubernetesController {
 
   @VisibleForTesting
   protected List<V1PersistentVolumeClaim> createPersistentVolumeClaims(
-      final Map<String, List<Pair<KubernetesConstants.PersistentVolumeClaimOptions, String>>>
-        mapPVCOpts) {
+      final Map<String, Map<KubernetesConstants.PersistentVolumeClaimOptions, String>> mapPVCOpts) {
 
     List<V1PersistentVolumeClaim> listOfPVCs = new LinkedList<>();
 
     // Iterate over all the PVC mounts.
-    for (Map.Entry<String, List<Pair<KubernetesConstants.PersistentVolumeClaimOptions, String>>> pvc
+    for (Map.Entry<String, Map<KubernetesConstants.PersistentVolumeClaimOptions, String>> pvc
         : mapPVCOpts.entrySet()) {
 
       V1PersistentVolumeClaim claim = new V1PersistentVolumeClaimBuilder()
@@ -875,9 +874,10 @@ public class V1Controller extends KubernetesController {
           .build();
 
       // Populate PVC options.
-      for (Pair<KubernetesConstants.PersistentVolumeClaimOptions, String> option : pvc.getValue()) {
-        String optionValue = option.second;
-        switch(option.first) {
+      for (Map.Entry<KubernetesConstants.PersistentVolumeClaimOptions, String> option
+          : pvc.getValue().entrySet()) {
+        String optionValue = option.getValue();
+        switch(option.getKey()) {
           case claimName:
             claim.getMetadata().setName(optionValue);
             break;
@@ -898,7 +898,7 @@ public class V1Controller extends KubernetesController {
           default:
             throw new TopologySubmissionException(
                 String.format("Invalid Persistent Volume Claim type option for '%s'",
-                    option.second));
+                    option.getKey()));
         }
       }
       listOfPVCs.add(claim);

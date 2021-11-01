@@ -754,20 +754,20 @@ public class V1ControllerTest {
     final String accessModesList = "ReadWriteOnce,ReadOnlyMany,ReadWriteMany";
     final String accessModes = "ReadOnlyMany";
     final String volumeMode = "VolumeMode";
-    Map<String, List<Pair<PersistentVolumeClaimOptions, String>>> mapPVCOpts =
+    Map<String, Map<PersistentVolumeClaimOptions, String>> mapPVCOpts =
         ImmutableMap.of(
-            volumeNameOne, Arrays.asList(
-                new Pair<>(PersistentVolumeClaimOptions.claimName, claimName),
-                new Pair<>(PersistentVolumeClaimOptions.storageClassName, storageClassName),
-                new Pair<>(PersistentVolumeClaimOptions.sizeLimit, sizeLimit),
-                new Pair<>(PersistentVolumeClaimOptions.accessModes, accessModesList),
-                new Pair<>(PersistentVolumeClaimOptions.volumeMode, volumeMode)),
-            volumeNameTwo, Arrays.asList(
-                new Pair<>(PersistentVolumeClaimOptions.claimName, claimName),
-                new Pair<>(PersistentVolumeClaimOptions.storageClassName, storageClassName),
-                new Pair<>(PersistentVolumeClaimOptions.sizeLimit, sizeLimit),
-                new Pair<>(PersistentVolumeClaimOptions.accessModes, accessModes),
-                new Pair<>(PersistentVolumeClaimOptions.volumeMode, volumeMode))
+            volumeNameOne, ImmutableMap.of(
+                PersistentVolumeClaimOptions.claimName, claimName,
+                PersistentVolumeClaimOptions.storageClassName, storageClassName,
+                PersistentVolumeClaimOptions.sizeLimit, sizeLimit,
+                PersistentVolumeClaimOptions.accessModes, accessModesList,
+                PersistentVolumeClaimOptions.volumeMode, volumeMode),
+            volumeNameTwo, ImmutableMap.of(
+                PersistentVolumeClaimOptions.claimName, claimName,
+                PersistentVolumeClaimOptions.storageClassName, storageClassName,
+                PersistentVolumeClaimOptions.sizeLimit, sizeLimit,
+                PersistentVolumeClaimOptions.accessModes, accessModes,
+                PersistentVolumeClaimOptions.volumeMode, volumeMode)
         );
 
     V1PersistentVolumeClaim claimOne = new V1PersistentVolumeClaimBuilder()

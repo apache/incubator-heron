@@ -21,14 +21,11 @@ package org.apache.heron.scheduler.kubernetes;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.apache.heron.common.basics.Pair;
 import org.apache.heron.scheduler.TopologySubmissionException;
 import org.apache.heron.spi.common.Config;
 import org.apache.heron.spi.common.Context;
@@ -220,7 +217,7 @@ public final class KubernetesContext extends Context {
     return getConfigItemsByPrefix(config, KUBERNETES_POD_SECRET_KEY_REF_PREFIX);
   }
 
-  public static Map<String, List<Pair<KubernetesConstants.PersistentVolumeClaimOptions, String>>>
+  public static Map<String, Map<KubernetesConstants.PersistentVolumeClaimOptions, String>>
         getPersistentVolumeClaims(Config config) {
     final Logger LOG = Logger.getLogger(V1Controller.class.getName());
 
@@ -230,7 +227,7 @@ public final class KubernetesContext extends Context {
     final int volumeNameIdx = 0;
     final int optionIdx = 1;
 
-    final Map<String, List<Pair<KubernetesConstants.PersistentVolumeClaimOptions, String>>> volumes
+    final Map<String, Map<KubernetesConstants.PersistentVolumeClaimOptions, String>> volumes
         = new HashMap<>();
 
     try {
@@ -240,9 +237,9 @@ public final class KubernetesContext extends Context {
         final String option = tokens[optionIdx];
         final String value = config.getStringValue(param);
 
-        volumes.computeIfAbsent(volumeName, val -> new LinkedList<>());
-        volumes.get(volumeName).add(
-            new Pair<>(KubernetesConstants.PersistentVolumeClaimOptions.valueOf(option), value));
+        volumes.computeIfAbsent(volumeName, val -> new HashMap<>());
+        volumes.get(volumeName)
+            .put(KubernetesConstants.PersistentVolumeClaimOptions.valueOf(option), value);
       }
     } catch (IndexOutOfBoundsException | IllegalArgumentException e) {
       final String message = "Invalid Persistent Volume Claim CLI parameter provided";
