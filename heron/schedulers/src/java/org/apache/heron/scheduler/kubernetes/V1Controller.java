@@ -77,6 +77,7 @@ import io.kubernetes.client.openapi.models.V1StatefulSet;
 import io.kubernetes.client.openapi.models.V1StatefulSetSpec;
 import io.kubernetes.client.openapi.models.V1Toleration;
 import io.kubernetes.client.openapi.models.V1Volume;
+import io.kubernetes.client.openapi.models.V1VolumeBuilder;
 import io.kubernetes.client.openapi.models.V1VolumeMount;
 import io.kubernetes.client.util.PatchUtils;
 import io.kubernetes.client.util.Yaml;
@@ -904,5 +905,30 @@ public class V1Controller extends KubernetesController {
       listOfPVCs.add(claim);
     }
     return listOfPVCs;
+  }
+
+  @VisibleForTesting
+  protected List<V1Volume> createPersistentVolumeClaimVolumes(
+      final Map<String, Map<KubernetesConstants.PersistentVolumeClaimOptions, String>> mapPVCOpts) {
+    List<V1Volume> volumeList = new LinkedList<>();
+    for (Map.Entry<String, Map<KubernetesConstants.PersistentVolumeClaimOptions, String>> volumeInfo
+        : mapPVCOpts.entrySet()) {
+      final String volumeName = volumeInfo.getKey();
+      final String claimName = volumeInfo.getValue()
+          .get(KubernetesConstants.PersistentVolumeClaimOptions.claimName);
+      if (claimName == null || claimName.isEmpty()) {
+        throw new TopologySubmissionException(
+            String.format("Claim name is missing from '%s'", volumeName));
+      }
+
+      final V1Volume volume = new V1VolumeBuilder()
+          .withName(volumeName)
+          .withNewPersistentVolumeClaim()
+            .withClaimName(claimName)
+          .endPersistentVolumeClaim()
+          .build();
+      volumeList.add(volume);
+    }
+    return volumeList;
   }
 }
