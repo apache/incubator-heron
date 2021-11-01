@@ -132,6 +132,12 @@ public class V1Controller extends KubernetesController {
       throw new TopologySubmissionException(e.getMessage());
     }
 
+    // Get and then create Persistent Volume Claims from the CLI.
+    final Map<String, List<Pair<KubernetesConstants.PersistentVolumeClaimOptions, String>>>
+        mapOfPVCOptions = KubernetesContext.getPersistentVolumeClaims(getConfiguration());
+    final List<V1PersistentVolumeClaim> persistentVolumeClaims =
+        createPersistentVolumeClaims(mapOfPVCOptions);
+
     // find the max number of instances in a container so we can open
     // enough ports if remote debugging is enabled.
     int numberOfInstances = 0;
@@ -141,6 +147,13 @@ public class V1Controller extends KubernetesController {
     final V1StatefulSet statefulSet = createStatefulSet(containerResource, numberOfInstances);
 
     try {
+      // Create all Persistent Volume Claims before the Stateful Set.
+      for (V1PersistentVolumeClaim claim : persistentVolumeClaims) {
+        coreClient.createNamespacedPersistentVolumeClaim(getNamespace(), claim, null,
+            null, null);
+        LOG.log(Level.INFO, String.format("Created Persistent Volume Claim `%s`",
+            claim.getMetadata().getName()));
+      }
       appsClient.createNamespacedStatefulSet(getNamespace(), statefulSet, null,
               null, null);
     } catch (ApiException e) {
