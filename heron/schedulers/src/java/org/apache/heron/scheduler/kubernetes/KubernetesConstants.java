@@ -35,6 +35,8 @@ public final class KubernetesConstants {
   public static final String MEMORY = "memory";
   public static final String CPU = "cpu";
 
+  public static final String EXECUTOR_NAME = "executor";
+
   // container env constants
   public static final String ENV_HOST = "HOST";
   public static final String POD_IP = "status.podIP";
@@ -102,8 +104,7 @@ public final class KubernetesConstants {
   static final List<String> TOLERATIONS = Collections.unmodifiableList(
       Arrays.asList(
           "node.kubernetes.io/not-ready",
-          "node.alpha.kubernetes.io/notReady",
-          "node.alpha.kubernetes.io/unreachable"
+          "node.kubernetes.io/unreachable"
       )
   );
 }
