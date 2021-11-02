@@ -63,6 +63,8 @@ import io.kubernetes.client.openapi.models.V1EnvVarSource;
 import io.kubernetes.client.openapi.models.V1LabelSelector;
 import io.kubernetes.client.openapi.models.V1ObjectFieldSelector;
 import io.kubernetes.client.openapi.models.V1ObjectMeta;
+import io.kubernetes.client.openapi.models.V1PersistentVolumeClaim;
+import io.kubernetes.client.openapi.models.V1PersistentVolumeClaimBuilder;
 import io.kubernetes.client.openapi.models.V1PodSpec;
 import io.kubernetes.client.openapi.models.V1PodTemplate;
 import io.kubernetes.client.openapi.models.V1PodTemplateSpec;
@@ -75,7 +77,9 @@ import io.kubernetes.client.openapi.models.V1StatefulSet;
 import io.kubernetes.client.openapi.models.V1StatefulSetSpec;
 import io.kubernetes.client.openapi.models.V1Toleration;
 import io.kubernetes.client.openapi.models.V1Volume;
+import io.kubernetes.client.openapi.models.V1VolumeBuilder;
 import io.kubernetes.client.openapi.models.V1VolumeMount;
+import io.kubernetes.client.openapi.models.V1VolumeMountBuilder;
 import io.kubernetes.client.util.PatchUtils;
 import io.kubernetes.client.util.Yaml;
 import okhttp3.Response;
@@ -93,6 +97,9 @@ public class V1Controller extends KubernetesController {
 
   private final AppsV1Api appsClient;
   private final CoreV1Api coreClient;
+
+  private Map<String, Map<KubernetesConstants.PersistentVolumeClaimOptions, String>>
+      persistentVolumeClaimConfigs = null;
 
   V1Controller(Config configuration, Config runtimeConfiguration) {
     super(configuration, runtimeConfiguration);
@@ -130,6 +137,11 @@ public class V1Controller extends KubernetesController {
       throw new TopologySubmissionException(e.getMessage());
     }
 
+    // Get and then create Persistent Volume Claims from the CLI.
+    persistentVolumeClaimConfigs = KubernetesContext.getPersistentVolumeClaims(getConfiguration());
+    final List<V1PersistentVolumeClaim> persistentVolumeClaims =
+        createPersistentVolumeClaims(persistentVolumeClaimConfigs);
+
     // find the max number of instances in a container so we can open
     // enough ports if remote debugging is enabled.
     int numberOfInstances = 0;
@@ -139,6 +151,13 @@ public class V1Controller extends KubernetesController {
     final V1StatefulSet statefulSet = createStatefulSet(containerResource, numberOfInstances);
 
     try {
+      // Create all Persistent Volume Claims before the Stateful Set.
+      for (V1PersistentVolumeClaim claim : persistentVolumeClaims) {
+        coreClient.createNamespacedPersistentVolumeClaim(getNamespace(), claim, null,
+            null, null);
+        LOG.log(Level.INFO, String.format("Created Persistent Volume Claim `%s`",
+            claim.getMetadata().getName()));
+      }
       appsClient.createNamespacedStatefulSet(getNamespace(), statefulSet, null,
               null, null);
     } catch (ApiException e) {
@@ -494,6 +513,10 @@ public class V1Controller extends KubernetesController {
       containers.add(executorContainer);
     }
 
+    if (persistentVolumeClaimConfigs != null && !persistentVolumeClaimConfigs.isEmpty()) {
+      configurePodWithPersistentVolumeClaims(podSpec, executorContainer);
+    }
+
     configureExecutorContainer(executorCommand, resource, numberOfInstances, executorContainer);
 
     podSpec.setContainers(containers);
@@ -838,5 +861,121 @@ public class V1Controller extends KubernetesController {
       KubernetesUtils.logExceptionWithDetails(LOG, message, e);
       throw new TopologySubmissionException(String.format("%s: %s", message, e.getMessage()));
     }
+  }
+
+  @VisibleForTesting
+  protected List<V1PersistentVolumeClaim> createPersistentVolumeClaims(
+      final Map<String, Map<KubernetesConstants.PersistentVolumeClaimOptions, String>> mapPVCOpts) {
+
+    List<V1PersistentVolumeClaim> listOfPVCs = new LinkedList<>();
+
+    // Iterate over all the PVC mounts.
+    for (Map.Entry<String, Map<KubernetesConstants.PersistentVolumeClaimOptions, String>> pvc
+        : mapPVCOpts.entrySet()) {
+
+      V1PersistentVolumeClaim claim = new V1PersistentVolumeClaimBuilder()
+          .withNewMetadata()
+          .endMetadata()
+          .withNewSpec()
+            .withNewVolumeName(pvc.getKey())
+          .endSpec()
+          .build();
+
+      // Populate PVC options.
+      for (Map.Entry<KubernetesConstants.PersistentVolumeClaimOptions, String> option
+          : pvc.getValue().entrySet()) {
+        String optionValue = option.getValue();
+        switch(option.getKey()) {
+          case claimName:
+            claim.getMetadata().setName(optionValue);
+            break;
+          case storageClassName:
+            claim.getSpec().setStorageClassName(optionValue);
+            break;
+          case sizeLimit:
+            claim.getSpec().setResources(
+                    new V1ResourceRequirements()
+                        .putRequestsItem("storage", new Quantity(optionValue)));
+            break;
+          case accessModes:
+            claim.getSpec().setAccessModes(Arrays.asList(optionValue.split(",")));
+            break;
+          case volumeMode:
+            claim.getSpec().setVolumeMode(optionValue);
+            break;
+          default:
+            throw new TopologySubmissionException(
+                String.format("Invalid Persistent Volume Claim type option for '%s'",
+                    option.getKey()));
+        }
+      }
+      listOfPVCs.add(claim);
+    }
+    return listOfPVCs;
+  }
+
+  @VisibleForTesting
+  protected Pair<List<V1Volume>, List<V1VolumeMount>> createPersistentVolumeClaimVolumesAndMounts(
+      final Map<String, Map<KubernetesConstants.PersistentVolumeClaimOptions, String>> mapPVCOpts) {
+    List<V1Volume> volumeList = new LinkedList<>();
+    List<V1VolumeMount> mountList = new LinkedList<>();
+    for (Map.Entry<String, Map<KubernetesConstants.PersistentVolumeClaimOptions, String>> volumeInfo
+        : mapPVCOpts.entrySet()) {
+      final String volumeName = volumeInfo.getKey();
+      final String claimName = volumeInfo.getValue()
+          .get(KubernetesConstants.PersistentVolumeClaimOptions.claimName);
+      final String path = volumeInfo.getValue()
+          .get(KubernetesConstants.PersistentVolumeClaimOptions.path);
+      final String subPath = volumeInfo.getValue()
+          .get(KubernetesConstants.PersistentVolumeClaimOptions.subPath);
+      if (claimName == null || claimName.isEmpty()) {
+        throw new TopologySubmissionException(
+            String.format("Claim name is missing from '%s'", volumeName));
+      }
+      if (path == null || path.isEmpty()) {
+        throw new TopologySubmissionException(
+            String.format("Mount path is missing from '%s'", volumeName));
+      }
+
+      final V1Volume volume = new V1VolumeBuilder()
+          .withName(volumeName)
+          .withNewPersistentVolumeClaim()
+            .withClaimName(claimName)
+          .endPersistentVolumeClaim()
+          .build();
+      volumeList.add(volume);
+
+      final V1VolumeMountBuilder volumeMount = new V1VolumeMountBuilder()
+          .withName(volumeName)
+          .withMountPath(path);
+      if (subPath != null && !subPath.isEmpty()) {
+        volumeMount.withSubPath(subPath);
+      }
+      mountList.add(volumeMount.build());
+    }
+    return new Pair<>(volumeList, mountList);
+  }
+
+  @VisibleForTesting
+  protected void configurePodWithPersistentVolumeClaims(final V1PodSpec podSpec,
+                                                        final V1Container executor) {
+    Pair<List<V1Volume>, List<V1VolumeMount>> volumesAndMounts =
+        createPersistentVolumeClaimVolumesAndMounts(persistentVolumeClaimConfigs);
+
+    // Deduplicate on Names with Persistent Volume Claims taking precedence.
+
+    KubernetesUtils.V1ControllerUtils<V1VolumeMount> utilsMounts =
+        new KubernetesUtils.V1ControllerUtils<>();
+    executor.setVolumeMounts(
+        utilsMounts.mergeListsDedupe(volumesAndMounts.second, executor.getVolumeMounts(),
+            Comparator.comparing(V1VolumeMount::getName),
+            "Executor and Persistent Volume Claim Volume Mounts"));
+
+    KubernetesUtils.V1ControllerUtils<V1Volume> utilsVolumes =
+        new KubernetesUtils.V1ControllerUtils<>();
+    podSpec.setVolumes(
+        utilsVolumes.mergeListsDedupe(volumesAndMounts.first, podSpec.getVolumes(),
+            Comparator.comparing(V1Volume::getName),
+            "Pod and Persistent Volume Claim Volumes"));
   }
 }

@@ -23,7 +23,10 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
+import org.apache.heron.scheduler.TopologySubmissionException;
 import org.apache.heron.spi.common.Config;
 import org.apache.heron.spi.common.Context;
 
@@ -108,6 +111,9 @@ public final class KubernetesContext extends Context {
   // heron.kubernetes.pod.secretKeyRef.ENV_NAME=name:key
   public static final String KUBERNETES_POD_SECRET_KEY_REF_PREFIX =
       "heron.kubernetes.pod.secretKeyRef.";
+  // heron.kubernetes.pod.secretKeyRef.ENV_NAME=name:key
+  public static final String KUBERNETES_PERSISTENT_VOLUME_CLAIM_PREFIX =
+      "heron.kubernetes.volumes.persistentVolumeClaim.";
 
   private KubernetesContext() {
   }
@@ -209,6 +215,39 @@ public final class KubernetesContext extends Context {
 
   public static Map<String, String> getPodSecretKeyRefs(Config config) {
     return getConfigItemsByPrefix(config, KUBERNETES_POD_SECRET_KEY_REF_PREFIX);
+  }
+
+  public static Map<String, Map<KubernetesConstants.PersistentVolumeClaimOptions, String>>
+        getPersistentVolumeClaims(Config config) {
+    final Logger LOG = Logger.getLogger(V1Controller.class.getName());
+
+    final Set<String> completeConfigParam =
+        getConfigKeys(config, KUBERNETES_PERSISTENT_VOLUME_CLAIM_PREFIX);
+    final int prefixLength = KUBERNETES_PERSISTENT_VOLUME_CLAIM_PREFIX.length();
+    final int volumeNameIdx = 0;
+    final int optionIdx = 1;
+
+    final Map<String, Map<KubernetesConstants.PersistentVolumeClaimOptions, String>> volumes
+        = new HashMap<>();
+
+    try {
+      for (String param : completeConfigParam) {
+        final String[] tokens = param.substring(prefixLength).split("\\.");
+        final String volumeName = tokens[volumeNameIdx];
+        final String option = tokens[optionIdx];
+        final String value = config.getStringValue(param);
+
+        volumes.computeIfAbsent(volumeName, val -> new HashMap<>());
+        volumes.get(volumeName)
+            .put(KubernetesConstants.PersistentVolumeClaimOptions.valueOf(option), value);
+      }
+    } catch (IndexOutOfBoundsException | IllegalArgumentException e) {
+      final String message = "Invalid Persistent Volume Claim CLI parameter provided";
+      LOG.log(Level.CONFIG, message);
+      throw new TopologySubmissionException(message);
+    }
+
+    return volumes;
   }
 
   static Set<String> getConfigKeys(Config config, String keyPrefix) {

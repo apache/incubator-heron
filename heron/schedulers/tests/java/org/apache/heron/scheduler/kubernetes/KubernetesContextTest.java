@@ -19,10 +19,16 @@
 
 package org.apache.heron.scheduler.kubernetes;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+
 import org.junit.Assert;
 import org.junit.Test;
 
 import org.apache.heron.spi.common.Config;
+
+import static org.apache.heron.scheduler.kubernetes.KubernetesConstants.PersistentVolumeClaimOptions;
 
 public class KubernetesContextTest {
 
@@ -58,5 +64,61 @@ public class KubernetesContextTest {
         .build();
     Assert.assertTrue(KubernetesContext
         .getPodTemplateConfigMapDisabled(configWithPodTemplateConfigMapOff));
+  }
+
+  @Test
+  public void testGetPersistentVolumeClaims() {
+    final String volumeNameOne = "volumeNameOne";
+    final String volumeNameTwo = "volumeNameTwo";
+    final String keyPattern = "%s%s.%s";
+
+    final String claimNameField =
+        PersistentVolumeClaimOptions.storageClassName.claimName.toString();
+    final String expectedClaimName = "expectedClaimName";
+    final String claimNameKeyOne = String.format(keyPattern,
+        KubernetesContext.KUBERNETES_PERSISTENT_VOLUME_CLAIM_PREFIX, volumeNameOne, claimNameField);
+    final String claimNameKeyTwo = String.format(keyPattern,
+        KubernetesContext.KUBERNETES_PERSISTENT_VOLUME_CLAIM_PREFIX, volumeNameTwo, claimNameField);
+
+    final String storageClassField = PersistentVolumeClaimOptions.storageClassName.toString();
+    final String expectedStorageClass = "expectedStorageClass";
+    final String storageClassKeyOne = String.format(keyPattern,
+        KubernetesContext.KUBERNETES_PERSISTENT_VOLUME_CLAIM_PREFIX, volumeNameOne,
+        storageClassField);
+    final String storageClassKeyTwo = String.format(keyPattern,
+        KubernetesContext.KUBERNETES_PERSISTENT_VOLUME_CLAIM_PREFIX, volumeNameTwo,
+        storageClassField);
+
+    final Config configPVC = Config.newBuilder()
+        .put(claimNameKeyOne, expectedClaimName)
+        .put(claimNameKeyTwo, expectedClaimName)
+        .put(storageClassKeyOne, expectedStorageClass)
+        .put(storageClassKeyTwo, expectedStorageClass)
+        .build();
+
+    List<String> expectedKeys = Arrays.asList(volumeNameOne, volumeNameTwo);
+    List<PersistentVolumeClaimOptions> expectedOptionsKeys =
+        Arrays.asList(PersistentVolumeClaimOptions.claimName,
+            PersistentVolumeClaimOptions.storageClassName);
+    List<String> expectedOptionsValues = Arrays.asList(expectedClaimName, expectedStorageClass);
+
+    // List of provided PVC options.
+    Map<String, Map<PersistentVolumeClaimOptions, String>> mapOfPVC =
+        KubernetesContext.getPersistentVolumeClaims(configPVC);
+
+    Assert.assertTrue("Contains all provided Volumes",
+        mapOfPVC.keySet().containsAll(expectedKeys));
+    for (Map<PersistentVolumeClaimOptions, String> items : mapOfPVC.values()) {
+      Assert.assertTrue("Contains all provided option keys",
+          items.keySet().containsAll(expectedOptionsKeys));
+      Assert.assertTrue("Contains all provided option values",
+          items.values().containsAll(expectedOptionsValues));
+    }
+
+    // Empty PVC.
+    Map<String, Map<PersistentVolumeClaimOptions, String>> emptyPVC =
+        KubernetesContext.getPersistentVolumeClaims(Config.newBuilder().build());
+    Assert.assertTrue("Empty PVC is returned when no options provided", emptyPVC.isEmpty());
+
   }
 }
