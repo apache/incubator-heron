@@ -139,6 +139,13 @@ public class V1Controller extends KubernetesController {
 
     // Get and then create Persistent Volume Claims from the CLI.
     persistentVolumeClaimConfigs = KubernetesContext.getPersistentVolumeClaims(getConfiguration());
+    if (KubernetesContext.getPersistentVolumeClaimDisabled(getConfiguration())
+        && !persistentVolumeClaimConfigs.isEmpty()) {
+      final String message =
+          String.format("Loading Persistent Volume Claim from CLI is disabled: '%s'", topologyName);
+      LOG.log(Level.WARNING, message);
+      throw new TopologySubmissionException(message);
+    }
     final List<V1PersistentVolumeClaim> persistentVolumeClaims =
         createPersistentVolumeClaims(persistentVolumeClaimConfigs);
 

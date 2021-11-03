@@ -111,7 +111,11 @@ public final class KubernetesContext extends Context {
   // heron.kubernetes.pod.secretKeyRef.ENV_NAME=name:key
   public static final String KUBERNETES_POD_SECRET_KEY_REF_PREFIX =
       "heron.kubernetes.pod.secretKeyRef.";
-  // heron.kubernetes.pod.secretKeyRef.ENV_NAME=name:key
+
+  // Persistent Volume Claims
+  public static final String KUBERNETES_PERSISTENT_VOLUME_CLAIMS_CLI_DISABLED =
+      "heron.kubernetes.persistent.volume.claims.cli.disabled";
+  // heron.kubernetes.volumes.persistentVolumeClaim.VOLUME_NAME.OPTION=OPTION_VALUE
   public static final String KUBERNETES_PERSISTENT_VOLUME_CLAIM_PREFIX =
       "heron.kubernetes.volumes.persistentVolumeClaim.";
 
@@ -215,6 +219,11 @@ public final class KubernetesContext extends Context {
 
   public static Map<String, String> getPodSecretKeyRefs(Config config) {
     return getConfigItemsByPrefix(config, KUBERNETES_POD_SECRET_KEY_REF_PREFIX);
+  }
+
+  public static boolean getPersistentVolumeClaimDisabled(Config config) {
+    final String disabled = config.getStringValue(KUBERNETES_PERSISTENT_VOLUME_CLAIMS_CLI_DISABLED);
+    return "true".equalsIgnoreCase(disabled);
   }
 
   public static Map<String, Map<KubernetesConstants.PersistentVolumeClaimOptions, String>>

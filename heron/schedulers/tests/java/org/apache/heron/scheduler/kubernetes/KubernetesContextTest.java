@@ -67,6 +67,21 @@ public class KubernetesContextTest {
   }
 
   @Test
+  public void testPersistentVolumeClaimDisabled() {
+    Assert.assertFalse(KubernetesContext.getPersistentVolumeClaimDisabled(config));
+    Assert.assertFalse(KubernetesContext
+        .getPersistentVolumeClaimDisabled(configWithPodTemplateConfigMap));
+
+    final Config configWithPodTemplateConfigMapOff = Config.newBuilder()
+        .put(KubernetesContext.KUBERNETES_POD_TEMPLATE_CONFIGMAP_NAME,
+            POD_TEMPLATE_CONFIGMAP_NAME)
+        .put(KubernetesContext.KUBERNETES_PERSISTENT_VOLUME_CLAIMS_CLI_DISABLED, "TRUE")
+        .build();
+    Assert.assertTrue(KubernetesContext
+        .getPersistentVolumeClaimDisabled(configWithPodTemplateConfigMapOff));
+  }
+
+  @Test
   public void testGetPersistentVolumeClaims() {
     final String volumeNameOne = "volumeNameOne";
     final String volumeNameTwo = "volumeNameTwo";
