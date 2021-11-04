@@ -760,21 +760,27 @@ public class V1ControllerTest {
     final String subPath = "/sub/path/to/mount/";
     final Map<String, Map<PersistentVolumeClaimOptions, String>> mapPVCOpts =
         ImmutableMap.of(
-            volumeNameOne, new HashMap<PersistentVolumeClaimOptions, String>() {{
+            volumeNameOne, new HashMap<PersistentVolumeClaimOptions, String>() {
+              {
                 put(PersistentVolumeClaimOptions.claimName, claimName);
                 put(PersistentVolumeClaimOptions.storageClassName, storageClassName);
                 put(PersistentVolumeClaimOptions.sizeLimit, sizeLimit);
                 put(PersistentVolumeClaimOptions.accessModes, accessModesList);
                 put(PersistentVolumeClaimOptions.volumeMode, volumeMode);
-                put(PersistentVolumeClaimOptions.path, path); }},
-            volumeNameTwo, new HashMap<PersistentVolumeClaimOptions, String>() {{
+                put(PersistentVolumeClaimOptions.path, path);
+              }
+            },
+            volumeNameTwo, new HashMap<PersistentVolumeClaimOptions, String>() {
+              {
                 put(PersistentVolumeClaimOptions.claimName, claimName);
                 put(PersistentVolumeClaimOptions.storageClassName, storageClassName);
                 put(PersistentVolumeClaimOptions.sizeLimit, sizeLimit);
                 put(PersistentVolumeClaimOptions.accessModes, accessModes);
                 put(PersistentVolumeClaimOptions.volumeMode, volumeMode);
                 put(PersistentVolumeClaimOptions.path, path);
-                put(PersistentVolumeClaimOptions.subPath, subPath); }}
+                put(PersistentVolumeClaimOptions.subPath, subPath);
+              }
+            }
         );
 
     final V1PersistentVolumeClaim claimOne = new V1PersistentVolumeClaimBuilder()
