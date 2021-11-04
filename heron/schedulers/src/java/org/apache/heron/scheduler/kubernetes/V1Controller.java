@@ -910,6 +910,9 @@ public class V1Controller extends KubernetesController {
           case volumeMode:
             claim.getSpec().setVolumeMode(optionValue);
             break;
+          // Valid ignored options not used in a PVC.
+          case path: case subPath:
+            break;
           default:
             throw new TopologySubmissionException(
                 String.format("Invalid Persistent Volume Claim type option for '%s'",
