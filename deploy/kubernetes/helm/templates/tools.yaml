@@ -159,6 +159,7 @@ spec:
               {{- end }}
               -D heron.kubernetes.resource.request.mode={{ .Values.topologyResourceRequestMode }}
               -D heron.kubernetes.pod.template.configmap.disabled={{ .Values.disablePodTemplates }}
+              -D heron.kubernetes.persistent.volume.claims.cli.disabled={{ .Values.disablePersistentVolumeMountsCLI }}
           envFrom:
             - configMapRef:
                 name: {{ .Release.Name }}-tools-config
@@ -269,6 +270,12 @@ rules:
   verbs:
   - get
   - list
+- apiGroups:
+  - ""
+  resources:
+  - persistentvolumeclaims
+  verbs:
+  - create
 
 ---
 apiVersion: v1
