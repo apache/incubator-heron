@@ -8,7 +8,6 @@ pex_library(
     reqs = [
         "PyYAML==3.13",
         "requests==2.12.3",
-        "netifaces==0.10.6",
     ],
     deps = [
         "//heron/common/src/python:common-py",

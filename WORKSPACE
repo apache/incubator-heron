@@ -170,9 +170,8 @@ jar_jar_repositories()
 
 http_archive(
     name = "rules_python",
-    sha256 = "b5668cde8bb6e3515057ef465a35ad712214962f0b3a314e551204266c7be90c",
-    strip_prefix = "rules_python-0.0.2",
-    url = "https://github.com/bazelbuild/rules_python/releases/download/0.0.2/rules_python-0.0.2.tar.gz",
+    url = "https://github.com/bazelbuild/rules_python/releases/download/0.0.3/rules_python-0.0.3.tar.gz",
+    sha256 = "e46612e9bb0dae8745de6a0643be69e8665a03f63163ac6610c210e80d14c3e4",
 )
 
 load("@rules_python//python:repositories.bzl", "py_repositories")
@@ -183,7 +182,7 @@ py_repositories()
 # pip_repositories()
 
 # for pex repos
-PEX_WHEEL = "https://pypi.python.org/packages/18/92/99270775cfc5ddb60c19588de1c475f9ff2837a6e0bbd5eaa5286a6a472b/pex-2.1.9-py2.py3-none-any.whl"
+PEX_WHEEL = "https://pypi.python.org/packages/fa/c4/5dbdce75117b60b6ffec65bc92ac25ee873b84158a55cfbffa1d49db6eb1/pex-2.1.54-py2.py3-none-any.whl"
 
 PY_WHEEL = "https://pypi.python.org/packages/53/67/9620edf7803ab867b175e4fd23c7b8bd8eba11cb761514dcd2e726ef07da/py-1.4.34-py2.py3-none-any.whl"
 
@@ -191,9 +190,9 @@ PYTEST_WHEEL = "https://pypi.python.org/packages/fd/3e/d326a05d083481746a769fc05
 
 REQUESTS_SRC = "https://pypi.python.org/packages/d9/03/155b3e67fe35fe5b6f4227a8d9e96a14fda828b18199800d161bcefc1359/requests-2.12.3.tar.gz"
 
-SETUPTOOLS_WHEEL = "https://pypi.python.org/packages/a0/df/635cdb901ee4a8a42ec68e480c49f85f4c59e8816effbf57d9e6ee8b3588/setuptools-46.1.3-py3-none-any.whl"
+SETUPTOOLS_WHEEL = "https://pypi.python.org/packages/70/e9/84e2865fddfaba4506bc5d293d2a535bf27e31b12ca16d31564f8ce28cdb/setuptools-58.5.3-py3-none-any.whl"
 
-WHEEL_SRC = "https://pypi.python.org/packages/c9/1d/bd19e691fd4cfe908c76c429fe6e4436c9e83583c4414b54f6c85471954a/wheel-0.29.0.tar.gz"
+WHEEL_SRC = "https://pypi.python.org/packages/4e/be/8139f127b4db2f79c8b117c80af56a3078cc4824b5b94250c7f81a70e03b/wheel-0.37.0.tar.gz"
 
 http_file(
     name = "pytest_whl",
@@ -211,15 +210,15 @@ http_file(
 
 http_file(
     name = "wheel_src",
-    downloaded_file_path = "wheel-0.29.0.tar.gz",
-    sha256 = "1ebb8ad7e26b448e9caa4773d2357849bf80ff9e313964bcaf79cbf0201a1648",
+    downloaded_file_path = "wheel-0.37.0.tar.gz",
+    sha256 = "e2ef7239991699e3355d54f8e968a21bb940a1dbf34a4d226741e64462516fad",
     urls = [WHEEL_SRC],
 )
 
 http_file(
     name = "pex_src",
-    downloaded_file_path = "pex-2.1.9-py2.py3-none-any.whl",
-    sha256 = "5cad8d960c187541f71682fc938a843ef9092aab46f27b33ace7e570325e2626",
+    downloaded_file_path = "pex-2.1.54-py2.py3-none-any.whl",
+    sha256 = "e60b006abe8abfd3c3377128e22c33f30cc6dea89e2beb463cf8360e3626db62",
     urls = [PEX_WHEEL],
 )
 
@@ -232,8 +231,8 @@ http_file(
 
 http_file(
     name = "setuptools_wheel",
-    downloaded_file_path = "setuptools-46.1.3-py3-none-any.whl",
-    sha256 = "4fe404eec2738c20ab5841fa2d791902d2a645f32318a7850ef26f8d7215a8ee",
+    downloaded_file_path = "setuptools-58.5.3-py3-none-any.whl",
+    sha256 = "a481fbc56b33f5d8f6b33dce41482e64c68b668be44ff42922903b03872590bf",
     urls = [SETUPTOOLS_WHEEL],
 )
 
