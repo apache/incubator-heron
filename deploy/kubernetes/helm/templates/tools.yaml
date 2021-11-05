@@ -241,10 +241,10 @@ spec:
     - port: 9000
       targetPort: 9000
       protocol: TCP
-      {{- if .Values.apiserver.nodePort.enabled }}
-      nodePort: {{ .Values.apiserver.nodePort.port }}
+      {{- if .Values.apiServer.nodePort.enabled }}
+      nodePort: {{ .Values.apiServer.nodePort.port }}
       {{- end }}
-  {{- if .Values.apiserver.nodePort.enabled }}
+  {{- if .Values.apiServer.nodePort.enabled }}
   type: NodePort
   {{- else }}
   type: ClusterIP
