@@ -44,7 +44,9 @@ heron:
   url: "-"
 
 apiserver:
-  NodePort: 32090
+  NodePort:
+    enabled: false
+    port: 32090
 
 # Can be EQUAL_TO_LIMIT or NOT_SET
 topologyResourceRequestMode: EQUAL_TO_LIMIT
