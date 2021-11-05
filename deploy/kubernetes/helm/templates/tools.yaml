@@ -18,7 +18,7 @@
 {{- $platform := .Values.platform -}}
 {{- $jobReplicas := .Values.jobReplicas -}}
 {{- $defaultUrl := (printf "/api/v1/namespaces/%s/services/%s-ui:8889/proxy" .Release.Namespace .Release.Name) -}}
-{{- $apiServerMemory := .Values.apiServerMemory }}
+{{- $apiServerMemory := .Values.apiServer.memory }}
 
 apiVersion: v1
 kind: ConfigMap
@@ -112,8 +112,8 @@ spec:
             - >-
               heron-ui
               --port=8889
-              {{- if not (kindIs "invalid" .Values.heron.url) }}
-              --base-url={{ eq .Values.heron.url "-" | ternary $defaultUrl .Values.heron.url }}
+              {{- if not (kindIs "invalid" .Values.ui.url) }}
+              --base-url={{ eq .Values.ui.url "-" | ternary $defaultUrl .Values.ui.url }}
               {{- end }}
         - name: heron-apiserver
           image: {{ .Values.image }}
@@ -181,6 +181,14 @@ spec:
     - port: 8889
       targetPort: 8889
       protocol: TCP
+      {{- if .Values.ui.nodePort.enabled }}
+      nodePort: {{ .Values.ui.nodePort.port }}
+      {{- end }}
+  {{- if .Values.ui.nodePort.enabled }}
+  type: NodePort
+  {{- else }}
+  type: ClusterIP
+  {{- end }}      
   selector:
     app: {{ .Release.Name }}-tools
     release: {{ .Release.Name }}
@@ -203,6 +211,44 @@ spec:
     - port: 8888
       targetPort: 8888
       protocol: TCP
+      {{- if .Values.tracker.nodePort.enabled }}
+      nodePort: {{ .Values.tracker.nodePort.port }}
+      {{- end }}
+  {{- if .Values.tracker.nodePort.enabled }}
+  type: NodePort
+  {{- else }}
+  type: ClusterIP
+  {{- end }}
+  selector:
+    app: {{ .Release.Name }}-tools
+    release: {{ .Release.Name }}
+
+---
+##
+## Service to expose the heron-apiserver
+##
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-apiserver
+  labels:
+    app: {{ .Release.Name }}-tools
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  ports:
+    - port: 9000
+      targetPort: 9000
+      protocol: TCP
+      {{- if .Values.apiserver.nodePort.enabled }}
+      nodePort: {{ .Values.apiserver.nodePort.port }}
+      {{- end }}
+  {{- if .Values.apiserver.nodePort.enabled }}
+  type: NodePort
+  {{- else }}
+  type: ClusterIP
+  {{- end }}
   selector:
     app: {{ .Release.Name }}-tools
     release: {{ .Release.Name }}
@@ -269,31 +315,3 @@ rules:
   verbs:
   - get
   - list
-
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: {{ .Release.Name }}-apiserver
-  labels:
-    app: {{ .Release.Name }}-tools
-    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
-    release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
-spec:
-  ports:
-    - port: 9000
-      targetPort: 9000
-      protocol: TCP
-      {{- if .Values.apiserver.NodePort.enabled }}
-      nodePort: {{ .Values.apiserver.NodePort.port }}
-      {{- end }}
-  {{- if .Values.apiserver.NodePort.enabled }}
-  type: NodePort
-  {{- else }}
-  type: ClusterIP
-  {{- end }}
-
-  selector:
-    app: {{ .Release.Name }}-tools
-    release: {{ .Release.Name }}
