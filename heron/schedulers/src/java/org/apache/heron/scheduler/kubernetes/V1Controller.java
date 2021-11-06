@@ -940,6 +940,12 @@ public class V1Controller extends KubernetesController {
     return listOfPVCs;
   }
 
+  /**
+   * Generates the <code>Volumes</code> to be placed in the <code>Pod Spec</code> and <code>Volume Mounts</code>
+   * to be placed in the <code>executor container</code>.
+   * @param mapPVCOpts Mapping of <code>Volumes</code> to <code>key-value</code> configuration pairs.
+   * @return Two lists, one of <code>V1Volume</code> and the other of <code>V1VolumeMount</code>.
+   */
   @VisibleForTesting
   protected Pair<List<V1Volume>, List<V1VolumeMount>> createPersistentVolumeClaimVolumesAndMounts(
       final Map<String, Map<KubernetesConstants.PersistentVolumeClaimOptions, String>> mapPVCOpts) {
@@ -982,6 +988,11 @@ public class V1Controller extends KubernetesController {
     return new Pair<>(volumeList, mountList);
   }
 
+  /**
+   * Makes a call to generate <code>Volumes</code> and <code>Volume Mounts</code> and then inserts them.
+   * @param podSpec All generated <code>V1Volume</code> will be placed in the <code>Pod Spec</code>.
+   * @param executor All generated <code>V1VolumeMount</code> will be placed in the <code>Container</code>.
+   */
   @VisibleForTesting
   protected void configurePodWithPersistentVolumeClaims(final V1PodSpec podSpec,
                                                         final V1Container executor) {
