@@ -899,8 +899,7 @@ public class V1Controller extends KubernetesController {
           .endMetadata()
           .withNewSpec()
             .withNewSelector()
-              .withMatchLabels(
-                  KubernetesConstants.getPersistentVolumeClaimMatchLabels(getTopologyName()))
+              .withMatchLabels(getPersistentVolumeClaimMatchLabels(getTopologyName()))
             .endSelector()
             .withNewVolumeName(pvc.getKey())
           .endSpec()
@@ -1032,7 +1031,7 @@ public class V1Controller extends KubernetesController {
 
     // Generate match label.
     for (Map.Entry<String, String> label
-        : KubernetesConstants.getPersistentVolumeClaimMatchLabels(topologyName).entrySet()) {
+        : getPersistentVolumeClaimMatchLabels(topologyName).entrySet()) {
       if (selectorMatchLabel.length() != 0) {
         selectorMatchLabel.append(",");
       }
@@ -1084,5 +1083,21 @@ public class V1Controller extends KubernetesController {
         throw new TopologyRuntimeManagementException(message);
       }
     }
+  }
+
+  /**
+   * Generates the <code>Selector</code> labels which are attached to a Topologies dynamically provisioned
+   * Persistent Volume Claims.
+   * @param topologyName Attached to the topology match label.
+   * @return A map consisting of the <code>label-value</code> pairs to be used in a <code>Selector</code>.
+   */
+  @VisibleForTesting
+  protected static Map<String, String> getPersistentVolumeClaimMatchLabels(String topologyName) {
+    return new HashMap<String, String>() {
+      {
+        put(KubernetesConstants.LABEL_TOPOLOGY, topologyName);
+        put(KubernetesConstants.LABEL_ON_DEMAND_PROVISIONING, "true");
+      }
+    };
   }
 }
