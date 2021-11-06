@@ -226,8 +226,16 @@ public final class KubernetesContext extends Context {
     return "true".equalsIgnoreCase(disabled);
   }
 
+  /**
+   * Collects parameters form the <code>CLI</code> and generates a mapping between <code>Volumes</code>
+   * and their options <code>key-value</code> pairs.
+   * @param config Contains the configuration options collected from the <code>CLI</code>.
+   * @param topologyName Required to generate a dynamically backed PVC <code>Claim Name</code>.
+   * @return A mapping between <code>Volumes</code> and their options <code>key-value</code> pairs.
+   * Will return an empty list if there are no PVCs to be generated.
+   */
   public static Map<String, Map<KubernetesConstants.PersistentVolumeClaimOptions, String>>
-        getPersistentVolumeClaims(Config config) {
+        getPersistentVolumeClaims(Config config, final String topologyName) {
     final Logger LOG = Logger.getLogger(V1Controller.class.getName());
 
     final Set<String> completeConfigParam =
@@ -243,19 +251,37 @@ public final class KubernetesContext extends Context {
       for (String param : completeConfigParam) {
         final String[] tokens = param.substring(prefixLength).split("\\.");
         final String volumeName = tokens[volumeNameIdx];
-        final String option = tokens[optionIdx];
+        final KubernetesConstants.PersistentVolumeClaimOptions option =
+            KubernetesConstants.PersistentVolumeClaimOptions.valueOf(tokens[optionIdx]);
         final String value = config.getStringValue(param);
 
-        volumes.computeIfAbsent(volumeName, val -> new HashMap<>());
-        volumes.get(volumeName)
-            .put(KubernetesConstants.PersistentVolumeClaimOptions.valueOf(option), value);
+        if (option == KubernetesConstants.PersistentVolumeClaimOptions.onDemand) {
+          throw new TopologySubmissionException(
+              "`onDemand` can only be used as a Persistent Volume Claim `claimName`");
+        }
+
+        Map<KubernetesConstants.PersistentVolumeClaimOptions, String> volume =
+            volumes.get(volumeName);
+        if (volume == null) {
+          volume = new HashMap<>();
+          volumes.put(volumeName, volume);
+        }
+
+        // Dynamic Provisioned Volume: Add token and generate volume name.
+        if (option == KubernetesConstants.PersistentVolumeClaimOptions.claimName
+            && KubernetesConstants.LABEL_ON_DEMAND_PROVISIONING.equalsIgnoreCase(value)) {
+          volume.put(KubernetesConstants.PersistentVolumeClaimOptions.onDemand, null);
+          volume.put(KubernetesConstants.PersistentVolumeClaimOptions.claimName,
+              KubernetesConstants.generatePersistentVolumeClaimName(topologyName, volumeName));
+        } else { // Other options.
+          volume.put(option, value);
+        }
       }
     } catch (IndexOutOfBoundsException | IllegalArgumentException e) {
       final String message = "Invalid Persistent Volume Claim CLI parameter provided";
       LOG.log(Level.CONFIG, message);
       throw new TopologySubmissionException(message);
     }
-
     return volumes;
   }
 

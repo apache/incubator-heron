@@ -748,10 +748,12 @@ public class V1ControllerTest {
 
   @Test
   public void testCreatePersistentVolumeClaims() {
-    final String volumeNameOne = "VolumeNameOne";
-    final String volumeNameTwo = "VolumeNameTwo";
-    final String claimName = "ClaimName";
-    final String storageClassName = "StorageClassName";
+    final String topologyName = "topology-name";
+    final String volumeNameOne = "volume-name-one";
+    final String volumeNameTwo = "volume-name-two";
+    final String volumeNameStatic = "volume-name-static";
+    final String claimName = "claim-name";
+    final String storageClassName = "storage-class-name";
     final String sizeLimit = "555Gi";
     final String accessModesList = "ReadWriteOnce,ReadOnlyMany,ReadWriteMany";
     final String accessModes = "ReadOnlyMany";
@@ -768,9 +770,22 @@ public class V1ControllerTest {
                 put(PersistentVolumeClaimOptions.accessModes, accessModesList);
                 put(PersistentVolumeClaimOptions.volumeMode, volumeMode);
                 put(PersistentVolumeClaimOptions.path, path);
+                put(PersistentVolumeClaimOptions.onDemand, null);
               }
             },
             volumeNameTwo, new HashMap<PersistentVolumeClaimOptions, String>() {
+              {
+                put(PersistentVolumeClaimOptions.claimName, claimName);
+                put(PersistentVolumeClaimOptions.storageClassName, storageClassName);
+                put(PersistentVolumeClaimOptions.sizeLimit, sizeLimit);
+                put(PersistentVolumeClaimOptions.accessModes, accessModes);
+                put(PersistentVolumeClaimOptions.volumeMode, volumeMode);
+                put(PersistentVolumeClaimOptions.path, path);
+                put(PersistentVolumeClaimOptions.subPath, subPath);
+                put(PersistentVolumeClaimOptions.onDemand, null);
+              }
+            },
+            volumeNameStatic, new HashMap<PersistentVolumeClaimOptions, String>() {
               {
                 put(PersistentVolumeClaimOptions.claimName, claimName);
                 put(PersistentVolumeClaimOptions.storageClassName, storageClassName);
@@ -788,6 +803,9 @@ public class V1ControllerTest {
           .withName(claimName)
         .endMetadata()
         .withNewSpec()
+          .withNewSelector()
+            .withMatchLabels(KubernetesConstants.getPersistentVolumeClaimMatchLabels(topologyName))
+          .endSelector()
           .withNewVolumeName(volumeNameOne)
           .withStorageClassName(storageClassName)
           .withAccessModes(Arrays.asList(accessModesList.split(",")))
@@ -803,6 +821,9 @@ public class V1ControllerTest {
           .withName(claimName)
         .endMetadata()
         .withNewSpec()
+          .withNewSelector()
+            .withMatchLabels(KubernetesConstants.getPersistentVolumeClaimMatchLabels(topologyName))
+          .endSelector()
           .withNewVolumeName(volumeNameTwo)
           .withStorageClassName(storageClassName)
           .withAccessModes(Collections.singletonList(accessModes))

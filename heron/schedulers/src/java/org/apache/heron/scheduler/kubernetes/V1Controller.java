@@ -138,11 +138,13 @@ public class V1Controller extends KubernetesController {
     }
 
     // Get and then create Persistent Volume Claims from the CLI.
-    persistentVolumeClaimConfigs = KubernetesContext.getPersistentVolumeClaims(getConfiguration());
+    persistentVolumeClaimConfigs =
+        KubernetesContext.getPersistentVolumeClaims(getConfiguration(), getTopologyName());
     if (KubernetesContext.getPersistentVolumeClaimDisabled(getConfiguration())
         && !persistentVolumeClaimConfigs.isEmpty()) {
       final String message =
-          String.format("Loading Persistent Volume Claim from CLI is disabled: '%s'", topologyName);
+          String.format("Configuring Persistent Volume Claim from CLI is disabled: '%s'",
+              topologyName);
       LOG.log(Level.WARNING, message);
       throw new TopologySubmissionException(message);
     }
@@ -177,6 +179,7 @@ public class V1Controller extends KubernetesController {
 
   @Override
   boolean killTopology() {
+    removeDynamicBackedPersistentVolumeClaims();
     deleteStatefulSet();
     deleteService();
     return true;
@@ -520,7 +523,7 @@ public class V1Controller extends KubernetesController {
       containers.add(executorContainer);
     }
 
-    if (persistentVolumeClaimConfigs != null && !persistentVolumeClaimConfigs.isEmpty()) {
+    if (!persistentVolumeClaimConfigs.isEmpty()) {
       configurePodWithPersistentVolumeClaims(podSpec, executorContainer);
     }
 
@@ -870,20 +873,35 @@ public class V1Controller extends KubernetesController {
     }
   }
 
+  /**
+   * Generates Dynamically backed <code>Persistent Volume Claims</code> from a mapping of <code>Volumes</code>
+   * to <code>key-value</code> pairs of configuration options and values.
+   * @param mapPVCOpts <code>Volume</code> to configuration <code>key-value</code> mappings.
+   * @return Fully populated list of only dynamically backed <code>Persistent Volume Claims</code>.
+   */
   @VisibleForTesting
   protected List<V1PersistentVolumeClaim> createPersistentVolumeClaims(
       final Map<String, Map<KubernetesConstants.PersistentVolumeClaimOptions, String>> mapPVCOpts) {
 
     List<V1PersistentVolumeClaim> listOfPVCs = new LinkedList<>();
 
-    // Iterate over all the PVC mounts.
+    // Iterate over all the PVC Volumes.
     for (Map.Entry<String, Map<KubernetesConstants.PersistentVolumeClaimOptions, String>> pvc
         : mapPVCOpts.entrySet()) {
+
+      // Ignore Volumes which are not dynamically backed.
+      if (!pvc.getValue().containsKey(KubernetesConstants.PersistentVolumeClaimOptions.onDemand)) {
+        continue;
+      }
 
       V1PersistentVolumeClaim claim = new V1PersistentVolumeClaimBuilder()
           .withNewMetadata()
           .endMetadata()
           .withNewSpec()
+            .withNewSelector()
+              .withMatchLabels(
+                  KubernetesConstants.getPersistentVolumeClaimMatchLabels(getTopologyName()))
+            .endSelector()
             .withNewVolumeName(pvc.getKey())
           .endSpec()
           .build();
@@ -911,7 +929,7 @@ public class V1Controller extends KubernetesController {
             claim.getSpec().setVolumeMode(optionValue);
             break;
           // Valid ignored options not used in a PVC.
-          case path: case subPath:
+          case path: case subPath: case onDemand:
             break;
           default:
             throw new TopologySubmissionException(
@@ -924,6 +942,12 @@ public class V1Controller extends KubernetesController {
     return listOfPVCs;
   }
 
+  /**
+   * Generates the <code>Volumes</code> to be placed in the <code>Pod Spec</code> and <code>Volume Mounts</code>
+   * to be placed in the <code>executor container</code>.
+   * @param mapPVCOpts Mapping of <code>Volumes</code> to <code>key-value</code> configuration pairs.
+   * @return Two lists, one of <code>V1Volume</code> and the other of <code>V1VolumeMount</code>.
+   */
   @VisibleForTesting
   protected Pair<List<V1Volume>, List<V1VolumeMount>> createPersistentVolumeClaimVolumesAndMounts(
       final Map<String, Map<KubernetesConstants.PersistentVolumeClaimOptions, String>> mapPVCOpts) {
@@ -966,6 +990,11 @@ public class V1Controller extends KubernetesController {
     return new Pair<>(volumeList, mountList);
   }
 
+  /**
+   * Makes a call to generate <code>Volumes</code> and <code>Volume Mounts</code> and then inserts them.
+   * @param podSpec All generated <code>V1Volume</code> will be placed in the <code>Pod Spec</code>.
+   * @param executor All generated <code>V1VolumeMount</code> will be placed in the <code>Container</code>.
+   */
   @VisibleForTesting
   protected void configurePodWithPersistentVolumeClaims(final V1PodSpec podSpec,
                                                         final V1Container executor) {
@@ -987,5 +1016,73 @@ public class V1Controller extends KubernetesController {
         utilsVolumes.mergeListsDedupe(volumesAndMounts.first, podSpec.getVolumes(),
             Comparator.comparing(V1Volume::getName),
             "Pod and Persistent Volume Claim Volumes"));
+  }
+
+  /**
+   * Removes all Dynamically backed Persistent Volume Claims associated with a specific topology, if
+   * they exist. It looks for the following:
+   * selector:
+   *   matchLabels:
+   *     topology: <code>topology-name</code>
+   *     onDemand: <code>true</code>
+   */
+  private void removeDynamicBackedPersistentVolumeClaims() {
+    final String topologyName = getTopologyName();
+    final StringBuilder selectorMatchLabel = new StringBuilder();
+
+    // Generate match label.
+    for (Map.Entry<String, String> label
+        : KubernetesConstants.getPersistentVolumeClaimMatchLabels(topologyName).entrySet()) {
+      if (selectorMatchLabel.length() != 0) {
+        selectorMatchLabel.append(",");
+      }
+      selectorMatchLabel.append(label.getKey()).append("=").append(label.getValue());
+    }
+
+    // Collect all associated dynamically backed Persistent Volume Claims.
+    // If this call does not fail it will generate a populated or empty list.
+    final List<V1PersistentVolumeClaim> claimList;
+    try {
+      claimList = coreClient.listNamespacedPersistentVolumeClaim(
+          getNamespace(),
+          null,
+          null,
+          null,
+          null,
+          selectorMatchLabel.toString(),
+          null,
+          null,
+          null,
+          null,
+          null)
+          .getItems();
+    } catch (ApiException e) {
+      final String message =
+          String.format("Failed to connect to K8s cluster to retrieve Persistent Volume Claims: %s",
+          e.getMessage());
+      LOG.log(Level.SEVERE, message);
+      throw new TopologyRuntimeManagementException(message);
+    }
+
+    // Remove all the Persistent Volume Claims.
+    for (V1PersistentVolumeClaim claim : claimList) {
+      try {
+        coreClient.deleteNamespacedPersistentVolumeClaim(
+            claim.getMetadata().getName(),
+            getNamespace(),
+            null,
+            null,
+            null,
+            null,
+            null,
+            null);
+      } catch (ApiException e) {
+        final String message =
+            String.format("Failed to remove Persistent Volume Claim form the K8s cluster: %s",
+                e.getMessage());
+        LOG.log(Level.SEVERE, message);
+        throw new TopologyRuntimeManagementException(message);
+      }
+    }
   }
 }
