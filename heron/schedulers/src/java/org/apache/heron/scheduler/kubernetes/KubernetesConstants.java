@@ -120,7 +120,7 @@ public final class KubernetesConstants {
   }
 
   public static String generatePersistentVolumeClaimName(String topologyName, String volumeName) {
-    return String.format("%s-%s-%s", LABEL_ON_DEMAND_PROVISIONING, topologyName.toLowerCase(),
-        volumeName);
+    return String.format("%s-%s-%s", LABEL_ON_DEMAND_PROVISIONING.toLowerCase(),
+        topologyName.toLowerCase(), volumeName);
   }
 }
