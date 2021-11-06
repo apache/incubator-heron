@@ -143,7 +143,8 @@ public class V1Controller extends KubernetesController {
     if (KubernetesContext.getPersistentVolumeClaimDisabled(getConfiguration())
         && !persistentVolumeClaimConfigs.isEmpty()) {
       final String message =
-          String.format("Loading Persistent Volume Claim from CLI is disabled: '%s'", topologyName);
+          String.format("Configuring Persistent Volume Claim from CLI is disabled: '%s'",
+              topologyName);
       LOG.log(Level.WARNING, message);
       throw new TopologySubmissionException(message);
     }
@@ -522,7 +523,7 @@ public class V1Controller extends KubernetesController {
       containers.add(executorContainer);
     }
 
-    if (persistentVolumeClaimConfigs != null && !persistentVolumeClaimConfigs.isEmpty()) {
+    if (!persistentVolumeClaimConfigs.isEmpty()) {
       configurePodWithPersistentVolumeClaims(podSpec, executorContainer);
     }
 
