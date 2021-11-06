@@ -871,20 +871,35 @@ public class V1Controller extends KubernetesController {
     }
   }
 
+  /**
+   * Generates Dynamically backed <code>Persistent Volume Claims</code> from a mapping of <code>Volumes</code>
+   * to <code>key-value</code> pairs of configuration options and values.
+   * @param mapPVCOpts <code>Volume</code> to configuration <code>key-value</code> mappings.
+   * @return Fully populated list of only dynamically backed <code>Persistent Volume Claims</code>.
+   */
   @VisibleForTesting
   protected List<V1PersistentVolumeClaim> createPersistentVolumeClaims(
       final Map<String, Map<KubernetesConstants.PersistentVolumeClaimOptions, String>> mapPVCOpts) {
 
     List<V1PersistentVolumeClaim> listOfPVCs = new LinkedList<>();
 
-    // Iterate over all the PVC mounts.
+    // Iterate over all the PVC Volumes.
     for (Map.Entry<String, Map<KubernetesConstants.PersistentVolumeClaimOptions, String>> pvc
         : mapPVCOpts.entrySet()) {
+
+      // Ignore Volumes which are not dynamically backed.
+      if (!pvc.getValue().containsKey(KubernetesConstants.PersistentVolumeClaimOptions.onDemand)) {
+        continue;
+      }
 
       V1PersistentVolumeClaim claim = new V1PersistentVolumeClaimBuilder()
           .withNewMetadata()
           .endMetadata()
           .withNewSpec()
+            .withNewSelector()
+              .withMatchLabels(
+                  KubernetesConstants.getPersistentVolumeClaimMatchLabels(getTopologyName()))
+            .endSelector()
             .withNewVolumeName(pvc.getKey())
           .endSpec()
           .build();
