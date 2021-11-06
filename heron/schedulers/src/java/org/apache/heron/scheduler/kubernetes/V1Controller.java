@@ -138,7 +138,8 @@ public class V1Controller extends KubernetesController {
     }
 
     // Get and then create Persistent Volume Claims from the CLI.
-    persistentVolumeClaimConfigs = KubernetesContext.getPersistentVolumeClaims(getConfiguration());
+    persistentVolumeClaimConfigs =
+        KubernetesContext.getPersistentVolumeClaims(getConfiguration(), getTopologyName());
     if (KubernetesContext.getPersistentVolumeClaimDisabled(getConfiguration())
         && !persistentVolumeClaimConfigs.isEmpty()) {
       final String message =
@@ -911,7 +912,7 @@ public class V1Controller extends KubernetesController {
             claim.getSpec().setVolumeMode(optionValue);
             break;
           // Valid ignored options not used in a PVC.
-          case path: case subPath:
+          case path: case subPath: case onDemand:
             break;
           default:
             throw new TopologySubmissionException(

@@ -52,6 +52,7 @@ public final class KubernetesConstants {
   public static final String LABEL_APP = "app";
   public static final String LABEL_APP_VALUE = "heron";
   public static final String LABEL_TOPOLOGY = "topology";
+  public static final String LABEL_ON_DEMAND_PROVISIONING = "onDemand";
 
   // prometheus annotation keys
   public static final String ANNOTATION_PROMETHEUS_SCRAPE = "prometheus.io/scrape";
@@ -88,7 +89,6 @@ public final class KubernetesConstants {
   public static final String JOB_LINK =
       "/api/v1/namespaces/kube-system/services/kubernetes-dashboard/proxy/#/pod";
 
-
   public static final Pattern VALID_POD_NAME_REGEX =
       Pattern.compile("[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*",
           Pattern.CASE_INSENSITIVE);
@@ -114,7 +114,20 @@ public final class KubernetesConstants {
     sizeLimit,
     accessModes,
     volumeMode,
+    onDemand, // Flag to indicate dynamic provisioning.
     path,     // Added to container.
     subPath,  // Added to container.
+  }
+
+  public static String generatePersistentVolumeClaimName(String topologyName, String volumeName) {
+    return String.format("%s-%s-%s", LABEL_ON_DEMAND_PROVISIONING, topologyName.toLowerCase(),
+        volumeName);
+  }
+
+  public static Map<String, String> getPersistentVolumeClaimMatchLabels(String topologyName) {
+    final Map<String, String> labels = new HashMap<>();
+    labels.put(KubernetesConstants.LABEL_TOPOLOGY, topologyName);
+    labels.put(KubernetesConstants.LABEL_ON_DEMAND_PROVISIONING, "true");
+    return labels;
   }
 }
