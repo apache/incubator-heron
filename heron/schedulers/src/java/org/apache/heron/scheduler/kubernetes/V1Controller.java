@@ -1066,8 +1066,9 @@ public class V1Controller extends KubernetesController {
     // Remove all the Persistent Volume Claims.
     for (V1PersistentVolumeClaim claim : claimList) {
       try {
+        final String claimName = claim.getMetadata().getName();
         coreClient.deleteNamespacedPersistentVolumeClaim(
-            claim.getMetadata().getName(),
+            claimName,
             getNamespace(),
             null,
             null,
@@ -1075,10 +1076,12 @@ public class V1Controller extends KubernetesController {
             null,
             null,
             null);
+        LOG.log(Level.INFO, String.format("Removed Persistent Volume Claim `%s` for topology `%s`",
+            claimName, topologyName));
       } catch (ApiException e) {
-        final String message =
-            String.format("Failed to remove Persistent Volume Claim form the K8s cluster: %s",
-                e.getMessage());
+        // SUPPRESS CHECKSTYLE LineLength
+        final String message = String.format("Failed to remove dynamically backed Persistent Volume Claims for topology `%s`. Manual removal is required.%n%s",
+                topologyName, e.getMessage());
         LOG.log(Level.SEVERE, message);
         throw new TopologyRuntimeManagementException(message);
       }
