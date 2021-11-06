@@ -170,8 +170,9 @@ public class V1Controller extends KubernetesController {
       appsClient.createNamespacedStatefulSet(getNamespace(), statefulSet, null,
               null, null);
     } catch (ApiException e) {
-      KubernetesUtils.logExceptionWithDetails(LOG, "Error creating topology", e);
-      throw new TopologySubmissionException(e.getMessage());
+      final String message = String.format("Error creating topology: %s%n", e.getResponseBody());
+      KubernetesUtils.logExceptionWithDetails(LOG, message, e);
+      throw new TopologySubmissionException(message);
     }
 
     return true;
