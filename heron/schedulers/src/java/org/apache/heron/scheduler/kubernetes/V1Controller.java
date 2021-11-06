@@ -178,6 +178,7 @@ public class V1Controller extends KubernetesController {
 
   @Override
   boolean killTopology() {
+    removeDynamicBackedPersistentVolumeClaims();
     deleteStatefulSet();
     deleteService();
     return true;
