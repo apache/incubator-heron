@@ -1015,4 +1015,72 @@ public class V1Controller extends KubernetesController {
             Comparator.comparing(V1Volume::getName),
             "Pod and Persistent Volume Claim Volumes"));
   }
+
+  /**
+   * Removes all Dynamically backed Persistent Volume Claims associated with a specific topology, if
+   * they exist. It looks for the following:
+   * selector:
+   *   matchLabels:
+   *     topology: <code>topology-name</code>
+   *     onDemand: <code>true</code>
+   */
+  private void removeDynamicBackedPersistentVolumeClaims() {
+    final String topologyName = getTopologyName();
+    final StringBuilder selectorMatchLabel = new StringBuilder();
+
+    // Generate match label.
+    for (Map.Entry<String, String> label
+        : KubernetesConstants.getPersistentVolumeClaimMatchLabels(topologyName).entrySet()) {
+      if (selectorMatchLabel.length() != 0) {
+        selectorMatchLabel.append(",");
+      }
+      selectorMatchLabel.append(label.getKey()).append("=").append(label.getValue());
+    }
+
+    // Collect all associated dynamically backed Persistent Volume Claims.
+    // If this call does not fail it will generate a populated or empty list.
+    final List<V1PersistentVolumeClaim> claimList;
+    try {
+      claimList = coreClient.listNamespacedPersistentVolumeClaim(
+          getNamespace(),
+          null,
+          null,
+          null,
+          null,
+          selectorMatchLabel.toString(),
+          null,
+          null,
+          null,
+          null,
+          null)
+          .getItems();
+    } catch (ApiException e) {
+      final String message =
+          String.format("Failed to connect to K8s cluster to retrieve Persistent Volume Claims: %s",
+          e.getMessage());
+      LOG.log(Level.SEVERE, message);
+      throw new TopologyRuntimeManagementException(message);
+    }
+
+    // Remove all the Persistent Volume Claims.
+    for (V1PersistentVolumeClaim claim : claimList) {
+      try {
+        coreClient.deleteNamespacedPersistentVolumeClaim(
+            claim.getMetadata().getName(),
+            getNamespace(),
+            null,
+            null,
+            null,
+            null,
+            null,
+            null);
+      } catch (ApiException e) {
+        final String message =
+            String.format("Failed to remove Persistent Volume Claim form the K8s cluster: %s",
+                e.getMessage());
+        LOG.log(Level.SEVERE, message);
+        throw new TopologyRuntimeManagementException(message);
+      }
+    }
+  }
 }
