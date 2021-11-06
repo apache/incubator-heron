@@ -123,11 +123,4 @@ public final class KubernetesConstants {
     return String.format("%s-%s-%s", LABEL_ON_DEMAND_PROVISIONING, topologyName.toLowerCase(),
         volumeName);
   }
-
-  public static Map<String, String> getPersistentVolumeClaimMatchLabels(String topologyName) {
-    final Map<String, String> labels = new HashMap<>();
-    labels.put(KubernetesConstants.LABEL_TOPOLOGY, topologyName);
-    labels.put(KubernetesConstants.LABEL_ON_DEMAND_PROVISIONING, "true");
-    return labels;
-  }
 }

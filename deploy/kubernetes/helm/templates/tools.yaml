@@ -276,6 +276,9 @@ rules:
   - persistentvolumeclaims
   verbs:
   - create
+  - delete
+  - get
+  - list
 
 ---
 apiVersion: v1

@@ -899,8 +899,7 @@ public class V1Controller extends KubernetesController {
           .endMetadata()
           .withNewSpec()
             .withNewSelector()
-              .withMatchLabels(
-                  KubernetesConstants.getPersistentVolumeClaimMatchLabels(getTopologyName()))
+              .withMatchLabels(getPersistentVolumeClaimMatchLabels(getTopologyName()))
             .endSelector()
             .withNewVolumeName(pvc.getKey())
           .endSpec()
@@ -1032,7 +1031,7 @@ public class V1Controller extends KubernetesController {
 
     // Generate match label.
     for (Map.Entry<String, String> label
-        : KubernetesConstants.getPersistentVolumeClaimMatchLabels(topologyName).entrySet()) {
+        : getPersistentVolumeClaimMatchLabels(topologyName).entrySet()) {
       if (selectorMatchLabel.length() != 0) {
         selectorMatchLabel.append(",");
       }
@@ -1067,8 +1066,9 @@ public class V1Controller extends KubernetesController {
     // Remove all the Persistent Volume Claims.
     for (V1PersistentVolumeClaim claim : claimList) {
       try {
+        final String claimName = claim.getMetadata().getName();
         coreClient.deleteNamespacedPersistentVolumeClaim(
-            claim.getMetadata().getName(),
+            claimName,
             getNamespace(),
             null,
             null,
@@ -1076,13 +1076,31 @@ public class V1Controller extends KubernetesController {
             null,
             null,
             null);
+        LOG.log(Level.INFO, String.format("Removed Persistent Volume Claim `%s` for topology `%s`",
+            claimName, topologyName));
       } catch (ApiException e) {
-        final String message =
-            String.format("Failed to remove Persistent Volume Claim form the K8s cluster: %s",
-                e.getMessage());
+        // SUPPRESS CHECKSTYLE LineLength
+        final String message = String.format("Failed to remove dynamically backed Persistent Volume Claims for topology `%s`. Manual removal is required.%n%s",
+                topologyName, e.getMessage());
         LOG.log(Level.SEVERE, message);
         throw new TopologyRuntimeManagementException(message);
       }
     }
+  }
+
+  /**
+   * Generates the <code>Selector</code> labels which are attached to a Topologies dynamically provisioned
+   * Persistent Volume Claims.
+   * @param topologyName Attached to the topology match label.
+   * @return A map consisting of the <code>label-value</code> pairs to be used in a <code>Selector</code>.
+   */
+  @VisibleForTesting
+  protected static Map<String, String> getPersistentVolumeClaimMatchLabels(String topologyName) {
+    return new HashMap<String, String>() {
+      {
+        put(KubernetesConstants.LABEL_TOPOLOGY, topologyName);
+        put(KubernetesConstants.LABEL_ON_DEMAND_PROVISIONING, "true");
+      }
+    };
   }
 }
