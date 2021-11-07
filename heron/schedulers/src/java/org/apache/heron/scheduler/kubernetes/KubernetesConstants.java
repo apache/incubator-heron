@@ -52,7 +52,7 @@ public final class KubernetesConstants {
   public static final String LABEL_APP = "app";
   public static final String LABEL_APP_VALUE = "heron";
   public static final String LABEL_TOPOLOGY = "topology";
-  public static final String LABEL_ON_DEMAND_PROVISIONING = "onDemand";
+  public static final String LABEL_ON_DEMAND = "onDemand";
 
   // prometheus annotation keys
   public static final String ANNOTATION_PROMETHEUS_SCRAPE = "prometheus.io/scrape";
@@ -120,7 +120,7 @@ public final class KubernetesConstants {
   }
 
   public static String generatePersistentVolumeClaimName(String topologyName, String volumeName) {
-    return String.format("%s-%s-%s", LABEL_ON_DEMAND_PROVISIONING, topologyName.toLowerCase(),
-        volumeName);
+    return String.format("%s-%s-%s", LABEL_ON_DEMAND.toLowerCase(),
+        topologyName.toLowerCase(), volumeName);
   }
 }
