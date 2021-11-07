@@ -75,6 +75,7 @@ import io.kubernetes.client.openapi.models.V1Service;
 import io.kubernetes.client.openapi.models.V1ServiceSpec;
 import io.kubernetes.client.openapi.models.V1StatefulSet;
 import io.kubernetes.client.openapi.models.V1StatefulSetSpec;
+import io.kubernetes.client.openapi.models.V1Status;
 import io.kubernetes.client.openapi.models.V1Toleration;
 import io.kubernetes.client.openapi.models.V1Volume;
 import io.kubernetes.client.openapi.models.V1VolumeBuilder;
@@ -1039,12 +1040,11 @@ public class V1Controller extends KubernetesController {
       selectorMatchLabel.append(label.getKey()).append("=").append(label.getValue());
     }
 
-    // Collect all associated dynamically backed Persistent Volume Claims.
-    // If this call does not fail it will generate a populated or empty list.
-    final List<V1PersistentVolumeClaim> claimList;
+    // Remove all dynamically backed Persistent Volume Claims.
     try {
-      claimList = coreClient.listNamespacedPersistentVolumeClaim(
+      V1Status status = coreClient.deleteCollectionNamespacedPersistentVolumeClaim(
           getNamespace(),
+          null,
           null,
           null,
           null,
@@ -1054,38 +1054,20 @@ public class V1Controller extends KubernetesController {
           null,
           null,
           null,
-          null)
-          .getItems();
-    } catch (ApiException e) {
-      final String message =
-          String.format("Failed to connect to K8s cluster to retrieve Persistent Volume Claims: %s",
-          e.getMessage());
-      LOG.log(Level.SEVERE, message);
-      throw new TopologyRuntimeManagementException(message);
-    }
+          null,
+          null,
+          null);
 
-    // Remove all the Persistent Volume Claims.
-    for (V1PersistentVolumeClaim claim : claimList) {
-      try {
-        final String claimName = claim.getMetadata().getName();
-        coreClient.deleteNamespacedPersistentVolumeClaim(
-            claimName,
-            getNamespace(),
-            null,
-            null,
-            null,
-            null,
-            null,
-            null);
-        LOG.log(Level.INFO, String.format("Removed Persistent Volume Claim `%s` for topology `%s`",
-            claimName, topologyName));
-      } catch (ApiException e) {
-        // SUPPRESS CHECKSTYLE LineLength
-        final String message = String.format("Failed to remove dynamically backed Persistent Volume Claims for topology `%s`. Manual removal is required.%n%s",
-                topologyName, e.getMessage());
-        LOG.log(Level.SEVERE, message);
-        throw new TopologyRuntimeManagementException(message);
-      }
+      // SUPPRESS CHECKSTYLE LineLength
+      LOG.log(Level.INFO, String.format("Removing Dynamically backed Persistent Volume Claims for `%s`:%n%s",
+          topologyName, status.getMessage()),
+          status.getMessage());
+    } catch (ApiException e) {
+      // SUPPRESS CHECKSTYLE LineLength
+      final String message = String.format("Failed to connect to K8s cluster to delete Persistent Volume Claims for topology `%s`. A manual clean-up is required.%n%s",
+          topologyName, e.getMessage());
+      LOG.log(Level.WARNING, message);
+      throw new TopologyRuntimeManagementException(message);
     }
   }
 
