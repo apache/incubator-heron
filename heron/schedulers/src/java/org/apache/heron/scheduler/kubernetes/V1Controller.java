@@ -1058,13 +1058,12 @@ public class V1Controller extends KubernetesController {
           null,
           null);
 
-      // SUPPRESS CHECKSTYLE LineLength
-      LOG.log(Level.INFO, String.format("Removing Dynamically backed Persistent Volume Claims for `%s`:%n%s",
-          topologyName, status.getMessage()),
-          status.getMessage());
+      LOG.log(Level.INFO,
+          String.format("Removing Dynamically backed Persistent Volume Claims for `%s`:%n%s",
+          topologyName, status.getStatus()));
     } catch (ApiException e) {
-      // SUPPRESS CHECKSTYLE LineLength
-      final String message = String.format("Failed to connect to K8s cluster to delete Persistent Volume Claims for topology `%s`. A manual clean-up is required.%n%s",
+      final String message = String.format("Failed to connect to K8s cluster to delete Persistent"
+              + "Volume Claims for topology `%s`. A manual clean-up is required.%n%s",
           topologyName, e.getMessage());
       LOG.log(Level.WARNING, message);
       throw new TopologyRuntimeManagementException(message);
@@ -1082,7 +1081,7 @@ public class V1Controller extends KubernetesController {
     return new HashMap<String, String>() {
       {
         put(KubernetesConstants.LABEL_TOPOLOGY, topologyName);
-        put(KubernetesConstants.LABEL_ON_DEMAND_PROVISIONING, "true");
+        put(KubernetesConstants.LABEL_ON_DEMAND, "true");
       }
     };
   }

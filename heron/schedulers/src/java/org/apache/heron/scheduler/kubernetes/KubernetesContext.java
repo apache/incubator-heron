@@ -269,7 +269,7 @@ public final class KubernetesContext extends Context {
 
         // Dynamic Provisioned Volume: Add token and generate volume name.
         if (option == KubernetesConstants.PersistentVolumeClaimOptions.claimName
-            && KubernetesConstants.LABEL_ON_DEMAND_PROVISIONING.equalsIgnoreCase(value)) {
+            && KubernetesConstants.LABEL_ON_DEMAND.equalsIgnoreCase(value)) {
           volume.put(KubernetesConstants.PersistentVolumeClaimOptions.onDemand, null);
           volume.put(KubernetesConstants.PersistentVolumeClaimOptions.claimName,
               KubernetesConstants.generatePersistentVolumeClaimName(topologyName, volumeName));
