@@ -26,10 +26,10 @@ sidebar_label: Kubernetes Persistent Volume Claims (CLI)
 
 It is possible to leverage Persistent Volumes with custom Pod Templates. The CLI commands allow you to configure a Persistent Volume Claim (dynamically backed or not) when you submit your topology. They also permit you to configure a Persistent Volume without a custom Pod Template. The CLI commands override any configurations you may have present in the Pod Template, but Heron's configurations will take precedence over all others.
 
-**Note:** Heron ***will*** remove any dynamically backed `Persistent Volume Claim`s it creates when a topology is terminated. Please be aware that Heron uses the following `Selector Match Labels`:
+**Note:** Heron ***will*** remove any dynamically backed `Persistent Volume Claim`s it creates when a topology is terminated. Please be aware that Heron uses the following `Labels`:
 ```yaml
-selector:
-  matchLabels:
+metadata:
+  labels:
     topology: <topology-name>
     onDemand: true
 ```
@@ -102,6 +102,9 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: ondemand-[topology-name]-volumenameofchoice
+  label:
+    onDemand: true
+    topology: [topology-name]
 spec:
   volumeName: volumenameofchoice
   accessModes:
