@@ -27,7 +27,7 @@ import java.util.Map;
 import org.junit.Assert;
 import org.junit.Test;
 
-import org.apache.heron.common.basics.Pair;
+import org.apache.heron.scheduler.kubernetes.KubernetesUtils.TestTuple;
 import org.apache.heron.spi.common.Config;
 
 import static org.apache.heron.scheduler.kubernetes.KubernetesConstants.PersistentVolumeClaimOptions;
@@ -42,6 +42,18 @@ public class KubernetesContextTest {
       .put(KubernetesContext.KUBERNETES_POD_TEMPLATE_CONFIGMAP_NAME,
           POD_TEMPLATE_CONFIGMAP_NAME)
       .build();
+
+  private class Tuple {
+    public final String description;
+    public final String expected;
+    public final Config config;
+
+    Tuple(String description, String expected, Config config) {
+      this.description = description;
+      this.expected = expected;
+      this.config = config;
+    }
+  }
 
   @Test
   public void testPodTemplateConfigMapName() {
@@ -210,34 +222,36 @@ public class KubernetesContextTest {
     final String generalFailureMessage = "Invalid Persistent Volume";
     final String keyPattern = KubernetesContext.KUBERNETES_PERSISTENT_VOLUME_CLAIM_PREFIX
         + "%s.%s";
-    final List<Pair<Config, String>> testCases = new LinkedList<>();
+    final List<TestTuple<Config, String>> testCases = new LinkedList<>();
 
     // OnDemand key test.
     final Config configOnDemand = Config.newBuilder()
         .put(String.format(keyPattern, volumeNameValid, "onDemand"), failureValue)
         .build();
-    testCases.add(new Pair<>(configOnDemand, "`onDemand` can only"));
+    testCases.add(new TestTuple<>("`onDemand` should trigger exception",
+        "`onDemand` can only", configOnDemand));
 
     // Invalid option key test.
     final Config configInvalidOption = Config.newBuilder()
         .put(String.format(keyPattern, volumeNameValid, "NonExistentKey"), failureValue)
         .build();
-    testCases.add(new Pair<>(configInvalidOption, generalFailureMessage));
+    testCases.add(new TestTuple<>("Invalid option key should trigger exception",
+        generalFailureMessage, configInvalidOption));
 
     // Just the prefix.
     final Config configJustPrefix = Config.newBuilder()
         .put(KubernetesContext.KUBERNETES_PERSISTENT_VOLUME_CLAIM_PREFIX, failureValue)
         .build();
-    testCases.add(new Pair<>(configJustPrefix, generalFailureMessage));
-
+    testCases.add(new TestTuple<>("Only a key prefix should trigger exception",
+        generalFailureMessage, configJustPrefix));
 
     // Testing loop.
-    for (Pair<Config, String> testCase : testCases) {
+    for (TestTuple<Config, String> testCase : testCases) {
       try {
-        KubernetesContext.getPersistentVolumeClaims(testCase.first, topologyName);
+        KubernetesContext.getPersistentVolumeClaims(testCase.input, topologyName);
       // SUPPRESS CHECKSTYLE IllegalCatch
       } catch (Exception e) {
-        Assert.assertTrue(e.getMessage().contains(testCase.second));
+        Assert.assertTrue(testCase.description, e.getMessage().contains(testCase.expected));
       }
     }
   }
