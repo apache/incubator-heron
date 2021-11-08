@@ -20,12 +20,14 @@
 package org.apache.heron.scheduler.kubernetes;
 
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
 import org.junit.Assert;
 import org.junit.Test;
 
+import org.apache.heron.common.basics.Pair;
 import org.apache.heron.spi.common.Config;
 
 import static org.apache.heron.scheduler.kubernetes.KubernetesConstants.PersistentVolumeClaimOptions;
@@ -198,5 +200,45 @@ public class KubernetesContextTest {
         actualVolumeTwo.keySet().containsAll(expectedOptionsKeysVolumeTwo));
     Assert.assertTrue("Dynamic PVC contains all provided values",
         actualVolumeTwo.values().containsAll(expectedOptionsValuesVolumeTwo));
+  }
+
+  @Test
+  public void testGetPersistentVolumeClaimsErrors() {
+    final String topologyName = "Topology-Name";
+    final String volumeNameValid = "volume-name-valid";
+    final String failureValue = "Should Fail";
+    final String generalFailureMessage = "Invalid Persistent Volume";
+    final String keyPattern = KubernetesContext.KUBERNETES_PERSISTENT_VOLUME_CLAIM_PREFIX
+        + "%s.%s";
+    final List<Pair<Config, String>> testCases = new LinkedList<>();
+
+    // OnDemand key test.
+    final Config configOnDemand = Config.newBuilder()
+        .put(String.format(keyPattern, volumeNameValid, "onDemand"), failureValue)
+        .build();
+    testCases.add(new Pair<>(configOnDemand, "`onDemand` can only"));
+
+    // Invalid option key test.
+    final Config configInvalidOption = Config.newBuilder()
+        .put(String.format(keyPattern, volumeNameValid, "NonExistentKey"), failureValue)
+        .build();
+    testCases.add(new Pair<>(configInvalidOption, generalFailureMessage));
+
+    // Just the prefix.
+    final Config configJustPrefix = Config.newBuilder()
+        .put(KubernetesContext.KUBERNETES_PERSISTENT_VOLUME_CLAIM_PREFIX, failureValue)
+        .build();
+    testCases.add(new Pair<>(configJustPrefix, generalFailureMessage));
+
+
+    // Testing loop.
+    for (Pair<Config, String> testCase : testCases) {
+      try {
+        KubernetesContext.getPersistentVolumeClaims(testCase.first, topologyName);
+      // SUPPRESS CHECKSTYLE IllegalCatch
+      } catch (Exception e) {
+        Assert.assertTrue(e.getMessage().contains(testCase.second));
+      }
+    }
   }
 }
