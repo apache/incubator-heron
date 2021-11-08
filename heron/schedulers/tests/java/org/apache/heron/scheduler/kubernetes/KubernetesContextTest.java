@@ -34,7 +34,8 @@ import static org.apache.heron.scheduler.kubernetes.KubernetesConstants.Persiste
 
 public class KubernetesContextTest {
 
-  public static final String KUBERNETES_POD_TEMPLATE_CONFIGMAP_NAME =
+  private static final String TOPOLOGY_NAME = "Topology-Name";
+  private static final String KUBERNETES_POD_TEMPLATE_CONFIGMAP_NAME =
       "heron.kubernetes.pod.template.configmap.name";
   private static final String POD_TEMPLATE_CONFIGMAP_NAME = "pod-template-configmap-name";
   private final Config config = Config.newBuilder().build();
@@ -42,18 +43,6 @@ public class KubernetesContextTest {
       .put(KubernetesContext.KUBERNETES_POD_TEMPLATE_CONFIGMAP_NAME,
           POD_TEMPLATE_CONFIGMAP_NAME)
       .build();
-
-  private class Tuple {
-    public final String description;
-    public final String expected;
-    public final Config config;
-
-    Tuple(String description, String expected, Config config) {
-      this.description = description;
-      this.expected = expected;
-      this.config = config;
-    }
-  }
 
   @Test
   public void testPodTemplateConfigMapName() {
@@ -97,27 +86,20 @@ public class KubernetesContextTest {
 
   @Test
   public void testGetPersistentVolumeClaims() {
-    final String topologyName = "Topology-Name";
     final String volumeNameOne = "volume-name-one";
     final String volumeNameTwo = "volume-name-two";
-    final String keyPattern = "%s%s.%s";
+    final String keyPattern = KubernetesContext.KUBERNETES_PERSISTENT_VOLUME_CLAIM_PREFIX + "%s.%s";
 
     final String claimNameField =
         PersistentVolumeClaimOptions.claimName.toString();
     final String expectedClaimName = "expected-claim-name";
-    final String claimNameKeyOne = String.format(keyPattern,
-        KubernetesContext.KUBERNETES_PERSISTENT_VOLUME_CLAIM_PREFIX, volumeNameOne, claimNameField);
-    final String claimNameKeyTwo = String.format(keyPattern,
-        KubernetesContext.KUBERNETES_PERSISTENT_VOLUME_CLAIM_PREFIX, volumeNameTwo, claimNameField);
+    final String claimNameKeyOne = String.format(keyPattern, volumeNameOne, claimNameField);
+    final String claimNameKeyTwo = String.format(keyPattern, volumeNameTwo, claimNameField);
 
     final String storageClassField = PersistentVolumeClaimOptions.storageClassName.toString();
     final String expectedStorageClass = "expected-storage-class";
-    final String storageClassKeyOne = String.format(keyPattern,
-        KubernetesContext.KUBERNETES_PERSISTENT_VOLUME_CLAIM_PREFIX, volumeNameOne,
-        storageClassField);
-    final String storageClassKeyTwo = String.format(keyPattern,
-        KubernetesContext.KUBERNETES_PERSISTENT_VOLUME_CLAIM_PREFIX, volumeNameTwo,
-        storageClassField);
+    final String storageClassKeyOne = String.format(keyPattern, volumeNameOne, storageClassField);
+    final String storageClassKeyTwo = String.format(keyPattern, volumeNameTwo, storageClassField);
 
     final Config configPVC = Config.newBuilder()
         .put(claimNameKeyOne, expectedClaimName)
@@ -135,7 +117,7 @@ public class KubernetesContextTest {
 
     // List of provided PVC options.
     final Map<String, Map<PersistentVolumeClaimOptions, String>> mapOfPVC =
-        KubernetesContext.getPersistentVolumeClaims(configPVC, topologyName);
+        KubernetesContext.getPersistentVolumeClaims(configPVC, TOPOLOGY_NAME);
 
     Assert.assertTrue("Contains all provided Volumes",
         mapOfPVC.keySet().containsAll(expectedKeys));
@@ -148,13 +130,12 @@ public class KubernetesContextTest {
 
     // Empty PVC.
     final Map<String, Map<PersistentVolumeClaimOptions, String>> emptyPVC =
-        KubernetesContext.getPersistentVolumeClaims(Config.newBuilder().build(), topologyName);
+        KubernetesContext.getPersistentVolumeClaims(Config.newBuilder().build(), TOPOLOGY_NAME);
     Assert.assertTrue("Empty PVC is returned when no options provided", emptyPVC.isEmpty());
   }
 
   @Test
   public void testGetPersistentVolumeClaimsOnDemand() {
-    final String topologyName = "Topology-Name";
     final String volumeNameOne = "volume-name-one";
     final String volumeNameTwo = "volume-name-two";
     final String keyPattern = KubernetesContext.KUBERNETES_PERSISTENT_VOLUME_CLAIM_PREFIX + "%s.%s";
@@ -164,7 +145,7 @@ public class KubernetesContextTest {
     final String expectedClaimNameOne = "expected-claim-name";
     final String claimNameTwo = "OnDeMAnD";
     final String expectedClaimNameTwo =
-        KubernetesConstants.generatePersistentVolumeClaimName(topologyName, volumeNameTwo);
+        KubernetesConstants.generatePersistentVolumeClaimName(TOPOLOGY_NAME, volumeNameTwo);
     final String claimNameKeyOne = String.format(keyPattern, volumeNameOne, claimNameField);
     final String claimNameKeyTwo = String.format(keyPattern, volumeNameTwo, claimNameField);
 
@@ -194,29 +175,35 @@ public class KubernetesContextTest {
 
     // Generate PVC options for each volume.
     final Map<String, Map<PersistentVolumeClaimOptions, String>> actual =
-        KubernetesContext.getPersistentVolumeClaims(configPVC, topologyName);
+        KubernetesContext.getPersistentVolumeClaims(configPVC, TOPOLOGY_NAME);
 
+    // Assemble test battery.
+    final List<TestTuple<Map<PersistentVolumeClaimOptions, String>, List<Object>[]>>
+        testCases = new LinkedList<>();
+    // Check non-dynamic volume.
+    testCases.add(new TestTuple<>("Non-dynamic PVC contains all provided",
+        actual.get(volumeNameOne),
+        new List[]{expectedOptionsKeysVolumeOne, expectedOptionsValuesVolumeOne}));
+    // Check dynamic volume.
+    testCases.add(new TestTuple<>("Dynamic PVC contains all provided",
+        actual.get(volumeNameTwo),
+        new List[]{expectedOptionsKeysVolumeTwo, expectedOptionsValuesVolumeTwo}));
+
+    // Testing loop.
     Assert.assertTrue("Contains all provided Volumes",
         actual.keySet().containsAll(expectedKeys));
 
-    // Check non-dynamic volume.
-    final Map<PersistentVolumeClaimOptions, String> actualVolumeOne = actual.get(volumeNameOne);
-    Assert.assertTrue("Non-dynamic PVC contains all provided keys",
-        actualVolumeOne.keySet().containsAll(expectedOptionsKeysVolumeOne));
-    Assert.assertTrue("Non-dynamic PVC contains all provided values",
-        actualVolumeOne.values().containsAll(expectedOptionsValuesVolumeOne));
-
-    // Check dynamic volume.
-    final Map<PersistentVolumeClaimOptions, String> actualVolumeTwo = actual.get(volumeNameTwo);
-    Assert.assertTrue("Dynamic PVC contains all provided keys",
-        actualVolumeTwo.keySet().containsAll(expectedOptionsKeysVolumeTwo));
-    Assert.assertTrue("Dynamic PVC contains all provided values",
-        actualVolumeTwo.values().containsAll(expectedOptionsValuesVolumeTwo));
+    for (TestTuple<Map<PersistentVolumeClaimOptions, String>, List<Object>[]>
+        testCase : testCases) {
+      Assert.assertTrue(testCase.description + " keys",
+          testCase.input.keySet().containsAll(testCase.expected[0]));
+      Assert.assertTrue(testCase.description + " values",
+          testCase.input.values().containsAll(testCase.expected[1]));
+    }
   }
 
   @Test
   public void testGetPersistentVolumeClaimsErrors() {
-    final String topologyName = "Topology-Name";
     final String volumeNameValid = "volume-name-valid";
     final String failureValue = "Should Fail";
     final String generalFailureMessage = "Invalid Persistent Volume";
@@ -228,27 +215,27 @@ public class KubernetesContextTest {
     final Config configOnDemand = Config.newBuilder()
         .put(String.format(keyPattern, volumeNameValid, "onDemand"), failureValue)
         .build();
-    testCases.add(new TestTuple<>("`onDemand` should trigger exception",
-        "`onDemand` can only", configOnDemand));
+    testCases.add(new TestTuple<>("`onDemand` should trigger exception", configOnDemand,
+        "`onDemand` can only"));
 
     // Invalid option key test.
     final Config configInvalidOption = Config.newBuilder()
         .put(String.format(keyPattern, volumeNameValid, "NonExistentKey"), failureValue)
         .build();
     testCases.add(new TestTuple<>("Invalid option key should trigger exception",
-        generalFailureMessage, configInvalidOption));
+        configInvalidOption, generalFailureMessage));
 
     // Just the prefix.
     final Config configJustPrefix = Config.newBuilder()
         .put(KubernetesContext.KUBERNETES_PERSISTENT_VOLUME_CLAIM_PREFIX, failureValue)
         .build();
     testCases.add(new TestTuple<>("Only a key prefix should trigger exception",
-        generalFailureMessage, configJustPrefix));
+        configJustPrefix, generalFailureMessage));
 
     // Testing loop.
     for (TestTuple<Config, String> testCase : testCases) {
       try {
-        KubernetesContext.getPersistentVolumeClaims(testCase.input, topologyName);
+        KubernetesContext.getPersistentVolumeClaims(testCase.input, TOPOLOGY_NAME);
       // SUPPRESS CHECKSTYLE IllegalCatch
       } catch (Exception e) {
         Assert.assertTrue(testCase.description, e.getMessage().contains(testCase.expected));
