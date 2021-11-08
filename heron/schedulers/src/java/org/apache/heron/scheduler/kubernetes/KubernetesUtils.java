@@ -136,10 +136,10 @@ final class KubernetesUtils {
     /**
      * Configure the test object.
      * @param description Description of the test to be run.
-     * @param expected Expected output form test.
      * @param input Input test case.
+     * @param expected Expected output form test.
      */
-    TestTuple(String description, T2 expected, T1 input) {
+    TestTuple(String description, T1 input, T2 expected) {
       this.description = description;
       this.expected = expected;
       this.input = input;
