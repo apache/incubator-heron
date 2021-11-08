@@ -251,9 +251,9 @@ http_archive(
 # 3rdparty C++ dependencies
 http_archive(
     name = "com_github_gflags_gflags",
-    sha256 = "ae27cdbcd6a2f935baa78e4f21f675649271634c092b1be01469440495609d0e",
-    strip_prefix = "gflags-2.2.1",
-    urls = ["https://github.com/gflags/gflags/archive/v2.2.1.tar.gz"],
+    sha256 = "34af2f15cf7367513b352bdcd2493ab14ce43692d2dcd9dfc499492966c64dcf",
+    strip_prefix = "gflags-2.2.2",
+    urls = ["https://github.com/gflags/gflags/archive/v2.2.2.tar.gz"],
 )
 
 http_archive(
@@ -292,10 +292,9 @@ http_archive(
 
 http_archive(
     name = "com_github_google_glog",
-    build_file = "@//:third_party/glog/glog.BUILD",
-    sha256 = "7580e408a2c0b5a89ca214739978ce6ff480b5e7d8d7698a2aa92fadc484d1e0",
-    strip_prefix = "glog-0.3.5",
-    urls = ["https://github.com/google/glog/archive/v0.3.5.tar.gz"],
+    sha256 = "21bc744fb7f2fa701ee8db339ded7dce4f975d0d55837a97be7d46e8382dea5a",
+    strip_prefix = "glog-0.5.0",
+    urls = ["https://github.com/google/glog/archive/v0.5.0.zip"],
 )
 
 http_archive(
