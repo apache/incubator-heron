@@ -143,7 +143,7 @@ public class KubernetesContextTest {
     final String topologyName = "Topology-Name";
     final String volumeNameOne = "volume-name-one";
     final String volumeNameTwo = "volume-name-two";
-    final String keyPattern = "%s%s.%s";
+    final String keyPattern = KubernetesContext.KUBERNETES_PERSISTENT_VOLUME_CLAIM_PREFIX + "%s.%s";
 
     final String claimNameField =
         PersistentVolumeClaimOptions.claimName.toString();
@@ -151,19 +151,13 @@ public class KubernetesContextTest {
     final String claimNameTwo = "OnDeMAnD";
     final String expectedClaimNameTwo =
         KubernetesConstants.generatePersistentVolumeClaimName(topologyName, volumeNameTwo);
-    final String claimNameKeyOne = String.format(keyPattern,
-        KubernetesContext.KUBERNETES_PERSISTENT_VOLUME_CLAIM_PREFIX, volumeNameOne, claimNameField);
-    final String claimNameKeyTwo = String.format(keyPattern,
-        KubernetesContext.KUBERNETES_PERSISTENT_VOLUME_CLAIM_PREFIX, volumeNameTwo, claimNameField);
+    final String claimNameKeyOne = String.format(keyPattern, volumeNameOne, claimNameField);
+    final String claimNameKeyTwo = String.format(keyPattern, volumeNameTwo, claimNameField);
 
     final String storageClassField = PersistentVolumeClaimOptions.storageClassName.toString();
     final String expectedStorageClass = "expected-storage-class";
-    final String storageClassKeyOne = String.format(keyPattern,
-        KubernetesContext.KUBERNETES_PERSISTENT_VOLUME_CLAIM_PREFIX, volumeNameOne,
-        storageClassField);
-    final String storageClassKeyTwo = String.format(keyPattern,
-        KubernetesContext.KUBERNETES_PERSISTENT_VOLUME_CLAIM_PREFIX, volumeNameTwo,
-        storageClassField);
+    final String storageClassKeyOne = String.format(keyPattern, volumeNameOne, storageClassField);
+    final String storageClassKeyTwo = String.format(keyPattern, volumeNameTwo, storageClassField);
 
     final Config configPVC = Config.newBuilder()
         .put(claimNameKeyOne, expectedClaimNameOne)
