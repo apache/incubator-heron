@@ -898,11 +898,9 @@ public class V1Controller extends KubernetesController {
 
       V1PersistentVolumeClaim claim = new V1PersistentVolumeClaimBuilder()
           .withNewMetadata()
+            .withLabels(getPersistentVolumeClaimLabels(getTopologyName()))
           .endMetadata()
           .withNewSpec()
-            .withNewSelector()
-              .withMatchLabels(getPersistentVolumeClaimMatchLabels(getTopologyName()))
-            .endSelector()
             .withNewVolumeName(pvc.getKey())
           .endSpec()
           .build();
@@ -1033,7 +1031,7 @@ public class V1Controller extends KubernetesController {
 
     // Generate match label.
     for (Map.Entry<String, String> label
-        : getPersistentVolumeClaimMatchLabels(topologyName).entrySet()) {
+        : getPersistentVolumeClaimLabels(topologyName).entrySet()) {
       if (selectorMatchLabel.length() != 0) {
         selectorMatchLabel.append(",");
       }
@@ -1060,9 +1058,9 @@ public class V1Controller extends KubernetesController {
 
       LOG.log(Level.INFO,
           String.format("Removing Dynamically backed Persistent Volume Claims for `%s`:%n%s",
-          topologyName, status.getStatus()));
+          topologyName, status.getMessage()));
     } catch (ApiException e) {
-      final String message = String.format("Failed to connect to K8s cluster to delete Persistent"
+      final String message = String.format("Failed to connect to K8s cluster to delete Persistent "
               + "Volume Claims for topology `%s`. A manual clean-up is required.%n%s",
           topologyName, e.getMessage());
       LOG.log(Level.WARNING, message);
@@ -1077,7 +1075,7 @@ public class V1Controller extends KubernetesController {
    * @return A map consisting of the <code>label-value</code> pairs to be used in a <code>Selector</code>.
    */
   @VisibleForTesting
-  protected static Map<String, String> getPersistentVolumeClaimMatchLabels(String topologyName) {
+  protected static Map<String, String> getPersistentVolumeClaimLabels(String topologyName) {
     return new HashMap<String, String>() {
       {
         put(KubernetesConstants.LABEL_TOPOLOGY, topologyName);
