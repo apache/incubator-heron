@@ -170,3 +170,17 @@ One `Persistent Volume Claim`, a `Volume`, and a `VolumeMount` will be created f
 | `accessModes` | A comma separated list of access modes. | Entries made in the `Persistent Volume Claim`.
 | `sizeLimit` | A resource request for storage space. | Entries made in the `Persistent Volume Claim`.
 | `volumeMode` | Either `FileSystem` (default) or `Block` (raw block). [Read more](https://kubernetes.io/docs/concepts/storage/_print/#volume-mode). | Entries made in the `Persistent Volume Claim`.
+| Labels | Two labels for `topology` and `onDemand` provisioning. | These labels are only added to dynamically backed `Persistent Volume Claim`s created by Heron to support the removal of any claims created when a topology is terminated.
+
+The following table outlines CLI options which are either ***required*** ( &#x2611; ) or ***optional*** ( &#x2612; ) depending on if you are using dynamic or statically backed `Volumes`.
+
+| Option | Dynamic | Static |
+|---|---|---|
+| `VOLUME NAME` | &#x2611; | &#x2611;
+| `path` | &#x2611; | &#x2611;
+| `subPath` | &#x2612; | &#x2612;
+| `claimName` | &#x2611; | &#x2611;
+| `storageClassName` | &#x2611; | &#x2612;
+| `accessModes` | &#x2611; | &#x2612;
+| `sizeLimit` | &#x2612; | &#x2612;
+| `volumeMode` | &#x2612; | &#x2612;
