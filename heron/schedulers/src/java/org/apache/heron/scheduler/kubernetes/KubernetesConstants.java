@@ -93,6 +93,9 @@ public final class KubernetesConstants {
       Pattern.compile("[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*",
           Pattern.CASE_INSENSITIVE);
 
+  public static final Pattern VALID_LOWERCASE_RFC_1123_REGEX =
+      Pattern.compile("[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*");
+
   public static final List<String> VALID_IMAGE_PULL_POLICIES = Collections.unmodifiableList(
       Arrays.asList(
           "IfNotPresent",
