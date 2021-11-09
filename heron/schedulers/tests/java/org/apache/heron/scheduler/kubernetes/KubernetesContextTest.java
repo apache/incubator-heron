@@ -27,6 +27,7 @@ import java.util.Map;
 import org.junit.Assert;
 import org.junit.Test;
 
+import org.apache.heron.scheduler.TopologySubmissionException;
 import org.apache.heron.scheduler.kubernetes.KubernetesUtils.TestTuple;
 import org.apache.heron.spi.common.Config;
 
@@ -205,7 +206,8 @@ public class KubernetesContextTest {
   @Test
   public void testGetPersistentVolumeClaimsErrors() {
     final String volumeNameValid = "volume-name-valid";
-    final String failureValue = "Should Fail";
+    final String volumeNameInvalid = "volume-Name-Invalid";
+    final String failureValue = "Should-Fail";
     final String generalFailureMessage = "Invalid Persistent Volume";
     final String keyPattern = KubernetesContext.KUBERNETES_PERSISTENT_VOLUME_CLAIM_PREFIX
         + "%s.%s";
@@ -232,12 +234,32 @@ public class KubernetesContextTest {
     testCases.add(new TestTuple<>("Only a key prefix should trigger exception",
         configJustPrefix, generalFailureMessage));
 
+    // Invalid Volume Name.
+    final Config configInvalidVolumeName = Config.newBuilder()
+        .put(String.format(keyPattern, volumeNameInvalid, "claimName"), failureValue)
+        .build();
+    testCases.add(new TestTuple<>("Invalid Volume Name should trigger exception",
+        configInvalidVolumeName, "lowercase RFC-1123"));
+
+    // Invalid Claim Name.
+    final Config configInvalidClaimName = Config.newBuilder()
+        .put(String.format(keyPattern, volumeNameValid, "claimName"), failureValue)
+        .build();
+    testCases.add(new TestTuple<>("Invalid Claim Name should trigger exception",
+        configInvalidClaimName, "Option `claimName`"));
+
+    // Invalid Storage Class Name.
+    final Config configInvalidStorageClassName = Config.newBuilder()
+        .put(String.format(keyPattern, volumeNameValid, "storageClassName"), failureValue)
+        .build();
+    testCases.add(new TestTuple<>("Invalid Storage Class Name should trigger exception",
+        configInvalidStorageClassName, "Option `storageClassName`"));
+
     // Testing loop.
     for (TestTuple<Config, String> testCase : testCases) {
       try {
         KubernetesContext.getPersistentVolumeClaims(testCase.input, TOPOLOGY_NAME);
-      // SUPPRESS CHECKSTYLE IllegalCatch
-      } catch (Exception e) {
+      } catch (TopologySubmissionException e) {
         Assert.assertTrue(testCase.description, e.getMessage().contains(testCase.expected));
       }
     }

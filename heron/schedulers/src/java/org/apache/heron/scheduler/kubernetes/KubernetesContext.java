@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
 
 import org.apache.heron.scheduler.TopologySubmissionException;
 import org.apache.heron.spi.common.Config;
@@ -243,6 +244,7 @@ public final class KubernetesContext extends Context {
     final int prefixLength = KUBERNETES_PERSISTENT_VOLUME_CLAIM_PREFIX.length();
     final int volumeNameIdx = 0;
     final int optionIdx = 1;
+    final Matcher matcher = KubernetesConstants.VALID_LOWERCASE_RFC_1123_REGEX.matcher("");
 
     final Map<String, Map<KubernetesConstants.PersistentVolumeClaimOptions, String>> volumes
         = new HashMap<>();
@@ -263,8 +265,33 @@ public final class KubernetesContext extends Context {
         Map<KubernetesConstants.PersistentVolumeClaimOptions, String> volume =
             volumes.get(volumeName);
         if (volume == null) {
+          // Validate new Volume Names.
+          if (!matcher.reset(volumeName).matches()) {
+            throw new TopologySubmissionException(
+                String.format("Volume name `%s` does not match lowercase RFC-1123 pattern",
+                    volumeName));
+          }
           volume = new HashMap<>();
           volumes.put(volumeName, volume);
+        }
+
+        /* Validate Claim and Storage Class names.
+          `notClaimNameOnDemand` checks for a `claimName` which is not `OnDemand`.
+          [1] `notClaimNameOnDemand`: Evaluated first.
+          [2] `storageClassName`: Check if it is the provided `option`.
+          Conditions [1] OR [2] are True, then...
+          [3] `AND` check for a valid lowercase RFC-1123 pattern.
+         */
+        boolean notClaimNameOnDemand =
+            KubernetesConstants.PersistentVolumeClaimOptions.claimName.equals(option)
+                && !KubernetesConstants.LABEL_ON_DEMAND.equalsIgnoreCase(value);
+        if ((notClaimNameOnDemand // [1]
+            ||
+            KubernetesConstants.PersistentVolumeClaimOptions.storageClassName.equals(option)) // [2]
+            && !matcher.reset(value).matches()) {
+          throw new TopologySubmissionException(
+              String.format("Option `%s` value `%s` does not match lowercase RFC-1123 pattern",
+                  option, value));
         }
 
         // Dynamic Provisioned Volume: Add token and generate volume name.
