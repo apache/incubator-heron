@@ -1020,22 +1020,22 @@ public class V1Controller extends KubernetesController {
   /**
    * Removes all Dynamically backed Persistent Volume Claims associated with a specific topology, if
    * they exist. It looks for the following:
-   * selector:
-   *   matchLabels:
+   * metadata:
+   *   labels:
    *     topology: <code>topology-name</code>
    *     onDemand: <code>true</code>
    */
   private void removeDynamicBackedPersistentVolumeClaims() {
     final String topologyName = getTopologyName();
-    final StringBuilder selectorMatchLabel = new StringBuilder();
+    final StringBuilder selectorLabel = new StringBuilder();
 
-    // Generate match label.
+    // Generate selector label.
     for (Map.Entry<String, String> label
         : getPersistentVolumeClaimLabels(topologyName).entrySet()) {
-      if (selectorMatchLabel.length() != 0) {
-        selectorMatchLabel.append(",");
+      if (selectorLabel.length() != 0) {
+        selectorLabel.append(",");
       }
-      selectorMatchLabel.append(label.getKey()).append("=").append(label.getValue());
+      selectorLabel.append(label.getKey()).append("=").append(label.getValue());
     }
 
     // Remove all dynamically backed Persistent Volume Claims.
@@ -1047,7 +1047,7 @@ public class V1Controller extends KubernetesController {
           null,
           null,
           null,
-          selectorMatchLabel.toString(),
+          selectorLabel.toString(),
           null,
           null,
           null,
