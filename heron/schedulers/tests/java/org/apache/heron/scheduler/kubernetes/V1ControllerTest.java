@@ -40,6 +40,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.heron.common.basics.ByteAmount;
 import org.apache.heron.common.basics.Pair;
 import org.apache.heron.scheduler.TopologySubmissionException;
+import org.apache.heron.scheduler.kubernetes.KubernetesUtils.TestTuple;
 import org.apache.heron.spi.common.Config;
 import org.apache.heron.spi.common.Key;
 import org.apache.heron.spi.packing.Resource;
@@ -880,11 +881,15 @@ public class V1ControllerTest {
         .withSubPath(mountSubPathTwo)
         .build();
 
+    // Test case container.
+    final List<TestTuple<Pair<List<V1Volume>, List<V1VolumeMount>>, Object[]>> testCases =
+        new LinkedList<>();
+
     // Default case: No PVC provided.
     final Pair<List<V1Volume>, List<V1VolumeMount>> actualEmpty =
         v1ControllerPodTemplate.createPersistentVolumeClaimVolumesAndMounts(new HashMap<>());
-    Assert.assertTrue("Generated an empty list of Volumes", actualEmpty.first.isEmpty());
-    Assert.assertTrue("Generated an empty list of Volumes Mounts", actualEmpty.second.isEmpty());
+    testCases.add(new TestTuple<>("Generated an empty list of Volumes", actualEmpty,
+        new Object[] {new LinkedList<V1Volume>(), new LinkedList<V1VolumeMount>()}));
 
     // PVC Provided.
     final Pair<List<V1Volume>, List<V1VolumeMount>> expectedFull =
@@ -893,10 +898,16 @@ public class V1ControllerTest {
             new LinkedList<>(Arrays.asList(volumeMountOne, volumeMountTwo)));
     final Pair<List<V1Volume>, List<V1VolumeMount>> actualFull =
         v1ControllerPodTemplate.createPersistentVolumeClaimVolumesAndMounts(mapPVCOpts);
-    Assert.assertTrue("Generated a list of Volumes",
-        expectedFull.first.containsAll(actualFull.first));
-    Assert.assertTrue("Generated a list of Volumes Mounts",
-        expectedFull.second.containsAll(actualFull.second));
+    testCases.add(new TestTuple<>("Generated a list of Volumes", actualFull,
+        new Object[] {expectedFull.first, expectedFull.second}));
+
+    // Testing loop.
+    for (TestTuple<Pair<List<V1Volume>, List<V1VolumeMount>>, Object[]> testCase : testCases) {
+      Assert.assertTrue(testCase.description,
+          ((List<V1Volume>) testCase.expected[0]).containsAll(testCase.input.first));
+      Assert.assertTrue(testCase.description + " Mounts",
+          ((List<V1VolumeMount>) testCase.expected[1]).containsAll(testCase.input.second));
+    }
   }
 
   @Test
@@ -934,6 +945,9 @@ public class V1ControllerTest {
         .withMountPath("/secondary/mount/path")
         .build();
 
+    // Test case container.
+    final List<TestTuple<Object[], Object[]>> testCases = new LinkedList<>();
+
     // No Persistent Volume Claim.
     final V1PodSpec podSpecEmptyCase = new V1PodSpecBuilder().withVolumes(baseVolume).build();
     final V1Container executorEmptyCase =
@@ -944,15 +958,9 @@ public class V1ControllerTest {
     Pair<List<V1Volume>, List<V1VolumeMount>> emptyVolumeAndMount =
         new Pair<>(new LinkedList<>(), new LinkedList<>());
 
-    doReturn(emptyVolumeAndMount)
-        .when(v1ControllerWithPodTemplate)
-        .createPersistentVolumeClaimVolumesAndMounts(anyMap());
-
-    v1ControllerWithPodTemplate
-        .configurePodWithPersistentVolumeClaims(podSpecEmptyCase, executorEmptyCase);
-
-    Assert.assertEquals("Empty Pod Specs match", podSpecEmptyCase, expectedEmptyPodSpec);
-    Assert.assertEquals("Empty Executors match", executorEmptyCase, expectedEmptyExecutor);
+    testCases.add(new TestTuple<>("Empty",
+        new Object[]{podSpecEmptyCase, executorEmptyCase, emptyVolumeAndMount},
+        new Object[]{expectedEmptyPodSpec, expectedEmptyExecutor}));
 
     // Non-clashing Persistent Volume Claim.
     final V1PodSpec podSpecNoClashCase = new V1PodSpecBuilder()
@@ -974,15 +982,9 @@ public class V1ControllerTest {
         new LinkedList<>(Collections.singletonList(secondaryVolume)),
         new LinkedList<>(Collections.singletonList(secondaryVolumeMount)));
 
-    doReturn(noClashVolumeAndMount)
-        .when(v1ControllerWithPodTemplate)
-        .createPersistentVolumeClaimVolumesAndMounts(anyMap());
-
-    v1ControllerWithPodTemplate
-        .configurePodWithPersistentVolumeClaims(podSpecNoClashCase, executorNoClashCase);
-
-    Assert.assertEquals("No Clash Pod Specs match", podSpecNoClashCase, expectedNoClashPodSpec);
-    Assert.assertEquals("No Clash Executors match", executorNoClashCase, expectedNoClashExecutor);
+    testCases.add(new TestTuple<>("No Clash",
+        new Object[]{podSpecNoClashCase, executorNoClashCase, noClashVolumeAndMount},
+        new Object[]{expectedNoClashPodSpec, expectedNoClashExecutor}));
 
     // Clashing Persistent Volume Claim.
     final V1PodSpec podSpecClashCase = new V1PodSpecBuilder()
@@ -1004,14 +1006,24 @@ public class V1ControllerTest {
         new LinkedList<>(Arrays.asList(clashingVolume, secondaryVolume)),
         new LinkedList<>(Arrays.asList(clashingVolumeMount, secondaryVolumeMount)));
 
-    doReturn(clashVolumeAndMount)
-        .when(v1ControllerWithPodTemplate)
-        .createPersistentVolumeClaimVolumesAndMounts(anyMap());
+    testCases.add(new TestTuple<>("Clashing",
+        new Object[]{podSpecClashCase, executorClashCase, clashVolumeAndMount},
+        new Object[]{expectedClashPodSpec, expectedClashExecutor}));
 
-    v1ControllerWithPodTemplate
-        .configurePodWithPersistentVolumeClaims(podSpecClashCase, executorClashCase);
+    // Testing loop.
+    for (TestTuple<Object[], Object[]> testCase : testCases) {
+      doReturn(testCase.input[2])
+          .when(v1ControllerWithPodTemplate)
+          .createPersistentVolumeClaimVolumesAndMounts(anyMap());
 
-    Assert.assertEquals("Clashing Pod Specs match", podSpecClashCase, expectedClashPodSpec);
-    Assert.assertEquals("Clashing Executors match", executorClashCase, expectedClashExecutor);
+      v1ControllerWithPodTemplate
+          .configurePodWithPersistentVolumeClaims((V1PodSpec) testCase.input[0],
+              (V1Container) testCase.input[1]);
+
+      Assert.assertEquals("Pod Specs match " + testCase.description,
+          testCase.input[0], testCase.expected[0]);
+      Assert.assertEquals("Executors match " + testCase.description,
+          testCase.input[1], testCase.expected[1]);
+    }
   }
 }
