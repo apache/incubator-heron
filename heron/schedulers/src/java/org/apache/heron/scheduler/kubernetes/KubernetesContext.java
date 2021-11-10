@@ -276,19 +276,18 @@ public final class KubernetesContext extends Context {
         }
 
         /* Validate Claim and Storage Class names.
-          `notClaimNameOnDemand` checks for a `claimName` which is not `OnDemand`.
-          [1] `notClaimNameOnDemand`: Evaluated first.
+          [1] `claimNameNotOnDemand`: checks for a `claimName` which is not `OnDemand`.
           [2] `storageClassName`: Check if it is the provided `option`.
           Conditions [1] OR [2] are True, then...
           [3] `AND` check for a valid lowercase RFC-1123 pattern.
          */
-        boolean notClaimNameOnDemand =
+        boolean claimNameNotOnDemand =
             KubernetesConstants.PersistentVolumeClaimOptions.claimName.equals(option)
                 && !KubernetesConstants.LABEL_ON_DEMAND.equalsIgnoreCase(value);
-        if ((notClaimNameOnDemand // [1]
+        if ((claimNameNotOnDemand // [1]
             ||
             KubernetesConstants.PersistentVolumeClaimOptions.storageClassName.equals(option)) // [2]
-            && !matcher.reset(value).matches()) {
+            && !matcher.reset(value).matches()) { // [3]
           throw new TopologySubmissionException(
               String.format("Option `%s` value `%s` does not match lowercase RFC-1123 pattern",
                   option, value));
