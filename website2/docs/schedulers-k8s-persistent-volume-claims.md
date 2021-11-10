@@ -58,7 +58,7 @@ metadata:
 
 ## Usage
 
-To configure a Persistent Volume Claim you must use the `--config-property` option with the `heron.kubernetes.volumes.persistentVolumeClaim.` command prefix. Heron will not validate your Persistent Volume Claim configurations, so please validate them to ensure is well-formed. All names must comply with the *lowercase RFC-1123* standard.
+To configure a Persistent Volume Claim you must use the `--config-property` option with the `heron.kubernetes.volumes.persistentVolumeClaim.` command prefix. Heron will not validate your Persistent Volume Claim configurations, so please validate them to ensure they are well-formed. All names must comply with the [*lowercase RFC-1123*](https://kubernetes.io/docs/concepts/overview/working-with-objects/names/) standard.
 
 The command pattern is as follows:
 `heron.kubernetes.volumes.persistentVolumeClaim.[VOLUME NAME].[OPTION]=[VALUE]`
@@ -154,23 +154,7 @@ heron submit kubernetes \
 --config-property heron.kubernetes.volumes.persistentVolumeClaim.volumenameofchoice.subPath=/sub/path/to/mount
 ```
 
-## Configuration Items Created and Entries Made
-
-The configuration items and entries in the tables below will made in their respective areas.
-
-One `Persistent Volume Claim`, a `Volume`, and a `VolumeMount` will be created for each `volume name` which you specify.
-
-| Name | Description | Policy |
-|---|---|---|
-| `VOLUME NAME` | The `name` of the `Volume`. | Entries made in the `Persistent Volume Claim`'s spec, the Pod Spec's `Volumes`, and the `executor` containers `volumeMounts`.
-| `path` | The `mountPath` of the `Volume`. | Entries made in the `executor` containers `volumeMounts`.
-| `subPath` | The `subPath` of the `Volume`. | Entries made in the `executor` containers `volumeMounts`.
-| `claimName` | The identifier name of the `Persistent Volume Claim`. If set to `OnDemand` a dynamically backed Persistent Volume Claim is created with a `Claim Name` of `ondemand-[Topology-Name]-[VOLUME-NAME]`. | Entries made in the `Persistent Volume Claim`'s metadata (if `OnDemand`) and the Pod Spec's `Volume`.
-| `storageClassName` | The identifier name used to reference the dynamic `StorageClass`. | Entries made in the `Persistent Volume Claim` and Pod Spec's `Volume`.
-| `accessModes` | A comma separated list of access modes. | Entries made in the `Persistent Volume Claim`.
-| `sizeLimit` | A resource request for storage space. | Entries made in the `Persistent Volume Claim`.
-| `volumeMode` | Either `FileSystem` (default) or `Block` (raw block). [Read more](https://kubernetes.io/docs/concepts/storage/_print/#volume-mode). | Entries made in the `Persistent Volume Claim`.
-| Labels | Two labels for `topology` and `onDemand` provisioning. | These labels are only added to dynamically backed `Persistent Volume Claim`'s created by Heron to support the removal of any claims created when a topology is terminated.
+## Required and Optional Configuration Items
 
 The following table outlines CLI options which are either ***required*** ( &#x2611; ) or ***optional*** ( &#x2612; ) depending on if you are using dynamic or statically backed `Volumes`.
 
@@ -184,3 +168,21 @@ The following table outlines CLI options which are either ***required*** ( &#x26
 | `accessModes` | &#x2611; | &#x2612;
 | `sizeLimit` | &#x2612; | &#x2612;
 | `volumeMode` | &#x2612; | &#x2612;
+
+## Configuration Items Created and Entries Made
+
+The configuration items and entries in the tables below will made in their respective areas.
+
+One `Persistent Volume Claim` (if dynamically backed), a `Volume`, and a `VolumeMount` will be created for each `volume name` which you specify.
+
+| Name | Description | Policy |
+|---|---|---|
+| `VOLUME NAME` | The `name` of the `Volume`. | Entries made in the `Persistent Volume Claim`'s spec, the Pod Spec's `Volumes`, and the `executor` containers `volumeMounts`.
+| `path` | The `mountPath` of the `Volume`. | Entries made in the `executor` containers `volumeMounts`.
+| `subPath` | The `subPath` of the `Volume`. | Entries made in the `executor` containers `volumeMounts`.
+| `claimName` | The identifier name of the `Persistent Volume Claim`. If set to `OnDemand` a dynamically backed Persistent Volume Claim is created with a `Claim Name` of `ondemand-[Topology-Name]-[VOLUME-NAME]`. | Entries made in the `Persistent Volume Claim`'s metadata (if `OnDemand`) and the Pod Spec's `Volume`.
+| `storageClassName` | The identifier name used to reference the dynamic `StorageClass`. | Entries made in the `Persistent Volume Claim` and Pod Spec's `Volume`.
+| `accessModes` | A comma separated list of access modes. | Entries made in the `Persistent Volume Claim`.
+| `sizeLimit` | A resource request for storage space. | Entries made in the `Persistent Volume Claim`.
+| `volumeMode` | Either `FileSystem` (default) or `Block` (raw block). [Read more](https://kubernetes.io/docs/concepts/storage/_print/#volume-mode). | Entries made in the `Persistent Volume Claim`.
+| Labels | Two labels for `topology` and `onDemand` provisioning are added. | These labels are only added to dynamically backed `Persistent Volume Claim`'s created by Heron to support the removal of any claims created when a topology is terminated.
