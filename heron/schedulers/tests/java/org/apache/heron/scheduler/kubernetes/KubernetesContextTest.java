@@ -194,8 +194,8 @@ public class KubernetesContextTest {
     Assert.assertTrue("Contains all provided Volumes",
         actual.keySet().containsAll(expectedKeys));
 
-    for (TestTuple<Map<PersistentVolumeClaimOptions, String>, List<Object>[]>
-        testCase : testCases) {
+    for (TestTuple<Map<PersistentVolumeClaimOptions, String>, List<Object>[]> testCase
+        : testCases) {
       Assert.assertTrue(testCase.description + " keys",
           testCase.input.keySet().containsAll(testCase.expected[0]));
       Assert.assertTrue(testCase.description + " values",
