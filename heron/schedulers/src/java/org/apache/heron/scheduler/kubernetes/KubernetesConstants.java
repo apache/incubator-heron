@@ -111,19 +111,12 @@ public final class KubernetesConstants {
       )
   );
 
-  enum PersistentVolumeClaimOptions {
-    claimName,
+  enum VolumeClaimTemplateConfigKeys {
     storageClassName,
     sizeLimit,
     accessModes,
     volumeMode,
-    onDemand, // Flag to indicate dynamic provisioning.
     path,     // Added to container.
     subPath,  // Added to container.
-  }
-
-  public static String generatePersistentVolumeClaimName(String topologyName, String volumeName) {
-    return String.format("%s-%s-%s", LABEL_ON_DEMAND.toLowerCase(),
-        topologyName.toLowerCase(), volumeName);
   }
 }
