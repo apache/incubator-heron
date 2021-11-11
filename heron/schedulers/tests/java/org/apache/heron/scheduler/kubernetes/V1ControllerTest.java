@@ -66,7 +66,7 @@ import io.kubernetes.client.openapi.models.V1VolumeBuilder;
 import io.kubernetes.client.openapi.models.V1VolumeMount;
 import io.kubernetes.client.openapi.models.V1VolumeMountBuilder;
 
-import static org.apache.heron.scheduler.kubernetes.KubernetesConstants.PersistentVolumeClaimOptions;
+import static org.apache.heron.scheduler.kubernetes.KubernetesConstants.VolumeClaimTemplateConfigKeys;
 import static org.mockito.Matchers.anyMap;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doReturn;
@@ -753,7 +753,6 @@ public class V1ControllerTest {
     final String volumeNameOne = "volume-name-one";
     final String volumeNameTwo = "volume-name-two";
     final String volumeNameStatic = "volume-name-static";
-    final String claimName = "claim-name";
     final String storageClassName = "storage-class-name";
     final String sizeLimit = "555Gi";
     final String accessModesList = "ReadWriteOnce,ReadOnlyMany,ReadWriteMany";
@@ -761,47 +760,41 @@ public class V1ControllerTest {
     final String volumeMode = "VolumeMode";
     final String path = "/path/to/mount/";
     final String subPath = "/sub/path/to/mount/";
-    final Map<String, Map<PersistentVolumeClaimOptions, String>> mapPVCOpts =
+    final Map<String, Map<VolumeClaimTemplateConfigKeys, String>> mapPVCOpts =
         ImmutableMap.of(
-            volumeNameOne, new HashMap<PersistentVolumeClaimOptions, String>() {
+            volumeNameOne, new HashMap<VolumeClaimTemplateConfigKeys, String>() {
               {
-                put(PersistentVolumeClaimOptions.claimName, claimName);
-                put(PersistentVolumeClaimOptions.storageClassName, storageClassName);
-                put(PersistentVolumeClaimOptions.sizeLimit, sizeLimit);
-                put(PersistentVolumeClaimOptions.accessModes, accessModesList);
-                put(PersistentVolumeClaimOptions.volumeMode, volumeMode);
-                put(PersistentVolumeClaimOptions.path, path);
-                put(PersistentVolumeClaimOptions.onDemand, null);
+                put(VolumeClaimTemplateConfigKeys.storageClassName, storageClassName);
+                put(VolumeClaimTemplateConfigKeys.sizeLimit, sizeLimit);
+                put(VolumeClaimTemplateConfigKeys.accessModes, accessModesList);
+                put(VolumeClaimTemplateConfigKeys.volumeMode, volumeMode);
+                put(VolumeClaimTemplateConfigKeys.path, path);
               }
             },
-            volumeNameTwo, new HashMap<PersistentVolumeClaimOptions, String>() {
+            volumeNameTwo, new HashMap<VolumeClaimTemplateConfigKeys, String>() {
               {
-                put(PersistentVolumeClaimOptions.claimName, claimName);
-                put(PersistentVolumeClaimOptions.storageClassName, storageClassName);
-                put(PersistentVolumeClaimOptions.sizeLimit, sizeLimit);
-                put(PersistentVolumeClaimOptions.accessModes, accessModes);
-                put(PersistentVolumeClaimOptions.volumeMode, volumeMode);
-                put(PersistentVolumeClaimOptions.path, path);
-                put(PersistentVolumeClaimOptions.subPath, subPath);
-                put(PersistentVolumeClaimOptions.onDemand, null);
+                put(VolumeClaimTemplateConfigKeys.storageClassName, storageClassName);
+                put(VolumeClaimTemplateConfigKeys.sizeLimit, sizeLimit);
+                put(VolumeClaimTemplateConfigKeys.accessModes, accessModes);
+                put(VolumeClaimTemplateConfigKeys.volumeMode, volumeMode);
+                put(VolumeClaimTemplateConfigKeys.path, path);
+                put(VolumeClaimTemplateConfigKeys.subPath, subPath);
               }
             },
-            volumeNameStatic, new HashMap<PersistentVolumeClaimOptions, String>() {
+            volumeNameStatic, new HashMap<VolumeClaimTemplateConfigKeys, String>() {
               {
-                put(PersistentVolumeClaimOptions.claimName, claimName);
-                put(PersistentVolumeClaimOptions.storageClassName, storageClassName);
-                put(PersistentVolumeClaimOptions.sizeLimit, sizeLimit);
-                put(PersistentVolumeClaimOptions.accessModes, accessModes);
-                put(PersistentVolumeClaimOptions.volumeMode, volumeMode);
-                put(PersistentVolumeClaimOptions.path, path);
-                put(PersistentVolumeClaimOptions.subPath, subPath);
+                put(VolumeClaimTemplateConfigKeys.storageClassName, storageClassName);
+                put(VolumeClaimTemplateConfigKeys.sizeLimit, sizeLimit);
+                put(VolumeClaimTemplateConfigKeys.accessModes, accessModes);
+                put(VolumeClaimTemplateConfigKeys.volumeMode, volumeMode);
+                put(VolumeClaimTemplateConfigKeys.path, path);
+                put(VolumeClaimTemplateConfigKeys.subPath, subPath);
               }
             }
         );
 
     final V1PersistentVolumeClaim claimOne = new V1PersistentVolumeClaimBuilder()
         .withNewMetadata()
-          .withName(claimName)
           .withLabels(V1Controller.getPersistentVolumeClaimLabels(topologyName))
         .endMetadata()
         .withNewSpec()
@@ -817,7 +810,6 @@ public class V1ControllerTest {
 
     final V1PersistentVolumeClaim claimTwo = new V1PersistentVolumeClaimBuilder()
         .withNewMetadata()
-          .withName(claimName)
           .withLabels(V1Controller.getPersistentVolumeClaimLabels(topologyName))
         .endMetadata()
         .withNewSpec()
@@ -843,32 +835,26 @@ public class V1ControllerTest {
   @Test
   public void testCreatePersistentVolumeClaimVolumesAndMounts() {
     final String volumeNameOne = "VolumeNameONE";
-    final String claimNameOne = "ClaimNameONE";
     final String volumeNameTwo = "VolumeNameTWO";
-    final String claimNameTwo = "ClaimNameTWO";
     final String mountPathOne = "/mount/path/ONE";
     final String mountPathTwo = "/mount/path/TWO";
     final String mountSubPathTwo = "/mount/sub/path/TWO";
-    Map<String, Map<PersistentVolumeClaimOptions, String>> mapPVCOpts =
+    Map<String, Map<VolumeClaimTemplateConfigKeys, String>> mapPVCOpts =
         ImmutableMap.of(
             volumeNameOne, ImmutableMap.of(
-                PersistentVolumeClaimOptions.claimName, claimNameOne,
-                PersistentVolumeClaimOptions.path, mountPathOne),
+                VolumeClaimTemplateConfigKeys.path, mountPathOne),
             volumeNameTwo, ImmutableMap.of(
-                PersistentVolumeClaimOptions.claimName, claimNameTwo,
-                PersistentVolumeClaimOptions.path, mountPathTwo,
-                PersistentVolumeClaimOptions.subPath, mountSubPathTwo)
+                VolumeClaimTemplateConfigKeys.path, mountPathTwo,
+                VolumeClaimTemplateConfigKeys.subPath, mountSubPathTwo)
         );
     final V1Volume volumeOne = new V1VolumeBuilder()
         .withName(volumeNameOne)
         .withNewPersistentVolumeClaim()
-          .withClaimName(claimNameOne)
         .endPersistentVolumeClaim()
         .build();
     final V1Volume volumeTwo = new V1VolumeBuilder()
         .withName(volumeNameTwo)
         .withNewPersistentVolumeClaim()
-          .withClaimName(claimNameTwo)
         .endPersistentVolumeClaim()
         .build();
     final V1VolumeMount volumeMountOne = new V1VolumeMountBuilder()

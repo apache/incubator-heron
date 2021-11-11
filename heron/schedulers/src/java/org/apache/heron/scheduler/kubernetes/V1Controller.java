@@ -78,7 +78,6 @@ import io.kubernetes.client.openapi.models.V1StatefulSetSpec;
 import io.kubernetes.client.openapi.models.V1Status;
 import io.kubernetes.client.openapi.models.V1Toleration;
 import io.kubernetes.client.openapi.models.V1Volume;
-import io.kubernetes.client.openapi.models.V1VolumeBuilder;
 import io.kubernetes.client.openapi.models.V1VolumeMount;
 import io.kubernetes.client.openapi.models.V1VolumeMountBuilder;
 import io.kubernetes.client.util.PatchUtils;
@@ -99,7 +98,7 @@ public class V1Controller extends KubernetesController {
   private final AppsV1Api appsClient;
   private final CoreV1Api coreClient;
 
-  private Map<String, Map<KubernetesConstants.PersistentVolumeClaimOptions, String>>
+  private Map<String, Map<KubernetesConstants.VolumeClaimTemplateConfigKeys, String>>
       persistentVolumeClaimConfigs = null;
 
   V1Controller(Config configuration, Config runtimeConfiguration) {
@@ -140,7 +139,7 @@ public class V1Controller extends KubernetesController {
 
     // Get and then create Persistent Volume Claims from the CLI.
     persistentVolumeClaimConfigs =
-        KubernetesContext.getPersistentVolumeClaims(getConfiguration(), getTopologyName());
+        KubernetesContext.getVolumeClaimTemplates(getConfiguration());
     if (KubernetesContext.getPersistentVolumeClaimDisabled(getConfiguration())
         && !persistentVolumeClaimConfigs.isEmpty()) {
       final String message =
@@ -149,8 +148,6 @@ public class V1Controller extends KubernetesController {
       LOG.log(Level.WARNING, message);
       throw new TopologySubmissionException(message);
     }
-    final List<V1PersistentVolumeClaim> persistentVolumeClaims =
-        createPersistentVolumeClaims(persistentVolumeClaimConfigs);
 
     // find the max number of instances in a container so we can open
     // enough ports if remote debugging is enabled.
@@ -161,13 +158,6 @@ public class V1Controller extends KubernetesController {
     final V1StatefulSet statefulSet = createStatefulSet(containerResource, numberOfInstances);
 
     try {
-      // Create all Persistent Volume Claims before the Stateful Set.
-      for (V1PersistentVolumeClaim claim : persistentVolumeClaims) {
-        coreClient.createNamespacedPersistentVolumeClaim(getNamespace(), claim, null,
-            null, null);
-        LOG.log(Level.INFO, String.format("Created Persistent Volume Claim `%s`",
-            claim.getMetadata().getName()));
-      }
       appsClient.createNamespacedStatefulSet(getNamespace(), statefulSet, null,
               null, null);
     } catch (ApiException e) {
@@ -883,18 +873,13 @@ public class V1Controller extends KubernetesController {
    */
   @VisibleForTesting
   protected List<V1PersistentVolumeClaim> createPersistentVolumeClaims(
-      final Map<String, Map<KubernetesConstants.PersistentVolumeClaimOptions, String>> mapPVCOpts) {
+      final Map<String, Map<KubernetesConstants.VolumeClaimTemplateConfigKeys, String>> mapPVCOpts) {
 
     List<V1PersistentVolumeClaim> listOfPVCs = new LinkedList<>();
 
     // Iterate over all the PVC Volumes.
-    for (Map.Entry<String, Map<KubernetesConstants.PersistentVolumeClaimOptions, String>> pvc
+    for (Map.Entry<String, Map<KubernetesConstants.VolumeClaimTemplateConfigKeys, String>> pvc
         : mapPVCOpts.entrySet()) {
-
-      // Ignore Volumes which are not dynamically backed.
-      if (!pvc.getValue().containsKey(KubernetesConstants.PersistentVolumeClaimOptions.onDemand)) {
-        continue;
-      }
 
       V1PersistentVolumeClaim claim = new V1PersistentVolumeClaimBuilder()
           .withNewMetadata()
@@ -906,13 +891,10 @@ public class V1Controller extends KubernetesController {
           .build();
 
       // Populate PVC options.
-      for (Map.Entry<KubernetesConstants.PersistentVolumeClaimOptions, String> option
+      for (Map.Entry<KubernetesConstants.VolumeClaimTemplateConfigKeys, String> option
           : pvc.getValue().entrySet()) {
         String optionValue = option.getValue();
         switch(option.getKey()) {
-          case claimName:
-            claim.getMetadata().setName(optionValue);
-            break;
           case storageClassName:
             claim.getSpec().setStorageClassName(optionValue);
             break;
@@ -928,7 +910,7 @@ public class V1Controller extends KubernetesController {
             claim.getSpec().setVolumeMode(optionValue);
             break;
           // Valid ignored options not used in a PVC.
-          case path: case subPath: case onDemand:
+          case path: case subPath:
             break;
           default:
             throw new TopologySubmissionException(
@@ -949,34 +931,32 @@ public class V1Controller extends KubernetesController {
    */
   @VisibleForTesting
   protected Pair<List<V1Volume>, List<V1VolumeMount>> createPersistentVolumeClaimVolumesAndMounts(
-      final Map<String, Map<KubernetesConstants.PersistentVolumeClaimOptions, String>> mapPVCOpts) {
+      final Map<String, Map<KubernetesConstants.VolumeClaimTemplateConfigKeys, String>> mapPVCOpts) {
     List<V1Volume> volumeList = new LinkedList<>();
     List<V1VolumeMount> mountList = new LinkedList<>();
-    for (Map.Entry<String, Map<KubernetesConstants.PersistentVolumeClaimOptions, String>> volumeInfo
+    for (Map.Entry<String, Map<KubernetesConstants.VolumeClaimTemplateConfigKeys, String>> volumeInfo
         : mapPVCOpts.entrySet()) {
       final String volumeName = volumeInfo.getKey();
-      final String claimName = volumeInfo.getValue()
-          .get(KubernetesConstants.PersistentVolumeClaimOptions.claimName);
       final String path = volumeInfo.getValue()
-          .get(KubernetesConstants.PersistentVolumeClaimOptions.path);
+          .get(KubernetesConstants.VolumeClaimTemplateConfigKeys.path);
       final String subPath = volumeInfo.getValue()
-          .get(KubernetesConstants.PersistentVolumeClaimOptions.subPath);
-      if (claimName == null || claimName.isEmpty()) {
-        throw new TopologySubmissionException(
-            String.format("Claim name is missing from '%s'", volumeName));
-      }
+          .get(KubernetesConstants.VolumeClaimTemplateConfigKeys.subPath);
+//      if (claimName == null || claimName.isEmpty()) {
+//        throw new TopologySubmissionException(
+//            String.format("Claim name is missing from '%s'", volumeName));
+//      }
       if (path == null || path.isEmpty()) {
         throw new TopologySubmissionException(
             String.format("Mount path is missing from '%s'", volumeName));
       }
 
-      final V1Volume volume = new V1VolumeBuilder()
-          .withName(volumeName)
-          .withNewPersistentVolumeClaim()
-            .withClaimName(claimName)
-          .endPersistentVolumeClaim()
-          .build();
-      volumeList.add(volume);
+//      final V1Volume volume = new V1VolumeBuilder()
+//          .withName(volumeName)
+//          .withNewPersistentVolumeClaim()
+//            .withClaimName(claimName)
+//          .endPersistentVolumeClaim()
+//          .build();
+//      volumeList.add(volume);
 
       final V1VolumeMountBuilder volumeMount = new V1VolumeMountBuilder()
           .withName(volumeName)
