@@ -354,17 +354,17 @@ http_archive(
 http_archive(
     name = "helm_mac",
     build_file = "@//:third_party/helm/helm.BUILD",
-    sha256 = "05c7748da0ea8d5f85576491cd3c615f94063f20986fd82a0f5658ddc286cdb1",
+    sha256 = "3a9efe337c61a61b3e160da919ac7af8cded8945b75706e401f3655a89d53ef5",
     strip_prefix = "darwin-amd64",
-    urls = ["https://get.helm.sh/helm-v3.0.2-darwin-amd64.tar.gz"],
+    urls = ["https://get.helm.sh/helm-v3.7.1-darwin-amd64.tar.gz"],
 )
 
 http_archive(
     name = "helm_linux",
     build_file = "@//:third_party/helm/helm.BUILD",
-    sha256 = "c6b7aa7e4ffc66e8abb4be328f71d48c643cb8f398d95c74d075cfb348710e1d",
+    sha256 = "6cd6cad4b97e10c33c978ff3ac97bb42b68f79766f1d2284cfd62ec04cd177f4",
     strip_prefix = "linux-amd64",
-    urls = ["https://get.helm.sh/helm-v3.0.2-linux-amd64.tar.gz"],
+    urls = ["https://get.helm.sh/helm-v3.7.1-linux-amd64.tar.gz"],
 )
 # end helm
 
