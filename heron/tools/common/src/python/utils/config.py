@@ -143,7 +143,6 @@ def get_classpath(jars):
   return ':'.join(map(normalized_class_path, jars))
 
 def _get_heron_dir():
-  # from https://github.com/pantsbuild/pex/blob/0ab3fd14f2789dba1a26cf145d1bfea82decf5f5/pex/pex_builder.py#L135
   pex_file = os.environ.get('PEX', None)
   if pex_file is not None:
     return normalized_class_path(str(Path(pex_file).resolve(strict=True).parent.parent))
