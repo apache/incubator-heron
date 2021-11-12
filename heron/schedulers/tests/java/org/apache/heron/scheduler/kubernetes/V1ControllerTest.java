@@ -66,7 +66,7 @@ import io.kubernetes.client.openapi.models.V1VolumeBuilder;
 import io.kubernetes.client.openapi.models.V1VolumeMount;
 import io.kubernetes.client.openapi.models.V1VolumeMountBuilder;
 
-import static org.apache.heron.scheduler.kubernetes.KubernetesConstants.PersistentVolumeClaimOptions;
+import static org.apache.heron.scheduler.kubernetes.KubernetesConstants.VolumeClaimTemplateConfigKeys;
 import static org.mockito.Matchers.anyMap;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doReturn;
@@ -753,7 +753,6 @@ public class V1ControllerTest {
     final String volumeNameOne = "volume-name-one";
     final String volumeNameTwo = "volume-name-two";
     final String volumeNameStatic = "volume-name-static";
-    final String claimName = "claim-name";
     final String storageClassName = "storage-class-name";
     final String sizeLimit = "555Gi";
     final String accessModesList = "ReadWriteOnce,ReadOnlyMany,ReadWriteMany";
@@ -761,51 +760,44 @@ public class V1ControllerTest {
     final String volumeMode = "VolumeMode";
     final String path = "/path/to/mount/";
     final String subPath = "/sub/path/to/mount/";
-    final Map<String, Map<PersistentVolumeClaimOptions, String>> mapPVCOpts =
+    final Map<String, Map<VolumeClaimTemplateConfigKeys, String>> mapPVCOpts =
         ImmutableMap.of(
-            volumeNameOne, new HashMap<PersistentVolumeClaimOptions, String>() {
+            volumeNameOne, new HashMap<VolumeClaimTemplateConfigKeys, String>() {
               {
-                put(PersistentVolumeClaimOptions.claimName, claimName);
-                put(PersistentVolumeClaimOptions.storageClassName, storageClassName);
-                put(PersistentVolumeClaimOptions.sizeLimit, sizeLimit);
-                put(PersistentVolumeClaimOptions.accessModes, accessModesList);
-                put(PersistentVolumeClaimOptions.volumeMode, volumeMode);
-                put(PersistentVolumeClaimOptions.path, path);
-                put(PersistentVolumeClaimOptions.onDemand, null);
+                put(VolumeClaimTemplateConfigKeys.storageClassName, storageClassName);
+                put(VolumeClaimTemplateConfigKeys.sizeLimit, sizeLimit);
+                put(VolumeClaimTemplateConfigKeys.accessModes, accessModesList);
+                put(VolumeClaimTemplateConfigKeys.volumeMode, volumeMode);
+                put(VolumeClaimTemplateConfigKeys.path, path);
               }
             },
-            volumeNameTwo, new HashMap<PersistentVolumeClaimOptions, String>() {
+            volumeNameTwo, new HashMap<VolumeClaimTemplateConfigKeys, String>() {
               {
-                put(PersistentVolumeClaimOptions.claimName, claimName);
-                put(PersistentVolumeClaimOptions.storageClassName, storageClassName);
-                put(PersistentVolumeClaimOptions.sizeLimit, sizeLimit);
-                put(PersistentVolumeClaimOptions.accessModes, accessModes);
-                put(PersistentVolumeClaimOptions.volumeMode, volumeMode);
-                put(PersistentVolumeClaimOptions.path, path);
-                put(PersistentVolumeClaimOptions.subPath, subPath);
-                put(PersistentVolumeClaimOptions.onDemand, null);
+                put(VolumeClaimTemplateConfigKeys.storageClassName, storageClassName);
+                put(VolumeClaimTemplateConfigKeys.sizeLimit, sizeLimit);
+                put(VolumeClaimTemplateConfigKeys.accessModes, accessModes);
+                put(VolumeClaimTemplateConfigKeys.volumeMode, volumeMode);
+                put(VolumeClaimTemplateConfigKeys.path, path);
+                put(VolumeClaimTemplateConfigKeys.subPath, subPath);
               }
             },
-            volumeNameStatic, new HashMap<PersistentVolumeClaimOptions, String>() {
+            volumeNameStatic, new HashMap<VolumeClaimTemplateConfigKeys, String>() {
               {
-                put(PersistentVolumeClaimOptions.claimName, claimName);
-                put(PersistentVolumeClaimOptions.storageClassName, storageClassName);
-                put(PersistentVolumeClaimOptions.sizeLimit, sizeLimit);
-                put(PersistentVolumeClaimOptions.accessModes, accessModes);
-                put(PersistentVolumeClaimOptions.volumeMode, volumeMode);
-                put(PersistentVolumeClaimOptions.path, path);
-                put(PersistentVolumeClaimOptions.subPath, subPath);
+                put(VolumeClaimTemplateConfigKeys.sizeLimit, sizeLimit);
+                put(VolumeClaimTemplateConfigKeys.accessModes, accessModes);
+                put(VolumeClaimTemplateConfigKeys.volumeMode, volumeMode);
+                put(VolumeClaimTemplateConfigKeys.path, path);
+                put(VolumeClaimTemplateConfigKeys.subPath, subPath);
               }
             }
         );
 
     final V1PersistentVolumeClaim claimOne = new V1PersistentVolumeClaimBuilder()
         .withNewMetadata()
-          .withName(claimName)
+          .withName(volumeNameOne)
           .withLabels(V1Controller.getPersistentVolumeClaimLabels(topologyName))
         .endMetadata()
         .withNewSpec()
-          .withNewVolumeName(volumeNameOne)
           .withStorageClassName(storageClassName)
           .withAccessModes(Arrays.asList(accessModesList.split(",")))
           .withVolumeMode(volumeMode)
@@ -817,11 +809,10 @@ public class V1ControllerTest {
 
     final V1PersistentVolumeClaim claimTwo = new V1PersistentVolumeClaimBuilder()
         .withNewMetadata()
-          .withName(claimName)
+          .withName(volumeNameTwo)
           .withLabels(V1Controller.getPersistentVolumeClaimLabels(topologyName))
         .endMetadata()
         .withNewSpec()
-          .withNewVolumeName(volumeNameTwo)
           .withStorageClassName(storageClassName)
           .withAccessModes(Collections.singletonList(accessModes))
           .withVolumeMode(volumeMode)
@@ -831,8 +822,22 @@ public class V1ControllerTest {
         .endSpec()
         .build();
 
+    final V1PersistentVolumeClaim claimStatic = new V1PersistentVolumeClaimBuilder()
+        .withNewMetadata()
+          .withName(volumeNameStatic)
+          .withLabels(V1Controller.getPersistentVolumeClaimLabels(topologyName))
+        .endMetadata()
+        .withNewSpec()
+          .withAccessModes(Collections.singletonList(accessModes))
+          .withVolumeMode(volumeMode)
+          .withNewResources()
+            .addToRequests("storage", new Quantity(sizeLimit))
+          .endResources()
+        .endSpec()
+        .build();
+
     final List<V1PersistentVolumeClaim> expectedClaims =
-        new LinkedList<>(Arrays.asList(claimOne, claimTwo));
+        new LinkedList<>(Arrays.asList(claimOne, claimTwo, claimStatic));
 
     final List<V1PersistentVolumeClaim> actualClaims =
         v1ControllerWithPodTemplate.createPersistentVolumeClaims(mapPVCOpts);
@@ -841,36 +846,20 @@ public class V1ControllerTest {
   }
 
   @Test
-  public void testCreatePersistentVolumeClaimVolumesAndMounts() {
+  public void testCreatePersistentVolumeClaimVolumeMounts() {
     final String volumeNameOne = "VolumeNameONE";
-    final String claimNameOne = "ClaimNameONE";
     final String volumeNameTwo = "VolumeNameTWO";
-    final String claimNameTwo = "ClaimNameTWO";
     final String mountPathOne = "/mount/path/ONE";
     final String mountPathTwo = "/mount/path/TWO";
     final String mountSubPathTwo = "/mount/sub/path/TWO";
-    Map<String, Map<PersistentVolumeClaimOptions, String>> mapPVCOpts =
+    Map<String, Map<VolumeClaimTemplateConfigKeys, String>> mapOfOpts =
         ImmutableMap.of(
             volumeNameOne, ImmutableMap.of(
-                PersistentVolumeClaimOptions.claimName, claimNameOne,
-                PersistentVolumeClaimOptions.path, mountPathOne),
+                VolumeClaimTemplateConfigKeys.path, mountPathOne),
             volumeNameTwo, ImmutableMap.of(
-                PersistentVolumeClaimOptions.claimName, claimNameTwo,
-                PersistentVolumeClaimOptions.path, mountPathTwo,
-                PersistentVolumeClaimOptions.subPath, mountSubPathTwo)
+                VolumeClaimTemplateConfigKeys.path, mountPathTwo,
+                VolumeClaimTemplateConfigKeys.subPath, mountSubPathTwo)
         );
-    final V1Volume volumeOne = new V1VolumeBuilder()
-        .withName(volumeNameOne)
-        .withNewPersistentVolumeClaim()
-          .withClaimName(claimNameOne)
-        .endPersistentVolumeClaim()
-        .build();
-    final V1Volume volumeTwo = new V1VolumeBuilder()
-        .withName(volumeNameTwo)
-        .withNewPersistentVolumeClaim()
-          .withClaimName(claimNameTwo)
-        .endPersistentVolumeClaim()
-        .build();
     final V1VolumeMount volumeMountOne = new V1VolumeMountBuilder()
         .withName(volumeNameOne)
         .withMountPath(mountPathOne)
@@ -882,148 +871,101 @@ public class V1ControllerTest {
         .build();
 
     // Test case container.
-    final List<TestTuple<Pair<List<V1Volume>, List<V1VolumeMount>>, Object[]>> testCases =
+    final List<TestTuple<List<V1VolumeMount>, List<V1VolumeMount>>> testCases =
         new LinkedList<>();
 
     // Default case: No PVC provided.
-    final Pair<List<V1Volume>, List<V1VolumeMount>> actualEmpty =
-        v1ControllerPodTemplate.createPersistentVolumeClaimVolumesAndMounts(new HashMap<>());
+    final List<V1VolumeMount> actualEmpty =
+        v1ControllerPodTemplate.createPersistentVolumeClaimVolumeMounts(new HashMap<>());
     testCases.add(new TestTuple<>("Generated an empty list of Volumes", actualEmpty,
-        new Object[] {new LinkedList<V1Volume>(), new LinkedList<V1VolumeMount>()}));
+        new LinkedList<>()));
 
     // PVC Provided.
-    final Pair<List<V1Volume>, List<V1VolumeMount>> expectedFull =
-        new Pair<>(
-            new LinkedList<>(Arrays.asList(volumeOne, volumeTwo)),
-            new LinkedList<>(Arrays.asList(volumeMountOne, volumeMountTwo)));
-    final Pair<List<V1Volume>, List<V1VolumeMount>> actualFull =
-        v1ControllerPodTemplate.createPersistentVolumeClaimVolumesAndMounts(mapPVCOpts);
-    testCases.add(new TestTuple<>("Generated a list of Volumes", actualFull,
-        new Object[] {expectedFull.first, expectedFull.second}));
+    final List<V1VolumeMount> expectedFull = Arrays.asList(volumeMountOne, volumeMountTwo);
+    final List<V1VolumeMount> actualFull =
+        v1ControllerPodTemplate.createPersistentVolumeClaimVolumeMounts(mapOfOpts);
+    testCases.add(new TestTuple<>("Generated a list of Volumes", actualFull, expectedFull));
 
     // Testing loop.
-    for (TestTuple<Pair<List<V1Volume>, List<V1VolumeMount>>, Object[]> testCase : testCases) {
-      Assert.assertTrue(testCase.description,
-          ((List<V1Volume>) testCase.expected[0]).containsAll(testCase.input.first));
+    for (TestTuple<List<V1VolumeMount>, List<V1VolumeMount>> testCase : testCases) {
       Assert.assertTrue(testCase.description + " Mounts",
-          ((List<V1VolumeMount>) testCase.expected[1]).containsAll(testCase.input.second));
+          testCase.expected.containsAll(testCase.input));
     }
   }
 
   @Test
-  public void testConfigurePodWithPersistentVolumeClaims() {
+  public void testConfigurePodWithPersistentVolumeClaimMounts() {
     final String volumeNameClashing = "clashing-volume";
     final String volumeMountNameClashing = "original-volume-mount";
-    V1Volume baseVolume = new V1VolumeBuilder()
-        .withName(volumeNameClashing)
-        .withNewPersistentVolumeClaim()
-          .withClaimName("Original Base Claim Name")
-        .endPersistentVolumeClaim()
-        .build();
     V1VolumeMount baseVolumeMount = new V1VolumeMountBuilder()
         .withName(volumeMountNameClashing)
         .withMountPath("/original/mount/path")
         .build();
-    V1Volume clashingVolume = new V1VolumeBuilder()
-        .withName(volumeNameClashing)
-        .withNewPersistentVolumeClaim()
-          .withClaimName("Clashing Claim Replaced")
-        .endPersistentVolumeClaim()
-        .build();
     V1VolumeMount clashingVolumeMount = new V1VolumeMountBuilder()
         .withName(volumeMountNameClashing)
         .withMountPath("/clashing/mount/path")
-        .build();
-    V1Volume secondaryVolume = new V1VolumeBuilder()
-        .withName("secondary-volume")
-        .withNewPersistentVolumeClaim()
-          .withClaimName("Original Secondary Claim Name")
-        .endPersistentVolumeClaim()
         .build();
     V1VolumeMount secondaryVolumeMount = new V1VolumeMountBuilder()
         .withName("secondary-volume-mount")
         .withMountPath("/secondary/mount/path")
         .build();
 
-    // Test case container.
-    final List<TestTuple<Object[], Object[]>> testCases = new LinkedList<>();
+    /* Test case container.
+     * Input: [V1Container to configure, List<V1VolumeMounts> to add]
+     * Expected: V1Container as it should be post configuration.
+     */
+    final List<TestTuple<Object[], V1Container>> testCases = new LinkedList<>();
 
     // No Persistent Volume Claim.
-    final V1PodSpec podSpecEmptyCase = new V1PodSpecBuilder().withVolumes(baseVolume).build();
     final V1Container executorEmptyCase =
         new V1ContainerBuilder().withVolumeMounts(baseVolumeMount).build();
-    final V1PodSpec expectedEmptyPodSpec = new V1PodSpecBuilder().withVolumes(baseVolume).build();
     final V1Container expectedEmptyExecutor =
         new V1ContainerBuilder().withVolumeMounts(baseVolumeMount).build();
-    Pair<List<V1Volume>, List<V1VolumeMount>> emptyVolumeAndMount =
-        new Pair<>(new LinkedList<>(), new LinkedList<>());
+    List<V1VolumeMount> emptyVolumeMount = new LinkedList<>();
 
     testCases.add(new TestTuple<>("Empty",
-        new Object[]{podSpecEmptyCase, executorEmptyCase, emptyVolumeAndMount},
-        new Object[]{expectedEmptyPodSpec, expectedEmptyExecutor}));
+        new Object[]{executorEmptyCase, emptyVolumeMount}, expectedEmptyExecutor));
 
     // Non-clashing Persistent Volume Claim.
-    final V1PodSpec podSpecNoClashCase = new V1PodSpecBuilder()
-        .withVolumes(baseVolume)
-        .build();
     final V1Container executorNoClashCase = new V1ContainerBuilder()
         .withVolumeMounts(baseVolumeMount)
-        .build();
-    final V1PodSpec expectedNoClashPodSpec = new V1PodSpecBuilder()
-        .addToVolumes(baseVolume)
-        .addToVolumes(secondaryVolume)
         .build();
     final V1Container expectedNoClashExecutor = new V1ContainerBuilder()
         .addToVolumeMounts(baseVolumeMount)
         .addToVolumeMounts(secondaryVolumeMount)
         .build();
 
-    Pair<List<V1Volume>, List<V1VolumeMount>> noClashVolumeAndMount = new Pair<>(
-        new LinkedList<>(Collections.singletonList(secondaryVolume)),
-        new LinkedList<>(Collections.singletonList(secondaryVolumeMount)));
+    List<V1VolumeMount> noClashVolumeMount =  Collections.singletonList(secondaryVolumeMount);
 
     testCases.add(new TestTuple<>("No Clash",
-        new Object[]{podSpecNoClashCase, executorNoClashCase, noClashVolumeAndMount},
-        new Object[]{expectedNoClashPodSpec, expectedNoClashExecutor}));
+        new Object[]{executorNoClashCase, noClashVolumeMount}, expectedNoClashExecutor));
 
     // Clashing Persistent Volume Claim.
-    final V1PodSpec podSpecClashCase = new V1PodSpecBuilder()
-        .withVolumes(baseVolume)
-        .build();
     final V1Container executorClashCase = new V1ContainerBuilder()
         .withVolumeMounts(baseVolumeMount)
-        .build();
-    final V1PodSpec expectedClashPodSpec = new V1PodSpecBuilder()
-        .addToVolumes(clashingVolume)
-        .addToVolumes(secondaryVolume)
         .build();
     final V1Container expectedClashExecutor = new V1ContainerBuilder()
         .addToVolumeMounts(clashingVolumeMount)
         .addToVolumeMounts(secondaryVolumeMount)
         .build();
 
-    Pair<List<V1Volume>, List<V1VolumeMount>> clashVolumeAndMount = new Pair<>(
-        new LinkedList<>(Arrays.asList(clashingVolume, secondaryVolume)),
-        new LinkedList<>(Arrays.asList(clashingVolumeMount, secondaryVolumeMount)));
+    List<V1VolumeMount> clashVolumeMount =
+        new LinkedList<>(Arrays.asList(clashingVolumeMount, secondaryVolumeMount));
 
     testCases.add(new TestTuple<>("Clashing",
-        new Object[]{podSpecClashCase, executorClashCase, clashVolumeAndMount},
-        new Object[]{expectedClashPodSpec, expectedClashExecutor}));
+        new Object[]{executorClashCase, clashVolumeMount}, expectedClashExecutor));
 
     // Testing loop.
-    for (TestTuple<Object[], Object[]> testCase : testCases) {
-      doReturn(testCase.input[2])
+    for (TestTuple<Object[], V1Container> testCase : testCases) {
+      doReturn(testCase.input[1])
           .when(v1ControllerWithPodTemplate)
-          .createPersistentVolumeClaimVolumesAndMounts(anyMap());
+          .createPersistentVolumeClaimVolumeMounts(anyMap());
 
       v1ControllerWithPodTemplate
-          .configurePodWithPersistentVolumeClaims((V1PodSpec) testCase.input[0],
-              (V1Container) testCase.input[1]);
+          .configurePodWithPersistentVolumeClaimMounts((V1Container) testCase.input[0]);
 
-      Assert.assertEquals("Pod Specs match " + testCase.description,
-          testCase.input[0], testCase.expected[0]);
       Assert.assertEquals("Executors match " + testCase.description,
-          testCase.input[1], testCase.expected[1]);
+          testCase.input[0], testCase.expected);
     }
   }
 }
