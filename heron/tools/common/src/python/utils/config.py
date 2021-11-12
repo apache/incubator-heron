@@ -143,6 +143,7 @@ def get_classpath(jars):
   return ':'.join(map(normalized_class_path, jars))
 
 def _get_heron_dir():
+  # from https://github.com/pantsbuild/pex/blob/0ab3fd14f2789dba1a26cf145d1bfea82decf5f5/pex/pex_builder.py#L135
   pex_file = os.environ.get('PEX', None)
   if pex_file is not None:
     return normalized_class_path(str(Path(pex_file).resolve(strict=True).parent.parent))
@@ -158,8 +159,6 @@ def get_heron_dir():
   its real path is '/Users/heron-user/.heron/bin/heron/tools/common/src/python/utils/config.pyc',
   the internal variable ``path`` would be '/Users/heron-user/.heron', which is the heron directory
 
-  This means the variable `go_above_dirs` below is 9.
-
   :return: root location of the .pex file
   """
   return _get_heron_dir()
@@ -174,8 +173,6 @@ def get_zipped_heron_dir():
     '/Users/heron-user/.pex/code/xxxyyy/heron/tools/common/src/python/utils/config.pyc', and
   the internal variable ``path`` would be '/Users/heron-user/.pex/code/xxxyyy/',
   which is the root PEX directory
-
-  This means the variable `go_above_dirs` below is 7.
 
   :return: root location of the .pex file.
   """
