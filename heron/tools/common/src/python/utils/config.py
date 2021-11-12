@@ -143,6 +143,9 @@ def get_classpath(jars):
   return ':'.join(map(normalized_class_path, jars))
 
 def _get_heron_dir():
+  pex_file = os.environ.get('PEX', None)
+  if pex_file is not None:
+    return normalized_class_path(str(Path(pex_file).resolve(strict=True).parent.parent))
   # assuming the tool runs from $HERON_ROOT/bin/<binary>
   return normalized_class_path(str(Path(sys.argv[0]).resolve(strict=True).parent.parent))
 
