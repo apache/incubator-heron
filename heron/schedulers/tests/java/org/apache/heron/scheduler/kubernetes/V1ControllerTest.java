@@ -783,7 +783,6 @@ public class V1ControllerTest {
             },
             volumeNameStatic, new HashMap<VolumeClaimTemplateConfigKeys, String>() {
               {
-                put(VolumeClaimTemplateConfigKeys.storageClassName, storageClassName);
                 put(VolumeClaimTemplateConfigKeys.sizeLimit, sizeLimit);
                 put(VolumeClaimTemplateConfigKeys.accessModes, accessModes);
                 put(VolumeClaimTemplateConfigKeys.volumeMode, volumeMode);
@@ -795,10 +794,10 @@ public class V1ControllerTest {
 
     final V1PersistentVolumeClaim claimOne = new V1PersistentVolumeClaimBuilder()
         .withNewMetadata()
+          .withName(volumeNameOne)
           .withLabels(V1Controller.getPersistentVolumeClaimLabels(topologyName))
         .endMetadata()
         .withNewSpec()
-          .withNewVolumeName(volumeNameOne)
           .withStorageClassName(storageClassName)
           .withAccessModes(Arrays.asList(accessModesList.split(",")))
           .withVolumeMode(volumeMode)
@@ -810,10 +809,10 @@ public class V1ControllerTest {
 
     final V1PersistentVolumeClaim claimTwo = new V1PersistentVolumeClaimBuilder()
         .withNewMetadata()
+          .withName(volumeNameTwo)
           .withLabels(V1Controller.getPersistentVolumeClaimLabels(topologyName))
         .endMetadata()
         .withNewSpec()
-          .withNewVolumeName(volumeNameTwo)
           .withStorageClassName(storageClassName)
           .withAccessModes(Collections.singletonList(accessModes))
           .withVolumeMode(volumeMode)
@@ -823,8 +822,22 @@ public class V1ControllerTest {
         .endSpec()
         .build();
 
+    final V1PersistentVolumeClaim claimStatic = new V1PersistentVolumeClaimBuilder()
+        .withNewMetadata()
+          .withName(volumeNameStatic)
+          .withLabels(V1Controller.getPersistentVolumeClaimLabels(topologyName))
+        .endMetadata()
+        .withNewSpec()
+          .withAccessModes(Collections.singletonList(accessModes))
+          .withVolumeMode(volumeMode)
+          .withNewResources()
+            .addToRequests("storage", new Quantity(sizeLimit))
+          .endResources()
+        .endSpec()
+        .build();
+
     final List<V1PersistentVolumeClaim> expectedClaims =
-        new LinkedList<>(Arrays.asList(claimOne, claimTwo));
+        new LinkedList<>(Arrays.asList(claimOne, claimTwo, claimStatic));
 
     final List<V1PersistentVolumeClaim> actualClaims =
         v1ControllerWithPodTemplate.createPersistentVolumeClaims(mapPVCOpts);

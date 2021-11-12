@@ -866,7 +866,7 @@ public class V1Controller extends KubernetesController {
   }
 
   /**
-   * Generates Dynamically backed <code>Persistent Volume Claims</code> from a mapping of <code>Volumes</code>
+   * Generates <code>Persistent Volume Claims Templates</code> from a mapping of <code>Volumes</code>
    * to <code>key-value</code> pairs of configuration options and values.
    * @param mapOfOpts <code>Volume</code> to configuration <code>key-value</code> mappings.
    * @return Fully populated list of only dynamically backed <code>Persistent Volume Claims</code>.
@@ -883,10 +883,10 @@ public class V1Controller extends KubernetesController {
 
       V1PersistentVolumeClaim claim = new V1PersistentVolumeClaimBuilder()
           .withNewMetadata()
+            .withName(pvc.getKey())
             .withLabels(getPersistentVolumeClaimLabels(getTopologyName()))
           .endMetadata()
           .withNewSpec()
-            .withNewVolumeName(pvc.getKey())
           .endSpec()
           .build();
 
