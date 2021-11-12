@@ -434,6 +434,9 @@ public class V1Controller extends KubernetesController {
 
     statefulSet.setSpec(statefulSetSpec);
 
+    statefulSetSpec.setVolumeClaimTemplates(
+        createPersistentVolumeClaims(persistentVolumeClaimConfigs));
+
     return statefulSet;
   }
 
