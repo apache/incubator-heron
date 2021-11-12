@@ -28,9 +28,9 @@ POST_EXECUTE = [
     # Create the virtual environment
     'python3 -m venv $$VENV --clear',
     'VIRTUAL_ENV_DISABLE_PROMPT=1 source "$$VENV/bin/activate"',
-
+    'TEMP="$(@D)/pexbuild"',
     'pip install pex \
-            --quiet --no-cache-dir --no-index --build $(@D)/pexbuild \
+            --quiet --no-cache-dir --no-index \
             --find-links $$(dirname $(location @pex_src//file)) \
             --find-links $$(dirname $(location @wheel_src//file)) \
             --find-links $$(dirname $(location @setuptools_wheel//file))',

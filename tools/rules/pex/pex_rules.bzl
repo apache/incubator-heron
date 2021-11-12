@@ -197,6 +197,8 @@ def _pex_binary_impl(ctx):
         "--disable-cache",
         "--python-shebang", "#!/usr/bin/env python3",
         "--no-compile",
+        "--include-tools",
+        "--layout", "zipapp",
         "--resolver-version", "pip-2020-resolver",
         "--manifest-file", manifest_file.path,
     ]
