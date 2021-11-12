@@ -516,7 +516,7 @@ public class V1Controller extends KubernetesController {
     }
 
     if (!persistentVolumeClaimConfigs.isEmpty()) {
-      configurePodWithPersistentVolumeClaims(executorContainer);
+      configurePodWithPersistentVolumeClaimMounts(executorContainer);
     }
 
     configureExecutorContainer(executorCommand, resource, numberOfInstances, executorContainer);
@@ -957,11 +957,11 @@ public class V1Controller extends KubernetesController {
   }
 
   /**
-   * Makes a call to generate <code>Volume Mounts</code> and then inserts them.
+   * Makes a call to generate <code>Volume Mounts</code> and then inserts them into the <code>Container</code>.
    * @param container All generated <code>V1VolumeMount</code> will be placed in the <code>Container</code>.
    */
   @VisibleForTesting
-  protected void configurePodWithPersistentVolumeClaims(final V1Container container) {
+  protected void configurePodWithPersistentVolumeClaimMounts(final V1Container container) {
     List<V1VolumeMount> volumeMounts =
         createPersistentVolumeClaimVolumeMounts(persistentVolumeClaimConfigs);
 

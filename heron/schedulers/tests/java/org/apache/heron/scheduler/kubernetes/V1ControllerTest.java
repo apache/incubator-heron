@@ -894,7 +894,7 @@ public class V1ControllerTest {
   }
 
   @Test
-  public void testConfigurePodWithPersistentVolumeClaims() {
+  public void testConfigurePodWithPersistentVolumeClaimMounts() {
     final String volumeNameClashing = "clashing-volume";
     final String volumeMountNameClashing = "original-volume-mount";
     V1VolumeMount baseVolumeMount = new V1VolumeMountBuilder()
@@ -962,7 +962,7 @@ public class V1ControllerTest {
           .createPersistentVolumeClaimVolumeMounts(anyMap());
 
       v1ControllerWithPodTemplate
-          .configurePodWithPersistentVolumeClaims((V1Container) testCase.input[0]);
+          .configurePodWithPersistentVolumeClaimMounts((V1Container) testCase.input[0]);
 
       Assert.assertEquals("Executors match " + testCase.description,
           testCase.input[0], testCase.expected);
