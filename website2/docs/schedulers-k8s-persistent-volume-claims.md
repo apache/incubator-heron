@@ -28,6 +28,8 @@ It is possible to leverage Persistent Volumes with custom Pod Templates but the 
 
 The CLI commands allow you to configure a Persistent Volume Claim (dynamically or statically backed) which will be unique and isolated to each Pod and mounted in a single `Executor` when you submit your topology. They also permit you to configure a Persistent Volume without a custom Pod Template which will be specific to an individual Pod. The CLI commands override any configurations you may have present in the Pod Template, but Heron's configurations will take precedence over all others.
 
+Some use cases include process checkpointing, caching of results for later use in the process, intermediate results which could prove useful in analysis (ETL/ELT to a data lake or warehouse), as a source of data enrichment, etc.
+
 **Note:** Heron ***will*** remove any dynamically backed Persistent Volume Claims it creates when a topology is terminated. Please be aware that Heron uses the following `Labels` to locate the claims it has created:
 ```yaml
 metadata:
