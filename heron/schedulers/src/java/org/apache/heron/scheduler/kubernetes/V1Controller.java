@@ -957,7 +957,7 @@ public class V1Controller extends KubernetesController {
   }
 
   /**
-   * Makes a call to generate <code>Volumes</code> and <code>Volume Mounts</code> and then inserts them.
+   * Makes a call to generate <code>Volume Mounts</code> and then inserts them.
    * @param container All generated <code>V1VolumeMount</code> will be placed in the <code>Container</code>.
    */
   @VisibleForTesting
