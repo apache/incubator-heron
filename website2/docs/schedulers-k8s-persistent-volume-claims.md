@@ -65,7 +65,6 @@ The command pattern is as follows:
 
 The currently supported CLI `options` are:
 
-* `claimName`
 * `storageClass`
 * `sizeLimit`
 * `accessModes`
@@ -75,18 +74,17 @@ The currently supported CLI `options` are:
 
 ***Note:*** The `accessModes` must be a comma separated list of values *without* any white space.
 
-***Note:*** The `claimName` can be specified as `OnDemand` to trigger the creation of a dynamically backed Persistent Volume claim.
+***Note:*** If a `storageClassName` is specified and there are no matching Persistent Volumes then [dynamic provisioning](https://kubernetes.io/docs/concepts/storage/dynamic-provisioning/) must be enabled. Kubernetes will attempt to locate a Persistent Volume that matches the `storageClassName` before it attempts to use dynamic provisioning. If a `storageClassName` is not specified there must be [Persistent Volumes](https://kubernetes.io/docs/tasks/configure-pod-container/configure-persistent-volume-storage/) provisioned manually with the `storageClassName` of `standard`.
 
 <br>
 
 ### Example
 
-An example series of commands and the YAML entries they make in their respective configurations are as follows.
+An example series of commands and the `YAML` entries they make in their respective configurations are as follows.
 
-Commands:
+***Dynamic:***
 
 ```bash
---config-property heron.kubernetes.volumes.persistentVolumeClaim.volumenameofchoice.claimName=OnDemand
 --config-property heron.kubernetes.volumes.persistentVolumeClaim.volumenameofchoice.storageClassName=storage-class-name-of-choice
 --config-property heron.kubernetes.volumes.persistentVolumeClaim.volumenameofchoice.accessModes=comma,separated,list
 --config-property heron.kubernetes.volumes.persistentVolumeClaim.volumenameofchoice.sizeLimit=555Gi
@@ -101,21 +99,21 @@ Generated `Persistent Volume Claim`:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: ondemand-[topology-name]-volumenameofchoice
-  label:
-    onDemand: true
-    topology: [topology-name]
+  labels:
+    app: heron
+    onDemand: "true"
+    topology: [Topology-Name]
+  name: volumenameofchoice-[Topology Name]-[Ordinal]
 spec:
-  volumeName: volumenameofchoice
   accessModes:
-    - comma
-    - separated
-    - list
-  volumeMode: volume-mode-of-choice
+  - comma
+  - separated
+  - list
   resources:
     requests:
       storage: 555Gi
   storageClassName: storage-class-name-of-choice
+  volumeMode: volume-mode-of-choice
 ```
 
 Pod Spec entries for `Volume`:
@@ -124,10 +122,10 @@ Pod Spec entries for `Volume`:
 volumes:
   - name: volumenameofchoice
     persistentVolumeClaim:
-      claimName: ondemand-[topology-name]-volumenameofchoice
+      claimName: volumenameofchoice-[Topology Name]-[Ordinal]
 ```
 
-`Executor` container entries for `VolumeMounts`:
+`Executor` container entries for `Volume Mounts`:
 
 ```yaml
 volumeMounts:
@@ -136,16 +134,70 @@ volumeMounts:
     name: volumenameofchoice
 ```
 
+<br>
+
+***Static:***
+
+```bash
+--config-property heron.kubernetes.volumes.persistentVolumeClaim.volumenameofchoice.accessModes=comma,separated,list
+--config-property heron.kubernetes.volumes.persistentVolumeClaim.volumenameofchoice.sizeLimit=555Gi
+--config-property heron.kubernetes.volumes.persistentVolumeClaim.volumenameofchoice.volumeMode=volume-mode-of-choice
+--config-property heron.kubernetes.volumes.persistentVolumeClaim.volumenameofchoice.path=/path/to/mount
+--config-property heron.kubernetes.volumes.persistentVolumeClaim.volumenameofchoice.subPath=/sub/path/to/mount
+```
+
+Generated `Persistent Volume Claim`:
+
+```yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  labels:
+    app: heron
+    onDemand: "true"
+    topology: [Topology-Name]
+  name: volumenameofchoice-[Topology Name]-[Ordinal]
+spec:
+  accessModes:
+  - comma
+  - separated
+  - list
+  resources:
+    requests:
+      storage: 555Gi
+  storageClassName: standard
+  volumeMode: volume-mode-of-choice
+```
+
+Pod Spec entries for `Volume`:
+
+```yaml
+volumes:
+  - name: volumenameofchoice
+    persistentVolumeClaim:
+      claimName: volumenameofchoice-[Topology Name]-[Ordinal]
+```
+
+`Executor` container entries for `Volume Mounts`:
+
+```yaml
+volumeMounts:
+  - mountPath: /path/to/mount
+    subPath: /sub/path/to/mount
+    name: volumenameofchoice
+```
+
+<br>
+
 ## Submitting
 
-An example of sumbitting a topology using the example CLI commands above:
+An example of sumbitting a topology using the *dynamic* example CLI commands above:
 
 ```bash
 heron submit kubernetes \
   --service-url=http://localhost:8001/api/v1/namespaces/default/services/heron-apiserver:9000/proxy \
   ~/.heron/examples/heron-api-examples.jar \
   org.apache.heron.examples.api.AckingTopology acking \
---config-property heron.kubernetes.volumes.persistentVolumeClaim.volumenameofchoice.claimName=OnDemand \
 --config-property heron.kubernetes.volumes.persistentVolumeClaim.volumenameofchoice.storageClassName=storage-class-name-of-choice \
 --config-property heron.kubernetes.volumes.persistentVolumeClaim.volumenameofchoice.accessModes=comma,separated,list \
 --config-property heron.kubernetes.volumes.persistentVolumeClaim.volumenameofchoice.sizeLimit=555Gi \
@@ -163,9 +215,8 @@ The following table outlines CLI options which are either ***required*** ( &#x26
 | `VOLUME NAME` | &#x2611; | &#x2611;
 | `path` | &#x2611; | &#x2611;
 | `subPath` | &#x2612; | &#x2612;
-| `claimName` | &#x2611; | &#x2611;
 | `storageClassName` | &#x2611; | &#x2612;
-| `accessModes` | &#x2611; | &#x2612;
+| `accessModes` | &#x2611; | &#x2611;
 | `sizeLimit` | &#x2612; | &#x2612;
 | `volumeMode` | &#x2612; | &#x2612;
 
@@ -180,7 +231,6 @@ One `Persistent Volume Claim` (if dynamically backed), a `Volume`, and a `Volume
 | `VOLUME NAME` | The `name` of the `Volume`. | Entries made in the `Persistent Volume Claim`'s spec, the Pod Spec's `Volumes`, and the `executor` containers `volumeMounts`.
 | `path` | The `mountPath` of the `Volume`. | Entries made in the `executor` containers `volumeMounts`.
 | `subPath` | The `subPath` of the `Volume`. | Entries made in the `executor` containers `volumeMounts`.
-| `claimName` | The identifier name of the `Persistent Volume Claim`. If set to `OnDemand` a dynamically backed Persistent Volume Claim is created with a `Claim Name` of `ondemand-[Topology-Name]-[VOLUME-NAME]`. | Entries made in the `Persistent Volume Claim`'s metadata (if `OnDemand`) and the Pod Spec's `Volume`.
 | `storageClassName` | The identifier name used to reference the dynamic `StorageClass`. | Entries made in the `Persistent Volume Claim` and Pod Spec's `Volume`.
 | `accessModes` | A comma separated list of access modes. | Entries made in the `Persistent Volume Claim`.
 | `sizeLimit` | A resource request for storage space. | Entries made in the `Persistent Volume Claim`.
