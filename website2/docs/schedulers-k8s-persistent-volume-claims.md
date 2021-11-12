@@ -24,7 +24,9 @@ sidebar_label: Kubernetes Persistent Volume Claims (CLI)
 
 <br/>
 
-It is possible to leverage Persistent Volumes with custom Pod Templates. The CLI commands allow you to configure a Persistent Volume Claim (dynamically or statically backed) when you submit your topology. They also permit you to configure a Persistent Volume without a custom Pod Template. The CLI commands override any configurations you may have present in the Pod Template, but Heron's configurations will take precedence over all others.
+It is possible to leverage Persistent Volumes with custom Pod Templates but the Volumes you add will be shared amongst all Pods in the topology. Please leverage Pod Templates if you require Volumes which are shared amongst the entire topology.
+
+The CLI commands allow you to configure a Persistent Volume Claim (dynamically or statically backed) which will be unique and isolated to each Pod and mounted in a single `Executor` when you submit your topology. They also permit you to configure a Persistent Volume without a custom Pod Template which will be specific to an individual Pod. The CLI commands override any configurations you may have present in the Pod Template, but Heron's configurations will take precedence over all others.
 
 **Note:** Heron ***will*** remove any dynamically backed Persistent Volume Claims it creates when a topology is terminated. Please be aware that Heron uses the following `Labels` to locate the claims it has created:
 ```yaml
@@ -102,8 +104,8 @@ metadata:
   labels:
     app: heron
     onDemand: "true"
-    topology: [Topology-Name]
-  name: volumenameofchoice-[Topology Name]-[Ordinal]
+    topology: <topology-name>
+  name: volumenameofchoice-<topology-name>-[Ordinal]
 spec:
   accessModes:
   - comma
@@ -122,7 +124,7 @@ Pod Spec entries for `Volume`:
 volumes:
   - name: volumenameofchoice
     persistentVolumeClaim:
-      claimName: volumenameofchoice-[Topology Name]-[Ordinal]
+      claimName: volumenameofchoice-<topology-name>-[Ordinal]
 ```
 
 `Executor` container entries for `Volume Mounts`:
@@ -155,8 +157,8 @@ metadata:
   labels:
     app: heron
     onDemand: "true"
-    topology: [Topology-Name]
-  name: volumenameofchoice-[Topology Name]-[Ordinal]
+    topology: <topology-name>
+  name: volumenameofchoice-<topology-name>-[Ordinal]
 spec:
   accessModes:
   - comma
@@ -175,7 +177,7 @@ Pod Spec entries for `Volume`:
 volumes:
   - name: volumenameofchoice
     persistentVolumeClaim:
-      claimName: volumenameofchoice-[Topology Name]-[Ordinal]
+      claimName: volumenameofchoice-<topology-name>-[Ordinal]
 ```
 
 `Executor` container entries for `Volume Mounts`:
@@ -224,7 +226,7 @@ The following table outlines CLI options which are either ***required*** ( &#x26
 
 The configuration items and entries in the tables below will made in their respective areas.
 
-One `Persistent Volume Claim` (if dynamically backed), a `Volume`, and a `VolumeMount` will be created for each `volume name` which you specify.
+One `Persistent Volume Claim`, a `Volume`, and a `Volume Mount` will be created for each `volume name` which you specify. Each will be unique to a Pod within the topology.
 
 | Name | Description | Policy |
 |---|---|---|
