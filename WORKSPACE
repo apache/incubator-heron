@@ -96,7 +96,7 @@ maven_install(
         "org.glassfish.jersey.media:jersey-media-multipart:" + jersey_version,
         "org.glassfish.jersey.containers:jersey-container-servlet:" + jersey_version,
         "org.apache.distributedlog:distributedlog-core:" + distributedlog_version,
-        "io.netty:netty-all:4.1.50.Final",
+        "io.netty:netty-all:4.1.70.Final",
         "aopalliance:aopalliance:1.0",
         "org.roaringbitmap:RoaringBitmap:0.6.51",
         "com.google.guava:guava:23.6-jre",
