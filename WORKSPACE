@@ -183,7 +183,7 @@ py_repositories()
 # pip_repositories()
 
 # for pex repos
-PEX_WHEEL = "https://pypi.python.org/packages/18/92/99270775cfc5ddb60c19588de1c475f9ff2837a6e0bbd5eaa5286a6a472b/pex-2.1.9-py2.py3-none-any.whl"
+PEX_WHEEL = "https://pypi.python.org/packages/fa/c4/5dbdce75117b60b6ffec65bc92ac25ee873b84158a55cfbffa1d49db6eb1/pex-2.1.54-py2.py3-none-any.whl"
 
 PY_WHEEL = "https://pypi.python.org/packages/53/67/9620edf7803ab867b175e4fd23c7b8bd8eba11cb761514dcd2e726ef07da/py-1.4.34-py2.py3-none-any.whl"
 
@@ -218,8 +218,8 @@ http_file(
 
 http_file(
     name = "pex_src",
-    downloaded_file_path = "pex-2.1.9-py2.py3-none-any.whl",
-    sha256 = "5cad8d960c187541f71682fc938a843ef9092aab46f27b33ace7e570325e2626",
+    downloaded_file_path = "pex-2.1.54-py2.py3-none-any.whl",
+    sha256 = "e60b006abe8abfd3c3377128e22c33f30cc6dea89e2beb463cf8360e3626db62",
     urls = [PEX_WHEEL],
 )
 
@@ -251,9 +251,9 @@ http_archive(
 # 3rdparty C++ dependencies
 http_archive(
     name = "com_github_gflags_gflags",
-    sha256 = "ae27cdbcd6a2f935baa78e4f21f675649271634c092b1be01469440495609d0e",
-    strip_prefix = "gflags-2.2.1",
-    urls = ["https://github.com/gflags/gflags/archive/v2.2.1.tar.gz"],
+    sha256 = "34af2f15cf7367513b352bdcd2493ab14ce43692d2dcd9dfc499492966c64dcf",
+    strip_prefix = "gflags-2.2.2",
+    urls = ["https://github.com/gflags/gflags/archive/v2.2.2.tar.gz"],
 )
 
 http_archive(
@@ -292,10 +292,9 @@ http_archive(
 
 http_archive(
     name = "com_github_google_glog",
-    build_file = "@//:third_party/glog/glog.BUILD",
-    sha256 = "7580e408a2c0b5a89ca214739978ce6ff480b5e7d8d7698a2aa92fadc484d1e0",
-    strip_prefix = "glog-0.3.5",
-    urls = ["https://github.com/google/glog/archive/v0.3.5.tar.gz"],
+    sha256 = "21bc744fb7f2fa701ee8db339ded7dce4f975d0d55837a97be7d46e8382dea5a",
+    strip_prefix = "glog-0.5.0",
+    urls = ["https://github.com/google/glog/archive/v0.5.0.zip"],
 )
 
 http_archive(
@@ -355,17 +354,17 @@ http_archive(
 http_archive(
     name = "helm_mac",
     build_file = "@//:third_party/helm/helm.BUILD",
-    sha256 = "05c7748da0ea8d5f85576491cd3c615f94063f20986fd82a0f5658ddc286cdb1",
+    sha256 = "3a9efe337c61a61b3e160da919ac7af8cded8945b75706e401f3655a89d53ef5",
     strip_prefix = "darwin-amd64",
-    urls = ["https://get.helm.sh/helm-v3.0.2-darwin-amd64.tar.gz"],
+    urls = ["https://get.helm.sh/helm-v3.7.1-darwin-amd64.tar.gz"],
 )
 
 http_archive(
     name = "helm_linux",
     build_file = "@//:third_party/helm/helm.BUILD",
-    sha256 = "c6b7aa7e4ffc66e8abb4be328f71d48c643cb8f398d95c74d075cfb348710e1d",
+    sha256 = "6cd6cad4b97e10c33c978ff3ac97bb42b68f79766f1d2284cfd62ec04cd177f4",
     strip_prefix = "linux-amd64",
-    urls = ["https://get.helm.sh/helm-v3.0.2-linux-amd64.tar.gz"],
+    urls = ["https://get.helm.sh/helm-v3.7.1-linux-amd64.tar.gz"],
 )
 # end helm
 
