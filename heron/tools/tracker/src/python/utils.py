@@ -140,6 +140,9 @@ def get_heron_tracker_dir() -> str:
   This will extract heron tracker directory from .pex file.
   :return: root location for heron-tools.
   """
+  pex_file = os.environ.get('PEX', None)
+  if pex_file is not None:
+    return normalized_class_path(str(Path(pex_file).resolve(strict=True).parent.parent))
   # assuming the tracker runs from $HERON_ROOT/bin/heron-tracker
   root = Path(sys.argv[0]).resolve(strict=True).parent.parent
   return normalized_class_path(str(root))
