@@ -958,250 +958,256 @@ TEST(StMgr, test_custom_grouping_route) {
 }
 
 TEST(StMgr, test_back_pressure_instance) {
-//   CommonResources common;
+  CommonResources common;
 
-//   // Initialize dummy params
-//   common.tmanager_host_ = LOCALHOST;
-//   common.tmanager_port_ = 17000;
-//   common.tmanager_controller_port_ = 17001;
-//   common.tmanager_stats_port_ = 17002;
-//   common.metricsmgr_port_ = 0;
-//   common.shell_port_ = 47000;
-//   common.ckptmgr_port_ = 57000;
-//   common.ckptmgr_id_ = "ckptmgr";
-//   common.topology_name_ = "mytopology";
-//   common.topology_id_ = "abcd-9999";
-//   common.setNumStmgrs(2);
-//   common.num_spouts_ = 2;
-//   common.num_spout_instances_ = 1;
-//   common.num_bolts_ = 2;
-//   common.num_bolt_instances_ = 1;
-//   common.grouping_ = heron::proto::api::SHUFFLE;
-//   // Empty so that we don't attempt to connect to the zk
-//   // but instead connect to the local filesytem
-//   common.zkhostportlist_ = "";
+  // Initialize dummy params
+  common.tmanager_host_ = LOCALHOST;
+  common.tmanager_port_ = 17000;
+  common.tmanager_controller_port_ = 17001;
+  common.tmanager_stats_port_ = 17002;
+  common.metricsmgr_port_ = 0;
+  common.shell_port_ = 47000;
+  common.ckptmgr_port_ = 57000;
+  common.ckptmgr_id_ = "ckptmgr";
+  common.topology_name_ = "mytopology";
+  common.topology_id_ = "abcd-9999";
+  common.setNumStmgrs(2);
+  common.num_spouts_ = 4;
+  common.num_spout_instances_ = 4;
+  common.num_bolts_ = 2;
+  common.num_bolt_instances_ = 1;
+  common.grouping_ = heron::proto::api::SHUFFLE;
+  // Empty so that we don't attempt to connect to the zk
+  // but instead connect to the local filesytem
+  common.zkhostportlist_ = "";
+  // Overwrite the default values for back pressure
+  common.high_watermark_ = 1_MB;
+  common.low_watermark_ = 500_KB;
 
-//   int num_msgs_sent_by_spout_instance = 100 * 1000 * 1000;  // 100M
+  int num_msgs_sent_by_spout_instance = 100 * 1000 * 1000;  // 100M
 
-//   // Start the metrics mgr
-//   StartMetricsMgr(common);
+  // Start the metrics mgr
+  StartMetricsMgr(common);
 
-//   // Start the tmanager etc.
-//   StartTManager(common);
+  // Start the tmanager etc.
+  StartTManager(common);
 
-//   // Distribute workers across stmgrs
-//   DistributeWorkersAcrossStmgrs(common);
+  // Distribute workers across stmgrs
+  DistributeWorkersAcrossStmgrs(common);
 
-//   // We'll start one regular stmgr and one dummy stmgr
-//   std::shared_ptr<EventLoopImpl> regular_stmgr_ss;
-//   heron::stmgr::StMgr* regular_stmgr = NULL;
-//   std::thread* regular_stmgr_thread = NULL;
-//   StartStMgr(regular_stmgr_ss, regular_stmgr, regular_stmgr_thread, common.tmanager_host_,
-//              common.stmgr_ports_[0], common.local_data_ports_[0],
-//              common.topology_name_, common.topology_id_, common.topology_,
-//              common.stmgr_instance_id_list_[0], common.stmgrs_id_list_[0], common.zkhostportlist_,
-//              common.dpath_, common.metricsmgr_port_, common.shell_port_, common.ckptmgr_port_,
-//              common.ckptmgr_id_, common.high_watermark_, common.low_watermark_);
-//   common.ss_list_.push_back(regular_stmgr_ss);
+  // We'll start one regular stmgr and one dummy stmgr
+  std::shared_ptr<EventLoopImpl> regular_stmgr_ss;
+  heron::stmgr::StMgr* regular_stmgr = NULL;
+  std::thread* regular_stmgr_thread = NULL;
+  StartStMgr(regular_stmgr_ss, regular_stmgr, regular_stmgr_thread, common.tmanager_host_,
+             common.stmgr_ports_[0], common.local_data_ports_[0],
+             common.topology_name_, common.topology_id_, common.topology_,
+             common.stmgr_instance_id_list_[0], common.stmgrs_id_list_[0], common.zkhostportlist_,
+             common.dpath_, common.metricsmgr_port_, common.shell_port_, common.ckptmgr_port_,
+             common.ckptmgr_id_, common.high_watermark_, common.low_watermark_);
+  common.ss_list_.push_back(regular_stmgr_ss);
 
-//   // Start a dummy stmgr
-//   std::shared_ptr<EventLoopImpl> dummy_stmgr_ss;
-//   DummyStMgr* dummy_stmgr = NULL;
+  // Start a dummy stmgr
+  std::shared_ptr<EventLoopImpl> dummy_stmgr_ss;
+  DummyStMgr* dummy_stmgr = NULL;
 
-//   std::thread* dummy_stmgr_thread = NULL;
-//   StartDummyStMgr(dummy_stmgr_ss, dummy_stmgr, dummy_stmgr_thread, common.stmgr_ports_[1],
-//                   common.tmanager_port_, common.shell_port_, common.stmgrs_id_list_[1],
-//                   common.stmgr_instance_list_[1]);
-//   common.ss_list_.push_back(dummy_stmgr_ss);
+  std::thread* dummy_stmgr_thread = NULL;
+  StartDummyStMgr(dummy_stmgr_ss, dummy_stmgr, dummy_stmgr_thread, common.stmgr_ports_[1],
+                  common.tmanager_port_, common.shell_port_, common.stmgrs_id_list_[1],
+                  common.stmgr_instance_list_[1]);
+  common.ss_list_.push_back(dummy_stmgr_ss);
 
-//   // Start the dummy workers
-//   StartWorkerComponents(common, num_msgs_sent_by_spout_instance, num_msgs_sent_by_spout_instance);
+  // Start the dummy workers
+  StartWorkerComponents(common, num_msgs_sent_by_spout_instance, num_msgs_sent_by_spout_instance);
 
-//   // Wait till we get the physical plan populated on the stmgr. That way we know the
-//   // workers have connected
-//   while (!regular_stmgr->GetPhysicalPlan()) sleep(1);
+  // Wait till we get the physical plan populated on the stmgr. That way we know the
+  // workers have connected
+  while (!regular_stmgr->GetPhysicalPlan()) sleep(1);
 
-//   // Stop the bolt schedulers at this point so that they stop receiving
-//   // This will build up back pressure
-//   for (size_t i = 0; i < common.bolt_workers_list_.size(); ++i) {
-//     common.bolt_workers_list_[i]->getEventLoop()->loopExit();
-//   }
+  // Stop the bolt schedulers at this point so that they stop receiving
+  // This will build up back pressure
+  for (size_t i = 0; i < common.bolt_workers_list_.size(); ++i) {
+    common.bolt_workers_list_[i]->getEventLoop()->loopExit();
+  }
 
-//   // Wait till we get the back pressure notification
-//   while (dummy_stmgr->NumStartBPMsgs() == 0) sleep(1);
+  // Wait till we get the back pressure notification
+  while (dummy_stmgr->NumStartBPMsgs() == 0) sleep(1);
 
-//   // Now kill the bolts - at that point the back pressure should be removed
-//   for (size_t i = 0; i < common.bolt_workers_threads_list_.size(); ++i) {
-//     common.bolt_workers_threads_list_[i]->join();
-//   }
-//   for (size_t w = 0; w < common.bolt_workers_list_.size(); ++w) {
-//     delete common.bolt_workers_list_[w];
-//   }
-//   // Clear the list so that we don't double delete in TearCommonResources
-//   common.bolt_workers_list_.clear();
+  // Now kill the bolts - at that point the back pressure should be removed
+  for (size_t i = 0; i < common.bolt_workers_threads_list_.size(); ++i) {
+    common.bolt_workers_threads_list_[i]->join();
+  }
+  for (size_t w = 0; w < common.bolt_workers_list_.size(); ++w) {
+    delete common.bolt_workers_list_[w];
+  }
+  // Clear the list so that we don't double delete in TearCommonResources
+  common.bolt_workers_list_.clear();
 
-//   // Wait till we get the back pressure notification
-//   while (dummy_stmgr->NumStopBPMsgs() == 0) sleep(1);
+  // Wait till we get the back pressure notification
+  while (dummy_stmgr->NumStopBPMsgs() == 0) sleep(1);
 
-//   EXPECT_EQ(dummy_stmgr->NumStopBPMsgs(), 1);
+  EXPECT_EQ(dummy_stmgr->NumStopBPMsgs(), 1);
 
-//   // Stop the schedulers
-//   for (size_t i = 0; i < common.ss_list_.size(); ++i) {
-//     common.ss_list_[i]->loopExit();
-//   }
+  // Stop the schedulers
+  for (size_t i = 0; i < common.ss_list_.size(); ++i) {
+    common.ss_list_[i]->loopExit();
+  }
 
-//   // Wait for the threads to terminate
-//   common.tmanager_thread_->join();
-//   common.metrics_mgr_thread_->join();
-//   regular_stmgr_thread->join();
-//   dummy_stmgr_thread->join();
-//   for (size_t i = 0; i < common.spout_workers_threads_list_.size(); ++i) {
-//     common.spout_workers_threads_list_[i]->join();
-//   }
+  // Wait for the threads to terminate
+  common.tmanager_thread_->join();
+  common.metrics_mgr_thread_->join();
+  regular_stmgr_thread->join();
+  dummy_stmgr_thread->join();
+  for (size_t i = 0; i < common.spout_workers_threads_list_.size(); ++i) {
+    common.spout_workers_threads_list_[i]->join();
+  }
 
-//   // Delete the common resources
-//   delete regular_stmgr_thread;
-//   delete regular_stmgr;
-//   delete dummy_stmgr_thread;
-//   delete dummy_stmgr;
-//   TearCommonResources(common);
+  // Delete the common resources
+  delete regular_stmgr_thread;
+  delete regular_stmgr;
+  delete dummy_stmgr_thread;
+  delete dummy_stmgr;
+  TearCommonResources(common);
 }
 
 // Tests that spout deaths during backpressure are handled correctly
 TEST(StMgr, test_spout_death_under_backpressure) {
-//   CommonResources common;
+  CommonResources common;
 
-//   // Initialize dummy params
-//   common.tmanager_host_ = LOCALHOST;
-//   common.tmanager_port_ = 17300;
-//   common.tmanager_controller_port_ = 17301;
-//   common.tmanager_stats_port_ = 17302;
-//   common.metricsmgr_port_ = 0;
-//   common.shell_port_ = 47300;
-//   common.ckptmgr_port_ = 57300;
-//   common.ckptmgr_id_ = "ckptmgr";
-//   common.topology_name_ = "mytopology";
-//   common.topology_id_ = "abcd-9999";
-//   common.setNumStmgrs(2);
-//   common.num_spouts_ = 1;
-//   common.num_spout_instances_ = 2;
-//   common.num_bolts_ = 2;
-//   common.num_bolt_instances_ = 1;
-//   common.grouping_ = heron::proto::api::SHUFFLE;
-//   // Empty so that we don't attempt to connect to the zk
-//   // but instead connect to the local filesytem
-//   common.zkhostportlist_ = "";
+  // Initialize dummy params
+  common.tmanager_host_ = LOCALHOST;
+  common.tmanager_port_ = 17300;
+  common.tmanager_controller_port_ = 17301;
+  common.tmanager_stats_port_ = 17302;
+  common.metricsmgr_port_ = 0;
+  common.shell_port_ = 47300;
+  common.ckptmgr_port_ = 57300;
+  common.ckptmgr_id_ = "ckptmgr";
+  common.topology_name_ = "mytopology";
+  common.topology_id_ = "abcd-9999";
+  common.setNumStmgrs(2);
+  common.num_spouts_ = 4;
+  common.num_spout_instances_ = 4;
+  common.num_bolts_ = 2;
+  common.num_bolt_instances_ = 1;
+  common.grouping_ = heron::proto::api::SHUFFLE;
+  // Empty so that we don't attempt to connect to the zk
+  // but instead connect to the local filesytem
+  common.zkhostportlist_ = "";
+  // Overwrite the default values for back pressure
+  common.high_watermark_ = 1_MB;
+  common.low_watermark_ = 500_KB;
 
-//   int num_msgs_sent_by_spout_instance = 100 * 1000 * 1000;  // 100M
+  int num_msgs_sent_by_spout_instance = 100 * 1000 * 1000;  // 100M
 
-//   // Start the metrics mgr
-//   StartMetricsMgr(common);
+  // Start the metrics mgr
+  StartMetricsMgr(common);
 
-//   // Start the tmanager etc.
-//   StartTManager(common);
+  // Start the tmanager etc.
+  StartTManager(common);
 
-//   // Distribute workers across stmgrs
-//   DistributeWorkersAcrossStmgrs(common);
+  // Distribute workers across stmgrs
+  DistributeWorkersAcrossStmgrs(common);
 
-//   // We'll start one regular stmgr and one dummy stmgr
-//   std::shared_ptr<EventLoopImpl> regular_stmgr_ss;
-//   heron::stmgr::StMgr* regular_stmgr = NULL;
-//   std::thread* regular_stmgr_thread = NULL;
-//   StartStMgr(regular_stmgr_ss, regular_stmgr, regular_stmgr_thread, common.tmanager_host_,
-//              common.stmgr_ports_[0], common.local_data_ports_[0],
-//              common.topology_name_, common.topology_id_, common.topology_,
-//              common.stmgr_instance_id_list_[0], common.stmgrs_id_list_[0], common.zkhostportlist_,
-//              common.dpath_, common.metricsmgr_port_, common.shell_port_, common.ckptmgr_port_,
-//              common.ckptmgr_id_, common.high_watermark_, common.low_watermark_);
-//   common.ss_list_.push_back(regular_stmgr_ss);
+  // We'll start one regular stmgr and one dummy stmgr
+  std::shared_ptr<EventLoopImpl> regular_stmgr_ss;
+  heron::stmgr::StMgr* regular_stmgr = NULL;
+  std::thread* regular_stmgr_thread = NULL;
+  StartStMgr(regular_stmgr_ss, regular_stmgr, regular_stmgr_thread, common.tmanager_host_,
+             common.stmgr_ports_[0], common.local_data_ports_[0],
+             common.topology_name_, common.topology_id_, common.topology_,
+             common.stmgr_instance_id_list_[0], common.stmgrs_id_list_[0], common.zkhostportlist_,
+             common.dpath_, common.metricsmgr_port_, common.shell_port_, common.ckptmgr_port_,
+             common.ckptmgr_id_, common.high_watermark_, common.low_watermark_);
+  common.ss_list_.push_back(regular_stmgr_ss);
 
-//   // Start a dummy stmgr
-//   std::shared_ptr<EventLoopImpl> dummy_stmgr_ss;
-//   DummyStMgr* dummy_stmgr = NULL;
-//   std::thread* dummy_stmgr_thread = NULL;
-//   StartDummyStMgr(dummy_stmgr_ss, dummy_stmgr, dummy_stmgr_thread, common.stmgr_ports_[1],
-//                   common.tmanager_port_, common.shell_port_, common.stmgrs_id_list_[1],
-//                   common.stmgr_instance_list_[1]);
-//   common.ss_list_.push_back(dummy_stmgr_ss);
+  // Start a dummy stmgr
+  std::shared_ptr<EventLoopImpl> dummy_stmgr_ss;
+  DummyStMgr* dummy_stmgr = NULL;
+  std::thread* dummy_stmgr_thread = NULL;
+  StartDummyStMgr(dummy_stmgr_ss, dummy_stmgr, dummy_stmgr_thread, common.stmgr_ports_[1],
+                  common.tmanager_port_, common.shell_port_, common.stmgrs_id_list_[1],
+                  common.stmgr_instance_list_[1]);
+  common.ss_list_.push_back(dummy_stmgr_ss);
 
-//   // Start the dummy workers
-//   StartWorkerComponents(common, num_msgs_sent_by_spout_instance, num_msgs_sent_by_spout_instance);
+  // Start the dummy workers
+  StartWorkerComponents(common, num_msgs_sent_by_spout_instance, num_msgs_sent_by_spout_instance);
 
-//   // Wait till we get the physical plan populated on the stmgr. That way we know the
-//   // workers have connected
-//   while (!regular_stmgr->GetPhysicalPlan()) sleep(1);
+  // Wait till we get the physical plan populated on the stmgr. That way we know the
+  // workers have connected
+  while (!regular_stmgr->GetPhysicalPlan()) sleep(1);
 
-//   // Stop the bolt schedulers at this point so that they stop receiving
-//   // This will build up back pressure
-//   for (size_t i = 0; i < common.bolt_workers_list_.size(); ++i) {
-//     common.bolt_workers_list_[i]->getEventLoop()->loopExit();
-//   }
+  // Stop the bolt schedulers at this point so that they stop receiving
+  // This will build up back pressure
+  for (size_t i = 0; i < common.bolt_workers_list_.size(); ++i) {
+    common.bolt_workers_list_[i]->getEventLoop()->loopExit();
+  }
 
-//   // Wait till we get the back pressure notification
-//   while (dummy_stmgr->NumStartBPMsgs() == 0) sleep(1);
+  // Wait till we get the back pressure notification
+  while (dummy_stmgr->NumStartBPMsgs() == 0) sleep(1);
 
-//   // Now that we are in back pressure, kill the current spout
-//   common.spout_workers_list_[0]->getEventLoop()->loopExit();
-//   common.spout_workers_threads_list_[0]->join();
+  // Now that we are in back pressure, kill the current spout
+  common.spout_workers_list_[0]->getEventLoop()->loopExit();
+  common.spout_workers_threads_list_[0]->join();
 
-//   // Create a new spout now
-//   StartDummySpoutInstanceHelper(common, 0, 0, num_msgs_sent_by_spout_instance);
-//   sleep(1);
+  // Create a new spout now
+  StartDummySpoutInstanceHelper(common, 0, 0, num_msgs_sent_by_spout_instance);
+  sleep(1);
 
-//   // First time the SM return NOTOK, and closes the old spout connection
-//   EXPECT_EQ(common.spout_workers_list_.back()->GetRegisterResponseStatus(),
-//             heron::proto::system::NOTOK);
+  // First time the SM return NOTOK, and closes the old spout connection
+  EXPECT_EQ(common.spout_workers_list_.back()->GetRegisterResponseStatus(),
+            heron::proto::system::NOTOK);
 
-//   // Upon receiving NOTOK, the new spout dies the first time
-//   common.spout_workers_list_.back()->getEventLoop()->loopExit();
-//   common.spout_workers_threads_list_.back()->join();
+  // Upon receiving NOTOK, the new spout dies the first time
+  common.spout_workers_list_.back()->getEventLoop()->loopExit();
+  common.spout_workers_threads_list_.back()->join();
 
-//   // Bring up the new spout again
-//   StartDummySpoutInstanceHelper(common, 0, 0, num_msgs_sent_by_spout_instance);
-//   sleep(1);
+  // Bring up the new spout again
+  StartDummySpoutInstanceHelper(common, 0, 0, num_msgs_sent_by_spout_instance);
+  sleep(1);
 
-//   // This time we expect SM to accept the new spout connection correctly
-//   EXPECT_EQ(common.spout_workers_list_.back()->GetRegisterResponseStatus(),
-//             heron::proto::system::OK);
+  // This time we expect SM to accept the new spout connection correctly
+  EXPECT_EQ(common.spout_workers_list_.back()->GetRegisterResponseStatus(),
+            heron::proto::system::OK);
 
-//   // Now kill the bolts - at that point the back pressure should be removed
-//   for (size_t i = 0; i < common.bolt_workers_threads_list_.size(); ++i) {
-//     common.bolt_workers_threads_list_[i]->join();
-//   }
-//   for (size_t w = 0; w < common.bolt_workers_list_.size(); ++w) {
-//     delete common.bolt_workers_list_[w];
-//   }
+  // Now kill the bolts - at that point the back pressure should be removed
+  for (size_t i = 0; i < common.bolt_workers_threads_list_.size(); ++i) {
+    common.bolt_workers_threads_list_[i]->join();
+  }
+  for (size_t w = 0; w < common.bolt_workers_list_.size(); ++w) {
+    delete common.bolt_workers_list_[w];
+  }
 
-//   // Clear the list so that we don't double delete in TearCommonResources
-//   common.bolt_workers_list_.clear();
+  // Clear the list so that we don't double delete in TearCommonResources
+  common.bolt_workers_list_.clear();
 
-//   // Wait till we get the back pressure notification
-//   while (dummy_stmgr->NumStopBPMsgs() == 0) sleep(1);
+  // Wait till we get the back pressure notification
+  while (dummy_stmgr->NumStopBPMsgs() == 0) sleep(1);
 
-//   EXPECT_EQ(dummy_stmgr->NumStopBPMsgs(), 1);
+  EXPECT_EQ(dummy_stmgr->NumStopBPMsgs(), 1);
 
-//   // Stop the schedulers
-//   for (size_t i = 0; i < common.ss_list_.size(); ++i) {
-//     common.ss_list_[i]->loopExit();
-//   }
+  // Stop the schedulers
+  for (size_t i = 0; i < common.ss_list_.size(); ++i) {
+    common.ss_list_[i]->loopExit();
+  }
 
-//   // Wait for the threads to terminate
-//   common.tmanager_thread_->join();
-//   common.metrics_mgr_thread_->join();
-//   regular_stmgr_thread->join();
-//   dummy_stmgr_thread->join();
+  // Wait for the threads to terminate
+  common.tmanager_thread_->join();
+  common.metrics_mgr_thread_->join();
+  regular_stmgr_thread->join();
+  dummy_stmgr_thread->join();
 
-//   for (size_t i = 0; i < common.spout_workers_threads_list_.size(); ++i) {
-//     if (common.spout_workers_threads_list_[i]->joinable())
-//       common.spout_workers_threads_list_[i]->join();
-//   }
+  for (size_t i = 0; i < common.spout_workers_threads_list_.size(); ++i) {
+    if (common.spout_workers_threads_list_[i]->joinable())
+      common.spout_workers_threads_list_[i]->join();
+  }
 
-//   // Delete the common resources
-//   delete regular_stmgr_thread;
-//   delete regular_stmgr;
-//   delete dummy_stmgr_thread;
-//   delete dummy_stmgr;
-//   TearCommonResources(common);
+  // Delete the common resources
+  delete regular_stmgr_thread;
+  delete regular_stmgr;
+  delete dummy_stmgr_thread;
+  delete dummy_stmgr;
+  TearCommonResources(common);
 }
 
 TEST(StMgr, test_back_pressure_stmgr) {
@@ -1326,118 +1332,121 @@ TEST(StMgr, test_back_pressure_stmgr) {
 }
 
 TEST(StMgr, test_back_pressure_stmgr_reconnect) {
-//   CommonResources common;
+  CommonResources common;
 
-//   // Initialize dummy params
-//   common.tmanager_host_ = LOCALHOST;
-//   common.tmanager_port_ = 18500;
-//   common.tmanager_controller_port_ = 18501;
-//   common.tmanager_stats_port_ = 18502;
-//   common.metricsmgr_port_ = 0;
-//   common.shell_port_ = 49000;
-//   common.ckptmgr_port_ = 59000;
-//   common.ckptmgr_id_ = "ckptmgr";
-//   common.topology_name_ = "mytopology";
-//   common.topology_id_ = "abcd-9999";
-//   common.setNumStmgrs(2);
-//   common.num_spouts_ = 2;
-//   common.num_spout_instances_ = 1;
-//   common.num_bolts_ = 2;
-//   common.num_bolt_instances_ = 1;
-//   common.grouping_ = heron::proto::api::SHUFFLE;
-//   // Empty so that we don't attempt to connect to the zk
-//   // but instead connect to the local filesytem
-//   common.zkhostportlist_ = "";
+  // Initialize dummy params
+  common.tmanager_host_ = LOCALHOST;
+  common.tmanager_port_ = 18500;
+  common.tmanager_controller_port_ = 18501;
+  common.tmanager_stats_port_ = 18502;
+  common.metricsmgr_port_ = 0;
+  common.shell_port_ = 49000;
+  common.ckptmgr_port_ = 59000;
+  common.ckptmgr_id_ = "ckptmgr";
+  common.topology_name_ = "mytopology";
+  common.topology_id_ = "abcd-9999";
+  common.setNumStmgrs(2);
+  common.num_spouts_ = 2;
+  common.num_spout_instances_ = 1;
+  common.num_bolts_ = 2;
+  common.num_bolt_instances_ = 1;
+  common.grouping_ = heron::proto::api::SHUFFLE;
+  // Empty so that we don't attempt to connect to the zk
+  // but instead connect to the local filesytem
+  common.zkhostportlist_ = "";
+  // Overwrite the default values for back pressure
+  common.high_watermark_ = 1_MB;
+  common.low_watermark_ = 500_KB;
 
-//   int num_msgs_sent_by_spout_instance = 100 * 1000 * 1000;  // 100M
+  int num_msgs_sent_by_spout_instance = 100 * 1000 * 1000;  // 100M
 
-//   // Start the metrics mgr
-//   StartMetricsMgr(common);
+  // Start the metrics mgr
+  StartMetricsMgr(common);
 
-//   // Start the tmanager etc.
-//   StartTManager(common);
+  // Start the tmanager etc.
+  StartTManager(common);
 
-//   // Distribute workers across stmgrs
-//   DistributeWorkersAcrossStmgrs(common);
+  // Distribute workers across stmgrs
+  DistributeWorkersAcrossStmgrs(common);
 
-//   // We'll start one regular stmgr and one dummy stmgr
-//   std::shared_ptr<EventLoopImpl> regular_stmgr_ss;
-//   heron::stmgr::StMgr* regular_stmgr = NULL;
-//   std::thread* regular_stmgr_thread = NULL;
-//   StartStMgr(regular_stmgr_ss, regular_stmgr, regular_stmgr_thread, common.tmanager_host_,
-//              common.stmgr_ports_[0], common.local_data_ports_[0],
-//              common.topology_name_, common.topology_id_, common.topology_,
-//              common.stmgr_instance_id_list_[0], common.stmgrs_id_list_[0], common.zkhostportlist_,
-//              common.dpath_, common.metricsmgr_port_, common.shell_port_, common.ckptmgr_port_,
-//              common.ckptmgr_id_, common.high_watermark_, common.low_watermark_);
-//   common.ss_list_.push_back(regular_stmgr_ss);
+  // We'll start one regular stmgr and one dummy stmgr
+  std::shared_ptr<EventLoopImpl> regular_stmgr_ss;
+  heron::stmgr::StMgr* regular_stmgr = NULL;
+  std::thread* regular_stmgr_thread = NULL;
+  StartStMgr(regular_stmgr_ss, regular_stmgr, regular_stmgr_thread, common.tmanager_host_,
+             common.stmgr_ports_[0], common.local_data_ports_[0],
+             common.topology_name_, common.topology_id_, common.topology_,
+             common.stmgr_instance_id_list_[0], common.stmgrs_id_list_[0], common.zkhostportlist_,
+             common.dpath_, common.metricsmgr_port_, common.shell_port_, common.ckptmgr_port_,
+             common.ckptmgr_id_, common.high_watermark_, common.low_watermark_);
+  common.ss_list_.push_back(regular_stmgr_ss);
 
-//   // Start a dummy stmgr
-//   std::shared_ptr<EventLoopImpl> dummy_stmgr_ss;
-//   DummyStMgr* dummy_stmgr = NULL;
-//   std::thread* dummy_stmgr_thread = NULL;
-//   StartDummyStMgr(dummy_stmgr_ss, dummy_stmgr, dummy_stmgr_thread, common.stmgr_ports_[1],
-//                   common.tmanager_port_, common.shell_port_, common.stmgrs_id_list_[1],
-//                   common.stmgr_instance_list_[1]);
-//   common.ss_list_.push_back(dummy_stmgr_ss);
+  // Start a dummy stmgr
+  std::shared_ptr<EventLoopImpl> dummy_stmgr_ss;
+  DummyStMgr* dummy_stmgr = NULL;
+  std::thread* dummy_stmgr_thread = NULL;
+  StartDummyStMgr(dummy_stmgr_ss, dummy_stmgr, dummy_stmgr_thread, common.stmgr_ports_[1],
+                  common.tmanager_port_, common.shell_port_, common.stmgrs_id_list_[1],
+                  common.stmgr_instance_list_[1]);
+  common.ss_list_.push_back(dummy_stmgr_ss);
 
-//   // Start the dummy workers
-//   StartWorkerComponents(common, num_msgs_sent_by_spout_instance, num_msgs_sent_by_spout_instance);
+  // Start the dummy workers
+  StartWorkerComponents(common, num_msgs_sent_by_spout_instance, num_msgs_sent_by_spout_instance);
 
-//   // Wait till we get the physical plan populated on the stmgr. That way we know the
-//   // workers have connected
-//   while (!regular_stmgr->GetPhysicalPlan()) sleep(1);
+  // Wait till we get the physical plan populated on the stmgr. That way we know the
+  // workers have connected
+  while (!regular_stmgr->GetPhysicalPlan()) sleep(1);
 
-//   // Stop the bolt schedulers at this point so that they stop receiving
-//   // This will build up back pressure
-//   for (size_t i = 0; i < common.bolt_workers_list_.size(); ++i) {
-//     common.bolt_workers_list_[i]->getEventLoop()->loopExit();
-//   }
+  // Stop the bolt schedulers at this point so that they stop receiving
+  // This will build up back pressure
+  for (size_t i = 0; i < common.bolt_workers_list_.size(); ++i) {
+    common.bolt_workers_list_[i]->getEventLoop()->loopExit();
+  }
 
-//   // Wait till we get the back pressure notification
-//   while (dummy_stmgr->NumStartBPMsgs() == 0) sleep(1);
+  // Wait till we get the back pressure notification
+  while (dummy_stmgr->NumStartBPMsgs() == 0) sleep(1);
 
-//   // Now disconnect the dummy stmgr and reconnect; it should get the back pressure
-//   // notification again
-//   dummy_stmgr_ss->loopExit();
-//   dummy_stmgr_thread->join();
-//   delete dummy_stmgr_thread;
-//   delete dummy_stmgr;
+  // Now disconnect the dummy stmgr and reconnect; it should get the back pressure
+  // notification again
+  dummy_stmgr_ss->loopExit();
+  dummy_stmgr_thread->join();
+  delete dummy_stmgr_thread;
+  delete dummy_stmgr;
 
-//   common.stmgr_ports_[1] = 0;
-//   StartDummyStMgr(dummy_stmgr_ss, dummy_stmgr, dummy_stmgr_thread, common.stmgr_ports_[1],
-//                   common.tmanager_port_, common.shell_port_, common.stmgrs_id_list_[1],
-//                   common.stmgr_instance_list_[1]);
-//   common.ss_list_.push_back(dummy_stmgr_ss);
+  common.stmgr_ports_[1] = 0;
+  StartDummyStMgr(dummy_stmgr_ss, dummy_stmgr, dummy_stmgr_thread, common.stmgr_ports_[1],
+                  common.tmanager_port_, common.shell_port_, common.stmgrs_id_list_[1],
+                  common.stmgr_instance_list_[1]);
+  common.ss_list_.push_back(dummy_stmgr_ss);
 
-//   // Wait till we get the back pressure notification
-//   while (dummy_stmgr->NumStartBPMsgs() == 0) sleep(1);
+  // Wait till we get the back pressure notification
+  while (dummy_stmgr->NumStartBPMsgs() == 0) sleep(1);
 
-//   EXPECT_EQ(dummy_stmgr->NumStartBPMsgs(), 1);
+  EXPECT_EQ(dummy_stmgr->NumStartBPMsgs(), 1);
 
-//   // Stop the schedulers
-//   for (size_t i = 0; i < common.ss_list_.size(); ++i) {
-//     common.ss_list_[i]->loopExit();
-//   }
+  // Stop the schedulers
+  for (size_t i = 0; i < common.ss_list_.size(); ++i) {
+    common.ss_list_[i]->loopExit();
+  }
 
-//   // Wait for the threads to terminate
-//   common.tmanager_thread_->join();
-//   common.metrics_mgr_thread_->join();
-//   regular_stmgr_thread->join();
-//   dummy_stmgr_thread->join();
-//   for (size_t i = 0; i < common.spout_workers_threads_list_.size(); ++i) {
-//     common.spout_workers_threads_list_[i]->join();
-//   }
-//   for (size_t i = 0; i < common.bolt_workers_threads_list_.size(); ++i) {
-//     common.bolt_workers_threads_list_[i]->join();
-//   }
+  // Wait for the threads to terminate
+  common.tmanager_thread_->join();
+  common.metrics_mgr_thread_->join();
+  regular_stmgr_thread->join();
+  dummy_stmgr_thread->join();
+  for (size_t i = 0; i < common.spout_workers_threads_list_.size(); ++i) {
+    common.spout_workers_threads_list_[i]->join();
+  }
+  for (size_t i = 0; i < common.bolt_workers_threads_list_.size(); ++i) {
+    common.bolt_workers_threads_list_[i]->join();
+  }
 
-//   // Delete the common resources
-//   delete regular_stmgr_thread;
-//   delete regular_stmgr;
-//   delete dummy_stmgr_thread;
-//   delete dummy_stmgr;
-//   TearCommonResources(common);
+  // Delete the common resources
+  delete regular_stmgr_thread;
+  delete regular_stmgr;
+  delete dummy_stmgr_thread;
+  delete dummy_stmgr;
+  TearCommonResources(common);
 }
 
 TEST(StMgr, test_tmanager_restart_on_new_address) {
