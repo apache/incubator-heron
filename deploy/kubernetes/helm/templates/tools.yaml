@@ -325,3 +325,4 @@ rules:
   - delete
   - get
   - list
+  - deletecollection
