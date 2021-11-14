@@ -1346,8 +1346,8 @@ TEST(StMgr, test_back_pressure_stmgr_reconnect) {
   common.topology_name_ = "mytopology";
   common.topology_id_ = "abcd-9999";
   common.setNumStmgrs(2);
-  common.num_spouts_ = 2;
-  common.num_spout_instances_ = 1;
+  common.num_spouts_ = 4;
+  common.num_spout_instances_ = 4;
   common.num_bolts_ = 2;
   common.num_bolt_instances_ = 1;
   common.grouping_ = heron::proto::api::SHUFFLE;
