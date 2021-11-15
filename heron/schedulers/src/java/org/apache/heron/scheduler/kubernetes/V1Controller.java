@@ -520,7 +520,7 @@ public class V1Controller extends KubernetesController {
     }
 
     if (!persistentVolumeClaimConfigs.isEmpty()) {
-      configurePodWithPersistentVolumeClaimMounts(executorContainer);
+      configurePodWithPersistentVolumeClaimVolumesAndMounts(podSpec, executorContainer);
     }
 
     configureExecutorContainer(executorCommand, resource, numberOfInstances, executorContainer);
@@ -982,21 +982,31 @@ public class V1Controller extends KubernetesController {
   }
 
   /**
-   * Makes a call to generate <code>Volume Mounts</code> and then inserts them into the <code>Container</code>.
-   * @param container All generated <code>V1VolumeMount</code> will be placed in the <code>Container</code>.
+   * Makes a call to generate <code>Volumes</code> and <code>Volume Mounts</code> and then inserts them.
+   * @param podSpec All generated <code>V1Volume</code> will be placed in the <code>Pod Spec</code>.
+   * @param executor All generated <code>V1VolumeMount</code> will be placed in the <code>Container</code>.
    */
   @VisibleForTesting
-  protected void configurePodWithPersistentVolumeClaimMounts(final V1Container container) {
-    List<V1VolumeMount> volumeMounts =
-        createPersistentVolumeClaimVolumeAndMounts(persistentVolumeClaimConfigs).second;
+  protected void configurePodWithPersistentVolumeClaimVolumesAndMounts(final V1PodSpec podSpec,
+                                                                       final V1Container executor) {
+    Pair<List<V1Volume>, List<V1VolumeMount>> volumesAndMounts =
+        createPersistentVolumeClaimVolumesAndMounts(persistentVolumeClaimConfigs);
 
-    // Deduplicate on Volume Mount names with Persistent Volume Claims taking precedence.
+    // Deduplicate on Names with Persistent Volume Claims taking precedence.
+
     KubernetesUtils.V1ControllerUtils<V1VolumeMount> utilsMounts =
         new KubernetesUtils.V1ControllerUtils<>();
-    container.setVolumeMounts(
-        utilsMounts.mergeListsDedupe(volumeMounts, container.getVolumeMounts(),
+    executor.setVolumeMounts(
+        utilsMounts.mergeListsDedupe(volumesAndMounts.second, executor.getVolumeMounts(),
             Comparator.comparing(V1VolumeMount::getName),
             "Executor and Persistent Volume Claim Volume Mounts"));
+
+    KubernetesUtils.V1ControllerUtils<V1Volume> utilsVolumes =
+        new KubernetesUtils.V1ControllerUtils<>();
+    podSpec.setVolumes(
+        utilsVolumes.mergeListsDedupe(volumesAndMounts.first, podSpec.getVolumes(),
+            Comparator.comparing(V1Volume::getName),
+            "Pod and Persistent Volume Claim Volumes"));
   }
 
   /**
