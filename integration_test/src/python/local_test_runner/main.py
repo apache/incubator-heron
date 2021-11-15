@@ -54,7 +54,7 @@ TEST_CLASSES = [
 ]
 
 # The location of default configure file
-DEFAULT_TEST_CONF_FILE = "integration_test/src/python/local_test_runner/resources/test.conf"
+DEFAULT_TEST_CONF_FILE = "resources/test.conf"
 
 ProcessTuple = namedtuple('ProcessTuple', 'pid cmd')
 

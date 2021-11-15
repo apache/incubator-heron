@@ -972,14 +972,17 @@ TEST(StMgr, test_back_pressure_instance) {
   common.topology_name_ = "mytopology";
   common.topology_id_ = "abcd-9999";
   common.setNumStmgrs(2);
-  common.num_spouts_ = 2;
-  common.num_spout_instances_ = 1;
+  common.num_spouts_ = 4;
+  common.num_spout_instances_ = 4;
   common.num_bolts_ = 2;
   common.num_bolt_instances_ = 1;
   common.grouping_ = heron::proto::api::SHUFFLE;
   // Empty so that we don't attempt to connect to the zk
   // but instead connect to the local filesytem
   common.zkhostportlist_ = "";
+  // Overwrite the default values for back pressure
+  common.high_watermark_ = 1_MB;
+  common.low_watermark_ = 500_KB;
 
   int num_msgs_sent_by_spout_instance = 100 * 1000 * 1000;  // 100M
 
@@ -1083,14 +1086,17 @@ TEST(StMgr, test_spout_death_under_backpressure) {
   common.topology_name_ = "mytopology";
   common.topology_id_ = "abcd-9999";
   common.setNumStmgrs(2);
-  common.num_spouts_ = 1;
-  common.num_spout_instances_ = 2;
+  common.num_spouts_ = 4;
+  common.num_spout_instances_ = 4;
   common.num_bolts_ = 2;
   common.num_bolt_instances_ = 1;
   common.grouping_ = heron::proto::api::SHUFFLE;
   // Empty so that we don't attempt to connect to the zk
   // but instead connect to the local filesytem
   common.zkhostportlist_ = "";
+  // Overwrite the default values for back pressure
+  common.high_watermark_ = 1_MB;
+  common.low_watermark_ = 500_KB;
 
   int num_msgs_sent_by_spout_instance = 100 * 1000 * 1000;  // 100M
 
@@ -1340,14 +1346,17 @@ TEST(StMgr, test_back_pressure_stmgr_reconnect) {
   common.topology_name_ = "mytopology";
   common.topology_id_ = "abcd-9999";
   common.setNumStmgrs(2);
-  common.num_spouts_ = 2;
-  common.num_spout_instances_ = 1;
+  common.num_spouts_ = 4;
+  common.num_spout_instances_ = 4;
   common.num_bolts_ = 2;
   common.num_bolt_instances_ = 1;
   common.grouping_ = heron::proto::api::SHUFFLE;
   // Empty so that we don't attempt to connect to the zk
   // but instead connect to the local filesytem
   common.zkhostportlist_ = "";
+  // Overwrite the default values for back pressure
+  common.high_watermark_ = 1_MB;
+  common.low_watermark_ = 500_KB;
 
   int num_msgs_sent_by_spout_instance = 100 * 1000 * 1000;  // 100M
 
