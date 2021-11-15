@@ -78,6 +78,7 @@ import io.kubernetes.client.openapi.models.V1StatefulSetSpec;
 import io.kubernetes.client.openapi.models.V1Status;
 import io.kubernetes.client.openapi.models.V1Toleration;
 import io.kubernetes.client.openapi.models.V1Volume;
+import io.kubernetes.client.openapi.models.V1VolumeBuilder;
 import io.kubernetes.client.openapi.models.V1VolumeMount;
 import io.kubernetes.client.openapi.models.V1VolumeMountBuilder;
 import io.kubernetes.client.util.PatchUtils;
@@ -934,13 +935,14 @@ public class V1Controller extends KubernetesController {
   }
 
   /**
-   * Generates the <code>Volume Mounts</code> to be placed in the <code>executor container</code>.
+   * Generates the <code>Volume</code> and <code>Volume Mounts</code> to be placed in the <code>executor container</code>.
    * @param mapConfig Mapping of <code>Volumes</code> to <code>key-value</code> configuration pairs.
-   * @return A list of configured <code>V1VolumeMount</code>.
+   * @return A pair of configured lists of <code>V1Volume</code> and <code>V1VolumeMount</code>.
    */
   @VisibleForTesting
-  protected List<V1VolumeMount> createPersistentVolumeClaimVolumeMounts(
+  protected Pair<List<V1Volume>, List<V1VolumeMount>> createPersistentVolumeClaimVolumesAndMounts(
       final Map<String, Map<KubernetesConstants.VolumeClaimTemplateConfigKeys, String>> mapConfig) {
+    List<V1Volume> volumeList = new LinkedList<>();
     List<V1VolumeMount> mountList = new LinkedList<>();
     for (Map.Entry<String, Map<KubernetesConstants.VolumeClaimTemplateConfigKeys, String>> configs
         : mapConfig.entrySet()) {
@@ -955,6 +957,19 @@ public class V1Controller extends KubernetesController {
             String.format("A mount path is required and missing from '%s'", volumeName));
       }
 
+      // Do not create Volumes for `OnDemand`.
+      final String claimName = configs.getValue()
+          .get(KubernetesConstants.VolumeClaimTemplateConfigKeys.claimName);
+      if (claimName != null && !KubernetesConstants.LABEL_ON_DEMAND.equalsIgnoreCase(claimName)) {
+        final V1Volume volume = new V1VolumeBuilder()
+            .withName(volumeName)
+            .withNewPersistentVolumeClaim()
+              .withClaimName(claimName)
+            .endPersistentVolumeClaim()
+            .build();
+        volumeList.add(volume);
+      }
+
       final V1VolumeMountBuilder volumeMount = new V1VolumeMountBuilder()
           .withName(volumeName)
           .withMountPath(path);
@@ -963,7 +978,7 @@ public class V1Controller extends KubernetesController {
       }
       mountList.add(volumeMount.build());
     }
-    return mountList;
+    return new Pair<>(volumeList, mountList);
   }
 
   /**
@@ -973,7 +988,7 @@ public class V1Controller extends KubernetesController {
   @VisibleForTesting
   protected void configurePodWithPersistentVolumeClaimMounts(final V1Container container) {
     List<V1VolumeMount> volumeMounts =
-        createPersistentVolumeClaimVolumeMounts(persistentVolumeClaimConfigs);
+        createPersistentVolumeClaimVolumeAndMounts(persistentVolumeClaimConfigs).second;
 
     // Deduplicate on Volume Mount names with Persistent Volume Claims taking precedence.
     KubernetesUtils.V1ControllerUtils<V1VolumeMount> utilsMounts =
