@@ -34,7 +34,7 @@ from heron.statemgrs.src.python.zkstatemanager import ZkStateManager
 from heron.statemgrs.src.python.filestatemanager import FileStateManager
 
 # The location of default configure file
-DEFAULT_TEST_CONF_FILE = "integration_test/src/python/topology_test_runner/resources/test.json"
+DEFAULT_TEST_CONF_FILE = "resources/test.json"
 
 #seconds
 RETRY_ATTEMPTS = 50
