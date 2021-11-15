@@ -884,6 +884,13 @@ public class V1Controller extends KubernetesController {
     for (Map.Entry<String, Map<KubernetesConstants.VolumeClaimTemplateConfigKeys, String>> pvc
         : mapOfOpts.entrySet()) {
 
+      // Only create claims for `OnDemand` volumes.
+      final String claimName = pvc.getValue()
+          .get(KubernetesConstants.VolumeClaimTemplateConfigKeys.claimName);
+      if (claimName != null && !KubernetesConstants.LABEL_ON_DEMAND.equalsIgnoreCase(claimName)) {
+        continue;
+      }
+
       V1PersistentVolumeClaim claim = new V1PersistentVolumeClaimBuilder()
           .withNewMetadata()
             .withName(pvc.getKey())
@@ -913,7 +920,7 @@ public class V1Controller extends KubernetesController {
             claim.getSpec().setVolumeMode(optionValue);
             break;
           // Valid ignored options not used in a PVC.
-          case path: case subPath:
+          case path: case subPath: case claimName:
             break;
           default:
             throw new TopologySubmissionException(
