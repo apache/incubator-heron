@@ -753,6 +753,9 @@ public class V1ControllerTest {
     final String volumeNameOne = "volume-name-one";
     final String volumeNameTwo = "volume-name-two";
     final String volumeNameStatic = "volume-name-static";
+    final String claimNameOne = "OnDemand";
+    final String claimNameTwo = "claim-name-two";
+    final String claimNameStatic = "OnDEmaND";
     final String storageClassName = "storage-class-name";
     final String sizeLimit = "555Gi";
     final String accessModesList = "ReadWriteOnce,ReadOnlyMany,ReadWriteMany";
@@ -764,6 +767,7 @@ public class V1ControllerTest {
         ImmutableMap.of(
             volumeNameOne, new HashMap<VolumeClaimTemplateConfigKeys, String>() {
               {
+                put(VolumeClaimTemplateConfigKeys.claimName, claimNameOne);
                 put(VolumeClaimTemplateConfigKeys.storageClassName, storageClassName);
                 put(VolumeClaimTemplateConfigKeys.sizeLimit, sizeLimit);
                 put(VolumeClaimTemplateConfigKeys.accessModes, accessModesList);
@@ -773,6 +777,7 @@ public class V1ControllerTest {
             },
             volumeNameTwo, new HashMap<VolumeClaimTemplateConfigKeys, String>() {
               {
+                put(VolumeClaimTemplateConfigKeys.claimName, claimNameTwo);
                 put(VolumeClaimTemplateConfigKeys.storageClassName, storageClassName);
                 put(VolumeClaimTemplateConfigKeys.sizeLimit, sizeLimit);
                 put(VolumeClaimTemplateConfigKeys.accessModes, accessModes);
@@ -783,6 +788,7 @@ public class V1ControllerTest {
             },
             volumeNameStatic, new HashMap<VolumeClaimTemplateConfigKeys, String>() {
               {
+                put(VolumeClaimTemplateConfigKeys.claimName, claimNameStatic);
                 put(VolumeClaimTemplateConfigKeys.sizeLimit, sizeLimit);
                 put(VolumeClaimTemplateConfigKeys.accessModes, accessModes);
                 put(VolumeClaimTemplateConfigKeys.volumeMode, volumeMode);
@@ -807,21 +813,6 @@ public class V1ControllerTest {
         .endSpec()
         .build();
 
-    final V1PersistentVolumeClaim claimTwo = new V1PersistentVolumeClaimBuilder()
-        .withNewMetadata()
-          .withName(volumeNameTwo)
-          .withLabels(V1Controller.getPersistentVolumeClaimLabels(topologyName))
-        .endMetadata()
-        .withNewSpec()
-          .withStorageClassName(storageClassName)
-          .withAccessModes(Collections.singletonList(accessModes))
-          .withVolumeMode(volumeMode)
-          .withNewResources()
-            .addToRequests("storage", new Quantity(sizeLimit))
-          .endResources()
-        .endSpec()
-        .build();
-
     final V1PersistentVolumeClaim claimStatic = new V1PersistentVolumeClaimBuilder()
         .withNewMetadata()
           .withName(volumeNameStatic)
@@ -837,7 +828,7 @@ public class V1ControllerTest {
         .build();
 
     final List<V1PersistentVolumeClaim> expectedClaims =
-        new LinkedList<>(Arrays.asList(claimOne, claimTwo, claimStatic));
+        new LinkedList<>(Arrays.asList(claimOne, claimStatic));
 
     final List<V1PersistentVolumeClaim> actualClaims =
         v1ControllerWithPodTemplate.createPersistentVolumeClaims(mapPVCOpts);
