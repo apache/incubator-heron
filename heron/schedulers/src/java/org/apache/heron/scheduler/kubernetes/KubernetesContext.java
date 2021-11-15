@@ -268,11 +268,22 @@ public final class KubernetesContext extends Context {
           volumes.put(volumeName, volume);
         }
 
-        if (KubernetesConstants.VolumeClaimTemplateConfigKeys.storageClassName.equals(key)
-            && !matcher.reset(value).matches()) {
+        /* Validate Claim and Storage Class names.
+          [1] `claimNameNotOnDemand`: checks for a `claimName` which is not `OnDemand`.
+          [2] `storageClassName`: Check if it is the provided `option`.
+          Conditions [1] OR [2] are True, then...
+          [3] Check for a valid lowercase RFC-1123 pattern.
+         */
+        boolean claimNameNotOnDemand =
+            KubernetesConstants.VolumeClaimTemplateConfigKeys.claimName.equals(key)
+                && !KubernetesConstants.LABEL_ON_DEMAND.equalsIgnoreCase(value);
+        if ((claimNameNotOnDemand // [1]
+            ||
+            KubernetesConstants.VolumeClaimTemplateConfigKeys.storageClassName.equals(key)) // [2]
+            && !matcher.reset(value).matches()) { // [3]
           throw new TopologySubmissionException(
-              String.format("Storage Class name `%s` does not match lowercase RFC-1123 pattern",
-                  value));
+              String.format("Option `%s` value `%s` does not match lowercase RFC-1123 pattern",
+                  key, value));
         }
 
         volume.put(key, value);

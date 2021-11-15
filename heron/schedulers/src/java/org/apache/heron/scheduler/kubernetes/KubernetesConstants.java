@@ -112,11 +112,12 @@ public final class KubernetesConstants {
   );
 
   enum VolumeClaimTemplateConfigKeys {
+    claimName,
     storageClassName,
     sizeLimit,
     accessModes,
     volumeMode,
-    path,     // Added to container.
-    subPath,  // Added to container.
+    path,               // Added to container.
+    subPath,            // Added to container.
   }
 }
