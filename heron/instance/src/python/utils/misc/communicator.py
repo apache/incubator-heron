@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 
 #  Licensed to the Apache Software Foundation (ASF) under one
@@ -24,7 +24,7 @@ from queue import Queue, Full, Empty
 
 from heron.common.src.python.utils.log import Log
 
-class HeronCommunicator(object):
+class HeronCommunicator:
   """HeronCommunicator: a wrapper class for non-blocking queue in Heron.
 
   Note that this class does not yet implement the dynamic tuning of expected available capacity,

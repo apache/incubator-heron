@@ -34,7 +34,7 @@ heron submit ... ExclamationTopology --verbose
 ### 2. Why does the topology launch successfully but fail to start?
 
 Even if the topology is submitted successfully, it could still fail to
-start some component. For example, TMaster may fail to start due to unfulfilled
+start some component. For example, TManager may fail to start due to unfulfilled
 dependencies.
 
 For example, the following message can appear:
@@ -51,7 +51,7 @@ java.nio.file.NoSuchFileException: \
 
 ...
 
-[2016-05-27 12:02:38 -0600] org.apache.heron.spi.utils.TMasterUtils SEVERE: \
+[2016-05-27 12:02:38 -0600] org.apache.heron.spi.utils.TManagerUtils SEVERE: \
 Failed to get physical plan for topology ExclamationTopology
 
 ...
@@ -122,7 +122,7 @@ To check, run the following command in a shell.
 
 ### 3. Why does the process fail during runtime?
 
-If a component (e.g., TMaster or Stream Manager) has failed during runtime, visit the component's logs in
+If a component (e.g., TManager or Stream Manager) has failed during runtime, visit the component's logs in
 
 ```bash
 ~/.herondata/topologies/{cluster}/{role}/{TopologyName}/log-files/

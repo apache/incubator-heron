@@ -31,7 +31,7 @@ from ..common import status
 from heron.common.src.python.utils import log
 
 # The location of default configure file
-DEFAULT_TEST_CONF_FILE = "integration_test/src/python/test_runner/resources/test.json"
+DEFAULT_TEST_CONF_FILE = "resources/test.json"
 
 RETRY_ATTEMPTS = 25
 #seconds
@@ -42,11 +42,11 @@ VERBOSE = False               # Disable verbose by default
 successes = []
 failures = []
 
-class FileBasedExpectedResultsHandler(object):
+class FileBasedExpectedResultsHandler:
   def __init__(self, file_path):
     self.file_path = file_path
 
-  def fetch_results(self):
+  def fetch_results(self) -> str:
     # Read expected result from the expected result file
     try:
       if not os.path.exists(self.file_path):
@@ -57,14 +57,14 @@ class FileBasedExpectedResultsHandler(object):
     except Exception as e:
       raise status.TestFailure("Failed to read expected result file %s" % self.file_path, e)
 
-class HttpBasedExpectedResultsHandler(object):
+class HttpBasedExpectedResultsHandler:
   def __init__(self, server_host_port, topology_name, task_count):
     self.server_host_port = server_host_port
     self.topology_name = topology_name
     self.task_count = task_count
 
   # pylint: disable=unnecessary-lambda
-  def fetch_results(self):
+  def fetch_results(self) -> str:
     try:
       result = []
       decoder = json.JSONDecoder(strict=False)
@@ -87,12 +87,12 @@ class HttpBasedExpectedResultsHandler(object):
       raise status.TestFailure(
           "Fetching expected result failed for %s topology" % self.topology_name, e)
 
-class HttpBasedActualResultsHandler(object):
+class HttpBasedActualResultsHandler:
   def __init__(self, server_host_port, topology_name):
     self.server_host_port = server_host_port
     self.topology_name = topology_name
 
-  def fetch_results(self):
+  def fetch_results(self) -> str:
     try:
       return fetch_from_server(self.server_host_port, self.topology_name,
                                'results', '/results/%s' % self.topology_name)
@@ -100,7 +100,7 @@ class HttpBasedActualResultsHandler(object):
       raise status.TestFailure("Fetching result failed for %s topology" % self.topology_name, e)
 
 # pylint: disable=unnecessary-lambda
-class ExactlyOnceResultsChecker(object):
+class ExactlyOnceResultsChecker:
   """Compares what results we found against what was expected. Verifies and exact match"""
 
   def __init__(self, topology_name, expected_results_handler, actual_results_handler):
@@ -221,13 +221,13 @@ def update_state_server(http_server_host_port, topology_name, key, value):
   response = connection.getresponse()
   return response.status == 200
 
-def fetch_from_server(server_host_port, topology_name, data_name, path):
+def fetch_from_server(server_host_port, topology_name, data_name, path) -> str:
   ''' Make a http get request to fetch actual results from http server '''
   for i in range(0, RETRY_ATTEMPTS):
     logging.info("Fetching %s for topology %s, retry count: %d", data_name, topology_name, i)
     response = get_http_response(server_host_port, path)
     if response.status == 200:
-      return response.read()
+      return response.read().decode()
     elif i != RETRY_ATTEMPTS:
       logging.info("Fetching %s failed with status: %s; reason: %s; body: %s",
                    data_name, response.status, response.reason, response.read())
@@ -425,7 +425,7 @@ def main():
   log.configure(level=logging.DEBUG)
   conf_file = DEFAULT_TEST_CONF_FILE
   # Read the configuration file from package
-  conf_string = pkgutil.get_data(__name__, conf_file)
+  conf_string = pkgutil.get_data(__name__, conf_file).decode()
   decoder = json.JSONDecoder(strict=False)
   # Convert the conf file to a json format
   conf = decoder.decode(conf_string)

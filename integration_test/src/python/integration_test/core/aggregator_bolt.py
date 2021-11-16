@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 
 #  Licensed to the Apache Software Foundation (ASF) under one
@@ -19,9 +19,6 @@
 #  under the License.
 
 '''aggregator_bolt.py'''
-from future.standard_library import install_aliases
-install_aliases()
-
 import http.client
 import json
 from urllib.parse import urlparse

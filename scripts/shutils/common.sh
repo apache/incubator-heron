@@ -92,7 +92,7 @@ function print_timer_summary {
 
 # Discover the platform that we are running on
 function discover_platform {
-  discover=`python -mplatform`
+  discover="${PLATFORM-$(python3 -mplatform)}"
   if [[ $discover =~ ^.*centos.*$ ]]; then
     echo "centos"
   elif [[ $discover =~ ^.*Ubuntu.*$ ]]; then

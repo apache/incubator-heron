@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 
 #  Licensed to the Apache Software Foundation (ASF) under one
@@ -22,7 +22,7 @@
 # pylint: disable=missing-docstring
 
 import unittest
-from mock import patch, Mock, call
+from unittest.mock import patch, Mock, call
 from io import StringIO
 
 from heron.common.src.python.utils import proc

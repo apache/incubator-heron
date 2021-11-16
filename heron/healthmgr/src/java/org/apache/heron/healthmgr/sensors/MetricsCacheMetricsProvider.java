@@ -36,12 +36,12 @@ import com.microsoft.dhalion.api.MetricsProvider;
 import com.microsoft.dhalion.core.Measurement;
 
 import org.apache.heron.proto.system.Common.StatusCode;
-import org.apache.heron.proto.tmaster.TopologyMaster;
-import org.apache.heron.proto.tmaster.TopologyMaster.MetricInterval;
-import org.apache.heron.proto.tmaster.TopologyMaster.MetricResponse.IndividualMetric;
-import org.apache.heron.proto.tmaster.TopologyMaster.MetricResponse.IndividualMetric.IntervalValue;
-import org.apache.heron.proto.tmaster.TopologyMaster.MetricResponse.TaskMetric;
-import org.apache.heron.proto.tmaster.TopologyMaster.MetricsCacheLocation;
+import org.apache.heron.proto.tmanager.TopologyManager;
+import org.apache.heron.proto.tmanager.TopologyManager.MetricInterval;
+import org.apache.heron.proto.tmanager.TopologyManager.MetricResponse.IndividualMetric;
+import org.apache.heron.proto.tmanager.TopologyManager.MetricResponse.IndividualMetric.IntervalValue;
+import org.apache.heron.proto.tmanager.TopologyManager.MetricResponse.TaskMetric;
+import org.apache.heron.proto.tmanager.TopologyManager.MetricsCacheLocation;
 import org.apache.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import org.apache.heron.spi.utils.NetworkUtils;
 
@@ -73,7 +73,7 @@ public class MetricsCacheMetricsProvider implements MetricsProvider {
     Collection<Measurement> result = new ArrayList<>();
     for (String metric : metricNames) {
       for (String component : components) {
-        TopologyMaster.MetricResponse response =
+        TopologyManager.MetricResponse response =
             getMetricsFromMetricsCache(metric, component, startTime, duration);
         Collection<Measurement> measurements = parse(response, component, metric, startTime);
         LOG.fine(String.format("%d measurements received for %s/%s",
@@ -87,7 +87,7 @@ public class MetricsCacheMetricsProvider implements MetricsProvider {
   @VisibleForTesting
   @SuppressWarnings("unchecked")
   Collection<Measurement> parse(
-      TopologyMaster.MetricResponse response, String component, String metric, Instant startTime) {
+      TopologyManager.MetricResponse response, String component, String metric, Instant startTime) {
     Collection<Measurement> metricsData = new ArrayList();
 
     if (response == null || !response.getStatus().getStatus().equals(StatusCode.OK)) {
@@ -137,10 +137,10 @@ public class MetricsCacheMetricsProvider implements MetricsProvider {
   }
 
   @VisibleForTesting
-  TopologyMaster.MetricResponse getMetricsFromMetricsCache(
+  TopologyManager.MetricResponse getMetricsFromMetricsCache(
       String metric, String component, Instant start, Duration duration) {
     LOG.log(Level.FINE, "MetricsCache Query request metric name : {0}", metric);
-    TopologyMaster.MetricRequest request = TopologyMaster.MetricRequest.newBuilder()
+    TopologyManager.MetricRequest request = TopologyManager.MetricRequest.newBuilder()
         .setComponentName(component)
         .setExplicitInterval(
             MetricInterval.newBuilder()
@@ -163,8 +163,8 @@ public class MetricsCacheMetricsProvider implements MetricsProvider {
       byte[] responseData = NetworkUtils.readHttpResponse(connection);
 
       try {
-        TopologyMaster.MetricResponse response =
-            TopologyMaster.MetricResponse.parseFrom(responseData);
+        TopologyManager.MetricResponse response =
+            TopologyManager.MetricResponse.parseFrom(responseData);
         LOG.log(Level.FINE, "MetricsCache Query response: \n{0}", response);
         return response;
       } catch (InvalidProtocolBufferException e) {

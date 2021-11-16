@@ -1,10 +1,10 @@
 {
   "name": "ExclamationTopology",
-  "tmaster_location": {
+  "tmanager_location": {
     "name": "ExclamationTopology",
     "stats_port": 61362,
     "host": "tw-mbp-rli",
-    "master_port": 61360,
+    "server_port": 61360,
     "id": "ExclamationTopology2cd540ae-0f43-4ae5-b304-9055910ff7e7",
     "controller_port": 61361
   },
@@ -122,7 +122,7 @@
   },
   "execution_state": {
     "release_username": "rli",
-    "has_tmaster_location": true,
+    "has_tmanager_location": true,
     "jobname": "ExclamationTopology",
     "release_version": "explorer",
     "submission_user": "rli",

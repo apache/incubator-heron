@@ -65,9 +65,9 @@ class HeronInternalsConfigReader : public YamlFileReader {
   // The maximum number of log files
   sp_int32 GetHeronLoggingMaximumFiles();
 
-  // The interval after which we check if the tmaster location
+  // The interval after which we check if the tmanager location
   // has been set or not
-  sp_int32 GetCheckTMasterLocationIntervalSec();
+  sp_int32 GetCheckTManagerLocationIntervalSec();
 
   // The interval in seconds to prune logging files in C+++
   sp_int32 GetHeronLoggingPruneIntervalSec();
@@ -105,44 +105,44 @@ class HeronInternalsConfigReader : public YamlFileReader {
   // The interval in seconds to flush cached metircs to scribe
   sp_int32 GetHeronMetricsmgrScribePeriodicFlushIntervalSec();
 
-  // The interval in seconds to reconnect to tmaster if a connection failure happens
-  sp_int32 GetHeronMetricsmgrReconnectTmasterIntervalSec();
+  // The interval in seconds to reconnect to tmanager if a connection failure happens
+  sp_int32 GetHeronMetricsmgrReconnectTmanagerIntervalSec();
 
   // The maximum packet size in MB of metrics manager's network options
   sp_int32 GetHeronMetricsmgrNetworkOptionsMaximumPacketMb();
 
   /**
-  * Tmaster Config Getters
+  * Tmanager Config Getters
   **/
-  // The maximum interval in minutes of metrics to be kept in tmaster
-  sp_int32 GetHeronTmasterMetricsCollectorMaximumIntervalMin();
+  // The maximum interval in minutes of metrics to be kept in tmanager
+  sp_int32 GetHeronTmanagerMetricsCollectorMaximumIntervalMin();
 
-  // The maximum time to retry to establish the tmaster
-  sp_int32 GetHeronTmasterEstablishRetryTimes();
+  // The maximum time to retry to establish the tmanager
+  sp_int32 GetHeronTmanagerEstablishRetryTimes();
 
-  // The interval to retry to establish the tmaster
-  sp_int32 GetHeronTmasterEstablishRetryIntervalSec();
+  // The interval to retry to establish the tmanager
+  sp_int32 GetHeronTmanagerEstablishRetryIntervalSec();
 
-  // The maximum packet size in MB of tmaster's network options for stmgrs to connect to
-  sp_int32 GetHeronTmasterNetworkMasterOptionsMaximumPacketMb();
+  // The maximum packet size in MB of tmanager's network options for stmgrs to connect to
+  sp_int32 GetHeronTmanagerNetworkServerOptionsMaximumPacketMb();
 
-  // The maximum packet size in MB of tmaster's network options for scheduler to connect to
-  sp_int32 GetHeronTmasterNetworkControllerOptionsMaximumPacketMb();
+  // The maximum packet size in MB of tmanager's network options for scheduler to connect to
+  sp_int32 GetHeronTmanagerNetworkControllerOptionsMaximumPacketMb();
 
-  // The maximum packet size in MB of tmaster's network options for stat queries
-  sp_int32 GetHeronTmasterNetworkStatsOptionsMaximumPacketMb();
+  // The maximum packet size in MB of tmanager's network options for stat queries
+  sp_int32 GetHeronTmanagerNetworkStatsOptionsMaximumPacketMb();
 
-  // The inteval for tmaster to purge metrics from socket
-  sp_int32 GetHeronTmasterMetricsCollectorPurgeIntervalSec();
+  // The inteval for tmanager to purge metrics from socket
+  sp_int32 GetHeronTmanagerMetricsCollectorPurgeIntervalSec();
 
   // The maximum # of exception to be stored in tmetrics collector, to prevent potential OOM
-  sp_int32 GetHeronTmasterMetricsCollectorMaximumException();
+  sp_int32 GetHeronTmanagerMetricsCollectorMaximumException();
 
   // Should metrics server bind on all interfaces
-  bool GetHeronTmasterMetricsNetworkBindAllInterfaces();
+  bool GetHeronTmanagerMetricsNetworkBindAllInterfaces();
 
   // The timeout in seconds for stream mgr, compared with (current time - last heartbeat time)
-  sp_int32 GetHeronTmasterStmgrStateTimeoutSec();
+  sp_int32 GetHeronTmanagerStmgrStateTimeoutSec();
 
   /**
   * Stream manager Config Getters
@@ -167,16 +167,16 @@ class HeronInternalsConfigReader : public YamlFileReader {
   sp_int32 GetHeronStreammgrClientReconnectIntervalSec();
 
   // The reconnect interval to tamster in second for stream manager client
-  sp_int32 GetHeronStreammgrClientReconnectTmasterIntervalSec();
+  sp_int32 GetHeronStreammgrClientReconnectTmanagerIntervalSec();
 
-  // The max reconnect attempts to tmaster for stream manager client
-  sp_int32 GetHeronStreammgrClientReconnectTmasterMaxAttempts();
+  // The max reconnect attempts to tmanager for stream manager client
+  sp_int32 GetHeronStreammgrClientReconnectTmanagerMaxAttempts();
 
   // The maximum packet size in MB of stream manager's network options
   sp_int32 GetHeronStreammgrNetworkOptionsMaximumPacketMb();
 
   // The interval in seconds to send heartbeat
-  sp_int32 GetHeronStreammgrTmasterHeartbeatIntervalSec();
+  sp_int32 GetHeronStreammgrTmanagerHeartbeatIntervalSec();
 
   // Maximum batch size in MB to read by stream manager from socket
   sp_int32 GetHeronStreammgrConnectionReadBatchSizeMb();

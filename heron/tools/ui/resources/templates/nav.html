@@ -1,4 +1,4 @@
-<!--
+{#
 Licensed to the Apache Software Foundation (ASF) under one
 or more contributor license agreements.  See the NOTICE file
 distributed with this work for additional information
@@ -15,15 +15,15 @@ software distributed under the License is distributed on an
 KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations
 under the License.
--->
+#}
 
 <div id="mainnav">
 <ul style="margin-left:5px;">
-  <li class="{{ className(active, 'topologies') }}">
-  {% if className(active, 'topologies') %}
+  <li {% if active == 'topologies' %}class="active"{% endif %}>
+  {% if active == 'topologies' %}
     <span class="current-arrow">&nbsp;</span>
-  {% end %}
-    <a href="{{ reverse_url('topologies') }}">
+  {% endif %}
+    <a href="{{ url_for('topologies_page') }}">
       <div class="icon">
         <span class="fs1" aria-hidden="true" data-icon="&#xe0b8;"></span>
       </div>

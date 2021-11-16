@@ -9,7 +9,7 @@ metricscachemgr_deps_files = [
     "//heron/spi/src/java:metricsmgr-spi-java",
     "//heron/proto:proto_common_java",
     "//heron/proto:proto_metrics_java",
-    "//heron/proto:proto_tmaster_java",
+    "//heron/proto:proto_tmanager_java",
     "//third_party/java:jackson",
     "//third_party/java:cli",
     "//third_party/java:guava",

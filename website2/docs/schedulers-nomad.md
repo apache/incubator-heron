@@ -20,7 +20,7 @@ sidebar_label:  Nomad
     under the License.
 -->
 
-Heron supports [Hashicorp](https://hashicorp.com)'s [Nomad](https://nomadproject.io) as a scheduler. You can use Nomad for either small- or large-scale Heron deployments or to run Heron locally in [standalone mode](schedulers-standalone).
+Heron supports [Hashicorp](https://hashicorp.com)'s [Nomad](https://nomadproject.io) as a scheduler.
 
 > Update: Heron now supports running on Nomad via [raw exec driver](https://www.nomadproject.io/docs/drivers/raw_exec.html) and [docker driver](https://www.nomadproject.io/docs/drivers/docker.html)
 
@@ -39,7 +39,7 @@ The advantages of this mode is that it is incredibly lightweight and likely do n
 When setting up your Nomad cluster, the following are required:
 
 * The [Heron CLI tool](user-manuals-heron-cli) must be installed on each machine used to deploy Heron topologies
-* Python 2.7, Java 7 or 8, and [curl](https://curl.haxx.se/) must be installed on every machine in the cluster
+* Python 3, Java 7 or 8, and [curl](https://curl.haxx.se/) must be installed on every machine in the cluster
 * A [ZooKeeper cluster](https://zookeeper.apache.org)
 
 ## Configuring Heron settings
@@ -301,7 +301,7 @@ heron.nomad.driver: "docker"
 You can also adjust which docker image to use for running Heron via the `heron.executor.docker.image` in `~/.heron/conf/nomad/scheduler.yaml` e.g.
 
 ```yaml
-heron.executor.docker.image: 'heron/heron:latest'
+heron.executor.docker.image: 'apache/heron:latest'
 ```
 
 You'll need to use a topology uploader to deploy topology packages to nodes in your cluster. You can use one of the following uploaders:

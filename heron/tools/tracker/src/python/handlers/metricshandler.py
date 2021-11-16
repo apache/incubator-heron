@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 
 #  Licensed to the Apache Software Foundation (ASF) under one
@@ -25,7 +25,7 @@ import tornado.web
 
 from heron.common.src.python.utils.log import Log
 from heron.proto import common_pb2
-from heron.proto import tmaster_pb2
+from heron.proto import tmanager_pb2
 from heron.tools.tracker.src.python import constants
 from heron.tools.tracker.src.python.handlers import BaseHandler
 
@@ -64,7 +64,7 @@ class MetricsHandler(BaseHandler):
       component = self.get_argument_component()
       metric_names = self.get_required_arguments_metricnames()
 
-      topology = self.tracker.getTopologyByClusterRoleEnvironAndName(
+      topology = self.tracker.get_topology(
           cluster, role, environ, topology_name)
 
       interval = int(self.get_argument(constants.PARAM_INTERVAL, default=-1))
@@ -72,7 +72,7 @@ class MetricsHandler(BaseHandler):
 
       metrics = yield tornado.gen.Task(
           self.getComponentMetrics,
-          topology.tmaster, component, metric_names, instances, interval)
+          topology.tmanager, component, metric_names, instances, interval)
 
       self.write_success_response(metrics)
     except Exception as e:
@@ -82,9 +82,9 @@ class MetricsHandler(BaseHandler):
   # pylint: disable=too-many-locals, no-self-use, unused-argument
   @tornado.gen.coroutine
   def getComponentMetrics(self,
-                          tmaster,
+                          tmanager,
                           componentName,
-                          metricNames,
+                          metric_names,
                           instances,
                           interval,
                           callback=None):
@@ -105,19 +105,19 @@ class MetricsHandler(BaseHandler):
 
     Raises exception on failure.
     """
-    if not tmaster or not tmaster.host or not tmaster.stats_port:
-      raise Exception("No Tmaster found")
+    if not tmanager or not tmanager.host or not tmanager.stats_port:
+      raise Exception("No Tmanager found")
 
-    host = tmaster.host
-    port = tmaster.stats_port
+    host = tmanager.host
+    port = tmanager.stats_port
 
-    metricRequest = tmaster_pb2.MetricRequest()
+    metricRequest = tmanager_pb2.MetricRequest()
     metricRequest.component_name = componentName
     if len(instances) > 0:
       for instance in instances:
         metricRequest.instance_id.append(instance)
-    for metricName in metricNames:
-      metricRequest.metric.append(metricName)
+    for metric_name in metric_names:
+      metricRequest.metric.append(metric_name)
     metricRequest.interval = interval
 
     # Serialize the metricRequest to send as a payload
@@ -142,17 +142,17 @@ class MetricsHandler(BaseHandler):
     # Check the response code - error if it is in 400s or 500s
     responseCode = result.code
     if responseCode >= 400:
-      message = "Error in getting metrics from Tmaster, code: " + responseCode
+      message = "Error in getting metrics from Tmanager, code: " + responseCode
       Log.error(message)
       raise Exception(message)
 
-    # Parse the response from tmaster.
-    metricResponse = tmaster_pb2.MetricResponse()
+    # Parse the response from tmanager.
+    metricResponse = tmanager_pb2.MetricResponse()
     metricResponse.ParseFromString(result.body)
 
     if metricResponse.status.status == common_pb2.NOTOK:
       if metricResponse.status.HasField("message"):
-        Log.warn("Received response from Tmaster: %s", metricResponse.status.message)
+        Log.warn("Received response from Tmanager: %s", metricResponse.status.message)
 
     # Form the response.
     ret = {}

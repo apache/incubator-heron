@@ -215,7 +215,7 @@ Available commands:
     submit             Submit a topology
     version            Print version of heron-cli
 
-For detailed documentation, go to https://heron.incubator.apache.org
+For detailed documentation, go to https://heron.apache.org
 ```
 
 To invoke help output for a command, run `heron help COMMAND`. Here's an

@@ -179,7 +179,7 @@ def _pex_binary_impl(ctx):
     pexbuilder = ctx.executable._pexbuilder
 
     # form the arguments to pex builder
-    arguments = [] if ctx.attr.zip_safe else ["--not-zip-safe"]
+    arguments = []
     arguments += [] if ctx.attr.pex_use_wheels else ["--no-use-wheel"]
     if ctx.attr.interpreter:
         arguments += ["--python", ctx.attr.interpreter]
@@ -195,7 +195,12 @@ def _pex_binary_impl(ctx):
         "--output-file",
         deploy_pex.path,
         "--disable-cache",
-        manifest_file.path,
+        "--python-shebang", "#!/usr/bin/env python3",
+        "--no-compile",
+        "--include-tools",
+        "--layout", "zipapp",
+        "--resolver-version", "pip-2020-resolver",
+        "--manifest-file", manifest_file.path,
     ]
     #EXTRA_PEX_ARGS#
 
@@ -321,7 +326,7 @@ pex_bin_attrs = _dmerge(pex_attrs, {
     "pex_verbosity": attr.int(default = 0),
     "resources": attr.label_list(allow_files = True),
     "zip_safe": attr.bool(
-        default = True,
+        default = False,
         mandatory = False,
     ),
 })

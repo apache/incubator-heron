@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 
 #  Licensed to the Apache Software Foundation (ASF) under one
@@ -24,7 +24,7 @@
 # pylint: disable=unused-argument
 # pylint: disable=missing-docstring
 import random
-from mock import patch
+from unittest.mock import patch
 
 from heronpy.api.task_hook import ITaskHook
 from heronpy.api.custom_grouping import ICustomGrouping

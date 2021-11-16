@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 
 #  Licensed to the Apache Software Foundation (ASF) under one
@@ -25,7 +25,7 @@ import struct
 
 from heron.common.src.python.utils.log import Log
 
-class HeronProtocol(object):
+class HeronProtocol:
   """Heron's application level network protocol"""
   INT_PACK_FMT = ">I"
   HEADER_SIZE = 4
@@ -71,7 +71,7 @@ class HeronProtocol(object):
     len_typename = HeronProtocol.unpack_int(data[:4])
     data = data[4:]
 
-    typename = data[:len_typename]
+    typename = data[:len_typename].decode()
     data = data[len_typename:]
 
     reqid = REQID.unpack(data[:REQID.REQID_SIZE])
@@ -84,11 +84,11 @@ class HeronProtocol(object):
 
     return typename, reqid, serialized_msg
 
-class OutgoingPacket(object):
+class OutgoingPacket:
   """Wrapper class for outgoing packet"""
   def __init__(self, raw_data):
-    self.raw = str(raw_data)
-    self.to_send = str(raw_data)
+    self.raw = bytes(raw_data)
+    self.to_send = bytes(raw_data)
 
   def __len__(self):
     return len(self.raw)
@@ -101,7 +101,7 @@ class OutgoingPacket(object):
     :param message: protocol buffer object
     """
     assert message.IsInitialized()
-    packet = ''
+    packet = b''
 
     # calculate the totla size of the packet incl. header
     typename = message.DESCRIPTOR.full_name
@@ -114,7 +114,7 @@ class OutgoingPacket(object):
 
     # next write the type string
     packet += HeronProtocol.pack_int(len(typename))
-    packet += typename
+    packet += typename.encode()
 
     # reqid
     packet += reqid.pack()
@@ -137,12 +137,12 @@ class OutgoingPacket(object):
     sent = dispatcher.send(self.to_send)
     self.to_send = self.to_send[sent:]
 
-class IncomingPacket(object):
+class IncomingPacket:
   """Helper class for incoming packet"""
   def __init__(self):
     """Initializes IncomingPacket object"""
-    self.header = ''
-    self.data = ''
+    self.header = b''
+    self.data = b''
     self.is_header_read = False
     self.is_complete = False
     # for debugging identification purposes
@@ -218,7 +218,7 @@ class IncomingPacket(object):
            (str(self.id), self.is_header_read, self.is_complete)
 
 
-class REQID(object):
+class REQID:
   """Helper class for REQID"""
   REQID_SIZE = 32
 
@@ -259,10 +259,9 @@ class REQID(object):
   def __str__(self):
     if self.is_zero():
       return "ZERO"
-    else:
-      return ''.join([str(i) for i in list(self.bytes)])
+    return ''.join([str(i) for i in list(self.bytes)])
 
-class StatusCode(object):
+class StatusCode:
   """StatusCode for Response"""
   OK = 0
   WRITE_ERROR = 1

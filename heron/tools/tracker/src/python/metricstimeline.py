@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 
 #  Licensed to the Apache Software Foundation (ASF) under one
@@ -19,21 +19,25 @@
 #  under the License.
 
 """ metricstimeline.py """
+from typing import List
+
 import tornado.gen
 
 from heron.common.src.python.utils.log import Log
 from heron.proto import common_pb2
-from heron.proto import tmaster_pb2
+from heron.proto import tmanager_pb2
 
 # pylint: disable=too-many-locals, too-many-branches, unused-argument
 @tornado.gen.coroutine
-def getMetricsTimeline(tmaster,
-                       component_name,
-                       metric_names,
-                       instances,
-                       start_time,
-                       end_time,
-                       callback=None):
+def get_metrics_timeline(
+    tmanager: tmanager_pb2.TManagerLocation,
+    component_name: str,
+    metric_names: List[str],
+    instances: List[str],
+    start_time: int,
+    end_time: int,
+    callback=None,
+) -> dict:
   """
   Get the specified metrics for the given component name of this topology.
   Returns the following dict on success:
@@ -58,39 +62,31 @@ def getMetricsTimeline(tmaster,
     "message": "..."
   }
   """
-  # Tmaster is the proto object and must have host and port for stats.
-  if not tmaster or not tmaster.host or not tmaster.stats_port:
-    raise Exception("No Tmaster found")
+  # Tmanager is the proto object and must have host and port for stats.
+  if not tmanager or not tmanager.host or not tmanager.stats_port:
+    raise Exception("No Tmanager found")
 
-  host = tmaster.host
-  port = tmaster.stats_port
+  host = tmanager.host
+  port = tmanager.stats_port
 
   # Create the proto request object to get metrics.
 
-  metricRequest = tmaster_pb2.MetricRequest()
-  metricRequest.component_name = component_name
+  request_parameters = tmanager_pb2.MetricRequest()
+  request_parameters.component_name = component_name
 
-  # If no instances are give, metrics for all instances
+  # If no instances are given, metrics for all instances
   # are fetched by default.
-  if len(instances) > 0:
-    for instance in instances:
-      metricRequest.instance_id.append(instance)
+  request_parameters.instance_id.extend(instances)
+  request_parameters.metric.extend(metric_names)
 
-  for metricName in metric_names:
-    metricRequest.metric.append(metricName)
-
-  metricRequest.explicit_interval.start = start_time
-  metricRequest.explicit_interval.end = end_time
-  metricRequest.minutely = True
-
-  # Serialize the metricRequest to send as a payload
-  # with the HTTP request.
-  metricRequestString = metricRequest.SerializeToString()
+  request_parameters.explicit_interval.start = start_time
+  request_parameters.explicit_interval.end = end_time
+  request_parameters.minutely = True
 
   # Form and send the http request.
-  url = "http://{0}:{1}/stats".format(host, port)
+  url = f"http://{host}:{port}/stats"
   request = tornado.httpclient.HTTPRequest(url,
-                                           body=metricRequestString,
+                                           body=request_parameters.SerializeToString(),
                                            method='POST',
                                            request_timeout=5)
 
@@ -105,19 +101,17 @@ def getMetricsTimeline(tmaster,
 
 
   # Check the response code - error if it is in 400s or 500s
-  responseCode = result.code
-  if responseCode >= 400:
-    message = "Error in getting metrics from Tmaster, code: " + responseCode
-    Log.error(message)
+  if result.code >= 400:
+    message = f"Error in getting metrics from Tmanager, code: {result.code}"
     raise Exception(message)
 
-  # Parse the response from tmaster.
-  metricResponse = tmaster_pb2.MetricResponse()
-  metricResponse.ParseFromString(result.body)
+  # Parse the response from tmanager.
+  response_data = tmanager_pb2.MetricResponse()
+  response_data.ParseFromString(result.body)
 
-  if metricResponse.status.status == common_pb2.NOTOK:
-    if metricResponse.status.HasField("message"):
-      Log.warn("Received response from Tmaster: %s", metricResponse.status.message)
+  if response_data.status.status == common_pb2.NOTOK:
+    if response_data.status.HasField("message"):
+      Log.warn("Received response from Tmanager: %s", response_data.status.message)
 
   # Form the response.
   ret = {}
@@ -129,7 +123,7 @@ def getMetricsTimeline(tmaster,
   # Loop through all the metrics
   # One instance corresponds to one metric, which can have
   # multiple IndividualMetrics for each metricname requested.
-  for metric in metricResponse.metric:
+  for metric in response_data.metric:
     instance = metric.instance_id
 
     # Loop through all individual metrics.

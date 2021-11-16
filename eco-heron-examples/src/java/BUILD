@@ -15,7 +15,7 @@ java_binary(
         "//heron/api/src/java:api-java",
         "//heron/api/src/java:api-java-low-level",
         "//heron/common/src/java:basics-java",
-        "//storm-compatibility/src/java:storm-compatibility-java",
+        "//storm-compatibility/v0.10.2/src/java:storm-compatibility-java",
     ],
 )
 

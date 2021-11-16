@@ -61,7 +61,6 @@ import org.apache.heron.apiserver.actions.ActionType;
 import org.apache.heron.apiserver.actions.Keys;
 import org.apache.heron.apiserver.utils.ConfigUtils;
 import org.apache.heron.apiserver.utils.FileHelper;
-import org.apache.heron.apiserver.utils.Logging;
 import org.apache.heron.apiserver.utils.Utils;
 import org.apache.heron.common.basics.DryRunFormatType;
 import org.apache.heron.common.basics.FileUtils;
@@ -175,6 +174,10 @@ public class TopologyResource extends HeronResource {
 
       final boolean isDryRun = form.getFields().containsKey(PARAM_DRY_RUN);
 
+      final boolean isVerbose = form.getFields().containsKey("verbose");
+
+      final boolean isVerboseGC = form.getFields().containsKey("verbose_gc");
+
       // copy configuration files to the sandbox config location
       // topology-dir/<default-heron-sandbox-config>
       FileHelper.copyDirectory(
@@ -217,7 +220,9 @@ public class TopologyResource extends HeronResource {
           Pair.create(Key.ROLE.value(), role),
           Pair.create(Key.ENVIRON.value(), environment),
           Pair.create(Key.SUBMIT_USER.value(), user),
-          Pair.create(Key.DRY_RUN.value(), isDryRun)
+          Pair.create(Key.DRY_RUN.value(), isDryRun),
+          Pair.create(Key.VERBOSE.value(), isVerbose),
+          Pair.create(Key.VERBOSE_GC.value(), isVerboseGC)
       ));
       final Config config = createConfig(val, submitOverrides);
 
@@ -550,14 +555,12 @@ public class TopologyResource extends HeronResource {
     }
     overrides.forEach(builder::put);
 
-    builder.put(Key.VERBOSE, Logging.isVerbose());
     return isLocalMode()
         ? Config.toLocalMode(builder.build()) : Config.toClusterMode(builder.build());
   }
 
   private boolean isLocalMode() {
-    return "local".equalsIgnoreCase(getCluster()) || "standalone".equalsIgnoreCase(getCluster())
-        || "nomad".equalsIgnoreCase(getCluster());
+    return "local".equalsIgnoreCase(getCluster()) || "nomad".equalsIgnoreCase(getCluster());
   }
 
   private static Map<String, String> getSubmitOverrides(FormDataMultiPart form) {

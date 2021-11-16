@@ -4,8 +4,10 @@ pex_library(
     name = "explorer-py",
     srcs = glob(["**/*.py"]),
     reqs = [
-        "tornado==4.0.2",
+        "tornado==4.5.3",
         "tabulate==0.7.4",
+        "click==7.1.2",
+        "requests==2.12.3",
     ],
     deps = [
         "//heron/common/src/python:common-py",

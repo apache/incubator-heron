@@ -22,6 +22,7 @@ zookeeper_statemgr_deps_files = [
     "//heron/statemgrs/src/java:zookeeper-statemgr-java",
     "@maven//:org_apache_curator_curator_framework",
     "@maven//:org_apache_zookeeper_zookeeper",
+    "@maven//:org_apache_zookeeper_zookeeper_jute",
 ]
 
 localfs_deps_files = \

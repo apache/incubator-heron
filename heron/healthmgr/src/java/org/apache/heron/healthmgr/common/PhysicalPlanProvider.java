@@ -33,7 +33,7 @@ import com.google.protobuf.InvalidProtocolBufferException;
 
 import org.apache.heron.api.generated.TopologyAPI;
 import org.apache.heron.proto.system.PhysicalPlans.PhysicalPlan;
-import org.apache.heron.proto.tmaster.TopologyMaster;
+import org.apache.heron.proto.tmanager.TopologyManager;
 import org.apache.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import org.apache.heron.spi.utils.NetworkUtils;
 
@@ -41,7 +41,7 @@ import static org.apache.heron.healthmgr.HealthPolicyConfig.CONF_TOPOLOGY_NAME;
 
 /**
  * A topology's physical plan may get updated at runtime. This provider is used to
- * fetch the latest version from the tmaster and provide to any dependent components.
+ * fetch the latest version from the tmanager and provide to any dependent components.
  */
 public class PhysicalPlanProvider implements Provider<PhysicalPlan> {
   private static final Logger LOG = Logger.getLogger(PhysicalPlanProvider.class.getName());
@@ -62,7 +62,7 @@ public class PhysicalPlanProvider implements Provider<PhysicalPlan> {
   protected PhysicalPlan ParseResponseToPhysicalPlan(byte[] responseData) {
     // byte to base64 string
     String encodedString = new String(responseData);
-    LOG.fine("tmaster returns physical plan in base64 str: " + encodedString);
+    LOG.fine("tmanager returns physical plan in base64 str: " + encodedString);
     // base64 string to proto bytes
     byte[] decodedBytes = Base64.getDecoder().decode(encodedString);
     // construct proto obj from bytes
@@ -77,14 +77,14 @@ public class PhysicalPlanProvider implements Provider<PhysicalPlan> {
 
   @Override
   public synchronized PhysicalPlan get() {
-    TopologyMaster.TMasterLocation tMasterLocation
-        = stateManagerAdaptor.getTMasterLocation(topologyName);
-    String host = tMasterLocation.getHost();
-    int port = tMasterLocation.getControllerPort();
+    TopologyManager.TManagerLocation tManagerLocation
+        = stateManagerAdaptor.getTManagerLocation(topologyName);
+    String host = tManagerLocation.getHost();
+    int port = tManagerLocation.getControllerPort();
 
     // construct metric cache stat url
     String url = "http://" + host + ":" + port + "/get_current_physical_plan";
-    LOG.fine("tmaster physical plan query endpoint: " + url);
+    LOG.fine("tmanager physical plan query endpoint: " + url);
 
     // http communication
     HttpURLConnection con = NetworkUtils.getHttpConnection(url);

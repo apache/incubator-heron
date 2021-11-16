@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 
 #  Licensed to the Apache Software Foundation (ASF) under one
@@ -19,9 +19,6 @@
 #  under the License.
 
 ''' submit.py '''
-from future.standard_library import install_aliases
-install_aliases()
-
 import glob
 import logging
 import os
@@ -82,6 +79,7 @@ def create_parser(subparsers):
   cli_args.add_service_url(parser)
   cli_args.add_system_property(parser)
   cli_args.add_verbose(parser)
+  cli_args.add_verbose_gc(parser)
 
   parser.set_defaults(subcommand='submit')
   return parser
@@ -129,7 +127,10 @@ def launch_a_topology(cl_args, tmp_dir, topology_file, topology_defn_file, topol
   if Log.getEffectiveLevel() == logging.DEBUG:
     args.append("--verbose")
 
-  if cl_args["dry_run"]:
+  if cl_args["verbose_gc"]:
+    args.append("--verbose_gc")
+
+  if cl_args['dry_run']:
     args.append("--dry_run")
     if "dry_run_format" in cl_args:
       args += ["--dry_run_format", cl_args["dry_run_format"]]
@@ -185,6 +186,9 @@ def launch_topology_server(cl_args, topology_file, topology_defn_file, topology_
 
   if cl_args['dry_run']:
     data["dry_run"] = True
+
+  if cl_args['verbose_gc']:
+    data['verbose_gc'] = True
 
   files = dict(
       definition=open(topology_defn_file, 'rb'),
@@ -399,6 +403,7 @@ def download(uri, cluster):
   for f in os.listdir(tmp_dir):
     if f.endswith(suffix):
       return os.path.join(tmp_dir, f)
+  return None
 
 ################################################################################
 # pylint: disable=unused-argument
@@ -478,9 +483,8 @@ def run(command, parser, cl_args, unknown_args):
   # check the extension of the file name to see if it is tar/jar file.
   if jar_type:
     return submit_fatjar(cl_args, unknown_args, tmp_dir)
-  elif tar_type:
+  if tar_type:
     return submit_tar(cl_args, unknown_args, tmp_dir)
-  elif cpp_type:
+  if cpp_type:
     return submit_cpp(cl_args, unknown_args, tmp_dir)
-  else:
-    return submit_pex(cl_args, unknown_args, tmp_dir)
+  return submit_pex(cl_args, unknown_args, tmp_dir)

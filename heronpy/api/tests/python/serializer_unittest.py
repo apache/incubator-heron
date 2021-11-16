@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 
 #  Licensed to the Apache Software Foundation (ASF) under one
@@ -23,7 +23,6 @@
 
 import unittest
 
-import six
 from heronpy.api.serializer import PythonSerializer
 
 prim_list = [1000, -234, 0.00023, "string",
@@ -40,6 +39,6 @@ class SerializerTest(unittest.TestCase):
     # Test with a list of primitive types
     for obj in prim_list:
       serialized = serializer.serialize(obj)
-      self.assertIsInstance(serialized, six.binary_type)
+      self.assertIsInstance(serialized, bytes)
       deserialized = serializer.deserialize(serialized)
       self.assertEqual(deserialized, obj)

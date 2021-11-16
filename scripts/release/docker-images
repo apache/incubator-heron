@@ -1,0 +1,163 @@
+#!/usr/bin/env python3
+
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
+
+"""
+This script cooridnates other scripts to put together a release.
+
+Generated images will have a label in the form apache/heron:<tag> and will be placed in the //distro/ directory.
+
+## Examples
+
+List available target distrobutions on separate stdout lines:
+  ./docker-images
+
+Build and tag a single distorbution image then print where the archive's path:
+  ./docker-images build 0.1.0-debian10 debian10
+
+Build and tag all distrobution images then print each archive's path:
+  ./docker-images build "$(git describe --tags)" --all
+
+"""
+from pathlib import Path
+
+import logging
+import re
+import shutil
+import subprocess
+import sys
+import tempfile
+import typing
+
+ROOT = Path(__file__).resolve().parent.parent.parent
+BUILD_ARTIFACTS = ROOT / "docker/scripts/build-artifacts.sh"
+BUILD_IMAGE = ROOT / "docker/scripts/build-docker.sh"
+
+
+class BuildFailure(Exception):
+    """Raised to indicate a failure buliding."""
+
+
+class BadDistrobutionName(BuildFailure):
+    """Raised when a bad distrobution name is provided."""
+
+
+def configure_logging(debug: bool):
+    """Use standard logging config and write to stdout and a logfile."""
+    logging.basicConfig(
+        format="[%(asctime)s] %(levelname)s: %(message)s",
+        level=(logging.DEBUG if debug else logging.INFO),
+    )
+
+
+def log_run(args: typing.List[str], log: typing.IO[str]) -> subprocess.CompletedProcess:
+    """Run an executable and direct its output to the given log file."""
+    return subprocess.run(
+        args, stdout=log, stderr=log, universal_newlines=True, check=True
+    )
+
+
+def build_dockerfile(
+    scratch: Path, dist: str, tag: str, out_dir: Path, log: typing.IO[str]
+) -> Path:
+    """
+    Raises CalledProcessError if either of the external scripts fail.
+    """
+    logging.info("building package for %s", dist)
+    log_run([str(BUILD_ARTIFACTS), dist, tag, scratch], log)
+    logging.info("building docker image for %s", dist)
+    log_run([str(BUILD_IMAGE), dist, tag, scratch], log)
+    tar = Path(scratch) / f"heron-docker-{tag}-{dist}.tar.gz"
+    tar_out = out_dir / tar.name
+    tar.replace(tar_out)
+    logging.info("docker image complete: %s", tar_out)
+    return tar_out
+
+
+def available_distrobutions() -> typing.List[str]:
+    """Return a list of available target distrobutions."""
+    compile_files = (ROOT / "docker/compile").glob("Dockerfile.*")
+    dist_files = (ROOT / "docker/dist").glob("Dockerfile.dist.*")
+    compile_distros = {re.sub(r"^Dockerfile\.", "", f.name) for f in compile_files}
+    dist_distros = {re.sub(r"^Dockerfile\.dist\.", "", f.name) for f in dist_files}
+    distros = compile_distros & dist_distros
+    mismatch = (compile_distros | dist_distros) ^ distros
+    if mismatch:
+        logging.warning(
+            "docker distros found without both compile+dist files: %s", mismatch
+        )
+
+    return sorted(distros)
+
+
+def build_target(tag: str, target: str) -> typing.List[Path]:
+    """Build docker images for the given target distrobutions."""
+    debug = True
+
+    distros = available_distrobutions()
+    logging.debug("available distro targets: %s", distros)
+    if target == "--all":
+        targets = distros
+    elif target not in distros:
+        raise BadDistrobutionName(f"distrobution {target!r} does not exist")
+    else:
+        targets = [target]
+
+    out_dir = ROOT / "dist"
+    out_dir.mkdir(exist_ok=True)
+
+    for target in targets:
+        scratch = Path(tempfile.mkdtemp(prefix=f"build-{target}-"))
+        log_path = scratch / "log.txt"
+        log = log_path.open("w")
+        logging.debug("building %s", target)
+
+        try:
+            tar = build_dockerfile(scratch, target, tag, out_dir, log)
+        except Exception as e:
+            logging.error(
+                "an error occurred building %s. See log in %s", target, log_path
+            )
+            if isinstance(e, subprocess.CalledProcessError):
+                raise BuildFailure("failure in underlying build scripts") from e
+            raise
+
+        if not debug:
+            shutil.rmtree(scratch)
+        yield tar
+
+
+def cli(args=sys.argv):
+    operation = sys.argv[1]
+    if operation == "list":
+        print("\n".join(available_distrobutions()))
+    elif operation == "build":
+        tag, target = sys.argv[2:]
+        try:
+            for archive in build_target(tag=tag, target=target):
+                print(archive)
+        except BuildFailure as e:
+            logging.error(e)
+            pass
+    else:
+        logging.error("unknown operation %r", operation)
+
+
+if __name__ == "__main__":
+    configure_logging(debug=True)
+    cli()

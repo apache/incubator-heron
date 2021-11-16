@@ -32,8 +32,8 @@ namespace config {
 
 class MetricsSinksVars {
  public:
-  static const sp_string METRICS_SINKS_TMASTER_SINK;
-  static const sp_string METRICS_SINKS_TMASTER_METRICS;
+  static const sp_string METRICS_SINKS_TMANAGER_SINK;
+  static const sp_string METRICS_SINKS_TMANAGER_METRICS;
 };
 }  // namespace config
 }  // namespace heron

@@ -212,13 +212,13 @@ public class LaunchableTask {
   protected String executorCommand(
       Config config, Config runtime, int containerIndex) {
     Map<ExecutorPort, String> ports = new HashMap<>();
-    ports.put(ExecutorPort.MASTER_PORT, String.valueOf(freePorts.get(0)));
-    ports.put(ExecutorPort.TMASTER_CONTROLLER_PORT, String.valueOf(freePorts.get(1)));
-    ports.put(ExecutorPort.TMASTER_STATS_PORT, String.valueOf(freePorts.get(2)));
+    ports.put(ExecutorPort.SERVER_PORT, String.valueOf(freePorts.get(0)));
+    ports.put(ExecutorPort.TMANAGER_CONTROLLER_PORT, String.valueOf(freePorts.get(1)));
+    ports.put(ExecutorPort.TMANAGER_STATS_PORT, String.valueOf(freePorts.get(2)));
     ports.put(ExecutorPort.SHELL_PORT, String.valueOf(freePorts.get(3)));
     ports.put(ExecutorPort.METRICS_MANAGER_PORT, String.valueOf(freePorts.get(4)));
     ports.put(ExecutorPort.SCHEDULER_PORT, String.valueOf(freePorts.get(5)));
-    ports.put(ExecutorPort.METRICS_CACHE_MASTER_PORT, String.valueOf(freePorts.get(6)));
+    ports.put(ExecutorPort.METRICS_CACHE_SERVER_PORT, String.valueOf(freePorts.get(6)));
     ports.put(ExecutorPort.METRICS_CACHE_STATS_PORT, String.valueOf(freePorts.get(7)));
     ports.put(ExecutorPort.CHECKPOINT_MANAGER_PORT, String.valueOf(freePorts.get(8)));
 

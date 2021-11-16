@@ -34,7 +34,7 @@ spec:
     spec:
       containers:
         - name: heron-tracker
-          image: heron/heron:latest
+          image: apache/heron:latest
           ports:
             - containerPort: 8888
               name: api-port
@@ -54,7 +54,7 @@ spec:
               cpu: "400m"
               memory: "512M"
         - name: heron-ui
-          image: heron/heron:latest
+          image: apache/heron:latest
           ports:
             - containerPort: 8889
               name: app-port
@@ -63,7 +63,7 @@ spec:
             - >-
               heron-ui
               --port=8889
-              --base_url=/api/v1/namespaces/default/services/heron-ui:8889/proxy
+              --base-url=/api/v1/namespaces/default/services/heron-ui:8889/proxy
           resources:
             requests:
               cpu: "100m"

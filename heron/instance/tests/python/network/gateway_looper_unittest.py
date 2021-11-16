@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 
 #  Licensed to the Apache Software Foundation (ASF) under one
@@ -21,7 +21,7 @@
 '''Unittest for GatewayLooper'''
 import threading
 import time
-import unittest2 as unittest
+import unittest
 
 from heron.instance.src.python.network.gateway_looper import GatewayLooper
 

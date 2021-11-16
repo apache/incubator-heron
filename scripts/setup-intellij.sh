@@ -35,7 +35,7 @@ cat > $iml_file <<EOH
 <module type="JAVA_MODULE" version="4">
   <component name="FacetManager">
     <facet type="Python" name="Python">
-      <configuration sdkName="Python 2.7.10 (/usr/bin/python)" />
+      <configuration sdkName="Python 3 (/usr/bin/python3)" />
     </facet>
   </component>
   <component name="NewModuleRootManager">
@@ -159,7 +159,7 @@ done
 #write_jar_entry "bazel-bin/heron/metricsmgr/src/thrift"
 
 cat >> $iml_file <<'EOF'
-    <orderEntry type="library" name="Python 2.7.10 (/usr/bin/python) interpreter library" level="application" />
+    <orderEntry type="library" name="Python 3 (/usr/bin/python3) interpreter library" level="application" />
   </component>
 </module>
 EOF

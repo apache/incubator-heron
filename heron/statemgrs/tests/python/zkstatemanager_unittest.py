@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 
 #  Licensed to the Apache Software Foundation (ASF) under one
@@ -19,7 +19,7 @@
 #  under the License.
 
 '''ZkStateManager unittest'''
-import unittest2 as unittest
+import unittest
 
 from heron.statemgrs.src.python.zkstatemanager import ZkStateManager
 

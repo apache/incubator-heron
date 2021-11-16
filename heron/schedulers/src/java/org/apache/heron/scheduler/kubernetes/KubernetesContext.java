@@ -19,6 +19,11 @@
 
 package org.apache.heron.scheduler.kubernetes;
 
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 import org.apache.heron.spi.common.Config;
 import org.apache.heron.spi.common.Context;
 
@@ -33,35 +38,76 @@ public final class KubernetesContext extends Context {
   public static final String HERON_KUBERNETES_SCHEDULER_IMAGE_PULL_POLICY =
       "heron.kubernetes.scheduler.imagePullPolicy";
 
+  public enum KubernetesResourceRequestMode {
+    /**
+     * The Kubernetes Request will not be set by the Heron Kubernetes Scheduler.
+     * The generated pods will use the Kubernetes default values.
+     */
+    NOT_SET,
+    /**
+     * The Kubernetes Pod Resource Request will be set to the same values as
+     * provided in the Resource Limit. This mode effectively guarantees the
+     * cpu and memory will be reserved.
+     */
+    EQUAL_TO_LIMIT
+  }
+  /**
+   * This config item is used to determine how to configure the K8s Resource Request.
+   * The format of this flag is the string encoded values of the
+   * underlying KubernetesRequestMode value.
+   */
+  public static final String KUBERNETES_RESOURCE_REQUEST_MODE =
+          "heron.kubernetes.resource.request.mode";
 
-  public static final String HERON_KUBERNETES_VOLUME_NAME = "heron.kubernetes.volume.name";
-  public static final String HERON_KUBERNETES_VOLUME_TYPE = "heron.kubernetes.volume.type";
+  public static final String KUBERNETES_VOLUME_NAME = "heron.kubernetes.volume.name";
+  public static final String KUBERNETES_VOLUME_TYPE = "heron.kubernetes.volume.type";
 
 
   // HostPath volume keys
   // https://kubernetes.io/docs/concepts/storage/volumes/#hostpath
-  public static final String HERON_KUBERNETES_VOLUME_HOSTPATH_PATH =
+  public static final String KUBERNETES_VOLUME_HOSTPATH_PATH =
       "heron.kubernetes.volume.hostPath.path";
 
   // nfs volume keys
   // https://kubernetes.io/docs/concepts/storage/volumes/#nfs
-  public static final String HERON_KUBERNETES_VOLUME_NFS_PATH =
+  public static final String KUBERNETES_VOLUME_NFS_PATH =
       "heron.kubernetes.volume.nfs.path";
-  public static final String HERON_KUBERNETES_VOLUME_NFS_SERVER =
+  public static final String KUBERNETES_VOLUME_NFS_SERVER =
       "heron.kubernetes.volume.nfs.server";
 
   // awsElasticBlockStore volume keys
   // https://kubernetes.io/docs/concepts/storage/volumes/#awselasticblockstore
-  public static final String HERON_KUBERNETES_VOLUME_AWS_EBS_VOLUME_ID =
+  public static final String KUBERNETES_VOLUME_AWS_EBS_VOLUME_ID =
       "heron.kubernetes.volume.awsElasticBlockStore.volumeID";
-  public static final String HERON_KUBERNETES_VOLUME_AWS_EBS_FS_TYPE =
+  public static final String KUBERNETES_VOLUME_AWS_EBS_FS_TYPE =
       "heron.kubernetes.volume.awsElasticBlockStore.fsType";
 
+  // pod template configmap
+  public static final String KUBERNETES_POD_TEMPLATE_CONFIGMAP_NAME =
+      "heron.kubernetes.pod.template.configmap.name";
+  public static final String KUBERNETES_POD_TEMPLATE_CONFIGMAP_DISABLED =
+      "heron.kubernetes.pod.template.configmap.disabled";
+
   // container mount volume mount keys
-  public static final String HERON_KUBERNETES_CONTAINER_VOLUME_MOUNT_NAME =
+  public static final String KUBERNETES_CONTAINER_VOLUME_MOUNT_NAME =
       "heron.kubernetes.container.volumeMount.name";
-  public static final String HERON_KUBERNETES_CONTAINER_VOLUME_MOUNT_PATH =
+  public static final String KUBERNETES_CONTAINER_VOLUME_MOUNT_PATH =
       "heron.kubernetes.container.volumeMount.path";
+
+  public static final String KUBERNETES_POD_ANNOTATION_PREFIX =
+      "heron.kubernetes.pod.annotation.";
+  public static final String KUBERNETES_SERVICE_ANNOTATION_PREFIX =
+      "heron.kubernetes.service.annotation.";
+  public static final String KUBERNETES_POD_LABEL_PREFIX =
+      "heron.kubernetes.pod.label.";
+  public static final String KUBERNETES_SERVICE_LABEL_PREFIX =
+      "heron.kubernetes.service.label.";
+  // heron.kubernetes.pod.secret.heron-secret=/etc/secrets
+  public static final String KUBERNETES_POD_SECRET_PREFIX =
+      "heron.kubernetes.pod.secret.";
+  // heron.kubernetes.pod.secretKeyRef.ENV_NAME=name:key
+  public static final String KUBERNETES_POD_SECRET_KEY_REF_PREFIX =
+      "heron.kubernetes.pod.secretKeyRef.";
 
   private KubernetesContext() {
   }
@@ -87,32 +133,37 @@ public final class KubernetesContext extends Context {
     return isNotEmpty(imagePullPolicy);
   }
 
+  public static KubernetesResourceRequestMode getKubernetesRequestMode(Config config) {
+    return KubernetesResourceRequestMode.valueOf(
+            config.getStringValue(KUBERNETES_RESOURCE_REQUEST_MODE));
+  }
+
   static String getVolumeType(Config config) {
-    return config.getStringValue(HERON_KUBERNETES_VOLUME_TYPE);
+    return config.getStringValue(KUBERNETES_VOLUME_TYPE);
   }
 
   static String getVolumeName(Config config) {
-    return config.getStringValue(HERON_KUBERNETES_VOLUME_NAME);
+    return config.getStringValue(KUBERNETES_VOLUME_NAME);
   }
 
   static String getHostPathVolumePath(Config config) {
-    return config.getStringValue(HERON_KUBERNETES_VOLUME_HOSTPATH_PATH);
+    return config.getStringValue(KUBERNETES_VOLUME_HOSTPATH_PATH);
   }
 
   static String getNfsVolumePath(Config config) {
-    return config.getStringValue(HERON_KUBERNETES_VOLUME_NFS_PATH);
+    return config.getStringValue(KUBERNETES_VOLUME_NFS_PATH);
   }
 
   static String getNfsServer(Config config) {
-    return config.getStringValue(HERON_KUBERNETES_VOLUME_NFS_SERVER);
+    return config.getStringValue(KUBERNETES_VOLUME_NFS_SERVER);
   }
 
   static String getAwsEbsVolumeId(Config config) {
-    return config.getStringValue(HERON_KUBERNETES_VOLUME_AWS_EBS_VOLUME_ID);
+    return config.getStringValue(KUBERNETES_VOLUME_AWS_EBS_VOLUME_ID);
   }
 
   static String getAwsEbsFsType(Config config) {
-    return config.getStringValue(HERON_KUBERNETES_VOLUME_AWS_EBS_FS_TYPE);
+    return config.getStringValue(KUBERNETES_VOLUME_AWS_EBS_FS_TYPE);
   }
 
   static boolean hasVolume(Config config) {
@@ -120,11 +171,64 @@ public final class KubernetesContext extends Context {
   }
 
   static String getContainerVolumeName(Config config) {
-    return config.getStringValue(HERON_KUBERNETES_CONTAINER_VOLUME_MOUNT_NAME);
+    return config.getStringValue(KUBERNETES_CONTAINER_VOLUME_MOUNT_NAME);
   }
 
   static String getContainerVolumeMountPath(Config config) {
-    return config.getStringValue(HERON_KUBERNETES_CONTAINER_VOLUME_MOUNT_PATH);
+    return config.getStringValue(KUBERNETES_CONTAINER_VOLUME_MOUNT_PATH);
+  }
+
+  public static String getPodTemplateConfigMapName(Config config) {
+    return config.getStringValue(KUBERNETES_POD_TEMPLATE_CONFIGMAP_NAME);
+  }
+
+  public static boolean getPodTemplateConfigMapDisabled(Config config) {
+    final String disabled = config.getStringValue(KUBERNETES_POD_TEMPLATE_CONFIGMAP_DISABLED);
+    return "true".equalsIgnoreCase(disabled);
+  }
+
+  public static Map<String, String> getPodLabels(Config config) {
+    return getConfigItemsByPrefix(config, KUBERNETES_POD_LABEL_PREFIX);
+  }
+
+  public static Map<String, String> getServiceLabels(Config config) {
+    return getConfigItemsByPrefix(config, KUBERNETES_SERVICE_LABEL_PREFIX);
+  }
+
+  public static Map<String, String> getPodAnnotations(Config config) {
+    return getConfigItemsByPrefix(config, KUBERNETES_POD_ANNOTATION_PREFIX);
+  }
+
+  public static Map<String, String> getServiceAnnotations(Config config) {
+    return getConfigItemsByPrefix(config, KUBERNETES_SERVICE_ANNOTATION_PREFIX);
+  }
+
+  public static Map<String, String> getPodSecretsToMount(Config config) {
+    return getConfigItemsByPrefix(config, KUBERNETES_POD_SECRET_PREFIX);
+  }
+
+  public static Map<String, String> getPodSecretKeyRefs(Config config) {
+    return getConfigItemsByPrefix(config, KUBERNETES_POD_SECRET_KEY_REF_PREFIX);
+  }
+
+  static Set<String> getConfigKeys(Config config, String keyPrefix) {
+    Set<String> annotations = new HashSet<>();
+    for (String s : config.getKeySet()) {
+      if (s.startsWith(keyPrefix)) {
+        annotations.add(s);
+      }
+    }
+    return annotations;
+  }
+
+  private static Map<String, String> getConfigItemsByPrefix(Config config, String keyPrefix) {
+    final Map<String, String> results = new HashMap<>();
+    final Set<String> keys = getConfigKeys(config, keyPrefix);
+    for (String s : keys) {
+      String value = config.getStringValue(s);
+      results.put(s.replaceFirst(keyPrefix, ""), value);
+    }
+    return results;
   }
 
   public static boolean hasContainerVolume(Config config) {

@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 
 #  Licensed to the Apache Software Foundation (ASF) under one
@@ -41,6 +41,8 @@ default_handlers = [
     (r"^/filestats/(.*)", handlers.FileStatsHandler),
     (r"^/download/(.*)", handlers.DownloadHandler),
     (r"^/killexecutor", handlers.KillExecutorHandler),
+    (r"^/quitquitquit", handlers.KillExecutorHandler),
+    (r"^/abortabortabort", handlers.KillExecutorHandler),
     (r"^/health", handlers.HealthHandler),
 ]
 

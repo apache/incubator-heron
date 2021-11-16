@@ -20,17 +20,22 @@
 package org.apache.heron.scheduler.kubernetes;
 
 import java.io.IOException;
+import java.util.Comparator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.heron.common.basics.ByteAmount;
 import org.apache.heron.common.basics.SysUtils;
+import org.apache.heron.scheduler.TopologySubmissionException;
 import org.apache.heron.scheduler.utils.Runtime;
 import org.apache.heron.spi.common.Config;
 import org.apache.heron.spi.common.Context;
 
 import io.kubernetes.client.openapi.ApiException;
-
 import okhttp3.Response;
 
 final class KubernetesUtils {
@@ -83,5 +88,38 @@ final class KubernetesUtils {
   // #meaning-of-memory
   static String Megabytes(ByteAmount amount) {
     return String.format("%sMi", Long.toString(amount.asMegabytes()));
+  }
+
+  static class V1ControllerUtils<T> {
+    private static final Logger LOG = Logger.getLogger(V1Controller.class.getName());
+
+    /**
+     * Merge two lists by keeping all values in the <code>primaryList</code> and de-duplicating values in
+     * <code>secondaryList</code> using the <code>comparator</code>.
+     * @param primaryList All the values in this will be retained.
+     * @param secondaryList The values in this list will be deduplicated against <code>primaryList</code>.
+     * @param comparator Used to compare keys in the <code>TreeSet</code> to find their insertion position.
+     * @param description Description of the list merge operation which is used for error messages.
+     * @return A de-duplicated list of all the values in both input lists using the <code>comparator</code>.
+     */
+    protected List<T> mergeListsDedupe(List<T> primaryList, List<T> secondaryList,
+                                       Comparator<T> comparator, String description) {
+      if (primaryList == null || primaryList.isEmpty()) {
+        return secondaryList;
+      }
+      if (secondaryList == null || secondaryList.isEmpty()) {
+        return primaryList;
+      }
+      try {
+        Set<T> treeSet = new TreeSet<>(comparator);
+        treeSet.addAll(primaryList);
+        treeSet.addAll(secondaryList);
+        return new LinkedList<>(treeSet);
+      } catch (NullPointerException e) {
+        final String message = String.format("Failed to merge lists for %s", description);
+        LOG.log(Level.FINE, message);
+        throw new TopologySubmissionException(message);
+      }
+    }
   }
 }

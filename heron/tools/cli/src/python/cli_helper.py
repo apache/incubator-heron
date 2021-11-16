@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 
 #  Licensed to the Apache Software Foundation (ASF) under one
@@ -152,5 +152,4 @@ def run_direct(command, cl_args, action, extra_args=[], extra_lib_jars=[]):
 def run(command, cl_args, action, extra_lib_jars=[]):
   if cl_args['deploy_mode'] == config.SERVER_MODE:
     return run_server(command, cl_args, action, extra_args=dict())
-  else:
-    return run_direct(command, cl_args, action, extra_args=[], extra_lib_jars=extra_lib_jars)
+  return run_direct(command, cl_args, action, extra_args=[], extra_lib_jars=extra_lib_jars)

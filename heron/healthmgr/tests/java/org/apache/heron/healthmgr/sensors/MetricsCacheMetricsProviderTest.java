@@ -36,12 +36,12 @@ import org.mockito.Mockito;
 
 import org.apache.heron.proto.system.Common.Status;
 import org.apache.heron.proto.system.Common.StatusCode;
-import org.apache.heron.proto.tmaster.TopologyMaster;
-import org.apache.heron.proto.tmaster.TopologyMaster.MetricInterval;
-import org.apache.heron.proto.tmaster.TopologyMaster.MetricResponse.IndividualMetric;
-import org.apache.heron.proto.tmaster.TopologyMaster.MetricResponse.IndividualMetric.IntervalValue;
-import org.apache.heron.proto.tmaster.TopologyMaster.MetricResponse.TaskMetric;
-import org.apache.heron.proto.tmaster.TopologyMaster.MetricsCacheLocation;
+import org.apache.heron.proto.tmanager.TopologyManager;
+import org.apache.heron.proto.tmanager.TopologyManager.MetricInterval;
+import org.apache.heron.proto.tmanager.TopologyManager.MetricResponse.IndividualMetric;
+import org.apache.heron.proto.tmanager.TopologyManager.MetricResponse.IndividualMetric.IntervalValue;
+import org.apache.heron.proto.tmanager.TopologyManager.MetricResponse.TaskMetric;
+import org.apache.heron.proto.tmanager.TopologyManager.MetricsCacheLocation;
 import org.apache.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.doReturn;
@@ -55,7 +55,7 @@ public class MetricsCacheMetricsProviderTest {
 
     String metric = "count";
     String comp = "bolt";
-    TopologyMaster.MetricResponse response = TopologyMaster.MetricResponse.newBuilder()
+    TopologyManager.MetricResponse response = TopologyManager.MetricResponse.newBuilder()
         .setStatus(Status.newBuilder().setStatus(StatusCode.OK))
         .addMetric(TaskMetric.newBuilder()
             .setInstanceId("container_1_bolt_1")
@@ -113,7 +113,7 @@ public class MetricsCacheMetricsProviderTest {
 
     String metric = "count";
     String comp1 = "bolt-1";
-    TopologyMaster.MetricResponse response1 = TopologyMaster.MetricResponse.newBuilder()
+    TopologyManager.MetricResponse response1 = TopologyManager.MetricResponse.newBuilder()
         .setStatus(Status.newBuilder().setStatus(StatusCode.OK))
         .addMetric(TaskMetric.newBuilder()
             .setInstanceId("container_1_bolt-1_2")
@@ -131,7 +131,7 @@ public class MetricsCacheMetricsProviderTest {
             metric, comp1, Instant.ofEpochSecond(10), Duration.ofSeconds(60));
 
     String comp2 = "bolt-2";
-    TopologyMaster.MetricResponse response2 = TopologyMaster.MetricResponse.newBuilder()
+    TopologyManager.MetricResponse response2 = TopologyManager.MetricResponse.newBuilder()
         .setStatus(Status.newBuilder().setStatus(StatusCode.OK))
         .addMetric(TaskMetric.newBuilder()
             .setInstanceId("container_1_bolt-2_1")
@@ -182,7 +182,7 @@ public class MetricsCacheMetricsProviderTest {
 
     String metric = "__time_spent_back_pressure_by_compid/container_1_split_1";
     String comp = "__stmgr__";
-    TopologyMaster.MetricResponse response = TopologyMaster.MetricResponse.newBuilder()
+    TopologyManager.MetricResponse response = TopologyManager.MetricResponse.newBuilder()
         .setStatus(Status.newBuilder().setStatus(StatusCode.OK))
         .addMetric(TaskMetric.newBuilder()
             .setInstanceId("stmgr-1")
@@ -216,7 +216,7 @@ public class MetricsCacheMetricsProviderTest {
 
     String metric = "dummy";
     String comp = "split";
-    TopologyMaster.MetricResponse response = TopologyMaster.MetricResponse.newBuilder()
+    TopologyManager.MetricResponse response = TopologyManager.MetricResponse.newBuilder()
         .setStatus(Status.newBuilder().setStatus(StatusCode.OK))
         .build();
 
@@ -238,7 +238,7 @@ public class MetricsCacheMetricsProviderTest {
         .setTopologyId("topoId")
         .setHost("localhost")
         .setControllerPort(0)
-        .setMasterPort(0)
+        .setServerPort(0)
         .build();
 
     SchedulerStateManagerAdaptor stateMgr = Mockito.mock(SchedulerStateManagerAdaptor.class);
@@ -256,7 +256,7 @@ public class MetricsCacheMetricsProviderTest {
 
     String metric = "count";
     String comp = "bolt";
-    TopologyMaster.MetricResponse response = TopologyMaster.MetricResponse.newBuilder()
+    TopologyManager.MetricResponse response = TopologyManager.MetricResponse.newBuilder()
         .setStatus(Status.newBuilder().setStatus(StatusCode.OK))
         .addMetric(TaskMetric.newBuilder()
             .setInstanceId("container_1_bolt_1")

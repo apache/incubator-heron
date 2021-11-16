@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 
 #  Licensed to the Apache Software Foundation (ASF) under one
@@ -26,9 +26,9 @@ from heron.instance.src.python.utils.misc import HeronCommunicator
 from heron.instance.src.python.network import SingleThreadStmgrClient, MetricsManagerClient
 from heron.instance.src.python.network import SocketOptions
 import heron.instance.tests.python.mock_protobuf as mock_protobuf
-from mock import Mock
+from unittest.mock import Mock
 
-from mock import patch
+from unittest.mock import patch
 
 class MockSTStmgrClient(SingleThreadStmgrClient):
   HOST = '127.0.0.1'

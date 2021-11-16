@@ -38,14 +38,14 @@ var TopologyItem = React.createClass({
     }
 
     var state_class = "gradeX normal";
-    if (!topology.has_tmaster_location) {
+    if (!topology.has_tmanager_location) {
       state_class = "gradeX dead";
     } else if (!topology.has_physical_plan) {
       state_class = "gradeX weird";
     }
 
     var starting_duration = 5 * 60 * 1000; // 5 minutes
-    if ((!topology.has_tmaster_location || !topology.has_physical_plan)
+    if ((!topology.has_tmanager_location || !topology.has_physical_plan)
         && topology.submission_time * 1000 > new Date().getTime() - starting_duration) {
       state_class = "gradeX starting";
     }
@@ -93,7 +93,7 @@ var TopologyTable = React.createClass({
                 environ: env,
                 role: estate.role,
                 has_physical_plan: estate.has_physical_plan,
-                has_tmaster_location: estate.has_tmaster_location,
+                has_tmanager_location: estate.has_tmanager_location,
                 release_version: estate.release_version,
                 submission_time: estate.submission_time,
                 submission_user: estate.submission_user,

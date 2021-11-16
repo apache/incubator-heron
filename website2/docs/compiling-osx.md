@@ -34,7 +34,7 @@ $ /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/inst
 
 ### Step 2 -- Install Bazel
 ```bash
-wget -O /tmp/bazel.sh https://github.com/bazelbuild/bazel/releases/download/3.0.0/bazel-3.0.0-installer-darwin-x86_64.sh
+wget -O /tmp/bazel.sh https://github.com/bazelbuild/bazel/releases/download/4.1.0/bazel-4.1.0-installer-darwin-x86_64.sh
 chmod +x /tmp/bazel.sh
 /tmp/bazel.sh --user
 ```
@@ -45,6 +45,8 @@ chmod +x /tmp/bazel.sh
 brew install automake
 brew install cmake
 brew install libtool
+brew install ant
+brew install pkg-config
 ```
 
 ### Step 3 --- Set the following environment variables

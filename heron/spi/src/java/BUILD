@@ -36,7 +36,7 @@ java_library(
         "//heron/proto:proto_packing_plan_java",
         "//heron/proto:proto_physical_plan_java",
         "//heron/proto:proto_scheduler_java",
-        "//heron/proto:proto_tmaster_java",
+        "//heron/proto:proto_tmanager_java",
         "//heron/proto:proto_topology_java",
         "@com_google_protobuf//:protobuf_java",
         "@maven//:com_google_guava_guava",

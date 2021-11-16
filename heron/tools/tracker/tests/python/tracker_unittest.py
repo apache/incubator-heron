@@ -17,8 +17,8 @@
 ''' tracker_unittest.py '''
 
 # pylint: disable=missing-docstring, attribute-defined-outside-init
-import unittest2 as unittest
-from mock import call, patch, Mock
+import unittest
+from unittest.mock import call, patch, Mock
 
 import heron.proto.execution_state_pb2 as protoEState
 from heron.statemgrs.src.python import statemanagerfactory
@@ -33,9 +33,9 @@ class TrackerTest(unittest.TestCase):
     self.tracker = Tracker(mock_config)
 
   # pylint: disable=unused-argument
-  @patch.object(Tracker, 'getTopologiesForStateLocation')
-  @patch.object(Tracker, 'removeTopology')
-  @patch.object(Tracker, 'addNewTopology')
+  @patch.object(Tracker, 'get_stmgr_topologies')
+  @patch.object(Tracker, 'remove_topology')
+  @patch.object(Tracker, 'add_new_topology')
   @patch.object(statemanagerfactory, 'get_all_state_managers')
   def test_first_synch_topologies(
       self, mock_get_all_state_managers,
@@ -72,9 +72,9 @@ class TrackerTest(unittest.TestCase):
                                             call(mock_state_manager_2, 'top_name4')],
                                            any_order=True)
 
-  @patch.object(Tracker, 'getTopologiesForStateLocation')
-  @patch.object(Tracker, 'removeTopology')
-  @patch.object(Tracker, 'addNewTopology')
+  @patch.object(Tracker, 'get_stmgr_topologies')
+  @patch.object(Tracker, 'remove_topology')
+  @patch.object(Tracker, 'add_new_topology')
   @patch.object(statemanagerfactory, 'get_all_state_managers')
   def test_synch_topologies_leading_with_add_and_remove_topologies(
       self, mock_get_all_state_managers,
@@ -143,33 +143,27 @@ class TrackerTest(unittest.TestCase):
 
   def fill_tracker_topologies(self):
 
-    def create_mock_execution_state(role):
+    def create_mock_execution_state(cluster, role, environ):
       estate = protoEState.ExecutionState()
+      estate.cluster = cluster
       estate.role = role
+      estate.environ = environ
       return estate
 
     self.topology1 = Topology('top_name1', 'mock_name1')
-    self.topology1.cluster = 'cluster1'
-    self.topology1.environ = 'env1'
-    self.topology1.execution_state = create_mock_execution_state('mark')
+    self.topology1.execution_state = create_mock_execution_state('cluster1', 'mark', 'env1')
 
     self.topology2 = Topology('top_name2', 'mock_name1')
-    self.topology2.cluster = 'cluster1'
-    self.topology2.environ = 'env1'
-    self.topology2.execution_state = create_mock_execution_state('bob')
+    self.topology2.execution_state = create_mock_execution_state('cluster1', 'bob', 'env1')
 
     self.topology3 = Topology('top_name3', 'mock_name1')
-    self.topology3.cluster = 'cluster1'
-    self.topology3.environ = 'env2'
-    self.topology3.execution_state = create_mock_execution_state('tom')
+    self.topology3.execution_state = create_mock_execution_state('cluster1', 'tom', 'env2')
 
     self.topology4 = Topology('top_name4', 'mock_name2')
-    self.topology4.cluster = 'cluster2'
-    self.topology4.environ = 'env1'
+    self.topology4.execution_state = create_mock_execution_state('cluster2', 'x', 'env1')
 
     self.topology5 = Topology('top_name5', 'mock_name2')
-    self.topology5.cluster = 'cluster2'
-    self.topology5.environ = 'env2'
+    self.topology5.execution_state = create_mock_execution_state('cluster2', 'x', 'env2')
     self.tracker.topologies = [
         self.topology1,
         self.topology2,
@@ -180,57 +174,57 @@ class TrackerTest(unittest.TestCase):
   # pylint: disable=line-too-long
   def test_get_topology_by_cluster_environ_and_name(self):
     self.fill_tracker_topologies()
-    self.assertEqual(self.topology1, self.tracker.getTopologyByClusterRoleEnvironAndName('cluster1', 'mark', 'env1', 'top_name1'))
-    self.assertEqual(self.topology1, self.tracker.getTopologyByClusterRoleEnvironAndName('cluster1', None, 'env1', 'top_name1'))
-    self.assertEqual(self.topology2, self.tracker.getTopologyByClusterRoleEnvironAndName('cluster1', 'bob', 'env1', 'top_name2'))
-    self.assertEqual(self.topology2, self.tracker.getTopologyByClusterRoleEnvironAndName('cluster1', None, 'env1', 'top_name2'))
-    self.assertEqual(self.topology3, self.tracker.getTopologyByClusterRoleEnvironAndName('cluster1', 'tom', 'env2', 'top_name3'))
-    self.assertEqual(self.topology3, self.tracker.getTopologyByClusterRoleEnvironAndName('cluster1', None, 'env2', 'top_name3'))
-    self.assertEqual(self.topology4, self.tracker.getTopologyByClusterRoleEnvironAndName('cluster2', None, 'env1', 'top_name4'))
-    self.assertEqual(self.topology5, self.tracker.getTopologyByClusterRoleEnvironAndName('cluster2', None, 'env2', 'top_name5'))
+    self.assertEqual(self.topology1, self.tracker.get_topology('cluster1', 'mark', 'env1', 'top_name1'))
+    self.assertEqual(self.topology1, self.tracker.get_topology('cluster1', None, 'env1', 'top_name1'))
+    self.assertEqual(self.topology2, self.tracker.get_topology('cluster1', 'bob', 'env1', 'top_name2'))
+    self.assertEqual(self.topology2, self.tracker.get_topology('cluster1', None, 'env1', 'top_name2'))
+    self.assertEqual(self.topology3, self.tracker.get_topology('cluster1', 'tom', 'env2', 'top_name3'))
+    self.assertEqual(self.topology3, self.tracker.get_topology('cluster1', None, 'env2', 'top_name3'))
+    self.assertEqual(self.topology4, self.tracker.get_topology('cluster2', None, 'env1', 'top_name4'))
+    self.assertEqual(self.topology5, self.tracker.get_topology('cluster2', None, 'env2', 'top_name5'))
 
   def test_get_topolies_for_state_location(self):
     self.fill_tracker_topologies()
-    self.assertItemsEqual(
+    self.assertCountEqual(
         [self.topology1, self.topology2, self.topology3],
-        self.tracker.getTopologiesForStateLocation('mock_name1'))
-    self.assertItemsEqual(
+        self.tracker.get_stmgr_topologies('mock_name1'))
+    self.assertCountEqual(
         [self.topology4, self.topology5],
-        self.tracker.getTopologiesForStateLocation('mock_name2'))
+        self.tracker.get_stmgr_topologies('mock_name2'))
 
   def test_add_new_topology(self):
-    self.assertItemsEqual([], self.tracker.topologies)
+    self.assertCountEqual([], self.tracker.topologies)
     mock_state_manager_1 = Mock()
     mock_state_manager_1.name = 'mock_name1'
 
-    self.tracker.addNewTopology(mock_state_manager_1, 'top_name1')
-    self.assertItemsEqual(
+    self.tracker.add_new_topology(mock_state_manager_1, 'top_name1')
+    self.assertCountEqual(
         ['top_name1'],
         [t.name for t in self.tracker.topologies])
 
-    self.tracker.addNewTopology(mock_state_manager_1, 'top_name2')
-    self.assertItemsEqual(
+    self.tracker.add_new_topology(mock_state_manager_1, 'top_name2')
+    self.assertCountEqual(
         ['top_name1', 'top_name2'],
         [t.name for t in self.tracker.topologies])
 
     self.assertEqual(2, mock_state_manager_1.get_pplan.call_count)
     self.assertEqual(2, mock_state_manager_1.get_execution_state.call_count)
-    self.assertEqual(2, mock_state_manager_1.get_tmaster.call_count)
+    self.assertEqual(2, mock_state_manager_1.get_tmanager.call_count)
 
   def test_remove_topology(self):
     self.fill_tracker_topologies()
-    self.tracker.removeTopology('top_name1', 'mock_name1')
-    self.assertItemsEqual([self.topology2, self.topology3, self.topology4, self.topology5],
+    self.tracker.remove_topology('top_name1', 'mock_name1')
+    self.assertCountEqual([self.topology2, self.topology3, self.topology4, self.topology5],
                           self.tracker.topologies)
-    self.tracker.removeTopology('top_name2', 'mock_name1')
-    self.assertItemsEqual([self.topology3, self.topology4, self.topology5],
+    self.tracker.remove_topology('top_name2', 'mock_name1')
+    self.assertCountEqual([self.topology3, self.topology4, self.topology5],
                           self.tracker.topologies)
     # Removing one that is not there should not have any affect
-    self.tracker.removeTopology('top_name8', 'mock_name1')
-    self.assertItemsEqual([self.topology3, self.topology4, self.topology5],
+    self.tracker.remove_topology('top_name8', 'mock_name1')
+    self.assertCountEqual([self.topology3, self.topology4, self.topology5],
                           self.tracker.topologies)
-    self.tracker.removeTopology('top_name4', 'mock_name2')
-    self.assertItemsEqual([self.topology3, self.topology5],
+    self.tracker.remove_topology('top_name4', 'mock_name2')
+    self.assertCountEqual([self.topology3, self.topology5],
                           self.tracker.topologies)
 
   def test_extract_physical_plan(self):

@@ -46,7 +46,7 @@ import org.apache.heron.proto.scheduler.Scheduler;
 import org.apache.heron.proto.system.ExecutionEnvironment;
 import org.apache.heron.proto.system.PackingPlans;
 import org.apache.heron.proto.system.PhysicalPlans;
-import org.apache.heron.proto.tmaster.TopologyMaster;
+import org.apache.heron.proto.tmanager.TopologyManager;
 import org.apache.heron.spi.common.Config;
 import org.apache.heron.spi.common.Context;
 import org.apache.heron.spi.common.Key;
@@ -348,15 +348,15 @@ public class CuratorStateManager extends FileSystemStateManager {
   }
 
   @Override
-  public ListenableFuture<Boolean> setTMasterLocation(
-      TopologyMaster.TMasterLocation location,
+  public ListenableFuture<Boolean> setTManagerLocation(
+      TopologyManager.TManagerLocation location,
       String topologyName) {
-    return createNode(StateLocation.TMASTER_LOCATION, topologyName, location.toByteArray(), true);
+    return createNode(StateLocation.TMANAGER_LOCATION, topologyName, location.toByteArray(), true);
   }
 
   @Override
   public ListenableFuture<Boolean> setMetricsCacheLocation(
-      TopologyMaster.MetricsCacheLocation location,
+      TopologyManager.MetricsCacheLocation location,
       String topologyName) {
     client.getConnectionStateListenable().addListener(new ConnectionStateListener() {
       @Override
@@ -419,7 +419,7 @@ public class CuratorStateManager extends FileSystemStateManager {
   }
 
   @Override
-  public ListenableFuture<Boolean> deleteTMasterLocation(String topologyName) {
+  public ListenableFuture<Boolean> deleteTManagerLocation(String topologyName) {
     // It is a EPHEMERAL node and would be removed automatically
     final SettableFuture<Boolean> result = SettableFuture.create();
     safeSetFuture(result, true);

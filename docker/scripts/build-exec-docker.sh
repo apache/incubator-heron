@@ -68,14 +68,14 @@ build_exec_image() {
 
   # build the image
   echo "Building docker image with tag:$DOCKER_TAG"
-  docker build --build-arg heronVersion=$HERON_VERSION -t "$DOCKER_TAG" -f "$DOCKER_FILE" "$SCRATCH_DIR"
+  docker buildx build --build-arg heronVersion=$HERON_VERSION -t "$DOCKER_TAG" -f "$DOCKER_FILE" "$SCRATCH_DIR"
 
   # save the image as a tar file
   DOCKER_IMAGE_FILE="$OUTPUT_DIRECTORY/heron-docker-$HERON_VERSION-$TARGET_PLATFORM.tar"
   
   echo "Saving docker image to $DOCKER_IMAGE_FILE"
   docker save -o $DOCKER_IMAGE_FILE $DOCKER_TAG
-  gzip $DOCKER_IMAGE_FILE
+  pigz $DOCKER_IMAGE_FILE
 }
 
 case $# in

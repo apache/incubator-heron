@@ -40,22 +40,22 @@ file-sink:
   filename-output: "metrics.json" # File for metrics to write to
   file-maximum: 5 # maximum number of file saved in disk
 
-### Config for tmaster-sink
-tmaster-sink:
-  class: "org.apache.heron.metricsmgr.sink.tmaster.TMasterSink"
+### Config for tmanager-sink
+tmanager-sink:
+  class: "org.apache.heron.metricsmgr.sink.tmanager.TManagerSink"
   flush-frequency-ms: 60000
   sink-restart-attempts: -1 # Forever
-  tmaster-location-check-interval-sec: 5
-  tmaster-client:
-    reconnect-interval-second: 5 # The re-connect interval to TMaster from TMasterClient
-    # The size of packets written to TMaster will be determined by the minimal of: (a) time based (b) size based
-    network-write-batch-size-bytes: 32768 # Size based, the maximum batch size in bytes to write to TMaster
-    network-write-batch-time-ms: 16 # Time based, the maximum batch time in ms for Metrics Manager to write to TMaster per attempt
-    network-read-batch-size-bytes: 32768 # Size based, the maximum batch size in bytes to write to TMaster
-    network-read-batch-time-ms: 16 # Time based, the maximum batch time in ms for Metrics Manager to write to TMaster per attempt
+  tmanager-location-check-interval-sec: 5
+  tmanager-client:
+    reconnect-interval-second: 5 # The re-connect interval to TManager from TManagerClient
+    # The size of packets written to TManager will be determined by the minimal of: (a) time based (b) size based
+    network-write-batch-size-bytes: 32768 # Size based, the maximum batch size in bytes to write to TManager
+    network-write-batch-time-ms: 16 # Time based, the maximum batch time in ms for Metrics Manager to write to TManager per attempt
+    network-read-batch-size-bytes: 32768 # Size based, the maximum batch size in bytes to write to TManager
+    network-read-batch-time-ms: 16 # Time based, the maximum batch time in ms for Metrics Manager to write to TManager per attempt
     socket-send-buffer-size-bytes: 6553600 # The maximum socket's send buffer size in bytes
     socket-received-buffer-size-bytes: 8738000 # The maximum socket's received buffer size in bytes
-  tmaster-metrics-type:
+  tmanager-metrics-type:
     "__emit-count": SUM
     "__execute-count": SUM
     "__fail-count": SUM
@@ -78,12 +78,12 @@ metricscache-sink:
   sink-restart-attempts: -1 # Forever
   metricscache-location-check-interval-sec: 5
   metricscache-client:
-    reconnect-interval-second: 5 # The re-connect interval to TMaster from TMasterClient
-    # The size of packets written to TMaster will be determined by the minimal of: (a) time based (b) size based
-    network-write-batch-size-bytes: 32768 # Size based, the maximum batch size in bytes to write to TMaster
-    network-write-batch-time-ms: 16 # Time based, the maximum batch time in ms for Metrics Manager to write to TMaster per attempt
-    network-read-batch-size-bytes: 32768 # Size based, the maximum batch size in bytes to write to TMaster
-    network-read-batch-time-ms: 16 # Time based, the maximum batch time in ms for Metrics Manager to write to TMaster per attempt
+    reconnect-interval-second: 5 # The re-connect interval to TManager from TManagerClient
+    # The size of packets written to TManager will be determined by the minimal of: (a) time based (b) size based
+    network-write-batch-size-bytes: 32768 # Size based, the maximum batch size in bytes to write to TManager
+    network-write-batch-time-ms: 16 # Time based, the maximum batch time in ms for Metrics Manager to write to TManager per attempt
+    network-read-batch-size-bytes: 32768 # Size based, the maximum batch size in bytes to write to TManager
+    network-read-batch-time-ms: 16 # Time based, the maximum batch time in ms for Metrics Manager to write to TManager per attempt
     socket-send-buffer-size-bytes: 6553600 # The maximum socket's send buffer size in bytes
     socket-received-buffer-size-bytes: 8738000 # The maximum socket's received buffer size in bytes
   metricscache-metrics-type:
@@ -111,6 +111,137 @@ metricscache-sink:
 #   include-topology-name: true # Include topology name in metric name (default false)
 #   metrics-cache-max-size: 1000000 # Max number of metrics cached and published (default 1000000)
 #   metrics-cache-ttl-sec: 600 # Time in seconds after which a metric that was collected will stopped being published (default 600)
+#  rules:
+#  # __jvm-peak-usage/G1-Survivor-Space-committed": "9",
+#  - pattern: __jvm-(.+)/(.+)
+#    name: jvm_$1_$2
+#    attrNameSnakeCase: true
+#    type: COUNTER
+#  # "__execute-time-ns/pulsar-prod-4/default": "418764",
+#  - pattern: __(?!jvm-+)(.+-count|.+-latency|.+-count|.+-time-ns)/(.+)/(.+)
+#    name: $1
+#    attrNameSnakeCase: true
+#    type: COUNTER
+#    labels:
+#      dest_component: "$2"
+#      context: "$3"
+#  # "__execute-time-ns/pulsar-prod-4": "418764",
+#  - pattern: __(?!jvm-+)(.+-count|.+-latency|.+-count|.+-time-ns)/(.+)
+#    name: $1
+#    attrNameSnakeCase: true
+#    type: COUNTER
+#    labels:
+#      context: "$2"
+#  # StreamManager
+#  # "__client_stmgr-17/__bytes_to_stmgrs": "7841039",
+#  - pattern: __(client_stmgr-.+)/__(.+_to_stmgrs)
+#    name: $2
+#    attrNameSnakeCase: true
+#    type: COUNTER
+#    labels:
+#      dest_component: "$1"
+#  # "__connection_buffer_by_instanceid/container_1_pulsar-prod-9_201/bytes": "0.000000",
+#  - pattern: __(connection_buffer_by_instanceid)/container_(.+)_(.+)/(.+)
+#    name: $1_$4
+#    attrNameSnakeCase: true
+#    type: COUNTER
+#    labels:
+#      dest_container: "$2"
+#      dest_task: "$3"
+#  # "__time_spent_back_pressure_by_compid/container_1_pulsar-prod-5_151": "0",
+#  - pattern: __(time_spent_back_pressure_by_compid)/container_(.+)_(.+)
+#    name: $1
+#    attrNameSnakeCase: true
+#    type: COUNTER
+#    labels:
+#      dest_container: "$2"
+#      dest_task: "$3"
+#  # PulsarSpoutMetrics of PulsarSpout 'PulsarSpoutMetrics/pulsar-prod-4-0/consumerThroughput'
+#  - pattern: PulsarSpout/(.+)/(.+)
+#    name: pulsar_spout_$2
+#    attrNameSnakeCase: true
+#    type: COUNTER
+#    labels:
+#      component: "$1"
+#  - pattern: PulsarBolt/(.+)/(.+)
+#    name: pulsar_bolt_$2
+#    attrNameSnakeCase: true
+#    type: COUNTER
+#    labels:
+#      component: "$1"
+#  # name: "kafkaConsumer-request-size-max/consumer-node-metrics/client-id-spout/node-id-node-1"
+#  - pattern: kafkaConsumer-(.+)/consumer-(node)-metrics/client-id-(.+)/node-id-(.+)
+#    name: kafka_consumer_$2_$1
+#    attrNameSnakeCase: true
+#    type: COUNTER
+#    labels:
+#      client_id: "$3"
+#      node_id: "$4"
+#  # name: "kafkaConsumer-commit-rate/consumer-coordinator-metrics/client-id-spout"
+#  - pattern: kafkaConsumer-(.+)/consumer-(coordinator)-metrics/client-id-(.+)
+#    name: kafka_consumer_$2_$1
+#    attrNameSnakeCase: true
+#    type: COUNTER
+#    labels:
+#      client_id: "$3"
+#  # name: "kafkaConsumer-records-lag-max/consumer-fetch-manager-metrics/client-id-spout/topic-nginx-lad-es/partition-1"
+#  - pattern: kafkaConsumer-(.+)/consumer-(fetch-manager)-metrics/client-id-(.+)/topic-(.+)/partition-(.+)
+#    name: kafka_consumer_$2_$1
+#    attrNameSnakeCase: true
+#    type: COUNTER
+#    labels:
+#      client_id: "$3"
+#      topic: "$4"
+#      partition: "$5"
+#  # name: "kafkaConsumer-records-per-request-avg/consumer-fetch-manager-metrics/client-id-spout/topic-nginx-adp-cms-api"
+#  - pattern: kafkaConsumer-(.+)/consumer-(fetch-manager)-metrics/client-id-(.+)/topic-(.+)
+#    name: kafka_consumer_$2_$1
+#    attrNameSnakeCase: true
+#    type: COUNTER
+#    labels:
+#      client_id: "$3"
+#      topic: "$4"
+#  # name: "kafkaConsumer-bytes-consumed-total/consumer-fetch-manager-metrics/client-id-consumer-1"
+#  - pattern: kafkaConsumer-(.+)/consumer-(feath-manager)-metrics/client-id-(.+)
+#    name: kafka_consumer_$2_$1
+#    attrNameSnakeCase: true
+#    type: COUNTER
+#    labels:
+#      client_id: "$3"
+#  - pattern: kafkaConsumer-(.+)/consumer-metrics/client-id-(.+)/node-id-(.+)
+#    name: kafka_consumer_$1
+#    attrNameSnakeCase: true
+#    type: COUNTER
+#    labels:
+#      client_id: "$2"
+#      node_id: "$3"
+#  - pattern: kafkaConsumer-(.+)/consumer-metrics/client-id-(.+)
+#    name: kafka_consumer_$1
+#    attrNameSnakeCase: true
+#    type: COUNTER
+#    labels:
+#      client_id: "$2"
+#  - pattern: kafkaConsumer-(.+)/app-info/client-id-(.+)
+#    name: kafka_consumer_$1
+#    attrNameSnakeCase: true
+#    type: COUNTER
+#    labels:
+#      client_id: "$2"
+#  # kafkaOffset of KafkaSpout 'kafkaOffset/topicName/partition_2/spoutLag'
+#  - pattern: kafkaOffset/(.+)/partition_([0-9]+)/(.+)
+#    name: kafka_offset_$3
+#    attrNameSnakeCase: true
+#    type: COUNTER
+#    labels:
+#      topic: "$1"
+#      partition: "$2"
+#  # kafkaOffset of KafkaSpout 'kafkaOffset/topicName/totalSpoutLag'
+#  - pattern: kafkaOffset/(.+)/(.+)
+#    name: kafka_offset_$2
+#    attrNameSnakeCase: true
+#    type: COUNTER
+#    labels:
+#      topic: "$1"
 
 ### Config for scribe-sink
 # scribe-sink:

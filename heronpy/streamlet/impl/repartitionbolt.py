@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 
 #  Licensed to the Apache Software Foundation (ASF) under one
@@ -33,6 +33,8 @@ from heronpy.streamlet.impl.streamletboltbase import StreamletBoltBase
 
 # pylint: disable=unused-argument
 class RepartitionCustomGrouping(ICustomGrouping):
+  """Implementation of repartitioning grouping"""
+
   def __init__(self, repartition_function):
     self._repartition_function = repartition_function
 

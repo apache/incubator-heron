@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 
 #  Licensed to the Apache Software Foundation (ASF) under one
@@ -64,7 +64,7 @@ class ContainerFileDataHandler(BaseHandler):
       path = self.get_argument(constants.PARAM_PATH)
       offset = self.get_argument_offset()
       length = self.get_argument_length()
-      topology_info = self.tracker.getTopologyInfo(topology_name, cluster, role, environ)
+      topology_info = self.tracker.get_topology_info(topology_name, cluster, role, environ)
 
       stmgr_id = "stmgr-" + container
       stmgr = topology_info["physical_plan"]["stmgrs"][stmgr_id]
@@ -103,6 +103,7 @@ class ContainerFileDownloadHandler(BaseHandler):
 
   @tornado.gen.coroutine
   def get(self):
+    """Serve a GET request."""
     try:
       cluster = self.get_argument_cluster()
       role = self.get_argument_role()
@@ -110,7 +111,7 @@ class ContainerFileDownloadHandler(BaseHandler):
       topology_name = self.get_argument_topology()
       container = self.get_argument(constants.PARAM_CONTAINER)
       path = self.get_argument(constants.PARAM_PATH)
-      topology_info = self.tracker.getTopologyInfo(topology_name, cluster, role, environ)
+      topology_info = self.tracker.get_topology_info(topology_name, cluster, role, environ)
 
       stmgr_id = "stmgr-" + container
       stmgr = topology_info["physical_plan"]["stmgrs"][stmgr_id]
@@ -165,7 +166,7 @@ class ContainerFileStatsHandler(BaseHandler):
       topology_name = self.get_argument_topology()
       container = self.get_argument(constants.PARAM_CONTAINER)
       path = self.get_argument(constants.PARAM_PATH, default=".")
-      topology_info = self.tracker.getTopologyInfo(topology_name, cluster, role, environ)
+      topology_info = self.tracker.get_topology_info(topology_name, cluster, role, environ)
 
       stmgr_id = "stmgr-" + str(container)
       stmgr = topology_info["physical_plan"]["stmgrs"][stmgr_id]

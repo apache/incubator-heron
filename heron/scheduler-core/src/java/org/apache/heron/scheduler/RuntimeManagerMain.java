@@ -49,7 +49,7 @@ import org.apache.heron.spi.scheduler.SchedulerException;
 import org.apache.heron.spi.statemgr.IStateManager;
 import org.apache.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import org.apache.heron.spi.utils.ReflectionUtils;
-import org.apache.heron.spi.utils.TMasterException;
+import org.apache.heron.spi.utils.TManagerException;
 
 public class RuntimeManagerMain {
   private static final Logger LOG = Logger.getLogger(RuntimeManagerMain.class.getName());
@@ -371,7 +371,7 @@ public class RuntimeManagerMain {
    * 3. Complete the runtime management for a specific command
    */
   public void manageTopology()
-      throws TopologyRuntimeManagementException, TMasterException, PackingException {
+      throws TopologyRuntimeManagementException, TManagerException, PackingException {
     String topologyName = Context.topologyName(config);
     // 1. Do prepare work
     // create an instance of state manager
@@ -488,7 +488,7 @@ public class RuntimeManagerMain {
       Config runtime,
       ISchedulerClient schedulerClient,
       boolean potentialStaleExecutionData)
-    throws TopologyRuntimeManagementException, TMasterException, PackingException {
+    throws TopologyRuntimeManagementException, TManagerException, PackingException {
     // create an instance of the runner class
     RuntimeManagerRunner runtimeManagerRunner =
         new RuntimeManagerRunner(config, runtime, command, schedulerClient,

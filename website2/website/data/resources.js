@@ -1,10 +1,10 @@
 module.exports = {
     publications: [
       {
-        forum: 'O’Reilly',
-        forum_link: 'http://shop.oreilly.com/product/0636920203131.do',
-        title: 'Stream Processing with Heron',
-        link: 'http://shop.oreilly.com/product/0636920203131.do'
+        forum: 'Springer',
+        forum_link: 'https://www.springer.com/us/book/9783030600938',
+        title: 'Heron Streaming: Fundamentals, Applications, Operations, and Insights',
+        link: 'https://www.springer.com/us/book/9783030600938'
       },
       {
         forum: '',
@@ -96,7 +96,7 @@ module.exports = {
             forum_link: 'https://blog.twitter.com/engineering/',
             presenter: 'Karthik Ramasamy',
             date: 'May 2016',
-            title: 'Leaving the Nest: Heron donated to Apache Software Foundation',
+            title: 'Open Sourcing Twitter Heron',
             link: 'https://blog.twitter.com/2016/open-sourcing-twitter-heron'
           },
           {

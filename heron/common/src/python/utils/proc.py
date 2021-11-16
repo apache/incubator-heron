@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 
 #  Licensed to the Apache Software Foundation (ASF) under one
@@ -81,12 +81,12 @@ def async_stream_process_stderr(process, handler):
   """
   return _async_stream_process_output(process, stream_process_stderr, handler)
 
-class StringBuilder(object):
+class StringBuilder:
   def __init__(self):
     self.end = False
     self.strs = []
 
-  def add(self, line):
+  def add(self, line: bytes):
     if not line:
       self.end = True
     else:
@@ -96,8 +96,6 @@ class StringBuilder(object):
     while True:
       if self.end:
         return ''.join(self.strs)
-      else:
-        continue
 
 def async_stdout_builder(proc):
   """ Save stdout into string builder

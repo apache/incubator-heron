@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 
 #  Licensed to the Apache Software Foundation (ASF) under one
@@ -31,7 +31,6 @@ try:
   API_VERSION = common_config.get_version_number()
 except:
   API_VERSION = ""
-
 
 
 # Handler Constants

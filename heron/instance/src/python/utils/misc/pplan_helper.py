@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 
 #  Licensed to the Apache Software Foundation (ASF) under one
@@ -32,7 +32,7 @@ from heronpy.api.serializer import default_serializer
 from .custom_grouping_helper import CustomGroupingHelper
 
 # pylint: disable=too-many-instance-attributes
-class PhysicalPlanHelper(object):
+class PhysicalPlanHelper:
   """Helper class for accessing Physical Plan
 
   :ivar pplan: Physical Plan protobuf message
@@ -121,7 +121,7 @@ class PhysicalPlanHelper(object):
     if size is None:
       raise RuntimeError("%s emitting to stream %s but was not declared in output fields"
                          % (self.my_component_name, stream_id))
-    elif size != len(tup):
+    if size != len(tup):
       raise RuntimeError("Number of fields emitted in stream %s does not match what's expected. "
                          "Expected: %s, Observed: %s" % (stream_id, size, len(tup)))
 
@@ -129,15 +129,13 @@ class PhysicalPlanHelper(object):
     """Returns spout instance, or ``None`` if bolt is assigned"""
     if self.is_spout:
       return self._my_spbl
-    else:
-      return None
+    return None
 
   def get_my_bolt(self):
     """Returns bolt instance, or ``None`` if spout is assigned"""
     if self.is_spout:
       return None
-    else:
-      return self._my_spbl
+    return self._my_spbl
 
   def get_topology_state(self):
     """Returns the current topology state"""
@@ -159,8 +157,7 @@ class PhysicalPlanHelper(object):
     """Returns the topology config"""
     if self.pplan.topology.HasField("topology_config"):
       return self._get_dict_from_config(self.pplan.topology.topology_config)
-    else:
-      return {}
+    return {}
 
   def set_topology_context(self, metrics_collector):
     """Sets a new topology context"""
@@ -192,9 +189,10 @@ class PhysicalPlanHelper(object):
         if PhysicalPlanHelper._is_number(kv.value):
           config[kv.key] = PhysicalPlanHelper._get_number(kv.value)
         elif kv.value.lower() in ("true", "false"):
-          config[kv.key] = True if kv.value.lower() == "true" else False
+          config[kv.key] = kv.value.lower() == "true"
         else:
           config[kv.key] = kv.value
+      # pytlint: disable=simplifiable-if-expression
       elif kv.HasField("serialized_value") and \
         kv.type == topology_pb2.ConfigValueType.Value("PYTHON_SERIALIZED_VALUE"):
         # deserialize that

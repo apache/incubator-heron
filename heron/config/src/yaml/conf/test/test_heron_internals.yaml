@@ -32,8 +32,8 @@ heron.logging.maximum.size.mb: 100
 # The maximum number of log files
 heron.logging.maximum.files: 5
 
-# The interval in seconds after which to check if the tmaster location has been fetched or not
-heron.check.tmaster.location.interval.sec: 120
+# The interval in seconds after which to check if the tmanager location has been fetched or not
+heron.check.tmanager.location.interval.sec: 120
 
 # The interval in seconds to prune logging files in C++
 heron.logging.prune.interval.sec: 300
@@ -74,16 +74,16 @@ heron.streammgr.xormgr.rotatingmap.nbuckets: 3
 heron.streammgr.client.reconnect.interval.sec: 1
 
 # The reconnect interval to tamster in second for stream manager client
-heron.streammgr.client.reconnect.tmaster.interval.sec: 1
+heron.streammgr.client.reconnect.tmanager.interval.sec: 1
 
-# The max reconnect attempts to tmaster for stream manager client
-heron.streammgr.client.reconnect.tmaster.max.attempts: 30
+# The max reconnect attempts to tmanager for stream manager client
+heron.streammgr.client.reconnect.tmanager.max.attempts: 30
 
 # The maximum packet size in MB of stream manager's network options
 heron.streammgr.network.options.maximum.packet.mb: 10
 
 # The interval in seconds to send heartbeat
-heron.streammgr.tmaster.heartbeat.interval.sec: 10
+heron.streammgr.tmanager.heartbeat.interval.sec: 10
 
 # Maximum batch size in MB to read by stream manager from socket
 heron.streammgr.connection.read.batch.size.mb: 1
@@ -101,37 +101,37 @@ heron.streammgr.network.backpressure.highwatermark.mb: 50
 heron.streammgr.network.backpressure.lowwatermark.mb: 30
 
 
-### heron.tmaster.* configs are for the tmaster
+### heron.tmanager.* configs are for the tmanager
 
-# The maximum interval in minutes of metrics to be kept in tmaster
-heron.tmaster.metrics.collector.maximum.interval.min: 180
+# The maximum interval in minutes of metrics to be kept in tmanager
+heron.tmanager.metrics.collector.maximum.interval.min: 180
 
-# The maximum time to retry to establish the tmaster
-heron.tmaster.establish.retry.times: 30
+# The maximum time to retry to establish the tmanager
+heron.tmanager.establish.retry.times: 30
 
-# The interval to retry to establish the tmaster
-heron.tmaster.establish.retry.interval.sec: 1
+# The interval to retry to establish the tmanager
+heron.tmanager.establish.retry.interval.sec: 1
 
-# The maximum packet size in MB of tmaster's network options for stmgrs to connect to
-heron.tmaster.network.master.options.maximum.packet.mb: 16
+# The maximum packet size in MB of tmanager's network options for stmgrs to connect to
+heron.tmanager.network.server.options.maximum.packet.mb: 16
 
-# The maximum packet size in MB of tmaster's network options for scheduler to connect to
-heron.tmaster.network.controller.options.maximum.packet.mb: 1
+# The maximum packet size in MB of tmanager's network options for scheduler to connect to
+heron.tmanager.network.controller.options.maximum.packet.mb: 1
 
-# The maximum packet size in MB of tmaster's network options for stat queries
-heron.tmaster.network.stats.options.maximum.packet.mb: 1
+# The maximum packet size in MB of tmanager's network options for stat queries
+heron.tmanager.network.stats.options.maximum.packet.mb: 1
 
-# The inteval for tmaster to purge metrics from socket
-heron.tmaster.metrics.collector.purge.interval.sec: 60
+# The inteval for tmanager to purge metrics from socket
+heron.tmanager.metrics.collector.purge.interval.sec: 60
 
 # The maximum # of exception to be stored in tmetrics collector, to prevent potential OOM
-heron.tmaster.metrics.collector.maximum.exception: 256
+heron.tmanager.metrics.collector.maximum.exception: 256
 
 # Should the metrics reporter bind on all interfaces
-heron.tmaster.metrics.network.bindallinterfaces: False
+heron.tmanager.metrics.network.bindallinterfaces: False
 
 # The timeout in seconds for stream mgr, compared with (current time - last heartbeat time)
-heron.tmaster.stmgr.state.timeout.sec: 60
+heron.tmanager.stmgr.state.timeout.sec: 60
 
 
 ### heron.metricsmgr.* configs are for the metrics manager

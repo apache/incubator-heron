@@ -36,11 +36,15 @@ metadata:
 data:
   BK_BOOKIE_EXTRA_OPTS: "\"-Xms{{ $bookieHeapMemory }} -Xmx{{ $bookieHeapMemory }} -XX:MaxDirectMemorySize={{ $bookieDirectMemory }} -XX:+UseG1GC  -XX:MaxGCPauseMillis=10 -XX:+ParallelRefProcEnabled -XX:+UnlockExperimentalVMOptions -XX:+AggressiveOpts -XX:+DoEscapeAnalysis -XX:ParallelGCThreads=32 -XX:ConcGCThreads=32 -XX:G1NewSizePercent=50 -XX:+DisableExplicitGC -XX:-ResizePLAB\""
   BK_bookiePort: "3181"
+  BK_httpServerPort: "8080"
   BK_journalDirectory: "/bookkeeper/data/journal"
   BK_ledgerDirectories: "/bookkeeper/data/ledgers"
   BK_indexDirectories: "/bookkeeper/data/ledgers" 
   BK_zkServers: {{ .Release.Name }}-zookeeper:{{ .Values.zookeeper.clientPort }}
   BK_autoRecoveryDaemonEnabled: "true"
+  BK_journalMaxBackups: "{{ .Values.bookieJournalMaxBackups }}"
+  BK_journalMaxSizeMB: "{{ .Values.bookieJournalMaxSizeMB }}"
+  BK_logSizeLimit: "{{ int64 .Values.bookieLogSizeLimit }}"
   {{- if or (eq .Values.platform "gke") (eq .Values.platform "minikube") }}
   BK_useHostNameAsBookieID: "true"
   {{- end }}
@@ -127,6 +131,21 @@ spec:
                 echo 'Zookeeper {{ .Release.Name }}-zookeeper:{{ .Values.zookeeper.clientPort }} not ready';
                 sleep 4;
               done
+{{- if eq .Values.platform "minikube" }}
+        # The first time, initialize BK to wipe data for minikube
+        - name: bookie-format
+          image: {{ .Values.bookkeeper.image }}
+          args: ["/opt/bookkeeper/bin/bookkeeper", "shell", "bookieformat", "-nonInteractive", "-force"]
+          command: [ "/bin/bash", "/opt/bookkeeper/scripts/entrypoint.sh" ]
+          envFrom:
+            - configMapRef:
+                name: {{ .Release.Name }}-bookie-config
+          volumeMounts:
+            - name: journal-disk
+              mountPath: /bookkeeper/data/journal
+            - name: ledgers-disk
+              mountPath: /bookkeeper/data/ledgers
+{{- end }}
       containers:
         - name: bookie
           image: {{ .Values.bookkeeper.image }}
@@ -141,9 +160,6 @@ spec:
           ports:
             - name: client
               containerPort: 3181
-              # we are using `status.hostIP` for the bookie's advertised address. export 3181 as the hostPort,
-              # so that the containers are able to access the host port
-              hostPort: 3181
           envFrom:
             - configMapRef:
                 name: {{ .Release.Name }}-bookie-config

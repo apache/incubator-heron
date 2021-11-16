@@ -1,5 +1,4 @@
-# load("@bazel_tools//tools/build_defs/pkg:pkg.bzl", "pkg_deb", "pkg_tar")
-load("@bazel_tools//tools/build_defs/pkg:pkg.bzl", "pkg_tar")
+load("@rules_pkg//:pkg.bzl", "pkg_tar")
 load("//scripts/packages:self_extract_binary.bzl", "self_extract_binary")
 
 package(default_visibility = ["//visibility:public"])
@@ -79,7 +78,7 @@ pkg_tar(
         "//heron/instance/src/python:heron-python-instance",
         "//heron/shell/src/python:heron-shell",
         "//heron/stmgr/src/cpp:heron-stmgr",
-        "//heron/tmaster/src/cpp:heron-tmaster",
+        "//heron/tmanager/src/cpp:heron-tmanager",
     ],
     package_dir = "heron-core/bin",
 )
@@ -267,13 +266,11 @@ pkg_tar(
     srcs = [
         "//heron/downloaders/src/shell:heron-downloader",
         "//heron/downloaders/src/shell:heron-downloader-config",
-        "//heron/tools/admin/src/python:heron-admin",
         "//heron/tools/apiserver/src/shell:heron-apiserver",
         "//heron/tools/cli/src/python:heron",
         "//heron/tools/explorer/src/python:heron-explorer",
         "//heron/tools/tracker/src/python:heron-tracker",
         "//heron/tools/ui/src/python:heron-ui",
-        "//third_party/nomad:heron-nomad",
     ],
     package_dir = "bin",
 )
@@ -475,6 +472,11 @@ pkg_tar(
 )
 
 pkg_tar(
+    name = "disclaimers",
+    srcs = ["//:disclaimers"],
+)
+
+pkg_tar(
     name = "heron",
     srcs = generated_release_files,
     extension = "tar.gz",
@@ -502,6 +504,7 @@ pkg_tar(
         ":heron-lib-third_party",
         ":heron-lib-uploader",
         ":heron-simulator",
+        ":disclaimers",
     ],
 )
 
@@ -605,8 +608,9 @@ genrule(
         "export RELEASE_FILE_DIR=$$(pwd)",
         "export TMP_DIR=$$(mktemp -d -t heronpy.XXXXX)",
         "echo $$TMP_DIR",
-        "$(location @virtualenv//:virtualenv) --no-download --quiet --clear $$TMP_DIR/venv",
-        "PS1= source $$TMP_DIR/venv/bin/activate",
+        # Create the virtual environment
+        'python3 -m venv $$TMP_DIR/venv --clear',
+        "VIRTUAL_ENV_DISABLE_PROMPT=1 source $$TMP_DIR/venv/bin/activate",
         "export HERONPY_DIR=$$TMP_DIR/heronpy",
         "export HERONPYAPI_UNZIP=$$TMP_DIR/heronapiunzip",
         "export HERONPYSTREAMLET_UNZIP=$$TMP_DIR/heronstreamletunzip",
@@ -646,12 +650,13 @@ genrule(
         'find heronpy -type f -name "*.bak" -delete',
         "rm setup.py.template",
         "tree $$HERONPY_DIR",
-        "/usr/bin/env python2.7 setup.py sdist",
-        "/usr/bin/env python2.7 setup.py bdist_wheel --universal",
+        "/usr/bin/env python3 setup.py sdist",
+        "pip3 install wheel",
+        "/usr/bin/env python3 setup.py bdist_wheel",
         "cd -",
         "ls -l $$HERONPY_DIR/dist",
-        "cp $$HERONPY_DIR/dist/heronpy-*-py2.py3-*.whl $$OUTPUT_DIR",
-        'cp $$HERONPY_DIR/dist/heronpy-*-py2.py3-*.whl "$@"',
+        "cp $$HERONPY_DIR/dist/heronpy-*-py3-*.whl $$OUTPUT_DIR",
+        'cp $$HERONPY_DIR/dist/heronpy-*-py3-*.whl "$@"',
         "cp $$HERONPY_DIR/dist/heronpy-*.tar.gz $$OUTPUT_DIR",
         "touch $$OUTPUT_DIR/heronpy.whl",
         "rm -rf $$TMP_DIR",
@@ -662,7 +667,6 @@ genrule(
         "//heronpy/connectors:heron-pythonconnectors-package",
         "//heronpy/proto:proto-py-package",
         "//heronpy/streamlet:heron-python-streamlet-api-package",
-        "@virtualenv",
     ],
 )
 
@@ -683,6 +687,7 @@ genrule(
         "export HERON_VERSION=$$(grep version $$RELEASE_FILE_DIR/$(location :release.yaml) | awk '{print $$3}')",
         'export HERON_VERSION=$$(echo $$HERON_VERSION | sed -e "s/^\'//" -e "s/\'$$//")',
         "export HERON_VERSION=$$(echo $$HERON_VERSION | grep \"[0-9]*\\.[0-9]*\\.[0-9]*\")",
+        'export HERON_VERSION=$$([[ ! -z $$HERON_VERSION_EXT ]] && echo $$HERON_VERSION_EXT || echo $$HERON_VERSION)',
         'export HERON_VERSION=$$([[ -z $$HERON_VERSION ]] && echo "0.0.0" || echo $$HERON_VERSION)',
         "mkdir -p $$TMP_DIR $$HELM_DIR heron-charts",
         "cp $(SRCS) $$HELM_DIR",

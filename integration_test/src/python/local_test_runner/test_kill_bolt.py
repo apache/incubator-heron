@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 
 #  Licensed to the Apache Software Foundation (ASF) under one
@@ -21,9 +21,9 @@
 
 """test_kill_bolt.py"""
 import logging
-import test_template
+from . import test_template
 
-NON_TMASTER_SHARD = 1
+NON_TMANAGER_SHARD = 1
 HERON_BOLT = 'identity-bolt_3'
 
 class TestKillBolt(test_template.TestTemplate):
@@ -31,5 +31,5 @@ class TestKillBolt(test_template.TestTemplate):
   def execute_test_case(self):
     logging.info("Executing kill bolt")
     bolt_pid = self.get_pid(
-        'container_%d_%s' % (NON_TMASTER_SHARD, HERON_BOLT), self.params['workingDirectory'])
+        'container_%d_%s' % (NON_TMANAGER_SHARD, HERON_BOLT), self.params['workingDirectory'])
     self.kill_process(bolt_pid)

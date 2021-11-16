@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 
 #  Licensed to the Apache Software Foundation (ASF) under one
@@ -100,8 +100,7 @@ class TopologyContextImpl(TopologyContext):
         key = StreamId(id=istream.stream.id, component_name=istream.stream.component_name)
         ret[key] = istream.gtype
       return ret
-    else:
-      return None
+    return None
 
   def get_this_sources(self):
     return self.get_sources(self.get_component_id())

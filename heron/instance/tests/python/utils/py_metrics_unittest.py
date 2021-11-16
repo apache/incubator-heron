@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 
 #  Licensed to the Apache Software Foundation (ASF) under one
@@ -21,7 +21,7 @@
 
 # pylint: disable=missing-docstring
 from collections import namedtuple
-from mock import Mock, patch
+from unittest.mock import Mock, patch
 import unittest
 import threading
 

@@ -33,7 +33,7 @@ public class YarnSchedulerTest {
   public void delegatesToDriverOnSchedule() throws Exception {
     HeronMasterDriver mockHeronDriver = Mockito.mock(HeronMasterDriver.class);
     HeronMasterDriverProvider.setInstance(mockHeronDriver);
-    Mockito.doNothing().when(mockHeronDriver).launchTMaster();
+    Mockito.doNothing().when(mockHeronDriver).launchTManager();
 
     IScheduler scheduler = new YarnScheduler();
     PackingPlan mockPacking = Mockito.mock(PackingPlan.class);
@@ -41,7 +41,7 @@ public class YarnSchedulerTest {
 
     InOrder invocationOrder = Mockito.inOrder(mockHeronDriver);
     invocationOrder.verify(mockHeronDriver).scheduleHeronWorkers(mockPacking);
-    invocationOrder.verify(mockHeronDriver).launchTMaster();
+    invocationOrder.verify(mockHeronDriver).launchTManager();
   }
 
   @Test

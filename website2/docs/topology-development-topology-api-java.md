@@ -20,9 +20,6 @@ sidebar_label: The Heron Topology API for Java
     under the License.
 -->
 
-> This document pertains to the older, Storm-based, Heron Topology API.  Heron now offers two separate APIs for building topologies: the original, [Storm](https://storm.apache.org)-based Topology API, and the newer [Streamlet API](../../../concepts/topologies#the-heron-streamlet-api). Topologies created using the Topology API can still run on Heron and there are currently no plans to deprecate this API. We would, however, recommend that you use the Streamlet API for future work.
-
-
 A topology specifies components like spouts and bolts, as well as the relation
 between components and proper configurations. The
 [`heron-api`](http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22org.apache.heron%22%20AND%20a%3A%22heron-api%22)
@@ -82,13 +79,13 @@ In order to run a Java topology in a Heron cluster, you'll need to package your 
 Once your `pom.xml` is properly set up, you can compile the JAR with dependencies using this command:
 
 ```bash
-$ mvn assembly:assembly
+$ mvn package
 ```
 
 By default, this will add a JAR in your project's `target` folder with the name `PROJECT-NAME-VERSION-jar-with-dependencies.jar`. Here's an example topology submission command using a compiled JAR:
 
 ```bash
-$ mvn assembly:assembly
+$ mvn package
 $ heron submit local \
   target/my-project-1.2.3-jar-with-dependencies.jar \
   com.example.Main \

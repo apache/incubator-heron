@@ -26,6 +26,8 @@ metadata:
 data:
   BK_BOOKIE_EXTRA_OPTS: "\"-Xms1g -Xmx1g -XX:MaxDirectMemorySize=1g -XX:+UseG1GC  -XX:MaxGCPauseMillis=10 -XX:+ParallelRefProcEnabled -XX:+UnlockExperimentalVMOptions -XX:+AggressiveOpts -XX:+DoEscapeAnalysis -XX:ParallelGCThreads=32 -XX:ConcGCThreads=32 -XX:G1NewSizePercent=50 -XX:+DisableExplicitGC -XX:-ResizePLAB\""
   BK_bookiePort: "3181"
+  BK_httpServerPort: "8080"
+  BK_useHostNameAsBookieID: "true"
   BK_journalDirectory: "/bookkeeper/data/journal"
   BK_ledgerDirectories: "/bookkeeper/data/ledgers"
   BK_indexDirectories: "/bookkeeper/data/ledgers" 
@@ -59,15 +61,20 @@ spec:
       initContainers:
         # The first time, initialize BK to wipe data for minikube
         - name: bookie-format
-          image: apache/bookkeeper:4.7.3
-          args: ["/opt/bookkeeper/bin/bookkeeper", "shell", "bookieformat", "--nonInteractive", "-f", "-deleteCookie"]
+          image: apache/bookkeeper:4.13.0
+          args: ["/opt/bookkeeper/bin/bookkeeper", "shell", "bookieformat", "-nonInteractive", "-force"]
           command: [ "/bin/bash", "/opt/bookkeeper/scripts/entrypoint.sh" ]
           envFrom:
             - configMapRef:
                 name: bookie-config
+          volumeMounts:
+            - name: journal-disk
+              mountPath: /bookkeeper/data/journal
+            - name: ledgers-disk
+              mountPath: /bookkeeper/data/ledgers
       containers:
         - name: bookie
-          image: apache/bookkeeper:4.7.3
+          image: apache/bookkeeper:4.13.0
           resources:
             requests:
               memory: "1Gi"
@@ -91,13 +98,11 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: status.hostIP
-    
           volumeMounts:
             - name: journal-disk
               mountPath: /bookkeeper/data/journal
             - name: ledgers-disk
               mountPath: /bookkeeper/data/ledgers
-
       volumes:
           # Mount local disks
         - name: journal-disk

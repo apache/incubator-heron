@@ -43,7 +43,7 @@ class DummyStMgrClientMgr : public heron::stmgr::StMgrClientMgr {
   virtual void CloseConnectionsAndClear() { close_connections_called_ = true; }
   bool CloseConnectionsCalled() const { return close_connections_called_; }
 
-  virtual void StartConnections(const heron::proto::system::PhysicalPlan*) {
+  virtual void StartConnections(heron::proto::system::PhysicalPlan const&) {
     start_connections_called_ = true;
   }
   bool StartConnectionsCalled() const { return start_connections_called_; }

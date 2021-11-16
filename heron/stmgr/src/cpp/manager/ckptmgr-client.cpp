@@ -45,10 +45,10 @@ CkptMgrClient::CkptMgrClient(std::shared_ptr<EventLoop> eventloop, const Network
       ckptmgr_id_(_ckptmgr_id),
       stmgr_id_(_stmgr_id),
       quit_(false),
-      pplan_(nullptr),
       ckpt_saved_watcher_(_ckpt_saved_watcher),
       ckpt_get_watcher_(_ckpt_get_watcher),
-      register_watcher_(_register_watcher) {
+      register_watcher_(_register_watcher),
+      pplan_(nullptr) {
 
   // TODO(nlu): take the value from config
   reconnect_cpktmgr_interval_sec_ = 10;

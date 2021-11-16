@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 
 #  Licensed to the Apache Software Foundation (ASF) under one
@@ -20,7 +20,7 @@
 
 '''resources.py: module for defining resources'''
 
-class Resources(object):
+class Resources:
   """Resources needed by the topology are encapsulated in this class.
      Currently we deal with CPU and RAM. Others can be added later.
   """

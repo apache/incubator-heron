@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 
 #  Licensed to the Apache Software Foundation (ASF) under one
@@ -19,7 +19,7 @@
 #  under the License.
 
 ''' opts_unittest.py '''
-import unittest2 as unittest
+import unittest
 import heron.tools.cli.src.python.opts as opts
 
 #pylint: disable=missing-docstring, no-self-use

@@ -29,8 +29,8 @@ import org.junit.Test;
 import org.apache.heron.api.generated.TopologyAPI;
 import org.apache.heron.common.basics.SingletonRegistry;
 import org.apache.heron.common.utils.misc.PhysicalPlanHelper;
+import org.apache.heron.instance.ExecutorTester;
 import org.apache.heron.instance.InstanceControlMsg;
-import org.apache.heron.instance.SlaveTester;
 import org.apache.heron.proto.system.PhysicalPlans;
 import org.apache.heron.resource.Constants;
 import org.apache.heron.resource.UnitTestHelper;
@@ -40,17 +40,17 @@ import static org.junit.Assert.assertTrue;
 
 public class ActivateDeactivateTest {
   private static final String SPOUT_INSTANCE_ID = "spout-id";
-  private SlaveTester slaveTester;
+  private ExecutorTester executorTester;
 
   @Before
   public void before() {
-    slaveTester = new SlaveTester();
-    slaveTester.start();
+    executorTester = new ExecutorTester();
+    executorTester.start();
   }
 
   @After
   public void after() throws NoSuchFieldException, IllegalAccessException {
-    slaveTester.stop();
+    executorTester.stop();
   }
 
   /**
@@ -64,20 +64,20 @@ public class ActivateDeactivateTest {
     SingletonRegistry.INSTANCE.registerSingleton(Constants.ACTIVATE_COUNT_LATCH, activateLatch);
     SingletonRegistry.INSTANCE.registerSingleton(Constants.DEACTIVATE_COUNT_LATCH, deactivateLatch);
 
-    slaveTester.getInControlQueue().offer(buildMessage(TopologyAPI.TopologyState.RUNNING));
+    executorTester.getInControlQueue().offer(buildMessage(TopologyAPI.TopologyState.RUNNING));
 
     // Now the activateLatch and deactivateLatch should be 1
     assertEquals(1, activateLatch.getCount());
     assertEquals(1, deactivateLatch.getCount());
 
     // And we start the test
-    slaveTester.getInControlQueue().offer(buildMessage(TopologyAPI.TopologyState.PAUSED));
+    executorTester.getInControlQueue().offer(buildMessage(TopologyAPI.TopologyState.PAUSED));
     assertTrue(deactivateLatch.await(Constants.TEST_WAIT_TIME.toMillis(), TimeUnit.MILLISECONDS));
 
     assertEquals(1, activateLatch.getCount());
     assertEquals(0, deactivateLatch.getCount());
 
-    slaveTester.getInControlQueue().offer(buildMessage(TopologyAPI.TopologyState.RUNNING));
+    executorTester.getInControlQueue().offer(buildMessage(TopologyAPI.TopologyState.RUNNING));
     assertTrue(activateLatch.await(Constants.TEST_WAIT_TIME.toMillis(), TimeUnit.MILLISECONDS));
 
     assertEquals(0, activateLatch.getCount());

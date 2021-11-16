@@ -28,7 +28,7 @@
 namespace heron {
 namespace config {
 
-const sp_string MetricsSinksVars::METRICS_SINKS_TMASTER_SINK = "tmaster-sink";
-const sp_string MetricsSinksVars::METRICS_SINKS_TMASTER_METRICS = "tmaster-metrics-type";
+const sp_string MetricsSinksVars::METRICS_SINKS_TMANAGER_SINK = "tmanager-sink";
+const sp_string MetricsSinksVars::METRICS_SINKS_TMANAGER_METRICS = "tmanager-metrics-type";
 }  // namespace config
 }  // namespace heron

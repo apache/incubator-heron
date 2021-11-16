@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 
 #  Licensed to the Apache Software Foundation (ASF) under one
@@ -52,7 +52,7 @@ class ExecutionStateHandler(BaseHandler):
       role = self.get_argument_role()
       environ = self.get_argument_environ()
       topology_name = self.get_argument_topology()
-      topology_info = self.tracker.getTopologyInfo(topology_name, cluster, role, environ)
+      topology_info = self.tracker.get_topology_info(topology_name, cluster, role, environ)
       execution_state = topology_info["execution_state"]
       self.write_success_response(execution_state)
     except Exception as e:

@@ -1,4 +1,4 @@
-<!--
+{#
 Licensed to the Apache Software Foundation (ASF) under one
 or more contributor license agreements.  See the NOTICE file
 distributed with this work for additional information
@@ -15,7 +15,7 @@ software distributed under the License is distributed on an
 KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations
 under the License.
--->
+#}
 
 {% extends "application.html" %}
 {% block content %}
@@ -31,8 +31,8 @@ under the License.
   <!-- Row end -->
 </div>
 
-<script src="{{ static_url('js/d3.min.3.4.11.js') }}"></script>
-<script type="text/jsx" src="{{ static_url('js/config.js') }}"></script>
+<script src="{{ url_for('static', path='js/d3.min.3.4.11.js') }}"></script>
+<script type="text/jsx" src="{{ url_for('static', path='js/config.js') }}"></script>
 
 <script type="application/javascript">
   window.onload = function() {
@@ -49,4 +49,4 @@ under the License.
     document.getElementById("display-config")
   );
 </script>
-{% end %}
+{% endblock %}

@@ -28,8 +28,8 @@
 
 namespace heron {
 namespace proto {
-namespace tmaster {
-class TMasterLocation;
+namespace tmanager {
+class TManagerLocation;
 }
 }
 }
@@ -45,15 +45,15 @@ class MetricsMgrClient : public Client {
   ~MetricsMgrClient();
 
   void SendMetrics(proto::system::MetricPublisherPublishMessage* _message);
-  void SendTMasterLocation(const proto::tmaster::TMasterLocation& location);
-  void SendMetricsCacheLocation(const proto::tmaster::MetricsCacheLocation& location);
+  void SendTManagerLocation(const proto::tmanager::TManagerLocation& location);
+  void SendMetricsCacheLocation(const proto::tmanager::MetricsCacheLocation& location);
 
  protected:
   virtual void HandleConnect(NetworkErrorCode status);
   virtual void HandleClose(NetworkErrorCode status);
 
  private:
-  void InternalSendTMasterLocation();
+  void InternalSendTManagerLocation();
   void InternalSendMetricsCacheLocation();
   void ReConnect();
   void SendRegisterRequest();
@@ -66,8 +66,8 @@ class MetricsMgrClient : public Client {
   sp_string component_name_;
   sp_string instance_id_;
   int instance_index_;
-  proto::tmaster::TMasterLocation* tmaster_location_;
-  proto::tmaster::MetricsCacheLocation* metricscache_location_;
+  proto::tmanager::TManagerLocation* tmanager_location_;
+  proto::tmanager::MetricsCacheLocation* metricscache_location_;
   // Tells if we have registered to metrics manager or not
   bool registered_;
 };

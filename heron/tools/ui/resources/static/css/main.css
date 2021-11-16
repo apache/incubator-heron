@@ -17,7 +17,6 @@
  * under the License.
  */
 
-@import url(//fonts.googleapis.com/css?family=Trykker);
 /*   Mixins  */
 /*  Gradients  */
 /*  Transition  */
@@ -26,6 +25,21 @@
 /*  Border Radius  */
 /*  Opacity  */
 /*  CSS  */
+
+
+@font-face {
+  font-family: 'RobotoSlab';
+  font-style: normal;
+  font-weight: 400;
+  src: url('../fonts/robotoslab-regular.eot'); /* IE9 Compat Modes */
+  src: local('RobotoSlab Regular'), local('RobotoSlab-Regular'),
+       url('../fonts/robotoslab-regular.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
+       url('../fonts/robotoslab-regular.woff2') format('woff2'), /* Super Modern Browsers */
+       url('../fonts/robotoslab-regular.woff') format('woff'), /* Modern Browsers */
+       url('../fonts/robotoslab-regular.ttf') format('truetype'), /* Safari, Android, iOS */
+       url('../fonts/robotoslab-regular.svg#RobotoSlab-Regular') format('svg'); /* Legacy iOS */
+}
+
 body {
   margin: 0;
   font: normal 12px 'Open Sans', arial, sans-serif;
@@ -618,7 +632,7 @@ header {
         float: left;
         font-weight: 100;
         font-size: 18px;
-        font-family: 'Trykker'; }
+        font-family: 'RobotoSlab'; }
         .dashboard-wrapper .widget .widget-header .title .attribution, .dashboard-wrapper .widget .widget-header .title .mini-title {
           font-size: 11px;
           padding-left: 4px;

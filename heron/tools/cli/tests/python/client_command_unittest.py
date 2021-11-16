@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 
 #  Licensed to the Apache Software Foundation (ASF) under one
@@ -19,9 +19,8 @@
 #  under the License.
 
 ''' opts_unittest.py '''
-import unittest2 as unittest
-import mock
-from mock import call, patch, Mock, MagicMock
+import unittest
+from unittest.mock import call, patch, Mock, MagicMock
 import os
 import getpass
 import subprocess

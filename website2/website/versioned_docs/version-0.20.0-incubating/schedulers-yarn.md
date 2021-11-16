@@ -44,7 +44,7 @@ Following steps are executed when a Heron topology is submitted:
 1. The REEF client copies the `Heron Core package` and the `topology package` on the distributed file system.
 1. It then starts the YARN Application Master (AM) for the topology.
 1. The AM subsequently invokes the `Heron Scheduler` in the same process.
-1. This is followed by container allocation for the topology's master and workers. As a result `N+2`
+1. This is followed by container allocation for the topology's manager and workers. As a result `N+2`
 containers are allocated for each topology.
 
 ### Configuring the Heron client classpath
@@ -150,10 +150,10 @@ Assuming HDFS as the file system, Heron logs and REEF logs can be found in the f
 1. Ths scheduler's logs are created on the first/AM container:
 `<NM_LOCAL_DIR>/usercache/heron/appcache/application_1466548964728_0004/container_1466548964728_0004_01_000001/log-files`
 
-1. Logs generated when the TMaster starts in its container:
+1. Logs generated when the TManager starts in its container:
 `<LOG_DIR>/userlogs/application_1466548964728_0004/container_1466548964728_0004_01_000002/evaluator.stderr`
 
-1. The TMaster's logs are created on the second container owned by the topology app:
+1. The TManager's logs are created on the second container owned by the topology app:
 `<NM_LOCAL_DIR>/usercache/heron/appcache/application_1466548964728_0004/container_1466548964728_0004_01_000002/log-files`
 
 1. Worker logs are created on the remaining containers in the YARN NodeManager's local directory.
@@ -161,8 +161,8 @@ Assuming HDFS as the file system, Heron logs and REEF logs can be found in the f
 
 ## Work in Progress
 
-1. The YARN Scheduler will restart any failed workers and TMaster containers. However [AM HA](https://hadoop.apache.org/docs/r2.7.1/hadoop-yarn/hadoop-yarn-site/ResourceManagerHA.html)  is not
+1. The YARN Scheduler will restart any failed workers and TManager containers. However [AM HA](https://hadoop.apache.org/docs/r2.7.1/hadoop-yarn/hadoop-yarn-site/ResourceManagerHA.html)  is not
  supported yet. As a result AM failure will result in topology failure.
  Issue: [#949](https://github.com/apache/incubator-heron/issues/949)
-1. TMaster and Scheduler are started in separate containers. Increased network latency can result
+1. TManager and Scheduler are started in separate containers. Increased network latency can result
  in warnings or failures. Issue: [#951](https://github.com/apache/incubator-heron/issues/951)

@@ -16,7 +16,11 @@
 # specific language governing permissions and limitations
 # under the License.
 
-BINDIR=$(dirname "$0")
+LINK=$(readlink ${0})
+if [ -z "$LINK" ]; then
+   LINK=$0
+fi
+BINDIR=$(dirname ${LINK})
 HERON_CORE=$(dirname ${BINDIR})
 HERON_DOWNLOADER_JAR=${HERON_CORE}/lib/downloaders/heron-downloader.jar
 

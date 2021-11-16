@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 
 #  Licensed to the Apache Software Foundation (ASF) under one
@@ -19,15 +19,18 @@
 #  under the License.
 
 ''' topology.py '''
-import traceback
 import uuid
 
-from heron.common.src.python.utils.log import Log
+from typing import Callable, Dict, List, Optional
 
 from heronpy.api import api_constants
+from heron.common.src.python.utils.log import Log
+from heron.proto.packing_plan_pb2 import PackingPlan
+from heron.proto.physical_plan_pb2 import PhysicalPlan
+from heron.proto.execution_state_pb2 import ExecutionState
 
 # pylint: disable=too-many-instance-attributes
-class Topology(object):
+class Topology:
   """
   Class Topology
     Contains all the relevant information about
@@ -38,28 +41,23 @@ class Topology(object):
     The watches are the callbacks that are called
     when there is any change in the topology
     instance using set_physical_plan, set_execution_state,
-    set_tmaster, and set_scheduler_location. Any other means of changing will
+    set_tmanager, and set_scheduler_location. Any other means of changing will
     not call the watches.
+
   """
 
-  def __init__(self, name, state_manager_name):
-    self.zone = None
+  def __init__(self, name: str, state_manager_name: str) -> None:
     self.name = name
     self.state_manager_name = state_manager_name
-    self.physical_plan = None
-    self.packing_plan = None
-    self.execution_state = None
-    self.id = None
-    self.cluster = None
-    self.environ = None
-    self.tmaster = None
+    self.physical_plan: PhysicalPlan = None
+    self.packing_plan: PackingPlan = None
+    self.execution_state: Optional[str] = None
+    self.id: Optional[int] = None
+    self.tmanager = None
     self.scheduler_location = None
+    self.watches: Dict[uuid.UUID, Callable[[Topology], None]] = {}
 
-    # A map from UUIDs to the callback
-    # functions.
-    self.watches = {}
-
-  def register_watch(self, callback):
+  def register_watch(self, callback: Callable[["Topology"], None]) -> Optional[uuid.UUID]:
     """
     Returns the UUID with which the watch is
     registered. This UUID can be used to unregister
@@ -72,55 +70,53 @@ class Topology(object):
     Note that the watch will be unregistered in case
     it raises any Exception the first time.
 
-    This callback is also called at the time
-    of registration.
-    """
-    RETRY_COUNT = 5
-    # Retry in case UID is previously
-    # generated, just in case...
-    for _ in range(RETRY_COUNT):
-      # Generate a random UUID.
-      uid = uuid.uuid4()
-      if uid not in self.watches:
-        Log.info("Registering a watch with uid: " + str(uid))
-        try:
-          callback(self)
-        except Exception as e:
-          Log.error("Caught exception while triggering callback: " + str(e))
-          Log.debug(traceback.format_exc())
-          return None
-        self.watches[uid] = callback
-        return uid
-    return None
+    This callback is also called at the time of registration.
 
-  def unregister_watch(self, uid):
+    """
+    # maybe this should use a counter
+    # Generate a random UUID.
+    uid = uuid.uuid4()
+    if uid in self.watches:
+      raise ValueError("Time to buy a lottery ticket")
+    Log.info(f"Registering a watch with uid: {uid}")
+    try:
+      callback(self)
+    except Exception as e:
+      Log.error(f"Caught exception while triggering callback: {e}")
+      Log.debug("source of error:", exc_info=True)
+      return None
+    self.watches[uid] = callback
+    return uid
+
+  def unregister_watch(self, uid) -> None:
     """
     Unregister the watch with the given UUID.
     """
-    # Do not raise an error if UUID is
-    # not present in the watches.
-    Log.info("Unregister a watch with uid: " + str(uid))
+    # Do not raise an error if UUID is not present in the watches
+    Log.info(f"Unregister a watch with uid: {uid}")
     self.watches.pop(uid, None)
 
-  def trigger_watches(self):
+  def trigger_watches(self) -> None:
     """
     Call all the callbacks.
-    If any callback raises an Exception,
-    unregister the corresponding watch.
+
+    If any callback raises an Exception, unregister the corresponding watch.
+
     """
     to_remove = []
+    # the list() is in case the callbacks modify the watches
     for uid, callback in list(self.watches.items()):
       try:
         callback(self)
       except Exception as e:
-        Log.error("Caught exception while triggering callback: " + str(e))
-        Log.debug(traceback.format_exc())
+        Log.error(f"Caught exception while triggering callback: {e}")
+        Log.debug("source of error:", exc_info=True)
         to_remove.append(uid)
 
     for uid in to_remove:
       self.unregister_watch(uid)
 
-  def set_physical_plan(self, physical_plan):
+  def set_physical_plan(self, physical_plan: PhysicalPlan) -> None:
     """ set physical plan """
     if not physical_plan:
       self.physical_plan = None
@@ -130,7 +126,7 @@ class Topology(object):
       self.id = physical_plan.topology.id
     self.trigger_watches()
 
-  def set_packing_plan(self, packing_plan):
+  def set_packing_plan(self, packing_plan: PackingPlan) -> None:
     """ set packing plan """
     if not packing_plan:
       self.packing_plan = None
@@ -140,39 +136,34 @@ class Topology(object):
       self.id = packing_plan.id
     self.trigger_watches()
 
-  # pylint: disable=no-self-use
-  def get_execution_state_dc_environ(self, execution_state):
-    """
-    Helper function to extract dc and environ from execution_state.
-    Returns a tuple (cluster, environ).
-    """
-    return (execution_state.cluster, execution_state.environ)
-
-  def set_execution_state(self, execution_state):
+  def set_execution_state(self, execution_state: ExecutionState) -> None:
     """ set exectuion state """
-    if not execution_state:
-      self.execution_state = None
-      self.cluster = None
-      self.environ = None
-    else:
-      self.execution_state = execution_state
-      cluster, environ = self.get_execution_state_dc_environ(execution_state)
-      self.cluster = cluster
-      self.environ = environ
-      self.zone = cluster
+    self.execution_state = execution_state
     self.trigger_watches()
 
-  def set_tmaster(self, tmaster):
+  @property
+  def cluster(self) -> Optional[str]:
+    if self.execution_state:
+      return self.execution_state.cluster
+    return None
+
+  @property
+  def environ(self) -> Optional[str]:
+    if self.execution_state:
+      return self.execution_state.environ
+    return None
+
+  def set_tmanager(self, tmanager) -> None:
     """ set exectuion state """
-    self.tmaster = tmaster
+    self.tmanager = tmanager
     self.trigger_watches()
 
-  def set_scheduler_location(self, scheduler_location):
+  def set_scheduler_location(self, scheduler_location) -> None:
     """ set exectuion state """
     self.scheduler_location = scheduler_location
     self.trigger_watches()
 
-  def num_instances(self):
+  def num_instances(self) -> int:
     """
     Number of spouts + bolts
     """
@@ -219,17 +210,16 @@ class Topology(object):
     """
     return [component.comp.name for component in self.bolts()]
 
-  def get_machines(self):
+  def get_machines(self) -> List[str]:
     """
     Get all the machines that this topology is running on.
     These are the hosts of all the stmgrs.
     """
     if self.physical_plan:
-      stmgrs = list(self.physical_plan.stmgrs)
-      return [s.host_name for s in stmgrs]
+      return [s.host_name for s in self.physical_plan.stmgrs]
     return []
 
-  def get_status(self):
+  def get_status(self) -> str:
     """
     Get the current state of this topology.
     The state values are from the topology.proto
@@ -240,11 +230,8 @@ class Topology(object):
     if self.physical_plan and self.physical_plan.topology:
       status = self.physical_plan.topology.state
 
-    if status == 1:
-      return "Running"
-    elif status == 2:
-      return "Paused"
-    elif status == 3:
-      return "Killed"
-    else:
-      return "Unknown"
+    return {
+        1: "Running",
+        2: "Paused",
+        3: "Killed",
+    }.get(status, "Unknown")

@@ -39,8 +39,8 @@ $ sudo apt-get upgrade -y
 ### Step 2 --- Install required libraries
 
 ```bash
-$ sudo apt-get install git build-essential automake cmake libtool-bin zip \
-  libunwind-setjmp0-dev zlib1g-dev unzip pkg-config python-setuptools -y
+$ sudo apt-get install git build-essential automake cmake libtool-bin zip ant \
+  libunwind-setjmp0-dev zlib1g-dev unzip pkg-config python3-setuptools -y
 ```
 
 #### Step 3 --- Set the following environment variables
@@ -72,7 +72,7 @@ bazelVersion %}}).
 
 ### Step 6 --- Install python development tools
 ```bash
-$ sudo apt-get install  python-dev python-pip
+$ sudo apt-get install  python3-dev python3-pip
 ```
 
 ### Step 7 --- Make sure the Bazel executable is in your `PATH`
@@ -154,7 +154,7 @@ To build Heron on a fresh CentOS 7 installation:
 ### Step 1 --- Install the required dependencies
 
 ```bash
-$ sudo yum install gcc gcc-c++ kernel-devel wget unzip zlib-devel zip git automake cmake patch libtool -y
+$ sudo yum install gcc gcc-c++ kernel-devel wget unzip zlib-devel zip git automake cmake patch libtool ant pkg-config -y
 ```
 
 ### Step 2 --- Install libunwind from source

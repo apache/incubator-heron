@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 
 #  Licensed to the Apache Software Foundation (ASF) under one
@@ -20,7 +20,7 @@
 
 
 # pylint: disable=missing-docstring
-import unittest2 as unittest
+import unittest
 from heron.instance.src.python.network import REQID, HeronProtocol, IncomingPacket
 import heron.instance.tests.python.network.mock_generator_client as mock_generator
 
@@ -73,7 +73,7 @@ class ProtocolTest(unittest.TestCase):
     pkt.read(header_dispatcher)
     self.assertTrue(pkt.is_header_read)
     self.assertFalse(pkt.is_complete)
-    self.assertEqual(pkt.data, "")
+    self.assertEqual(pkt.data, b"")
 
     # an incomplete data packet is prepared
     partial_data_dispatcher = mock_generator.MockDispatcher()

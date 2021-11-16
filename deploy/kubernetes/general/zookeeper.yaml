@@ -21,7 +21,7 @@
 
 ## Define a disruption budget to ensure there are at least
 ## 2 ZK servers running all the time
-apiVersion: policy/v1beta1
+apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
   name: zk-budget
@@ -70,7 +70,7 @@ spec:
                 topologyKey: "kubernetes.io/hostname"
       containers:
         - name: zookeeper
-          image: heron/heron:latest
+          image: apache/heron:latest
           command: ["sh", "-c"]
           args:
             - >

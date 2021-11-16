@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 
 #  Licensed to the Apache Software Foundation (ASF) under one
@@ -61,7 +61,6 @@ def configure(level=logging.INFO, logfile=None):
   # otherwise, use StreamHandler to output to stream (stdout, stderr...)
   else:
     log_format = "[%(asctime)s] %(log_color)s[%(levelname)s]%(reset)s: %(message)s"
-    # pylint: disable=redefined-variable-type
     formatter = colorlog.ColoredFormatter(fmt=log_format, datefmt=date_format)
     stream_handler = logging.StreamHandler()
     stream_handler.setFormatter(formatter)
@@ -85,9 +84,9 @@ def init_rotating_logger(level, logfile, max_files, max_bytes):
   root_logger.addHandler(handler)
 
   for handler in root_logger.handlers:
-    root_logger.debug("Associated handlers - " + str(handler))
+    root_logger.debug("Associated handlers - %s", str(handler))
     if isinstance(handler, logging.StreamHandler):
-      root_logger.debug("Removing StreamHandler: " + str(handler))
+      root_logger.debug("Removing StreamHandler: %s", str(handler))
       root_logger.handlers.remove(handler)
 
 def set_logging_level(cl_args):

@@ -15,11 +15,11 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
-SLAVES=1
+SECONDARIES=0
 NET_PREFIX="192.168.25."
 
-NODES={"master" => NET_PREFIX + "5"}
-(0..SLAVES-1).each do |i| NODES["slave#{i}"] = NET_PREFIX + (6 + i).to_s end
+NODES={"primary" => NET_PREFIX + "5"}
+(0..SECONDARIES-1).each do |i| NODES["secondary#{i}"] = NET_PREFIX + (6 + i).to_s end
 
 # create hosts
 File.open('.vagrant/hosts', 'w') do |file|
@@ -29,31 +29,56 @@ File.open('.vagrant/hosts', 'w') do |file|
 end
 
 Vagrant.configure(2) do |config|
-  config.vm.box = "ubuntu/trusty64"
+  # config.vm.box = "ubuntu/focal64"
+  config.vm.box = "bento/ubuntu-20.04"
   config.vm.synced_folder "../", "/vagrant"
+  config.vm.boot_timeout = 600
+  # heron-ui
+  config.vm.network "forwarded_port", guest: 8889, host: 8889
 
-  config.vm.define "master" do |master|
-    master.vm.provider "virtualbox" do |v|
-      v.memory = 4096
+  config.vm.define "primary" do |primary|
+    primary.vm.provider "virtualbox" do |v|
+      host = RbConfig::CONFIG['host_os']
+      mem_ratio = 1.0/2
+      cpu_exec_cap = 75
+      # Give VM 1/2 system memory & access to all cpu cores on the host
+      if host =~ /darwin/
+        cpus = `sysctl -n hw.ncpu`.to_i
+        # sysctl returns Bytes and we need to convert to MB
+        mem = `sysctl -n hw.memsize`.to_f / 1024**2 * mem_ratio
+      elsif host =~ /linux/
+        cpus = `nproc`.to_i
+        # meminfo shows KB and we need to convert to MB
+        mem = `grep 'MemTotal' /proc/meminfo | sed -E -e 's/MemTotal:\\s+//' -e 's/ kB//'`.to_i / 1024 * mem_ratio
+      else # Windows folks
+        cpus = `wmic cpu get NumberOfCores`.split("\n")[2].to_i
+        mem = `wmic OS get TotalVisibleMemorySize`.split("\n")[2].to_i / 1024 * mem_ratio
+      end
+      mem = mem.to_i
+      v.customize ["modifyvm", :id, "--cpuexecutioncap", cpu_exec_cap]
+      v.memory = mem
+      v.cpus = cpus
     end
 
-    master.vm.hostname = "master"
-    master.vm.network :private_network, ip: NODES["master"]
+    primary.vm.hostname = "primary"
+    primary.vm.network :private_network, ip: NODES["primary"]
 
-    master.vm.provision "shell", path: "init.sh", args: "master"
+    # NB: Apache Mesos requires the use of "master"/"slave"
+    primary.vm.provision "shell", path: "init.sh", args: "master"
   end
 
-  (0..SLAVES-1).each do |i|
-    config.vm.define "slave#{i}" do |slave|
-      slave.vm.provider "virtualbox" do |v|
+  (0..SECONDARIES-1).each do |i|
+    config.vm.define "secondary#{i}" do |secondary|
+      secondary.vm.provider "virtualbox" do |v|
         v.memory = 2048
         v.cpus = 2
       end
 
-      slave.vm.hostname = "slave#{i}"
-      slave.vm.network :private_network, ip: NODES[slave.vm.hostname]
+      secondary.vm.hostname = "secondary#{i}"
+      secondary.vm.network :private_network, ip: NODES[secondary.vm.hostname]
 
-      slave.vm.provision "shell", path: "init.sh", args: "slave"
+      # NB: Apache Mesos requires the use of "master"/"slave"
+      secondary.vm.provision "shell", path: "init.sh", args: "slave"
     end
   end
 end

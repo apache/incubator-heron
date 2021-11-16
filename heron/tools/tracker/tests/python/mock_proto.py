@@ -19,11 +19,11 @@ from heronpy.api import api_constants
 import heron.proto.execution_state_pb2 as protoEState
 import heron.proto.physical_plan_pb2 as protoPPlan
 import heron.proto.packing_plan_pb2 as protoPackingPlan
-import heron.proto.tmaster_pb2 as protoTmaster
+import heron.proto.tmanager_pb2 as protoTmanager
 import heron.proto.topology_pb2 as protoTopology
 
 # pylint: disable=no-self-use, missing-docstring
-class MockProto(object):
+class MockProto:
   ''' Mocking Proto'''
   topology_name = "mock_topology_name"
   topology_id = "mock_topology_id"
@@ -223,9 +223,9 @@ class MockProto(object):
     estate.environ = MockProto.environ
     return estate
 
-  def create_mock_tmaster(self):
-    tmaster = protoTmaster.TMasterLocation()
-    return tmaster
+  def create_mock_tmanager(self):
+    tmanager = protoTmanager.TManagerLocation()
+    return tmanager
 
   def add_topology_config(self, topology, key, value):
     kv = topology.topology_config.kvs.add()

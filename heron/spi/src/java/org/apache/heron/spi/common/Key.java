@@ -62,6 +62,9 @@ public enum Key {
   DRY_RUN                  ("heron.config.dry_run",             Boolean.FALSE),
   DRY_RUN_FORMAT_TYPE      ("heron.config.dry_run_format_type", Type.DRY_RUN_FORMAT_TYPE),
   VERBOSE                  ("heron.config.verbose",             Boolean.FALSE),
+  // Used to enable verbose JVM GC logging
+  VERBOSE_GC               ("heron.config.verbose_gc",          Boolean.FALSE),
+
   CONFIG_PROPERTY          ("heron.config.property",            Type.STRING),
 
   //keys for release/build information
@@ -182,7 +185,7 @@ public enum Key {
   //keys for config provided user binaries
   EXECUTOR_BINARY       ("heron.binaries.executor",        "${HERON_BIN}/heron-executor"),
   STMGR_BINARY          ("heron.binaries.stmgr",           "${HERON_BIN}/heron-stmgr"),
-  TMASTER_BINARY        ("heron.binaries.tmaster",         "${HERON_BIN}/heron-tmaster"),
+  TMANAGER_BINARY       ("heron.binaries.tmanager",        "${HERON_BIN}/heron-tmanager"),
   SHELL_BINARY          ("heron.binaries.shell",           "${HERON_BIN}/heron-shell"),
   PYTHON_INSTANCE_BINARY("heron.binaries.python.instance", "${HERON_BIN}/heron-python-instance"),
   CPP_INSTANCE_BINARY   ("heron.binaries.cpp.instance",    "${HERON_BIN}/heron-cpp-instance"),

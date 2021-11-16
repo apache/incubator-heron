@@ -19,7 +19,6 @@
 # Script to kick off the travis CI build. We want the build to fail-fast if any
 # of the below commands fail so we need to chain them in this script.
 #
-
 set -e
 
 DIR=`dirname $0`
@@ -36,9 +35,8 @@ if [ "$JARS" ]; then
 fi
 
 # verify that eggs have not been added to the repo
-# ./third_party/pex/wheel-0.23.0-py2.7.egg should be the only one
 set +e
-EGGS=`find . -name "*.egg" | grep -v "third_party/pex/wheel"`
+#EGGS=`find . -name "*.egg"`
 set -e
 if [ "$EGGS" ]; then
   echo 'ERROR: The following eggs were found in the repo, '\
@@ -49,9 +47,8 @@ if [ "$EGGS" ]; then
 fi
 
 # verify that wheels have not been added to the repo
-# ./third_party/pex/setuptools-18.0.1-py2.py3-none-any.whl should be the only one
 set +e
-WHEELS=`find . -name "*.whl" | grep -v "third_party/pex/setuptools"`
+#WHEELS=`find . -name "*.whl"`
 set -e
 if [ "$WHEELS" ]; then
   echo 'ERROR: The following wheels were found in the repo, '\
@@ -79,20 +76,20 @@ echo "Using $PLATFORM platform"
 # build heron
 T="heron build"
 start_timer "$T"
-python ${UTILS}/save-logs.py "heron_build.txt" bazel\
+${UTILS}/save-logs.py "heron_build.txt" bazel\
   --bazelrc=tools/travis/bazel.rc build --config=$PLATFORM heron/... \
-  heronpy/... examples/... storm-compatibility-examples/... \
+  heronpy/... examples/... storm-compatibility-examples/v0.10.2/... \
   eco-storm-examples/... eco-heron-examples/... contrib/...
 end_timer "$T"
 
 # run heron unit tests
 T="heron test non-flaky"
 start_timer "$T"
-python ${UTILS}/save-logs.py "heron_test_non_flaky.txt" bazel\
+${UTILS}/save-logs.py "heron_test_non_flaky.txt" bazel\
   --bazelrc=tools/travis/bazel.rc test\
   --test_summary=detailed --test_output=errors\
   --config=$PLATFORM --test_tag_filters=-flaky heron/... \
-  heronpy/... examples/... storm-compatibility-examples/... \
+  heronpy/... examples/... storm-compatibility-examples/v0.10.2/... \
   eco-storm-examples/... eco-heron-examples/... contrib/... 
 end_timer "$T"
 
@@ -100,32 +97,32 @@ end_timer "$T"
 # which should be fixed. For now, run them serially
 T="heron test flaky"
 start_timer "$T"
-python ${UTILS}/save-logs.py "heron_test_flaky.txt" bazel\
+${UTILS}/save-logs.py "heron_test_flaky.txt" bazel\
   --bazelrc=tools/travis/bazel.rc test\
   --test_summary=detailed --test_output=errors\
   --config=$PLATFORM --test_tag_filters=flaky --jobs=1 heron/... \
-  heronpy/... examples/... storm-compatibility-examples/... \
+  heronpy/... examples/... storm-compatibility-examples/v0.10.2/... \
   eco-storm-examples/... eco-heron-examples/...
 end_timer "$T"
 
 # build packages
 T="heron build tarpkgs"
 start_timer "$T"
-python ${UTILS}/save-logs.py "heron_build_tarpkgs.txt" bazel\
+${UTILS}/save-logs.py "heron_build_tarpkgs.txt" bazel\
   --bazelrc=tools/travis/bazel.rc build\
   --config=$PLATFORM scripts/packages:tarpkgs
 end_timer "$T"
 
 T="heron build binpkgs"
 start_timer "$T"
-python ${UTILS}/save-logs.py "heron_build_binpkgs.txt" bazel\
+${UTILS}/save-logs.py "heron_build_binpkgs.txt" bazel\
   --bazelrc=tools/travis/bazel.rc build\
   --config=$PLATFORM scripts/packages:binpkgs
 end_timer "$T"
 
 T="heron build docker images"
 start_timer "$T"
-python ${UTILS}/save-logs.py "heron_build_binpkgs.txt" bazel\
+${UTILS}/save-logs.py "heron_build_binpkgs.txt" bazel\
   --bazelrc=tools/travis/bazel.rc build\
   --config=$PLATFORM scripts/images:heron.tar
 end_timer "$T"

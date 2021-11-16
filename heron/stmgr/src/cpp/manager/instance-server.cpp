@@ -378,7 +378,7 @@ void InstanceServer::HandleRegisterInstanceRequest(REQID _reqid, Connection* _co
 
     // Have all the instances connected to us?
     if (HaveAllInstancesConnectedToUs()) {
-      // Notify to stmgr so that it might want to connect to tmaster
+      // Notify to stmgr so that it might want to connect to tmanager
       stmgr_->HandleAllInstancesConnected();
     }
   }

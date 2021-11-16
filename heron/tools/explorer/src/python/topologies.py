@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 
 #  Licensed to the Apache Software Foundation (ASF) under one
@@ -19,114 +19,38 @@
 #  under the License.
 
 ''' topologies.py '''
+import sys
+
 from heron.common.src.python.utils.log import Log
-import heron.tools.explorer.src.python.args as args
-import heron.tools.common.src.python.access.tracker_access as tracker_access
+from heron.tools.common.src.python.clients import tracker
+
 from tabulate import tabulate
 
-
-def create_parser(subparsers):
-  ''' create parser '''
-  parser = subparsers.add_parser(
-      'topologies',
-      help='Display running topologies',
-      usage="%(prog)s cluster/[role]/[env] [options]",
-      add_help=True)
-  args.add_cluster_role_env(parser)
-  args.add_verbose(parser)
-  args.add_tracker_url(parser)
-  args.add_config(parser)
-  parser.set_defaults(subcommand='topologies')
-  return subparsers
+import requests
 
 
 def to_table(result):
-  ''' normalize raw result to table '''
-  max_count = 20
-  table, count = [], 0
-  for role, envs_topos in list(result.items()):
-    for env, topos in list(envs_topos.items()):
+  table = []
+  for role, envs_topos in result.items():
+    for env, topos in envs_topos.items():
       for topo in topos:
-        count += 1
-        if count > max_count:
-          continue
-        else:
-          table.append([role, env, topo])
+        table.append([role, env, topo])
   header = ['role', 'env', 'topology']
-  rest_count = 0 if count <= max_count else count - max_count
-  return table, header, rest_count
+  return table, header
 
 
-# pylint: disable=superfluous-parens
-def show_cluster(cl_args, cluster):
-  ''' print topologies information to stdout '''
+def run(cre: str) -> None:
+  """Print all topologies under the given CRE."""
+  cluster, *role_env = cre.split('/')
+  if len(role_env) > 2:
+    Log.error("Invalid topologies selection")
+    sys.exit(1)
   try:
-    result = tracker_access.get_cluster_topologies(cluster)
-    if not result:
-      Log.error('No topologies in cluster \'%s\'' % cluster)
-      return False
-    result = result[cluster]
-  except Exception:
-    Log.error("Fail to connect to tracker: \'%s\'", cl_args["tracker_url"])
-    return False
-  table, header, rest_count = to_table(result)
-  print('Topologies running in cluster \'%s\'' % cluster)
-  if rest_count:
-    print('  with %d more...' % rest_count)
+    result = tracker.get_topologies(cluster, *role_env)
+  except requests.ConnectionError as e:
+    Log.error(f"Fail to connect to tracker: {e}")
+    sys.exit(1)
+  topologies = result[cluster]
+  table, header = to_table(topologies)
+  print(f"Topologies in {cre}:")
   print(tabulate(table, headers=header))
-  return True
-
-
-# pylint: disable=superfluous-parens
-def show_cluster_role(cl_args, cluster, role):
-  ''' print topologies information to stdout '''
-  try:
-    result = tracker_access.get_cluster_role_topologies(cluster, role)
-    if not result:
-      Log.error('Unknown cluster/role \'%s\'' % '/'.join([cluster, role]))
-      return False
-    result = result[cluster]
-  except Exception:
-    Log.error("Fail to connect to tracker: \'%s\'", cl_args["tracker_url"])
-    return False
-  table, header, rest_count = to_table(result)
-  print('Topologies running in cluster \'%s\' submitted by \'%s\':' % (cluster, role))
-  if rest_count:
-    print('  with %d more...' % rest_count)
-  print(tabulate(table, headers=header))
-  return True
-
-
-# pylint: disable=superfluous-parens
-def show_cluster_role_env(cl_args, cluster, role, env):
-  ''' print topologies information to stdout '''
-  try:
-    result = tracker_access.get_cluster_role_env_topologies(cluster, role, env)
-    if not result:
-      Log.error('Unknown cluster/role/env \'%s\'' % '/'.join([cluster, role, env]))
-      return False
-    result = result[cluster]
-  except Exception:
-    Log.error("Fail to connect to tracker: \'%s\'", cl_args["tracker_url"])
-    return False
-  table, header, rest_count = to_table(result)
-  print('Topologies running in cluster \'%s\', submitted by \'%s\', and\
- under environment \'%s\':' % (cluster, role, env))
-  if rest_count:
-    print('  with %d more...' % rest_count)
-  print(tabulate(table, headers=header))
-  return True
-
-# pylint: disable=unused-argument
-def run(command, parser, cl_args, unknown_args):
-  """ run command """
-  location = cl_args['cluster/[role]/[env]'].split('/')
-  if len(location) == 1:
-    return show_cluster(cl_args, *location)
-  elif len(location) == 2:
-    return show_cluster_role(cl_args, *location)
-  elif len(location) == 3:
-    return show_cluster_role_env(cl_args, *location)
-  else:
-    Log.error('Invalid topologies selection')
-    return False

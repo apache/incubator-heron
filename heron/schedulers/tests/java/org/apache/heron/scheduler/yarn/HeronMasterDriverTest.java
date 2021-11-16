@@ -128,13 +128,13 @@ public class HeronMasterDriverTest {
   }
 
   @Test
-  public void onKillClosesContainersKillsTMaster() throws Exception {
-    HeronMasterDriver.TMaster mockTMaster = mock(HeronMasterDriver.TMaster.class);
-    when(spyDriver.buildTMaster(any(ExecutorService.class))).thenReturn(mockTMaster);
+  public void onKillClosesContainersKillsTManager() throws Exception {
+    HeronMasterDriver.TManager mockTManager = mock(HeronMasterDriver.TManager.class);
+    when(spyDriver.buildTManager(any(ExecutorService.class))).thenReturn(mockTManager);
 
     int numContainers = 3;
     AllocatedEvaluator[] mockEvaluators = createApplicationWithContainers(numContainers);
-    spyDriver.launchTMaster();
+    spyDriver.launchTManager();
 
     spyDriver.killTopology();
 
@@ -143,7 +143,7 @@ public class HeronMasterDriverTest {
       assertFalse(spyDriver.lookupByEvaluatorId("e" + id).isPresent());
     }
 
-    verify(mockTMaster, times(1)).killTMaster();
+    verify(mockTManager, times(1)).killTManager();
   }
 
   /**
@@ -364,33 +364,33 @@ public class HeronMasterDriverTest {
   }
 
   @Test
-  public void tMasterLaunchLaunchesExecutorForTMaster() throws Exception {
+  public void tManagerLaunchLaunchesExecutorForTManager() throws Exception {
     ExecutorService executorService = mock(ExecutorService.class);
-    HeronMasterDriver.TMaster tMaster = spyDriver.buildTMaster(executorService);
-    doReturn(mock(Future.class)).when(executorService).submit(tMaster);
-    tMaster.launch();
-    verify(executorService, times(1)).submit(tMaster);
+    HeronMasterDriver.TManager tManager = spyDriver.buildTManager(executorService);
+    doReturn(mock(Future.class)).when(executorService).submit(tManager);
+    tManager.launch();
+    verify(executorService, times(1)).submit(tManager);
   }
 
   @Test
-  public void tMasterKillTerminatesTMaster() throws Exception {
+  public void tManagerKillTerminatesTManager() throws Exception {
     ExecutorService mockExecutorService = mock(ExecutorService.class);
-    HeronMasterDriver.TMaster tMaster = spyDriver.buildTMaster(mockExecutorService);
+    HeronMasterDriver.TManager tManager = spyDriver.buildTManager(mockExecutorService);
 
     Future<?> mockFuture = mock(Future.class);
-    doReturn(mockFuture).when(mockExecutorService).submit(tMaster);
+    doReturn(mockFuture).when(mockExecutorService).submit(tManager);
 
-    tMaster.launch();
-    tMaster.killTMaster();
+    tManager.launch();
+    tManager.killTManager();
 
     verify(mockFuture, times(1)).cancel(true);
     verify(mockExecutorService, times(1)).shutdownNow();
   }
 
   @Test
-  public void tMasterLaunchRestartsTMasterOnFailure() throws Exception {
-    HeronMasterDriver.TMaster tMaster =
-        spy(spyDriver.buildTMaster(Executors.newSingleThreadExecutor()));
+  public void tManagerLaunchRestartsTManagerOnFailure() throws Exception {
+    HeronMasterDriver.TManager tManager =
+        spy(spyDriver.buildTManager(Executors.newSingleThreadExecutor()));
 
     HeronExecutorTask mockTask = mock(HeronExecutorTask.class);
     final CountDownLatch testLatch = new CountDownLatch(1);
@@ -401,19 +401,19 @@ public class HeronMasterDriverTest {
         return null;
       }
     }).when(mockTask).startExecutor();
-    doReturn(mockTask).when(tMaster).getTMasterExecutorTask();
+    doReturn(mockTask).when(tManager).getTManagerExecutorTask();
 
-    tMaster.launch();
+    tManager.launch();
 
     verify(mockTask, timeout(1000).times(1)).startExecutor();
     testLatch.countDown();
-    //retries if tmaster ends for some reason
+    //retries if tmanager ends for some reason
     verify(mockTask, timeout(1000).times(3)).startExecutor();
   }
 
   @Test
   @PrepareForTest({HeronReefUtils.class, SchedulerMain.class})
-  public void onNextStartTimeStartsSchedulerTMaster() throws Exception {
+  public void onNextStartTimeStartsSchedulerTManager() throws Exception {
     PowerMockito.spy(HeronReefUtils.class);
     PowerMockito.doNothing().when(HeronReefUtils.class,
         "extractPackageInSandbox",

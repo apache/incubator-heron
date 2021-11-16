@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 
 #  Licensed to the Apache Software Foundation (ASF) under one
@@ -52,7 +52,6 @@ class Spout(BaseSpout):
                     topology, including the task id and component id of this task, input and output
                     information, etc.
     """
-    pass
 
   @abstractmethod
   def close(self):
@@ -60,7 +59,6 @@ class Spout(BaseSpout):
 
     There is no guarantee that close() will be called.
     """
-    pass
 
   @abstractmethod
   def next_tuple(self):
@@ -92,7 +90,6 @@ class Spout(BaseSpout):
 
     :param tup_id: the ID of the HeronTuple that has been fully acknowledged.
     """
-    pass
 
   @abstractmethod
   def fail(self, tup_id):
@@ -109,7 +106,6 @@ class Spout(BaseSpout):
     :param tup_id: the ID of the HeronTuple that has failed either due to a bolt calling ``fail()``
                    or timeout
     """
-    pass
 
   @abstractmethod
   def activate(self):
@@ -119,7 +115,6 @@ class Spout(BaseSpout):
     after having been deactivated when the topology is manipulated using the
     `heron` client.
     """
-    pass
 
   @abstractmethod
   def deactivate(self):
@@ -128,4 +123,3 @@ class Spout(BaseSpout):
     next_tuple() will not be called while a spout is deactivated.
     The spout may or may not be reactivated in the future.
     """
-    pass

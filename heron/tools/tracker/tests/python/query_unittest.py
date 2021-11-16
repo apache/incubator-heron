@@ -16,8 +16,8 @@
 # under the License.
 ''' query_unittest.py '''
 # pylint: disable=missing-docstring, undefined-variable
-import unittest2 as unittest
-from mock import Mock
+import unittest
+from unittest.mock import Mock
 
 from heron.tools.tracker.src.python.query import *
 
@@ -57,19 +57,23 @@ class QueryTest(unittest.TestCase):
     query = ",,"
     self.assertEqual(["", "", ""], self.query.get_sub_parts(query))
 
+    query = "())"
+    with self.assertRaises(Exception):
+      self.query.get_sub_parts(query)
+
   # pylint: disable=too-many-statements
   def test_parse_query_string(self):
     query = "TS(a, b, c)"
     root = self.query.parse_query_string(query)
     self.assertEqual("a", root.component)
     self.assertEqual(["b"], root.instances)
-    self.assertEqual("c", root.metricName)
+    self.assertEqual("c", root.metric_name)
 
     query = "TS(a, *, m)"
     root = self.query.parse_query_string(query)
     self.assertEqual("a", root.component)
     self.assertEqual([], root.instances)
-    self.assertEqual("m", root.metricName)
+    self.assertEqual("m", root.metric_name)
 
     query = "DEFAULT(0, TS(a, b, c))"
     root = self.query.parse_query_string(query)
@@ -106,16 +110,16 @@ class QueryTest(unittest.TestCase):
     query = "DIVIDE(TS(a, a, a), TS(b, b, b))"
     root = self.query.parse_query_string(query)
     self.assertIsInstance(root, Divide)
-    self.assertIsInstance(root.timeSeries1, TS)
-    self.assertIsInstance(root.timeSeries2, TS)
+    self.assertIsInstance(root.operand1, TS)
+    self.assertIsInstance(root.operand2, TS)
 
     # Dividing by a constant is fine
     query = "DIVIDE(TS(a, a, a), 90)"
     self.query.parse_query_string(query)
     root = self.query.parse_query_string(query)
     self.assertIsInstance(root, Divide)
-    self.assertIsInstance(root.timeSeries1, TS)
-    self.assertIsInstance(root.timeSeries2, float)
+    self.assertIsInstance(root.operand1, TS)
+    self.assertIsInstance(root.operand2, float)
 
     # Must have two operands
     query = "DIVIDE(TS(a, a, a))"
@@ -125,15 +129,15 @@ class QueryTest(unittest.TestCase):
     query = "MULTIPLY(TS(a, a, a), TS(b, b, b))"
     root = self.query.parse_query_string(query)
     self.assertIsInstance(root, Multiply)
-    self.assertIsInstance(root.timeSeries1, TS)
-    self.assertIsInstance(root.timeSeries2, TS)
+    self.assertIsInstance(root.operand1, TS)
+    self.assertIsInstance(root.operand2, TS)
 
     # Multiplying with a constant is fine.
     query = "MULTIPLY(TS(a, a, a), 10)"
     root = self.query.parse_query_string(query)
     self.assertIsInstance(root, Multiply)
-    self.assertIsInstance(root.timeSeries1, TS)
-    self.assertIsInstance(root.timeSeries2, float)
+    self.assertIsInstance(root.operand1, TS)
+    self.assertIsInstance(root.operand2, float)
 
     # Must have two operands
     query = "MULTIPLY(TS(a, a, a))"
@@ -143,15 +147,15 @@ class QueryTest(unittest.TestCase):
     query = "SUBTRACT(TS(a, a, a), TS(b, b, b))"
     root = self.query.parse_query_string(query)
     self.assertIsInstance(root, Subtract)
-    self.assertIsInstance(root.timeSeries1, TS)
-    self.assertIsInstance(root.timeSeries2, TS)
+    self.assertIsInstance(root.operand1, TS)
+    self.assertIsInstance(root.operand2, TS)
 
     # Multiplying with a constant is fine.
     query = "SUBTRACT(TS(a, a, a), 10)"
     root = self.query.parse_query_string(query)
     self.assertIsInstance(root, Subtract)
-    self.assertIsInstance(root.timeSeries1, TS)
-    self.assertIsInstance(root.timeSeries2, float)
+    self.assertIsInstance(root.operand1, TS)
+    self.assertIsInstance(root.operand2, float)
 
     # Must have two operands
     query = "SUBTRACT(TS(a, a, a))"

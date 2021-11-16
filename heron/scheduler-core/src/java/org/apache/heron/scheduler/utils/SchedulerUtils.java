@@ -56,13 +56,13 @@ public final class SchedulerUtils {
    */
 
   public enum ExecutorPort {
-    MASTER_PORT("master", true),
-    TMASTER_CONTROLLER_PORT("tmaster-ctl", true),
-    TMASTER_STATS_PORT("tmaster-stats", true),
+    SERVER_PORT("server", true),
+    TMANAGER_CONTROLLER_PORT("tmanager-ctl", true),
+    TMANAGER_STATS_PORT("tmanager-stats", true),
     SHELL_PORT("shell-port", true),
     METRICS_MANAGER_PORT("metrics-mgr", true),
     SCHEDULER_PORT("scheduler", true),
-    METRICS_CACHE_MASTER_PORT("metrics-cache-m", true),
+    METRICS_CACHE_SERVER_PORT("metrics-cache-m", true),
     METRICS_CACHE_STATS_PORT("metrics-cache-s", true),
     CHECKPOINT_MANAGER_PORT("ckptmgr", true),
     JVM_REMOTE_DEBUGGER_PORTS("jvm-remote-debugger", false);
@@ -260,7 +260,7 @@ public final class SchedulerUtils {
         Context.stateManagerRootPath(config)));
     args.add(createCommandArg(ExecutorFlag.StateManagerConfigFile,
         Context.stateManagerFile(config)));
-    args.add(createCommandArg(ExecutorFlag.TMasterBinary, Context.tmasterBinary(config)));
+    args.add(createCommandArg(ExecutorFlag.TManagerBinary, Context.tmanagerBinary(config)));
     args.add(createCommandArg(ExecutorFlag.StmgrBinary, Context.stmgrBinary(config)));
     args.add(createCommandArg(ExecutorFlag.MetricsManagerClasspath,
         Context.metricsManagerClassPath(config)));
@@ -279,6 +279,9 @@ public final class SchedulerUtils {
     args.add(createCommandArg(ExecutorFlag.TopologyBinaryFile,
         Context.topologyBinaryFile(config)));
     args.add(createCommandArg(ExecutorFlag.HeronJavaHome, Context.clusterJavaHome(config)));
+    if (Context.verboseGC(config)) {
+      args.add(ExecutorFlag.EnableVerboseGCLog.getFlag());
+    }
     args.add(createCommandArg(ExecutorFlag.HeronShellBinary, Context.shellBinary(config)));
     args.add(createCommandArg(ExecutorFlag.Cluster, Context.cluster(config)));
     args.add(createCommandArg(ExecutorFlag.Role, Context.role(config)));
@@ -335,15 +338,15 @@ public final class SchedulerUtils {
       List<String> args,
       Map<ExecutorPort, String> ports,
       String containerIndex) {
-    String masterPort = ExecutorPort.getPort(ExecutorPort.MASTER_PORT, ports);
-    String tmasterControllerPort = ExecutorPort.getPort(
-        ExecutorPort.TMASTER_CONTROLLER_PORT, ports);
-    String tmasterStatsPort = ExecutorPort.getPort(ExecutorPort.TMASTER_STATS_PORT, ports);
+    String serverPort = ExecutorPort.getPort(ExecutorPort.SERVER_PORT, ports);
+    String tmanagerControllerPort = ExecutorPort.getPort(
+        ExecutorPort.TMANAGER_CONTROLLER_PORT, ports);
+    String tmanagerStatsPort = ExecutorPort.getPort(ExecutorPort.TMANAGER_STATS_PORT, ports);
     String shellPort = ExecutorPort.getPort(ExecutorPort.SHELL_PORT, ports);
     String metricsmgrPort = ExecutorPort.getPort(ExecutorPort.METRICS_MANAGER_PORT, ports);
     String schedulerPort = ExecutorPort.getPort(ExecutorPort.SCHEDULER_PORT, ports);
-    String metricsCacheMasterPort = ExecutorPort.getPort(
-        ExecutorPort.METRICS_CACHE_MASTER_PORT, ports);
+    String metricsCacheServerPort = ExecutorPort.getPort(
+        ExecutorPort.METRICS_CACHE_SERVER_PORT, ports);
     String metricsCacheStatsPort = ExecutorPort.getPort(
         ExecutorPort.METRICS_CACHE_STATS_PORT, ports);
     String ckptmgrPort = ExecutorPort.getPort(ExecutorPort.CHECKPOINT_MANAGER_PORT, ports);
@@ -353,13 +356,13 @@ public final class SchedulerUtils {
     if (containerIndex != null) {
       args.add(createCommandArg(ExecutorFlag.Shard, containerIndex));
     }
-    args.add(createCommandArg(ExecutorFlag.MasterPort, masterPort));
-    args.add(createCommandArg(ExecutorFlag.TMasterControllerPort, tmasterControllerPort));
-    args.add(createCommandArg(ExecutorFlag.TMasterStatsPort, tmasterStatsPort));
+    args.add(createCommandArg(ExecutorFlag.ServerPort, serverPort));
+    args.add(createCommandArg(ExecutorFlag.TManagerControllerPort, tmanagerControllerPort));
+    args.add(createCommandArg(ExecutorFlag.TManagerStatsPort, tmanagerStatsPort));
     args.add(createCommandArg(ExecutorFlag.ShellPort, shellPort));
     args.add(createCommandArg(ExecutorFlag.MetricsManagerPort, metricsmgrPort));
     args.add(createCommandArg(ExecutorFlag.SchedulerPort, schedulerPort));
-    args.add(createCommandArg(ExecutorFlag.MetricsCacheManagerMasterPort, metricsCacheMasterPort));
+    args.add(createCommandArg(ExecutorFlag.MetricsCacheManagerServerPort, metricsCacheServerPort));
     args.add(createCommandArg(ExecutorFlag.MetricsCacheManagerStatsPort, metricsCacheStatsPort));
     args.add(createCommandArg(ExecutorFlag.CheckpointManagerPort, ckptmgrPort));
     if (remoteDebuggerPorts != null) {

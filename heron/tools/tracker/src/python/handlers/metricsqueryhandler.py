@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 
 #  Licensed to the Apache Software Foundation (ASF) under one
@@ -58,7 +58,7 @@ class MetricsQueryHandler(BaseHandler):
       role = self.get_argument_role()
       environ = self.get_argument_environ()
       topology_name = self.get_argument_topology()
-      topology = self.tracker.getTopologyByClusterRoleEnvironAndName(
+      topology = self.tracker.get_topology(
           cluster, role, environ, topology_name)
 
       start_time = self.get_argument_starttime()
@@ -67,7 +67,7 @@ class MetricsQueryHandler(BaseHandler):
 
       query = self.get_argument_query()
       metrics = yield tornado.gen.Task(self.executeMetricsQuery,
-                                       topology.tmaster, query, int(start_time), int(end_time))
+                                       topology.tmanager, query, int(start_time), int(end_time))
       self.write_success_response(metrics)
     except Exception as e:
       Log.debug(traceback.format_exc())
@@ -75,7 +75,7 @@ class MetricsQueryHandler(BaseHandler):
 
   # pylint: disable=unused-argument
   @tornado.gen.coroutine
-  def executeMetricsQuery(self, tmaster, queryString, start_time, end_time, callback=None):
+  def executeMetricsQuery(self, tmanager, queryString, start_time, end_time, callback=None):
     """
     Get the specified metrics for the given query in this topology.
     Returns the following dict on success:
@@ -101,7 +101,7 @@ class MetricsQueryHandler(BaseHandler):
     """
 
     query = Query(self.tracker)
-    metrics = yield query.execute_query(tmaster, queryString, start_time, end_time)
+    metrics = yield query.execute_query(tmanager, queryString, start_time, end_time)
 
     # Parse the response
     ret = {}

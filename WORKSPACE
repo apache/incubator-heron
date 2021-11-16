@@ -33,7 +33,7 @@ http_archive(
 # versions shared across artifacts that should be upgraded together
 aws_version = "1.11.58"
 
-curator_version = "2.9.0"
+curator_version = "5.1.0"
 
 google_client_version = "1.22.0"
 
@@ -45,7 +45,7 @@ reef_version = "0.14.0"
 
 slf4j_version = "1.7.30"
 
-distributedlog_version = "4.7.3"
+distributedlog_version = "4.13.0"
 
 http_client_version = "4.5.2"
 
@@ -54,7 +54,7 @@ jetty_version = "9.4.6.v20170531"
 
 jersey_version = "2.25.1"
 
-kubernetes_client_version = "7.0.0"
+kubernetes_client_version = "11.0.0"
 
 load("@rules_jvm_external//:defs.bzl", "maven_install")
 load("@rules_jvm_external//:specs.bzl", "maven")
@@ -66,14 +66,14 @@ maven_install(
     name = "maven",
     artifacts = [
         "antlr:antlr:2.7.7",
-        "org.apache.zookeeper:zookeeper:3.4.14",
+        "org.apache.zookeeper:zookeeper:3.6.3",
         "io.kubernetes:client-java:" + kubernetes_client_version,
-        "com.esotericsoftware:kryo:3.0.3",
+        "com.esotericsoftware:kryo:5.2.0",
         "org.apache.avro:avro:1.7.4",
         "org.apache.mesos:mesos:0.22.0",
         "com.hashicorp.nomad:nomad-sdk:0.7.0",
         "org.apache.hadoop:hadoop-core:0.20.2",
-        "org.apache.pulsar:pulsar-client:1.19.0-incubating",
+        "org.apache.pulsar:pulsar-client:jar:shaded:1.19.0-incubating",
         "org.apache.kafka:kafka-clients:2.2.0",
         "com.google.apis:google-api-services-storage:v1-rev108-" + google_client_version,
         "org.apache.reef:reef-runtime-yarn:" + reef_version,
@@ -81,11 +81,8 @@ maven_install(
         "org.apache.httpcomponents:httpclient:" + http_client_version,
         "org.apache.httpcomponents:httpmime:" + http_client_version,
         "com.google.apis:google-api-services-storage:v1-rev108-1.22.0",
-        "io.kubernetes:client-java:7.0.0",
         "com.microsoft.dhalion:dhalion:0.2.3",
         "org.objenesis:objenesis:2.1",
-        "org.ow2.asm:asm-all:5.1",
-        "org.ow2.asm:asm:5.0.4",
         "com.amazonaws:aws-java-sdk-s3:" + aws_version,
         "org.eclipse.jetty:jetty-server:" + jetty_version,
         "org.eclipse.jetty:jetty-http:" + jetty_version,
@@ -98,11 +95,11 @@ maven_install(
         "org.glassfish.jersey.media:jersey-media-json-jackson:" + jersey_version,
         "org.glassfish.jersey.media:jersey-media-multipart:" + jersey_version,
         "org.glassfish.jersey.containers:jersey-container-servlet:" + jersey_version,
-        "org.apache.distributedlog:distributedlog-core-shaded:" + distributedlog_version,
-        "io.netty:netty-all:4.1.22.Final",
+        "org.apache.distributedlog:distributedlog-core:" + distributedlog_version,
+        "io.netty:netty-all:4.1.70.Final",
         "aopalliance:aopalliance:1.0",
         "org.roaringbitmap:RoaringBitmap:0.6.51",
-        "com.google.guava:guava:18.0",
+        "com.google.guava:guava:23.6-jre",
         "io.gsonfire:gson-fire:1.8.3",
         "org.apache.curator:curator-framework:" + curator_version,
         "org.apache.curator:curator-recipes:" + curator_version,
@@ -127,7 +124,6 @@ maven_install(
         "javax.xml.bind:jaxb-api:2.3.0",
         "javax.activation:activation:1.1.1",
         "org.mockito:mockito-all:1.10.19",
-        "org.sonatype.plugins:jarjar-maven-plugin:1.9",
         "org.powermock:powermock-api-mockito:" + powermock_version,
         "org.powermock:powermock-module-junit4:" + powermock_version,
         "com.puppycrawl.tools:checkstyle:6.17",
@@ -157,10 +153,26 @@ load("@maven//:defs.bzl", "pinned_maven_install")
 
 pinned_maven_install()
 
+load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
+
+git_repository(
+    name = "com_github_johnynek_bazel_jar_jar",
+    commit = "171f268569384c57c19474b04aebe574d85fde0d", # Latest commit SHA as at 2019/02/13
+    remote = "git://github.com/johnynek/bazel_jar_jar.git",
+    shallow_since = "1594234634 -1000",
+)
+
+load(
+    "@com_github_johnynek_bazel_jar_jar//:jar_jar.bzl",
+    "jar_jar_repositories",
+)
+jar_jar_repositories()
+
 http_archive(
     name = "rules_python",
-    sha256 = "aa96a691d3a8177f3215b14b0edc9641787abaaa30363a080165d06ab65e1161",
-    url = "https://github.com/bazelbuild/rules_python/releases/download/0.0.1/rules_python-0.0.1.tar.gz",
+    sha256 = "b5668cde8bb6e3515057ef465a35ad712214962f0b3a314e551204266c7be90c",
+    strip_prefix = "rules_python-0.0.2",
+    url = "https://github.com/bazelbuild/rules_python/releases/download/0.0.2/rules_python-0.0.2.tar.gz",
 )
 
 load("@rules_python//python:repositories.bzl", "py_repositories")
@@ -171,7 +183,7 @@ py_repositories()
 # pip_repositories()
 
 # for pex repos
-PEX_SRC = "https://pypi.python.org/packages/3a/1d/cd41cd3765b78a4353bbf27d18b099f7afbcd13e7f2dc9520f304ec8981c/pex-1.2.15.tar.gz"
+PEX_WHEEL = "https://pypi.python.org/packages/fa/c4/5dbdce75117b60b6ffec65bc92ac25ee873b84158a55cfbffa1d49db6eb1/pex-2.1.54-py2.py3-none-any.whl"
 
 PY_WHEEL = "https://pypi.python.org/packages/53/67/9620edf7803ab867b175e4fd23c7b8bd8eba11cb761514dcd2e726ef07da/py-1.4.34-py2.py3-none-any.whl"
 
@@ -179,11 +191,7 @@ PYTEST_WHEEL = "https://pypi.python.org/packages/fd/3e/d326a05d083481746a769fc05
 
 REQUESTS_SRC = "https://pypi.python.org/packages/d9/03/155b3e67fe35fe5b6f4227a8d9e96a14fda828b18199800d161bcefc1359/requests-2.12.3.tar.gz"
 
-SETUPTOOLS_SRC = "https://pypi.python.org/packages/68/13/1bfbfbd86560e61fa9803d241084fff41a775bf56ee8b3ad72fc9e550dad/setuptools-31.0.0.tar.gz"
-
-VIRTUALENV_SRC = "https://pypi.python.org/packages/d4/0c/9840c08189e030873387a73b90ada981885010dd9aea134d6de30cd24cb8/virtualenv-15.1.0.tar.gz"
-
-VIRTUALENV_PREFIX = "virtualenv-15.1.0"
+SETUPTOOLS_WHEEL = "https://pypi.python.org/packages/a0/df/635cdb901ee4a8a42ec68e480c49f85f4c59e8816effbf57d9e6ee8b3588/setuptools-46.1.3-py3-none-any.whl"
 
 WHEEL_SRC = "https://pypi.python.org/packages/c9/1d/bd19e691fd4cfe908c76c429fe6e4436c9e83583c4414b54f6c85471954a/wheel-0.29.0.tar.gz"
 
@@ -210,9 +218,9 @@ http_file(
 
 http_file(
     name = "pex_src",
-    downloaded_file_path = "pex-1.2.15.tar.gz",
-    sha256 = "0147d19123340677b9793b00ec86fe65b6697db3ec99afb796da2300ae5fec14",
-    urls = [PEX_SRC],
+    downloaded_file_path = "pex-2.1.54-py2.py3-none-any.whl",
+    sha256 = "e60b006abe8abfd3c3377128e22c33f30cc6dea89e2beb463cf8360e3626db62",
+    urls = [PEX_WHEEL],
 )
 
 http_file(
@@ -223,27 +231,12 @@ http_file(
 )
 
 http_file(
-    name = "setuptools_src",
-    downloaded_file_path = "setuptools-31.0.0.tar.gz",
-    sha256 = "0818cc0de692c3a5c83ca83aa7ec7ba6bc206f278735f1e0267b8d0e095cfe7a",
-    urls = [SETUPTOOLS_SRC],
+    name = "setuptools_wheel",
+    downloaded_file_path = "setuptools-46.1.3-py3-none-any.whl",
+    sha256 = "4fe404eec2738c20ab5841fa2d791902d2a645f32318a7850ef26f8d7215a8ee",
+    urls = [SETUPTOOLS_WHEEL],
 )
 
-http_archive(
-    name = "virtualenv",
-    build_file_content = "\n".join([
-        "load(\"@rules_python//python:defs.bzl\", \"py_binary\")",
-        "py_binary(",
-        "    name = 'virtualenv',",
-        "    srcs = ['virtualenv.py'],",
-        "    data = glob(['**/*']),",
-        "    visibility = ['//visibility:public'],",
-        ")",
-    ]),
-    sha256 = "02f8102c2436bb03b3ee6dede1919d1dac8a427541652e5ec95171ec8adbc93a",
-    strip_prefix = VIRTUALENV_PREFIX,
-    urls = [VIRTUALENV_SRC],
-)
 # end pex repos
 
 # protobuf dependencies for C++ and Java
@@ -258,9 +251,9 @@ http_archive(
 # 3rdparty C++ dependencies
 http_archive(
     name = "com_github_gflags_gflags",
-    sha256 = "ae27cdbcd6a2f935baa78e4f21f675649271634c092b1be01469440495609d0e",
-    strip_prefix = "gflags-2.2.1",
-    urls = ["https://github.com/gflags/gflags/archive/v2.2.1.tar.gz"],
+    sha256 = "34af2f15cf7367513b352bdcd2493ab14ce43692d2dcd9dfc499492966c64dcf",
+    strip_prefix = "gflags-2.2.2",
+    urls = ["https://github.com/gflags/gflags/archive/v2.2.2.tar.gz"],
 )
 
 http_archive(
@@ -282,11 +275,11 @@ http_archive(
 http_archive(
     name = "org_apache_zookeeper",
     build_file = "@//:third_party/zookeeper/BUILD",
-    patch_args = ["-p2"],
-    patches = ["//third_party/zookeeper:pkgconfig.patch"],
-    sha256 = "b14f7a0fece8bd34c7fffa46039e563ac5367607c612517aa7bd37306afbd1cd",
-    strip_prefix = "zookeeper-3.4.14",
-    urls = ["https://archive.apache.org/dist/zookeeper/zookeeper-3.4.14/zookeeper-3.4.14.tar.gz"],
+    patch_args = ["-p1"],
+    patches = ["//third_party/zookeeper:zookeeper_jute.patch"],
+    sha256 = "1c52a4ea012c12c87e49298343eae44f89ce0d61133f7e07384d5fb64f8eaa77",
+    strip_prefix = "apache-zookeeper-3.6.3",
+    urls = ["https://downloads.apache.org/zookeeper/zookeeper-3.6.3/apache-zookeeper-3.6.3.tar.gz"],
 )
 
 http_archive(
@@ -299,10 +292,9 @@ http_archive(
 
 http_archive(
     name = "com_github_google_glog",
-    build_file = "@//:third_party/glog/glog.BUILD",
-    sha256 = "7580e408a2c0b5a89ca214739978ce6ff480b5e7d8d7698a2aa92fadc484d1e0",
-    strip_prefix = "glog-0.3.5",
-    urls = ["https://github.com/google/glog/archive/v0.3.5.tar.gz"],
+    sha256 = "21bc744fb7f2fa701ee8db339ded7dce4f975d0d55837a97be7d46e8382dea5a",
+    strip_prefix = "glog-0.5.0",
+    urls = ["https://github.com/google/glog/archive/v0.5.0.zip"],
 )
 
 http_archive(
@@ -330,6 +322,16 @@ http_archive(
 )
 
 http_archive(
+    name = "com_github_corvusoft_kashmir_cpp",
+    build_file = "@//:third_party/kashmir/kashmir.BUILD",
+    patch_args = ["-p1"],
+    patches = ["//third_party/kashmir:kashmir-random-fix.patch"],
+    sha256 = "c3515d6c7a470663f06b79bb23cbb2ff2f3feab4c2a333f783edc0a802f1d062",
+    strip_prefix = "kashmir-dependency-19fb1d5c14866bd5202c2458baf50263001a9cb0",
+    urls = ["https://github.com/Corvusoft/kashmir-dependency/archive/19fb1d5c14866bd5202c2458baf50263001a9cb0.zip"],
+)
+
+http_archive(
     name = "com_github_danmar_cppcheck",
     build_file = "@//:third_party/cppcheck/cppcheck.BUILD",
     patch_args = ["-p2"],
@@ -352,34 +354,43 @@ http_archive(
 http_archive(
     name = "helm_mac",
     build_file = "@//:third_party/helm/helm.BUILD",
-    sha256 = "05c7748da0ea8d5f85576491cd3c615f94063f20986fd82a0f5658ddc286cdb1",
+    sha256 = "3a9efe337c61a61b3e160da919ac7af8cded8945b75706e401f3655a89d53ef5",
     strip_prefix = "darwin-amd64",
-    urls = ["https://get.helm.sh/helm-v3.0.2-darwin-amd64.tar.gz"],
+    urls = ["https://get.helm.sh/helm-v3.7.1-darwin-amd64.tar.gz"],
 )
 
 http_archive(
     name = "helm_linux",
     build_file = "@//:third_party/helm/helm.BUILD",
-    sha256 = "c6b7aa7e4ffc66e8abb4be328f71d48c643cb8f398d95c74d075cfb348710e1d",
+    sha256 = "6cd6cad4b97e10c33c978ff3ac97bb42b68f79766f1d2284cfd62ec04cd177f4",
     strip_prefix = "linux-amd64",
-    urls = ["https://get.helm.sh/helm-v3.0.2-linux-amd64.tar.gz"],
+    urls = ["https://get.helm.sh/helm-v3.7.1-linux-amd64.tar.gz"],
 )
 # end helm
 
 # for docker image building
+DOCKER_RULES_VERSION = "0.14.4"
+
 http_archive(
     name = "io_bazel_rules_docker",
-    sha256 = "aed1c249d4ec8f703edddf35cbe9dfaca0b5f5ea6e4cd9e83e99f3b0d1136c3d",
-    strip_prefix = "rules_docker-0.7.0",
-    urls = ["https://github.com/bazelbuild/rules_docker/archive/v0.7.0.tar.gz"],
+    sha256 = "4521794f0fba2e20f3bf15846ab5e01d5332e587e9ce81629c7f96c793bb7036",
+    strip_prefix = "rules_docker-%s" % DOCKER_RULES_VERSION,
+    urls = ["https://github.com/bazelbuild/rules_docker/archive/v%s.tar.gz" % DOCKER_RULES_VERSION],
 )
 
 load(
     "@io_bazel_rules_docker//repositories:repositories.bzl",
     container_repositories = "repositories",
 )
-
 container_repositories()
+
+load("@io_bazel_rules_docker//repositories:deps.bzl", container_deps = "deps")
+
+container_deps()
+
+load("@io_bazel_rules_docker//repositories:pip_repositories.bzl", "pip_deps")
+
+pip_deps()
 
 load(
     "@io_bazel_rules_docker//container:container.bzl",
@@ -391,25 +402,20 @@ container_pull(
     digest = "sha256:495800e9eb001dfd2fb41d1941155203bb9be06b716b0f8b1b0133eb12ea813c",
     registry = "index.docker.io",
     repository = "heron/base",
-    tag = "0.4.0",
+    tag = "0.5.0",
 )
-
 # end docker image building
 
-# for nomad repear
 http_archive(
-    name = "nomad_mac",
-    build_file = "@//:third_party/nomad/nomad.BUILD",
-    sha256 = "53452f5bb27131f1fe5a5f9178324511bcbc54e4fef5bec4e25b049ac38e0632",
-    urls = ["https://releases.hashicorp.com/nomad/0.7.0/nomad_0.7.0_darwin_amd64.zip"],
+    name = "rules_pkg",
+    urls = [
+        "https://github.com/bazelbuild/rules_pkg/releases/download/0.2.6/rules_pkg-0.2.6.tar.gz",
+        "https://mirror.bazel.build/github.com/bazelbuild/rules_pkg/releases/download/0.2.6/rules_pkg-0.2.6.tar.gz",
+    ],
+    sha256 = "aeca78988341a2ee1ba097641056d168320ecc51372ef7ff8e64b139516a4937",
 )
-
-http_archive(
-    name = "nomad_linux",
-    build_file = "@//:third_party/nomad/nomad.BUILD",
-    sha256 = "b3b78dccbdbd54ddc7a5ffdad29bce2d745cac93ea9e45f94e078f57b756f511",
-    urls = ["https://releases.hashicorp.com/nomad/0.7.0/nomad_0.7.0_linux_amd64.zip"],
-)
+load("@rules_pkg//:deps.bzl", "rules_pkg_dependencies")
+rules_pkg_dependencies()
 
 # scala integration
 rules_scala_version = "358ab829626c6c2d34ec27f856485d3121e299c7"  # Jan 15 2020 - update this as needed

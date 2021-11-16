@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 
 #  Licensed to the Apache Software Foundation (ASF) under one
@@ -20,7 +20,7 @@
 
 
 """test_kill_stmgr_metricsmgr.py"""
-import test_template
+from . import test_template
 
 class TestKillStmgrMetricsMgr(test_template.TestTemplate):
 

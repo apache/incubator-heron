@@ -23,7 +23,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -35,9 +34,7 @@ import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.Serializer;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
-import com.esotericsoftware.kryo.serializers.CollectionSerializer;
 import com.esotericsoftware.kryo.serializers.DefaultSerializers;
-import com.esotericsoftware.kryo.serializers.MapSerializer;
 
 import org.apache.heron.api.Config;
 import org.apache.heron.api.tuple.Values;
@@ -79,7 +76,7 @@ public class KryoSerializer implements IPluggableSerializer {
 
   @Override
   public byte[] serialize(Object object) {
-    kryoOut.clear();
+    kryoOut.reset();
     kryo.writeClassAndObject(kryoOut, object);
     return kryoOut.toBytes();
   }
@@ -94,9 +91,9 @@ public class KryoSerializer implements IPluggableSerializer {
   private static void registerDefaultSerializers(Kryo k) {
     // Default serializers
     k.register(byte[].class);
-    k.register(ArrayList.class, new ArrayListSerializer());
-    k.register(HashMap.class, new HashMapSerializer());
-    k.register(HashSet.class, new HashSetSerializer());
+    k.register(ArrayList.class);
+    k.register(HashMap.class);
+    k.register(HashSet.class);
     k.register(BigInteger.class, new DefaultSerializers.BigIntegerSerializer());
     k.register(Values.class);
   }
@@ -216,29 +213,5 @@ public class KryoSerializer implements IPluggableSerializer {
     throw new IllegalArgumentException(
         String.format("Unable to create serializer \"%s\" for class: %s",
             serializerClass.getName(), superClass.getName()));
-  }
-
-  private static class ArrayListSerializer extends CollectionSerializer {
-    @Override
-    @SuppressWarnings("rawtypes") // extending Kryo class that uses raw types
-    public Collection create(Kryo k, Input input, Class<Collection> type) {
-      return new ArrayList();
-    }
-  }
-
-  private static class HashMapSerializer extends MapSerializer {
-    @Override
-    @SuppressWarnings("rawtypes") // extending kryo class signature that takes Map
-    public Map<String, Object> create(Kryo k, Input input, Class<Map> type) {
-      return new HashMap<>();
-    }
-  }
-
-  private static class HashSetSerializer extends CollectionSerializer {
-    @Override
-    @SuppressWarnings("rawtypes") // extending Kryo class that uses raw types
-    public Collection create(Kryo k, Input input, Class<Collection> type) {
-      return new HashSet();
-    }
   }
 }

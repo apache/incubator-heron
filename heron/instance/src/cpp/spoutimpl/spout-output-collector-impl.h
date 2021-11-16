@@ -34,8 +34,8 @@
 #include "spout/ispout-output-collector.h"
 #include "serializer/ipluggable-serializer.h"
 #include "spoutimpl/root-tuple-info.h"
-#include "slave/task-context-impl.h"
-#include "slave/outgoing-tuple-collection.h"
+#include "executor/task-context-impl.h"
+#include "executor/outgoing-tuple-collection.h"
 
 namespace heron {
 namespace instance {
@@ -44,7 +44,7 @@ class SpoutOutputCollectorImpl : public api::spout::ISpoutOutputCollector {
  public:
   SpoutOutputCollectorImpl(std::shared_ptr<api::serializer::IPluggableSerializer> serializer,
                            std::shared_ptr<TaskContextImpl> taskContext,
-                           NotifyingCommunicator<google::protobuf::Message*>* dataFromSlave);
+                           NotifyingCommunicator<google::protobuf::Message*>* dataFromExecutor);
   virtual ~SpoutOutputCollectorImpl();
 
   virtual void reportError(std::exception& except);

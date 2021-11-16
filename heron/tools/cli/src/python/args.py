@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 
 #  Licensed to the Apache Software Foundation (ASF) under one
@@ -48,6 +48,17 @@ def add_verbose(parser):
       help='Verbose mode. Increases logging level to show debug messages')
   return parser
 
+def add_verbose_gc(parser):
+  '''
+  :param parser:
+  :return:
+  '''
+  parser.add_argument(
+      '--verbose_gc',
+      default=False,
+      action='store_true',
+      help='Produce JVM GC logging')
+  return parser
 
 def add_topology(parser):
   '''

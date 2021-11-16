@@ -21,6 +21,9 @@ heron.class.uploader:                            org.apache.heron.uploader.s3.S3
 # S3 bucket to put the jar file into
 heron.uploader.s3.bucket: <s3_bucket>
 
+# S3 bucket region
+heron.uploader.s3.region: <s3_region>
+
 # AWS access key
 heron.uploader.s3.access_key: <aws_access_key>
 

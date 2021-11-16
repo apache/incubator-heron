@@ -25,8 +25,8 @@ cc_library(
         "multi-mean-metric.h",
         "time-spent-metric.cpp",
         "time-spent-metric.h",
-        "tmaster-metrics.cpp",
-        "tmaster-metrics.h",
+        "tmanager-metrics.cpp",
+        "tmanager-metrics.h",
     ],
     copts = [
         "-Iheron",

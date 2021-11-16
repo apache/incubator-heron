@@ -5,8 +5,6 @@ pex_binary(
     srcs = glob(["*.py"]),
     main = "main.py",
     reqs = [
-        "argparse==1.4.0",
-        "future==0.18.2",
     ],
     resources = [
         "resources/test.conf",

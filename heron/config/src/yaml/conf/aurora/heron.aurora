@@ -17,7 +17,7 @@
 
 """
 Launch the topology as a single aurora job with multiple instances.
-The heron-executor is responsible for starting a tmaster (container 0)
+The heron-executor is responsible for starting a tmanager (container 0)
 and regular stmgr/metricsmgr/instances (container index > 0).
 """
 
@@ -40,13 +40,13 @@ fetch_user_package = Process(
 command_to_start_executor = \
   '{{EXECUTOR_BINARY}}' \
   ' --shard={{mesos.instance}}' \
-  ' --master-port={{thermos.ports[port1]}}' \
-  ' --tmaster-controller-port={{thermos.ports[port2]}}' \
-  ' --tmaster-stats-port={{thermos.ports[port3]}}' \
+  ' --server-port={{thermos.ports[port1]}}' \
+  ' --tmanager-controller-port={{thermos.ports[port2]}}' \
+  ' --tmanager-stats-port={{thermos.ports[port3]}}' \
   ' --shell-port={{thermos.ports[http]}}' \
   ' --metrics-manager-port={{thermos.ports[port4]}}' \
   ' --scheduler-port={{thermos.ports[scheduler]}}' \
-  ' --metricscache-manager-master-port={{thermos.ports[metricscachemgr_masterport]}}' \
+  ' --metricscache-manager-server-port={{thermos.ports[metricscachemgr_serverport]}}' \
   ' --metricscache-manager-stats-port={{thermos.ports[metricscachemgr_statsport]}}' \
   ' --checkpoint-manager-port={{thermos.ports[ckptmgr_port]}}' \
   ' {{TOPOLOGY_ARGUMENTS}}'
@@ -79,7 +79,7 @@ jobs = [
     service = True,
     task = heron_task,
     instances = '{{NUM_CONTAINERS}}',
-    announce = Announcer(primary_port = 'http', portmap = {'health': 'http'}),
+    announce = Announcer(primary_port = 'http', portmap = {'admin': 'http', 'health': 'http'}),
     health_check_config = HealthCheckConfig(
       health_checker = HealthCheckerConfig(
         http = HttpHealthChecker(endpoint='/health', expected_response='ok', expected_response_code=200)

@@ -30,7 +30,7 @@
 #include "topology/task-context.h"
 #include "serializer/ipluggable-serializer.h"
 
-#include "slave/task-context-impl.h"
+#include "executor/task-context-impl.h"
 
 namespace heron {
 namespace instance {

@@ -44,7 +44,7 @@ import org.apache.heron.common.config.SystemConfig;
 import org.apache.heron.common.network.HeronSocketOptions;
 import org.apache.heron.metricsmgr.MetricsManagerServer;
 import org.apache.heron.metricsmgr.MetricsUtil;
-import org.apache.heron.proto.tmaster.TopologyMaster;
+import org.apache.heron.proto.tmanager.TopologyManager;
 import org.apache.heron.spi.metricsmgr.metrics.ExceptionInfo;
 import org.apache.heron.spi.metricsmgr.metrics.MetricsFilter;
 import org.apache.heron.spi.metricsmgr.metrics.MetricsInfo;
@@ -70,7 +70,7 @@ import org.apache.heron.spi.metricsmgr.sink.SinkContext;
  * external logic would take care of it.
  * <p>
  * -- MetricsCacheLocation changes (though in fact, metricsCacheClient might also throw exceptions in this case),
- * in this case, we would invoke MetricsCacheService to start from tMasterLocationStarter's thread.
+ * in this case, we would invoke MetricsCacheService to start from tManagerLocationStarter's thread.
  * But the MetricsCacheService and metricsCacheClient still start wihtin the thread they run.
  * <p>
  * 3. When a new MetricsRecord comes by invoking processRecord, it would push the MetricsRecord
@@ -86,10 +86,10 @@ public class MetricsCacheSink implements IMetricsSink {
   private static final int MAX_COMMUNICATOR_SIZE = 128;
 
   // These configs would be read from metrics-sink-configs.yaml
-  private static final String KEY_TMASTER_LOCATION_CHECK_INTERVAL_SEC =
+  private static final String KEY_TMANAGER_LOCATION_CHECK_INTERVAL_SEC =
       "metricscache-location-check-interval-sec";
-  private static final String KEY_TMASTER = "metricscache-client";
-  private static final String KEY_TMASTER_RECONNECT_INTERVAL_SEC = "reconnect-interval-second";
+  private static final String KEY_TMANAGER = "metricscache-client";
+  private static final String KEY_TMANAGER_RECONNECT_INTERVAL_SEC = "reconnect-interval-second";
   private static final String KEY_NETWORK_WRITE_BATCH_SIZE_BYTES = "network-write-batch-size-bytes";
   private static final String KEY_NETWORK_WRITE_BATCH_TIME_MS = "network-write-batch-time-ms";
   private static final String KEY_NETWORK_READ_BATCH_SIZE_BYTES = "network-read-batch-size-bytes";
@@ -97,31 +97,31 @@ public class MetricsCacheSink implements IMetricsSink {
   private static final String KEY_SOCKET_SEND_BUFFER_BYTES = "socket-send-buffer-size-bytes";
   private static final String KEY_SOCKET_RECEIVED_BUFFER_BYTES =
       "socket-received-buffer-size-bytes";
-  private static final String KEY_TMASTER_METRICS_TYPE = "metricscache-metrics-type";
+  private static final String KEY_TMANAGER_METRICS_TYPE = "metricscache-metrics-type";
 
   // Bean name to fetch the MetricsCacheLocation object from SingletonRegistry
-//  private static final String TMASTER_LOCATION_BEAN_NAME =
-//      TopologyMaster.MetricsCacheLocation.newBuilder().getDescriptorForType().getFullName();
+//  private static final String TMANAGER_LOCATION_BEAN_NAME =
+//      TopologyManager.MetricsCacheLocation.newBuilder().getDescriptorForType().getFullName();
   // Metrics Counter Name
   private static final String METRICS_COUNT = "metrics-count";
   private static final String EXCEPTIONS_COUNT = "exceptions-count";
   private static final String RECORD_PROCESS_COUNT = "record-process-count";
   private static final String METRICSMGR_RESTART_COUNT = "metricsmgr-restart-count";
   private static final String METRICSMGR_LOCATION_UPDATE_COUNT = "metricsmgr-location-update-count";
-  private final Communicator<TopologyMaster.PublishMetrics> metricsCommunicator =
+  private final Communicator<TopologyManager.PublishMetrics> metricsCommunicator =
       new Communicator<>();
-  private final MetricsFilter tMasterMetricsFilter = new MetricsFilter();
+  private final MetricsFilter tManagerMetricsFilter = new MetricsFilter();
   private final Map<String, Object> sinkConfig = new HashMap<>();
   // A scheduled executor service to check whether the MetricsCacheLocation has changed
   // If so, restart the metricsCacheClientService with the new MetricsCacheLocation
   // Start of metricsCacheClientService will also be in this thread
-  private final ScheduledExecutorService tMasterLocationStarter =
+  private final ScheduledExecutorService tManagerLocationStarter =
       Executors.newSingleThreadScheduledExecutor();
   private MetricsCacheClientService metricsCacheClientService;
   // We need to cache it locally to check whether the MetricsCacheLocation is changed
   // This field is changed only in ScheduledExecutorService's thread,
   // so no need to make it volatile
-  private TopologyMaster.MetricsCacheLocation currentMetricsCacheLocation = null;
+  private TopologyManager.MetricsCacheLocation currentMetricsCacheLocation = null;
   private SinkContext sinkContext;
 
   @Override
@@ -132,24 +132,24 @@ public class MetricsCacheSink implements IMetricsSink {
 
     sinkContext = context;
 
-    // Fill the tMasterMetricsFilter according to metrics-sink-configs.yaml
-    Map<String, String> tmasterMetricsType =
-        (Map<String, String>) sinkConfig.get(KEY_TMASTER_METRICS_TYPE);
-    if (tmasterMetricsType != null) {
-      for (Map.Entry<String, String> metricToType : tmasterMetricsType.entrySet()) {
+    // Fill the tManagerMetricsFilter according to metrics-sink-configs.yaml
+    Map<String, String> tmanagerMetricsType =
+        (Map<String, String>) sinkConfig.get(KEY_TMANAGER_METRICS_TYPE);
+    if (tmanagerMetricsType != null) {
+      for (Map.Entry<String, String> metricToType : tmanagerMetricsType.entrySet()) {
         String value = metricToType.getValue();
         MetricsFilter.MetricAggregationType type =
             MetricsFilter.MetricAggregationType.valueOf(value);
-        tMasterMetricsFilter.setPrefixToType(metricToType.getKey(), type);
+        tManagerMetricsFilter.setPrefixToType(metricToType.getKey(), type);
       }
     }
 
     // Construct the long-live metricsCacheClientService
     metricsCacheClientService =
         new MetricsCacheClientService((Map<String, Object>)
-            sinkConfig.get(KEY_TMASTER), metricsCommunicator);
+            sinkConfig.get(KEY_TMANAGER), metricsCommunicator);
 
-    // Start the tMasterLocationStarter
+    // Start the tManagerLocationStarter
     startMetricsCacheChecker();
   }
 
@@ -158,13 +158,13 @@ public class MetricsCacheSink implements IMetricsSink {
   // If so, restart the metricsCacheClientService with the new MetricsCacheLocation
   private void startMetricsCacheChecker() {
     final int checkIntervalSec =
-        TypeUtils.getInteger(sinkConfig.get(KEY_TMASTER_LOCATION_CHECK_INTERVAL_SEC));
+        TypeUtils.getInteger(sinkConfig.get(KEY_TMANAGER_LOCATION_CHECK_INTERVAL_SEC));
 
     Runnable runnable = new Runnable() {
       @Override
       public void run() {
-        TopologyMaster.MetricsCacheLocation location =
-            (TopologyMaster.MetricsCacheLocation) SingletonRegistry.INSTANCE.getSingleton(
+        TopologyManager.MetricsCacheLocation location =
+            (TopologyManager.MetricsCacheLocation) SingletonRegistry.INSTANCE.getSingleton(
                 MetricsManagerServer.METRICSCACHE_LOCATION_BEAN_NAME);
 
         if (location != null) {
@@ -173,7 +173,7 @@ public class MetricsCacheSink implements IMetricsSink {
             LOG.info("Update current MetricsCacheLocation to: " + location);
             currentMetricsCacheLocation = location;
             metricsCacheClientService.updateMetricsCacheLocation(currentMetricsCacheLocation);
-            metricsCacheClientService.startNewMasterClient();
+            metricsCacheClientService.startNewPrimaryClient();
 
             // Update Metrics
             sinkContext.exportCountMetric(METRICSMGR_LOCATION_UPDATE_COUNT, 1);
@@ -181,19 +181,19 @@ public class MetricsCacheSink implements IMetricsSink {
         }
 
         // Schedule itself in future
-        tMasterLocationStarter.schedule(this, checkIntervalSec, TimeUnit.SECONDS);
+        tManagerLocationStarter.schedule(this, checkIntervalSec, TimeUnit.SECONDS);
       }
     };
 
     // First Entry
-    tMasterLocationStarter.schedule(runnable, checkIntervalSec, TimeUnit.SECONDS);
+    tManagerLocationStarter.schedule(runnable, checkIntervalSec, TimeUnit.SECONDS);
     LOG.info("MetricsCacheChecker started with interval: " + checkIntervalSec);
   }
 
   @Override
   public void processRecord(MetricsRecord record) {
     LOG.info("metricscache sink processRecord");
-    // Format it into TopologyMaster.PublishMetrics
+    // Format it into TopologyManager.PublishMetrics
 
     // The format of record is "host:port/componentName/instanceId"
     // So MetricsRecord.getSource().split("/") would be an array with 3 elements:
@@ -203,12 +203,12 @@ public class MetricsCacheSink implements IMetricsSink {
     String componentName = sources[1];
     String instanceId = sources[2];
 
-    TopologyMaster.PublishMetrics.Builder publishMetrics =
-        TopologyMaster.PublishMetrics.newBuilder();
+    TopologyManager.PublishMetrics.Builder publishMetrics =
+        TopologyManager.PublishMetrics.newBuilder();
 
-    for (MetricsInfo metricsInfo : tMasterMetricsFilter.filter(record.getMetrics())) {
+    for (MetricsInfo metricsInfo : tManagerMetricsFilter.filter(record.getMetrics())) {
       // We would filter out unneeded metrics
-      TopologyMaster.MetricDatum metricDatum = TopologyMaster.MetricDatum.newBuilder().
+      TopologyManager.MetricDatum metricDatum = TopologyManager.MetricDatum.newBuilder().
           setComponentName(componentName).setInstanceId(instanceId).setName(metricsInfo.getName()).
           setValue(metricsInfo.getValue()).setTimestamp(record.getTimestamp()).build();
       publishMetrics.addMetrics(metricDatum);
@@ -219,8 +219,8 @@ public class MetricsCacheSink implements IMetricsSink {
       String[] exceptionStackTraceLines = exceptionStackTrace.split("\r\n|[\r\n]", 3);
       String exceptionStackTraceFirstTwoLines = String.join(System.lineSeparator(),
           exceptionStackTraceLines[0], exceptionStackTraceLines[1]);
-      TopologyMaster.TmasterExceptionLog exceptionLog =
-          TopologyMaster.TmasterExceptionLog.newBuilder()
+      TopologyManager.TmanagerExceptionLog exceptionLog =
+          TopologyManager.TmanagerExceptionLog.newBuilder()
               .setComponentName(componentName)
               .setHostname(hostPort)
               .setInstanceId(instanceId)
@@ -246,7 +246,7 @@ public class MetricsCacheSink implements IMetricsSink {
 
   // Check if the communicator is full/overflow. Poll and drop extra elements that
   // are over the queue limit from the head.
-  public static void checkCommunicator(Communicator<TopologyMaster.PublishMetrics> communicator,
+  public static void checkCommunicator(Communicator<TopologyManager.PublishMetrics> communicator,
                                         int maxSize) {
     synchronized (communicator) {
       int size = communicator.size();
@@ -287,9 +287,9 @@ public class MetricsCacheSink implements IMetricsSink {
   }
 
   @VisibleForTesting
-  void startNewMetricsCacheClient(TopologyMaster.MetricsCacheLocation location) {
+  void startNewMetricsCacheClient(TopologyManager.MetricsCacheLocation location) {
     metricsCacheClientService.updateMetricsCacheLocation(location);
-    metricsCacheClientService.startNewMasterClient();
+    metricsCacheClientService.startNewPrimaryClient();
   }
 
   @VisibleForTesting
@@ -298,12 +298,12 @@ public class MetricsCacheSink implements IMetricsSink {
   }
 
   @VisibleForTesting
-  TopologyMaster.MetricsCacheLocation getCurrentMetricsCacheLocation() {
+  TopologyManager.MetricsCacheLocation getCurrentMetricsCacheLocation() {
     return currentMetricsCacheLocation;
   }
 
   @VisibleForTesting
-  TopologyMaster.MetricsCacheLocation getCurrentMetricsCacheLocationInService() {
+  TopologyManager.MetricsCacheLocation getCurrentMetricsCacheLocationInService() {
     return metricsCacheClientService.getCurrentMetricsCacheLocation();
   }
 
@@ -312,17 +312,17 @@ public class MetricsCacheSink implements IMetricsSink {
    * It would automatically restart the metricsCacheClient connecting and communicating to the latest
    * MetricsCacheLocation if any uncaught exceptions throw.
    * <p>
-   * It provides startNewMasterClient(TopologyMaster.MetricsCacheLocation location), which would also
+   * It provides startNewPrimaryClient(TopologyManager.MetricsCacheLocation location), which would also
    * update the currentMetricsCacheLocation to the lastest location.
    * <p>
    * So a new metricsCacheClient would start in two cases:
    * 1. The old one threw exceptions and died.
-   * 2. startNewMasterClient() is invoked externally with MetricsCacheLocation.
+   * 2. startNewPrimaryClient() is invoked externally with MetricsCacheLocation.
    */
   private static final class MetricsCacheClientService {
     private final AtomicInteger startedAttempts = new AtomicInteger(0);
     private final Map<String, Object> metricsCacheClientConfig;
-    private final Communicator<TopologyMaster.PublishMetrics> metricsCommunicator;
+    private final Communicator<TopologyManager.PublishMetrics> metricsCommunicator;
     private final ExecutorService metricsCacheClientExecutor =
         Executors.newSingleThreadExecutor(new MetricsCacheClientThreadFactory());
     private volatile MetricsCacheClient metricsCacheClient;
@@ -330,11 +330,11 @@ public class MetricsCacheSink implements IMetricsSink {
     // This value is set in ScheduledExecutorService' thread while
     // it is used in metricsCacheClientService thread,
     // so we need to make it volatile to guarantee the visiability.
-    private volatile TopologyMaster.MetricsCacheLocation currentMetricsCacheLocation;
+    private volatile TopologyManager.MetricsCacheLocation currentMetricsCacheLocation;
 
     private MetricsCacheClientService(
         Map<String, Object> metricsCacheClientConfig,
-        Communicator<TopologyMaster.PublishMetrics> metricsCommunicator) {
+        Communicator<TopologyManager.PublishMetrics> metricsCommunicator) {
       this.metricsCacheClientConfig = metricsCacheClientConfig;
       this.metricsCommunicator = metricsCommunicator;
     }
@@ -344,13 +344,13 @@ public class MetricsCacheSink implements IMetricsSink {
     // currentMetricsCacheLocation is volatile and we just replace it.
     // In our scenario, it is only invoked when MetricsCacheLocation is changed,
     // i.e. this method is only invoked in scheduled executor thread.
-    public void updateMetricsCacheLocation(TopologyMaster.MetricsCacheLocation location) {
+    public void updateMetricsCacheLocation(TopologyManager.MetricsCacheLocation location) {
       currentMetricsCacheLocation = location;
     }
 
     // This method could be invoked by different threads
     // Make it synchronized to guarantee thread-safe
-    public synchronized void startNewMasterClient() {
+    public synchronized void startNewPrimaryClient() {
 
       // Exit any running metricsCacheClient if there is any to release
       // the thread in metricsCacheClientExecutor
@@ -390,10 +390,10 @@ public class MetricsCacheSink implements IMetricsSink {
 
       metricsCacheClient = new MetricsCacheClient(looper,
           currentMetricsCacheLocation.getHost(),
-          currentMetricsCacheLocation.getMasterPort(),
+          currentMetricsCacheLocation.getServerPort(),
           socketOptions, metricsCommunicator,
           TypeUtils.getDuration(
-              metricsCacheClientConfig.get(KEY_TMASTER_RECONNECT_INTERVAL_SEC),
+              metricsCacheClientConfig.get(KEY_TMANAGER_RECONNECT_INTERVAL_SEC),
               ChronoUnit.SECONDS));
 
       int attempts = startedAttempts.incrementAndGet();
@@ -419,7 +419,7 @@ public class MetricsCacheSink implements IMetricsSink {
     }
 
     @VisibleForTesting
-    TopologyMaster.MetricsCacheLocation getCurrentMetricsCacheLocation() {
+    TopologyManager.MetricsCacheLocation getCurrentMetricsCacheLocation() {
       return currentMetricsCacheLocation;
     }
 
@@ -439,14 +439,15 @@ public class MetricsCacheSink implements IMetricsSink {
           LOG.log(Level.SEVERE, "metricsCacheClient dies in thread: " + t, e);
 
           Duration reconnectInterval = TypeUtils.getDuration(
-              metricsCacheClientConfig.get(KEY_TMASTER_RECONNECT_INTERVAL_SEC), ChronoUnit.SECONDS);
+              metricsCacheClientConfig.get(KEY_TMANAGER_RECONNECT_INTERVAL_SEC),
+              ChronoUnit.SECONDS);
           SysUtils.sleep(reconnectInterval);
           LOG.info("Restarting metricsCacheClient");
 
           // We would use the MetricsCacheLocation in cache, since
           // the new metricsCacheClient is started due to exception thrown,
           // rather than MetricsCacheLocation changes
-          startNewMasterClient();
+          startNewPrimaryClient();
         }
       }
     }

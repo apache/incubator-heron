@@ -25,8 +25,8 @@ import java.util.concurrent.CountDownLatch;
 import com.google.protobuf.Message;
 
 import org.apache.heron.common.basics.Communicator;
+import org.apache.heron.common.basics.ExecutorLooper;
 import org.apache.heron.common.basics.NIOLooper;
-import org.apache.heron.common.basics.SlaveLooper;
 import org.apache.heron.common.basics.WakeableLooper;
 import org.apache.heron.common.testhelpers.CommunicatorTestHelper;
 import org.apache.heron.proto.system.Metrics;
@@ -38,7 +38,7 @@ import org.apache.heron.resource.UnitTestHelper;
  */
 public class CommunicatorTester {
   private final WakeableLooper testLooper;
-  private final SlaveLooper slaveLooper;
+  private final ExecutorLooper executorLooper;
 
   // Only one outStreamQueue, which is responsible for both control tuples and data tuples
   private final Communicator<Message> outStreamQueue;
@@ -47,7 +47,7 @@ public class CommunicatorTester {
   // For spout, it will buffer Control tuple, while for bolt, it will buffer data tuple.
   private final Communicator<Message> inStreamQueue;
   private final Communicator<InstanceControlMsg> inControlQueue;
-  private final Communicator<Metrics.MetricPublisherPublishMessage> slaveMetricsOut;
+  private final Communicator<Metrics.MetricPublisherPublishMessage> executorMetricsOut;
 
   public CommunicatorTester(CountDownLatch inControlQueueOfferLatch,
                             CountDownLatch inStreamQueueOfferLatch) throws IOException {
@@ -64,17 +64,17 @@ public class CommunicatorTester {
                              final CountDownLatch outStreamQueueOfferLatch) {
     UnitTestHelper.addSystemConfigToSingleton();
     this.testLooper = testLooper;
-    slaveLooper = new SlaveLooper();
+    executorLooper = new ExecutorLooper();
     outStreamQueue = initCommunicator(
-        new Communicator<Message>(slaveLooper, testLooper),
+        new Communicator<Message>(executorLooper, testLooper),
         outStreamQueueOfferLatch);
     inStreamQueue = initCommunicator(
-        new Communicator<Message>(testLooper, slaveLooper),
+        new Communicator<Message>(testLooper, executorLooper),
         inStreamQueueOfferLatch);
     inControlQueue = initCommunicator(
-        new Communicator<InstanceControlMsg>(testLooper, slaveLooper), inControlQueueOfferLatch);
-    slaveMetricsOut = initCommunicator(
-        new Communicator<Metrics.MetricPublisherPublishMessage>(slaveLooper, testLooper), null);
+        new Communicator<InstanceControlMsg>(testLooper, executorLooper), inControlQueueOfferLatch);
+    executorMetricsOut = initCommunicator(
+        new Communicator<Metrics.MetricPublisherPublishMessage>(executorLooper, testLooper), null);
   }
 
   private <T> Communicator<T> initCommunicator(Communicator<T> communicator,
@@ -93,21 +93,21 @@ public class CommunicatorTester {
     if (testLooper != null) {
       testLooper.exitLoop();
     }
-    if (slaveLooper != null) {
-      slaveLooper.exitLoop();
+    if (executorLooper != null) {
+      executorLooper.exitLoop();
     }
   }
 
-  public Communicator<Metrics.MetricPublisherPublishMessage> getSlaveMetricsOut() {
-    return slaveMetricsOut;
+  public Communicator<Metrics.MetricPublisherPublishMessage> getExecutorMetricsOut() {
+    return executorMetricsOut;
   }
 
   public WakeableLooper getTestLooper() {
     return testLooper;
   }
 
-  public SlaveLooper getSlaveLooper() {
-    return slaveLooper;
+  public ExecutorLooper getExecutorLooper() {
+    return executorLooper;
   }
 
   public Communicator<InstanceControlMsg> getInControlQueue() {

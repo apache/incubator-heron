@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python3
 # Copyright 2014 Google Inc. All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,7 +15,9 @@
 """ Pex builder wrapper """
 
 import pex.bin.pex as pexbin
-from pex.common import safe_delete
+from pex.resolve import requirement_options, resolver_options, target_options
+from pex.resolve.requirement_configuration import RequirementConfiguration
+from pex.common import die, safe_delete
 from pex.tracer import TRACER
 from pex.variables import ENV
 
@@ -51,30 +53,53 @@ def parse_manifest(manifest_text):
     return json.loads(manifest_text)
 
 
-def main():
-    pparser, resolver_options_builder = pexbin.configure_clp()
-    poptions, args = pparser.parse_args(sys.argv)
+def main(args=None):
+    args = args[:] if args else sys.argv[1:]
+    args = [pexbin.transform_legacy_arg(arg) for arg in args]
+    pparser = pexbin.configure_clp()
 
-    manifest_file = args[1]
+    try:
+        separator = args.index("--")
+        args, cmdline = args[:separator], args[separator + 1:]
+    except ValueError:
+        args, cmdline = args, []
+
+    pparser.add_argument(
+            "--manifest-file",
+            dest="manifest_file",
+            default=None,
+            metavar="FILE",
+            type=str,
+            help="pex_wrapper manifest file.",
+        )
+    poptions = pparser.parse_args(args=args)
+
+    manifest_file = poptions.manifest_file
     manifest_text = open(manifest_file, 'r').read()
     manifest = parse_manifest(manifest_text)
 
-    if poptions.pex_root:
-        ENV.set('PEX_ROOT', poptions.pex_root)
-    else:
-        poptions.pex_root = ENV.PEX_ROOT
-
-    if poptions.cache_dir:
-        poptions.cache_dir = pexbin.make_relative_to_root(poptions.cache_dir)
-    poptions.interpreter_cache_dir = pexbin.make_relative_to_root(
-        poptions.interpreter_cache_dir)
-
     reqs = manifest.get('requirements', [])
+    requirement_configuration = RequirementConfiguration(requirements=reqs)
+    try:
+        resolver_configuration = resolver_options.configure(poptions)
+    except resolver_options.InvalidConfigurationError as e:
+        die(str(e))
 
-    with ENV.patch(PEX_VERBOSE=str(poptions.verbosity)):
+    try:
+        target_configuration = target_options.configure(poptions)
+    except target_options.InterpreterNotFound as e:
+        die(str(e))
+    except target_options.InterpreterConstraintsNotSatisfied as e:
+        die(str(e), exit_code=pexbin.CANNOT_SETUP_INTERPRETER)
+
+    with ENV.patch(PEX_VERBOSE=str(poptions.verbosity),
+                   PEX_ROOT=poptions.pex_root or ENV.PEX_ROOT):
         with TRACER.timed('Building pex'):
-            pex_builder = pexbin.build_pex(reqs, poptions,
-                                           resolver_options_builder)
+            pex_builder = pexbin.build_pex(
+                requirement_configuration=requirement_configuration,
+                resolver_configuration=resolver_configuration,
+                target_configuration=target_configuration,
+                options=poptions)
 
         # Add source files from the manifest
         for modmap in manifest.get('modules', []):
@@ -100,7 +125,7 @@ def main():
         for reqmap in manifest.get('resources', []):
             src = reqmap.get('src')
             dst = reqmap.get('dest')
-            pex_builder.add_resource(dereference_symlinks(src), dst)
+            pex_builder.add_source(dereference_symlinks(src), dst)
 
         # Add eggs/wheels from the manifest
         for egg in manifest.get('prebuiltLibraries', []):
@@ -112,7 +137,7 @@ def main():
         # TODO(mikekap): Do something about manifest['nativeLibraries'].
 
         pexbin.log('Saving PEX file to %s' % poptions.pex_name,
-                   v=poptions.verbosity)
+                   V=poptions.verbosity)
         tmp_name = poptions.pex_name + '~'
         safe_delete(tmp_name)
         pex_builder.build(tmp_name)

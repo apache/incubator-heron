@@ -125,8 +125,7 @@ void StMgrClient::HandleRegisterResponse(
 
   if (response->has_pplan()) {
     LOG(INFO) << "Registration response had a pplan";
-    using std::move;
-    pplanWatcher_(move(pool_unique_ptr<proto::system::PhysicalPlan>(response->release_pplan())));
+    pplanWatcher_(pool_unique_ptr<proto::system::PhysicalPlan>(response->release_pplan()));
   }
 }
 
@@ -145,7 +144,7 @@ void StMgrClient::HandlePhysicalPlan(
         pool_unique_ptr<proto::stmgr::NewInstanceAssignmentMessage> msg) {
   LOG(INFO) << "Got a Physical Plan from our stmgr " << instanceProto_.stmgr_id() << " running at "
             << get_clientoptions().get_host() << ":" << get_clientoptions().get_port();
-  pplanWatcher_(std::move(pool_unique_ptr<proto::system::PhysicalPlan>(msg->release_pplan())));
+  pplanWatcher_(pool_unique_ptr<proto::system::PhysicalPlan>(msg->release_pplan()));
 }
 
 void StMgrClient::HandleTupleMessage(pool_unique_ptr<proto::system::HeronTupleSet2> msg) {
@@ -172,7 +171,7 @@ void StMgrClient::SendTupleMessage(const proto::system::HeronTupleSet& msg) {
 void StMgrClient::putBackPressure() {
   auto conn = static_cast<Connection*>(conn_);
   if (!conn->isUnderBackPressure()) {
-    LOG(INFO) << "Buffer to Slave Thread at maximum capacity. Clamping down on reads from Stmgr";
+    LOG(INFO) << "Buffer to Executor Thread at maximum capacity. Clamping down on reads from Stmgr";
     conn->putBackPressure();
   }
 }
@@ -180,7 +179,7 @@ void StMgrClient::putBackPressure() {
 void StMgrClient::removeBackPressure() {
   auto conn = static_cast<Connection*>(conn_);
   if (conn->isUnderBackPressure()) {
-    LOG(INFO) << "Buffer to Slave Thread less than capacity. Resuming reads from stmgr";
+    LOG(INFO) << "Buffer to Executor Thread less than capacity. Resuming reads from stmgr";
     conn->removeBackPressure();
   }
 }

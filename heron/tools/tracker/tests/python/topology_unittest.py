@@ -16,7 +16,7 @@
 # under the License.
 ''' topology_unittest.py '''
 # pylint: disable=missing-docstring
-import unittest2 as unittest
+import unittest
 
 from heron.tools.tracker.src.python.topology import Topology
 from mock_proto import MockProto
@@ -70,14 +70,14 @@ class TopologyTest(unittest.TestCase):
     self.assertEqual(MockProto.cluster, self.topology.cluster)
     self.assertEqual(MockProto.environ, self.topology.environ)
 
-  def test_set_tmaster(self):
+  def test_set_tmanager(self):
     # Set it to None
-    self.topology.set_tmaster(None)
-    self.assertIsNone(self.topology.tmaster)
+    self.topology.set_tmanager(None)
+    self.assertIsNone(self.topology.tmanager)
 
-    tmaster = MockProto().create_mock_tmaster()
-    self.topology.set_tmaster(tmaster)
-    self.assertEqual(tmaster, self.topology.tmaster)
+    tmanager = MockProto().create_mock_tmanager()
+    self.topology.set_tmanager(tmanager)
+    self.assertEqual(tmanager, self.topology.tmanager)
 
   def test_spouts(self):
     # When pplan is not set
@@ -140,7 +140,7 @@ class TopologyTest(unittest.TestCase):
 
     scope["is_called"] = False
     self.assertFalse(scope["is_called"])
-    self.topology.set_tmaster(None)
+    self.topology.set_tmanager(None)
     self.assertTrue(scope["is_called"])
 
   def test_unregister_watch(self):

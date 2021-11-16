@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 
 #  Licensed to the Apache Software Foundation (ASF) under one
@@ -23,7 +23,6 @@ import abc
 
 import socket
 import subprocess
-import six
 
 from heron.statemgrs.src.python.log import Log as LOG
 
@@ -31,11 +30,11 @@ HERON_EXECUTION_STATE_PREFIX = "{0}/executionstate/"
 HERON_PACKING_PLANS_PREFIX = "{0}/packingplans/"
 HERON_PPLANS_PREFIX = "{0}/pplans/"
 HERON_SCHEDULER_LOCATION_PREFIX = "{0}/schedulers/"
-HERON_TMASTER_PREFIX = "{0}/tmasters/"
+HERON_TMANAGER_PREFIX = "{0}/tmanagers/"
 HERON_TOPOLOGIES_KEY = "{0}/topologies"
 
 # pylint: disable=too-many-public-methods, attribute-defined-outside-init
-class StateManager(six.with_metaclass(abc.ABCMeta)):
+class StateManager(metaclass=abc.ABCMeta):
   """
   This is the abstract base class for state manager. It provides methods to get/set/delete various
   state from the state store. The getters accept an optional callback, which will watch for state
@@ -127,12 +126,10 @@ class StateManager(six.with_metaclass(abc.ABCMeta)):
   @abc.abstractmethod
   def start(self):
     """ If the state manager needs to connect to a remote host. """
-    pass
 
   @abc.abstractmethod
   def stop(self):
     """ If the state manager had connected to a remote server, it would need to stop as well. """
-    pass
 
   def get_topologies_path(self):
     return HERON_TOPOLOGIES_KEY.format(self.rootpath)
@@ -149,8 +146,8 @@ class StateManager(six.with_metaclass(abc.ABCMeta)):
   def get_execution_state_path(self, topologyName):
     return HERON_EXECUTION_STATE_PREFIX.format(self.rootpath) + topologyName
 
-  def get_tmaster_path(self, topologyName):
-    return HERON_TMASTER_PREFIX.format(self.rootpath) + topologyName
+  def get_tmanager_path(self, topologyName):
+    return HERON_TMANAGER_PREFIX.format(self.rootpath) + topologyName
 
   def get_scheduler_location_path(self, topologyName):
     return HERON_SCHEDULER_LOCATION_PREFIX.format(self.rootpath) + topologyName
@@ -179,7 +176,6 @@ class StateManager(six.with_metaclass(abc.ABCMeta)):
     sets watch on the path and calls the callback
     with the new packing_plan.
     """
-    pass
 
   @abc.abstractmethod
   def get_pplan(self, topologyName, callback=None):
@@ -206,7 +202,7 @@ class StateManager(six.with_metaclass(abc.ABCMeta)):
     pass
 
   @abc.abstractmethod
-  def get_tmaster(self, topologyName, callback=None):
+  def get_tmanager(self, topologyName, callback=None):
     pass
 
   @abc.abstractmethod

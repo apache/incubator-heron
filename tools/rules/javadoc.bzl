@@ -20,7 +20,7 @@ def _impl(ctx):
     transitive_jar_paths = [j.path for j in transitive_jar_set.to_list()]
     dir = ctx.outputs.zip.path + ".dir"
     source = ctx.outputs.zip.path + ".source"
-    external_docs = ["http://docs.oracle.com/javase/8/docs/api"] + ctx.attr.external_docs
+    external_docs = ["https://docs.oracle.com/en/java/javase/11/docs/api"] + ctx.attr.external_docs
     cmd = [
         "rm -rf %s" % source,
         "mkdir %s" % source,
@@ -36,7 +36,8 @@ def _impl(ctx):
             "-notimestamp",
             "-quiet",
             "-windowtitle '%s'" % ctx.attr.title,
-            " ".join(["-link %s" % url for url in external_docs]),
+            "-source 11",
+            " ".join(["-link '%s'" % url for url in external_docs]),
             "-sourcepath %s" % source,
             "-subpackages ",
             ":".join(ctx.attr.pkgs),

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 
 #  Licensed to the Apache Software Foundation (ASF) under one
@@ -19,6 +19,7 @@
 #  under the License.
 
 ''' config.py '''
+import string
 
 from heron.statemgrs.src.python.config import Config as StateMgrConfig
 
@@ -28,11 +29,12 @@ EXTRA_LINK_NAME_KEY = "name"
 EXTRA_LINK_FORMATTER_KEY = "formatter"
 EXTRA_LINK_URL_KEY = "url"
 
-class Config(object):
+class Config:
   """
   Responsible for reading the yaml config file and
   exposing various tracker configs.
   """
+  FORMATTER_PARAMETERS = {"CLUSTER", "ENVIRON", "TOPOLOGY", "ROLE", "USER"}
 
   def __init__(self, configs):
     self.configs = configs
@@ -48,7 +50,7 @@ class Config(object):
       for extra_link in self.configs[EXTRA_LINKS_KEY]:
         self.extra_links.append(self.validate_extra_link(extra_link))
 
-  def validate_extra_link(self, extra_link):
+  def validate_extra_link(self, extra_link: dict):
     """validate extra link"""
     if EXTRA_LINK_NAME_KEY not in extra_link or EXTRA_LINK_FORMATTER_KEY not in extra_link:
       raise Exception("Invalid extra.links format. " +
@@ -57,56 +59,43 @@ class Config(object):
     self.validated_formatter(extra_link[EXTRA_LINK_FORMATTER_KEY])
     return extra_link
 
-  # pylint: disable=no-self-use
-  def validated_formatter(self, url_format):
-    """validate visualization url format"""
-    # We try to create a string by substituting all known
-    # parameters. If an unknown parameter is present, an error
-    # will be thrown
-    valid_parameters = {
-        "${CLUSTER}": "cluster",
-        "${ENVIRON}": "environ",
-        "${TOPOLOGY}": "topology",
-        "${ROLE}": "role",
-        "${USER}": "user",
-    }
-    dummy_formatted_url = url_format
-    for key, value in list(valid_parameters.items()):
-      dummy_formatted_url = dummy_formatted_url.replace(key, value)
+  def validated_formatter(self, url_format: str) -> None:
+    """Check visualization url format has no unrecongnised parameters."""
+    # collect the parameters which would be interpolated
+    formatter_variables = set()
+    class ValidationHelper:
+      def __getitem__(self, key):
+        formatter_variables.add(key)
+        return ""
 
-    # All $ signs must have been replaced
-    if '$' in dummy_formatted_url:
-      raise Exception("Invalid viz.url.format: %s" % (url_format))
+    string.Template(url_format).safe_substitute(ValidationHelper())
 
-    # No error is thrown, so the format is valid.
-    return url_format
+    if not formatter_variables <= self.FORMATTER_PARAMETERS:
+      raise Exception(f"Invalid viz.url.format: {url_format!r}")
 
-  def get_formatted_url(self, formatter, execution_state):
+  @staticmethod
+  def get_formatted_url(formatter: str, execution_state: dict) -> str:
     """
-    @param formatter: The template string to interpolate
-    @param execution_state: The python dict representing JSON execution_state
-    @return Formatted viz url
+    Format a url string using values from the execution state.
+
     """
 
-    # Create the parameters based on execution state
-    common_parameters = {
-        "${CLUSTER}": execution_state.get("cluster", "${CLUSTER}"),
-        "${ENVIRON}": execution_state.get("environ", "${ENVIRON}"),
-        "${TOPOLOGY}": execution_state.get("jobname", "${TOPOLOGY}"),
-        "${ROLE}": execution_state.get("role", "${ROLE}"),
-        "${USER}": execution_state.get("submission_user", "${USER}"),
+    subs = {
+        var: execution_state[prop]
+        for prop, var in (
+            ("cluster", "CLUSTER"),
+            ("environ", "ENVIRON"),
+            ("jobname", "TOPOLOGY"),
+            ("role", "ROLE"),
+            ("submission_user", "USER"))
+        if prop in execution_state
     }
-
-    formatted_url = formatter
-
-    for key, value in list(common_parameters.items()):
-      formatted_url = formatted_url.replace(key, value)
-
-    return formatted_url
+    return string.Template(formatter).substitute(subs)
 
   def __str__(self):
     return "".join((self.config_str(c) for c in self.configs[STATEMGRS_KEY]))
 
-  def config_str(self, config):
+  @staticmethod
+  def config_str(config):
     keys = ("type", "name", "hostport", "rootpath", "tunnelhost")
     return "".join("\t{}: {}\n".format(k, config[k]) for k in keys if k in config).rstrip()

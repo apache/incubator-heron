@@ -1,4 +1,5 @@
-#!/bin/bash -ex
+#!/bin/bash
+set -o errexit -o nounset -o pipefail
 
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -15,17 +16,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# NB: Apache Mesos requires the use of "master"/"slave"
 install_mesos() {
     mode=$1 # master | slave
     apt-get -qy install mesos=0.25.0*
 
-    echo "zk://master:2181/mesos" > /etc/mesos/zk
+    echo "zk://primary:2181/mesos" > /etc/mesos/zk
     echo '5mins' > /etc/mesos-slave/executor_registration_timeout
 
     ip=$(cat /etc/hosts | grep `hostname` | grep -E -o "([0-9]{1,3}[\.]){3}[0-9]{1,3}")
     echo $ip > "/etc/mesos-$mode/ip"
 
-    if [ $mode == "master" ]; then
+    if [ "$mode" == "master" ]; then
         ln -s /lib/init/upstart-job /etc/init.d/mesos-master
         service mesos-master start
     else
@@ -33,6 +35,7 @@ install_mesos() {
     fi
 
     ln -s /lib/init/upstart-job /etc/init.d/mesos-slave
+    echo 'docker,mesos' > /etc/mesos-slave/containerizers
     service mesos-slave start
 }
 
@@ -41,69 +44,40 @@ install_marathon() {
     service marathon start
 }
 
-install_docker() {
-    apt-get install -qy lxc-docker
-    echo 'docker,mesos' > /etc/mesos-slave/containerizers
-    service mesos-slave restart
-}
-
-install_jdk8() {
-    apt-get install -y software-properties-common python-software-properties
-    add-apt-repository -y ppa:webupd8team/java
-    apt-get -y update
-    /bin/echo debconf shared/accepted-oracle-license-v1-1 select true | /usr/bin/debconf-set-selections
-    apt-get -y install oracle-java8-installer oracle-java8-set-default vim wget screen git    
-}
-
-bazelVersion=3.0.0
+bazelVersion=4.1.0
 bazel_install() {
-    install_jdk8
-    apt-get install -y g++ automake cmake gcc-4.8 g++-4.8 zlib1g-dev zip pkg-config wget libssl-dev
+    apt-get install -y automake cmake gcc g++ zlib1g-dev zip pkg-config wget libssl-dev libunwind-dev
     mkdir -p /opt/bazel
     pushd /opt/bazel
-        pushd /tmp
-            wget http://download.savannah.gnu.org/releases/libunwind/libunwind-1.1.tar.gz
-            tar xvfz libunwind-1.1.tar.gz
-            cd libunwind-1.1 && ./configure --prefix=/usr && make install 
-        popd
         wget -O /tmp/bazel.sh https://github.com/bazelbuild/bazel/releases/download/${bazelVersion}/bazel-${bazelVersion}-installer-linux-x86_64.sh
         chmod +x /tmp/bazel.sh
-        /tmp/bazel.sh --user 
+        /tmp/bazel.sh
     popd
 }
 
 build_heron() {
-    pushd /tmp
-        wget http://ftpmirror.gnu.org/libtool/libtool-2.4.6.tar.gz
-        tar xf libtool*
-        cd libtool-2.4.6
-        sh configure --prefix /usr/local
-        make install 
-    popd
     pushd /vagrant
-        export CC=gcc-4.8
-        export CXX=g++-4.8
-        export PATH=/sbin:$PATH
-        ~/bin/bazel clean
+        bazel clean
         ./bazel_configure.py
-        ~/bin/bazel --bazelrc=tools/travis/bazel.rc build --config=ubuntu heron/...
+        bazel --bazelrc=tools/travis/bazel.rc build --config=ubuntu heron/...
     popd
 }
 
-if [[ $1 != "master" && $1 != "slave" ]]; then
+if [[ "$1" != "master" && $1 != "slave" ]]; then
     echo "Usage: $0 master|slave"
     exit 1
 fi
-mode=$1
+mode="$1"
 
 cd /vagrant/vagrant
 
 # name resolution
 cp .vagrant/hosts /etc/hosts
 
+# XXX: not needed?
 # ssh key
 key=".vagrant/ssh_key.pub"
-if [ -f $key ]; then
+if [ -f "$key" ]; then
     cat $key >> /home/vagrant/.ssh/authorized_keys
 fi
 
@@ -118,27 +92,23 @@ if [ -f ".vagrant/apt-proxy" ]; then
     echo "Acquire::http::Proxy \"$apt_proxy\";" > /etc/apt/apt.conf.d/90-apt-proxy.conf
 fi
 
+:<<'REMOVED'
 # add mesosphere repo
 apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv E56151BF
 DISTRO=$(lsb_release -is | tr '[:upper:]' '[:lower:]')
 CODENAME=$(lsb_release -cs)
-echo "deb http://repos.mesosphere.io/${DISTRO} ${CODENAME} main" | tee /etc/apt/sources.list.d/mesosphere.list
-
-# add docker repo
-apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 36A1D7869245C8950F966E92D8576A8BA88D21E9
-echo "deb http://get.docker.com/ubuntu docker main" > /etc/apt/sources.list.d/docker.list
+echo "deb http://repos.mesosphere.io/${DISTRO} cosmic main" | tee /etc/apt/sources.list.d/mesosphere.list
+REMOVED
 
 apt-get -qy update
 
 # install deps
-apt-get install -qy vim zip mc curl wget openjdk-7-jre scala git python-setuptools python-dev
+apt-get install -qy ant vim zip mc curl wget openjdk-11-jdk scala git python3-setuptools python3-venv python3-dev libtool-bin python-is-python3
 
-install_mesos $mode
+# install_mesos $mode
 if [ $mode == "master" ]; then 
-    install_marathon
+    # install_marathon
     bazel_install
-    build_heron
+    # switch to non-root so bazel cache can be reused when SSHing in
+    # su --login vagrant /vagrant/scripts/travis/ci.sh
 fi
-
-install_docker
-

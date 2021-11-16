@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 
 #  Licensed to the Apache Software Foundation (ASF) under one
@@ -24,7 +24,7 @@ import tornado.gen
 import tornado.web
 
 from heron.common.src.python.utils.log import Log
-from heron.proto import tmaster_pb2
+from heron.proto import tmanager_pb2
 from heron.tools.tracker.src.python.handlers import BaseHandler
 
 # pylint: disable=attribute-defined-outside-init
@@ -43,7 +43,7 @@ class RuntimeStateHandler(BaseHandler):
 
   Example JSON response:
     {
-      has_tmaster_location: true,
+      has_tmanager_location: true,
       stmgrs_reg_summary: {
         registered_stmgrs: [
           "stmgr-1",
@@ -61,16 +61,16 @@ class RuntimeStateHandler(BaseHandler):
 
   # pylint: disable=dangerous-default-value, no-self-use, unused-argument
   @tornado.gen.coroutine
-  def getStmgrsRegSummary(self, tmaster, callback=None):
+  def getStmgrsRegSummary(self, tmanager, callback=None):
     """
     Get summary of stream managers registration summary
     """
-    if not tmaster or not tmaster.host or not tmaster.stats_port:
+    if not tmanager or not tmanager.host or not tmanager.stats_port:
       return
-    reg_request = tmaster_pb2.StmgrsRegistrationSummaryRequest()
+    reg_request = tmanager_pb2.StmgrsRegistrationSummaryRequest()
     request_str = reg_request.SerializeToString()
-    port = str(tmaster.stats_port)
-    host = tmaster.host
+    port = str(tmanager.stats_port)
+    host = tmanager.host
     url = "http://{0}:{1}/stmgrsregistrationsummary".format(host, port)
     request = tornado.httpclient.HTTPRequest(url,
                                              body=request_str,
@@ -86,13 +86,13 @@ class RuntimeStateHandler(BaseHandler):
     # Check the response code - error if it is in 400s or 500s
     responseCode = result.code
     if responseCode >= 400:
-      message = "Error in getting exceptions from Tmaster, code: " + responseCode
+      message = "Error in getting exceptions from Tmanager, code: " + responseCode
       Log.error(message)
       raise tornado.gen.Return({
           "message": message
       })
-    # Parse the response from tmaster.
-    reg_response = tmaster_pb2.StmgrsRegistrationSummaryResponse()
+    # Parse the response from tmanager.
+    reg_response = tmanager_pb2.StmgrsRegistrationSummaryResponse()
     reg_response.ParseFromString(result.body)
     # Send response
     ret = {}
@@ -110,12 +110,12 @@ class RuntimeStateHandler(BaseHandler):
       role = self.get_argument_role()
       environ = self.get_argument_environ()
       topology_name = self.get_argument_topology()
-      topology_info = self.tracker.getTopologyInfo(topology_name, cluster, role, environ)
+      topology_info = self.tracker.get_topology_info(topology_name, cluster, role, environ)
       runtime_state = topology_info["runtime_state"]
       runtime_state["topology_version"] = topology_info["metadata"]["release_version"]
-      topology = self.tracker.getTopologyByClusterRoleEnvironAndName(
+      topology = self.tracker.get_topology(
           cluster, role, environ, topology_name)
-      reg_summary = yield tornado.gen.Task(self.getStmgrsRegSummary, topology.tmaster)
+      reg_summary = yield tornado.gen.Task(self.getStmgrsRegSummary, topology.tmanager)
       for stmgr, reg in list(reg_summary.items()):
         runtime_state["stmgrs"].setdefault(stmgr, {})["is_registered"] = reg
       self.write_success_response(runtime_state)

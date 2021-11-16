@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 
 #  Licensed to the Apache Software Foundation (ASF) under one
@@ -134,7 +134,6 @@ def run(command, parser, cl_args, unknown_args):
   configcommand = cl_args.get('configcommand', None)
   if configcommand == 'set':
     return _set(cl_args)
-  elif configcommand == 'unset':
+  if configcommand == 'unset':
     return _unset(cl_args)
-  else:
-    return _list(cl_args)
+  return _list(cl_args)

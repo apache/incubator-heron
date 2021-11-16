@@ -215,9 +215,9 @@ function StatTrendlines(baseUrl, cluster, environ, toponame, physicalPlan, logic
         .append('div')
         .attr('class', 'text-center')
         .html([
-          '<a class="btn btn-primary btn-xs" target="_blank" href="/topologies/' + cluster + '/' + environ + '/' + toponame + '/' + container + '/file?path=./log-files/' + instance + '.log.0">logs</a>',
-          '<a class="btn btn-primary btn-xs" target="_blank" href="/topologies/filestats/' + cluster + '/' + environ + '/' + toponame + '/' + container + '">job</a>',
-          '<a class="btn btn-primary btn-xs" target="_blank" href="/topologies/' + cluster + '/' + environ + '/' + toponame + '/' + name + '/' + instance + '/exceptions">exceptions</a>',
+          '<a class="btn btn-primary btn-xs" target="_blank" href="' + baseUrl + '/topologies/' + cluster + '/' + environ + '/' + toponame + '/' + container + '/file?path=./log-files/' + instance + '.log.0">logs</a>',
+          '<a class="btn btn-primary btn-xs" target="_blank" href="' + baseUrl + '/topologies/filestats/' + cluster + '/' + environ + '/' + toponame + '/' + container + '/file">files</a>',
+          '<a class="btn btn-primary btn-xs" target="_blank" href="' + baseUrl + '/topologies/' + cluster + '/' + environ + '/' + toponame + '/' + name + '/' + instance + '/exceptions">exceptions</a>',
           '<br>',
         ].join(' '));
     }

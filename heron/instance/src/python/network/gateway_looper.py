@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 
 #  Licensed to the Apache Software Foundation (ASF) under one
@@ -66,7 +66,7 @@ class GatewayLooper(EventLooper):
       self.poll(timeout=0.0)
 
   def wake_up(self):
-    os.write(self.pipe_w, "\n")
+    os.write(self.pipe_w, b"\n")
     Log.debug("Wake up called")
 
   def on_exit(self):
@@ -105,8 +105,7 @@ class GatewayLooper(EventLooper):
       Log.debug("Trivial error: " + str(err))
       if err.args[0] != errno.EINTR:
         raise
-      else:
-        return
+      return
     Log.debug("Selected [r]: " + str(readable_lst) +
               " [w]: " + str(writable_lst) + " [e]: " + str(error_lst))
 

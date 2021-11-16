@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 
 #  Licensed to the Apache Software Foundation (ASF) under one
@@ -26,42 +26,39 @@ try:
 except:
   import pickle
 
-import heronpy.api.cloudpickle as cloudpickle
+import cloudpickle
 
-class IHeronSerializer(object):
+class IHeronSerializer:
   """Serializer interface for Heron"""
   @abstractmethod
   def initialize(self, config):
     """Initializes the serializer"""
-    pass
 
   @abstractmethod
-  def serialize(self, obj):
+  def serialize(self, obj) -> bytes:
     """Serialize an object
 
     :param obj: The object to be serialized
     :returns: Serialized object as byte string
     """
-    pass
 
   @abstractmethod
-  def deserialize(self, input_str):
+  def deserialize(self, input_str: bytes):
     """Deserialize an object
 
     :param input_str: Serialized object as byte string
     :returns: Deserialized object
     """
-    pass
 
 class PythonSerializer(IHeronSerializer):
   """Default serializer"""
   def initialize(self, config=None):
     pass
 
-  def serialize(self, obj):
+  def serialize(self, obj) -> bytes:
     return cloudpickle.dumps(obj)
 
-  def deserialize(self, input_str):
+  def deserialize(self, input_str: bytes):
     return pickle.loads(input_str)
 
 default_serializer = PythonSerializer()

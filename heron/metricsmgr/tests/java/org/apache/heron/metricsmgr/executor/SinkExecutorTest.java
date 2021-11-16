@@ -37,7 +37,7 @@ import org.junit.Test;
 
 import org.apache.heron.api.metric.MultiCountMetric;
 import org.apache.heron.common.basics.Communicator;
-import org.apache.heron.common.basics.SlaveLooper;
+import org.apache.heron.common.basics.ExecutorLooper;
 import org.apache.heron.metricsmgr.MetricsSinksConfig;
 import org.apache.heron.metricsmgr.sink.SinkContextImpl;
 import org.apache.heron.spi.metricsmgr.metrics.ExceptionInfo;
@@ -66,7 +66,7 @@ public class SinkExecutorTest {
   private volatile int flushInvoked = 0;
   private volatile int initInvoked = 0;
   private DummyMetricsSink metricsSink;
-  private SlaveLooper slaveLooper;
+  private ExecutorLooper executorLooper;
   private Communicator<MetricsRecord> communicator;
   private SinkExecutor sinkExecutor;
   private ExecutorService threadsPool;
@@ -74,21 +74,21 @@ public class SinkExecutorTest {
   @Before
   public void before() throws Exception {
     metricsSink = new DummyMetricsSink(EXPECTED_RECORDS, EXPECTED_FLUSHES);
-    slaveLooper = new SlaveLooper();
-    communicator = new Communicator<>(null, slaveLooper);
+    executorLooper = new ExecutorLooper();
+    communicator = new Communicator<>(null, executorLooper);
 
     SinkContext sinkContext =
         new SinkContextImpl("topology-name", "cluster", "role", "environment",
             "metricsmgr-id", "sink-id", new MultiCountMetric());
 
     sinkExecutor =
-        new SinkExecutor("testSinkId", metricsSink, slaveLooper, communicator, sinkContext);
+        new SinkExecutor("testSinkId", metricsSink, executorLooper, communicator, sinkContext);
   }
 
   @After
   public void after() throws Exception {
     metricsSink = null;
-    slaveLooper = null;
+    executorLooper = null;
     communicator = null;
     sinkExecutor = null;
   }

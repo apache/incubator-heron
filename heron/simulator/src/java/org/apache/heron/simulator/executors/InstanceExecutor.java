@@ -26,7 +26,7 @@ import com.google.protobuf.Message;
 
 import org.apache.heron.api.generated.TopologyAPI;
 import org.apache.heron.common.basics.Communicator;
-import org.apache.heron.common.basics.SlaveLooper;
+import org.apache.heron.common.basics.ExecutorLooper;
 import org.apache.heron.common.utils.metrics.MetricsCollector;
 import org.apache.heron.common.utils.misc.PhysicalPlanHelper;
 import org.apache.heron.instance.IInstance;
@@ -49,7 +49,7 @@ public class InstanceExecutor implements Runnable {
 
   private final PhysicalPlanHelper physicalPlanHelper;
 
-  private final SlaveLooper looper;
+  private final ExecutorLooper looper;
 
   private final Communicator<Message> streamInQueue;
   private final Communicator<Message> streamOutQueue;
@@ -68,7 +68,7 @@ public class InstanceExecutor implements Runnable {
     streamInQueue = new Communicator<>();
     streamOutQueue = new Communicator<>();
     metricsOutQueue = new Communicator<>();
-    looper = new SlaveLooper();
+    looper = new ExecutorLooper();
 
     MetricsCollector metricsCollector = new MetricsCollector(looper, metricsOutQueue);
 

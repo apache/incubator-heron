@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 
 #  Licensed to the Apache Software Foundation (ASF) under one
@@ -30,7 +30,7 @@ from heron.proto.execution_state_pb2 import ExecutionState
 from heron.proto.packing_plan_pb2 import PackingPlan
 from heron.proto.physical_plan_pb2 import PhysicalPlan
 from heron.proto.scheduler_pb2 import SchedulerLocation
-from heron.proto.tmaster_pb2 import TMasterLocation
+from heron.proto.tmanager_pb2 import TManagerLocation
 from heron.proto.topology_pb2 import Topology
 
 # pylint: disable=too-many-instance-attributes
@@ -50,7 +50,7 @@ class FileStateManager(StateManager):
     self.execution_state_directory = {}
     self.packing_plan_directory = {}
     self.pplan_directory = {}
-    self.tmaster_directory = {}
+    self.tmanager_directory = {}
     self.scheduler_location_directory = {}
 
     # The watches are triggered when there
@@ -65,7 +65,7 @@ class FileStateManager(StateManager):
     self.execution_state_watchers = defaultdict(lambda: [])
     self.packing_plan_watchers = defaultdict(lambda: [])
     self.pplan_watchers = defaultdict(lambda: [])
-    self.tmaster_watchers = defaultdict(lambda: [])
+    self.tmanager_watchers = defaultdict(lambda: [])
     self.scheduler_location_watchers = defaultdict(lambda: [])
 
     # Instantiate the monitoring thread.
@@ -101,9 +101,9 @@ class FileStateManager(StateManager):
       """
       for topology, callbacks in list(watchers.items()):
         file_path = os.path.join(path, topology)
-        data = ""
+        data = b""
         if os.path.exists(file_path):
-          with open(os.path.join(path, topology)) as f:
+          with open(os.path.join(path, topology), "rb") as f:
             data = f.read()
         if topology not in directory or data != directory[topology]:
           proto_object = ProtoClass()
@@ -144,11 +144,11 @@ class FileStateManager(StateManager):
           self.pplan_watchers, pplan_path,
           self.pplan_directory, PhysicalPlan)
 
-      # Get the directory name for tmaster
-      tmaster_path = os.path.dirname(self.get_tmaster_path(""))
+      # Get the directory name for tmanager
+      tmanager_path = os.path.dirname(self.get_tmanager_path(""))
       trigger_watches_based_on_files(
-          self.tmaster_watchers, tmaster_path,
-          self.tmaster_directory, TMasterLocation)
+          self.tmanager_watchers, tmanager_path,
+          self.tmanager_directory, TManagerLocation)
 
       # Get the directory name for scheduler location
       scheduler_location_path = os.path.dirname(self.get_scheduler_location_path(""))
@@ -167,6 +167,7 @@ class FileStateManager(StateManager):
       topologies_path = self.get_topologies_path()
       return [f for f in os.listdir(topologies_path)
               if os.path.isfile(os.path.join(topologies_path, f))]
+    return None
 
   def get_topology(self, topologyName, callback=None):
     """get topology"""
@@ -174,23 +175,22 @@ class FileStateManager(StateManager):
       self.topology_watchers[topologyName].append(callback)
     else:
       topology_path = self.get_topology_path(topologyName)
-      with open(topology_path) as f:
+      with open(topology_path, "rb") as f:
         data = f.read()
         topology = Topology()
         topology.ParseFromString(data)
         return topology
+    return None
 
   def create_topology(self, topologyName, topology):
     """
     Create path is currently not supported in file based state manager.
     """
-    pass
 
   def delete_topology(self, topologyName):
     """
     Delete path is currently not supported in file based state manager.
     """
-    pass
 
   def get_packing_plan(self, topologyName, callback=None):
     """ get packing plan """
@@ -198,7 +198,7 @@ class FileStateManager(StateManager):
       self.packing_plan_watchers[topologyName].append(callback)
     else:
       packing_plan_path = self.get_packing_plan_path(topologyName)
-      with open(packing_plan_path) as f:
+      with open(packing_plan_path, "rb") as f:
         data = f.read()
         packing_plan = PackingPlan()
         packing_plan.ParseFromString(data)
@@ -211,23 +211,22 @@ class FileStateManager(StateManager):
       self.pplan_watchers[topologyName].append(callback)
     else:
       pplan_path = self.get_pplan_path(topologyName)
-      with open(pplan_path) as f:
+      with open(pplan_path, "rb") as f:
         data = f.read()
         pplan = PhysicalPlan()
         pplan.ParseFromString(data)
         return pplan
+    return None
 
   def create_pplan(self, topologyName, pplan):
     """
     Create path is currently not supported in file based state manager.
     """
-    pass
 
   def delete_pplan(self, topologyName):
     """
     Delete path is currently not supported in file based state manager.
     """
-    pass
 
   def get_execution_state(self, topologyName, callback=None):
     """
@@ -237,37 +236,37 @@ class FileStateManager(StateManager):
       self.execution_state_watchers[topologyName].append(callback)
     else:
       execution_state_path = self.get_execution_state_path(topologyName)
-      with open(execution_state_path) as f:
+      with open(execution_state_path, "rb") as f:
         data = f.read()
         executionState = ExecutionState()
         executionState.ParseFromString(data)
         return executionState
+    return None
 
   def create_execution_state(self, topologyName, executionState):
     """
     Create path is currently not supported in file based state manager.
     """
-    pass
 
   def delete_execution_state(self, topologyName):
     """
     Delete path is currently not supported in file based state manager.
     """
-    pass
 
-  def get_tmaster(self, topologyName, callback=None):
+  def get_tmanager(self, topologyName, callback=None):
     """
-    Get tmaster
+    Get tmanager
     """
     if callback:
-      self.tmaster_watchers[topologyName].append(callback)
+      self.tmanager_watchers[topologyName].append(callback)
     else:
-      tmaster_path = self.get_tmaster_path(topologyName)
-      with open(tmaster_path) as f:
+      tmanager_path = self.get_tmanager_path(topologyName)
+      with open(tmanager_path, "rb") as f:
         data = f.read()
-        tmaster = TMasterLocation()
-        tmaster.ParseFromString(data)
-        return tmaster
+        tmanager = TManagerLocation()
+        tmanager.ParseFromString(data)
+        return tmanager
+    return None
 
   def get_scheduler_location(self, topologyName, callback=None):
     """
@@ -277,8 +276,9 @@ class FileStateManager(StateManager):
       self.scheduler_location_watchers[topologyName].append(callback)
     else:
       scheduler_location_path = self.get_scheduler_location_path(topologyName)
-      with open(scheduler_location_path) as f:
+      with open(scheduler_location_path, "rb") as f:
         data = f.read()
         scheduler_location = SchedulerLocation()
         scheduler_location.ParseFromString(data)
         return scheduler_location
+    return None

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 
 #  Licensed to the Apache Software Foundation (ASF) under one
@@ -46,10 +46,9 @@ def format_mode(sres):
     ''' stat type'''
     if stat.S_ISDIR(md):
       return 'd'
-    elif stat.S_ISSOCK(md):
+    if stat.S_ISSOCK(md):
       return 's'
-    else:
-      return '-'
+    return '-'
 
   def triple(md):
     ''' triple '''
@@ -136,7 +135,7 @@ def read_chunk(filename, offset=-1, length=-1, escape_data=False):
   if length == -1:
     length = fstat.st_size - offset
 
-  with open(filename, "r") as fp:
+  with open(filename, "rb") as fp:
     fp.seek(offset)
     try:
       data = fp.read(length)
@@ -144,7 +143,8 @@ def read_chunk(filename, offset=-1, length=-1, escape_data=False):
       return {}
 
   if data:
-    data = _escape_data(data) if escape_data else data
+    # use permissive decoding and escaping if escape_data is set, otherwise use strict decoding
+    data = _escape_data(data) if escape_data else data.decode()
     return dict(offset=offset, length=len(data), data=data)
 
   return dict(offset=offset, length=0)
@@ -170,7 +170,8 @@ def str_cmd(cmd, cwd, env):
   Runs the command and returns its stdout and stderr.
   """
   process = subprocess.Popen(cmd, stdout=subprocess.PIPE,
-                             stderr=subprocess.PIPE, cwd=cwd, env=env)
+                             stderr=subprocess.PIPE, cwd=cwd,
+                             env=env, universal_newlines=True)
   stdout_builder, stderr_builder = proc.async_stdout_stderr_builder(process)
   process.wait()
   stdout, stderr = stdout_builder.result(), stderr_builder.result()
@@ -197,7 +198,7 @@ def get_container_id(instance_id):
 
 def get_asset(asset_name):
   ''' get assset '''
-  return pkgutil.get_data("heron.shell", os.path.join("assets", asset_name))
+  return pkgutil.get_data("heron.shell", os.path.join("assets", asset_name)).decode()
 
 def check_path(path):
   """

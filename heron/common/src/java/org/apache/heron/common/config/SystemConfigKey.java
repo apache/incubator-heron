@@ -309,23 +309,23 @@ public enum SystemConfigKey {
       "heron.metricsmgr.network.options.maximum.packetsize.bytes", Type.BYTE_AMOUNT),
 
   /**
-   *The maximum exception count be kept in tmaster
+   *The maximum exception count be kept in tmanager
    */
-  TMASTER_METRICS_COLLECTOR_MAXIMUM_EXCEPTION(
-      "heron.tmaster.metrics.collector.maximum.exception", Type.LONG),
+  TMANAGER_METRICS_COLLECTOR_MAXIMUM_EXCEPTION(
+      "heron.tmanager.metrics.collector.maximum.exception", Type.LONG),
 
   /**
-   * The maximum interval in minutes of metrics to be kept in tmaster
+   * The maximum interval in minutes of metrics to be kept in tmanager
    */
-  TMASTER_METRICS_COLLECTOR_MAXIMUM_INTERVAL(
-      "heron.tmaster.metrics.collector.maximum.interval.min",
+  TMANAGER_METRICS_COLLECTOR_MAXIMUM_INTERVAL(
+      "heron.tmanager.metrics.collector.maximum.interval.min",
       ChronoUnit.MINUTES, Duration.ofHours(3)),
 
   /**
-   * The interval for tmaster to purge metrics from socket
+   * The interval for tmanager to purge metrics from socket
    */
-  TMASTER_METRICS_COLLECTOR_PURGE_INTERVAL(
-       "heron.tmaster.metrics.collector.purge.interval.sec",
+  TMANAGER_METRICS_COLLECTOR_PURGE_INTERVAL(
+       "heron.tmanager.metrics.collector.purge.interval.sec",
       ChronoUnit.SECONDS, Duration.ofMinutes(1));
 
 

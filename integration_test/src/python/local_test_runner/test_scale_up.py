@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 
 #  Licensed to the Apache Software Foundation (ASF) under one
@@ -24,7 +24,7 @@ import logging
 import subprocess
 
 from ..common import status
-import test_template
+from . import test_template
 
 class TestScaleUp(test_template.TestTemplate):
 

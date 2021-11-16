@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 
 #  Licensed to the Apache Software Foundation (ASF) under one
@@ -25,7 +25,7 @@ import tornado.web
 
 from heron.common.src.python.utils.log import Log
 from heron.proto import common_pb2
-from heron.proto import tmaster_pb2
+from heron.proto import tmanager_pb2
 from heron.tools.tracker.src.python import constants
 from heron.tools.tracker.src.python.handlers import BaseHandler
 
@@ -60,11 +60,11 @@ class ExceptionSummaryHandler(BaseHandler):
       role = self.get_argument_role()
       topology_name = self.get_argument_topology()
       component = self.get_argument_component()
-      topology = self.tracker.getTopologyByClusterRoleEnvironAndName(
+      topology = self.tracker.get_topology(
           cluster, role, environ, topology_name)
       instances = self.get_arguments(constants.PARAM_INSTANCE)
       exceptions_summary = yield tornado.gen.Task(self.getComponentExceptionSummary,
-                                                  topology.tmaster, component, instances)
+                                                  topology.tmanager, component, instances)
       self.write_success_response(exceptions_summary)
     except Exception as e:
       Log.debug(traceback.format_exc())
@@ -72,20 +72,20 @@ class ExceptionSummaryHandler(BaseHandler):
 
   # pylint: disable=dangerous-default-value, no-self-use, unused-argument
   @tornado.gen.coroutine
-  def getComponentExceptionSummary(self, tmaster, component_name, instances=[], callback=None):
+  def getComponentExceptionSummary(self, tmanager, component_name, instances=[], callback=None):
     """
     Get the summary of exceptions for component_name and list of instances.
     Empty instance list will fetch all exceptions.
     """
-    if not tmaster or not tmaster.host or not tmaster.stats_port:
+    if not tmanager or not tmanager.host or not tmanager.stats_port:
       return
-    exception_request = tmaster_pb2.ExceptionLogRequest()
+    exception_request = tmanager_pb2.ExceptionLogRequest()
     exception_request.component_name = component_name
     if len(instances) > 0:
       exception_request.instances.extend(instances)
     request_str = exception_request.SerializeToString()
-    port = str(tmaster.stats_port)
-    host = tmaster.host
+    port = str(tmanager.stats_port)
+    host = tmanager.host
     url = "http://{0}:{1}/exceptionsummary".format(host, port)
     Log.debug("Creating request object.")
     request = tornado.httpclient.HTTPRequest(url,
@@ -103,14 +103,14 @@ class ExceptionSummaryHandler(BaseHandler):
     # Check the response code - error if it is in 400s or 500s
     responseCode = result.code
     if responseCode >= 400:
-      message = "Error in getting exceptions from Tmaster, code: " + responseCode
+      message = "Error in getting exceptions from Tmanager, code: " + responseCode
       Log.error(message)
       raise tornado.gen.Return({
           "message": message
       })
 
-    # Parse the response from tmaster.
-    exception_response = tmaster_pb2.ExceptionLogResponse()
+    # Parse the response from tmanager.
+    exception_response = tmanager_pb2.ExceptionLogResponse()
     exception_response.ParseFromString(result.body)
 
     if exception_response.status.status == common_pb2.NOTOK:

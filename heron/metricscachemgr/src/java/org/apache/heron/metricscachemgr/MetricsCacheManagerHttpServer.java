@@ -34,13 +34,13 @@ import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 
 import org.apache.heron.metricscachemgr.metricscache.MetricsCache;
-import org.apache.heron.proto.tmaster.TopologyMaster;
+import org.apache.heron.proto.tmanager.TopologyManager;
 import org.apache.heron.spi.utils.NetworkUtils;
 
 
 /**
  * MetricsCacheMgr http server:
- * compatible with tmaster and tracker http interface for metrics
+ * compatible with tmanager and tracker http interface for metrics
  * http path:
  * "/stats" metric query
  * "/exceptions" exception query
@@ -53,7 +53,7 @@ import org.apache.heron.spi.utils.NetworkUtils;
  * MetricsCacheManagerHttpServer is a http server
  */
 public class MetricsCacheManagerHttpServer {
-  // http path, compatible with tmaster stat interface
+  // http path, compatible with tmanager stat interface
   private static final String PATH_STATS = "/stats";
   private static final String PATH_EXCEPTIONS = "/exceptions";
   private static final String PATH_EXCEPTIONSUMMARY = "/exceptionsummary";
@@ -105,7 +105,7 @@ public class MetricsCacheManagerHttpServer {
     System.out.println("endpoint: " + url + "; component: " + args[1]);
 
     // construct query payload
-    byte[] requestData = TopologyMaster.MetricRequest.newBuilder()
+    byte[] requestData = TopologyManager.MetricRequest.newBuilder()
         .setComponentName(args[1])
         .setMinutely(true)
         .setInterval(-1)
@@ -118,7 +118,8 @@ public class MetricsCacheManagerHttpServer {
     byte[] responseData = NetworkUtils.readHttpResponse(con);
 
     // parse response data
-    TopologyMaster.MetricResponse response = TopologyMaster.MetricResponse.parseFrom(responseData);
+    TopologyManager.MetricResponse response =
+        TopologyManager.MetricResponse.parseFrom(responseData);
 
     System.out.println(response.toString());
   }
@@ -157,50 +158,50 @@ public class MetricsCacheManagerHttpServer {
     abstract U generateResponse(T request, MetricsCache metricsCache1);
   }
 
-  // compatible with tmaster stat interface: http+protobuf
+  // compatible with tmanager stat interface: http+protobuf
   class HandleStatsRequest
-      extends RequestHandler<TopologyMaster.MetricRequest, TopologyMaster.MetricResponse> {
+      extends RequestHandler<TopologyManager.MetricRequest, TopologyManager.MetricResponse> {
     @Override
-    public TopologyMaster.MetricRequest parseRequest(byte[] requestBytes)
+    public TopologyManager.MetricRequest parseRequest(byte[] requestBytes)
         throws InvalidProtocolBufferException {
-      return TopologyMaster.MetricRequest.parseFrom(requestBytes);
+      return TopologyManager.MetricRequest.parseFrom(requestBytes);
     }
 
     @Override
-    public TopologyMaster.MetricResponse generateResponse(
-        TopologyMaster.MetricRequest request, MetricsCache metricsCache1) {
+    public TopologyManager.MetricResponse generateResponse(
+        TopologyManager.MetricRequest request, MetricsCache metricsCache1) {
       return metricsCache1.getMetrics(request);
     }
   }
 
-  // compatible with tmaster exceptions interface: http+protobuf
+  // compatible with tmanager exceptions interface: http+protobuf
   public class HandleExceptionRequest extends
-      RequestHandler<TopologyMaster.ExceptionLogRequest, TopologyMaster.ExceptionLogResponse> {
+      RequestHandler<TopologyManager.ExceptionLogRequest, TopologyManager.ExceptionLogResponse> {
     @Override
-    public TopologyMaster.ExceptionLogRequest parseRequest(byte[] requestBytes)
+    public TopologyManager.ExceptionLogRequest parseRequest(byte[] requestBytes)
         throws InvalidProtocolBufferException {
-      return TopologyMaster.ExceptionLogRequest.parseFrom(requestBytes);
+      return TopologyManager.ExceptionLogRequest.parseFrom(requestBytes);
     }
 
     @Override
-    public TopologyMaster.ExceptionLogResponse generateResponse(
-        TopologyMaster.ExceptionLogRequest request, MetricsCache metricsCache1) {
+    public TopologyManager.ExceptionLogResponse generateResponse(
+        TopologyManager.ExceptionLogRequest request, MetricsCache metricsCache1) {
       return metricsCache1.getExceptions(request);
     }
   }
 
-  // compatible with tmaster exceptionsummary interface: http+protobuf
+  // compatible with tmanager exceptionsummary interface: http+protobuf
   public class HandleExceptionSummaryRequest extends
-      RequestHandler<TopologyMaster.ExceptionLogRequest, TopologyMaster.ExceptionLogResponse> {
+      RequestHandler<TopologyManager.ExceptionLogRequest, TopologyManager.ExceptionLogResponse> {
     @Override
-    public TopologyMaster.ExceptionLogRequest parseRequest(byte[] requestBytes)
+    public TopologyManager.ExceptionLogRequest parseRequest(byte[] requestBytes)
         throws InvalidProtocolBufferException {
-      return TopologyMaster.ExceptionLogRequest.parseFrom(requestBytes);
+      return TopologyManager.ExceptionLogRequest.parseFrom(requestBytes);
     }
 
     @Override
-    public TopologyMaster.ExceptionLogResponse generateResponse(
-        TopologyMaster.ExceptionLogRequest request, MetricsCache metricsCache1) {
+    public TopologyManager.ExceptionLogResponse generateResponse(
+        TopologyManager.ExceptionLogRequest request, MetricsCache metricsCache1) {
       return metricsCache1.getExceptionsSummary(request);
     }
   }

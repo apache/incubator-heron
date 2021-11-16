@@ -70,16 +70,6 @@ java_library(
 )
 
 java_library(
-    name = "jarjar",
-    srcs = ["Empty.java"],
-    exports = ["@maven//:org_sonatype_plugins_jarjar_maven_plugin"],
-    deps = [
-        "@maven//:org_ow2_asm_asm_all",
-        "@maven//:org_sonatype_plugins_jarjar_maven_plugin",
-    ],
-)
-
-java_library(
     name = "logging",
     srcs = ["Empty.java"],
     exports = ["@maven//:org_slf4j_slf4j_api"],
@@ -104,7 +94,7 @@ java_library(
 
 # This version is needed for dependents that don't want
 # kryo to be included in the generated binary
-# (e.g. //storm-compatibility/src/java:heron-storm)
+# (e.g. //storm-compatibility/v0.10.2/src/java:heron-storm)
 java_library(
     name = "kryo-neverlink",
     srcs = ["Empty.java"],
@@ -352,7 +342,8 @@ java_library(
     srcs = ["Empty.java"],
     exports = [
         "@maven//:io_netty_netty_all",
-        "@maven//:org_apache_distributedlog_distributedlog_core_shaded",
+        "@maven//:org_apache_distributedlog_distributedlog_core",
+        "@maven//:org_apache_distributedlog_distributedlog_protocol",
     ],
     deps = [
         "@maven//:commons_collections_commons_collections",
@@ -360,7 +351,8 @@ java_library(
         "@maven//:commons_lang_commons_lang",
         "@maven//:commons_logging_commons_logging",
         "@maven//:io_netty_netty_all",
-        "@maven//:org_apache_distributedlog_distributedlog_core_shaded",
+        "@maven//:org_apache_distributedlog_distributedlog_core",
+        "@maven//:org_apache_distributedlog_distributedlog_protocol",
         "@maven//:org_slf4j_slf4j_api",
         "@maven//:org_slf4j_slf4j_jdk14",
     ],

@@ -7,7 +7,7 @@ pex_binary(
     ],
     main = "main.py",
     reqs = [
-        "tornado==4.0.2",
+        "tornado==4.5.3",
         "werkzeug==2.0.2",
     ],
     deps = [

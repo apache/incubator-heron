@@ -66,7 +66,7 @@ import static org.apache.heron.api.Config.TOPOLOGY_CONTAINER_RAM_REQUESTED;
  * 2. The size of resource required by the whole topology is equal to
  * ((# of container specified in config) + 1) * (size of resource required for a single container).
  * The extra 1 is considered for Heron internal container,
- * i.e. the one containing Scheduler and TMaster.
+ * i.e. the one containing Scheduler and TManager.
  * <p>
  * 3. The disk required for a container is calculated as:
  * value for org.apache.heron.api.Config.TOPOLOGY_CONTAINER_DISK_REQUESTED if exists, otherwise,
@@ -102,7 +102,7 @@ public class RoundRobinPacking implements IPacking, IRepacking {
 
   @VisibleForTesting
   static final ByteAmount DEFAULT_DAEMON_PROCESS_RAM_PADDING = ByteAmount.fromGigabytes(1);
-  private static final ByteAmount MIN_RAM_PER_INSTANCE = ByteAmount.fromMegabytes(192);
+  private static final ByteAmount MIN_RAM_PER_INSTANCE = ByteAmount.fromMegabytes(16);
 
   // Use as a stub as default number value when getting config value
   private static final ByteAmount NOT_SPECIFIED_BYTE_AMOUNT = ByteAmount.fromBytes(-1);

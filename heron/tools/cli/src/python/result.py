@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 
 #  Licensed to the Apache Software Foundation (ASF) under one
@@ -19,7 +19,6 @@
 #  under the License.
 
 '''result.py'''
-from __future__ import print_function
 import abc
 import sys
 from enum import Enum
@@ -52,14 +51,13 @@ class Status(Enum):
 def status_type(status_code):
   if status_code == 0:
     return Status.Ok
-  elif status_code < 100:
+  if status_code < 100:
     return Status.InvocationError
-  elif status_code == 200:
+  if status_code == 200:
     return Status.DryRun
-  else:
-    return Status.HeronError
+  return Status.HeronError
 
-class Result(object):
+class Result:
   """Result class"""
   def __init__(self, status=None, err_context=None, succ_context=None):
     self.status = status
@@ -89,7 +87,7 @@ class Result(object):
       self._do_log(Log.error, self.err_context)
     else:
       raise RuntimeError(
-          "Unknown status type of value %d. Expected value: %s", self.status.value, list(Status))
+          "Unknown status type of value %d. Expected value: %s" % (self.status.value, list(Status)))
 
   def add_context(self, err_context, succ_context=None):
     """ Prepend msg to add some context information
@@ -181,13 +179,12 @@ def render(results):
     for r in results:
       r.render()
   else:
-    raise RuntimeError("Unknown result instance: %s", str(results.__class__))
+    raise RuntimeError("Unknown result instance: %s" % (str(results.__class__),))
 
 # check if all results are successful
 def is_successful(results):
   if isinstance(results, list):
     return all([is_successful(result) for result in results])
-  elif isinstance(results, Result):
+  if isinstance(results, Result):
     return results.status == Status.Ok or results.status == Status.DryRun
-  else:
-    raise RuntimeError("Unknown result instance: %s", str(results.__class__))
+  raise RuntimeError("Unknown result instance: %s" % (str(results.__class__),))

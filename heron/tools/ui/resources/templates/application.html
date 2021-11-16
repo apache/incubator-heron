@@ -1,4 +1,4 @@
-<!--
+{#
 Licensed to the Apache Software Foundation (ASF) under one
 or more contributor license agreements.  See the NOTICE file
 distributed with this work for additional information
@@ -15,7 +15,7 @@ software distributed under the License is distributed on an
 KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations
 under the License.
--->
+#}
 
 <!DOCTYPE html>
 <html lang="en" class="not-showing-stats no-colors">
@@ -23,30 +23,30 @@ under the License.
     <meta charset="utf-8">
     <title>Heron Admin</title>
     <meta content="width=device-width, initial-scale=1.0, user-scalable=no" name="viewport">
-    <link rel="shortcut icon" href="{{ static_url('img/logo54x54.png') }}" type="image/x-icon" >
-    <script src="{{ static_url('js/html5-trunk.js') }}"></script>
+    <link rel="shortcut icon" href="{{ url_for('static', path='/img/logo54x54.png') }}" type="image/x-icon" >
+    <script src="{{ url_for('static', path='/js/html5-trunk.js') }}"></script>
 
     <!-- bootstrap css -->
-    <link href="{{ static_url('css/bootstrap.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', path='/css/bootstrap.css') }}" rel="stylesheet">
 
     <!-- custom css -->
-    <link href="{{ static_url('css/main.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', path='/css/main.css') }}" rel="stylesheet">
 
-    <link href="{{ static_url('css/visstyle.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', path='/css/visstyle.css') }}" rel="stylesheet">
 
-    <script src="{{ static_url('js/react.0.10.0.js') }}"></script>
-    <script src="{{ static_url('js/JSXTransformer.0.10.0.js') }}"></script>
-    <script src="{{ static_url('js/moment.min.2.8.3.js') }}"></script>
-    <script src="{{ static_url('js/underscore-min.1.6.0.js') }}"></script>
+    <script src="{{ url_for('static', path='/js/react.0.10.0.js') }}"></script>
+    <script src="{{ url_for('static', path='/js/JSXTransformer.0.10.0.js') }}"></script>
+    <script src="{{ url_for('static', path='/js/moment.min.2.8.3.js') }}"></script>
+    <script src="{{ url_for('static', path='/js/underscore-min.1.6.0.js') }}"></script>
 
     <!-- Scripts -->
-    <script src="{{ static_url('js/jquery.min.js') }}"></script>
-    <script src="{{ static_url('js/bootstrap.js') }}"></script>
-    <script src="{{ static_url('js/jquery-ui-1.8.23.custom.min.js') }}"></script>
+    <script src="{{ url_for('static', path='/js/jquery.min.js') }}"></script>
+    <script src="{{ url_for('static', path='/js/bootstrap.js') }}"></script>
+    <script src="{{ url_for('static', path='/js/jquery-ui-1.8.23.custom.min.js') }}"></script>
 
-    <script src="{{ static_url('js/list.min.1.1.1.js') }}"></script>
+    <script src="{{ url_for('static', path='/js/list.min.1.1.1.js') }}"></script>
 
-    <script type="text/jsx" src="{{ static_url('js/common.js') }}" ></script>
+    <script type="text/jsx" src="{{ url_for('static', path='/js/common.js') }}" ></script>
 
     <style type="text/css">
       .logo-img{
@@ -81,10 +81,10 @@ under the License.
     <!-- Main navigation start -->
     <nav id="global-nav">
       <div class="logo-img">
-        <img src="{{ static_url('img/logo54x54.png') }}" alt="Heron">
+        <img src="{{ url_for('static', path='/img/logo54x54.png') }}" alt="Heron">
       </div>
       <!-- <div class="logo">H<span>eron</span></div> -->
-      {% module Template("nav.html", active=active, className=function) %}
+      {% include "nav.html" %}
     </nav>
     <!-- Main navigation end -->
 
@@ -99,7 +99,7 @@ under the License.
     <!-- Header end -->
       <!-- Dashboard wrapper start -->
       <div class="dashboard-wrapper">
-        {% block content %}{% end %}
+        {% block content %}{% endblock %}
       </div>
       <!-- Dashboard wrapper end -->
     </div>
