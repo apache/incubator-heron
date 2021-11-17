@@ -33,7 +33,7 @@ class MainHandler(tornado.web.RequestHandler):
 
 class FileHandler(tornado.web.RequestHandler):
   def get(self, fileName):
-    jsonFilePath = secure_filename(RESULTS_DIRECTORY + "/" + fileName + ".json")
+    jsonFilePath = RESULTS_DIRECTORY + "/" + secure_filename(fileName) + ".json"
 
     if not os.path.exists(jsonFilePath):
       self.clear()
@@ -47,7 +47,7 @@ class FileHandler(tornado.web.RequestHandler):
       self.write(data)
 
   def post(self, fileName):
-    jsonFilePath = secure_filename(RESULTS_DIRECTORY + "/" + fileName + ".json")
+    jsonFilePath = RESULTS_DIRECTORY + "/" + secure_filename(fileName) + ".json"
 
     #Overwrites the existing file
     with open(jsonFilePath, "w") as jsonFile:
