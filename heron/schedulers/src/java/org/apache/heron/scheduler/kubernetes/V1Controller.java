@@ -401,6 +401,12 @@ public class V1Controller extends KubernetesController {
     return service;
   }
 
+  /**
+   * Creates and configures the <code>StatefulSet</code> which the topologies <code>executor</code>s will run in.
+   * @param containerResource Passed down to configure the <code>executor</code> resource limits.
+   * @param numberOfInstances Used to configure the execution command and ports for the <code>executor</code>.
+   * @return A fully configured <code>StatefulSet</code> for the topologies <code>executors</code>.
+   */
   private V1StatefulSet createStatefulSet(Resource containerResource, int numberOfInstances) {
     final String topologyName = getTopologyName();
     final Config runtimeConfiguration = getRuntimeConfiguration();
@@ -490,6 +496,14 @@ public class V1Controller extends KubernetesController {
     return KubernetesContext.getServiceLabels(getConfiguration());
   }
 
+  /**
+   * Configures the <code>Pod Spec</code> section of the <code>StatefulSet</code>. The <code>executor</code> container
+   * will be configured to allow Heron to function but other supplied containers are loaded verbatim.
+   * @param podTemplateSpec The <code>Pod Template Spec</code> section to update.
+   * @param executorCommand Passed down to configure the <code>executor</code> start command.
+   * @param resource Passed down to configure the <code>executor</code> resource limits.
+   * @param numberOfInstances Passed down to configure the <code>executor</code> ports.
+   */
   private void configurePodSpec(final V1PodTemplateSpec podTemplateSpec,
                                 List<String> executorCommand,
                                 Resource resource,
@@ -543,6 +557,10 @@ public class V1Controller extends KubernetesController {
     mountSecretsAsVolumes(podSpec);
   }
 
+  /**
+   * Adds <code>tolerations</code> to the <code>Pod Spec</code> with Heron's values taking precedence.
+   * @param spec <code>Pod Spec</code> to be configured.
+   */
   @VisibleForTesting
   protected void configureTolerations(final V1PodSpec spec) {
     KubernetesUtils.V1ControllerUtils<V1Toleration> utils =
@@ -553,6 +571,10 @@ public class V1Controller extends KubernetesController {
     );
   }
 
+  /**
+   * Generates a list of <code>tolerations</code> which Heron requires.
+   * @return A list of configured <code>tolerations</code>.
+   */
   @VisibleForTesting
   protected static List<V1Toleration> getTolerations() {
     final List<V1Toleration> tolerations = new ArrayList<>();
@@ -569,6 +591,10 @@ public class V1Controller extends KubernetesController {
     return tolerations;
   }
 
+  /**
+   * Adds volume to the <code>Pod Spec</code> that Heron requires. Heron's values taking precedence.
+   * @param spec <code>Pod Spec</code> to be configured.
+   */
   @VisibleForTesting
   protected void addVolumesIfPresent(final V1PodSpec spec) {
     final Config config = getConfiguration();
@@ -606,6 +632,13 @@ public class V1Controller extends KubernetesController {
     }
   }
 
+  /**
+   * Configures the <code>executor</code> container with values for parameters Heron requires for functioning.
+   * @param executorCommand Command to bring up the <code>executor</code> Heron process in the container.
+   * @param resource Resource limits.
+   * @param numberOfInstances Required number of <code>executor</code> containers which is used to configure ports.
+   * @param container The <code>executor</code> container to be configured.
+   */
   private void configureExecutorContainer(List<String> executorCommand, Resource resource,
                                           int numberOfInstances, final V1Container container) {
     final Config configuration = getConfiguration();
@@ -639,6 +672,12 @@ public class V1Controller extends KubernetesController {
     mountVolumeIfPresent(container);
   }
 
+  /**
+   * Configures the resources in the <code>container</code> with values in the <code>config</code> taking precedence.
+   * @param container The <code>container</code> to be configured.
+   * @param configuration The <code>Config</code> object to check if a resource request needs to be set.
+   * @param resource User defined resources limits from input.
+   */
   @VisibleForTesting
   protected void configureContainerResources(final V1Container container,
                                              final Config configuration, final Resource resource) {
@@ -671,6 +710,11 @@ public class V1Controller extends KubernetesController {
     container.setResources(resourceRequirements);
   }
 
+  /**
+   * Configures the environment variables in the <code>container</code> with those Heron requires.
+   * Heron's values take precedence.
+   * @param container The <code>container</code> to be configured.
+   */
   @VisibleForTesting
   protected void configureContainerEnvVars(final V1Container container) {
     // Deduplicate on var name with Heron defaults take precedence.
@@ -681,6 +725,10 @@ public class V1Controller extends KubernetesController {
     );
   }
 
+  /**
+   * Generates a list of <code>Environment Variables</code> required by Heron to function.
+   * @return A list of configured <code>Environment Variables</code> required by Heron to function.
+   */
   @VisibleForTesting
   protected static List<V1EnvVar> getExecutorEnvVars() {
     final V1EnvVar envVarHost = new V1EnvVar();
@@ -698,6 +746,12 @@ public class V1Controller extends KubernetesController {
     return Arrays.asList(envVarHost, envVarPodName);
   }
 
+  /**
+   * Configures the ports in the <code>container</code> with those Heron requires. Heron's values take precedence.
+   * @param remoteDebugEnabled Flag used to indicate if debugging ports need to be added.
+   * @param numberOfInstances The number of debugging ports to be opened.
+   * @param container <code>container</code> to be configured.
+   */
   @VisibleForTesting
   protected void configureContainerPorts(boolean remoteDebugEnabled, int numberOfInstances,
                                          final V1Container container) {
@@ -716,6 +770,10 @@ public class V1Controller extends KubernetesController {
     );
   }
 
+  /**
+   * Generates a list of <code>ports</code> required by Heron to function.
+   * @return A list of configured <code>ports</code> required by Heron to function.
+   */
   @VisibleForTesting
   protected static List<V1ContainerPort> getExecutorPorts() {
     List<V1ContainerPort> ports = new LinkedList<>();
@@ -728,6 +786,11 @@ public class V1Controller extends KubernetesController {
     return ports;
   }
 
+  /**
+   * Generate the debugging ports required by Heron.
+   * @param numberOfInstances The number of debugging ports to generate.
+   * @return A list of configured debugging <code>ports</code>.
+   */
   @VisibleForTesting
   protected static List<V1ContainerPort> getDebuggingPorts(int numberOfInstances) {
     List<V1ContainerPort> ports = new LinkedList<>();
@@ -742,6 +805,10 @@ public class V1Controller extends KubernetesController {
     return ports;
   }
 
+  /**
+   * Adds volume mounts to the <code>container</code> that Heron requires. Heron's values taking precedence.
+   * @param container <code>container</code> to be configured.
+   */
   @VisibleForTesting
   protected void mountVolumeIfPresent(final V1Container container) {
     final Config config = getConfiguration();
@@ -789,6 +856,11 @@ public class V1Controller extends KubernetesController {
     return Math.round(value * scale) / scale;
   }
 
+  /**
+   * Initiates the process of locating and loading <code>Pod Template</code> from a <code>ConfigMap</code>.
+   * The loaded text is then parsed into a usable <code>Pod Template</code>.
+   * @return A <code>Pod Template</code> which is loaded and parsed from a <code>ConfigMap</code>.
+   */
   @VisibleForTesting
   protected V1PodTemplateSpec loadPodFromTemplate() {
     final Pair<String, String> podTemplateConfigMapName = getPodTemplateLocation();
@@ -838,6 +910,10 @@ public class V1Controller extends KubernetesController {
     }
   }
 
+  /**
+   * Extracts the <code>ConfigMap</code> and <code>Pod Template</code> names from the CLI parameter.
+   * @return A pair of the form <code>(ConfigMap, Pod Template)</code>.
+   */
   @VisibleForTesting
   protected Pair<String, String> getPodTemplateLocation() {
     final String podTemplateConfigMapName = KubernetesContext
@@ -864,6 +940,11 @@ public class V1Controller extends KubernetesController {
     }
   }
 
+  /**
+   * Retrieves a <code>ConfigMap</code> from the K8s cluster in the API Server's namespace.
+   * @param configMapName Name of the <code>ConfigMap</code> to retrieve.
+   * @return The retrieved <code>ConfigMap</code>.
+   */
   @VisibleForTesting
   protected V1ConfigMap getConfigMap(String configMapName) {
     try {
