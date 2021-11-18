@@ -124,7 +124,7 @@ public class V1Controller extends KubernetesController {
   boolean submit(PackingPlan packingPlan) {
     final String topologyName = getTopologyName();
     if (!topologyName.equals(topologyName.toLowerCase())) {
-      throw new TopologySubmissionException("K8S scheduler does not allow upper case topologies.");
+      throw new TopologySubmissionException("K8S scheduler does not allow upper case topology's.");
     }
 
     final Resource containerResource = getContainerResource(packingPlan);
@@ -402,10 +402,10 @@ public class V1Controller extends KubernetesController {
   }
 
   /**
-   * Creates and configures the <code>StatefulSet</code> which the topologies <code>executor</code>s will run in.
+   * Creates and configures the <code>StatefulSet</code> which the topology's <code>executor</code>s will run in.
    * @param containerResource Passed down to configure the <code>executor</code> resource limits.
    * @param numberOfInstances Used to configure the execution command and ports for the <code>executor</code>.
-   * @return A fully configured <code>StatefulSet</code> for the topologies <code>executors</code>.
+   * @return A fully configured <code>StatefulSet</code> for the topology's <code>executors</code>.
    */
   private V1StatefulSet createStatefulSet(Resource containerResource, int numberOfInstances) {
     final String topologyName = getTopologyName();
@@ -1153,7 +1153,7 @@ public class V1Controller extends KubernetesController {
   }
 
   /**
-   * Generates the <code>Label</code> which are attached to a Topologies Persistent Volume Claims.
+   * Generates the <code>Label</code> which are attached to a Topology's Persistent Volume Claims.
    * @param topologyName Attached to the topology match label.
    * @return A map consisting of the <code>label-value</code> pairs to be used in <code>Label</code>s.
    */
