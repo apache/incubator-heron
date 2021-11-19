@@ -119,6 +119,9 @@ public final class KubernetesContext extends Context {
   // heron.kubernetes.volumes.persistentVolumeClaim.VOLUME_NAME.OPTION=OPTION_VALUE
   public static final String KUBERNETES_VOLUME_CLAIM_PREFIX =
       "heron.kubernetes.volumes.persistentVolumeClaim.";
+  // heron.kubernetes.manager.limits.OPTION=VALUE
+  public static final String KUBERNETES_MANAGER_LIMITS_PREFIX =
+      "heron.kubernetes.manager.limits.";
 
   private KubernetesContext() {
   }
@@ -220,6 +223,10 @@ public final class KubernetesContext extends Context {
 
   public static Map<String, String> getPodSecretKeyRefs(Config config) {
     return getConfigItemsByPrefix(config, KUBERNETES_POD_SECRET_KEY_REF_PREFIX);
+  }
+
+  public static Map<String, String> getManagerLimits(Config config) {
+    return getConfigItemsByPrefix(config, KUBERNETES_MANAGER_LIMITS_PREFIX);
   }
 
   public static boolean getPersistentVolumeClaimDisabled(Config config) {
