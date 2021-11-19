@@ -370,13 +370,22 @@ public class V1Controller extends KubernetesController {
         "-c",
         KubernetesUtils.getConfCommand(configuration)
             + " && " + KubernetesUtils.getFetchCommand(configuration, runtimeConfiguration)
-            + " && " + setShardIdEnvironmentVariableCommand()
+            + " && " + setShardIdEnvironmentVariableCommand(true)
             + " && " + String.join(" ", executorCommand)
     );
   }
 
-  private static String setShardIdEnvironmentVariableCommand() {
-    return String.format("%s=${POD_NAME##*-} && echo shardId=${%s}", ENV_SHARD_ID, ENV_SHARD_ID);
+  /**
+   * Configures the <code>shard_id</code> for the Heron container based on whether it is an <code>executor</code>
+   * or <code>manager</code>. <code>executor</code> IDs are [1 - n) and the <code>manager</code> IDs start at 0.
+   * @param isExecutor Switch flag to generate correct command.
+   * @return The command required to put the Heron instance in <code>executor</code> or <code>manager</code> mode.
+   */
+  @VisibleForTesting
+  protected static String setShardIdEnvironmentVariableCommand(boolean isExecutor) {
+    final String pattern = String.format("%%s=%s && echo shardId=${%%s}",
+        isExecutor ? "$((${POD_NAME##*-} + 1))" : "${POD_NAME##*-}");
+    return String.format(pattern, ENV_SHARD_ID, ENV_SHARD_ID);
   }
 
   private V1Service createTopologyService() {

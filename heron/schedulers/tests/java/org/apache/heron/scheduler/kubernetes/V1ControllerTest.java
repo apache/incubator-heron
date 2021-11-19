@@ -1026,4 +1026,20 @@ public class V1ControllerTest {
           testCase.input[1], testCase.expected.second);
     }
   }
+
+  @Test
+  public void testSetShardIdEnvironmentVariableCommand() {
+
+    List<TestTuple<Boolean, String>> testCases = new LinkedList<>();
+
+    testCases.add(new TestTuple<>("Executor command is set correctly",
+        true, "SHARD_ID=$((${POD_NAME##*-} + 1)) && echo shardId=${SHARD_ID}"));
+    testCases.add(new TestTuple<>("Manager command is set correctly",
+        false, "SHARD_ID=${POD_NAME##*-} && echo shardId=${SHARD_ID}"));
+
+    for (TestTuple<Boolean, String> testCase : testCases) {
+      Assert.assertEquals(testCase.description, testCase.expected,
+          v1ControllerWithPodTemplate.setShardIdEnvironmentVariableCommand(testCase.input));
+    }
+  }
 }
