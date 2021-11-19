@@ -60,6 +60,8 @@ import io.kubernetes.client.openapi.models.V1PodSpec;
 import io.kubernetes.client.openapi.models.V1PodSpecBuilder;
 import io.kubernetes.client.openapi.models.V1PodTemplateSpec;
 import io.kubernetes.client.openapi.models.V1ResourceRequirements;
+import io.kubernetes.client.openapi.models.V1StatefulSet;
+import io.kubernetes.client.openapi.models.V1StatefulSetBuilder;
 import io.kubernetes.client.openapi.models.V1Toleration;
 import io.kubernetes.client.openapi.models.V1Volume;
 import io.kubernetes.client.openapi.models.V1VolumeBuilder;
@@ -67,6 +69,8 @@ import io.kubernetes.client.openapi.models.V1VolumeMount;
 import io.kubernetes.client.openapi.models.V1VolumeMountBuilder;
 
 import static org.apache.heron.scheduler.kubernetes.KubernetesConstants.VolumeClaimTemplateConfigKeys;
+import static org.mockito.Matchers.anyBoolean;
+import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyMap;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doReturn;
@@ -103,10 +107,14 @@ public class V1ControllerTest {
           + "          limits:\n"
           + "            cpu: \"400m\"\n"
           + "            memory: \"512M\"";
+  private static final String MANAGER_CPU_LIMIT = "32";
+  private static final String MANAGER_RAM_LIMIT = "256";
 
   private final Config config = Config.newBuilder().build();
   private final Config configWithPodTemplate = Config.newBuilder()
       .put(KubernetesContext.KUBERNETES_POD_TEMPLATE_CONFIGMAP_NAME, CONFIGMAP_POD_TEMPLATE_NAME)
+      .put(KubernetesContext.KUBERNETES_MANAGER_LIMITS_PREFIX + "cpu", MANAGER_CPU_LIMIT)
+      .put(KubernetesContext.KUBERNETES_MANAGER_LIMITS_PREFIX + "ram", MANAGER_RAM_LIMIT)
       .build();
   private final Config runtime = Config.newBuilder()
       .put(Key.TOPOLOGY_NAME, TOPOLOGY_NAME)
@@ -1041,5 +1049,116 @@ public class V1ControllerTest {
       Assert.assertEquals(testCase.description, testCase.expected,
           v1ControllerWithPodTemplate.setShardIdEnvironmentVariableCommand(testCase.input));
     }
+  }
+
+  private Pair<V1StatefulSet, V1StatefulSet> createExecutorManagerStatefulSets(List<String> cmds) {
+    final Resource executorResource = new Resource(
+        9, ByteAmount.fromGigabytes(19), ByteAmount.fromGigabytes(99));
+    final Quantity executorMEM = Quantity.fromString(
+        KubernetesUtils.Megabytes(executorResource.getRam()));
+    final Quantity executorCPU = Quantity.fromString(
+        Double.toString(V1Controller.roundDecimal(executorResource.getCpu(), 3)));
+
+    final V1Container executorContainer = new V1ContainerBuilder()
+        .withName(KubernetesConstants.EXECUTOR_NAME)
+        .addNewCommand("executor container command")
+        .withNewResources()
+          .addToLimits(KubernetesConstants.CPU, executorCPU)
+          .addToLimits(KubernetesConstants.MEMORY, executorMEM)
+          .addToRequests(KubernetesConstants.CPU, executorCPU)
+          .addToRequests(KubernetesConstants.MEMORY, executorMEM)
+        .endResources()
+        .withImage("heron-image")
+        .build();
+
+    final V1StatefulSet executorStatefulSet = new V1StatefulSetBuilder()
+        .withNewMetadata()
+          .withName("topology-executors")
+        .endMetadata()
+        .withNewSpec()
+          .withReplicas(10)
+          .withNewTemplate()
+            .withNewSpec()
+              .withContainers(executorContainer)
+            .endSpec()
+          .endTemplate()
+        .endSpec()
+        .build();
+
+    final V1Container managerContainer = new V1ContainerBuilder()
+        .withName(KubernetesConstants.MANAGER_NAME)
+        .withCommand(cmds)
+        .withNewResources()
+          .addToLimits(KubernetesConstants.CPU, executorCPU)
+          .addToLimits(KubernetesConstants.MEMORY, executorMEM)
+        .endResources()
+        .withImage("heron-image")
+        .build();
+
+    final V1StatefulSet managerStatefulSet = new V1StatefulSetBuilder()
+        .withNewMetadata()
+          .withName(String.format("%s-%s", TOPOLOGY_NAME, KubernetesConstants.MANAGER_NAME))
+        .endMetadata()
+        .withNewSpec()
+          .withReplicas(1)
+          .withNewTemplate()
+            .withNewSpec()
+              .withContainers(managerContainer)
+            .endSpec()
+          .endTemplate()
+        .endSpec()
+        .build();
+
+    return new Pair<>(executorStatefulSet, managerStatefulSet);
+  }
+
+  @Test
+  public void testCreateStatefulSetManager() {
+    final List<String> commands = Arrays.asList("command 1", "command 2", "command 3");
+
+    // No CLI parameters used and limits copied over from executor.
+    Pair<V1StatefulSet, V1StatefulSet> baseExecutorManager =
+        createExecutorManagerStatefulSets(commands);
+
+    doReturn(commands)
+        .when(v1ControllerPodTemplate)
+        .getExecutorCommand(anyString(), anyInt(), anyBoolean());
+
+    final V1StatefulSet actualBase =
+        v1ControllerPodTemplate.createStatefulSetManager(baseExecutorManager.first, 5);
+
+    Assert.assertEquals("Manager StatefulSet without CLI parameters configured correctly",
+        baseExecutorManager.second, actualBase);
+
+    // CLI parameters used.
+    final Resource cliResource = new Resource(Integer.parseInt(MANAGER_CPU_LIMIT),
+        ByteAmount.fromGigabytes(Integer.parseInt(MANAGER_RAM_LIMIT)),
+        ByteAmount.fromGigabytes(100));
+    final Quantity executorMEM = Quantity.fromString(
+        KubernetesUtils.Megabytes(cliResource.getRam()));
+    final Quantity executorCPU = Quantity.fromString(
+        Double.toString(V1Controller.roundDecimal(cliResource.getCpu(), 3)));
+    final Map<String, Quantity> cliLimits = new HashMap<String, Quantity>() {
+      {
+        put(KubernetesConstants.CPU, executorCPU);
+        put(KubernetesConstants.MEMORY, executorMEM);
+      }
+    };
+
+    final Pair<V1StatefulSet, V1StatefulSet> cliExecutorManager =
+        createExecutorManagerStatefulSets(commands);
+
+    cliExecutorManager.second.getSpec()
+        .getTemplate().getSpec().getContainers().get(0).getResources().setLimits(cliLimits);
+
+    doReturn(commands)
+        .when(v1ControllerWithPodTemplate)
+        .getExecutorCommand(anyString(), anyInt(), anyBoolean());
+
+    final V1StatefulSet actualCLI =
+        v1ControllerWithPodTemplate.createStatefulSetManager(cliExecutorManager.first, 12);
+
+    Assert.assertEquals("Manager StatefulSet with CLI parameters configured correctly",
+        cliExecutorManager.second, actualCLI);
   }
 }
