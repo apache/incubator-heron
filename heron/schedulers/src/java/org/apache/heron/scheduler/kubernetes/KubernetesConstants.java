@@ -36,6 +36,7 @@ public final class KubernetesConstants {
   public static final String CPU = "cpu";
 
   public static final String EXECUTOR_NAME = "executor";
+  public static final String MANAGER_NAME = "manager";
 
   // container env constants
   public static final String ENV_HOST = "HOST";
