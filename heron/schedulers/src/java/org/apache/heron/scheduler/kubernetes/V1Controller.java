@@ -178,7 +178,7 @@ public class V1Controller extends KubernetesController {
   @Override
   boolean killTopology() {
     removePersistentVolumeClaims();
-    deleteStatefulSet();
+    deleteStatefulSets();
     deleteService();
     return true;
   }
@@ -312,18 +312,19 @@ public class V1Controller extends KubernetesController {
             + "] in namespace [" + getNamespace() + "] is deleted.");
   }
 
-  void deleteStatefulSet() {
-    try (Response response = appsClient.deleteNamespacedStatefulSetCall(getTopologyName(),
-          getNamespace(), null, null, 0, null,
-          KubernetesConstants.DELETE_OPTIONS_PROPAGATION_POLICY, null, null).execute()) {
+  void deleteStatefulSets() {
+    try (Response response = appsClient.deleteCollectionNamespacedStatefulSetCall(getNamespace(),
+        null, null, null, null, null,
+        createTopologySelectorLabels(), null, null, "0", null,
+          KubernetesConstants.DELETE_OPTIONS_PROPAGATION_POLICY, null, null, null).execute()) {
 
       if (!response.isSuccessful()) {
         if (response.code() == HTTP_NOT_FOUND) {
-          LOG.log(Level.WARNING, "Tried to delete a non-existent StatefulSet for Topology: "
+          LOG.log(Level.WARNING, "Tried to delete a non-existent StatefulSets for Topology: "
                   + getTopologyName());
           return;
         }
-        LOG.log(Level.SEVERE, "Error when deleting the StatefulSet of the job ["
+        LOG.log(Level.SEVERE, "Error when deleting the StatefulSets of the job ["
                 + getTopologyName() + "] in namespace [" + getNamespace() + "]");
         LOG.log(Level.SEVERE, "Error killing topology message: " + response.message());
         KubernetesUtils.logResponseBodyIfPresent(LOG, response);
@@ -338,10 +339,10 @@ public class V1Controller extends KubernetesController {
         return;
       }
       throw new TopologyRuntimeManagementException("Error deleting topology ["
-              + getTopologyName() + "] Kubernetes StatefulSet", e);
+              + getTopologyName() + "] Kubernetes StatefulSets", e);
     } catch (IOException e) {
       throw new TopologyRuntimeManagementException("Error deleting topology ["
-              + getTopologyName() + "] Kubernetes StatefulSet", e);
+              + getTopologyName() + "] Kubernetes StatefulSets", e);
     }
     LOG.log(Level.INFO, "StatefulSet for the Job [" + getTopologyName()
             + "] in namespace [" + getNamespace() + "] is deleted.");
