@@ -257,7 +257,7 @@ public class V1Controller extends KubernetesController {
     PatchUtils.patch(V1StatefulSet.class,
         () ->
           appsClient.patchNamespacedStatefulSetCall(
-            getTopologyName(),
+            getExecutorStatefulSetName(),
             getNamespace(),
             patch,
             null,
@@ -273,7 +273,7 @@ public class V1Controller extends KubernetesController {
           "[{\"op\":\"replace\",\"path\":\"/spec/replicas\",\"value\":%d}]";
 
   V1StatefulSet getStatefulSet() throws ApiException {
-    return appsClient.readNamespacedStatefulSet(getTopologyName(), getNamespace(),
+    return appsClient.readNamespacedStatefulSet(getExecutorStatefulSetName(), getNamespace(),
         null, null, null);
   }
 
