@@ -839,4 +839,14 @@ public class V1Controller extends KubernetesController {
       throw new TopologySubmissionException(String.format("%s: %s", message, e.getMessage()));
     }
   }
+
+  /**
+   * Generates the <code>Selector</code> match labels with which resources in this topology can be found.
+   * @return A label of the form <code>app=heron,topology=topology-name</code>.
+   */
+  private String createTopologySelectorLabels() {
+    return String.format("%s=%s,%s=%s",
+        KubernetesConstants.LABEL_APP, KubernetesConstants.LABEL_APP_VALUE,
+        KubernetesConstants.LABEL_TOPOLOGY, getTopologyName());
+  }
 }
