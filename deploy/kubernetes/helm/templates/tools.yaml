@@ -297,6 +297,7 @@ rules:
   - patch
   - update
   - watch
+  - deletecollection
 - apiGroups:
   - ""
   resources:
