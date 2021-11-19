@@ -432,13 +432,13 @@ public class V1Controller extends KubernetesController {
 
     // Setup StatefulSet's metadata.
     final V1ObjectMeta objectMeta = new V1ObjectMeta()
-        .name(topologyName);
+        .name(String.format("%s-%ss", topologyName, KubernetesConstants.EXECUTOR_NAME));
     statefulSet.setMetadata(objectMeta);
 
-    // Create the stateful set spec.
+    // Create the StatefulSet Spec. Reduce replica count by one because of isolated Manager.
     final V1StatefulSetSpec statefulSetSpec = new V1StatefulSetSpec()
         .serviceName(topologyName)
-        .replicas(Runtime.numContainers(runtimeConfiguration).intValue());
+        .replicas(Runtime.numContainers(runtimeConfiguration).intValue() - 1);
 
     // Parallel pod management tells the StatefulSet controller to launch or terminate
     // all Pods in parallel, and not to wait for Pods to become Running and Ready or completely
@@ -462,8 +462,7 @@ public class V1Controller extends KubernetesController {
     templateMetaData.setAnnotations(annotations);
     podTemplateSpec.setMetadata(templateMetaData);
 
-    final List<String> command =
-        getExecutorCommand("$" + ENV_SHARD_ID, numberOfInstances, true);
+    final List<String> command = getExecutorCommand("$" + ENV_SHARD_ID, numberOfInstances, true);
     configurePodSpec(podTemplateSpec, command, containerResource, numberOfInstances);
 
     statefulSetSpec.setTemplate(podTemplateSpec);
