@@ -156,12 +156,23 @@ public class V1Controller extends KubernetesController {
     return true;
   }
 
+  /**
+   * Restarts a topology by deleting the Pods associated with it using <code>Selector Labels</code>.
+   * @param shardId Not used but required because of interface.
+   * @return Indicator of successful submission of restart request to Kubernetes cluster.
+   */
   @Override
   boolean restart(int shardId) {
-    final String message = "Restarting the whole topology is not supported yet. "
-        + "Please kill and resubmit the topology.";
-    LOG.log(Level.SEVERE, message);
-    return false;
+    try {
+      coreClient.deleteCollectionNamespacedPod(getNamespace(), null, null, null, null,
+          0, createTopologySelectorLabels(), null, null, null, null,
+          null, null, null);
+      LOG.log(Level.WARNING, String.format("Restarting topology '%s'...", getTopologyName()));
+    } catch (ApiException e) {
+      LOG.log(Level.SEVERE, String.format("Failed to restart topology '%s'...", getTopologyName()));
+      return false;
+    }
+    return true;
   }
 
   @Override
