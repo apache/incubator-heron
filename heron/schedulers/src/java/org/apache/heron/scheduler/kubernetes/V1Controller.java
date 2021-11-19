@@ -493,7 +493,7 @@ public class V1Controller extends KubernetesController {
 
     // Setup StatefulSet's metadata.
     final V1ObjectMeta objectMeta = new V1ObjectMeta()
-        .name(String.format("%s-%ss", topologyName, KubernetesConstants.EXECUTOR_NAME));
+        .name(getExecutorStatefulSetName());
     statefulSet.setMetadata(objectMeta);
 
     // Create the StatefulSet Spec. Reduce replica count by one because of isolated Manager.
@@ -1241,6 +1241,14 @@ public class V1Controller extends KubernetesController {
         put(KubernetesConstants.LABEL_ON_DEMAND, "true");
       }
     };
+  }
+
+  /**
+   * Generates the <code>Executor</code> <code>StatefulSet</code> name.
+   * @return String <code>"topology-name"-executors</code>.
+   */
+  private String getExecutorStatefulSetName() {
+    return String.format("%s-%ss", getTopologyName(), KubernetesConstants.EXECUTOR_NAME);
   }
 
   /**
