@@ -158,10 +158,13 @@ public class V1Controller extends KubernetesController {
     for (PackingPlan.ContainerPlan containerPlan : packingPlan.getContainers()) {
       numberOfInstances = Math.max(numberOfInstances, containerPlan.getInstances().size());
     }
-    final V1StatefulSet statefulSet = createStatefulSet(containerResource, numberOfInstances);
+    final V1StatefulSet executors = createStatefulSet(containerResource, numberOfInstances);
+    final V1StatefulSet manager = createStatefulSetManager(executors, numberOfInstances);
 
     try {
-      appsClient.createNamespacedStatefulSet(getNamespace(), statefulSet, null,
+      appsClient.createNamespacedStatefulSet(getNamespace(), executors, null,
+              null, null);
+      appsClient.createNamespacedStatefulSet(getNamespace(), manager, null,
               null, null);
     } catch (ApiException e) {
       final String message = String.format("Error creating topology: %s%n", e.getResponseBody());
