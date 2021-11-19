@@ -342,7 +342,15 @@ public class V1Controller extends KubernetesController {
             + "] in namespace [" + getNamespace() + "] is deleted.");
   }
 
-  protected List<String> getExecutorCommand(String containerId, int numOfInstances) {
+  /**
+   * Generates the command to start Heron within the <code>container</code>.
+   * @param containerId Passed down to <>SchedulerUtils</> to generate executor command.
+   * @param numOfInstances Used to configure the debugging ports.
+   * @param isExecutor Flag used to generate the correct <code>shard_id</code>.
+   * @return The complete command to start Heron in a <code>container</code>.
+   */
+  protected List<String> getExecutorCommand(String containerId, int numOfInstances,
+                                            boolean isExecutor) {
     final Config configuration = getConfiguration();
     final Config runtimeConfiguration = getRuntimeConfiguration();
     final Map<ExecutorPort, String> ports =
@@ -370,7 +378,7 @@ public class V1Controller extends KubernetesController {
         "-c",
         KubernetesUtils.getConfCommand(configuration)
             + " && " + KubernetesUtils.getFetchCommand(configuration, runtimeConfiguration)
-            + " && " + setShardIdEnvironmentVariableCommand(true)
+            + " && " + setShardIdEnvironmentVariableCommand(isExecutor)
             + " && " + String.join(" ", executorCommand)
     );
   }
@@ -454,7 +462,8 @@ public class V1Controller extends KubernetesController {
     templateMetaData.setAnnotations(annotations);
     podTemplateSpec.setMetadata(templateMetaData);
 
-    final List<String> command = getExecutorCommand("$" + ENV_SHARD_ID, numberOfInstances);
+    final List<String> command =
+        getExecutorCommand("$" + ENV_SHARD_ID, numberOfInstances, true);
     configurePodSpec(podTemplateSpec, command, containerResource, numberOfInstances);
 
     statefulSetSpec.setTemplate(podTemplateSpec);
