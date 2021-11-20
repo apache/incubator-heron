@@ -178,12 +178,23 @@ public class V1Controller extends KubernetesController {
     return true;
   }
 
+  /**
+   * Restarts a topology by deleting the Pods associated with it using <code>Selector Labels</code>.
+   * @param shardId Not used but required because of interface.
+   * @return Indicator of successful submission of restart request to Kubernetes cluster.
+   */
   @Override
   boolean restart(int shardId) {
-    final String message = "Restarting the whole topology is not supported yet. "
-        + "Please kill and resubmit the topology.";
-    LOG.log(Level.SEVERE, message);
-    return false;
+    try {
+      coreClient.deleteCollectionNamespacedPod(getNamespace(), null, null, null, null,
+          0, createTopologySelectorLabels(), null, null, null, null,
+          null, null, null);
+      LOG.log(Level.WARNING, String.format("Restarting topology '%s'...", getTopologyName()));
+    } catch (ApiException e) {
+      LOG.log(Level.SEVERE, String.format("Failed to restart topology '%s'...", getTopologyName()));
+      return false;
+    }
+    return true;
   }
 
   @Override
@@ -1073,5 +1084,15 @@ public class V1Controller extends KubernetesController {
         put(KubernetesConstants.LABEL_ON_DEMAND, "true");
       }
     };
+  }
+
+  /**
+   * Generates the <code>Selector</code> match labels with which resources in this topology can be found.
+   * @return A label of the form <code>app=heron,topology=topology-name</code>.
+   */
+  private String createTopologySelectorLabels() {
+    return String.format("%s=%s,%s=%s",
+        KubernetesConstants.LABEL_APP, KubernetesConstants.LABEL_APP_VALUE,
+        KubernetesConstants.LABEL_TOPOLOGY, getTopologyName());
   }
 }
