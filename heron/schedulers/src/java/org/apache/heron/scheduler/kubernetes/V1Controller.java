@@ -70,6 +70,7 @@ import io.kubernetes.client.openapi.models.V1PodSpec;
 import io.kubernetes.client.openapi.models.V1PodTemplate;
 import io.kubernetes.client.openapi.models.V1PodTemplateSpec;
 import io.kubernetes.client.openapi.models.V1ResourceRequirements;
+import io.kubernetes.client.openapi.models.V1ResourceRequirementsBuilder;
 import io.kubernetes.client.openapi.models.V1SecretKeySelector;
 import io.kubernetes.client.openapi.models.V1SecretVolumeSourceBuilder;
 import io.kubernetes.client.openapi.models.V1Service;
@@ -472,9 +473,12 @@ public class V1Controller extends KubernetesController {
         limits.put(KubernetesConstants.CPU, Quantity.fromString(
             Double.toString(V1Controller.roundDecimal(Double.parseDouble(cpuLimit), 3))));
       }
-      managerContainer.getResources().setLimits(limits);
+      final V1ResourceRequirements requirements = new V1ResourceRequirementsBuilder()
+          .withLimits(limits)
+          .withRequests(limits)
+          .build();
+      managerContainer.setResources(requirements);
     }
-    managerContainer.getResources().setRequests(null);
 
     return manager;
   }

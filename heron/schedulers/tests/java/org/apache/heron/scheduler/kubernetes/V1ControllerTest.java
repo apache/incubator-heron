@@ -60,6 +60,7 @@ import io.kubernetes.client.openapi.models.V1PodSpec;
 import io.kubernetes.client.openapi.models.V1PodSpecBuilder;
 import io.kubernetes.client.openapi.models.V1PodTemplateSpec;
 import io.kubernetes.client.openapi.models.V1ResourceRequirements;
+import io.kubernetes.client.openapi.models.V1ResourceRequirementsBuilder;
 import io.kubernetes.client.openapi.models.V1StatefulSet;
 import io.kubernetes.client.openapi.models.V1StatefulSetBuilder;
 import io.kubernetes.client.openapi.models.V1Toleration;
@@ -1093,6 +1094,8 @@ public class V1ControllerTest {
         .withNewResources()
           .addToLimits(KubernetesConstants.CPU, executorCPU)
           .addToLimits(KubernetesConstants.MEMORY, executorMEM)
+          .addToRequests(KubernetesConstants.CPU, executorCPU)
+          .addToRequests(KubernetesConstants.MEMORY, executorMEM)
         .endResources()
         .withImage("heron-image")
         .build();
@@ -1150,8 +1153,13 @@ public class V1ControllerTest {
     final Pair<V1StatefulSet, V1StatefulSet> cliExecutorManager =
         createExecutorManagerStatefulSets(commands);
 
+    final V1ResourceRequirements cliResources = new V1ResourceRequirementsBuilder()
+        .withLimits(cliLimits)
+        .withRequests(cliLimits)
+        .build();
+
     cliExecutorManager.second.getSpec()
-        .getTemplate().getSpec().getContainers().get(0).getResources().setLimits(cliLimits);
+        .getTemplate().getSpec().getContainers().get(0).setResources(cliResources);
 
     doReturn(commands)
         .when(v1ControllerWithPodTemplate)
