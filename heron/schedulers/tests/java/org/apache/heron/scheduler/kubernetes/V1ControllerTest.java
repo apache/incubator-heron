@@ -113,8 +113,10 @@ public class V1ControllerTest {
   private final Config config = Config.newBuilder().build();
   private final Config configWithPodTemplate = Config.newBuilder()
       .put(KubernetesContext.KUBERNETES_POD_TEMPLATE_CONFIGMAP_NAME, CONFIGMAP_POD_TEMPLATE_NAME)
-      .put(KubernetesContext.KUBERNETES_MANAGER_LIMITS_PREFIX + "cpu", MANAGER_CPU_LIMIT)
-      .put(KubernetesContext.KUBERNETES_MANAGER_LIMITS_PREFIX + "ram", MANAGER_RAM_LIMIT)
+      .put(KubernetesContext.KUBERNETES_MANAGER_LIMITS_PREFIX + KubernetesConstants.CPU,
+          MANAGER_CPU_LIMIT)
+      .put(KubernetesContext.KUBERNETES_MANAGER_LIMITS_PREFIX + KubernetesConstants.MEMORY,
+          MANAGER_RAM_LIMIT)
       .build();
   private final Config runtime = Config.newBuilder()
       .put(Key.TOPOLOGY_NAME, TOPOLOGY_NAME)

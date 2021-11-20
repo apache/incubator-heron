@@ -462,12 +462,12 @@ public class V1Controller extends KubernetesController {
     final Map<String, String> configLimits = KubernetesContext.getManagerLimits(getConfiguration());
     if (!configLimits.isEmpty()) {
       final Map<String, Quantity> limits = new HashMap<>();
-      final String memoryLimit = configLimits.get("ram");
+      final String memoryLimit = configLimits.get(KubernetesConstants.MEMORY);
       if (memoryLimit != null && !memoryLimit.isEmpty()) {
         limits.put(KubernetesConstants.MEMORY, Quantity.fromString(
             KubernetesUtils.Megabytes(ByteAmount.fromGigabytes(Long.parseLong(memoryLimit)))));
       }
-      final String cpuLimit = configLimits.get("cpu");
+      final String cpuLimit = configLimits.get(KubernetesConstants.CPU);
       if (cpuLimit != null && !cpuLimit.isEmpty()) {
         limits.put(KubernetesConstants.CPU, Quantity.fromString(
             Double.toString(V1Controller.roundDecimal(Double.parseDouble(cpuLimit), 3))));
