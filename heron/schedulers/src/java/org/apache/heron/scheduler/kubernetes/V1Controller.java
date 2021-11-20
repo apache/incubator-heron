@@ -493,7 +493,8 @@ public class V1Controller extends KubernetesController {
 
     // Setup StatefulSet's metadata.
     final V1ObjectMeta objectMeta = new V1ObjectMeta()
-        .name(getExecutorStatefulSetName());
+        .name(getExecutorStatefulSetName())
+        .labels(getPodLabels(topologyName));
     statefulSet.setMetadata(objectMeta);
 
     // Create the StatefulSet Spec. Reduce replica count by one because of isolated Manager.
