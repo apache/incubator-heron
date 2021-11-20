@@ -315,8 +315,8 @@ public class V1Controller extends KubernetesController {
   void deleteStatefulSets() {
     try (Response response = appsClient.deleteCollectionNamespacedStatefulSetCall(getNamespace(),
         null, null, null, null, null,
-        createTopologySelectorLabels(), null, null, "0", null,
-          KubernetesConstants.DELETE_OPTIONS_PROPAGATION_POLICY, null, null, null).execute()) {
+        createTopologySelectorLabels(), null, null, null, null, null, null, null, null)
+        .execute()) {
 
       if (!response.isSuccessful()) {
         if (response.code() == HTTP_NOT_FOUND) {
