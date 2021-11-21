@@ -462,22 +462,12 @@ public class V1Controller extends KubernetesController {
     // Configure limits and requests.
     final Map<String, String> configLimits = KubernetesContext.getManagerLimits(getConfiguration());
     if (!configLimits.isEmpty()) {
-      final Map<String, Quantity> limits = new HashMap<>();
-      final String memoryLimit = configLimits.get(KubernetesConstants.MEMORY);
-      if (memoryLimit != null && !memoryLimit.isEmpty()) {
-        limits.put(KubernetesConstants.MEMORY, Quantity.fromString(
-            KubernetesUtils.Megabytes(ByteAmount.fromGigabytes(Long.parseLong(memoryLimit)))));
-      }
-      final String cpuLimit = configLimits.get(KubernetesConstants.CPU);
-      if (cpuLimit != null && !cpuLimit.isEmpty()) {
-        limits.put(KubernetesConstants.CPU, Quantity.fromString(
-            Double.toString(V1Controller.roundDecimal(Double.parseDouble(cpuLimit), 3))));
-      }
-      final V1ResourceRequirements requirements = new V1ResourceRequirementsBuilder()
-          .withLimits(limits)
-          .withRequests(limits)
-          .build();
-      managerContainer.setResources(requirements);
+      managerContainer.getResources().setLimits(createResourcesRequirement(configLimits));
+    }
+    final Map<String, String> configRequests =
+        KubernetesContext.getManagerRequests(getConfiguration());
+    if (!configRequests.isEmpty()) {
+      managerContainer.getResources().setRequests(createResourcesRequirement(configRequests));
     }
 
     return manager;
