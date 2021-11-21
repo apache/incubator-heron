@@ -1265,4 +1265,38 @@ public class V1Controller extends KubernetesController {
         KubernetesConstants.LABEL_APP, KubernetesConstants.LABEL_APP_VALUE,
         KubernetesConstants.LABEL_TOPOLOGY, getTopologyName());
   }
+
+  /**
+   * Creates <code>Resource Requirements</code> from a Map of <code>Config</code> items for <code>CPU</code>
+   * and <code>Memory</code>.
+   * @param configs <code>Configs</code> to be parsed for configuration.
+   * @return Configured <code>Resource Requirements</code>. <code>null</code> will be returned if there
+   * are no <code>configs</code>.
+   */
+  @VisibleForTesting
+  protected Map<String, Quantity> createResourcesRequirement(Map<String, String> configs) {
+    if (configs == null || configs.isEmpty()) {
+      return null;
+    }
+
+    final Map<String, Quantity> requirements = new HashMap<>();
+
+    final String memoryLimit = configs.get(KubernetesConstants.MEMORY);
+    if (memoryLimit != null && !memoryLimit.isEmpty()) {
+      requirements.put(KubernetesConstants.MEMORY, Quantity.fromString(
+          KubernetesUtils.Megabytes(ByteAmount.fromGigabytes(Long.parseLong(memoryLimit)))));
+    }
+    final String cpuLimit = configs.get(KubernetesConstants.CPU);
+    if (cpuLimit != null && !cpuLimit.isEmpty()) {
+      requirements.put(KubernetesConstants.CPU, Quantity.fromString(
+          Double.toString(V1Controller.roundDecimal(Double.parseDouble(cpuLimit), 3))));
+    }
+
+    // Return an empty map if there are no viable requirements.
+    if (requirements.isEmpty()) {
+      return null;
+    } else {
+      return requirements;
+    }
+  }
 }
