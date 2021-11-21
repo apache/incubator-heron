@@ -70,7 +70,6 @@ import io.kubernetes.client.openapi.models.V1PodSpec;
 import io.kubernetes.client.openapi.models.V1PodTemplate;
 import io.kubernetes.client.openapi.models.V1PodTemplateSpec;
 import io.kubernetes.client.openapi.models.V1ResourceRequirements;
-import io.kubernetes.client.openapi.models.V1ResourceRequirementsBuilder;
 import io.kubernetes.client.openapi.models.V1SecretKeySelector;
 import io.kubernetes.client.openapi.models.V1SecretVolumeSourceBuilder;
 import io.kubernetes.client.openapi.models.V1Service;
@@ -459,15 +458,19 @@ public class V1Controller extends KubernetesController {
     managerContainer.setCommand(command);
     managerContainer.setName(KubernetesConstants.MANAGER_NAME);
 
-    // Configure limits and requests.
+    // Configure Limits.
     final Map<String, String> configLimits = KubernetesContext.getManagerLimits(getConfiguration());
     if (!configLimits.isEmpty()) {
       managerContainer.getResources().setLimits(createResourcesRequirement(configLimits));
     }
+
+    // Configure Requests. Set Requests=Limits if no Requests are provided but Limits are.
     final Map<String, String> configRequests =
         KubernetesContext.getManagerRequests(getConfiguration());
     if (!configRequests.isEmpty()) {
       managerContainer.getResources().setRequests(createResourcesRequirement(configRequests));
+    } else if (!configLimits.isEmpty()) {
+      managerContainer.getResources().setRequests(createResourcesRequirement(configLimits));
     }
 
     return manager;
