@@ -1054,6 +1054,82 @@ public class V1ControllerTest {
     }
   }
 
+  @Test
+  public void testCreateResourcesRequirement() {
+    final Quantity memory = Quantity.fromString(
+        KubernetesUtils.Megabytes(ByteAmount.fromGigabytes(Long.parseLong(MANAGER_MEM_LIMIT))));
+    final Quantity cpu = Quantity.fromString(
+        Double.toString(V1Controller.roundDecimal(Double.parseDouble(MANAGER_CPU_LIMIT), 3)));
+    final List<TestTuple<Map<String, String>, Map<String, Quantity>>> testCases =
+        new LinkedList<>();
+
+    // No input.
+    Map<String, String> inputEmpty = new HashMap<>();
+    testCases.add(new TestTuple<>("Empty input.", inputEmpty, null));
+
+    // Only memory.
+    Map<String, String> inputMemory = new HashMap<String, String>() {
+      {
+        put(KubernetesConstants.MEMORY, MANAGER_MEM_LIMIT);
+      }
+    };
+    Map<String, Quantity> expectedMemory = new HashMap<String, Quantity>() {
+      {
+        put(KubernetesConstants.MEMORY, memory);
+      }
+    };
+    testCases.add(new TestTuple<>("Only memory input.", inputMemory, expectedMemory));
+
+    // Only CPU.
+    Map<String, String> inputCPU = new HashMap<String, String>() {
+      {
+        put(KubernetesConstants.CPU, MANAGER_CPU_LIMIT);
+      }
+    };
+    Map<String, Quantity> expectedCPU = new HashMap<String, Quantity>() {
+      {
+        put(KubernetesConstants.CPU, cpu);
+      }
+    };
+    testCases.add(new TestTuple<>("Only CPU input.", inputCPU, expectedCPU));
+
+    // CPU and memory.
+    Map<String, String> inputMemoryCPU = new HashMap<String, String>() {
+      {
+        put(KubernetesConstants.MEMORY, MANAGER_MEM_LIMIT);
+        put(KubernetesConstants.CPU, MANAGER_CPU_LIMIT);
+      }
+    };
+    Map<String, Quantity> expectedMemoryCPU = new HashMap<String, Quantity>() {
+      {
+        put(KubernetesConstants.MEMORY, memory);
+        put(KubernetesConstants.CPU, cpu);
+      }
+    };
+    testCases.add(new TestTuple<>("Memory and CPU input.", inputMemoryCPU, expectedMemoryCPU));
+
+    // Invalid.
+    Map<String, String> inputInvalid = new HashMap<String, String>() {
+      {
+        put("invalid input", "will not be ignored");
+        put(KubernetesConstants.CPU, MANAGER_CPU_LIMIT);
+      }
+    };
+    Map<String, Quantity> expectedInvalid = new HashMap<String, Quantity>() {
+      {
+        put(KubernetesConstants.CPU, cpu);
+      }
+    };
+    testCases.add(new TestTuple<>("Invalid input.", inputInvalid, expectedInvalid));
+
+    // Test loop.
+    for (TestTuple<Map<String, String>, Map<String, Quantity>> testCase : testCases) {
+      Map<String, Quantity> actual =
+          v1ControllerPodTemplate.createResourcesRequirement(testCase.input);
+      Assert.assertEquals(testCase.description, actual, testCase.expected);
+    }
+  }
+
   private Pair<V1StatefulSet, V1StatefulSet> createExecutorManagerStatefulSets(List<String> cmds) {
     final Resource executorResource = new Resource(
         9, ByteAmount.fromGigabytes(19), ByteAmount.fromGigabytes(99));
