@@ -219,18 +219,24 @@ heron submit kubernetes \
 
 ## Required and Optional Configuration Items
 
-The following table outlines CLI options which are either ***required*** ( &#x2611; ) or ***optional*** ( &#x2612; ) depending on if you are using dynamic/statically backed or shared `Volume`.
+The following table outlines CLI options which are either ***required*** ( &#x2705; ), ***optional*** ( &#x2754; ), or ***not available*** ( &#x274c; ) depending on if you are using dynamic/statically backed or shared `Volume`.
 
 | Option | Dynamic | Static | Shared
 |---|---|---|---|
-| `VOLUME NAME` | &#x2611; | &#x2611; | &#x2611;
-| `claimName` | &#x2611; | &#x2611; | &#x2611;
-| `path` | &#x2611; | &#x2611; | &#x2611;
-| `subPath` | &#x2612; | &#x2612; | &#x2612;
-| `storageClassName` | &#x2611; | &#x2612; | &#x2612;
-| `accessModes` | &#x2611; | &#x2611; | &#x2612;
-| `sizeLimit` | &#x2612; | &#x2612; | &#x2612;
-| `volumeMode` | &#x2612; | &#x2612; | &#x2612;
+| `VOLUME NAME` | &#x2705; | &#x2705; | &#x2705;
+| `claimName` | `OnDemand` | `OnDemand` | A valid name
+| `path` | &#x2705; | &#x2705; | &#x2705;
+| `subPath` | &#x2754; | &#x2754; | &#x2754;
+| `storageClassName` | &#x2705; | &#x274c; | &#x274c;
+| `accessModes` | &#x2705; | &#x2705; | &#x274c;
+| `sizeLimit` | &#x2754; | &#x2754; | &#x274c;
+| `volumeMode` | &#x2754; | &#x2754; | &#x274c;
+
+<br>
+
+***Note:*** The `VOLUME NAME` will be extracted from the CLI command and a `claimName` is a always required.
+
+<br>
 
 ## Configuration Items Created and Entries Made
 
