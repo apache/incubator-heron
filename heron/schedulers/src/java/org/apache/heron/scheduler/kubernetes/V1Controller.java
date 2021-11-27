@@ -158,7 +158,7 @@ public class V1Controller extends KubernetesController {
     for (PackingPlan.ContainerPlan containerPlan : packingPlan.getContainers()) {
       numberOfInstances = Math.max(numberOfInstances, containerPlan.getInstances().size());
     }
-    final V1StatefulSet executors = createStatefulSet(containerResource, numberOfInstances);
+    final V1StatefulSet executors = createStatefulSet(containerResource, numberOfInstances, true);
     final V1StatefulSet manager = createStatefulSetManager(executors, numberOfInstances);
 
     try {
@@ -480,9 +480,11 @@ public class V1Controller extends KubernetesController {
    * Creates and configures the <code>StatefulSet</code> which the topology's <code>executor</code>s will run in.
    * @param containerResource Passed down to configure the <code>executor</code> resource limits.
    * @param numberOfInstances Used to configure the execution command and ports for the <code>executor</code>.
+   * @param isExecutor Flag used to configure components specific to <code>executor</code> and <code>manager</code>.
    * @return A fully configured <code>StatefulSet</code> for the topology's <code>executors</code>.
    */
-  private V1StatefulSet createStatefulSet(Resource containerResource, int numberOfInstances) {
+  private V1StatefulSet createStatefulSet(Resource containerResource, int numberOfInstances,
+                                          boolean isExecutor) {
     final String topologyName = getTopologyName();
     final Config runtimeConfiguration = getRuntimeConfiguration();
 
@@ -521,8 +523,7 @@ public class V1Controller extends KubernetesController {
     templateMetaData.setAnnotations(annotations);
     podTemplateSpec.setMetadata(templateMetaData);
 
-    final List<String> command = getExecutorCommand("$" + ENV_SHARD_ID, numberOfInstances, true);
-    configurePodSpec(podTemplateSpec, command, containerResource, numberOfInstances);
+    configurePodSpec(podTemplateSpec, containerResource, numberOfInstances, isExecutor);
 
     statefulSetSpec.setTemplate(podTemplateSpec);
 
@@ -576,14 +577,12 @@ public class V1Controller extends KubernetesController {
    * Configures the <code>Pod Spec</code> section of the <code>StatefulSet</code>. The <code>executor</code> container
    * will be configured to allow Heron to function but other supplied containers are loaded verbatim.
    * @param podTemplateSpec The <code>Pod Template Spec</code> section to update.
-   * @param executorCommand Passed down to configure the <code>executor</code> start command.
    * @param resource Passed down to configure the <code>executor</code> resource limits.
    * @param numberOfInstances Passed down to configure the <code>executor</code> ports.
+   * @param isExecutor Flag used to configure components specific to <code>executor</code> and <code>manager</code>.
    */
-  private void configurePodSpec(final V1PodTemplateSpec podTemplateSpec,
-                                List<String> executorCommand,
-                                Resource resource,
-                                int numberOfInstances) {
+  private void configurePodSpec(final V1PodTemplateSpec podTemplateSpec, Resource resource,
+                                int numberOfInstances, boolean isExecutor) {
     if (podTemplateSpec.getSpec() == null) {
       podTemplateSpec.setSpec(new V1PodSpec());
     }
@@ -624,7 +623,7 @@ public class V1Controller extends KubernetesController {
       configurePodWithPersistentVolumeClaimVolumesAndMounts(podSpec, executorContainer);
     }
 
-    configureExecutorContainer(executorCommand, resource, numberOfInstances, executorContainer);
+    configureHeronContainer(resource, numberOfInstances, executorContainer, isExecutor);
 
     podSpec.setContainers(containers);
 
@@ -709,21 +708,23 @@ public class V1Controller extends KubernetesController {
   }
 
   /**
-   * Configures the <code>executor</code> container with values for parameters Heron requires for functioning.
-   * @param executorCommand Command to bring up the <code>executor</code> Heron process in the container.
+   * Configures the <code>Heron</code> container with values for parameters Heron requires for functioning.
    * @param resource Resource limits.
    * @param numberOfInstances Required number of <code>executor</code> containers which is used to configure ports.
    * @param container The <code>executor</code> container to be configured.
+   * @param isExecutor Flag indicating whether to set a <code>executor</code> or <code>manager</code> command.
    */
-  private void configureExecutorContainer(List<String> executorCommand, Resource resource,
-                                          int numberOfInstances, final V1Container container) {
+  private void configureHeronContainer(Resource resource, int numberOfInstances,
+                                       final V1Container container, boolean isExecutor) {
     final Config configuration = getConfiguration();
 
     // Set up the container images.
     container.setImage(KubernetesContext.getExecutorDockerImage(configuration));
 
     // Set up the container command.
-    container.setCommand(executorCommand);
+    final List<String> command =
+        getExecutorCommand("$" + ENV_SHARD_ID, numberOfInstances, isExecutor);
+    container.setCommand(command);
 
     if (KubernetesContext.hasImagePullPolicy(configuration)) {
       container.setImagePullPolicy(KubernetesContext.getKubernetesImagePullPolicy(configuration));
