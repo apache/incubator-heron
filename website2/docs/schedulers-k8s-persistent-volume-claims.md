@@ -208,8 +208,8 @@ heron submit kubernetes \
   --service-url=http://localhost:8001/api/v1/namespaces/default/services/heron-apiserver:9000/proxy \
   ~/.heron/examples/heron-api-examples.jar \
   org.apache.heron.examples.api.AckingTopology acking \
+--config-property heron.kubernetes.volumes.persistentVolumeClaim.volumenameofchoice.claimName=OnDemand \
 --config-property heron.kubernetes.volumes.persistentVolumeClaim.volumenameofchoice.storageClassName=storage-class-name-of-choice \
---config-property heron.kubernetes.volumes.persistentVolumeClaim.volumenameofchoice.storageClassName=OnDemand \
 --config-property heron.kubernetes.volumes.persistentVolumeClaim.volumenameofchoice.accessModes=comma,separated,list \
 --config-property heron.kubernetes.volumes.persistentVolumeClaim.volumenameofchoice.sizeLimit=555Gi \
 --config-property heron.kubernetes.volumes.persistentVolumeClaim.volumenameofchoice.volumeMode=volume-mode-of-choice \
