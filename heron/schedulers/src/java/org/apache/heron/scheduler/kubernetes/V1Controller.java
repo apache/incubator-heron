@@ -1248,11 +1248,14 @@ public class V1Controller extends KubernetesController {
   }
 
   /**
-   * Generates the <code>Executor</code> <code>StatefulSet</code> name.
+   * Generates the <code>StatefulSet</code> name depending on if it is a <code>Executor</code> or
+   * <code>Manager</code>.
+   * @param isExecutor Flag used to generate name for <code>Executor</code> or <code>Manager</code>.
    * @return String <code>"topology-name"-executors</code>.
    */
-  private String getExecutorStatefulSetName() {
-    return String.format("%s-%ss", getTopologyName(), KubernetesConstants.EXECUTOR_NAME);
+  private String getStatefulSetName(boolean isExecutor) {
+    return String.format("%s-%s", getTopologyName(),
+        isExecutor ? KubernetesConstants.EXECUTOR_NAME + "s" : KubernetesConstants.MANAGER_NAME);
   }
 
   /**
