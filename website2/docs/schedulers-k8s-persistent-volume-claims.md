@@ -93,7 +93,7 @@ An example series of commands and the `YAML` entries they make in their respecti
 ***Dynamic:***
 
 ```bash
---config-property heron.kubernetes.volumes.persistentVolumeClaim.volumenameofchoice.storageClassName=OnDemand
+--config-property heron.kubernetes.volumes.persistentVolumeClaim.volumenameofchoice.claimName=OnDemand
 --config-property heron.kubernetes.volumes.persistentVolumeClaim.volumenameofchoice.storageClassName=storage-class-name-of-choice
 --config-property heron.kubernetes.volumes.persistentVolumeClaim.volumenameofchoice.accessModes=comma,separated,list
 --config-property heron.kubernetes.volumes.persistentVolumeClaim.volumenameofchoice.sizeLimit=555Gi
