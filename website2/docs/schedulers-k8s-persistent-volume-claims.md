@@ -148,7 +148,7 @@ volumeMounts:
 ***Static:***
 
 ```bash
---config-property heron.kubernetes.volumes.persistentVolumeClaim.volumenameofchoice.storageClassName=OnDemand
+--config-property heron.kubernetes.volumes.persistentVolumeClaim.volumenameofchoice.claimName=OnDemand
 --config-property heron.kubernetes.volumes.persistentVolumeClaim.volumenameofchoice.accessModes=comma,separated,list
 --config-property heron.kubernetes.volumes.persistentVolumeClaim.volumenameofchoice.sizeLimit=555Gi
 --config-property heron.kubernetes.volumes.persistentVolumeClaim.volumenameofchoice.volumeMode=volume-mode-of-choice
