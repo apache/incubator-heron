@@ -80,7 +80,7 @@ The currently supported CLI `options` are:
 
 ***Note:*** A `claimName` of `OnDemand` will create unique Volumes for each `Executor` as well as deploy a Persistent Volume Claim for each Volume. Any other Claim name will result in a shared Volume being created between all Pods in the topology.
 
-***Note:*** The `accessModes` must be a comma separated list of values *without* any white space.
+***Note:*** The `accessModes` must be a comma separated list of values *without* any white space. Valid values can be found in the [Kubernetes documentation](https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes).
 
 ***Note:*** If a `storageClassName` is specified and there are no matching Persistent Volumes then [dynamic provisioning](https://kubernetes.io/docs/concepts/storage/dynamic-provisioning/) must be enabled. Kubernetes will attempt to locate a Persistent Volume that matches the `storageClassName` before it attempts to use dynamic provisioning. If a `storageClassName` is not specified there must be [Persistent Volumes](https://kubernetes.io/docs/tasks/configure-pod-container/configure-persistent-volume-storage/) provisioned manually with the `storageClassName` of `standard`.
 
