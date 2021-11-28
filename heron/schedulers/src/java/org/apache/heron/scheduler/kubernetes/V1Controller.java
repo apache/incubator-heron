@@ -574,12 +574,12 @@ public class V1Controller extends KubernetesController {
   }
 
   /**
-   * Configures the <code>Pod Spec</code> section of the <code>StatefulSet</code>. The <code>executor</code> container
-   * will be configured to allow Heron to function but other supplied containers are loaded verbatim.
+   * Configures the <code>Pod Spec</code> section of the <code>StatefulSet</code>. The <code>Heron</code> container
+   * will be configured to allow it to function but other supplied containers are loaded verbatim.
    * @param podTemplateSpec The <code>Pod Template Spec</code> section to update.
-   * @param resource Passed down to configure the <code>executor</code> resource limits.
-   * @param numberOfInstances Passed down to configure the <code>executor</code> ports.
-   * @param isExecutor Flag used to configure components specific to <code>executor</code> and <code>manager</code>.
+   * @param resource Passed down to configure the resource limits.
+   * @param numberOfInstances Passed down to configure the ports.
+   * @param isExecutor Flag used to configure components specific to <code>Executor</code> and <code>Manager</code>.
    */
   private void configurePodSpec(final V1PodTemplateSpec podTemplateSpec, Resource resource,
                                 int numberOfInstances, boolean isExecutor) {
@@ -588,42 +588,43 @@ public class V1Controller extends KubernetesController {
     }
     final V1PodSpec podSpec = podTemplateSpec.getSpec();
 
-    // set the termination period to 0 so pods can be deleted quickly
+    // Set the termination period to 0 so pods can be deleted quickly
     podSpec.setTerminationGracePeriodSeconds(0L);
 
-    // set the pod tolerations so pods are rescheduled when nodes go down
+    // Set the pod tolerations so pods are rescheduled when nodes go down
     // https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/#taint-based-evictions
     configureTolerations(podSpec);
 
-    // Get <executor> container and discard all others.
-    final String executorName = KubernetesConstants.EXECUTOR_NAME;
-    V1Container executorContainer = null;
+    // Get <Heron> container and ignore all others.
+    final String containerName =
+        isExecutor ? KubernetesConstants.EXECUTOR_NAME : KubernetesConstants.MANAGER_NAME;
+    V1Container heronContainer = null;
     List<V1Container> containers = podSpec.getContainers();
     if (containers != null) {
       for (V1Container container : containers) {
         final String name = container.getName();
-        if (name != null && name.equals(executorName)) {
-          if (executorContainer != null) {
+        if (name != null && name.equals(containerName)) {
+          if (heronContainer != null) {
             throw new TopologySubmissionException(
-                String.format("Multiple configurations found for %s container", executorName));
+                String.format("Multiple configurations found for '%s' container", containerName));
           }
-          executorContainer = container;
+          heronContainer = container;
         }
       }
     } else {
       containers = new LinkedList<>();
     }
 
-    if (executorContainer == null) {
-      executorContainer = new V1Container().name(executorName);
-      containers.add(executorContainer);
+    if (heronContainer == null) {
+      heronContainer = new V1Container().name(containerName);
+      containers.add(heronContainer);
     }
 
     if (!persistentVolumeClaimConfigs.isEmpty()) {
-      configurePodWithPersistentVolumeClaimVolumesAndMounts(podSpec, executorContainer);
+      configurePodWithPersistentVolumeClaimVolumesAndMounts(podSpec, heronContainer);
     }
 
-    configureHeronContainer(resource, numberOfInstances, executorContainer, isExecutor);
+    configureHeronContainer(resource, numberOfInstances, heronContainer, isExecutor);
 
     podSpec.setContainers(containers);
 
