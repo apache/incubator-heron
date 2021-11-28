@@ -148,105 +148,132 @@ public class V1ControllerTest {
   @Test
   public void testLoadPodFromTemplateDefault() {
     final V1Controller v1ControllerNoPodTemplate = new V1Controller(CONFIG, RUNTIME);
-    final V1PodTemplateSpec podSpec = v1ControllerNoPodTemplate.loadPodFromTemplate(true);
+    final V1PodTemplateSpec defaultPodSpec = new V1PodTemplateSpec();
 
-    Assert.assertEquals(podSpec, new V1PodTemplateSpec());
+    final V1PodTemplateSpec podSpecExecutor = v1ControllerNoPodTemplate.loadPodFromTemplate(true);
+    Assert.assertEquals("Default Pod Spec for Executor", defaultPodSpec, podSpecExecutor);
+
+    final V1PodTemplateSpec podSpecManager = v1ControllerNoPodTemplate.loadPodFromTemplate(false);
+    Assert.assertEquals("Default Pod Spec for Manager", defaultPodSpec, podSpecManager);
   }
 
   @Test
   public void testLoadPodFromTemplateNullConfigMap() {
-    final String expected = "unable to locate";
-    String message = "";
+    final List<TestTuple<Boolean, String>> testCases = new LinkedList<>();
+    testCases.add(new TestTuple<>("Executor not found", true, "unable to locate"));
+    testCases.add(new TestTuple<>("Manager not found", false, "unable to locate"));
 
-    doReturn(null)
-        .when(v1ControllerWithPodTemplate)
-        .getConfigMap(anyString());
-    try {
-      v1ControllerWithPodTemplate.loadPodFromTemplate(true);
-    } catch (TopologySubmissionException e) {
-      message = e.getMessage();
+    for (TestTuple<Boolean, String> testCase : testCases) {
+      doReturn(null)
+          .when(v1ControllerWithPodTemplate)
+          .getConfigMap(anyString());
+
+      String message = "";
+      try {
+        v1ControllerWithPodTemplate.loadPodFromTemplate(testCase.input);
+      } catch (TopologySubmissionException e) {
+        message = e.getMessage();
+      }
+      Assert.assertTrue(testCase.description, message.contains(testCase.expected));
     }
-    Assert.assertTrue(message.contains(expected));
   }
 
   @Test
   public void testLoadPodFromTemplateNoConfigMap() {
-    final String expected = "Failed to locate Pod Template";
-    String message = "";
+    final List<TestTuple<Boolean, String>> testCases = new LinkedList<>();
+    testCases.add(new TestTuple<>("Executor no ConfigMap", true, "Failed to locate Pod Template"));
+    testCases.add(new TestTuple<>("Manager no ConfigMap", false, "Failed to locate Pod Template"));
 
-    doReturn(new V1ConfigMap())
-        .when(v1ControllerWithPodTemplate)
-        .getConfigMap(anyString());
-    try {
-      v1ControllerWithPodTemplate.loadPodFromTemplate(true);
-    } catch (TopologySubmissionException e) {
-      message = e.getMessage();
+    for (TestTuple<Boolean, String> testCase : testCases) {
+      doReturn(new V1ConfigMap())
+          .when(v1ControllerWithPodTemplate)
+          .getConfigMap(anyString());
+
+      String message = "";
+      try {
+        v1ControllerWithPodTemplate.loadPodFromTemplate(testCase.input);
+      } catch (TopologySubmissionException e) {
+        message = e.getMessage();
+      }
+      Assert.assertTrue(testCase.description, message.contains(testCase.expected));
     }
-    Assert.assertTrue(message.contains(expected));
   }
 
   @Test
   public void testLoadPodFromTemplateNoTargetConfigMap() {
-    final String expected = "Failed to locate Pod Template";
-    String message = "";
-    V1ConfigMap configMapNoTargetData = new V1ConfigMapBuilder()
+    final List<TestTuple<Boolean, String>> testCases = new LinkedList<>();
+    testCases.add(new TestTuple<>("Executor no target ConfigMap",
+        true, "Failed to locate Pod Template"));
+    testCases.add(new TestTuple<>("Manager no target ConfigMap",
+        false, "Failed to locate Pod Template"));
+
+    final V1ConfigMap configMapNoTargetData = new V1ConfigMapBuilder()
         .withNewMetadata()
           .withName(CONFIGMAP_NAME)
         .endMetadata()
         .addToData("Dummy Key", "Dummy Value")
         .build();
 
-    doReturn(configMapNoTargetData)
-        .when(v1ControllerWithPodTemplate)
-        .getConfigMap(anyString());
-    try {
-      v1ControllerWithPodTemplate.loadPodFromTemplate(true);
-    } catch (TopologySubmissionException e) {
-      message = e.getMessage();
+    for (TestTuple<Boolean, String> testCase : testCases) {
+      doReturn(configMapNoTargetData)
+          .when(v1ControllerWithPodTemplate)
+          .getConfigMap(anyString());
+
+      String message = "";
+      try {
+        v1ControllerWithPodTemplate.loadPodFromTemplate(testCase.input);
+      } catch (TopologySubmissionException e) {
+        message = e.getMessage();
+      }
+      Assert.assertTrue(testCase.description, message.contains(testCase.expected));
     }
-    Assert.assertTrue(message.contains(expected));
   }
 
   @Test
   public void testLoadPodFromTemplateBadTargetConfigMap() {
-    final String expected = "Error parsing";
-    String message = "";
-
     // ConfigMap with target ConfigMap and an invalid Pod Template.
-    V1ConfigMap configMapInvalidPod = new V1ConfigMapBuilder()
+    final V1ConfigMap configMapInvalidPod = new V1ConfigMapBuilder()
         .withNewMetadata()
           .withName(CONFIGMAP_NAME)
         .endMetadata()
         .addToData(POD_TEMPLATE_NAME, "Dummy Value")
         .build();
 
-    doReturn(configMapInvalidPod)
-        .when(v1ControllerWithPodTemplate)
-        .getConfigMap(anyString());
-    try {
-      v1ControllerWithPodTemplate.loadPodFromTemplate(true);
-    } catch (TopologySubmissionException e) {
-      message = e.getMessage();
-    }
-    Assert.assertTrue("Invalid Pod Template parsing should fail", message.contains(expected));
-
     // ConfigMap with target ConfigMaps and an empty Pod Template.
-    V1ConfigMap configMapEmptyPod = new V1ConfigMapBuilder()
+    final V1ConfigMap configMapEmptyPod = new V1ConfigMapBuilder()
         .withNewMetadata()
-          .withName(CONFIGMAP_NAME)
+        .withName(CONFIGMAP_NAME)
         .endMetadata()
         .addToData(POD_TEMPLATE_NAME, "")
         .build();
 
-    doReturn(configMapEmptyPod)
-        .when(v1ControllerWithPodTemplate)
-        .getConfigMap(anyString());
-    try {
-      v1ControllerWithPodTemplate.loadPodFromTemplate(true);
-    } catch (TopologySubmissionException e) {
-      message = e.getMessage();
+    // Test case container.
+    // Input: ConfigMap to setup mock V1Controller, Boolean flag for executor/manager switch.
+    // Output: The expected error message.
+    final List<TestTuple<Pair<V1ConfigMap, Boolean>, String>> testCases = new LinkedList<>();
+    testCases.add(new TestTuple<>("Executor invalid Pod Template",
+        new Pair<>(configMapInvalidPod, true), "Error parsing"));
+    testCases.add(new TestTuple<>("Manager invalid Pod Template",
+        new Pair<>(configMapInvalidPod, false), "Error parsing"));
+    testCases.add(new TestTuple<>("Executor empty Pod Template",
+        new Pair<>(configMapEmptyPod, true), "Error parsing"));
+    testCases.add(new TestTuple<>("Manager empty Pod Template",
+        new Pair<>(configMapEmptyPod, false), "Error parsing"));
+
+    // Test loop.
+    for (TestTuple<Pair<V1ConfigMap, Boolean>, String> testCase : testCases) {
+      doReturn(testCase.input.first)
+          .when(v1ControllerWithPodTemplate)
+          .getConfigMap(anyString());
+
+      String message = "";
+      try {
+        v1ControllerWithPodTemplate.loadPodFromTemplate(testCase.input.second);
+      } catch (TopologySubmissionException e) {
+        message = e.getMessage();
+      }
+      Assert.assertTrue(testCase.description, message.contains(testCase.expected));
     }
-    Assert.assertTrue("Empty Pod Template parsing should fail", message.contains(expected));
   }
 
   @Test
@@ -290,18 +317,32 @@ public class V1ControllerTest {
 
 
     // ConfigMap with valid Pod Template.
-    V1ConfigMap configMapValidPod = new V1ConfigMapBuilder()
+    final V1ConfigMap configMapValidPod = new V1ConfigMapBuilder()
         .withNewMetadata()
           .withName(CONFIGMAP_NAME)
         .endMetadata()
         .addToData(POD_TEMPLATE_NAME, POD_TEMPLATE_VALID)
         .build();
-    doReturn(configMapValidPod)
-        .when(v1ControllerWithPodTemplate)
-        .getConfigMap(anyString());
-    V1PodTemplateSpec podTemplateSpec = v1ControllerWithPodTemplate.loadPodFromTemplate(true);
 
-    Assert.assertTrue(podTemplateSpec.toString().contains(expected));
+    // Test case container.
+    // Input: ConfigMap to setup mock V1Controller, Boolean flag for executor/manager switch.
+    // Output: The expected Pod template as a string.
+    final List<TestTuple<Pair<V1ConfigMap, Boolean>, String>> testCases = new LinkedList<>();
+    testCases.add(new TestTuple<>("Executor valid Pod Template",
+        new Pair<>(configMapValidPod, true), expected));
+    testCases.add(new TestTuple<>("Manager valid Pod Template",
+        new Pair<>(configMapValidPod, false), expected));
+
+    // Test loop.
+    for (TestTuple<Pair<V1ConfigMap, Boolean>, String> testCase : testCases) {
+      doReturn(testCase.input.first)
+          .when(v1ControllerWithPodTemplate)
+          .getConfigMap(anyString());
+
+      V1PodTemplateSpec podTemplateSpec = v1ControllerWithPodTemplate.loadPodFromTemplate(true);
+
+      Assert.assertTrue(podTemplateSpec.toString().contains(testCase.expected));
+    }
   }
 
   @Test
@@ -318,24 +359,37 @@ public class V1ControllerTest {
             + "    labels:\n"
             + "      app: heron-tracker\n"
             + "  spec:\n";
-    V1ConfigMap configMap = new V1ConfigMapBuilder()
+    final V1ConfigMap configMap = new V1ConfigMapBuilder()
         .withNewMetadata()
           .withName(CONFIGMAP_NAME)
         .endMetadata()
         .addToData(POD_TEMPLATE_NAME, invalidPodTemplate)
         .build();
-    final String expected = "Error parsing";
-    String message = "";
 
-    doReturn(configMap)
-        .when(v1ControllerWithPodTemplate)
-        .getConfigMap(anyString());
-    try {
-      v1ControllerWithPodTemplate.loadPodFromTemplate(true);
-    } catch (TopologySubmissionException e) {
-      message = e.getMessage();
+
+    // Test case container.
+    // Input: ConfigMap to setup mock V1Controller, Boolean flag for executor/manager switch.
+    // Output: The expected Pod template as a string.
+    final List<TestTuple<Pair<V1ConfigMap, Boolean>, String>> testCases = new LinkedList<>();
+    testCases.add(new TestTuple<>("Executor invalid Pod Template",
+        new Pair<>(configMap, true), "Error parsing"));
+    testCases.add(new TestTuple<>("Manager invalid Pod Template",
+        new Pair<>(configMap, false), "Error parsing"));
+
+    // Test loop.
+    for (TestTuple<Pair<V1ConfigMap, Boolean>, String> testCase : testCases) {
+      doReturn(testCase.input.first)
+          .when(v1ControllerWithPodTemplate)
+          .getConfigMap(anyString());
+
+      String message = "";
+      try {
+        v1ControllerWithPodTemplate.loadPodFromTemplate(testCase.input.second);
+      } catch (TopologySubmissionException e) {
+        message = e.getMessage();
+      }
+      Assert.assertTrue(message.contains(testCase.expected));
     }
-    Assert.assertTrue(message.contains(expected));
   }
 
   @Test
