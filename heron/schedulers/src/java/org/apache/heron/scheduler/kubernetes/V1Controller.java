@@ -992,7 +992,7 @@ public class V1Controller extends KubernetesController {
   @VisibleForTesting
   protected Pair<String, String> getPodTemplateLocation() {
     final String podTemplateConfigMapName = KubernetesContext
-        .getPodTemplateConfigMapName(getConfiguration());
+        .getPodTemplateConfigMapName(getConfiguration(), true);
 
     if (podTemplateConfigMapName == null) {
       return null;

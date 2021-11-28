@@ -113,33 +113,41 @@ public class V1ControllerTest {
   private static final String MANAGER_MEM_LIMIT = "256";
   private static final String MANAGER_CPU_REQUEST = "24";
   private static final String MANAGER_MEM_REQUEST = "128";
+  private static final String POD_TEMPLATE_LOCATION_EXECUTOR =
+      String.format(KubernetesContext.KUBERNETES_POD_TEMPLATE_LOCATION,
+          KubernetesConstants.EXECUTOR_NAME);
+  private static final String POD_TEMPLATE_LOCATION_MANAGER =
+      String.format(KubernetesContext.KUBERNETES_POD_TEMPLATE_LOCATION,
+          KubernetesConstants.MANAGER_NAME);
 
-  private final Config config = Config.newBuilder().build();
-  private final Config configWithPodTemplate = Config.newBuilder()
-      .put(KubernetesContext.KUBERNETES_POD_TEMPLATE_CONFIGMAP_NAME, CONFIGMAP_POD_TEMPLATE_NAME)
+  private static final Config CONFIG = Config.newBuilder().build();
+  private static final Config CONFIG_WITH_POD_TEMPLATE = Config.newBuilder()
+      .put(POD_TEMPLATE_LOCATION_EXECUTOR, CONFIGMAP_POD_TEMPLATE_NAME)
+      .put(POD_TEMPLATE_LOCATION_MANAGER, CONFIGMAP_POD_TEMPLATE_NAME)
       .build();
-  private final Config runtime = Config.newBuilder()
+  private static final Config RUNTIME = Config.newBuilder()
       .put(Key.TOPOLOGY_NAME, TOPOLOGY_NAME)
       .build();
   private final Config configDisabledPodTemplate = Config.newBuilder()
-      .put(KubernetesContext.KUBERNETES_POD_TEMPLATE_CONFIGMAP_NAME, CONFIGMAP_POD_TEMPLATE_NAME)
+      .put(POD_TEMPLATE_LOCATION_EXECUTOR, CONFIGMAP_POD_TEMPLATE_NAME)
+      .put(POD_TEMPLATE_LOCATION_MANAGER, CONFIGMAP_POD_TEMPLATE_NAME)
       .put(KubernetesContext.KUBERNETES_POD_TEMPLATE_CONFIGMAP_DISABLED, "true")
       .build();
 
   @Spy
   private final V1Controller v1ControllerWithPodTemplate =
-      new V1Controller(configWithPodTemplate, runtime);
+      new V1Controller(CONFIG_WITH_POD_TEMPLATE, RUNTIME);
 
   @Spy
   private final V1Controller v1ControllerPodTemplate =
-      new V1Controller(configDisabledPodTemplate, runtime);
+      new V1Controller(configDisabledPodTemplate, RUNTIME);
 
   @Rule
   public final ExpectedException expectedException = ExpectedException.none();
 
   @Test
   public void testLoadPodFromTemplateDefault() {
-    final V1Controller v1ControllerNoPodTemplate = new V1Controller(config, runtime);
+    final V1Controller v1ControllerNoPodTemplate = new V1Controller(CONFIG, RUNTIME);
     final V1PodTemplateSpec podSpec = v1ControllerNoPodTemplate.loadPodFromTemplate();
 
     Assert.assertEquals(podSpec, new V1PodTemplateSpec());
@@ -356,24 +364,23 @@ public class V1ControllerTest {
   @Test
   public void testGetPodTemplateLocationPassing() {
     final Config testConfig = Config.newBuilder()
-        .put(KubernetesContext.KUBERNETES_POD_TEMPLATE_CONFIGMAP_NAME, CONFIGMAP_POD_TEMPLATE_NAME)
+        .put(POD_TEMPLATE_LOCATION_EXECUTOR, CONFIGMAP_POD_TEMPLATE_NAME)
         .build();
-    final V1Controller v1Controller = new V1Controller(testConfig, runtime);
+    final V1Controller v1Controller = new V1Controller(testConfig, RUNTIME);
     final Pair<String, String> expected = new Pair<>(CONFIGMAP_NAME, POD_TEMPLATE_NAME);
     Pair<String, String> actual;
 
     // Correct parsing
     actual = v1Controller.getPodTemplateLocation();
-    Assert.assertEquals(actual, expected);
+    Assert.assertEquals(expected, actual);
   }
 
   @Test
   public void testGetPodTemplateLocationNoConfigMap() {
     expectedException.expect(TopologySubmissionException.class);
     final Config testConfig = Config.newBuilder()
-        .put(KubernetesContext.KUBERNETES_POD_TEMPLATE_CONFIGMAP_NAME,
-        ".POD-TEMPLATE-NAME").build();
-    V1Controller v1Controller = new V1Controller(testConfig, runtime);
+        .put(POD_TEMPLATE_LOCATION_EXECUTOR, ".POD-TEMPLATE-NAME").build();
+    V1Controller v1Controller = new V1Controller(testConfig, RUNTIME);
     v1Controller.getPodTemplateLocation();
   }
 
@@ -381,9 +388,8 @@ public class V1ControllerTest {
   public void testGetPodTemplateLocationNoPodTemplate() {
     expectedException.expect(TopologySubmissionException.class);
     final Config testConfig = Config.newBuilder()
-        .put(KubernetesContext.KUBERNETES_POD_TEMPLATE_CONFIGMAP_NAME,
-        "CONFIGMAP-NAME.").build();
-    V1Controller v1Controller = new V1Controller(testConfig, runtime);
+        .put(POD_TEMPLATE_LOCATION_EXECUTOR, "CONFIGMAP-NAME.").build();
+    V1Controller v1Controller = new V1Controller(testConfig, RUNTIME);
     v1Controller.getPodTemplateLocation();
   }
 
@@ -391,9 +397,8 @@ public class V1ControllerTest {
   public void testGetPodTemplateLocationNoDelimiter() {
     expectedException.expect(TopologySubmissionException.class);
     final Config testConfig = Config.newBuilder()
-        .put(KubernetesContext.KUBERNETES_POD_TEMPLATE_CONFIGMAP_NAME,
-        "CONFIGMAP-NAMEPOD-TEMPLATE-NAME").build();
-    V1Controller v1Controller = new V1Controller(testConfig, runtime);
+        .put(POD_TEMPLATE_LOCATION_EXECUTOR, "CONFIGMAP-NAMEPOD-TEMPLATE-NAME").build();
+    V1Controller v1Controller = new V1Controller(testConfig, RUNTIME);
     v1Controller.getPodTemplateLocation();
   }
 
@@ -595,7 +600,7 @@ public class V1ControllerTest {
         .put(KubernetesContext.KUBERNETES_VOLUME_TYPE, Volumes.HOST_PATH)
         .put(KubernetesContext.KUBERNETES_VOLUME_HOSTPATH_PATH, pathDefault)
         .build();
-    final V1Controller controllerWithVol = new V1Controller(configWithVolumes, runtime);
+    final V1Controller controllerWithVol = new V1Controller(configWithVolumes, RUNTIME);
 
     final V1Volume volumeDefault = new V1VolumeBuilder()
         .withName(pathNameDefault)
@@ -623,7 +628,7 @@ public class V1ControllerTest {
     final List<V1Volume> expectedCustom = Arrays.asList(volumeDefault, volumeToBeKept);
 
     // No Volumes set.
-    V1Controller controllerDoNotSetVolumes = new V1Controller(Config.newBuilder().build(), runtime);
+    V1Controller controllerDoNotSetVolumes = new V1Controller(Config.newBuilder().build(), RUNTIME);
     V1PodSpec podSpecNoSetVolumes = new V1PodSpec();
     controllerDoNotSetVolumes.addVolumesIfPresent(podSpecNoSetVolumes);
     Assert.assertNull(podSpecNoSetVolumes.getVolumes());
@@ -659,7 +664,7 @@ public class V1ControllerTest {
         .put(KubernetesContext.KUBERNETES_CONTAINER_VOLUME_MOUNT_NAME, pathNameDefault)
         .put(KubernetesContext.KUBERNETES_CONTAINER_VOLUME_MOUNT_PATH, pathDefault)
         .build();
-    final V1Controller controllerWithMounts = new V1Controller(configWithVolumes, runtime);
+    final V1Controller controllerWithMounts = new V1Controller(configWithVolumes, RUNTIME);
     final V1VolumeMount volumeDefault = new V1VolumeMountBuilder()
         .withName(pathNameDefault)
         .withMountPath(pathDefault)
@@ -680,7 +685,7 @@ public class V1ControllerTest {
     );
 
     // No Volume Mounts set.
-    V1Controller controllerDoNotSetMounts = new V1Controller(Config.newBuilder().build(), runtime);
+    V1Controller controllerDoNotSetMounts = new V1Controller(Config.newBuilder().build(), RUNTIME);
     V1Container containerNoSetMounts = new V1Container();
     controllerDoNotSetMounts.mountVolumeIfPresent(containerNoSetMounts);
     Assert.assertNull(containerNoSetMounts.getVolumeMounts());
@@ -1299,7 +1304,7 @@ public class V1ControllerTest {
 
     // Test loop.
     for (TestTuple<Pair<Config, V1StatefulSet>, V1StatefulSet> testCase : testCases) {
-      final V1Controller controller = Mockito.spy(new V1Controller(testCase.input.first, runtime));
+      final V1Controller controller = Mockito.spy(new V1Controller(testCase.input.first, RUNTIME));
       doReturn(commands)
           .when(controller)
           .getExecutorCommand(anyString(), anyInt(), anyBoolean());

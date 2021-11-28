@@ -86,9 +86,9 @@ public final class KubernetesContext extends Context {
   public static final String KUBERNETES_VOLUME_AWS_EBS_FS_TYPE =
       "heron.kubernetes.volume.awsElasticBlockStore.fsType";
 
-  // pod template configmap
-  public static final String KUBERNETES_POD_TEMPLATE_CONFIGMAP_NAME =
-      "heron.kubernetes.pod.template.configmap.name";
+  // Pod Template ConfigMap: heron.kubernetes.[executor | manager].pod.template
+  public static final String KUBERNETES_POD_TEMPLATE_LOCATION =
+      "heron.kubernetes.%s.pod.template.configmap.name";
   public static final String KUBERNETES_POD_TEMPLATE_CONFIGMAP_DISABLED =
       "heron.kubernetes.pod.template.configmap.disabled";
 
@@ -195,8 +195,10 @@ public final class KubernetesContext extends Context {
     return config.getStringValue(KUBERNETES_CONTAINER_VOLUME_MOUNT_PATH);
   }
 
-  public static String getPodTemplateConfigMapName(Config config) {
-    return config.getStringValue(KUBERNETES_POD_TEMPLATE_CONFIGMAP_NAME);
+  public static String getPodTemplateConfigMapName(Config config, boolean isExecutor) {
+    final String key = String.format(KUBERNETES_POD_TEMPLATE_LOCATION,
+        isExecutor ? KubernetesConstants.EXECUTOR_NAME : KubernetesConstants.MANAGER_NAME);
+    return config.getStringValue(key);
   }
 
   public static boolean getPodTemplateConfigMapDisabled(Config config) {

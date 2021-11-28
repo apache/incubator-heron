@@ -36,23 +36,33 @@ import static org.apache.heron.scheduler.kubernetes.KubernetesConstants.VolumeCl
 public class KubernetesContextTest {
 
   private static final String TOPOLOGY_NAME = "Topology-Name";
-  private static final String KUBERNETES_POD_TEMPLATE_CONFIGMAP_NAME =
-      "heron.kubernetes.pod.template.configmap.name";
   private static final String POD_TEMPLATE_CONFIGMAP_NAME = "pod-template-configmap-name";
   private final Config config = Config.newBuilder().build();
   private final Config configWithPodTemplateConfigMap = Config.newBuilder()
-      .put(KubernetesContext.KUBERNETES_POD_TEMPLATE_CONFIGMAP_NAME,
+      .put(KubernetesContext.KUBERNETES_POD_TEMPLATE_LOCATION,
           POD_TEMPLATE_CONFIGMAP_NAME)
       .build();
 
   @Test
   public void testPodTemplateConfigMapName() {
-    Assert.assertEquals(KubernetesContext.KUBERNETES_POD_TEMPLATE_CONFIGMAP_NAME,
-        KUBERNETES_POD_TEMPLATE_CONFIGMAP_NAME);
-    Assert.assertEquals(
-        KubernetesContext.getPodTemplateConfigMapName(configWithPodTemplateConfigMap),
-        POD_TEMPLATE_CONFIGMAP_NAME);
-    Assert.assertNull(KubernetesContext.getPodTemplateConfigMapName(config));
+    final String executorKey = String.format(KubernetesContext.KUBERNETES_POD_TEMPLATE_LOCATION,
+        KubernetesConstants.EXECUTOR_NAME);
+    final Config configExecutor = Config.newBuilder()
+        .put(executorKey, POD_TEMPLATE_CONFIGMAP_NAME)
+        .build();
+    Assert.assertEquals("Executor location", POD_TEMPLATE_CONFIGMAP_NAME,
+        KubernetesContext.getPodTemplateConfigMapName(configExecutor, true));
+
+    final String managerKey = String.format(KubernetesContext.KUBERNETES_POD_TEMPLATE_LOCATION,
+        KubernetesConstants.MANAGER_NAME);
+    final Config configManager = Config.newBuilder()
+        .put(managerKey, POD_TEMPLATE_CONFIGMAP_NAME)
+        .build();
+    Assert.assertEquals("Manager location", POD_TEMPLATE_CONFIGMAP_NAME,
+        KubernetesContext.getPodTemplateConfigMapName(configManager, false));
+
+    Assert.assertNull("No Pod Template",
+        KubernetesContext.getPodTemplateConfigMapName(config, true));
   }
 
   @Test
@@ -62,7 +72,7 @@ public class KubernetesContextTest {
         .getPodTemplateConfigMapDisabled(configWithPodTemplateConfigMap));
 
     final Config configWithPodTemplateConfigMapOff = Config.newBuilder()
-        .put(KubernetesContext.KUBERNETES_POD_TEMPLATE_CONFIGMAP_NAME,
+        .put(KubernetesContext.KUBERNETES_POD_TEMPLATE_LOCATION,
             POD_TEMPLATE_CONFIGMAP_NAME)
         .put(KubernetesContext.KUBERNETES_POD_TEMPLATE_CONFIGMAP_DISABLED, "TRUE")
         .build();
@@ -77,7 +87,7 @@ public class KubernetesContextTest {
         .getPersistentVolumeClaimDisabled(configWithPodTemplateConfigMap));
 
     final Config configWithPodTemplateConfigMapOff = Config.newBuilder()
-        .put(KubernetesContext.KUBERNETES_POD_TEMPLATE_CONFIGMAP_NAME,
+        .put(KubernetesContext.KUBERNETES_POD_TEMPLATE_LOCATION,
             POD_TEMPLATE_CONFIGMAP_NAME)
         .put(KubernetesContext.KUBERNETES_PERSISTENT_VOLUME_CLAIMS_CLI_DISABLED, "TRUE")
         .build();
