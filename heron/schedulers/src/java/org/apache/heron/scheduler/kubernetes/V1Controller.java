@@ -745,6 +745,26 @@ public class V1Controller extends KubernetesController {
     // Set container resources
     configureContainerResources(container, configuration, resource);
 
+    // Override container resources via CLI for Manager.
+    // TODO: Move to <configureContainerResources> and add support for both Executors and Managers.
+    if (!isExecutor) {
+      // Configure Limits.
+      final Map<String, String> configLimits =
+          KubernetesContext.getManagerLimits(getConfiguration());
+      if (!configLimits.isEmpty()) {
+        container.getResources().setLimits(createResourcesRequirement(configLimits));
+      }
+
+      // Configure Requests. Set Requests=Limits if no Requests are provided but Limits are.
+      final Map<String, String> configRequests =
+          KubernetesContext.getManagerRequests(getConfiguration());
+      if (!configRequests.isEmpty()) {
+        container.getResources().setRequests(createResourcesRequirement(configRequests));
+      } else if (!configLimits.isEmpty()) {
+        container.getResources().setRequests(createResourcesRequirement(configLimits));
+      }
+    }
+
     // Set container ports.
     final boolean debuggingEnabled =
         TopologyUtils.getTopologyRemoteDebuggingEnabled(
