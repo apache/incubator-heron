@@ -141,6 +141,7 @@ public class V1Controller extends KubernetesController {
     }
 
     // Get and then create Persistent Volume Claims from the CLI.
+    // TODO: Get PVC for the Manager and Executors.
     persistentVolumeClaimConfigs =
         KubernetesContext.getVolumeClaimTemplates(getConfiguration());
     if (KubernetesContext.getPersistentVolumeClaimDisabled(getConfiguration())
@@ -152,7 +153,7 @@ public class V1Controller extends KubernetesController {
       throw new TopologySubmissionException(message);
     }
 
-    // find the max number of instances in a container so we can open
+    // Find the max number of instances in a container so that we can open
     // enough ports if remote debugging is enabled.
     int numberOfInstances = 0;
     for (PackingPlan.ContainerPlan containerPlan : packingPlan.getContainers()) {
@@ -257,7 +258,7 @@ public class V1Controller extends KubernetesController {
     PatchUtils.patch(V1StatefulSet.class,
         () ->
           appsClient.patchNamespacedStatefulSetCall(
-            getExecutorStatefulSetName(),
+            getStatefulSetName(true),
             getNamespace(),
             patch,
             null,
@@ -273,7 +274,7 @@ public class V1Controller extends KubernetesController {
           "[{\"op\":\"replace\",\"path\":\"/spec/replicas\",\"value\":%d}]";
 
   V1StatefulSet getStatefulSet() throws ApiException {
-    return appsClient.readNamespacedStatefulSet(getExecutorStatefulSetName(), getNamespace(),
+    return appsClient.readNamespacedStatefulSet(getStatefulSetName(true), getNamespace(),
         null, null, null);
   }
 
@@ -492,14 +493,17 @@ public class V1Controller extends KubernetesController {
 
     // Setup StatefulSet's metadata.
     final V1ObjectMeta objectMeta = new V1ObjectMeta()
-        .name(getExecutorStatefulSetName())
+        .name(getStatefulSetName(isExecutor))
         .labels(getPodLabels(topologyName));
     statefulSet.setMetadata(objectMeta);
 
-    // Create the StatefulSet Spec. Reduce replica count by one because of isolated Manager.
+    // Create the StatefulSet Spec.
+    // Reduce replica count by one for Executors and set to one for Manager.
+    final int replicasCount =
+        isExecutor ? Runtime.numContainers(runtimeConfiguration).intValue() - 1 : 1;
     final V1StatefulSetSpec statefulSetSpec = new V1StatefulSetSpec()
         .serviceName(topologyName)
-        .replicas(Runtime.numContainers(runtimeConfiguration).intValue() - 1);
+        .replicas(replicasCount);
 
     // Parallel pod management tells the StatefulSet controller to launch or terminate
     // all Pods in parallel, and not to wait for Pods to become Running and Ready or completely
@@ -512,10 +516,10 @@ public class V1Controller extends KubernetesController {
         .matchLabels(getPodMatchLabels(topologyName));
     statefulSetSpec.setSelector(selector);
 
-    // create a pod template
-    final V1PodTemplateSpec podTemplateSpec = loadPodFromTemplate(true);
+    // Create a Pod Template.
+    final V1PodTemplateSpec podTemplateSpec = loadPodFromTemplate(isExecutor);
 
-    // set up pod meta
+    // Set up Pod Metadata.
     final V1ObjectMeta templateMetaData = new V1ObjectMeta().labels(getPodLabels(topologyName));
     Map<String, String> annotations = new HashMap<>();
     annotations.putAll(getPodAnnotations());
@@ -529,6 +533,7 @@ public class V1Controller extends KubernetesController {
 
     statefulSet.setSpec(statefulSetSpec);
 
+    // TODO: Configure PVCs for Executors and Manager separately.
     statefulSetSpec.setVolumeClaimTemplates(
         createPersistentVolumeClaims(persistentVolumeClaimConfigs));
 
