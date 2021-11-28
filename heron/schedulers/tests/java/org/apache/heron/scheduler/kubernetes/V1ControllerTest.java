@@ -148,7 +148,7 @@ public class V1ControllerTest {
   @Test
   public void testLoadPodFromTemplateDefault() {
     final V1Controller v1ControllerNoPodTemplate = new V1Controller(CONFIG, RUNTIME);
-    final V1PodTemplateSpec podSpec = v1ControllerNoPodTemplate.loadPodFromTemplate();
+    final V1PodTemplateSpec podSpec = v1ControllerNoPodTemplate.loadPodFromTemplate(true);
 
     Assert.assertEquals(podSpec, new V1PodTemplateSpec());
   }
@@ -162,7 +162,7 @@ public class V1ControllerTest {
         .when(v1ControllerWithPodTemplate)
         .getConfigMap(anyString());
     try {
-      v1ControllerWithPodTemplate.loadPodFromTemplate();
+      v1ControllerWithPodTemplate.loadPodFromTemplate(true);
     } catch (TopologySubmissionException e) {
       message = e.getMessage();
     }
@@ -178,7 +178,7 @@ public class V1ControllerTest {
         .when(v1ControllerWithPodTemplate)
         .getConfigMap(anyString());
     try {
-      v1ControllerWithPodTemplate.loadPodFromTemplate();
+      v1ControllerWithPodTemplate.loadPodFromTemplate(true);
     } catch (TopologySubmissionException e) {
       message = e.getMessage();
     }
@@ -200,7 +200,7 @@ public class V1ControllerTest {
         .when(v1ControllerWithPodTemplate)
         .getConfigMap(anyString());
     try {
-      v1ControllerWithPodTemplate.loadPodFromTemplate();
+      v1ControllerWithPodTemplate.loadPodFromTemplate(true);
     } catch (TopologySubmissionException e) {
       message = e.getMessage();
     }
@@ -224,7 +224,7 @@ public class V1ControllerTest {
         .when(v1ControllerWithPodTemplate)
         .getConfigMap(anyString());
     try {
-      v1ControllerWithPodTemplate.loadPodFromTemplate();
+      v1ControllerWithPodTemplate.loadPodFromTemplate(true);
     } catch (TopologySubmissionException e) {
       message = e.getMessage();
     }
@@ -242,7 +242,7 @@ public class V1ControllerTest {
         .when(v1ControllerWithPodTemplate)
         .getConfigMap(anyString());
     try {
-      v1ControllerWithPodTemplate.loadPodFromTemplate();
+      v1ControllerWithPodTemplate.loadPodFromTemplate(true);
     } catch (TopologySubmissionException e) {
       message = e.getMessage();
     }
@@ -299,7 +299,7 @@ public class V1ControllerTest {
     doReturn(configMapValidPod)
         .when(v1ControllerWithPodTemplate)
         .getConfigMap(anyString());
-    V1PodTemplateSpec podTemplateSpec = v1ControllerWithPodTemplate.loadPodFromTemplate();
+    V1PodTemplateSpec podTemplateSpec = v1ControllerWithPodTemplate.loadPodFromTemplate(true);
 
     Assert.assertTrue(podTemplateSpec.toString().contains(expected));
   }
@@ -331,7 +331,7 @@ public class V1ControllerTest {
         .when(v1ControllerWithPodTemplate)
         .getConfigMap(anyString());
     try {
-      v1ControllerWithPodTemplate.loadPodFromTemplate();
+      v1ControllerWithPodTemplate.loadPodFromTemplate(true);
     } catch (TopologySubmissionException e) {
       message = e.getMessage();
     }
@@ -354,7 +354,7 @@ public class V1ControllerTest {
         .getConfigMap(anyString());
 
     try {
-      v1ControllerPodTemplate.loadPodFromTemplate();
+      v1ControllerPodTemplate.loadPodFromTemplate(true);
     } catch (TopologySubmissionException e) {
       message = e.getMessage();
     }
@@ -368,10 +368,9 @@ public class V1ControllerTest {
         .build();
     final V1Controller v1Controller = new V1Controller(testConfig, RUNTIME);
     final Pair<String, String> expected = new Pair<>(CONFIGMAP_NAME, POD_TEMPLATE_NAME);
-    Pair<String, String> actual;
 
     // Correct parsing
-    actual = v1Controller.getPodTemplateLocation();
+    final Pair<String, String> actual = v1Controller.getPodTemplateLocation(true);
     Assert.assertEquals(expected, actual);
   }
 
@@ -381,7 +380,7 @@ public class V1ControllerTest {
     final Config testConfig = Config.newBuilder()
         .put(POD_TEMPLATE_LOCATION_EXECUTOR, ".POD-TEMPLATE-NAME").build();
     V1Controller v1Controller = new V1Controller(testConfig, RUNTIME);
-    v1Controller.getPodTemplateLocation();
+    v1Controller.getPodTemplateLocation(true);
   }
 
   @Test
@@ -390,7 +389,7 @@ public class V1ControllerTest {
     final Config testConfig = Config.newBuilder()
         .put(POD_TEMPLATE_LOCATION_EXECUTOR, "CONFIGMAP-NAME.").build();
     V1Controller v1Controller = new V1Controller(testConfig, RUNTIME);
-    v1Controller.getPodTemplateLocation();
+    v1Controller.getPodTemplateLocation(true);
   }
 
   @Test
@@ -399,7 +398,7 @@ public class V1ControllerTest {
     final Config testConfig = Config.newBuilder()
         .put(POD_TEMPLATE_LOCATION_EXECUTOR, "CONFIGMAP-NAMEPOD-TEMPLATE-NAME").build();
     V1Controller v1Controller = new V1Controller(testConfig, RUNTIME);
-    v1Controller.getPodTemplateLocation();
+    v1Controller.getPodTemplateLocation(true);
   }
 
   @Test

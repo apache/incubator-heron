@@ -513,7 +513,7 @@ public class V1Controller extends KubernetesController {
     statefulSetSpec.setSelector(selector);
 
     // create a pod template
-    final V1PodTemplateSpec podTemplateSpec = loadPodFromTemplate();
+    final V1PodTemplateSpec podTemplateSpec = loadPodFromTemplate(true);
 
     // set up pod meta
     final V1ObjectMeta templateMetaData = new V1ObjectMeta().labels(getPodLabels(topologyName));
@@ -934,11 +934,13 @@ public class V1Controller extends KubernetesController {
   /**
    * Initiates the process of locating and loading <code>Pod Template</code> from a <code>ConfigMap</code>.
    * The loaded text is then parsed into a usable <code>Pod Template</code>.
+   * @param isExecutor Flag to indicate loading of <code>Pod Template</code> for <code>Executor</code>
+   *                   or <code>Manager</code>.
    * @return A <code>Pod Template</code> which is loaded and parsed from a <code>ConfigMap</code>.
    */
   @VisibleForTesting
-  protected V1PodTemplateSpec loadPodFromTemplate() {
-    final Pair<String, String> podTemplateConfigMapName = getPodTemplateLocation();
+  protected V1PodTemplateSpec loadPodFromTemplate(boolean isExecutor) {
+    final Pair<String, String> podTemplateConfigMapName = getPodTemplateLocation(isExecutor);
 
     // Default Pod Template.
     if (podTemplateConfigMapName == null) {
@@ -987,12 +989,14 @@ public class V1Controller extends KubernetesController {
 
   /**
    * Extracts the <code>ConfigMap</code> and <code>Pod Template</code> names from the CLI parameter.
+   * @param isExecutor Flag to indicate loading of <code>Pod Template</code> for <code>Executor</code>
+   *                   or <code>Manager</code>.
    * @return A pair of the form <code>(ConfigMap, Pod Template)</code>.
    */
   @VisibleForTesting
-  protected Pair<String, String> getPodTemplateLocation() {
+  protected Pair<String, String> getPodTemplateLocation(boolean isExecutor) {
     final String podTemplateConfigMapName = KubernetesContext
-        .getPodTemplateConfigMapName(getConfiguration(), true);
+        .getPodTemplateConfigMapName(getConfiguration(), isExecutor);
 
     if (podTemplateConfigMapName == null) {
       return null;
