@@ -116,9 +116,9 @@ public final class KubernetesContext extends Context {
   // Persistent Volume Claims
   public static final String KUBERNETES_PERSISTENT_VOLUME_CLAIMS_CLI_DISABLED =
       "heron.kubernetes.persistent.volume.claims.cli.disabled";
-  // heron.kubernetes.volumes.persistentVolumeClaim.VOLUME_NAME.OPTION=OPTION_VALUE
+  // heron.kubernetes.[executor | manager].volumes.persistentVolumeClaim.VOLUME_NAME.OPTION=VALUE
   public static final String KUBERNETES_VOLUME_CLAIM_PREFIX =
-      "heron.kubernetes.volumes.persistentVolumeClaim.";
+      "heron.kubernetes.%s.volumes.persistentVolumeClaim.";
   // heron.kubernetes.manager.limits.OPTION=VALUE
   public static final String KUBERNETES_MANAGER_LIMITS_PREFIX =
       "heron.kubernetes.manager.limits.";
@@ -247,15 +247,18 @@ public final class KubernetesContext extends Context {
    * Collects parameters form the <code>CLI</code> and generates a mapping between <code>Volumes</code>
    * and their configuration <code>key-value</code> pairs.
    * @param config Contains the configuration options collected from the <code>CLI</code>.
+   * @param isExecutor Flag used to collect CLI commands for the <code>executor</code> and <code>manager</code>.
    * @return A mapping between <code>Volumes</code> and their configuration <code>key-value</code> pairs.
    * Will return an empty list if there are no Volume Claim Templates to be generated.
    */
   public static Map<String, Map<KubernetesConstants.VolumeClaimTemplateConfigKeys, String>>
-      getVolumeClaimTemplates(Config config) {
+      getVolumeClaimTemplates(Config config, boolean isExecutor) {
     final Logger LOG = Logger.getLogger(V1Controller.class.getName());
 
-    final Set<String> completeConfigParam = getConfigKeys(config, KUBERNETES_VOLUME_CLAIM_PREFIX);
-    final int prefixLength = KUBERNETES_VOLUME_CLAIM_PREFIX.length();
+    final String prefixKey = String.format(KUBERNETES_VOLUME_CLAIM_PREFIX,
+        isExecutor ? KubernetesConstants.EXECUTOR_NAME : KubernetesConstants.MANAGER_NAME);
+    final Set<String> completeConfigParam = getConfigKeys(config, prefixKey);
+    final int prefixLength = prefixKey.length();
     final int volumeNameIdx = 0;
     final int optionIdx = 1;
     final Matcher matcher = KubernetesConstants.VALID_LOWERCASE_RFC_1123_REGEX.matcher("");

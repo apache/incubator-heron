@@ -475,7 +475,7 @@ public class V1Controller extends KubernetesController {
 
     // Get and then create Persistent Volume Claims from the CLI.
     final Map<String, Map<KubernetesConstants.VolumeClaimTemplateConfigKeys, String>> configsPVC =
-        KubernetesContext.getVolumeClaimTemplates(getConfiguration());
+        KubernetesContext.getVolumeClaimTemplates(getConfiguration(), isExecutor);
     if (KubernetesContext.getPersistentVolumeClaimDisabled(getConfiguration())
         && !configsPVC.isEmpty()) {
       final String message =

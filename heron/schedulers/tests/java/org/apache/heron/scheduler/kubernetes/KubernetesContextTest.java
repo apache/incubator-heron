@@ -27,6 +27,7 @@ import java.util.Map;
 import org.junit.Assert;
 import org.junit.Test;
 
+import org.apache.heron.common.basics.Pair;
 import org.apache.heron.scheduler.TopologySubmissionException;
 import org.apache.heron.scheduler.kubernetes.KubernetesUtils.TestTuple;
 import org.apache.heron.spi.common.Config;
@@ -100,54 +101,88 @@ public class KubernetesContextTest {
     final String volumeNameOne = "volume-name-one";
     final String volumeNameTwo = "volume-name-two";
     final String claimName = "OnDeMaNd";
-    final String keyPattern = KubernetesContext.KUBERNETES_VOLUME_CLAIM_PREFIX + "%s.%s";
+    final String keyPattern = KubernetesContext.KUBERNETES_VOLUME_CLAIM_PREFIX + "%%s.%%s";
+    final String keyExecutor = String.format(keyPattern, KubernetesConstants.EXECUTOR_NAME);
+    final String keyManager = String.format(keyPattern, KubernetesConstants.MANAGER_NAME);
 
     final String storageClassField = VolumeClaimTemplateConfigKeys.storageClassName.name();
     final String pathField = VolumeClaimTemplateConfigKeys.path.name();
     final String claimNameField = VolumeClaimTemplateConfigKeys.claimName.name();
     final String expectedStorageClass = "expected-storage-class";
-    final String storageClassKeyOne = String.format(keyPattern, volumeNameOne, storageClassField);
-    final String storageClassKeyTwo = String.format(keyPattern, volumeNameTwo, storageClassField);
     final String expectedPath = "/path/for/volume/expected";
-    final String pathKeyOne = String.format(keyPattern, volumeNameOne, pathField);
-    final String pathKeyTwo = String.format(keyPattern, volumeNameTwo, pathField);
-    final String claimNameKeyOne = String.format(keyPattern, volumeNameOne, claimNameField);
-    final String claimNameKeyTwo = String.format(keyPattern, volumeNameTwo, claimNameField);
 
-    final Config configPVC = Config.newBuilder()
-        .put(pathKeyOne, expectedPath)
-        .put(pathKeyTwo, expectedPath)
-        .put(claimNameKeyOne, claimName)
-        .put(claimNameKeyTwo, claimName)
-        .put(storageClassKeyOne, expectedStorageClass)
-        .put(storageClassKeyTwo, expectedStorageClass)
-        .build();
 
-    final List<String> expectedKeys = Arrays.asList(volumeNameOne, volumeNameTwo);
-    final List<VolumeClaimTemplateConfigKeys> expectedOptionsKeys =
-        Arrays.asList(VolumeClaimTemplateConfigKeys.path,
-            VolumeClaimTemplateConfigKeys.storageClassName,
-            VolumeClaimTemplateConfigKeys.claimName);
-    final List<String> expectedOptionsValues =
-        Arrays.asList(expectedPath, expectedStorageClass, claimName);
+    // Test case container.
+    // Input: Config to extract options from, Boolean to indicate Manager/Executor.
+    // Output: [0] expectedKeys, [1] expectedOptionsKeys, [2] expectedOptionsValues.
+    final List<TestTuple<Pair<Config, Boolean>, Object[]>> testCases = new LinkedList<>();
 
-    // List of provided PVC options.
-    final Map<String, Map<VolumeClaimTemplateConfigKeys, String>> mapOfPVC =
-        KubernetesContext.getVolumeClaimTemplates(configPVC);
+    // Create test cases for Executor/Manager on even/odd indices respectively.
+    for (int idx = 0; idx < 2; ++idx) {
 
-    Assert.assertTrue("Contains all provided Volumes",
-        mapOfPVC.keySet().containsAll(expectedKeys));
-    for (Map<VolumeClaimTemplateConfigKeys, String> items : mapOfPVC.values()) {
-      Assert.assertTrue("Contains all provided option keys",
-          items.keySet().containsAll(expectedOptionsKeys));
-      Assert.assertTrue("Contains all provided option values",
-          items.values().containsAll(expectedOptionsValues));
+      // Manager case is default.
+      boolean isExecutor = false;
+      String key = keyManager;
+      String description = KubernetesConstants.MANAGER_NAME;
+
+      // Executor case.
+      if (idx % 2 == 0) {
+        isExecutor = true;
+        key = keyExecutor;
+        description = KubernetesConstants.EXECUTOR_NAME;
+      }
+
+      final String storageClassKeyOne = String.format(key, volumeNameOne, storageClassField);
+      final String storageClassKeyTwo = String.format(key, volumeNameTwo, storageClassField);
+      final String pathKeyOne = String.format(key, volumeNameOne, pathField);
+      final String pathKeyTwo = String.format(key, volumeNameTwo, pathField);
+      final String claimNameKeyOne = String.format(key, volumeNameOne, claimNameField);
+      final String claimNameKeyTwo = String.format(key, volumeNameTwo, claimNameField);
+
+      final Config configPVC = Config.newBuilder()
+          .put(pathKeyOne, expectedPath)
+          .put(pathKeyTwo, expectedPath)
+          .put(claimNameKeyOne, claimName)
+          .put(claimNameKeyTwo, claimName)
+          .put(storageClassKeyOne, expectedStorageClass)
+          .put(storageClassKeyTwo, expectedStorageClass)
+          .build();
+
+      final List<String> expectedKeys = Arrays.asList(volumeNameOne, volumeNameTwo);
+      final List<VolumeClaimTemplateConfigKeys> expectedOptionsKeys =
+          Arrays.asList(VolumeClaimTemplateConfigKeys.path,
+              VolumeClaimTemplateConfigKeys.storageClassName,
+              VolumeClaimTemplateConfigKeys.claimName);
+      final List<String> expectedOptionsValues =
+          Arrays.asList(expectedPath, expectedStorageClass, claimName);
+
+      testCases.add(new TestTuple<>(description,
+          new Pair<>(configPVC, isExecutor),
+          new Object[]{expectedKeys, expectedOptionsKeys, expectedOptionsValues}));
+    }
+
+    // Test loop.
+    for (TestTuple<Pair<Config, Boolean>, Object[]> testCase : testCases) {
+      final Map<String, Map<VolumeClaimTemplateConfigKeys, String>> mapOfPVC =
+          KubernetesContext.getVolumeClaimTemplates(testCase.input.first, testCase.input.second);
+
+      Assert.assertTrue(testCase.description + ": Contains all provided Volumes",
+          mapOfPVC.keySet().containsAll((List<String>) testCase.expected[0]));
+      for (Map<VolumeClaimTemplateConfigKeys, String> items : mapOfPVC.values()) {
+        Assert.assertTrue(testCase.description + ": Contains all provided option keys",
+            items.keySet().containsAll((List<VolumeClaimTemplateConfigKeys>) testCase.expected[1]));
+        Assert.assertTrue(testCase.description + ": Contains all provided option values",
+            items.values().containsAll((List<String>) testCase.expected[2]));
+      }
     }
 
     // Empty PVC.
-    final Map<String, Map<VolumeClaimTemplateConfigKeys, String>> emptyPVC =
-        KubernetesContext.getVolumeClaimTemplates(Config.newBuilder().build());
-    Assert.assertTrue("Empty PVC is returned when no options provided", emptyPVC.isEmpty());
+    final Boolean[] emptyPVCTestCases = new Boolean[] {true, false};
+    for (boolean testCase : emptyPVCTestCases) {
+      final Map<String, Map<VolumeClaimTemplateConfigKeys, String>> emptyPVC =
+          KubernetesContext.getVolumeClaimTemplates(Config.newBuilder().build(), testCase);
+      Assert.assertTrue("Empty PVC is returned when no options provided", emptyPVC.isEmpty());
+    }
   }
 
   @Test
@@ -156,8 +191,8 @@ public class KubernetesContextTest {
     final String volumeNameInvalid = "volume-Name-Invalid";
     final String failureValue = "Should-Fail";
     final String generalFailureMessage = "Invalid Persistent Volume";
-    final String keyPattern = KubernetesContext.KUBERNETES_VOLUME_CLAIM_PREFIX
-        + "%s.%s";
+    final String keyPattern = String.format(KubernetesContext.KUBERNETES_VOLUME_CLAIM_PREFIX
+        + "%%s.%%s", KubernetesConstants.EXECUTOR_NAME);
     final List<TestTuple<Config, String>> testCases = new LinkedList<>();
 
     // Invalid option key test.
@@ -196,11 +231,15 @@ public class KubernetesContextTest {
         configInvalidStorageClassName, "Option `storageClassName`"));
 
     // Testing loop.
+    final Boolean[] executorFlags = new Boolean[] {true, false};
     for (TestTuple<Config, String> testCase : testCases) {
-      try {
-        KubernetesContext.getVolumeClaimTemplates(testCase.input);
-      } catch (TopologySubmissionException e) {
-        Assert.assertTrue(testCase.description, e.getMessage().contains(testCase.expected));
+      // Test for both Executor and Manager.
+      for (boolean isExecutor : executorFlags) {
+        try {
+          KubernetesContext.getVolumeClaimTemplates(testCase.input, isExecutor);
+        } catch (TopologySubmissionException e) {
+          Assert.assertTrue(testCase.description, e.getMessage().contains(testCase.expected));
+        }
       }
     }
   }
