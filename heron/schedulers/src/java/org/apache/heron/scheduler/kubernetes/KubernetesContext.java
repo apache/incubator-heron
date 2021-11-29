@@ -88,7 +88,7 @@ public final class KubernetesContext extends Context {
 
   // Pod Template ConfigMap: heron.kubernetes.[executor | manager].pod.template
   public static final String KUBERNETES_POD_TEMPLATE_LOCATION =
-      "heron.kubernetes.%s.pod.template.configmap.name";
+      "heron.kubernetes.%s.pod.template";
   public static final String KUBERNETES_POD_TEMPLATE_CONFIGMAP_DISABLED =
       "heron.kubernetes.pod.template.configmap.disabled";
 
