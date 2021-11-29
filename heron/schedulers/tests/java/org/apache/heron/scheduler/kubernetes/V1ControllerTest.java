@@ -1084,9 +1084,10 @@ public class V1ControllerTest {
           .when(v1ControllerWithPodTemplate)
           .createPersistentVolumeClaimVolumesAndMounts(anyMap());
 
+      // <configPVC> parameter is used in mock above, so we can set it to <null> as it is not used.
       v1ControllerWithPodTemplate
           .configurePodWithPersistentVolumeClaimVolumesAndMounts((V1PodSpec) testCase.input[0],
-              (V1Container) testCase.input[1]);
+              (V1Container) testCase.input[1], null);
 
       Assert.assertEquals("Pod Specs match " + testCase.description,
           testCase.input[0], testCase.expected.first);

@@ -101,9 +101,6 @@ public class V1Controller extends KubernetesController {
   private final AppsV1Api appsClient;
   private final CoreV1Api coreClient;
 
-  private Map<String, Map<KubernetesConstants.VolumeClaimTemplateConfigKeys, String>>
-      persistentVolumeClaimConfigs = null;
-
   V1Controller(Config configuration, Config runtimeConfiguration) {
     super(configuration, runtimeConfiguration);
 
@@ -138,19 +135,6 @@ public class V1Controller extends KubernetesController {
     } catch (ApiException e) {
       KubernetesUtils.logExceptionWithDetails(LOG, "Error creating topology service", e);
       throw new TopologySubmissionException(e.getMessage());
-    }
-
-    // Get and then create Persistent Volume Claims from the CLI.
-    // TODO: Get PVC for the Manager and Executors.
-    persistentVolumeClaimConfigs =
-        KubernetesContext.getVolumeClaimTemplates(getConfiguration());
-    if (KubernetesContext.getPersistentVolumeClaimDisabled(getConfiguration())
-        && !persistentVolumeClaimConfigs.isEmpty()) {
-      final String message =
-          String.format("Configuring Persistent Volume Claim from CLI is disabled: '%s'",
-              topologyName);
-      LOG.log(Level.WARNING, message);
-      throw new TopologySubmissionException(message);
     }
 
     // Find the max number of instances in a container so that we can open
@@ -489,6 +473,18 @@ public class V1Controller extends KubernetesController {
     final String topologyName = getTopologyName();
     final Config runtimeConfiguration = getRuntimeConfiguration();
 
+    // Get and then create Persistent Volume Claims from the CLI.
+    final Map<String, Map<KubernetesConstants.VolumeClaimTemplateConfigKeys, String>> configsPVC =
+        KubernetesContext.getVolumeClaimTemplates(getConfiguration());
+    if (KubernetesContext.getPersistentVolumeClaimDisabled(getConfiguration())
+        && !configsPVC.isEmpty()) {
+      final String message =
+          String.format("'%s': Configuring Persistent Volume Claim from CLI is disabled",
+              topologyName);
+      LOG.log(Level.WARNING, message);
+      throw new TopologySubmissionException(message);
+    }
+
     final V1StatefulSet statefulSet = new V1StatefulSet();
 
     // Setup StatefulSet's metadata.
@@ -527,15 +523,13 @@ public class V1Controller extends KubernetesController {
     templateMetaData.setAnnotations(annotations);
     podTemplateSpec.setMetadata(templateMetaData);
 
-    configurePodSpec(podTemplateSpec, containerResource, numberOfInstances, isExecutor);
+    configurePodSpec(podTemplateSpec, containerResource, numberOfInstances, isExecutor, configsPVC);
 
     statefulSetSpec.setTemplate(podTemplateSpec);
 
     statefulSet.setSpec(statefulSetSpec);
 
-    // TODO: Configure PVCs for Executors and Manager separately.
-    statefulSetSpec.setVolumeClaimTemplates(
-        createPersistentVolumeClaims(persistentVolumeClaimConfigs));
+    statefulSetSpec.setVolumeClaimTemplates(createPersistentVolumeClaims(configsPVC));
 
     return statefulSet;
   }
@@ -585,9 +579,11 @@ public class V1Controller extends KubernetesController {
    * @param resource Passed down to configure the resource limits.
    * @param numberOfInstances Passed down to configure the ports.
    * @param isExecutor Flag used to configure components specific to <code>Executor</code> and <code>Manager</code>.
+   * @param configPVC <code>Persistent Volume Claim</code> configurations options.
    */
   private void configurePodSpec(final V1PodTemplateSpec podTemplateSpec, Resource resource,
-                                int numberOfInstances, boolean isExecutor) {
+      int numberOfInstances, boolean isExecutor,
+      final Map<String, Map<KubernetesConstants.VolumeClaimTemplateConfigKeys, String>> configPVC) {
     if (podTemplateSpec.getSpec() == null) {
       podTemplateSpec.setSpec(new V1PodSpec());
     }
@@ -625,8 +621,8 @@ public class V1Controller extends KubernetesController {
       containers.add(heronContainer);
     }
 
-    if (!persistentVolumeClaimConfigs.isEmpty()) {
-      configurePodWithPersistentVolumeClaimVolumesAndMounts(podSpec, heronContainer);
+    if (!configPVC.isEmpty()) {
+      configurePodWithPersistentVolumeClaimVolumesAndMounts(podSpec, heronContainer, configPVC);
     }
 
     configureHeronContainer(resource, numberOfInstances, heronContainer, isExecutor);
@@ -1182,12 +1178,14 @@ public class V1Controller extends KubernetesController {
    * Makes a call to generate <code>Volumes</code> and <code>Volume Mounts</code> and then inserts them.
    * @param podSpec All generated <code>V1Volume</code> will be placed in the <code>Pod Spec</code>.
    * @param executor All generated <code>V1VolumeMount</code> will be placed in the <code>Container</code>.
+   * @param configPVC <code>Persistent Volume Claim</code> configurations options.
    */
   @VisibleForTesting
   protected void configurePodWithPersistentVolumeClaimVolumesAndMounts(final V1PodSpec podSpec,
-                                                                       final V1Container executor) {
+      final V1Container executor,
+      final Map<String, Map<KubernetesConstants.VolumeClaimTemplateConfigKeys, String>> configPVC) {
     Pair<List<V1Volume>, List<V1VolumeMount>> volumesAndMounts =
-        createPersistentVolumeClaimVolumesAndMounts(persistentVolumeClaimConfigs);
+        createPersistentVolumeClaimVolumesAndMounts(configPVC);
 
     // Deduplicate on Names with Persistent Volume Claims taking precedence.
 
