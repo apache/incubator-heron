@@ -160,7 +160,7 @@ public class V1Controller extends KubernetesController {
       numberOfInstances = Math.max(numberOfInstances, containerPlan.getInstances().size());
     }
     final V1StatefulSet executors = createStatefulSet(containerResource, numberOfInstances, true);
-    final V1StatefulSet manager = createStatefulSetManager(executors, numberOfInstances);
+    final V1StatefulSet manager = createStatefulSet(containerResource, numberOfInstances, false);
 
     try {
       appsClient.createNamespacedStatefulSet(getNamespace(), executors, null,
