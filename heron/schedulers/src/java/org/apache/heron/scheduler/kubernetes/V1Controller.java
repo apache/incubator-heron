@@ -693,14 +693,14 @@ public class V1Controller extends KubernetesController {
     if (!isExecutor) {
       // Configure Limits.
       final Map<String, String> configLimits =
-          KubernetesContext.getManagerLimits(getConfiguration());
+          KubernetesContext.getResourceLimits(getConfiguration(), false);
       if (!configLimits.isEmpty()) {
         container.getResources().setLimits(createResourcesRequirement(configLimits));
       }
 
       // Configure Requests. Set Requests=Limits if no Requests are provided but Limits are.
       final Map<String, String> configRequests =
-          KubernetesContext.getManagerRequests(getConfiguration());
+          KubernetesContext.getResourceRequests(getConfiguration(), false);
       if (!configRequests.isEmpty()) {
         container.getResources().setRequests(createResourcesRequirement(configRequests));
       } else if (!configLimits.isEmpty()) {

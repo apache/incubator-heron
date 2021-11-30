@@ -119,12 +119,12 @@ public final class KubernetesContext extends Context {
   // heron.kubernetes.[executor | manager].volumes.persistentVolumeClaim.VOLUME_NAME.OPTION=VALUE
   public static final String KUBERNETES_VOLUME_CLAIM_PREFIX =
       "heron.kubernetes.%s.volumes.persistentVolumeClaim.";
-  // heron.kubernetes.manager.limits.OPTION=VALUE
-  public static final String KUBERNETES_MANAGER_LIMITS_PREFIX =
-      "heron.kubernetes.manager.limits.";
-  // heron.kubernetes.manager.requests.OPTION=VALUE
-  public static final String KUBERNETES_MANAGER_REQUESTS_PREFIX =
-      "heron.kubernetes.manager.requests.";
+  // heron.kubernetes.[executor | manager].limits.OPTION=VALUE
+  public static final String KUBERNETES_RESOURCE_LIMITS_PREFIX =
+      "heron.kubernetes.%s.limits.";
+  // heron.kubernetes.[executor | manager].requests.OPTION=VALUE
+  public static final String KUBERNETES_RESOURCE_REQUESTS_PREFIX =
+      "heron.kubernetes.%s.requests.";
 
   private KubernetesContext() {
   }
@@ -230,12 +230,16 @@ public final class KubernetesContext extends Context {
     return getConfigItemsByPrefix(config, KUBERNETES_POD_SECRET_KEY_REF_PREFIX);
   }
 
-  public static Map<String, String> getManagerLimits(Config config) {
-    return getConfigItemsByPrefix(config, KUBERNETES_MANAGER_LIMITS_PREFIX);
+  public static Map<String, String> getResourceLimits(Config config, boolean isExecutor) {
+    final String key = String.format(KUBERNETES_RESOURCE_LIMITS_PREFIX,
+        isExecutor ? KubernetesConstants.EXECUTOR_NAME : KubernetesConstants.MANAGER_NAME);
+    return getConfigItemsByPrefix(config, key);
   }
 
-  public static Map<String, String> getManagerRequests(Config config) {
-    return getConfigItemsByPrefix(config, KUBERNETES_MANAGER_REQUESTS_PREFIX);
+  public static Map<String, String> getResourceRequests(Config config, boolean isExecutor) {
+    final String key = String.format(KUBERNETES_RESOURCE_REQUESTS_PREFIX,
+        isExecutor ? KubernetesConstants.EXECUTOR_NAME : KubernetesConstants.MANAGER_NAME);
+    return getConfigItemsByPrefix(config, key);
   }
 
   public static boolean getPersistentVolumeClaimDisabled(Config config) {
