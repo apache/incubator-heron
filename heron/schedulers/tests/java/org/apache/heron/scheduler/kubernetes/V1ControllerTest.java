@@ -33,7 +33,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
-import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 
@@ -61,9 +60,6 @@ import io.kubernetes.client.openapi.models.V1PodSpec;
 import io.kubernetes.client.openapi.models.V1PodSpecBuilder;
 import io.kubernetes.client.openapi.models.V1PodTemplateSpec;
 import io.kubernetes.client.openapi.models.V1ResourceRequirements;
-import io.kubernetes.client.openapi.models.V1ResourceRequirementsBuilder;
-import io.kubernetes.client.openapi.models.V1StatefulSet;
-import io.kubernetes.client.openapi.models.V1StatefulSetBuilder;
 import io.kubernetes.client.openapi.models.V1Toleration;
 import io.kubernetes.client.openapi.models.V1Volume;
 import io.kubernetes.client.openapi.models.V1VolumeBuilder;
@@ -71,8 +67,6 @@ import io.kubernetes.client.openapi.models.V1VolumeMount;
 import io.kubernetes.client.openapi.models.V1VolumeMountBuilder;
 
 import static org.apache.heron.scheduler.kubernetes.KubernetesConstants.VolumeClaimTemplateConfigKeys;
-import static org.mockito.Matchers.anyBoolean;
-import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyMap;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doReturn;
@@ -1185,190 +1179,6 @@ public class V1ControllerTest {
       Map<String, Quantity> actual =
           v1ControllerPodTemplate.createResourcesRequirement(testCase.input);
       Assert.assertEquals(testCase.description, actual, testCase.expected);
-    }
-  }
-
-  private Pair<V1StatefulSet, V1StatefulSet> createExecutorManagerStatefulSets(List<String> cmds) {
-    final Resource executorResource = new Resource(
-        9, ByteAmount.fromGigabytes(19), ByteAmount.fromGigabytes(99));
-    final Quantity executorMEM = Quantity.fromString(
-        KubernetesUtils.Megabytes(executorResource.getRam()));
-    final Quantity executorCPU = Quantity.fromString(
-        Double.toString(V1Controller.roundDecimal(executorResource.getCpu(), 3)));
-
-    final V1Container executorContainer = new V1ContainerBuilder()
-        .withName(KubernetesConstants.EXECUTOR_NAME)
-        .addNewCommand("executor container command")
-        .withNewResources()
-          .addToLimits(KubernetesConstants.CPU, executorCPU)
-          .addToLimits(KubernetesConstants.MEMORY, executorMEM)
-          .addToRequests(KubernetesConstants.CPU, executorCPU)
-          .addToRequests(KubernetesConstants.MEMORY, executorMEM)
-        .endResources()
-        .withImage("heron-image")
-        .build();
-
-    final V1StatefulSet executorStatefulSet = new V1StatefulSetBuilder()
-        .withNewMetadata()
-          .withName("topology-executors")
-        .endMetadata()
-        .withNewSpec()
-          .withReplicas(10)
-          .withNewTemplate()
-            .withNewSpec()
-              .withContainers(executorContainer)
-            .endSpec()
-          .endTemplate()
-        .endSpec()
-        .build();
-
-    final V1Container managerContainer = new V1ContainerBuilder()
-        .withName(KubernetesConstants.MANAGER_NAME)
-        .withCommand(cmds)
-        .withNewResources()
-          .addToLimits(KubernetesConstants.CPU, executorCPU)
-          .addToLimits(KubernetesConstants.MEMORY, executorMEM)
-          .addToRequests(KubernetesConstants.CPU, executorCPU)
-          .addToRequests(KubernetesConstants.MEMORY, executorMEM)
-        .endResources()
-        .withImage("heron-image")
-        .build();
-
-    final V1StatefulSet managerStatefulSet = new V1StatefulSetBuilder()
-        .withNewMetadata()
-          .withName(String.format("%s-%s", TOPOLOGY_NAME, KubernetesConstants.MANAGER_NAME))
-        .endMetadata()
-        .withNewSpec()
-          .withReplicas(1)
-          .withNewTemplate()
-            .withNewSpec()
-              .withContainers(managerContainer)
-            .endSpec()
-          .endTemplate()
-        .endSpec()
-        .build();
-
-    return new Pair<>(executorStatefulSet, managerStatefulSet);
-  }
-
-  @Test
-  public void testCreateStatefulSetManager() {
-    final List<String> commands = Arrays.asList("command 1", "command 2", "command 3");
-    final Quantity limitMEM = Quantity.fromString(
-        KubernetesUtils.Megabytes(ByteAmount.fromGigabytes(Long.parseLong(MANAGER_MEM_LIMIT))));
-    final Quantity limitCPU = Quantity.fromString(
-        Double.toString(V1Controller.roundDecimal(Double.parseDouble(MANAGER_CPU_LIMIT), 3)));
-    final Quantity requestMEM = Quantity.fromString(
-        KubernetesUtils.Megabytes(ByteAmount.fromGigabytes(Long.parseLong(MANAGER_MEM_REQUEST))));
-    final Quantity requestCPU = Quantity.fromString(
-        Double.toString(V1Controller.roundDecimal(Double.parseDouble(MANAGER_CPU_REQUEST), 3)));
-    final Map<String, Quantity> cliLimits = new HashMap<String, Quantity>() {
-      {
-        put(KubernetesConstants.CPU, limitCPU);
-        put(KubernetesConstants.MEMORY, limitMEM);
-      }
-    };
-    final Map<String, Quantity> cliRequests = new HashMap<String, Quantity>() {
-      {
-        put(KubernetesConstants.CPU, requestCPU);
-        put(KubernetesConstants.MEMORY, requestMEM);
-      }
-    };
-    final V1StatefulSet groundTruthExecutor = createExecutorManagerStatefulSets(commands).first;
-
-    // Test case container.
-    // Input: Config to setup mock V1Controller, Executor StatefulSet.
-    // Output: The expected Manager StatefulSet.
-    final List<TestTuple<Pair<Config, V1StatefulSet>, V1StatefulSet>> testCases =
-        new LinkedList<>();
-
-
-    // No Limits or Requests.
-    final Config configEmpty = Config.newBuilder().build();
-    Pair<V1StatefulSet, V1StatefulSet> baseExecutorManager =
-        createExecutorManagerStatefulSets(commands);
-    testCases.add(new TestTuple<>("No Limits or Requests.",
-        new Pair<>(configEmpty, baseExecutorManager.first), baseExecutorManager.second));
-
-
-    // Limits and Requests.
-    final Config configLimitsRequests = Config.newBuilder()
-        .put(KubernetesContext.KUBERNETES_MANAGER_LIMITS_PREFIX + KubernetesConstants.CPU,
-            MANAGER_CPU_LIMIT)
-        .put(KubernetesContext.KUBERNETES_MANAGER_LIMITS_PREFIX + KubernetesConstants.MEMORY,
-            MANAGER_MEM_LIMIT)
-        .put(KubernetesContext.KUBERNETES_MANAGER_REQUESTS_PREFIX + KubernetesConstants.CPU,
-            MANAGER_CPU_REQUEST)
-        .put(KubernetesContext.KUBERNETES_MANAGER_REQUESTS_PREFIX + KubernetesConstants.MEMORY,
-            MANAGER_MEM_REQUEST)
-        .build();
-
-    final Pair<V1StatefulSet, V1StatefulSet> cliLimitsRequests =
-        createExecutorManagerStatefulSets(commands);
-
-    final V1ResourceRequirements resLimitsRequests = new V1ResourceRequirementsBuilder()
-        .withLimits(cliLimits)
-        .withRequests(cliRequests)
-        .build();
-
-    cliLimitsRequests.second.getSpec()
-        .getTemplate().getSpec().getContainers().get(0).setResources(resLimitsRequests);
-    testCases.add(new TestTuple<>("With Limits and Requests.",
-        new Pair<>(configLimitsRequests, cliLimitsRequests.first), cliLimitsRequests.second));
-
-
-    // Only Limits.
-    final Config configLimits = Config.newBuilder()
-        .put(KubernetesContext.KUBERNETES_MANAGER_LIMITS_PREFIX + KubernetesConstants.CPU,
-            MANAGER_CPU_LIMIT)
-        .put(KubernetesContext.KUBERNETES_MANAGER_LIMITS_PREFIX + KubernetesConstants.MEMORY,
-            MANAGER_MEM_LIMIT)
-        .build();
-
-    final Pair<V1StatefulSet, V1StatefulSet> statefulSetLimits =
-        createExecutorManagerStatefulSets(commands);
-
-    final V1ResourceRequirements resLimits = new V1ResourceRequirementsBuilder()
-        .withLimits(cliLimits)
-        .withRequests(cliLimits)
-        .build();
-
-    statefulSetLimits.second.getSpec()
-        .getTemplate().getSpec().getContainers().get(0).setResources(resLimits);
-    testCases.add(new TestTuple<>("With Limits.",
-        new Pair<>(configLimits, statefulSetLimits.first), statefulSetLimits.second));
-
-
-    // Only Requests.
-    final Config configRequests = Config.newBuilder()
-        .put(KubernetesContext.KUBERNETES_MANAGER_REQUESTS_PREFIX + KubernetesConstants.CPU,
-            MANAGER_CPU_REQUEST)
-        .put(KubernetesContext.KUBERNETES_MANAGER_REQUESTS_PREFIX + KubernetesConstants.MEMORY,
-            MANAGER_MEM_REQUEST)
-        .build();
-
-    final Pair<V1StatefulSet, V1StatefulSet> statefulSetRequests =
-        createExecutorManagerStatefulSets(commands);
-
-    statefulSetRequests.second.getSpec()
-        .getTemplate().getSpec().getContainers().get(0).getResources().setRequests(cliRequests);
-    testCases.add(new TestTuple<>("With Requests.",
-        new Pair<>(configRequests, statefulSetRequests.first), statefulSetRequests.second));
-
-
-    // Test loop.
-    for (TestTuple<Pair<Config, V1StatefulSet>, V1StatefulSet> testCase : testCases) {
-      final V1Controller controller = Mockito.spy(new V1Controller(testCase.input.first, RUNTIME));
-      doReturn(commands)
-          .when(controller)
-          .getExecutorCommand(anyString(), anyInt(), anyBoolean());
-
-      final V1StatefulSet actual =
-          controller.createStatefulSetManager(testCase.input.second, 12);
-
-      Assert.assertEquals(testCase.description, testCase.expected, actual);
-      Assert.assertEquals("Executor remains unchanged: " + testCase.description,
-          groundTruthExecutor, testCase.input.second);
     }
   }
 }

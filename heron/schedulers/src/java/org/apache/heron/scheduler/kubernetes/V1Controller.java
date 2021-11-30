@@ -75,7 +75,6 @@ import io.kubernetes.client.openapi.models.V1SecretVolumeSourceBuilder;
 import io.kubernetes.client.openapi.models.V1Service;
 import io.kubernetes.client.openapi.models.V1ServiceSpec;
 import io.kubernetes.client.openapi.models.V1StatefulSet;
-import io.kubernetes.client.openapi.models.V1StatefulSetBuilder;
 import io.kubernetes.client.openapi.models.V1StatefulSetSpec;
 import io.kubernetes.client.openapi.models.V1Status;
 import io.kubernetes.client.openapi.models.V1Toleration;
@@ -407,58 +406,6 @@ public class V1Controller extends KubernetesController {
     service.setSpec(serviceSpec);
 
     return service;
-  }
-
-  /**
-   * Creates and configures the <code>StatefulSet</code> which the topology's <code>manager</code>s will run in.
-   * @param executor The <code>executor</code> to be used as the foundation for the <code>manager</code>.
-   * @param numberOfInstances Used to configure the execution command and ports for the <code>manager</code>.
-   * @return A fully configured <code>StatefulSet</code> for the topology's <code>manager</code>.
-   */
-  @VisibleForTesting
-  protected V1StatefulSet createStatefulSetManager(V1StatefulSet executor, int numberOfInstances) {
-    // Duplicate the executor.
-    final V1StatefulSet manager = new V1StatefulSetBuilder()
-        .withNewMetadataLike(executor.getMetadata())
-        .endMetadata()
-        .withNewSpecLike(executor.getSpec())
-        .endSpec()
-        .build();
-
-    // Set replica count and name in StatefulSet Spec for single manager.
-    manager.getSpec().setReplicas(1);
-    manager.getMetadata()
-        .setName(String.format("%s-%s", getTopologyName(), KubernetesConstants.MANAGER_NAME));
-
-    // Locate executor container. Executor container will always exist and will never be null.
-    final V1Container managerContainer =
-        manager.getSpec().getTemplate().getSpec().getContainers().stream()
-            .filter(container ->
-                KubernetesConstants.EXECUTOR_NAME.equalsIgnoreCase(container.getName()))
-            .findFirst()
-            .orElse(null);
-
-    // Update command and name of manager container.
-    final List<String> command = getExecutorCommand("$" + ENV_SHARD_ID, numberOfInstances, false);
-    managerContainer.setCommand(command);
-    managerContainer.setName(KubernetesConstants.MANAGER_NAME);
-
-    // Configure Limits.
-    final Map<String, String> configLimits = KubernetesContext.getManagerLimits(getConfiguration());
-    if (!configLimits.isEmpty()) {
-      managerContainer.getResources().setLimits(createResourcesRequirement(configLimits));
-    }
-
-    // Configure Requests. Set Requests=Limits if no Requests are provided but Limits are.
-    final Map<String, String> configRequests =
-        KubernetesContext.getManagerRequests(getConfiguration());
-    if (!configRequests.isEmpty()) {
-      managerContainer.getResources().setRequests(createResourcesRequirement(configRequests));
-    } else if (!configLimits.isEmpty()) {
-      managerContainer.getResources().setRequests(createResourcesRequirement(configLimits));
-    }
-
-    return manager;
   }
 
   /**
