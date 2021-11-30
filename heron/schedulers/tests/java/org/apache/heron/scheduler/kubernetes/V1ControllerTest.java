@@ -561,6 +561,8 @@ public class V1ControllerTest {
 
   @Test
   public void testConfigureContainerResources() {
+    final boolean isExecutor = true;
+
     final Resource resourceDefault = new Resource(
         9, ByteAmount.fromGigabytes(19), ByteAmount.fromGigabytes(99));
     final Resource resourceCustom = new Resource(
@@ -601,7 +603,7 @@ public class V1ControllerTest {
     // Default. Null resources.
     V1Container containerNull = new V1ContainerBuilder().build();
     v1ControllerWithPodTemplate.configureContainerResources(
-        containerNull, configNoLimit, resourceDefault);
+        containerNull, configNoLimit, resourceDefault, isExecutor);
     Assert.assertTrue("Default LIMITS should be set in container with null LIMITS",
         containerNull.getResources().getLimits().entrySet()
             .containsAll(expectDefaultRequirements.getLimits().entrySet()));
@@ -609,7 +611,7 @@ public class V1ControllerTest {
     // Empty resources.
     V1Container containerEmpty = new V1ContainerBuilder().withNewResources().endResources().build();
     v1ControllerWithPodTemplate.configureContainerResources(
-        containerEmpty, configNoLimit, resourceDefault);
+        containerEmpty, configNoLimit, resourceDefault, isExecutor);
     Assert.assertTrue("Default LIMITS should be set in container with empty LIMITS",
         containerNull.getResources().getLimits().entrySet()
             .containsAll(expectDefaultRequirements.getLimits().entrySet()));
@@ -619,7 +621,7 @@ public class V1ControllerTest {
         .withResources(customRequirements)
         .build();
     v1ControllerWithPodTemplate.configureContainerResources(
-        containerCustom, configNoLimit, resourceDefault);
+        containerCustom, configNoLimit, resourceDefault, isExecutor);
     Assert.assertTrue("Custom LIMITS should be set in container with custom LIMITS",
         containerCustom.getResources().getLimits().entrySet()
             .containsAll(expectCustomRequirements.getLimits().entrySet()));
@@ -629,7 +631,7 @@ public class V1ControllerTest {
         .withResources(customRequirements)
         .build();
     v1ControllerWithPodTemplate.configureContainerResources(
-        containerRequests, configWithLimit, resourceDefault);
+        containerRequests, configWithLimit, resourceDefault, isExecutor);
     Assert.assertTrue("Custom LIMITS should be set in container with custom LIMITS and REQUEST",
         containerRequests.getResources().getLimits().entrySet()
             .containsAll(expectCustomRequirements.getLimits().entrySet()));

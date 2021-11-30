@@ -686,7 +686,7 @@ public class V1Controller extends KubernetesController {
     setSecretKeyRefs(container);
 
     // Set container resources
-    configureContainerResources(container, configuration, resource);
+    configureContainerResources(container, configuration, resource, isExecutor);
 
     // Override container resources via CLI for Manager.
     // TODO: Move to <configureContainerResources> and add support for both Executors and Managers.
@@ -723,24 +723,41 @@ public class V1Controller extends KubernetesController {
    * @param container The <code>container</code> to be configured.
    * @param configuration The <code>Config</code> object to check if a resource request needs to be set.
    * @param resource User defined resources limits from input.
+   * @param isExecutor
    */
   @VisibleForTesting
   protected void configureContainerResources(final V1Container container,
-                                             final Config configuration, final Resource resource) {
+                                             final Config configuration, final Resource resource,
+                                             boolean isExecutor) {
     if (container.getResources() == null) {
       container.setResources(new V1ResourceRequirements());
     }
     final V1ResourceRequirements resourceRequirements = container.getResources();
 
-    // Configure resource limits. Deduplicate on limit name with user values taking precedence.
+    // Collect Limits and Requests from CLI
+    final Map<String, Quantity> limitsCLI = createResourcesRequirement(
+        KubernetesContext.getResourceLimits(getConfiguration(), isExecutor));
+    final Map<String, Quantity> requestsCLI = createResourcesRequirement(
+        KubernetesContext.getResourceRequests(getConfiguration(), isExecutor));
+
+    // Configure resource Limits. Deduplicate on limit name with user values taking precedence.
     if (resourceRequirements.getLimits() == null) {
       resourceRequirements.setLimits(new HashMap<>());
     }
+
+    // Set Limits and Resources from CLI <if> available, <else> use Configs.
     final Map<String, Quantity> limits = resourceRequirements.getLimits();
-    limits.put(KubernetesConstants.MEMORY,
-        Quantity.fromString(KubernetesUtils.Megabytes(resource.getRam())));
-    limits.put(KubernetesConstants.CPU,
-        Quantity.fromString(Double.toString(roundDecimal(resource.getCpu(), 3))));
+    Quantity limitCPU = Quantity.fromString(Double.toString(roundDecimal(resource.getCpu(), 3)));
+    Quantity limitMEMORY = Quantity.fromString(KubernetesUtils.Megabytes(resource.getRam()));
+    if (limitsCLI != null && limitsCLI.containsKey(KubernetesConstants.CPU)) {
+      limitCPU = limitsCLI.get(KubernetesConstants.CPU);
+    }
+    if (limitsCLI != null && limitsCLI.containsKey(KubernetesConstants.MEMORY)) {
+      limitMEMORY = limitsCLI.get(KubernetesConstants.MEMORY);
+    }
+
+    limits.put(KubernetesConstants.MEMORY, limitMEMORY);
+    limits.put(KubernetesConstants.CPU, limitCPU);
 
     // Set the Kubernetes container resource request.
     KubernetesContext.KubernetesResourceRequestMode requestMode =
