@@ -23,7 +23,11 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.regex.Matcher;
 
+import org.apache.heron.scheduler.TopologySubmissionException;
 import org.apache.heron.spi.common.Config;
 import org.apache.heron.spi.common.Context;
 
@@ -108,6 +112,13 @@ public final class KubernetesContext extends Context {
   // heron.kubernetes.pod.secretKeyRef.ENV_NAME=name:key
   public static final String KUBERNETES_POD_SECRET_KEY_REF_PREFIX =
       "heron.kubernetes.pod.secretKeyRef.";
+
+  // Persistent Volume Claims
+  public static final String KUBERNETES_PERSISTENT_VOLUME_CLAIMS_CLI_DISABLED =
+      "heron.kubernetes.persistent.volume.claims.cli.disabled";
+  // heron.kubernetes.volumes.persistentVolumeClaim.VOLUME_NAME.OPTION=OPTION_VALUE
+  public static final String KUBERNETES_VOLUME_CLAIM_PREFIX =
+      "heron.kubernetes.volumes.persistentVolumeClaim.";
 
   private KubernetesContext() {
   }
@@ -209,6 +220,80 @@ public final class KubernetesContext extends Context {
 
   public static Map<String, String> getPodSecretKeyRefs(Config config) {
     return getConfigItemsByPrefix(config, KUBERNETES_POD_SECRET_KEY_REF_PREFIX);
+  }
+
+  public static boolean getPersistentVolumeClaimDisabled(Config config) {
+    final String disabled = config.getStringValue(KUBERNETES_PERSISTENT_VOLUME_CLAIMS_CLI_DISABLED);
+    return "true".equalsIgnoreCase(disabled);
+  }
+
+  /**
+   * Collects parameters form the <code>CLI</code> and generates a mapping between <code>Volumes</code>
+   * and their configuration <code>key-value</code> pairs.
+   * @param config Contains the configuration options collected from the <code>CLI</code>.
+   * @return A mapping between <code>Volumes</code> and their configuration <code>key-value</code> pairs.
+   * Will return an empty list if there are no Volume Claim Templates to be generated.
+   */
+  public static Map<String, Map<KubernetesConstants.VolumeClaimTemplateConfigKeys, String>>
+      getVolumeClaimTemplates(Config config) {
+    final Logger LOG = Logger.getLogger(V1Controller.class.getName());
+
+    final Set<String> completeConfigParam = getConfigKeys(config, KUBERNETES_VOLUME_CLAIM_PREFIX);
+    final int prefixLength = KUBERNETES_VOLUME_CLAIM_PREFIX.length();
+    final int volumeNameIdx = 0;
+    final int optionIdx = 1;
+    final Matcher matcher = KubernetesConstants.VALID_LOWERCASE_RFC_1123_REGEX.matcher("");
+
+    final Map<String, Map<KubernetesConstants.VolumeClaimTemplateConfigKeys, String>> volumes
+        = new HashMap<>();
+
+    try {
+      for (String param : completeConfigParam) {
+        final String[] tokens = param.substring(prefixLength).split("\\.");
+        final String volumeName = tokens[volumeNameIdx];
+        final KubernetesConstants.VolumeClaimTemplateConfigKeys key =
+            KubernetesConstants.VolumeClaimTemplateConfigKeys.valueOf(tokens[optionIdx]);
+        final String value = config.getStringValue(param);
+
+        Map<KubernetesConstants.VolumeClaimTemplateConfigKeys, String> volume =
+            volumes.get(volumeName);
+        if (volume == null) {
+          // Validate new Volume Names.
+          if (!matcher.reset(volumeName).matches()) {
+            throw new TopologySubmissionException(
+                String.format("Volume name `%s` does not match lowercase RFC-1123 pattern",
+                    volumeName));
+          }
+          volume = new HashMap<>();
+          volumes.put(volumeName, volume);
+        }
+
+        /* Validate Claim and Storage Class names.
+          [1] `claimNameNotOnDemand`: checks for a `claimName` which is not `OnDemand`.
+          [2] `storageClassName`: Check if it is the provided `option`.
+          Conditions [1] OR [2] are True, then...
+          [3] Check for a valid lowercase RFC-1123 pattern.
+         */
+        boolean claimNameNotOnDemand =
+            KubernetesConstants.VolumeClaimTemplateConfigKeys.claimName.equals(key)
+                && !KubernetesConstants.LABEL_ON_DEMAND.equalsIgnoreCase(value);
+        if ((claimNameNotOnDemand // [1]
+            ||
+            KubernetesConstants.VolumeClaimTemplateConfigKeys.storageClassName.equals(key)) // [2]
+            && !matcher.reset(value).matches()) { // [3]
+          throw new TopologySubmissionException(
+              String.format("Option `%s` value `%s` does not match lowercase RFC-1123 pattern",
+                  key, value));
+        }
+
+        volume.put(key, value);
+      }
+    } catch (IndexOutOfBoundsException | IllegalArgumentException e) {
+      final String message = "Invalid Persistent Volume Claim CLI parameter provided";
+      LOG.log(Level.CONFIG, message);
+      throw new TopologySubmissionException(message);
+    }
+    return volumes;
   }
 
   static Set<String> getConfigKeys(Config config, String keyPrefix) {

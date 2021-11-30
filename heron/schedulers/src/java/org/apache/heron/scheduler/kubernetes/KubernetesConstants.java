@@ -52,6 +52,7 @@ public final class KubernetesConstants {
   public static final String LABEL_APP = "app";
   public static final String LABEL_APP_VALUE = "heron";
   public static final String LABEL_TOPOLOGY = "topology";
+  public static final String LABEL_ON_DEMAND = "onDemand";
 
   // prometheus annotation keys
   public static final String ANNOTATION_PROMETHEUS_SCRAPE = "prometheus.io/scrape";
@@ -88,10 +89,12 @@ public final class KubernetesConstants {
   public static final String JOB_LINK =
       "/api/v1/namespaces/kube-system/services/kubernetes-dashboard/proxy/#/pod";
 
-
   public static final Pattern VALID_POD_NAME_REGEX =
       Pattern.compile("[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*",
           Pattern.CASE_INSENSITIVE);
+
+  public static final Pattern VALID_LOWERCASE_RFC_1123_REGEX =
+      Pattern.compile("[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*");
 
   public static final List<String> VALID_IMAGE_PULL_POLICIES = Collections.unmodifiableList(
       Arrays.asList(
@@ -107,4 +110,14 @@ public final class KubernetesConstants {
           "node.kubernetes.io/unreachable"
       )
   );
+
+  enum VolumeClaimTemplateConfigKeys {
+    claimName,
+    storageClassName,
+    sizeLimit,
+    accessModes,
+    volumeMode,
+    path,               // Added to container.
+    subPath,            // Added to container.
+  }
 }
