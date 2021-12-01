@@ -564,9 +564,9 @@ public class V1ControllerTest {
     final boolean isExecutor = true;
 
     final Resource resourceDefault = new Resource(
-        9, ByteAmount.fromMegabytes(19000), ByteAmount.fromGigabytes(99));
+        9, ByteAmount.fromMegabytes(19000), ByteAmount.fromMegabytes(99000));
     final Resource resourceCustom = new Resource(
-        4, ByteAmount.fromMegabytes(34000), ByteAmount.fromGigabytes(400));
+        4, ByteAmount.fromMegabytes(34000), ByteAmount.fromMegabytes(400000));
 
     final Quantity defaultRAM = Quantity.fromString(
         KubernetesUtils.Megabytes(resourceDefault.getRam()));
@@ -577,7 +577,7 @@ public class V1ControllerTest {
     final Quantity customCPU = Quantity.fromString(
         Double.toString(V1Controller.roundDecimal(resourceCustom.getCpu(), 3)));
     final Quantity customDisk = Quantity.fromString(
-        Double.toString(V1Controller.roundDecimal(resourceCustom.getDisk().getValue(), 3)));
+        KubernetesUtils.Megabytes(resourceCustom.getDisk()));
 
     final Config configNoLimit = Config.newBuilder()
         .put(KubernetesContext.KUBERNETES_RESOURCE_REQUEST_MODE, "NOT_SET")
@@ -638,6 +638,53 @@ public class V1ControllerTest {
     Assert.assertTrue("Custom REQUEST should be set in container with custom LIMITS and REQUEST",
         containerRequests.getResources().getRequests().entrySet()
             .containsAll(expectCustomRequirements.getLimits().entrySet()));
+  }
+
+  @Test
+  public void testConfigureContainerResourcesCLI() {
+    final boolean isExecutor = true;
+    final String customLimitMEMStr = "12000";
+    final String customLimitCPUStr = "5";
+    final String customRequestMEMStr = "10000";
+    final String customRequestCPUStr = "4";
+
+    final Resource resources = new Resource(
+        6, ByteAmount.fromMegabytes(34000), ByteAmount.fromGigabytes(400));
+
+    final Quantity customLimitMEM = Quantity.fromString(
+        KubernetesUtils.Megabytes(ByteAmount.fromMegabytes(Long.parseLong(customLimitMEMStr))));
+    final Quantity customLimitCPU = Quantity.fromString(
+        Double.toString(V1Controller.roundDecimal(Double.parseDouble(customLimitCPUStr), 3)));
+    final Quantity customRequestMEM = Quantity.fromString(
+        KubernetesUtils.Megabytes(ByteAmount.fromMegabytes(Long.parseLong(customRequestMEMStr))));
+    final Quantity customRequestCPU = Quantity.fromString(
+        Double.toString(V1Controller.roundDecimal(Double.parseDouble(customRequestCPUStr), 3)));
+
+    final Config config = Config.newBuilder()
+        .put(String.format(KubernetesContext.KUBERNETES_RESOURCE_LIMITS_PREFIX
+                + KubernetesConstants.CPU, KubernetesConstants.EXECUTOR_NAME), customLimitCPUStr)
+        .put(String.format(KubernetesContext.KUBERNETES_RESOURCE_LIMITS_PREFIX
+                + KubernetesConstants.MEMORY, KubernetesConstants.EXECUTOR_NAME), customLimitMEMStr)
+        .put(String.format(KubernetesContext.KUBERNETES_RESOURCE_REQUESTS_PREFIX
+                + KubernetesConstants.CPU, KubernetesConstants.EXECUTOR_NAME), customRequestCPUStr)
+        .put(String.format(KubernetesContext.KUBERNETES_RESOURCE_REQUESTS_PREFIX
+                + KubernetesConstants.MEMORY, KubernetesConstants.EXECUTOR_NAME),
+            customRequestMEMStr)
+        .put(KubernetesContext.KUBERNETES_RESOURCE_REQUEST_MODE, "EQUAL_TO_LIMIT")
+        .build();
+
+    final V1Container expected = new V1ContainerBuilder()
+        .withNewResources()
+          .addToLimits(KubernetesConstants.CPU, customLimitCPU)
+          .addToLimits(KubernetesConstants.MEMORY, customLimitMEM)
+          .addToRequests(KubernetesConstants.CPU, customRequestCPU)
+          .addToRequests(KubernetesConstants.MEMORY, customRequestMEM)
+        .endResources()
+        .build();
+
+    final V1Container actual = new V1Container();
+    v1ControllerWithPodTemplate.configureContainerResources(actual, config, resources, isExecutor);
+    Assert.assertEquals("Container Resources are set from CLI.", expected, actual);
   }
 
   @Test
