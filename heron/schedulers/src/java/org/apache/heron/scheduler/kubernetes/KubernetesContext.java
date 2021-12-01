@@ -89,8 +89,8 @@ public final class KubernetesContext extends Context {
   // Pod Template ConfigMap: heron.kubernetes.[executor | manager].pod.template
   public static final String KUBERNETES_POD_TEMPLATE_LOCATION =
       "heron.kubernetes.%s.pod.template";
-  public static final String KUBERNETES_POD_TEMPLATE_CONFIGMAP_DISABLED =
-      "heron.kubernetes.pod.template.configmap.disabled";
+  public static final String KUBERNETES_POD_TEMPLATE_DISABLED =
+      "heron.kubernetes.pod.template.disabled";
 
   // container mount volume mount keys
   public static final String KUBERNETES_CONTAINER_VOLUME_MOUNT_NAME =
@@ -201,8 +201,8 @@ public final class KubernetesContext extends Context {
     return config.getStringValue(key);
   }
 
-  public static boolean getPodTemplateConfigMapDisabled(Config config) {
-    final String disabled = config.getStringValue(KUBERNETES_POD_TEMPLATE_CONFIGMAP_DISABLED);
+  public static boolean getPodTemplateDisabled(Config config) {
+    final String disabled = config.getStringValue(KUBERNETES_POD_TEMPLATE_DISABLED);
     return "true".equalsIgnoreCase(disabled);
   }
 

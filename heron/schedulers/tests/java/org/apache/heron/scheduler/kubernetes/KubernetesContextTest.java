@@ -67,18 +67,18 @@ public class KubernetesContextTest {
   }
 
   @Test
-  public void testPodTemplateConfigMapDisabled() {
-    Assert.assertFalse(KubernetesContext.getPodTemplateConfigMapDisabled(config));
+  public void testPodTemplateDisabled() {
+    Assert.assertFalse(KubernetesContext.getPodTemplateDisabled(config));
     Assert.assertFalse(KubernetesContext
-        .getPodTemplateConfigMapDisabled(configWithPodTemplateConfigMap));
+        .getPodTemplateDisabled(configWithPodTemplateConfigMap));
 
     final Config configWithPodTemplateConfigMapOff = Config.newBuilder()
         .put(KubernetesContext.KUBERNETES_POD_TEMPLATE_LOCATION,
             POD_TEMPLATE_CONFIGMAP_NAME)
-        .put(KubernetesContext.KUBERNETES_POD_TEMPLATE_CONFIGMAP_DISABLED, "TRUE")
+        .put(KubernetesContext.KUBERNETES_POD_TEMPLATE_DISABLED, "TRUE")
         .build();
     Assert.assertTrue(KubernetesContext
-        .getPodTemplateConfigMapDisabled(configWithPodTemplateConfigMapOff));
+        .getPodTemplateDisabled(configWithPodTemplateConfigMapOff));
   }
 
   @Test

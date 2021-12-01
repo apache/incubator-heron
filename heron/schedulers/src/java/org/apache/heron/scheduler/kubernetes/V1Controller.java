@@ -103,7 +103,7 @@ public class V1Controller extends KubernetesController {
   V1Controller(Config configuration, Config runtimeConfiguration) {
     super(configuration, runtimeConfiguration);
 
-    isPodTemplateDisabled = KubernetesContext.getPodTemplateConfigMapDisabled(configuration);
+    isPodTemplateDisabled = KubernetesContext.getPodTemplateDisabled(configuration);
     LOG.log(Level.WARNING, String.format("Custom Pod Templates are %s",
         isPodTemplateDisabled ? "DISABLED" : "ENABLED"));
 
