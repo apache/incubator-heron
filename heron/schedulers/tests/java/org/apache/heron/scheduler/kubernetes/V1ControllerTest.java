@@ -564,9 +564,9 @@ public class V1ControllerTest {
     final boolean isExecutor = true;
 
     final Resource resourceDefault = new Resource(
-        9, ByteAmount.fromGigabytes(19), ByteAmount.fromGigabytes(99));
+        9, ByteAmount.fromMegabytes(19000), ByteAmount.fromGigabytes(99));
     final Resource resourceCustom = new Resource(
-        4, ByteAmount.fromGigabytes(34), ByteAmount.fromGigabytes(400));
+        4, ByteAmount.fromMegabytes(34000), ByteAmount.fromGigabytes(400));
 
     final Quantity defaultRAM = Quantity.fromString(
         KubernetesUtils.Megabytes(resourceDefault.getRam()));
@@ -1119,7 +1119,7 @@ public class V1ControllerTest {
 
     // No input.
     Map<String, String> inputEmpty = new HashMap<>();
-    testCases.add(new TestTuple<>("Empty input.", inputEmpty, null));
+    testCases.add(new TestTuple<>("Empty input.", inputEmpty, new HashMap<>()));
 
     // Only memory.
     Map<String, String> inputMemory = new HashMap<String, String>() {
@@ -1180,7 +1180,7 @@ public class V1ControllerTest {
     for (TestTuple<Map<String, String>, Map<String, Quantity>> testCase : testCases) {
       Map<String, Quantity> actual =
           v1ControllerPodTemplate.createResourcesRequirement(testCase.input);
-      Assert.assertEquals(testCase.description, actual, testCase.expected);
+      Assert.assertEquals(testCase.description, testCase.expected, actual);
     }
   }
 }

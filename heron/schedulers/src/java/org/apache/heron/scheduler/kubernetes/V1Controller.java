@@ -688,26 +688,6 @@ public class V1Controller extends KubernetesController {
     // Set container resources
     configureContainerResources(container, configuration, resource, isExecutor);
 
-    // Override container resources via CLI for Manager.
-    // TODO: Move to <configureContainerResources> and add support for both Executors and Managers.
-    if (!isExecutor) {
-      // Configure Limits.
-      final Map<String, String> configLimits =
-          KubernetesContext.getResourceLimits(getConfiguration(), false);
-      if (!configLimits.isEmpty()) {
-        container.getResources().setLimits(createResourcesRequirement(configLimits));
-      }
-
-      // Configure Requests. Set Requests=Limits if no Requests are provided but Limits are.
-      final Map<String, String> configRequests =
-          KubernetesContext.getResourceRequests(getConfiguration(), false);
-      if (!configRequests.isEmpty()) {
-        container.getResources().setRequests(createResourcesRequirement(configRequests));
-      } else if (!configLimits.isEmpty()) {
-        container.getResources().setRequests(createResourcesRequirement(configLimits));
-      }
-    }
-
     // Set container ports.
     final boolean debuggingEnabled =
         TopologyUtils.getTopologyRemoteDebuggingEnabled(
@@ -734,41 +714,79 @@ public class V1Controller extends KubernetesController {
     }
     final V1ResourceRequirements resourceRequirements = container.getResources();
 
-    // Collect Limits and Requests from CLI
+    // Collect Limits and Requests from CLI.
     final Map<String, Quantity> limitsCLI = createResourcesRequirement(
-        KubernetesContext.getResourceLimits(getConfiguration(), isExecutor));
+        KubernetesContext.getResourceLimits(configuration, isExecutor));
     final Map<String, Quantity> requestsCLI = createResourcesRequirement(
-        KubernetesContext.getResourceRequests(getConfiguration(), isExecutor));
+        KubernetesContext.getResourceRequests(configuration, isExecutor));
 
-    // Configure resource Limits. Deduplicate on limit name with user values taking precedence.
     if (resourceRequirements.getLimits() == null) {
       resourceRequirements.setLimits(new HashMap<>());
     }
 
-    // Set Limits and Resources from CLI <if> available, <else> use Configs.
+    // Set Limits and Resources from CLI <if> available, <else> use Configs. Deduplicate on name
+    // with precedence [1] CLI, [2] Config.
     final Map<String, Quantity> limits = resourceRequirements.getLimits();
-    Quantity limitCPU = Quantity.fromString(Double.toString(roundDecimal(resource.getCpu(), 3)));
-    Quantity limitMEMORY = Quantity.fromString(KubernetesUtils.Megabytes(resource.getRam()));
-    if (limitsCLI != null && limitsCLI.containsKey(KubernetesConstants.CPU)) {
-      limitCPU = limitsCLI.get(KubernetesConstants.CPU);
-    }
-    if (limitsCLI != null && limitsCLI.containsKey(KubernetesConstants.MEMORY)) {
-      limitMEMORY = limitsCLI.get(KubernetesConstants.MEMORY);
-    }
+    final Quantity limitCPU = limitsCLI.getOrDefault(KubernetesConstants.CPU,
+        Quantity.fromString(Double.toString(roundDecimal(resource.getCpu(), 3))));
+    final Quantity limitMEMORY = limitsCLI.getOrDefault(KubernetesConstants.MEMORY,
+        Quantity.fromString(KubernetesUtils.Megabytes(resource.getRam())));
 
     limits.put(KubernetesConstants.MEMORY, limitMEMORY);
     limits.put(KubernetesConstants.CPU, limitCPU);
 
     // Set the Kubernetes container resource request.
+    // Order: [1] CLI, [2] EQUAL_TO_LIMIT, [3] NOT_SET
     KubernetesContext.KubernetesResourceRequestMode requestMode =
         KubernetesContext.getKubernetesRequestMode(configuration);
-    if (requestMode == KubernetesContext.KubernetesResourceRequestMode.EQUAL_TO_LIMIT) {
+    if (!requestsCLI.isEmpty()) {
+      if (resourceRequirements.getRequests() == null) {
+        resourceRequirements.setRequests(new HashMap<>());
+      }
+      final Map<String, Quantity> requests = resourceRequirements.getRequests();
+
+      if (requestsCLI.containsKey(KubernetesConstants.MEMORY)) {
+        requests.put(KubernetesConstants.MEMORY, requestsCLI.get(KubernetesConstants.MEMORY));
+      }
+      if (requestsCLI.containsKey(KubernetesConstants.CPU)) {
+        requests.put(KubernetesConstants.CPU, requestsCLI.get(KubernetesConstants.CPU));
+      }
+    } else if (requestMode == KubernetesContext.KubernetesResourceRequestMode.EQUAL_TO_LIMIT) {
       LOG.log(Level.CONFIG, "Setting K8s Request equal to Limit");
       resourceRequirements.setRequests(limits);
     } else {
       LOG.log(Level.CONFIG, "Not setting K8s request because config was NOT_SET");
     }
     container.setResources(resourceRequirements);
+  }
+
+  /**
+   * Creates <code>Resource Requirements</code> from a Map of <code>Config</code> items for <code>CPU</code>
+   * and <code>Memory</code>.
+   * @param configs <code>Configs</code> to be parsed for configuration.
+   * @return Configured <code>Resource Requirements</code>. An <code>empty</code> map will be returned
+   * if there are no <code>configs</code>.
+   */
+  @VisibleForTesting
+  protected Map<String, Quantity> createResourcesRequirement(Map<String, String> configs) {
+    final Map<String, Quantity> requirements = new HashMap<>();
+
+    if (configs == null || configs.isEmpty()) {
+      return requirements;
+    }
+
+    final String memoryLimit = configs.get(KubernetesConstants.MEMORY);
+    if (memoryLimit != null && !memoryLimit.isEmpty()) {
+      requirements.put(KubernetesConstants.MEMORY, Quantity.fromString(
+          KubernetesUtils.Megabytes(ByteAmount.fromMegabytes(Long.parseLong(memoryLimit)))));
+    }
+    final String cpuLimit = configs.get(KubernetesConstants.CPU);
+    if (cpuLimit != null && !cpuLimit.isEmpty()) {
+      requirements.put(KubernetesConstants.CPU, Quantity.fromString(
+          Double.toString(V1Controller.roundDecimal(Double.parseDouble(cpuLimit), 3))));
+    }
+
+    return requirements;
   }
 
   /**
@@ -1253,39 +1271,5 @@ public class V1Controller extends KubernetesController {
     return String.format("%s=%s,%s=%s",
         KubernetesConstants.LABEL_APP, KubernetesConstants.LABEL_APP_VALUE,
         KubernetesConstants.LABEL_TOPOLOGY, getTopologyName());
-  }
-
-  /**
-   * Creates <code>Resource Requirements</code> from a Map of <code>Config</code> items for <code>CPU</code>
-   * and <code>Memory</code>.
-   * @param configs <code>Configs</code> to be parsed for configuration.
-   * @return Configured <code>Resource Requirements</code>. <code>null</code> will be returned if there
-   * are no <code>configs</code>.
-   */
-  @VisibleForTesting
-  protected Map<String, Quantity> createResourcesRequirement(Map<String, String> configs) {
-    if (configs == null || configs.isEmpty()) {
-      return null;
-    }
-
-    final Map<String, Quantity> requirements = new HashMap<>();
-
-    final String memoryLimit = configs.get(KubernetesConstants.MEMORY);
-    if (memoryLimit != null && !memoryLimit.isEmpty()) {
-      requirements.put(KubernetesConstants.MEMORY, Quantity.fromString(
-          KubernetesUtils.Megabytes(ByteAmount.fromGigabytes(Long.parseLong(memoryLimit)))));
-    }
-    final String cpuLimit = configs.get(KubernetesConstants.CPU);
-    if (cpuLimit != null && !cpuLimit.isEmpty()) {
-      requirements.put(KubernetesConstants.CPU, Quantity.fromString(
-          Double.toString(V1Controller.roundDecimal(Double.parseDouble(cpuLimit), 3))));
-    }
-
-    // Return an empty map if there are no viable requirements.
-    if (requirements.isEmpty()) {
-      return null;
-    } else {
-      return requirements;
-    }
   }
 }
