@@ -175,9 +175,8 @@ public class V1Controller extends KubernetesController {
   @Override
   boolean restart(int shardId) {
     try {
-      coreClient.deleteCollectionNamespacedPod(getNamespace(), null, null, null, null,
-          0, createTopologySelectorLabels(), null, null, null, null,
-          null, null, null);
+      coreClient.deleteCollectionNamespacedPod(getNamespace(), null, null, null, null, 0,
+          createTopologySelectorLabels(), null, null, null, null, null, null, null);
       LOG.log(Level.WARNING, String.format("Restarting topology '%s'...", getTopologyName()));
     } catch (ApiException e) {
       LOG.log(Level.SEVERE, String.format("Failed to restart topology '%s'...", getTopologyName()));
@@ -234,7 +233,7 @@ public class V1Controller extends KubernetesController {
 
   private void patchStatefulSetReplicas(int replicas) throws ApiException {
     final String body =
-            String.format(JSON_PATCH_STATEFUL_SET_REPLICAS_FORMAT,
+            String.format(KubernetesConstants.JSON_PATCH_STATEFUL_SET_REPLICAS_FORMAT,
                     replicas);
     final V1Patch patch = new V1Patch(body);
 
@@ -252,9 +251,6 @@ public class V1Controller extends KubernetesController {
         V1Patch.PATCH_FORMAT_JSON_PATCH,
         appsClient.getApiClient());
   }
-
-  private static final String JSON_PATCH_STATEFUL_SET_REPLICAS_FORMAT =
-          "[{\"op\":\"replace\",\"path\":\"/spec/replicas\",\"value\":%d}]";
 
   V1StatefulSet getStatefulSet() throws ApiException {
     return appsClient.readNamespacedStatefulSet(getStatefulSetName(true), getNamespace(),
@@ -298,8 +294,8 @@ public class V1Controller extends KubernetesController {
 
   void deleteStatefulSets() {
     try (Response response = appsClient.deleteCollectionNamespacedStatefulSetCall(getNamespace(),
-        null, null, null, null, null,
-        createTopologySelectorLabels(), null, null, null, null, null, null, null, null)
+        null, null, null, null, null, createTopologySelectorLabels(), null, null, null, null, null,
+            null, null, null)
         .execute()) {
 
       if (!response.isSuccessful()) {
@@ -482,13 +478,11 @@ public class V1Controller extends KubernetesController {
   }
 
   private Map<String, String> getPodAnnotations() {
-    Config config = getConfiguration();
-    return KubernetesContext.getPodAnnotations(config);
+    return KubernetesContext.getPodAnnotations(getConfiguration());
   }
 
   private Map<String, String> getServiceAnnotations() {
-    Config config = getConfiguration();
-    return KubernetesContext.getServiceAnnotations(config);
+    return KubernetesContext.getServiceAnnotations(getConfiguration());
   }
 
   private Map<String, String> getPrometheusAnnotations() {
