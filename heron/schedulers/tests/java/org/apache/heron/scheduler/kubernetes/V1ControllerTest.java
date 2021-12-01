@@ -125,7 +125,7 @@ public class V1ControllerTest {
   private final Config configDisabledPodTemplate = Config.newBuilder()
       .put(POD_TEMPLATE_LOCATION_EXECUTOR, CONFIGMAP_POD_TEMPLATE_NAME)
       .put(POD_TEMPLATE_LOCATION_MANAGER, CONFIGMAP_POD_TEMPLATE_NAME)
-      .put(KubernetesContext.KUBERNETES_POD_TEMPLATE_CONFIGMAP_DISABLED, "true")
+      .put(KubernetesContext.KUBERNETES_POD_TEMPLATE_DISABLED, "true")
       .build();
 
   @Spy

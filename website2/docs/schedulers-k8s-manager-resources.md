@@ -20,28 +20,23 @@ sidebar_label: Configuring a Topology's Manager Resources in Kubernetes (CLI)
     under the License.
 -->
 
-> This document demonstrates how you can configure a topology's `Manager` resource `Requests` and `Limits` through CLI commands.
+> This document demonstrates how you can configure a topology's `Executor` and/or `Manager` (hereinafter referred to as `Heron containers`) resource `Requests` and `Limits` through CLI commands.
 
 <br/>
 
-You may configure an individual toplogy `Manager`'s resource `Requests` and `Limits` during submission through CLI commands. The `Manager`'s configuration will be identical to that of the topology's `Executors` with the exception of when CLI parameters are provided for the `Manager`s resources.
-
-***Note:*** In the event `Limits` are provided via CLI but `Requests` are not, the `Requests` will be set to the same values as those of the new `Limits`.
-
+You may configure an individual topology's `Heron container`'s resource `Requests` and `Limits` during submission through CLI commands.
 
 <br>
 
 ## Usage
 
 The command pattern is as follows:
-`heron.kubernetes.manager.[limits | requests].[OPTION]=[VALUE]`
+`heron.kubernetes.[executor | manager].[limits | requests].[OPTION]=[VALUE]`
 
 The currently supported CLI `options` are:
 
-* `cpu`
-* `memory`
-
-All associated `value`s must be natural numbers.
+* `cpu`: A natural number indicating the number of CPU's.
+* `memory`: A positive decimal number indicating the amount of memory in `Megabytes`.
 
 <br>
 
@@ -54,7 +49,6 @@ An example submission command is as follows.
 ```bash
 ~/bin/heron submit kubernetes ~/.heron/examples/heron-api-examples.jar \
 org.apache.heron.examples.api.AckingTopology acking \
---verbose \
 --config-property heron.kubernetes.manager.limits.cpu=2 \
 --config-property heron.kubernetes.manager.limits.memory=3 \
 --config-property heron.kubernetes.manager.requests.cpu=1 \
