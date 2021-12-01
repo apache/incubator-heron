@@ -103,132 +103,171 @@ public class V1ControllerTest {
           + "          limits:\n"
           + "            cpu: \"400m\"\n"
           + "            memory: \"512M\"";
+  private static final String MANAGER_CPU_LIMIT = "32";
+  private static final String MANAGER_MEM_LIMIT = "256";
+  private static final String MANAGER_CPU_REQUEST = "24";
+  private static final String MANAGER_MEM_REQUEST = "128";
+  private static final String POD_TEMPLATE_LOCATION_EXECUTOR =
+      String.format(KubernetesContext.KUBERNETES_POD_TEMPLATE_LOCATION,
+          KubernetesConstants.EXECUTOR_NAME);
+  private static final String POD_TEMPLATE_LOCATION_MANAGER =
+      String.format(KubernetesContext.KUBERNETES_POD_TEMPLATE_LOCATION,
+          KubernetesConstants.MANAGER_NAME);
 
-  private final Config config = Config.newBuilder().build();
-  private final Config configWithPodTemplate = Config.newBuilder()
-      .put(KubernetesContext.KUBERNETES_POD_TEMPLATE_CONFIGMAP_NAME, CONFIGMAP_POD_TEMPLATE_NAME)
+  private static final Config CONFIG = Config.newBuilder().build();
+  private static final Config CONFIG_WITH_POD_TEMPLATE = Config.newBuilder()
+      .put(POD_TEMPLATE_LOCATION_EXECUTOR, CONFIGMAP_POD_TEMPLATE_NAME)
+      .put(POD_TEMPLATE_LOCATION_MANAGER, CONFIGMAP_POD_TEMPLATE_NAME)
       .build();
-  private final Config runtime = Config.newBuilder()
+  private static final Config RUNTIME = Config.newBuilder()
       .put(Key.TOPOLOGY_NAME, TOPOLOGY_NAME)
       .build();
   private final Config configDisabledPodTemplate = Config.newBuilder()
-      .put(KubernetesContext.KUBERNETES_POD_TEMPLATE_CONFIGMAP_NAME, CONFIGMAP_POD_TEMPLATE_NAME)
+      .put(POD_TEMPLATE_LOCATION_EXECUTOR, CONFIGMAP_POD_TEMPLATE_NAME)
+      .put(POD_TEMPLATE_LOCATION_MANAGER, CONFIGMAP_POD_TEMPLATE_NAME)
       .put(KubernetesContext.KUBERNETES_POD_TEMPLATE_CONFIGMAP_DISABLED, "true")
       .build();
 
   @Spy
   private final V1Controller v1ControllerWithPodTemplate =
-      new V1Controller(configWithPodTemplate, runtime);
+      new V1Controller(CONFIG_WITH_POD_TEMPLATE, RUNTIME);
 
   @Spy
   private final V1Controller v1ControllerPodTemplate =
-      new V1Controller(configDisabledPodTemplate, runtime);
+      new V1Controller(configDisabledPodTemplate, RUNTIME);
 
   @Rule
   public final ExpectedException expectedException = ExpectedException.none();
 
   @Test
   public void testLoadPodFromTemplateDefault() {
-    final V1Controller v1ControllerNoPodTemplate = new V1Controller(config, runtime);
-    final V1PodTemplateSpec podSpec = v1ControllerNoPodTemplate.loadPodFromTemplate();
+    final V1Controller v1ControllerNoPodTemplate = new V1Controller(CONFIG, RUNTIME);
+    final V1PodTemplateSpec defaultPodSpec = new V1PodTemplateSpec();
 
-    Assert.assertEquals(podSpec, new V1PodTemplateSpec());
+    final V1PodTemplateSpec podSpecExecutor = v1ControllerNoPodTemplate.loadPodFromTemplate(true);
+    Assert.assertEquals("Default Pod Spec for Executor", defaultPodSpec, podSpecExecutor);
+
+    final V1PodTemplateSpec podSpecManager = v1ControllerNoPodTemplate.loadPodFromTemplate(false);
+    Assert.assertEquals("Default Pod Spec for Manager", defaultPodSpec, podSpecManager);
   }
 
   @Test
   public void testLoadPodFromTemplateNullConfigMap() {
-    final String expected = "unable to locate";
-    String message = "";
+    final List<TestTuple<Boolean, String>> testCases = new LinkedList<>();
+    testCases.add(new TestTuple<>("Executor not found", true, "unable to locate"));
+    testCases.add(new TestTuple<>("Manager not found", false, "unable to locate"));
 
-    doReturn(null)
-        .when(v1ControllerWithPodTemplate)
-        .getConfigMap(anyString());
-    try {
-      v1ControllerWithPodTemplate.loadPodFromTemplate();
-    } catch (TopologySubmissionException e) {
-      message = e.getMessage();
+    for (TestTuple<Boolean, String> testCase : testCases) {
+      doReturn(null)
+          .when(v1ControllerWithPodTemplate)
+          .getConfigMap(anyString());
+
+      String message = "";
+      try {
+        v1ControllerWithPodTemplate.loadPodFromTemplate(testCase.input);
+      } catch (TopologySubmissionException e) {
+        message = e.getMessage();
+      }
+      Assert.assertTrue(testCase.description, message.contains(testCase.expected));
     }
-    Assert.assertTrue(message.contains(expected));
   }
 
   @Test
   public void testLoadPodFromTemplateNoConfigMap() {
-    final String expected = "Failed to locate Pod Template";
-    String message = "";
+    final List<TestTuple<Boolean, String>> testCases = new LinkedList<>();
+    testCases.add(new TestTuple<>("Executor no ConfigMap", true, "Failed to locate Pod Template"));
+    testCases.add(new TestTuple<>("Manager no ConfigMap", false, "Failed to locate Pod Template"));
 
-    doReturn(new V1ConfigMap())
-        .when(v1ControllerWithPodTemplate)
-        .getConfigMap(anyString());
-    try {
-      v1ControllerWithPodTemplate.loadPodFromTemplate();
-    } catch (TopologySubmissionException e) {
-      message = e.getMessage();
+    for (TestTuple<Boolean, String> testCase : testCases) {
+      doReturn(new V1ConfigMap())
+          .when(v1ControllerWithPodTemplate)
+          .getConfigMap(anyString());
+
+      String message = "";
+      try {
+        v1ControllerWithPodTemplate.loadPodFromTemplate(testCase.input);
+      } catch (TopologySubmissionException e) {
+        message = e.getMessage();
+      }
+      Assert.assertTrue(testCase.description, message.contains(testCase.expected));
     }
-    Assert.assertTrue(message.contains(expected));
   }
 
   @Test
   public void testLoadPodFromTemplateNoTargetConfigMap() {
-    final String expected = "Failed to locate Pod Template";
-    String message = "";
-    V1ConfigMap configMapNoTargetData = new V1ConfigMapBuilder()
+    final List<TestTuple<Boolean, String>> testCases = new LinkedList<>();
+    testCases.add(new TestTuple<>("Executor no target ConfigMap",
+        true, "Failed to locate Pod Template"));
+    testCases.add(new TestTuple<>("Manager no target ConfigMap",
+        false, "Failed to locate Pod Template"));
+
+    final V1ConfigMap configMapNoTargetData = new V1ConfigMapBuilder()
         .withNewMetadata()
           .withName(CONFIGMAP_NAME)
         .endMetadata()
         .addToData("Dummy Key", "Dummy Value")
         .build();
 
-    doReturn(configMapNoTargetData)
-        .when(v1ControllerWithPodTemplate)
-        .getConfigMap(anyString());
-    try {
-      v1ControllerWithPodTemplate.loadPodFromTemplate();
-    } catch (TopologySubmissionException e) {
-      message = e.getMessage();
+    for (TestTuple<Boolean, String> testCase : testCases) {
+      doReturn(configMapNoTargetData)
+          .when(v1ControllerWithPodTemplate)
+          .getConfigMap(anyString());
+
+      String message = "";
+      try {
+        v1ControllerWithPodTemplate.loadPodFromTemplate(testCase.input);
+      } catch (TopologySubmissionException e) {
+        message = e.getMessage();
+      }
+      Assert.assertTrue(testCase.description, message.contains(testCase.expected));
     }
-    Assert.assertTrue(message.contains(expected));
   }
 
   @Test
   public void testLoadPodFromTemplateBadTargetConfigMap() {
-    final String expected = "Error parsing";
-    String message = "";
-
     // ConfigMap with target ConfigMap and an invalid Pod Template.
-    V1ConfigMap configMapInvalidPod = new V1ConfigMapBuilder()
+    final V1ConfigMap configMapInvalidPod = new V1ConfigMapBuilder()
         .withNewMetadata()
           .withName(CONFIGMAP_NAME)
         .endMetadata()
         .addToData(POD_TEMPLATE_NAME, "Dummy Value")
         .build();
 
-    doReturn(configMapInvalidPod)
-        .when(v1ControllerWithPodTemplate)
-        .getConfigMap(anyString());
-    try {
-      v1ControllerWithPodTemplate.loadPodFromTemplate();
-    } catch (TopologySubmissionException e) {
-      message = e.getMessage();
-    }
-    Assert.assertTrue("Invalid Pod Template parsing should fail", message.contains(expected));
-
     // ConfigMap with target ConfigMaps and an empty Pod Template.
-    V1ConfigMap configMapEmptyPod = new V1ConfigMapBuilder()
+    final V1ConfigMap configMapEmptyPod = new V1ConfigMapBuilder()
         .withNewMetadata()
-          .withName(CONFIGMAP_NAME)
+        .withName(CONFIGMAP_NAME)
         .endMetadata()
         .addToData(POD_TEMPLATE_NAME, "")
         .build();
 
-    doReturn(configMapEmptyPod)
-        .when(v1ControllerWithPodTemplate)
-        .getConfigMap(anyString());
-    try {
-      v1ControllerWithPodTemplate.loadPodFromTemplate();
-    } catch (TopologySubmissionException e) {
-      message = e.getMessage();
+    // Test case container.
+    // Input: ConfigMap to setup mock V1Controller, Boolean flag for executor/manager switch.
+    // Output: The expected error message.
+    final List<TestTuple<Pair<V1ConfigMap, Boolean>, String>> testCases = new LinkedList<>();
+    testCases.add(new TestTuple<>("Executor invalid Pod Template",
+        new Pair<>(configMapInvalidPod, true), "Error parsing"));
+    testCases.add(new TestTuple<>("Manager invalid Pod Template",
+        new Pair<>(configMapInvalidPod, false), "Error parsing"));
+    testCases.add(new TestTuple<>("Executor empty Pod Template",
+        new Pair<>(configMapEmptyPod, true), "Error parsing"));
+    testCases.add(new TestTuple<>("Manager empty Pod Template",
+        new Pair<>(configMapEmptyPod, false), "Error parsing"));
+
+    // Test loop.
+    for (TestTuple<Pair<V1ConfigMap, Boolean>, String> testCase : testCases) {
+      doReturn(testCase.input.first)
+          .when(v1ControllerWithPodTemplate)
+          .getConfigMap(anyString());
+
+      String message = "";
+      try {
+        v1ControllerWithPodTemplate.loadPodFromTemplate(testCase.input.second);
+      } catch (TopologySubmissionException e) {
+        message = e.getMessage();
+      }
+      Assert.assertTrue(testCase.description, message.contains(testCase.expected));
     }
-    Assert.assertTrue("Empty Pod Template parsing should fail", message.contains(expected));
   }
 
   @Test
@@ -272,18 +311,32 @@ public class V1ControllerTest {
 
 
     // ConfigMap with valid Pod Template.
-    V1ConfigMap configMapValidPod = new V1ConfigMapBuilder()
+    final V1ConfigMap configMapValidPod = new V1ConfigMapBuilder()
         .withNewMetadata()
           .withName(CONFIGMAP_NAME)
         .endMetadata()
         .addToData(POD_TEMPLATE_NAME, POD_TEMPLATE_VALID)
         .build();
-    doReturn(configMapValidPod)
-        .when(v1ControllerWithPodTemplate)
-        .getConfigMap(anyString());
-    V1PodTemplateSpec podTemplateSpec = v1ControllerWithPodTemplate.loadPodFromTemplate();
 
-    Assert.assertTrue(podTemplateSpec.toString().contains(expected));
+    // Test case container.
+    // Input: ConfigMap to setup mock V1Controller, Boolean flag for executor/manager switch.
+    // Output: The expected Pod template as a string.
+    final List<TestTuple<Pair<V1ConfigMap, Boolean>, String>> testCases = new LinkedList<>();
+    testCases.add(new TestTuple<>("Executor valid Pod Template",
+        new Pair<>(configMapValidPod, true), expected));
+    testCases.add(new TestTuple<>("Manager valid Pod Template",
+        new Pair<>(configMapValidPod, false), expected));
+
+    // Test loop.
+    for (TestTuple<Pair<V1ConfigMap, Boolean>, String> testCase : testCases) {
+      doReturn(testCase.input.first)
+          .when(v1ControllerWithPodTemplate)
+          .getConfigMap(anyString());
+
+      V1PodTemplateSpec podTemplateSpec = v1ControllerWithPodTemplate.loadPodFromTemplate(true);
+
+      Assert.assertTrue(podTemplateSpec.toString().contains(testCase.expected));
+    }
   }
 
   @Test
@@ -300,24 +353,37 @@ public class V1ControllerTest {
             + "    labels:\n"
             + "      app: heron-tracker\n"
             + "  spec:\n";
-    V1ConfigMap configMap = new V1ConfigMapBuilder()
+    final V1ConfigMap configMap = new V1ConfigMapBuilder()
         .withNewMetadata()
           .withName(CONFIGMAP_NAME)
         .endMetadata()
         .addToData(POD_TEMPLATE_NAME, invalidPodTemplate)
         .build();
-    final String expected = "Error parsing";
-    String message = "";
 
-    doReturn(configMap)
-        .when(v1ControllerWithPodTemplate)
-        .getConfigMap(anyString());
-    try {
-      v1ControllerWithPodTemplate.loadPodFromTemplate();
-    } catch (TopologySubmissionException e) {
-      message = e.getMessage();
+
+    // Test case container.
+    // Input: ConfigMap to setup mock V1Controller, Boolean flag for executor/manager switch.
+    // Output: The expected Pod template as a string.
+    final List<TestTuple<Pair<V1ConfigMap, Boolean>, String>> testCases = new LinkedList<>();
+    testCases.add(new TestTuple<>("Executor invalid Pod Template",
+        new Pair<>(configMap, true), "Error parsing"));
+    testCases.add(new TestTuple<>("Manager invalid Pod Template",
+        new Pair<>(configMap, false), "Error parsing"));
+
+    // Test loop.
+    for (TestTuple<Pair<V1ConfigMap, Boolean>, String> testCase : testCases) {
+      doReturn(testCase.input.first)
+          .when(v1ControllerWithPodTemplate)
+          .getConfigMap(anyString());
+
+      String message = "";
+      try {
+        v1ControllerWithPodTemplate.loadPodFromTemplate(testCase.input.second);
+      } catch (TopologySubmissionException e) {
+        message = e.getMessage();
+      }
+      Assert.assertTrue(message.contains(testCase.expected));
     }
-    Assert.assertTrue(message.contains(expected));
   }
 
   @Test
@@ -336,7 +402,7 @@ public class V1ControllerTest {
         .getConfigMap(anyString());
 
     try {
-      v1ControllerPodTemplate.loadPodFromTemplate();
+      v1ControllerPodTemplate.loadPodFromTemplate(true);
     } catch (TopologySubmissionException e) {
       message = e.getMessage();
     }
@@ -346,45 +412,41 @@ public class V1ControllerTest {
   @Test
   public void testGetPodTemplateLocationPassing() {
     final Config testConfig = Config.newBuilder()
-        .put(KubernetesContext.KUBERNETES_POD_TEMPLATE_CONFIGMAP_NAME, CONFIGMAP_POD_TEMPLATE_NAME)
+        .put(POD_TEMPLATE_LOCATION_EXECUTOR, CONFIGMAP_POD_TEMPLATE_NAME)
         .build();
-    final V1Controller v1Controller = new V1Controller(testConfig, runtime);
+    final V1Controller v1Controller = new V1Controller(testConfig, RUNTIME);
     final Pair<String, String> expected = new Pair<>(CONFIGMAP_NAME, POD_TEMPLATE_NAME);
-    Pair<String, String> actual;
 
     // Correct parsing
-    actual = v1Controller.getPodTemplateLocation();
-    Assert.assertEquals(actual, expected);
+    final Pair<String, String> actual = v1Controller.getPodTemplateLocation(true);
+    Assert.assertEquals(expected, actual);
   }
 
   @Test
   public void testGetPodTemplateLocationNoConfigMap() {
     expectedException.expect(TopologySubmissionException.class);
     final Config testConfig = Config.newBuilder()
-        .put(KubernetesContext.KUBERNETES_POD_TEMPLATE_CONFIGMAP_NAME,
-        ".POD-TEMPLATE-NAME").build();
-    V1Controller v1Controller = new V1Controller(testConfig, runtime);
-    v1Controller.getPodTemplateLocation();
+        .put(POD_TEMPLATE_LOCATION_EXECUTOR, ".POD-TEMPLATE-NAME").build();
+    V1Controller v1Controller = new V1Controller(testConfig, RUNTIME);
+    v1Controller.getPodTemplateLocation(true);
   }
 
   @Test
   public void testGetPodTemplateLocationNoPodTemplate() {
     expectedException.expect(TopologySubmissionException.class);
     final Config testConfig = Config.newBuilder()
-        .put(KubernetesContext.KUBERNETES_POD_TEMPLATE_CONFIGMAP_NAME,
-        "CONFIGMAP-NAME.").build();
-    V1Controller v1Controller = new V1Controller(testConfig, runtime);
-    v1Controller.getPodTemplateLocation();
+        .put(POD_TEMPLATE_LOCATION_EXECUTOR, "CONFIGMAP-NAME.").build();
+    V1Controller v1Controller = new V1Controller(testConfig, RUNTIME);
+    v1Controller.getPodTemplateLocation(true);
   }
 
   @Test
   public void testGetPodTemplateLocationNoDelimiter() {
     expectedException.expect(TopologySubmissionException.class);
     final Config testConfig = Config.newBuilder()
-        .put(KubernetesContext.KUBERNETES_POD_TEMPLATE_CONFIGMAP_NAME,
-        "CONFIGMAP-NAMEPOD-TEMPLATE-NAME").build();
-    V1Controller v1Controller = new V1Controller(testConfig, runtime);
-    v1Controller.getPodTemplateLocation();
+        .put(POD_TEMPLATE_LOCATION_EXECUTOR, "CONFIGMAP-NAMEPOD-TEMPLATE-NAME").build();
+    V1Controller v1Controller = new V1Controller(testConfig, RUNTIME);
+    v1Controller.getPodTemplateLocation(true);
   }
 
   @Test
@@ -499,10 +561,12 @@ public class V1ControllerTest {
 
   @Test
   public void testConfigureContainerResources() {
+    final boolean isExecutor = true;
+
     final Resource resourceDefault = new Resource(
-        9, ByteAmount.fromGigabytes(19), ByteAmount.fromGigabytes(99));
+        9, ByteAmount.fromMegabytes(19000), ByteAmount.fromMegabytes(99000));
     final Resource resourceCustom = new Resource(
-        4, ByteAmount.fromGigabytes(34), ByteAmount.fromGigabytes(400));
+        4, ByteAmount.fromMegabytes(34000), ByteAmount.fromMegabytes(400000));
 
     final Quantity defaultRAM = Quantity.fromString(
         KubernetesUtils.Megabytes(resourceDefault.getRam()));
@@ -513,7 +577,7 @@ public class V1ControllerTest {
     final Quantity customCPU = Quantity.fromString(
         Double.toString(V1Controller.roundDecimal(resourceCustom.getCpu(), 3)));
     final Quantity customDisk = Quantity.fromString(
-        Double.toString(V1Controller.roundDecimal(resourceCustom.getDisk().getValue(), 3)));
+        KubernetesUtils.Megabytes(resourceCustom.getDisk()));
 
     final Config configNoLimit = Config.newBuilder()
         .put(KubernetesContext.KUBERNETES_RESOURCE_REQUEST_MODE, "NOT_SET")
@@ -539,7 +603,7 @@ public class V1ControllerTest {
     // Default. Null resources.
     V1Container containerNull = new V1ContainerBuilder().build();
     v1ControllerWithPodTemplate.configureContainerResources(
-        containerNull, configNoLimit, resourceDefault);
+        containerNull, configNoLimit, resourceDefault, isExecutor);
     Assert.assertTrue("Default LIMITS should be set in container with null LIMITS",
         containerNull.getResources().getLimits().entrySet()
             .containsAll(expectDefaultRequirements.getLimits().entrySet()));
@@ -547,7 +611,7 @@ public class V1ControllerTest {
     // Empty resources.
     V1Container containerEmpty = new V1ContainerBuilder().withNewResources().endResources().build();
     v1ControllerWithPodTemplate.configureContainerResources(
-        containerEmpty, configNoLimit, resourceDefault);
+        containerEmpty, configNoLimit, resourceDefault, isExecutor);
     Assert.assertTrue("Default LIMITS should be set in container with empty LIMITS",
         containerNull.getResources().getLimits().entrySet()
             .containsAll(expectDefaultRequirements.getLimits().entrySet()));
@@ -557,7 +621,7 @@ public class V1ControllerTest {
         .withResources(customRequirements)
         .build();
     v1ControllerWithPodTemplate.configureContainerResources(
-        containerCustom, configNoLimit, resourceDefault);
+        containerCustom, configNoLimit, resourceDefault, isExecutor);
     Assert.assertTrue("Custom LIMITS should be set in container with custom LIMITS",
         containerCustom.getResources().getLimits().entrySet()
             .containsAll(expectCustomRequirements.getLimits().entrySet()));
@@ -567,13 +631,60 @@ public class V1ControllerTest {
         .withResources(customRequirements)
         .build();
     v1ControllerWithPodTemplate.configureContainerResources(
-        containerRequests, configWithLimit, resourceDefault);
+        containerRequests, configWithLimit, resourceDefault, isExecutor);
     Assert.assertTrue("Custom LIMITS should be set in container with custom LIMITS and REQUEST",
         containerRequests.getResources().getLimits().entrySet()
             .containsAll(expectCustomRequirements.getLimits().entrySet()));
     Assert.assertTrue("Custom REQUEST should be set in container with custom LIMITS and REQUEST",
         containerRequests.getResources().getRequests().entrySet()
             .containsAll(expectCustomRequirements.getLimits().entrySet()));
+  }
+
+  @Test
+  public void testConfigureContainerResourcesCLI() {
+    final boolean isExecutor = true;
+    final String customLimitMEMStr = "12000";
+    final String customLimitCPUStr = "5";
+    final String customRequestMEMStr = "10000";
+    final String customRequestCPUStr = "4";
+
+    final Resource resources = new Resource(
+        6, ByteAmount.fromMegabytes(34000), ByteAmount.fromGigabytes(400));
+
+    final Quantity customLimitMEM = Quantity.fromString(
+        KubernetesUtils.Megabytes(ByteAmount.fromMegabytes(Long.parseLong(customLimitMEMStr))));
+    final Quantity customLimitCPU = Quantity.fromString(
+        Double.toString(V1Controller.roundDecimal(Double.parseDouble(customLimitCPUStr), 3)));
+    final Quantity customRequestMEM = Quantity.fromString(
+        KubernetesUtils.Megabytes(ByteAmount.fromMegabytes(Long.parseLong(customRequestMEMStr))));
+    final Quantity customRequestCPU = Quantity.fromString(
+        Double.toString(V1Controller.roundDecimal(Double.parseDouble(customRequestCPUStr), 3)));
+
+    final Config config = Config.newBuilder()
+        .put(String.format(KubernetesContext.KUBERNETES_RESOURCE_LIMITS_PREFIX
+                + KubernetesConstants.CPU, KubernetesConstants.EXECUTOR_NAME), customLimitCPUStr)
+        .put(String.format(KubernetesContext.KUBERNETES_RESOURCE_LIMITS_PREFIX
+                + KubernetesConstants.MEMORY, KubernetesConstants.EXECUTOR_NAME), customLimitMEMStr)
+        .put(String.format(KubernetesContext.KUBERNETES_RESOURCE_REQUESTS_PREFIX
+                + KubernetesConstants.CPU, KubernetesConstants.EXECUTOR_NAME), customRequestCPUStr)
+        .put(String.format(KubernetesContext.KUBERNETES_RESOURCE_REQUESTS_PREFIX
+                + KubernetesConstants.MEMORY, KubernetesConstants.EXECUTOR_NAME),
+            customRequestMEMStr)
+        .put(KubernetesContext.KUBERNETES_RESOURCE_REQUEST_MODE, "EQUAL_TO_LIMIT")
+        .build();
+
+    final V1Container expected = new V1ContainerBuilder()
+        .withNewResources()
+          .addToLimits(KubernetesConstants.CPU, customLimitCPU)
+          .addToLimits(KubernetesConstants.MEMORY, customLimitMEM)
+          .addToRequests(KubernetesConstants.CPU, customRequestCPU)
+          .addToRequests(KubernetesConstants.MEMORY, customRequestMEM)
+        .endResources()
+        .build();
+
+    final V1Container actual = new V1Container();
+    v1ControllerWithPodTemplate.configureContainerResources(actual, config, resources, isExecutor);
+    Assert.assertEquals("Container Resources are set from CLI.", expected, actual);
   }
 
   @Test
@@ -585,7 +696,7 @@ public class V1ControllerTest {
         .put(KubernetesContext.KUBERNETES_VOLUME_TYPE, Volumes.HOST_PATH)
         .put(KubernetesContext.KUBERNETES_VOLUME_HOSTPATH_PATH, pathDefault)
         .build();
-    final V1Controller controllerWithVol = new V1Controller(configWithVolumes, runtime);
+    final V1Controller controllerWithVol = new V1Controller(configWithVolumes, RUNTIME);
 
     final V1Volume volumeDefault = new V1VolumeBuilder()
         .withName(pathNameDefault)
@@ -613,7 +724,7 @@ public class V1ControllerTest {
     final List<V1Volume> expectedCustom = Arrays.asList(volumeDefault, volumeToBeKept);
 
     // No Volumes set.
-    V1Controller controllerDoNotSetVolumes = new V1Controller(Config.newBuilder().build(), runtime);
+    V1Controller controllerDoNotSetVolumes = new V1Controller(Config.newBuilder().build(), RUNTIME);
     V1PodSpec podSpecNoSetVolumes = new V1PodSpec();
     controllerDoNotSetVolumes.addVolumesIfPresent(podSpecNoSetVolumes);
     Assert.assertNull(podSpecNoSetVolumes.getVolumes());
@@ -649,7 +760,7 @@ public class V1ControllerTest {
         .put(KubernetesContext.KUBERNETES_CONTAINER_VOLUME_MOUNT_NAME, pathNameDefault)
         .put(KubernetesContext.KUBERNETES_CONTAINER_VOLUME_MOUNT_PATH, pathDefault)
         .build();
-    final V1Controller controllerWithMounts = new V1Controller(configWithVolumes, runtime);
+    final V1Controller controllerWithMounts = new V1Controller(configWithVolumes, RUNTIME);
     final V1VolumeMount volumeDefault = new V1VolumeMountBuilder()
         .withName(pathNameDefault)
         .withMountPath(pathDefault)
@@ -670,7 +781,7 @@ public class V1ControllerTest {
     );
 
     // No Volume Mounts set.
-    V1Controller controllerDoNotSetMounts = new V1Controller(Config.newBuilder().build(), runtime);
+    V1Controller controllerDoNotSetMounts = new V1Controller(Config.newBuilder().build(), RUNTIME);
     V1Container containerNoSetMounts = new V1Container();
     controllerDoNotSetMounts.mountVolumeIfPresent(containerNoSetMounts);
     Assert.assertNull(containerNoSetMounts.getVolumeMounts());
@@ -1016,14 +1127,107 @@ public class V1ControllerTest {
           .when(v1ControllerWithPodTemplate)
           .createPersistentVolumeClaimVolumesAndMounts(anyMap());
 
+      // <configPVC> parameter is used in mock above, so we can set it to <null> as it is not used.
       v1ControllerWithPodTemplate
           .configurePodWithPersistentVolumeClaimVolumesAndMounts((V1PodSpec) testCase.input[0],
-              (V1Container) testCase.input[1]);
+              (V1Container) testCase.input[1], null);
 
       Assert.assertEquals("Pod Specs match " + testCase.description,
           testCase.input[0], testCase.expected.first);
       Assert.assertEquals("Executors match " + testCase.description,
           testCase.input[1], testCase.expected.second);
+    }
+  }
+
+  @Test
+  public void testSetShardIdEnvironmentVariableCommand() {
+
+    List<TestTuple<Boolean, String>> testCases = new LinkedList<>();
+
+    testCases.add(new TestTuple<>("Executor command is set correctly",
+        true, "SHARD_ID=$((${POD_NAME##*-} + 1)) && echo shardId=${SHARD_ID}"));
+    testCases.add(new TestTuple<>("Manager command is set correctly",
+        false, "SHARD_ID=${POD_NAME##*-} && echo shardId=${SHARD_ID}"));
+
+    for (TestTuple<Boolean, String> testCase : testCases) {
+      Assert.assertEquals(testCase.description, testCase.expected,
+          v1ControllerWithPodTemplate.setShardIdEnvironmentVariableCommand(testCase.input));
+    }
+  }
+
+  @Test
+  public void testCreateResourcesRequirement() {
+    final Quantity memory = Quantity.fromString(
+        KubernetesUtils.Megabytes(ByteAmount.fromMegabytes(Long.parseLong(MANAGER_MEM_LIMIT))));
+    final Quantity cpu = Quantity.fromString(
+        Double.toString(V1Controller.roundDecimal(Double.parseDouble(MANAGER_CPU_LIMIT), 3)));
+    final List<TestTuple<Map<String, String>, Map<String, Quantity>>> testCases =
+        new LinkedList<>();
+
+    // No input.
+    Map<String, String> inputEmpty = new HashMap<>();
+    testCases.add(new TestTuple<>("Empty input.", inputEmpty, new HashMap<>()));
+
+    // Only memory.
+    Map<String, String> inputMemory = new HashMap<String, String>() {
+      {
+        put(KubernetesConstants.MEMORY, MANAGER_MEM_LIMIT);
+      }
+    };
+    Map<String, Quantity> expectedMemory = new HashMap<String, Quantity>() {
+      {
+        put(KubernetesConstants.MEMORY, memory);
+      }
+    };
+    testCases.add(new TestTuple<>("Only memory input.", inputMemory, expectedMemory));
+
+    // Only CPU.
+    Map<String, String> inputCPU = new HashMap<String, String>() {
+      {
+        put(KubernetesConstants.CPU, MANAGER_CPU_LIMIT);
+      }
+    };
+    Map<String, Quantity> expectedCPU = new HashMap<String, Quantity>() {
+      {
+        put(KubernetesConstants.CPU, cpu);
+      }
+    };
+    testCases.add(new TestTuple<>("Only CPU input.", inputCPU, expectedCPU));
+
+    // CPU and memory.
+    Map<String, String> inputMemoryCPU = new HashMap<String, String>() {
+      {
+        put(KubernetesConstants.MEMORY, MANAGER_MEM_LIMIT);
+        put(KubernetesConstants.CPU, MANAGER_CPU_LIMIT);
+      }
+    };
+    Map<String, Quantity> expectedMemoryCPU = new HashMap<String, Quantity>() {
+      {
+        put(KubernetesConstants.MEMORY, memory);
+        put(KubernetesConstants.CPU, cpu);
+      }
+    };
+    testCases.add(new TestTuple<>("Memory and CPU input.", inputMemoryCPU, expectedMemoryCPU));
+
+    // Invalid.
+    Map<String, String> inputInvalid = new HashMap<String, String>() {
+      {
+        put("invalid input", "will not be ignored");
+        put(KubernetesConstants.CPU, MANAGER_CPU_LIMIT);
+      }
+    };
+    Map<String, Quantity> expectedInvalid = new HashMap<String, Quantity>() {
+      {
+        put(KubernetesConstants.CPU, cpu);
+      }
+    };
+    testCases.add(new TestTuple<>("Invalid input.", inputInvalid, expectedInvalid));
+
+    // Test loop.
+    for (TestTuple<Map<String, String>, Map<String, Quantity>> testCase : testCases) {
+      Map<String, Quantity> actual =
+          v1ControllerPodTemplate.createResourcesRequirement(testCase.input);
+      Assert.assertEquals(testCase.description, testCase.expected, actual);
     }
   }
 }
