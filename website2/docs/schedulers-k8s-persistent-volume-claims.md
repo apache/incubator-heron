@@ -20,13 +20,13 @@ sidebar_label: Kubernetes Persistent Volume Claims (CLI)
     under the License.
 -->
 
-> This document demonstrates how you can utilize both static and dynamically backed [Persistent Volume Claims](https://kubernetes.io/docs/concepts/storage/dynamic-provisioning/) in the `Executor` containers. You will need to enable Dynamic Provisioning in your Kubernetes cluster to proceed to use the dynamic provisioning functionality.
+> This document demonstrates how you can utilize both static and dynamically backed [Persistent Volume Claims](https://kubernetes.io/docs/concepts/storage/dynamic-provisioning/) in the `Executor` and `Manager` containers (hereinafter referred to as `Heron containers`). You will need to enable Dynamic Provisioning in your Kubernetes cluster to proceed to use the dynamic provisioning functionality.
 
 <br/>
 
 It is possible to leverage Persistent Volumes with custom Pod Templates but the Volumes you add will be shared between all Pods in the topology.
 
-The CLI commands allow you to configure a Persistent Volume Claim (dynamically or statically backed) which will be unique and isolated to each Pod and mounted in a single `Executor` when you submit your topology with a Claim name of `OnDemand`. Using any Claim name other than on `OnDemand` will permit you to configure a shared Persistent Volume without a custom Pod Template which will be specific to an individual Pod. The CLI commands override any configurations you may have present in the Pod Template, but Heron's configurations will take precedence over all others.
+The CLI commands allow you to configure a Persistent Volume Claim (dynamically or statically backed) which will be unique and isolated to each Pod and mounted in a single `Heron container` when you submit your topology with a Claim name of `OnDemand`. Using any Claim name other than on `OnDemand` will permit you to configure a shared Persistent Volume without a custom Pod Template which will be specific to an individual Pod. The CLI commands override any configurations you may have present in the Pod Template, but Heron's configurations will take precedence over all others.
 
 Some use cases include process checkpointing, caching of results for later use in the process, intermediate results which could prove useful in analysis (ETL/ELT to a data lake or warehouse), as a source of data enrichment, etc.
 
@@ -63,10 +63,10 @@ metadata:
 
 ## Usage
 
-To configure a Persistent Volume Claim you must use the `--config-property` option with the `heron.kubernetes.volumes.persistentVolumeClaim.` command prefix. Heron will not validate your Persistent Volume Claim configurations, so please validate them to ensure they are well-formed. All names must comply with the [*lowercase RFC-1123*](https://kubernetes.io/docs/concepts/overview/working-with-objects/names/) standard.
+To configure a Persistent Volume Claim you must use the `--config-property` option with the `heron.kubernetes[executor | manager].volumes.persistentVolumeClaim.` command prefix. Heron will not validate your Persistent Volume Claim configurations, so please validate them to ensure they are well-formed. All names must comply with the [*lowercase RFC-1123*](https://kubernetes.io/docs/concepts/overview/working-with-objects/names/) standard.
 
 The command pattern is as follows:
-`heron.kubernetes.volumes.persistentVolumeClaim.[VOLUME NAME].[OPTION]=[VALUE]`
+`heron.kubernetes.[executor | manager].volumes.persistentVolumeClaim.[VOLUME NAME].[OPTION]=[VALUE]`
 
 The currently supported CLI `options` are:
 
@@ -78,9 +78,9 @@ The currently supported CLI `options` are:
 * `path`
 * `subPath`
 
-***Note:*** A `claimName` of `OnDemand` will create unique Volumes for each `Executor` as well as deploy a Persistent Volume Claim for each Volume. Any other Claim name will result in a shared Volume being created between all Pods in the topology.
+***Note:*** A `claimName` of `OnDemand` will create unique Volumes for each `Heron containers` as well as deploy a Persistent Volume Claim for each Volume. Any other Claim name will result in a shared Volume being created between all Pods in the topology.
 
-***Note:*** The `accessModes` must be a comma separated list of values *without* any white space. Valid values can be found in the [Kubernetes documentation](https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes).
+***Note:*** The `accessModes` must be a comma-separated list of values *without* any white space. Valid values can be found in the [Kubernetes documentation](https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes).
 
 ***Note:*** If a `storageClassName` is specified and there are no matching Persistent Volumes then [dynamic provisioning](https://kubernetes.io/docs/concepts/storage/dynamic-provisioning/) must be enabled. Kubernetes will attempt to locate a Persistent Volume that matches the `storageClassName` before it attempts to use dynamic provisioning. If a `storageClassName` is not specified there must be [Persistent Volumes](https://kubernetes.io/docs/tasks/configure-pod-container/configure-persistent-volume-storage/) provisioned manually with the `storageClassName` of `standard`.
 
@@ -88,18 +88,18 @@ The currently supported CLI `options` are:
 
 ### Example
 
-An example series of commands and the `YAML` entries they make in their respective configurations are as follows.
+A series of example commands to add `Persistent Volumes` to `Executor`s, and the `YAML` entries they make in their respective configurations, are as follows.
 
 ***Dynamic:***
 
 ```bash
---config-property heron.kubernetes.volumes.persistentVolumeClaim.volumenameofchoice.claimName=OnDemand
---config-property heron.kubernetes.volumes.persistentVolumeClaim.volumenameofchoice.storageClassName=storage-class-name-of-choice
---config-property heron.kubernetes.volumes.persistentVolumeClaim.volumenameofchoice.accessModes=comma,separated,list
---config-property heron.kubernetes.volumes.persistentVolumeClaim.volumenameofchoice.sizeLimit=555Gi
---config-property heron.kubernetes.volumes.persistentVolumeClaim.volumenameofchoice.volumeMode=volume-mode-of-choice
---config-property heron.kubernetes.volumes.persistentVolumeClaim.volumenameofchoice.path=/path/to/mount
---config-property heron.kubernetes.volumes.persistentVolumeClaim.volumenameofchoice.subPath=/sub/path/to/mount
+--config-property heron.kubernetes.executor.volumes.persistentVolumeClaim.volumenameofchoice.claimName=OnDemand
+--config-property heron.kubernetes.executor.volumes.persistentVolumeClaim.volumenameofchoice.storageClassName=storage-class-name-of-choice
+--config-property heron.kubernetes.executor.volumes.persistentVolumeClaim.volumenameofchoice.accessModes=comma,separated,list
+--config-property heron.kubernetes.executor.volumes.persistentVolumeClaim.volumenameofchoice.sizeLimit=555Gi
+--config-property heron.kubernetes.executor.volumes.persistentVolumeClaim.volumenameofchoice.volumeMode=volume-mode-of-choice
+--config-property heron.kubernetes.executor.volumes.persistentVolumeClaim.volumenameofchoice.path=/path/to/mount
+--config-property heron.kubernetes.executor.volumes.persistentVolumeClaim.volumenameofchoice.subPath=/sub/path/to/mount
 ```
 
 Generated `Persistent Volume Claim`:
@@ -148,12 +148,12 @@ volumeMounts:
 ***Static:***
 
 ```bash
---config-property heron.kubernetes.volumes.persistentVolumeClaim.volumenameofchoice.claimName=OnDemand
---config-property heron.kubernetes.volumes.persistentVolumeClaim.volumenameofchoice.accessModes=comma,separated,list
---config-property heron.kubernetes.volumes.persistentVolumeClaim.volumenameofchoice.sizeLimit=555Gi
---config-property heron.kubernetes.volumes.persistentVolumeClaim.volumenameofchoice.volumeMode=volume-mode-of-choice
---config-property heron.kubernetes.volumes.persistentVolumeClaim.volumenameofchoice.path=/path/to/mount
---config-property heron.kubernetes.volumes.persistentVolumeClaim.volumenameofchoice.subPath=/sub/path/to/mount
+--config-property heron.kubernetes.executor.volumes.persistentVolumeClaim.volumenameofchoice.claimName=OnDemand
+--config-property heron.kubernetes.executor.volumes.persistentVolumeClaim.volumenameofchoice.accessModes=comma,separated,list
+--config-property heron.kubernetes.executor.volumes.persistentVolumeClaim.volumenameofchoice.sizeLimit=555Gi
+--config-property heron.kubernetes.executor.volumes.persistentVolumeClaim.volumenameofchoice.volumeMode=volume-mode-of-choice
+--config-property heron.kubernetes.executor.volumes.persistentVolumeClaim.volumenameofchoice.path=/path/to/mount
+--config-property heron.kubernetes.executor.volumes.persistentVolumeClaim.volumenameofchoice.subPath=/sub/path/to/mount
 ```
 
 Generated `Persistent Volume Claim`:
@@ -201,20 +201,20 @@ volumeMounts:
 
 ## Submitting
 
-An example of sumbitting a topology using the *dynamic* example CLI commands above:
+A series of example commands to sumbit a topology using the *dynamic* example CLI commands above:
 
 ```bash
 heron submit kubernetes \
   --service-url=http://localhost:8001/api/v1/namespaces/default/services/heron-apiserver:9000/proxy \
   ~/.heron/examples/heron-api-examples.jar \
   org.apache.heron.examples.api.AckingTopology acking \
---config-property heron.kubernetes.volumes.persistentVolumeClaim.volumenameofchoice.claimName=OnDemand \
---config-property heron.kubernetes.volumes.persistentVolumeClaim.volumenameofchoice.storageClassName=storage-class-name-of-choice \
---config-property heron.kubernetes.volumes.persistentVolumeClaim.volumenameofchoice.accessModes=comma,separated,list \
---config-property heron.kubernetes.volumes.persistentVolumeClaim.volumenameofchoice.sizeLimit=555Gi \
---config-property heron.kubernetes.volumes.persistentVolumeClaim.volumenameofchoice.volumeMode=volume-mode-of-choice \
---config-property heron.kubernetes.volumes.persistentVolumeClaim.volumenameofchoice.path=/path/to/mount \
---config-property heron.kubernetes.volumes.persistentVolumeClaim.volumenameofchoice.subPath=/sub/path/to/mount
+--config-property heron.kubernetes.executor.volumes.persistentVolumeClaim.volumenameofchoice.claimName=OnDemand \
+--config-property heron.kubernetes.executor.volumes.persistentVolumeClaim.volumenameofchoice.storageClassName=storage-class-name-of-choice \
+--config-property heron.kubernetes.executor.volumes.persistentVolumeClaim.volumenameofchoice.accessModes=comma,separated,list \
+--config-property heron.kubernetes.executor.volumes.persistentVolumeClaim.volumenameofchoice.sizeLimit=555Gi \
+--config-property heron.kubernetes.executor.volumes.persistentVolumeClaim.volumenameofchoice.volumeMode=volume-mode-of-choice \
+--config-property heron.kubernetes.executor.volumes.persistentVolumeClaim.volumenameofchoice.path=/path/to/mount \
+--config-property heron.kubernetes.executor.volumes.persistentVolumeClaim.volumenameofchoice.subPath=/sub/path/to/mount
 ```
 
 ## Required and Optional Configuration Items
@@ -246,12 +246,12 @@ One `Persistent Volume Claim`, a `Volume`, and a `Volume Mount` will be created 
 
 | Name | Description | Policy |
 |---|---|---|
-| `VOLUME NAME` | The `name` of the `Volume`. | Entries made in the `Persistent Volume Claim`'s spec, the Pod Spec's `Volumes`, and the `executor` containers `volumeMounts`.
+| `VOLUME NAME` | The `name` of the `Volume`. | Entries made in the `Persistent Volume Claim`'s spec, the Pod Spec's `Volumes`, and the `Heron containers` `volumeMounts`.
 | `claimName` | A Claim name for the Persistent Volume. | If `OnDemand` is provided as the parameter then a unique Volume and Persistent Volume Claim will be created. Any other name will result in a shared Volume between all Pods in the topology with only a Volume and Volume Mount being added.
-| `path` | The `mountPath` of the `Volume`. | Entries made in the `executor` containers `volumeMounts`.
-| `subPath` | The `subPath` of the `Volume`. | Entries made in the `executor` containers `volumeMounts`.
+| `path` | The `mountPath` of the `Volume`. | Entries made in the `Heron containers` `volumeMounts`.
+| `subPath` | The `subPath` of the `Volume`. | Entries made in the `Heron containers` containers `volumeMounts`.
 | `storageClassName` | The identifier name used to reference the dynamic `StorageClass`. | Entries made in the `Persistent Volume Claim` and Pod Spec's `Volume`.
-| `accessModes` | A comma separated list of access modes. | Entries made in the `Persistent Volume Claim`.
+| `accessModes` | A comma-separated list of access modes. | Entries made in the `Persistent Volume Claim`.
 | `sizeLimit` | A resource request for storage space. | Entries made in the `Persistent Volume Claim`.
 | `volumeMode` | Either `FileSystem` (default) or `Block` (raw block). [Read more](https://kubernetes.io/docs/concepts/storage/_print/#volume-mode). | Entries made in the `Persistent Volume Claim`.
 | Labels | Two labels for `topology` and `onDemand` provisioning are added. | These labels are only added to dynamically backed `Persistent Volume Claim`'s created by Heron to support the removal of any claims created when a topology is terminated.
