@@ -491,7 +491,7 @@ One `Persistent Volume Claim`, a `Volume`, and a `Volume Mount` will be created 
 
 ## Setting Limits and Requests via the Command Line Interface
 
-> This document demonstrates how you can configure a topology's `Executor` and/or `Manager` (hereinafter referred to as `Heron containers`) resource `Requests` and `Limits` through CLI commands.
+> This section demonstrates how you can configure a topology's `Executor` and/or `Manager` (hereinafter referred to as `Heron containers`) resource `Requests` and `Limits` through CLI commands.
 
 <br/>
 
