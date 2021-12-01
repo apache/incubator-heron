@@ -1158,7 +1158,7 @@ public class V1ControllerTest {
   @Test
   public void testCreateResourcesRequirement() {
     final Quantity memory = Quantity.fromString(
-        KubernetesUtils.Megabytes(ByteAmount.fromGigabytes(Long.parseLong(MANAGER_MEM_LIMIT))));
+        KubernetesUtils.Megabytes(ByteAmount.fromMegabytes(Long.parseLong(MANAGER_MEM_LIMIT))));
     final Quantity cpu = Quantity.fromString(
         Double.toString(V1Controller.roundDecimal(Double.parseDouble(MANAGER_CPU_LIMIT), 3)));
     final List<TestTuple<Map<String, String>, Map<String, Quantity>>> testCases =
