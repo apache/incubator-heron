@@ -60,15 +60,15 @@ This document demonstrates how you can customize various aspects of the Heron ex
 
 <br/>
 
-When you deploy a topology to Heron on Kubernetes, you may specify a Pod Template to be used in your topology's `Executor`s and `Manager`. This can be achieved by providing valid Pod Templates, and embedding the Pod Templates within Configuration Maps. By default, Heron will use a minimally configured Pod Template which is adequate to deploy a topology.
+When you deploy a topology to Heron on Kubernetes, you may specify individual Pod Templates to be used in your topology's `Executor`s and `Manager`. This can be achieved by providing valid Pod Templates, and embedding the Pod Templates in Configuration Maps. By default, Heron will use a minimally configured Pod Template which is adequate to deploy a topology.
 
-Pod Templates will allow you to configure most aspects of your topology's execution environment, with some exceptions. There are some aspects of Pods for which Heron will have the final say, and which will not be user-customizable. Please view the tables at the end of this document to identify what is set by Heron.
+Pod Templates will allow you to configure most aspects of your topology's execution environment, with some exceptions. There are some aspects of Pods for which Heron will have the final say, and which will not be user-customizable. Please view the [tables](#heron-configured-items-in-pod-templates) at the end of this section to identify what is set by Heron.
 
 <br>
 
 > ***System Administrators:***
 >
-> * You may wish to disable the ability to load custom Pod Templates. To achieve this, you must pass the define option `-D heron.kubernetes.pod.template.disabled=true` to the Heron API Server on the command line on launch. This command has been added to the Kubernetes configuration files to deploy the Heron API Server and is set to `false` by default.
+> * You may wish to disable the ability to load custom Pod Templates. To achieve this, you must pass the define option `-D heron.kubernetes.pod.template.disabled=true` to the Heron API Server on the command line when launching. This command has been added to the Kubernetes configuration files to deploy the Heron API Server and is set to `false` by default.
 > * If you have a custom `Role` for the Heron API Server you will need to ensure the `ServiceAccount` attached to the API server, via a `RoleBinding`, has the correct permissions to access the `ConfigMaps`:
 >
 >```yaml
@@ -96,7 +96,7 @@ To deploy a custom Pod Template to Kubernetes with your topology, you must provi
 
 It is highly advised that you validate your Pod Templates before placing them in a `ConfigMap` to isolate any validity issues using a tool such as [Kubeval](https://kubeval.instrumenta.dev/) or the built-in `dry-run` functionality in Kubernetes. Whilst these tools are handy, they will not catch all potential errors in Kubernetes configurations.
 
-***NOTE***: When submitting a Pod Template to customize an `Executor` or `Manager`, Heron will look for containers named `executor` or `manager` respectively. These containers will be modified to support the functioning of Heron, please read further below.
+***NOTE***: When submitting a Pod Template to customize an `Executor` or `Manager`, Heron will look for containers named `executor` and `manager` respectively. These containers will be modified to support the functioning of Heron, please read further below.
 
 #### Pod Templates
 
@@ -132,7 +132,7 @@ You would need to save this file as `POD-TEMPLATE-NAME`. Once you have a valid P
 
 #### Configuration Maps
 
-> You must place the `ConfigMap` in the same namespace as the Heron API Server using the `--namespace` option in the commands below if the server is not in the `default` namespace.
+> You must place the `ConfigMap` in the same namespace as the Heron API Server using the `--namespace` option in the commands below if the API Server is not in the `default` namespace.
 
 To generate a `ConfigMap` you will need to run the following command:
 
@@ -251,9 +251,9 @@ The following items will be set in the Pod Template's `spec` by Heron.
 
 <br/>
 
-It is possible to leverage Persistent Volumes with custom Pod Templates but the Volumes you add will be shared between all Pods in the topology.
+It is possible to leverage Persistent Volumes with custom Pod Templates but the Volumes you add will be shared between all  `Executor` Pods in the topology when customizing the `Executor`s.
 
-The CLI commands allow you to configure a Persistent Volume Claim (dynamically or statically backed) which will be unique and isolated to each Pod and mounted in a single `Heron container` when you submit your topology with a Claim name of `OnDemand`. Using any Claim name other than on `OnDemand` will permit you to configure a shared Persistent Volume without a custom Pod Template which will be specific to an individual Pod. The CLI commands override any configurations you may have present in the Pod Template, but Heron's configurations will take precedence over all others.
+The CLI commands allow you to configure a Persistent Volume Claim (dynamically or statically backed) which will be unique and isolated to each Pod and mounted in a single `Heron container` when you submit your topology with a claim name of `OnDemand`. Using any claim name other than on `OnDemand` will permit you to configure a shared Persistent Volume without a custom Pod Template which will be shared between all `Executor` Pods when customizing them. The CLI commands override any configurations you may have present in the Pod Template, but Heron's configurations will take precedence over all others.
 
 Some use cases include process checkpointing, caching of results for later use in the process, intermediate results which could prove useful in analysis (ETL/ELT to a data lake or warehouse), as a source of data enrichment, etc.
 
@@ -269,7 +269,7 @@ metadata:
 
 > ***System Administrators:***
 >
-> * You may wish to disable the ability to configure dynamic Persistent Volume Claims specified on the CLI. To achieve this, you must pass the define option `-D heron.kubernetes.persistent.volume.claims.cli.disabled=true` to the Heron API Server on the command line during boot. This command has been added to the Kubernetes configuration files to deploy the Heron API Server and is set to `false` by default.
+> * You may wish to disable the ability to configure Persistent Volume Claims specified via the CLI. To achieve this, you must pass the define option `-D heron.kubernetes.persistent.volume.claims.cli.disabled=true` to the Heron API Server on the command line during boot. This command has been added to the Kubernetes configuration files to deploy the Heron API Server and is set to `false` by default.
 > * If you have a custom `Role`/`ClusterRole` for the Heron API Server you will need to ensure the `ServiceAccount` attached to the API server has the correct permissions to access the `Persistent Volume Claim`s:
 >
 >```yaml
@@ -305,7 +305,7 @@ The currently supported CLI `options` are:
 * `path`
 * `subPath`
 
-***Note:*** A `claimName` of `OnDemand` will create unique Volumes for each `Heron containers` as well as deploy a Persistent Volume Claim for each Volume. Any other Claim name will result in a shared Volume being created between all Pods in the topology.
+***Note:*** A `claimName` of `OnDemand` will create unique Volumes for each `Heron container` as well as deploy a Persistent Volume Claim for each Volume. Any other claim name will result in a shared Volume being created between all Pods in the topology.
 
 ***Note:*** The `accessModes` must be a comma-separated list of values *without* any white space. Valid values can be found in the [Kubernetes documentation](https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes).
 
@@ -446,7 +446,7 @@ heron submit kubernetes \
 
 ### Required and Optional Configuration Items
 
-The following table outlines CLI options which are either ***required*** ( &#x2705; ), ***optional*** ( &#x2754; ), or ***not available*** ( &#x274c; ) depending on if you are using dynamic/statically backed or shared `Volume`.
+The following table outlines CLI options which are either ***required*** ( &#x2705; ), ***optional*** ( &#x2754; ), or ***not available*** ( &#x274c; ) depending on if you are using dynamic/statically backed or shared `Volume`s.
 
 | Option | Dynamic | Static | Shared
 |---|---|---|---|
@@ -469,7 +469,7 @@ The following table outlines CLI options which are either ***required*** ( &#x27
 
 The configuration items and entries in the tables below will made in their respective areas.
 
-One `Persistent Volume Claim`, a `Volume`, and a `Volume Mount` will be created for each `volume name` which you specify. Each will be unique to a Pod within the topology.
+A `Volume` and a `Volume Mount` will be created for each `volume name` which you specify. Additionally, one `Persistent Volume Claim` will be created for each `Volume` specified as dynamic using the `OnDemand` claim name.
 
 | Name | Description | Policy |
 |---|---|---|
@@ -481,7 +481,7 @@ One `Persistent Volume Claim`, a `Volume`, and a `Volume Mount` will be created 
 | `accessModes` | A comma-separated list of access modes. | Entries made in the `Persistent Volume Claim`.
 | `sizeLimit` | A resource request for storage space. | Entries made in the `Persistent Volume Claim`.
 | `volumeMode` | Either `FileSystem` (default) or `Block` (raw block). [Read more](https://kubernetes.io/docs/concepts/storage/_print/#volume-mode). | Entries made in the `Persistent Volume Claim`.
-| Labels | Two labels for `topology` and `onDemand` provisioning are added. | These labels are only added to dynamically backed `Persistent Volume Claim`'s created by Heron to support the removal of any claims created when a topology is terminated.
+| Labels | Two labels for `topology` and `onDemand` provisioning are added. | These labels are only added to dynamically backed `Persistent Volume Claim`s created by Heron to support the removal of any claims created when a topology is terminated.
 
 <br>
 
@@ -491,11 +491,11 @@ One `Persistent Volume Claim`, a `Volume`, and a `Volume Mount` will be created 
 
 ## Setting Limits and Requests via the Command Line Interface
 
-> This document demonstrates how you can configure a topology's `Executor` and/or `Manager` (hereinafter referred to as `Heron containers`) resource `Requests` and `Limits` through CLI commands.
+> This section demonstrates how you can configure a topology's `Executor` and/or `Manager` (hereinafter referred to as `Heron containers`) resource `Requests` and `Limits` through CLI commands.
 
 <br/>
 
-You may configure an individual topology's `Heron container`'s resource `Requests` and `Limits` during submission through CLI commands.
+You may configure an individual topology's `Heron container`'s resource `Requests` and `Limits` during submission through CLI commands. The default behaviour is to acquire values for resources from Configurations and for them to be common between `Executor`s and the `Manager` for a topology.
 
 <br>
 
@@ -507,7 +507,7 @@ The command pattern is as follows:
 The currently supported CLI `options` are:
 
 * `cpu`: A natural number indicating the number of CPU's.
-* `memory`: A positive decimal number indicating the amount of memory in `Megabytes`.
+* `memory`: A natural number indicating the amount of memory in `Megabytes`.
 
 <br>
 
