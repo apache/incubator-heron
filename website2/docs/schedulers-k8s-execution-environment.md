@@ -269,7 +269,7 @@ metadata:
 
 > ***System Administrators:***
 >
-> * You may wish to disable the ability to configure Persistent Volume Claims specified via the CLI. To achieve this, you must pass the define option `-D heron.kubernetes.persistent.volume.claims.cli.disabled=true` to the Heron API Server on the command line during boot. This command has been added to the Kubernetes configuration files to deploy the Heron API Server and is set to `false` by default.
+> * You may wish to disable the ability to configure Persistent Volume Claims specified via the CLI. To achieve this, you must pass the define option `-D heron.kubernetes.persistent.volume.claims.cli.disabled=true`to the Heron API Server on the command line when launching. This command has been added to the Kubernetes configuration files to deploy the Heron API Server and is set to `false` by default.
 > * If you have a custom `Role`/`ClusterRole` for the Heron API Server you will need to ensure the `ServiceAccount` attached to the API server has the correct permissions to access the `Persistent Volume Claim`s:
 >
 >```yaml
@@ -290,7 +290,7 @@ metadata:
 
 ### Usage
 
-To configure a Persistent Volume Claim you must use the `--config-property` option with the `heron.kubernetes[executor | manager].volumes.persistentVolumeClaim.` command prefix. Heron will not validate your Persistent Volume Claim configurations, so please validate them to ensure they are well-formed. All names must comply with the [*lowercase RFC-1123*](https://kubernetes.io/docs/concepts/overview/working-with-objects/names/) standard.
+To configure a Persistent Volume Claim you must use the `--config-property` option with the `heron.kubernetes.[executor | manager].volumes.persistentVolumeClaim.` command prefix. Heron will not validate your Persistent Volume Claim configurations, so please validate them to ensure they are well-formed. All names must comply with the [*lowercase RFC-1123*](https://kubernetes.io/docs/concepts/overview/working-with-objects/names/) standard.
 
 The command pattern is as follows:
 `heron.kubernetes.[executor | manager].volumes.persistentVolumeClaim.[VOLUME NAME].[OPTION]=[VALUE]`
@@ -446,7 +446,7 @@ heron submit kubernetes \
 
 ### Required and Optional Configuration Items
 
-The following table outlines CLI options which are either ***required*** ( &#x2705; ), ***optional*** ( &#x2754; ), or ***not available*** ( &#x274c; ) depending on if you are using dynamic/statically backed or shared `Volume`s.
+The following table outlines CLI options which are either ***required*** ( &#x2705; ), ***optional*** ( &#x2754; ), or ***not available*** ( &#x274c; ) depending on if you are using dynamically/statically backed or shared `Volume`s.
 
 | Option | Dynamic | Static | Shared
 |---|---|---|---|
@@ -476,10 +476,10 @@ A `Volume` and a `Volume Mount` will be created for each `volume name` which you
 | `VOLUME NAME` | The `name` of the `Volume`. | Entries made in the `Persistent Volume Claim`'s spec, the Pod Spec's `Volumes`, and the `Heron containers` `volumeMounts`.
 | `claimName` | A Claim name for the Persistent Volume. | If `OnDemand` is provided as the parameter then a unique Volume and Persistent Volume Claim will be created. Any other name will result in a shared Volume between all Pods in the topology with only a Volume and Volume Mount being added.
 | `path` | The `mountPath` of the `Volume`. | Entries made in the `Heron containers` `volumeMounts`.
-| `subPath` | The `subPath` of the `Volume`. | Entries made in the `Heron containers` containers `volumeMounts`.
+| `subPath` | The `subPath` of the `Volume`. | Entries made in the `Heron containers` `volumeMounts`.
 | `storageClassName` | The identifier name used to reference the dynamic `StorageClass`. | Entries made in the `Persistent Volume Claim` and Pod Spec's `Volume`.
-| `accessModes` | A comma-separated list of access modes. | Entries made in the `Persistent Volume Claim`.
-| `sizeLimit` | A resource request for storage space. | Entries made in the `Persistent Volume Claim`.
+| `accessModes` | A comma-separated list of [access modes](https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes). | Entries made in the `Persistent Volume Claim`.
+| `sizeLimit` | A resource request for storage space [units](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#meaning-of-memory). | Entries made in the `Persistent Volume Claim`.
 | `volumeMode` | Either `FileSystem` (default) or `Block` (raw block). [Read more](https://kubernetes.io/docs/concepts/storage/_print/#volume-mode). | Entries made in the `Persistent Volume Claim`.
 | Labels | Two labels for `topology` and `onDemand` provisioning are added. | These labels are only added to dynamically backed `Persistent Volume Claim`s created by Heron to support the removal of any claims created when a topology is terminated.
 
@@ -495,7 +495,7 @@ A `Volume` and a `Volume Mount` will be created for each `volume name` which you
 
 <br/>
 
-You may configure an individual topology's `Heron container`'s resource `Requests` and `Limits` during submission through CLI commands. The default behaviour is to acquire values for resources from Configurations and for them to be common between `Executor`s and the `Manager` for a topology.
+You may configure an individual topology's `Heron container`'s resource `Requests` and `Limits` during submission through CLI commands. The default behaviour is to acquire values for resources from Configurations and for them to be common between the `Executor`s and the `Manager` for a topology.
 
 <br>
 
@@ -504,10 +504,10 @@ You may configure an individual topology's `Heron container`'s resource `Request
 The command pattern is as follows:
 `heron.kubernetes.[executor | manager].[limits | requests].[OPTION]=[VALUE]`
 
-The currently supported CLI `options` are:
+The currently supported CLI `options` and their associated `values` are:
 
-* `cpu`: A natural number indicating the number of CPU's.
-* `memory`: A natural number indicating the amount of memory in `Megabytes`.
+* `cpu`: A natural number indicating the number of [CPU units](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#meaning-of-cpu).
+* `memory`: A natural number indicating the amount of [memory units](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#meaning-of-memory).
 
 <br>
 
