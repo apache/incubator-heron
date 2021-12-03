@@ -38,7 +38,6 @@ import java.util.stream.IntStream;
 import com.google.common.annotations.VisibleForTesting;
 
 import org.apache.heron.api.utils.TopologyUtils;
-import org.apache.heron.common.basics.ByteAmount;
 import org.apache.heron.common.basics.Pair;
 import org.apache.heron.scheduler.TopologyRuntimeManagementException;
 import org.apache.heron.scheduler.TopologySubmissionException;
@@ -771,13 +770,11 @@ public class V1Controller extends KubernetesController {
 
     final String memoryLimit = configs.get(KubernetesConstants.MEMORY);
     if (memoryLimit != null && !memoryLimit.isEmpty()) {
-      requirements.put(KubernetesConstants.MEMORY, Quantity.fromString(
-          KubernetesUtils.Megabytes(ByteAmount.fromMegabytes(Long.parseLong(memoryLimit)))));
+      requirements.put(KubernetesConstants.MEMORY, Quantity.fromString(memoryLimit));
     }
     final String cpuLimit = configs.get(KubernetesConstants.CPU);
     if (cpuLimit != null && !cpuLimit.isEmpty()) {
-      requirements.put(KubernetesConstants.CPU, Quantity.fromString(
-          Double.toString(V1Controller.roundDecimal(Double.parseDouble(cpuLimit), 3))));
+      requirements.put(KubernetesConstants.CPU, Quantity.fromString(cpuLimit));
     }
 
     return requirements;

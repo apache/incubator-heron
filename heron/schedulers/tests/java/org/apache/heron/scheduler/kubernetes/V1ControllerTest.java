@@ -103,10 +103,6 @@ public class V1ControllerTest {
           + "          limits:\n"
           + "            cpu: \"400m\"\n"
           + "            memory: \"512M\"";
-  private static final String MANAGER_CPU_LIMIT = "32";
-  private static final String MANAGER_MEM_LIMIT = "256";
-  private static final String MANAGER_CPU_REQUEST = "24";
-  private static final String MANAGER_MEM_REQUEST = "128";
   private static final String POD_TEMPLATE_LOCATION_EXECUTOR =
       String.format(KubernetesContext.KUBERNETES_POD_TEMPLATE_LOCATION,
           KubernetesConstants.EXECUTOR_NAME);
@@ -643,22 +639,18 @@ public class V1ControllerTest {
   @Test
   public void testConfigureContainerResourcesCLI() {
     final boolean isExecutor = true;
-    final String customLimitMEMStr = "12000";
+    final String customLimitMEMStr = "120Gi";
     final String customLimitCPUStr = "5";
-    final String customRequestMEMStr = "10000";
+    final String customRequestMEMStr = "100Mi";
     final String customRequestCPUStr = "4";
 
     final Resource resources = new Resource(
         6, ByteAmount.fromMegabytes(34000), ByteAmount.fromGigabytes(400));
 
-    final Quantity customLimitMEM = Quantity.fromString(
-        KubernetesUtils.Megabytes(ByteAmount.fromMegabytes(Long.parseLong(customLimitMEMStr))));
-    final Quantity customLimitCPU = Quantity.fromString(
-        Double.toString(V1Controller.roundDecimal(Double.parseDouble(customLimitCPUStr), 3)));
-    final Quantity customRequestMEM = Quantity.fromString(
-        KubernetesUtils.Megabytes(ByteAmount.fromMegabytes(Long.parseLong(customRequestMEMStr))));
-    final Quantity customRequestCPU = Quantity.fromString(
-        Double.toString(V1Controller.roundDecimal(Double.parseDouble(customRequestCPUStr), 3)));
+    final Quantity customLimitMEM = Quantity.fromString(customLimitMEMStr);
+    final Quantity customLimitCPU = Quantity.fromString(customLimitCPUStr);
+    final Quantity customRequestMEM = Quantity.fromString(customRequestMEMStr);
+    final Quantity customRequestCPU = Quantity.fromString(customRequestCPUStr);
 
     final Config config = Config.newBuilder()
         .put(String.format(KubernetesContext.KUBERNETES_RESOURCE_LIMITS_PREFIX
@@ -1157,10 +1149,10 @@ public class V1ControllerTest {
 
   @Test
   public void testCreateResourcesRequirement() {
-    final Quantity memory = Quantity.fromString(
-        KubernetesUtils.Megabytes(ByteAmount.fromMegabytes(Long.parseLong(MANAGER_MEM_LIMIT))));
-    final Quantity cpu = Quantity.fromString(
-        Double.toString(V1Controller.roundDecimal(Double.parseDouble(MANAGER_CPU_LIMIT), 3)));
+    final String managerCpuLimit = "3000m";
+    final String managerMemLimit = "256Gi";
+    final Quantity memory = Quantity.fromString(managerMemLimit);
+    final Quantity cpu = Quantity.fromString(managerCpuLimit);
     final List<TestTuple<Map<String, String>, Map<String, Quantity>>> testCases =
         new LinkedList<>();
 
@@ -1171,7 +1163,7 @@ public class V1ControllerTest {
     // Only memory.
     Map<String, String> inputMemory = new HashMap<String, String>() {
       {
-        put(KubernetesConstants.MEMORY, MANAGER_MEM_LIMIT);
+        put(KubernetesConstants.MEMORY, managerMemLimit);
       }
     };
     Map<String, Quantity> expectedMemory = new HashMap<String, Quantity>() {
@@ -1184,7 +1176,7 @@ public class V1ControllerTest {
     // Only CPU.
     Map<String, String> inputCPU = new HashMap<String, String>() {
       {
-        put(KubernetesConstants.CPU, MANAGER_CPU_LIMIT);
+        put(KubernetesConstants.CPU, managerCpuLimit);
       }
     };
     Map<String, Quantity> expectedCPU = new HashMap<String, Quantity>() {
@@ -1197,8 +1189,8 @@ public class V1ControllerTest {
     // CPU and memory.
     Map<String, String> inputMemoryCPU = new HashMap<String, String>() {
       {
-        put(KubernetesConstants.MEMORY, MANAGER_MEM_LIMIT);
-        put(KubernetesConstants.CPU, MANAGER_CPU_LIMIT);
+        put(KubernetesConstants.MEMORY, managerMemLimit);
+        put(KubernetesConstants.CPU, managerCpuLimit);
       }
     };
     Map<String, Quantity> expectedMemoryCPU = new HashMap<String, Quantity>() {
@@ -1213,7 +1205,7 @@ public class V1ControllerTest {
     Map<String, String> inputInvalid = new HashMap<String, String>() {
       {
         put("invalid input", "will not be ignored");
-        put(KubernetesConstants.CPU, MANAGER_CPU_LIMIT);
+        put(KubernetesConstants.CPU, managerCpuLimit);
       }
     };
     Map<String, Quantity> expectedInvalid = new HashMap<String, Quantity>() {
