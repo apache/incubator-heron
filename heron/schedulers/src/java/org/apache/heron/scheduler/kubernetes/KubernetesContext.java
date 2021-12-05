@@ -255,7 +255,7 @@ public final class KubernetesContext extends Context {
    * @return A mapping between <code>Volumes</code> and their configuration <code>key-value</code> pairs.
    * Will return an empty list if there are no Volume Claim Templates to be generated.
    */
-  public static Map<String, Map<KubernetesConstants.VolumeClaimTemplateConfigKeys, String>>
+  public static Map<String, Map<KubernetesConstants.VolumeConfigKeys, String>>
       getVolumeClaimTemplates(Config config, boolean isExecutor) {
     final Logger LOG = Logger.getLogger(V1Controller.class.getName());
 
@@ -267,19 +267,17 @@ public final class KubernetesContext extends Context {
     final int optionIdx = 1;
     final Matcher matcher = KubernetesConstants.VALID_LOWERCASE_RFC_1123_REGEX.matcher("");
 
-    final Map<String, Map<KubernetesConstants.VolumeClaimTemplateConfigKeys, String>> volumes
-        = new HashMap<>();
+    final Map<String, Map<KubernetesConstants.VolumeConfigKeys, String>> volumes = new HashMap<>();
 
     try {
       for (String param : completeConfigParam) {
         final String[] tokens = param.substring(prefixLength).split("\\.");
         final String volumeName = tokens[volumeNameIdx];
-        final KubernetesConstants.VolumeClaimTemplateConfigKeys key =
-            KubernetesConstants.VolumeClaimTemplateConfigKeys.valueOf(tokens[optionIdx]);
+        final KubernetesConstants.VolumeConfigKeys key =
+            KubernetesConstants.VolumeConfigKeys.valueOf(tokens[optionIdx]);
         final String value = config.getStringValue(param);
 
-        Map<KubernetesConstants.VolumeClaimTemplateConfigKeys, String> volume =
-            volumes.get(volumeName);
+        Map<KubernetesConstants.VolumeConfigKeys, String> volume = volumes.get(volumeName);
         if (volume == null) {
           // Validate new Volume Names.
           if (!matcher.reset(volumeName).matches()) {
@@ -298,11 +296,10 @@ public final class KubernetesContext extends Context {
           [3] Check for a valid lowercase RFC-1123 pattern.
          */
         boolean claimNameNotOnDemand =
-            KubernetesConstants.VolumeClaimTemplateConfigKeys.claimName.equals(key)
+            KubernetesConstants.VolumeConfigKeys.claimName.equals(key)
                 && !KubernetesConstants.LABEL_ON_DEMAND.equalsIgnoreCase(value);
         if ((claimNameNotOnDemand // [1]
-            ||
-            KubernetesConstants.VolumeClaimTemplateConfigKeys.storageClassName.equals(key)) // [2]
+            || KubernetesConstants.VolumeConfigKeys.storageClassName.equals(key)) // [2]
             && !matcher.reset(value).matches()) { // [3]
           throw new TopologySubmissionException(
               String.format("Option `%s` value `%s` does not match lowercase RFC-1123 pattern",

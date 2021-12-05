@@ -32,7 +32,7 @@ import org.apache.heron.scheduler.TopologySubmissionException;
 import org.apache.heron.scheduler.kubernetes.KubernetesUtils.TestTuple;
 import org.apache.heron.spi.common.Config;
 
-import static org.apache.heron.scheduler.kubernetes.KubernetesConstants.VolumeClaimTemplateConfigKeys;
+import static org.apache.heron.scheduler.kubernetes.KubernetesConstants.VolumeConfigKeys;
 
 public class KubernetesContextTest {
 
@@ -105,9 +105,9 @@ public class KubernetesContextTest {
     final String keyExecutor = String.format(keyPattern, KubernetesConstants.EXECUTOR_NAME);
     final String keyManager = String.format(keyPattern, KubernetesConstants.MANAGER_NAME);
 
-    final String storageClassField = VolumeClaimTemplateConfigKeys.storageClassName.name();
-    final String pathField = VolumeClaimTemplateConfigKeys.path.name();
-    final String claimNameField = VolumeClaimTemplateConfigKeys.claimName.name();
+    final String storageClassField = VolumeConfigKeys.storageClassName.name();
+    final String pathField = VolumeConfigKeys.path.name();
+    final String claimNameField = VolumeConfigKeys.claimName.name();
     final String expectedStorageClass = "expected-storage-class";
     final String expectedPath = "/path/for/volume/expected";
 
@@ -149,10 +149,10 @@ public class KubernetesContextTest {
           .build();
 
       final List<String> expectedKeys = Arrays.asList(volumeNameOne, volumeNameTwo);
-      final List<VolumeClaimTemplateConfigKeys> expectedOptionsKeys =
-          Arrays.asList(VolumeClaimTemplateConfigKeys.path,
-              VolumeClaimTemplateConfigKeys.storageClassName,
-              VolumeClaimTemplateConfigKeys.claimName);
+      final List<VolumeConfigKeys> expectedOptionsKeys =
+          Arrays.asList(VolumeConfigKeys.path,
+              VolumeConfigKeys.storageClassName,
+              VolumeConfigKeys.claimName);
       final List<String> expectedOptionsValues =
           Arrays.asList(expectedPath, expectedStorageClass, claimName);
 
@@ -163,14 +163,14 @@ public class KubernetesContextTest {
 
     // Test loop.
     for (TestTuple<Pair<Config, Boolean>, Object[]> testCase : testCases) {
-      final Map<String, Map<VolumeClaimTemplateConfigKeys, String>> mapOfPVC =
+      final Map<String, Map<VolumeConfigKeys, String>> mapOfPVC =
           KubernetesContext.getVolumeClaimTemplates(testCase.input.first, testCase.input.second);
 
       Assert.assertTrue(testCase.description + ": Contains all provided Volumes",
           mapOfPVC.keySet().containsAll((List<String>) testCase.expected[0]));
-      for (Map<VolumeClaimTemplateConfigKeys, String> items : mapOfPVC.values()) {
+      for (Map<VolumeConfigKeys, String> items : mapOfPVC.values()) {
         Assert.assertTrue(testCase.description + ": Contains all provided option keys",
-            items.keySet().containsAll((List<VolumeClaimTemplateConfigKeys>) testCase.expected[1]));
+            items.keySet().containsAll((List<VolumeConfigKeys>) testCase.expected[1]));
         Assert.assertTrue(testCase.description + ": Contains all provided option values",
             items.values().containsAll((List<String>) testCase.expected[2]));
       }
@@ -179,7 +179,7 @@ public class KubernetesContextTest {
     // Empty PVC.
     final Boolean[] emptyPVCTestCases = new Boolean[] {true, false};
     for (boolean testCase : emptyPVCTestCases) {
-      final Map<String, Map<VolumeClaimTemplateConfigKeys, String>> emptyPVC =
+      final Map<String, Map<VolumeConfigKeys, String>> emptyPVC =
           KubernetesContext.getVolumeClaimTemplates(Config.newBuilder().build(), testCase);
       Assert.assertTrue("Empty PVC is returned when no options provided", emptyPVC.isEmpty());
     }
