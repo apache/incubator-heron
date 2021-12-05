@@ -66,7 +66,7 @@ import io.kubernetes.client.openapi.models.V1VolumeBuilder;
 import io.kubernetes.client.openapi.models.V1VolumeMount;
 import io.kubernetes.client.openapi.models.V1VolumeMountBuilder;
 
-import static org.apache.heron.scheduler.kubernetes.KubernetesConstants.VolumeClaimTemplateConfigKeys;
+import static org.apache.heron.scheduler.kubernetes.KubernetesConstants.VolumeConfigKeys;
 import static org.mockito.Matchers.anyMap;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doReturn;
@@ -866,37 +866,37 @@ public class V1ControllerTest {
     final String volumeMode = "VolumeMode";
     final String path = "/path/to/mount/";
     final String subPath = "/sub/path/to/mount/";
-    final Map<String, Map<VolumeClaimTemplateConfigKeys, String>> mapPVCOpts =
+    final Map<String, Map<VolumeConfigKeys, String>> mapPVCOpts =
         ImmutableMap.of(
-            volumeNameOne, new HashMap<VolumeClaimTemplateConfigKeys, String>() {
+            volumeNameOne, new HashMap<VolumeConfigKeys, String>() {
               {
-                put(VolumeClaimTemplateConfigKeys.claimName, claimNameOne);
-                put(VolumeClaimTemplateConfigKeys.storageClassName, storageClassName);
-                put(VolumeClaimTemplateConfigKeys.sizeLimit, sizeLimit);
-                put(VolumeClaimTemplateConfigKeys.accessModes, accessModesList);
-                put(VolumeClaimTemplateConfigKeys.volumeMode, volumeMode);
-                put(VolumeClaimTemplateConfigKeys.path, path);
+                put(VolumeConfigKeys.claimName, claimNameOne);
+                put(VolumeConfigKeys.storageClassName, storageClassName);
+                put(VolumeConfigKeys.sizeLimit, sizeLimit);
+                put(VolumeConfigKeys.accessModes, accessModesList);
+                put(VolumeConfigKeys.volumeMode, volumeMode);
+                put(VolumeConfigKeys.path, path);
               }
             },
-            volumeNameTwo, new HashMap<VolumeClaimTemplateConfigKeys, String>() {
+            volumeNameTwo, new HashMap<VolumeConfigKeys, String>() {
               {
-                put(VolumeClaimTemplateConfigKeys.claimName, claimNameTwo);
-                put(VolumeClaimTemplateConfigKeys.storageClassName, storageClassName);
-                put(VolumeClaimTemplateConfigKeys.sizeLimit, sizeLimit);
-                put(VolumeClaimTemplateConfigKeys.accessModes, accessModes);
-                put(VolumeClaimTemplateConfigKeys.volumeMode, volumeMode);
-                put(VolumeClaimTemplateConfigKeys.path, path);
-                put(VolumeClaimTemplateConfigKeys.subPath, subPath);
+                put(VolumeConfigKeys.claimName, claimNameTwo);
+                put(VolumeConfigKeys.storageClassName, storageClassName);
+                put(VolumeConfigKeys.sizeLimit, sizeLimit);
+                put(VolumeConfigKeys.accessModes, accessModes);
+                put(VolumeConfigKeys.volumeMode, volumeMode);
+                put(VolumeConfigKeys.path, path);
+                put(VolumeConfigKeys.subPath, subPath);
               }
             },
-            volumeNameStatic, new HashMap<VolumeClaimTemplateConfigKeys, String>() {
+            volumeNameStatic, new HashMap<VolumeConfigKeys, String>() {
               {
-                put(VolumeClaimTemplateConfigKeys.claimName, claimNameStatic);
-                put(VolumeClaimTemplateConfigKeys.sizeLimit, sizeLimit);
-                put(VolumeClaimTemplateConfigKeys.accessModes, accessModes);
-                put(VolumeClaimTemplateConfigKeys.volumeMode, volumeMode);
-                put(VolumeClaimTemplateConfigKeys.path, path);
-                put(VolumeClaimTemplateConfigKeys.subPath, subPath);
+                put(VolumeConfigKeys.claimName, claimNameStatic);
+                put(VolumeConfigKeys.sizeLimit, sizeLimit);
+                put(VolumeConfigKeys.accessModes, accessModes);
+                put(VolumeConfigKeys.volumeMode, volumeMode);
+                put(VolumeConfigKeys.path, path);
+                put(VolumeConfigKeys.subPath, subPath);
               }
             }
         );
@@ -948,15 +948,15 @@ public class V1ControllerTest {
     final String mountPathOne = "/mount/path/ONE";
     final String mountPathTwo = "/mount/path/TWO";
     final String mountSubPathTwo = "/mount/sub/path/TWO";
-    Map<String, Map<VolumeClaimTemplateConfigKeys, String>> mapOfOpts =
+    Map<String, Map<VolumeConfigKeys, String>> mapOfOpts =
         ImmutableMap.of(
             volumeNameOne, ImmutableMap.of(
-                VolumeClaimTemplateConfigKeys.claimName, claimNameOne,
-                VolumeClaimTemplateConfigKeys.path, mountPathOne),
+                VolumeConfigKeys.claimName, claimNameOne,
+                VolumeConfigKeys.path, mountPathOne),
             volumeNameTwo, ImmutableMap.of(
-                VolumeClaimTemplateConfigKeys.claimName, claimNameTwo,
-                VolumeClaimTemplateConfigKeys.path, mountPathTwo,
-                VolumeClaimTemplateConfigKeys.subPath, mountSubPathTwo)
+                VolumeConfigKeys.claimName, claimNameTwo,
+                VolumeConfigKeys.path, mountPathTwo,
+                VolumeConfigKeys.subPath, mountSubPathTwo)
         );
     final V1Volume volumeOne = new V1VolumeBuilder()
         .withName(volumeNameOne)

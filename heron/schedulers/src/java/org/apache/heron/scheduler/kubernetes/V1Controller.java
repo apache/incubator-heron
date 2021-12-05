@@ -416,7 +416,7 @@ public class V1Controller extends KubernetesController {
     final Config runtimeConfiguration = getRuntimeConfiguration();
 
     // Get and then create Persistent Volume Claims from the CLI.
-    final Map<String, Map<KubernetesConstants.VolumeClaimTemplateConfigKeys, String>> configsPVC =
+    final Map<String, Map<KubernetesConstants.VolumeConfigKeys, String>> configsPVC =
         KubernetesContext.getVolumeClaimTemplates(getConfiguration(), isExecutor);
     if (KubernetesContext.getPersistentVolumeClaimDisabled(getConfiguration())
         && !configsPVC.isEmpty()) {
@@ -523,7 +523,7 @@ public class V1Controller extends KubernetesController {
    */
   private void configurePodSpec(final V1PodTemplateSpec podTemplateSpec, Resource resource,
       int numberOfInstances, boolean isExecutor,
-      final Map<String, Map<KubernetesConstants.VolumeClaimTemplateConfigKeys, String>> configPVC) {
+      final Map<String, Map<KubernetesConstants.VolumeConfigKeys, String>> configPVC) {
     if (podTemplateSpec.getSpec() == null) {
       podTemplateSpec.setSpec(new V1PodSpec());
     }
@@ -1043,17 +1043,16 @@ public class V1Controller extends KubernetesController {
    */
   @VisibleForTesting
   protected List<V1PersistentVolumeClaim> createPersistentVolumeClaims(
-      final Map<String, Map<KubernetesConstants.VolumeClaimTemplateConfigKeys, String>> mapOfOpts) {
+      final Map<String, Map<KubernetesConstants.VolumeConfigKeys, String>> mapOfOpts) {
 
     List<V1PersistentVolumeClaim> listOfPVCs = new LinkedList<>();
 
     // Iterate over all the PVC Volumes.
-    for (Map.Entry<String, Map<KubernetesConstants.VolumeClaimTemplateConfigKeys, String>> pvc
+    for (Map.Entry<String, Map<KubernetesConstants.VolumeConfigKeys, String>> pvc
         : mapOfOpts.entrySet()) {
 
       // Only create claims for `OnDemand` volumes.
-      final String claimName = pvc.getValue()
-          .get(KubernetesConstants.VolumeClaimTemplateConfigKeys.claimName);
+      final String claimName = pvc.getValue().get(KubernetesConstants.VolumeConfigKeys.claimName);
       if (claimName != null && !KubernetesConstants.LABEL_ON_DEMAND.equalsIgnoreCase(claimName)) {
         continue;
       }
@@ -1068,7 +1067,7 @@ public class V1Controller extends KubernetesController {
           .build();
 
       // Populate PVC options.
-      for (Map.Entry<KubernetesConstants.VolumeClaimTemplateConfigKeys, String> option
+      for (Map.Entry<KubernetesConstants.VolumeConfigKeys, String> option
           : pvc.getValue().entrySet()) {
         String optionValue = option.getValue();
         switch(option.getKey()) {
@@ -1107,16 +1106,16 @@ public class V1Controller extends KubernetesController {
    */
   @VisibleForTesting
   protected Pair<List<V1Volume>, List<V1VolumeMount>> createPersistentVolumeClaimVolumesAndMounts(
-      final Map<String, Map<KubernetesConstants.VolumeClaimTemplateConfigKeys, String>> mapConfig) {
-    List<V1Volume> volumeList = new LinkedList<>();
-    List<V1VolumeMount> mountList = new LinkedList<>();
-    for (Map.Entry<String, Map<KubernetesConstants.VolumeClaimTemplateConfigKeys, String>> configs
+      final Map<String, Map<KubernetesConstants.VolumeConfigKeys, String>> mapConfig) {
+    final List<V1Volume> volumeList = new LinkedList<>();
+    final List<V1VolumeMount> mountList = new LinkedList<>();
+    for (Map.Entry<String, Map<KubernetesConstants.VolumeConfigKeys, String>> configs
         : mapConfig.entrySet()) {
       final String volumeName = configs.getKey();
       final String path = configs.getValue()
-          .get(KubernetesConstants.VolumeClaimTemplateConfigKeys.path);
+          .get(KubernetesConstants.VolumeConfigKeys.path);
       final String subPath = configs.getValue()
-          .get(KubernetesConstants.VolumeClaimTemplateConfigKeys.subPath);
+          .get(KubernetesConstants.VolumeConfigKeys.subPath);
 
       if (path == null || path.isEmpty()) {
         throw new TopologySubmissionException(
@@ -1125,7 +1124,7 @@ public class V1Controller extends KubernetesController {
 
       // Do not create Volumes for `OnDemand`.
       final String claimName = configs.getValue()
-          .get(KubernetesConstants.VolumeClaimTemplateConfigKeys.claimName);
+          .get(KubernetesConstants.VolumeConfigKeys.claimName);
       if (claimName != null && !KubernetesConstants.LABEL_ON_DEMAND.equalsIgnoreCase(claimName)) {
         final V1Volume volume = new V1VolumeBuilder()
             .withName(volumeName)
@@ -1156,7 +1155,7 @@ public class V1Controller extends KubernetesController {
   @VisibleForTesting
   protected void configurePodWithPersistentVolumeClaimVolumesAndMounts(final V1PodSpec podSpec,
       final V1Container executor,
-      final Map<String, Map<KubernetesConstants.VolumeClaimTemplateConfigKeys, String>> configPVC) {
+      final Map<String, Map<KubernetesConstants.VolumeConfigKeys, String>> configPVC) {
     Pair<List<V1Volume>, List<V1VolumeMount>> volumesAndMounts =
         createPersistentVolumeClaimVolumesAndMounts(configPVC);
 
@@ -1186,12 +1185,11 @@ public class V1Controller extends KubernetesController {
    *     onDemand: <code>true</code>
    */
   private void removePersistentVolumeClaims() {
-    final String topologyName = getTopologyName();
+    final String name = getTopologyName();
     final StringBuilder selectorLabel = new StringBuilder();
 
     // Generate selector label.
-    for (Map.Entry<String, String> label
-        : getPersistentVolumeClaimLabels(topologyName).entrySet()) {
+    for (Map.Entry<String, String> label : getPersistentVolumeClaimLabels(name).entrySet()) {
       if (selectorLabel.length() != 0) {
         selectorLabel.append(",");
       }
@@ -1218,11 +1216,11 @@ public class V1Controller extends KubernetesController {
 
       LOG.log(Level.INFO,
           String.format("Removing automatically generated Persistent Volume Claims for `%s`:%n%s",
-          topologyName, status.getMessage()));
+          name, status.getMessage()));
     } catch (ApiException e) {
       final String message = String.format("Failed to connect to K8s cluster to delete Persistent "
               + "Volume Claims for topology `%s`. A manual clean-up is required.%n%s",
-          topologyName, e.getMessage());
+          name, e.getMessage());
       LOG.log(Level.WARNING, message);
       throw new TopologyRuntimeManagementException(message);
     }
