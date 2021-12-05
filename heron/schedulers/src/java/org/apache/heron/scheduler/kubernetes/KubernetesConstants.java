@@ -36,6 +36,7 @@ public final class KubernetesConstants {
   public static final String CPU = "cpu";
 
   public static final String EXECUTOR_NAME = "executor";
+  public static final String MANAGER_NAME = "manager";
 
   // container env constants
   public static final String ENV_HOST = "HOST";
@@ -88,6 +89,9 @@ public final class KubernetesConstants {
 
   public static final String JOB_LINK =
       "/api/v1/namespaces/kube-system/services/kubernetes-dashboard/proxy/#/pod";
+
+  protected static final String JSON_PATCH_STATEFUL_SET_REPLICAS_FORMAT =
+      "[{\"op\":\"replace\",\"path\":\"/spec/replicas\",\"value\":%d}]";
 
   public static final Pattern VALID_POD_NAME_REGEX =
       Pattern.compile("[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*",

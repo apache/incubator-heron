@@ -158,7 +158,7 @@ spec:
               -D heron.class.repacking.algorithm=org.apache.heron.packing.binpacking.FirstFitDecreasingPacking
               {{- end }}
               -D heron.kubernetes.resource.request.mode={{ .Values.topologyResourceRequestMode }}
-              -D heron.kubernetes.pod.template.configmap.disabled={{ .Values.disablePodTemplates }}
+              -D heron.kubernetes.pod.template.disabled={{ .Values.disablePodTemplates }}
               -D heron.kubernetes.persistent.volume.claims.cli.disabled={{ .Values.disablePersistentVolumeMountsCLI }}
           envFrom:
             - configMapRef:
@@ -297,6 +297,7 @@ rules:
   - patch
   - update
   - watch
+  - deletecollection
 - apiGroups:
   - ""
   resources:

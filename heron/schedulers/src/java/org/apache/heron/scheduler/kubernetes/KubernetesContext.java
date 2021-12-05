@@ -86,11 +86,11 @@ public final class KubernetesContext extends Context {
   public static final String KUBERNETES_VOLUME_AWS_EBS_FS_TYPE =
       "heron.kubernetes.volume.awsElasticBlockStore.fsType";
 
-  // pod template configmap
-  public static final String KUBERNETES_POD_TEMPLATE_CONFIGMAP_NAME =
-      "heron.kubernetes.pod.template.configmap.name";
-  public static final String KUBERNETES_POD_TEMPLATE_CONFIGMAP_DISABLED =
-      "heron.kubernetes.pod.template.configmap.disabled";
+  // Pod Template ConfigMap: heron.kubernetes.[executor | manager].pod.template
+  public static final String KUBERNETES_POD_TEMPLATE_LOCATION =
+      "heron.kubernetes.%s.pod.template";
+  public static final String KUBERNETES_POD_TEMPLATE_DISABLED =
+      "heron.kubernetes.pod.template.disabled";
 
   // container mount volume mount keys
   public static final String KUBERNETES_CONTAINER_VOLUME_MOUNT_NAME =
@@ -116,9 +116,15 @@ public final class KubernetesContext extends Context {
   // Persistent Volume Claims
   public static final String KUBERNETES_PERSISTENT_VOLUME_CLAIMS_CLI_DISABLED =
       "heron.kubernetes.persistent.volume.claims.cli.disabled";
-  // heron.kubernetes.volumes.persistentVolumeClaim.VOLUME_NAME.OPTION=OPTION_VALUE
+  // heron.kubernetes.[executor | manager].volumes.persistentVolumeClaim.VOLUME_NAME.OPTION=VALUE
   public static final String KUBERNETES_VOLUME_CLAIM_PREFIX =
-      "heron.kubernetes.volumes.persistentVolumeClaim.";
+      "heron.kubernetes.%s.volumes.persistentVolumeClaim.";
+  // heron.kubernetes.[executor | manager].limits.OPTION=VALUE
+  public static final String KUBERNETES_RESOURCE_LIMITS_PREFIX =
+      "heron.kubernetes.%s.limits.";
+  // heron.kubernetes.[executor | manager].requests.OPTION=VALUE
+  public static final String KUBERNETES_RESOURCE_REQUESTS_PREFIX =
+      "heron.kubernetes.%s.requests.";
 
   private KubernetesContext() {
   }
@@ -189,12 +195,14 @@ public final class KubernetesContext extends Context {
     return config.getStringValue(KUBERNETES_CONTAINER_VOLUME_MOUNT_PATH);
   }
 
-  public static String getPodTemplateConfigMapName(Config config) {
-    return config.getStringValue(KUBERNETES_POD_TEMPLATE_CONFIGMAP_NAME);
+  public static String getPodTemplateConfigMapName(Config config, boolean isExecutor) {
+    final String key = String.format(KUBERNETES_POD_TEMPLATE_LOCATION,
+        isExecutor ? KubernetesConstants.EXECUTOR_NAME : KubernetesConstants.MANAGER_NAME);
+    return config.getStringValue(key);
   }
 
-  public static boolean getPodTemplateConfigMapDisabled(Config config) {
-    final String disabled = config.getStringValue(KUBERNETES_POD_TEMPLATE_CONFIGMAP_DISABLED);
+  public static boolean getPodTemplateDisabled(Config config) {
+    final String disabled = config.getStringValue(KUBERNETES_POD_TEMPLATE_DISABLED);
     return "true".equalsIgnoreCase(disabled);
   }
 
@@ -222,6 +230,18 @@ public final class KubernetesContext extends Context {
     return getConfigItemsByPrefix(config, KUBERNETES_POD_SECRET_KEY_REF_PREFIX);
   }
 
+  public static Map<String, String> getResourceLimits(Config config, boolean isExecutor) {
+    final String key = String.format(KUBERNETES_RESOURCE_LIMITS_PREFIX,
+        isExecutor ? KubernetesConstants.EXECUTOR_NAME : KubernetesConstants.MANAGER_NAME);
+    return getConfigItemsByPrefix(config, key);
+  }
+
+  public static Map<String, String> getResourceRequests(Config config, boolean isExecutor) {
+    final String key = String.format(KUBERNETES_RESOURCE_REQUESTS_PREFIX,
+        isExecutor ? KubernetesConstants.EXECUTOR_NAME : KubernetesConstants.MANAGER_NAME);
+    return getConfigItemsByPrefix(config, key);
+  }
+
   public static boolean getPersistentVolumeClaimDisabled(Config config) {
     final String disabled = config.getStringValue(KUBERNETES_PERSISTENT_VOLUME_CLAIMS_CLI_DISABLED);
     return "true".equalsIgnoreCase(disabled);
@@ -231,15 +251,18 @@ public final class KubernetesContext extends Context {
    * Collects parameters form the <code>CLI</code> and generates a mapping between <code>Volumes</code>
    * and their configuration <code>key-value</code> pairs.
    * @param config Contains the configuration options collected from the <code>CLI</code>.
+   * @param isExecutor Flag used to collect CLI commands for the <code>executor</code> and <code>manager</code>.
    * @return A mapping between <code>Volumes</code> and their configuration <code>key-value</code> pairs.
    * Will return an empty list if there are no Volume Claim Templates to be generated.
    */
   public static Map<String, Map<KubernetesConstants.VolumeClaimTemplateConfigKeys, String>>
-      getVolumeClaimTemplates(Config config) {
+      getVolumeClaimTemplates(Config config, boolean isExecutor) {
     final Logger LOG = Logger.getLogger(V1Controller.class.getName());
 
-    final Set<String> completeConfigParam = getConfigKeys(config, KUBERNETES_VOLUME_CLAIM_PREFIX);
-    final int prefixLength = KUBERNETES_VOLUME_CLAIM_PREFIX.length();
+    final String prefixKey = String.format(KUBERNETES_VOLUME_CLAIM_PREFIX,
+        isExecutor ? KubernetesConstants.EXECUTOR_NAME : KubernetesConstants.MANAGER_NAME);
+    final Set<String> completeConfigParam = getConfigKeys(config, prefixKey);
+    final int prefixLength = prefixKey.length();
     final int volumeNameIdx = 0;
     final int optionIdx = 1;
     final Matcher matcher = KubernetesConstants.VALID_LOWERCASE_RFC_1123_REGEX.matcher("");

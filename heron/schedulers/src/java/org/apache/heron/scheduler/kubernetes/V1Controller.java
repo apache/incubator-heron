@@ -99,13 +99,10 @@ public class V1Controller extends KubernetesController {
   private final AppsV1Api appsClient;
   private final CoreV1Api coreClient;
 
-  private Map<String, Map<KubernetesConstants.VolumeClaimTemplateConfigKeys, String>>
-      persistentVolumeClaimConfigs = null;
-
   V1Controller(Config configuration, Config runtimeConfiguration) {
     super(configuration, runtimeConfiguration);
 
-    isPodTemplateDisabled = KubernetesContext.getPodTemplateConfigMapDisabled(configuration);
+    isPodTemplateDisabled = KubernetesContext.getPodTemplateDisabled(configuration);
     LOG.log(Level.WARNING, String.format("Custom Pod Templates are %s",
         isPodTemplateDisabled ? "DISABLED" : "ENABLED"));
 
@@ -124,7 +121,7 @@ public class V1Controller extends KubernetesController {
   boolean submit(PackingPlan packingPlan) {
     final String topologyName = getTopologyName();
     if (!topologyName.equals(topologyName.toLowerCase())) {
-      throw new TopologySubmissionException("K8S scheduler does not allow upper case topologies.");
+      throw new TopologySubmissionException("K8S scheduler does not allow upper case topology's.");
     }
 
     final Resource containerResource = getContainerResource(packingPlan);
@@ -138,28 +135,19 @@ public class V1Controller extends KubernetesController {
       throw new TopologySubmissionException(e.getMessage());
     }
 
-    // Get and then create Persistent Volume Claims from the CLI.
-    persistentVolumeClaimConfigs =
-        KubernetesContext.getVolumeClaimTemplates(getConfiguration());
-    if (KubernetesContext.getPersistentVolumeClaimDisabled(getConfiguration())
-        && !persistentVolumeClaimConfigs.isEmpty()) {
-      final String message =
-          String.format("Configuring Persistent Volume Claim from CLI is disabled: '%s'",
-              topologyName);
-      LOG.log(Level.WARNING, message);
-      throw new TopologySubmissionException(message);
-    }
-
-    // find the max number of instances in a container so we can open
+    // Find the max number of instances in a container so that we can open
     // enough ports if remote debugging is enabled.
     int numberOfInstances = 0;
     for (PackingPlan.ContainerPlan containerPlan : packingPlan.getContainers()) {
       numberOfInstances = Math.max(numberOfInstances, containerPlan.getInstances().size());
     }
-    final V1StatefulSet statefulSet = createStatefulSet(containerResource, numberOfInstances);
+    final V1StatefulSet executors = createStatefulSet(containerResource, numberOfInstances, true);
+    final V1StatefulSet manager = createStatefulSet(containerResource, numberOfInstances, false);
 
     try {
-      appsClient.createNamespacedStatefulSet(getNamespace(), statefulSet, null,
+      appsClient.createNamespacedStatefulSet(getNamespace(), executors, null,
+              null, null);
+      appsClient.createNamespacedStatefulSet(getNamespace(), manager, null,
               null, null);
     } catch (ApiException e) {
       final String message = String.format("Error creating topology: %s%n", e.getResponseBody());
@@ -173,7 +161,7 @@ public class V1Controller extends KubernetesController {
   @Override
   boolean killTopology() {
     removePersistentVolumeClaims();
-    deleteStatefulSet();
+    deleteStatefulSets();
     deleteService();
     return true;
   }
@@ -186,9 +174,8 @@ public class V1Controller extends KubernetesController {
   @Override
   boolean restart(int shardId) {
     try {
-      coreClient.deleteCollectionNamespacedPod(getNamespace(), null, null, null, null,
-          0, createTopologySelectorLabels(), null, null, null, null,
-          null, null, null);
+      coreClient.deleteCollectionNamespacedPod(getNamespace(), null, null, null, null, 0,
+          createTopologySelectorLabels(), null, null, null, null, null, null, null);
       LOG.log(Level.WARNING, String.format("Restarting topology '%s'...", getTopologyName()));
     } catch (ApiException e) {
       LOG.log(Level.SEVERE, String.format("Failed to restart topology '%s'...", getTopologyName()));
@@ -245,14 +232,14 @@ public class V1Controller extends KubernetesController {
 
   private void patchStatefulSetReplicas(int replicas) throws ApiException {
     final String body =
-            String.format(JSON_PATCH_STATEFUL_SET_REPLICAS_FORMAT,
+            String.format(KubernetesConstants.JSON_PATCH_STATEFUL_SET_REPLICAS_FORMAT,
                     replicas);
     final V1Patch patch = new V1Patch(body);
 
     PatchUtils.patch(V1StatefulSet.class,
         () ->
           appsClient.patchNamespacedStatefulSetCall(
-            getTopologyName(),
+            getStatefulSetName(true),
             getNamespace(),
             patch,
             null,
@@ -264,11 +251,8 @@ public class V1Controller extends KubernetesController {
         appsClient.getApiClient());
   }
 
-  private static final String JSON_PATCH_STATEFUL_SET_REPLICAS_FORMAT =
-          "[{\"op\":\"replace\",\"path\":\"/spec/replicas\",\"value\":%d}]";
-
   V1StatefulSet getStatefulSet() throws ApiException {
-    return appsClient.readNamespacedStatefulSet(getTopologyName(), getNamespace(),
+    return appsClient.readNamespacedStatefulSet(getStatefulSetName(true), getNamespace(),
         null, null, null);
   }
 
@@ -307,18 +291,19 @@ public class V1Controller extends KubernetesController {
             + "] in namespace [" + getNamespace() + "] is deleted.");
   }
 
-  void deleteStatefulSet() {
-    try (Response response = appsClient.deleteNamespacedStatefulSetCall(getTopologyName(),
-          getNamespace(), null, null, 0, null,
-          KubernetesConstants.DELETE_OPTIONS_PROPAGATION_POLICY, null, null).execute()) {
+  void deleteStatefulSets() {
+    try (Response response = appsClient.deleteCollectionNamespacedStatefulSetCall(getNamespace(),
+        null, null, null, null, null, createTopologySelectorLabels(), null, null, null, null, null,
+            null, null, null)
+        .execute()) {
 
       if (!response.isSuccessful()) {
         if (response.code() == HTTP_NOT_FOUND) {
-          LOG.log(Level.WARNING, "Tried to delete a non-existent StatefulSet for Topology: "
+          LOG.log(Level.WARNING, "Tried to delete a non-existent StatefulSets for Topology: "
                   + getTopologyName());
           return;
         }
-        LOG.log(Level.SEVERE, "Error when deleting the StatefulSet of the job ["
+        LOG.log(Level.SEVERE, "Error when deleting the StatefulSets of the job ["
                 + getTopologyName() + "] in namespace [" + getNamespace() + "]");
         LOG.log(Level.SEVERE, "Error killing topology message: " + response.message());
         KubernetesUtils.logResponseBodyIfPresent(LOG, response);
@@ -333,16 +318,24 @@ public class V1Controller extends KubernetesController {
         return;
       }
       throw new TopologyRuntimeManagementException("Error deleting topology ["
-              + getTopologyName() + "] Kubernetes StatefulSet", e);
+              + getTopologyName() + "] Kubernetes StatefulSets", e);
     } catch (IOException e) {
       throw new TopologyRuntimeManagementException("Error deleting topology ["
-              + getTopologyName() + "] Kubernetes StatefulSet", e);
+              + getTopologyName() + "] Kubernetes StatefulSets", e);
     }
     LOG.log(Level.INFO, "StatefulSet for the Job [" + getTopologyName()
             + "] in namespace [" + getNamespace() + "] is deleted.");
   }
 
-  protected List<String> getExecutorCommand(String containerId, int numOfInstances) {
+  /**
+   * Generates the command to start Heron within the <code>container</code>.
+   * @param containerId Passed down to <>SchedulerUtils</> to generate executor command.
+   * @param numOfInstances Used to configure the debugging ports.
+   * @param isExecutor Flag used to generate the correct <code>shard_id</code>.
+   * @return The complete command to start Heron in a <code>container</code>.
+   */
+  protected List<String> getExecutorCommand(String containerId, int numOfInstances,
+                                            boolean isExecutor) {
     final Config configuration = getConfiguration();
     final Config runtimeConfiguration = getRuntimeConfiguration();
     final Map<ExecutorPort, String> ports =
@@ -370,13 +363,22 @@ public class V1Controller extends KubernetesController {
         "-c",
         KubernetesUtils.getConfCommand(configuration)
             + " && " + KubernetesUtils.getFetchCommand(configuration, runtimeConfiguration)
-            + " && " + setShardIdEnvironmentVariableCommand()
+            + " && " + setShardIdEnvironmentVariableCommand(isExecutor)
             + " && " + String.join(" ", executorCommand)
     );
   }
 
-  private static String setShardIdEnvironmentVariableCommand() {
-    return String.format("%s=${POD_NAME##*-} && echo shardId=${%s}", ENV_SHARD_ID, ENV_SHARD_ID);
+  /**
+   * Configures the <code>shard_id</code> for the Heron container based on whether it is an <code>executor</code>
+   * or <code>manager</code>. <code>executor</code> IDs are [1 - n) and the <code>manager</code> IDs start at 0.
+   * @param isExecutor Switch flag to generate correct command.
+   * @return The command required to put the Heron instance in <code>executor</code> or <code>manager</code> mode.
+   */
+  @VisibleForTesting
+  protected static String setShardIdEnvironmentVariableCommand(boolean isExecutor) {
+    final String pattern = String.format("%%s=%s && echo shardId=${%%s}",
+        isExecutor ? "$((${POD_NAME##*-} + 1))" : "${POD_NAME##*-}");
+    return String.format(pattern, ENV_SHARD_ID, ENV_SHARD_ID);
   }
 
   private V1Service createTopologyService() {
@@ -401,21 +403,45 @@ public class V1Controller extends KubernetesController {
     return service;
   }
 
-  private V1StatefulSet createStatefulSet(Resource containerResource, int numberOfInstances) {
+  /**
+   * Creates and configures the <code>StatefulSet</code> which the topology's <code>executor</code>s will run in.
+   * @param containerResource Passed down to configure the <code>executor</code> resource limits.
+   * @param numberOfInstances Used to configure the execution command and ports for the <code>executor</code>.
+   * @param isExecutor Flag used to configure components specific to <code>executor</code> and <code>manager</code>.
+   * @return A fully configured <code>StatefulSet</code> for the topology's <code>executors</code>.
+   */
+  private V1StatefulSet createStatefulSet(Resource containerResource, int numberOfInstances,
+                                          boolean isExecutor) {
     final String topologyName = getTopologyName();
     final Config runtimeConfiguration = getRuntimeConfiguration();
+
+    // Get and then create Persistent Volume Claims from the CLI.
+    final Map<String, Map<KubernetesConstants.VolumeClaimTemplateConfigKeys, String>> configsPVC =
+        KubernetesContext.getVolumeClaimTemplates(getConfiguration(), isExecutor);
+    if (KubernetesContext.getPersistentVolumeClaimDisabled(getConfiguration())
+        && !configsPVC.isEmpty()) {
+      final String message =
+          String.format("'%s': Configuring Persistent Volume Claim from CLI is disabled",
+              topologyName);
+      LOG.log(Level.WARNING, message);
+      throw new TopologySubmissionException(message);
+    }
 
     final V1StatefulSet statefulSet = new V1StatefulSet();
 
     // Setup StatefulSet's metadata.
     final V1ObjectMeta objectMeta = new V1ObjectMeta()
-        .name(topologyName);
+        .name(getStatefulSetName(isExecutor))
+        .labels(getPodLabels(topologyName));
     statefulSet.setMetadata(objectMeta);
 
-    // Create the stateful set spec.
+    // Create the StatefulSet Spec.
+    // Reduce replica count by one for Executors and set to one for Manager.
+    final int replicasCount =
+        isExecutor ? Runtime.numContainers(runtimeConfiguration).intValue() - 1 : 1;
     final V1StatefulSetSpec statefulSetSpec = new V1StatefulSetSpec()
         .serviceName(topologyName)
-        .replicas(Runtime.numContainers(runtimeConfiguration).intValue());
+        .replicas(replicasCount);
 
     // Parallel pod management tells the StatefulSet controller to launch or terminate
     // all Pods in parallel, and not to wait for Pods to become Running and Ready or completely
@@ -428,10 +454,10 @@ public class V1Controller extends KubernetesController {
         .matchLabels(getPodMatchLabels(topologyName));
     statefulSetSpec.setSelector(selector);
 
-    // create a pod template
-    final V1PodTemplateSpec podTemplateSpec = loadPodFromTemplate();
+    // Create a Pod Template.
+    final V1PodTemplateSpec podTemplateSpec = loadPodFromTemplate(isExecutor);
 
-    // set up pod meta
+    // Set up Pod Metadata.
     final V1ObjectMeta templateMetaData = new V1ObjectMeta().labels(getPodLabels(topologyName));
     Map<String, String> annotations = new HashMap<>();
     annotations.putAll(getPodAnnotations());
@@ -439,27 +465,23 @@ public class V1Controller extends KubernetesController {
     templateMetaData.setAnnotations(annotations);
     podTemplateSpec.setMetadata(templateMetaData);
 
-    final List<String> command = getExecutorCommand("$" + ENV_SHARD_ID, numberOfInstances);
-    configurePodSpec(podTemplateSpec, command, containerResource, numberOfInstances);
+    configurePodSpec(podTemplateSpec, containerResource, numberOfInstances, isExecutor, configsPVC);
 
     statefulSetSpec.setTemplate(podTemplateSpec);
 
     statefulSet.setSpec(statefulSetSpec);
 
-    statefulSetSpec.setVolumeClaimTemplates(
-        createPersistentVolumeClaims(persistentVolumeClaimConfigs));
+    statefulSetSpec.setVolumeClaimTemplates(createPersistentVolumeClaims(configsPVC));
 
     return statefulSet;
   }
 
   private Map<String, String> getPodAnnotations() {
-    Config config = getConfiguration();
-    return KubernetesContext.getPodAnnotations(config);
+    return KubernetesContext.getPodAnnotations(getConfiguration());
   }
 
   private Map<String, String> getServiceAnnotations() {
-    Config config = getConfiguration();
-    return KubernetesContext.getServiceAnnotations(config);
+    return KubernetesContext.getServiceAnnotations(getConfiguration());
   }
 
   private Map<String, String> getPrometheusAnnotations() {
@@ -490,51 +512,60 @@ public class V1Controller extends KubernetesController {
     return KubernetesContext.getServiceLabels(getConfiguration());
   }
 
-  private void configurePodSpec(final V1PodTemplateSpec podTemplateSpec,
-                                List<String> executorCommand,
-                                Resource resource,
-                                int numberOfInstances) {
+  /**
+   * Configures the <code>Pod Spec</code> section of the <code>StatefulSet</code>. The <code>Heron</code> container
+   * will be configured to allow it to function but other supplied containers are loaded verbatim.
+   * @param podTemplateSpec The <code>Pod Template Spec</code> section to update.
+   * @param resource Passed down to configure the resource limits.
+   * @param numberOfInstances Passed down to configure the ports.
+   * @param isExecutor Flag used to configure components specific to <code>Executor</code> and <code>Manager</code>.
+   * @param configPVC <code>Persistent Volume Claim</code> configurations options.
+   */
+  private void configurePodSpec(final V1PodTemplateSpec podTemplateSpec, Resource resource,
+      int numberOfInstances, boolean isExecutor,
+      final Map<String, Map<KubernetesConstants.VolumeClaimTemplateConfigKeys, String>> configPVC) {
     if (podTemplateSpec.getSpec() == null) {
       podTemplateSpec.setSpec(new V1PodSpec());
     }
     final V1PodSpec podSpec = podTemplateSpec.getSpec();
 
-    // set the termination period to 0 so pods can be deleted quickly
+    // Set the termination period to 0 so pods can be deleted quickly
     podSpec.setTerminationGracePeriodSeconds(0L);
 
-    // set the pod tolerations so pods are rescheduled when nodes go down
+    // Set the pod tolerations so pods are rescheduled when nodes go down
     // https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/#taint-based-evictions
     configureTolerations(podSpec);
 
-    // Get <executor> container and discard all others.
-    final String executorName = KubernetesConstants.EXECUTOR_NAME;
-    V1Container executorContainer = null;
+    // Get <Heron> container and ignore all others.
+    final String containerName =
+        isExecutor ? KubernetesConstants.EXECUTOR_NAME : KubernetesConstants.MANAGER_NAME;
+    V1Container heronContainer = null;
     List<V1Container> containers = podSpec.getContainers();
     if (containers != null) {
       for (V1Container container : containers) {
         final String name = container.getName();
-        if (name != null && name.equals(executorName)) {
-          if (executorContainer != null) {
+        if (name != null && name.equals(containerName)) {
+          if (heronContainer != null) {
             throw new TopologySubmissionException(
-                String.format("Multiple configurations found for %s container", executorName));
+                String.format("Multiple configurations found for '%s' container", containerName));
           }
-          executorContainer = container;
+          heronContainer = container;
         }
       }
     } else {
       containers = new LinkedList<>();
     }
 
-    if (executorContainer == null) {
-      executorContainer = new V1Container().name(executorName);
-      containers.add(executorContainer);
+    if (heronContainer == null) {
+      heronContainer = new V1Container().name(containerName);
+      containers.add(heronContainer);
     }
 
-    if (!persistentVolumeClaimConfigs.isEmpty()) {
-      configurePodWithPersistentVolumeClaimVolumesAndMounts(podSpec, executorContainer);
+    if (!configPVC.isEmpty()) {
+      configurePodWithPersistentVolumeClaimVolumesAndMounts(podSpec, heronContainer, configPVC);
     }
 
-    configureExecutorContainer(executorCommand, resource, numberOfInstances, executorContainer);
+    configureHeronContainer(resource, numberOfInstances, heronContainer, isExecutor);
 
     podSpec.setContainers(containers);
 
@@ -543,6 +574,10 @@ public class V1Controller extends KubernetesController {
     mountSecretsAsVolumes(podSpec);
   }
 
+  /**
+   * Adds <code>tolerations</code> to the <code>Pod Spec</code> with Heron's values taking precedence.
+   * @param spec <code>Pod Spec</code> to be configured.
+   */
   @VisibleForTesting
   protected void configureTolerations(final V1PodSpec spec) {
     KubernetesUtils.V1ControllerUtils<V1Toleration> utils =
@@ -553,6 +588,10 @@ public class V1Controller extends KubernetesController {
     );
   }
 
+  /**
+   * Generates a list of <code>tolerations</code> which Heron requires.
+   * @return A list of configured <code>tolerations</code>.
+   */
   @VisibleForTesting
   protected static List<V1Toleration> getTolerations() {
     final List<V1Toleration> tolerations = new ArrayList<>();
@@ -569,6 +608,10 @@ public class V1Controller extends KubernetesController {
     return tolerations;
   }
 
+  /**
+   * Adds volume to the <code>Pod Spec</code> that Heron requires. Heron's values taking precedence.
+   * @param spec <code>Pod Spec</code> to be configured.
+   */
   @VisibleForTesting
   protected void addVolumesIfPresent(final V1PodSpec spec) {
     final Config config = getConfiguration();
@@ -606,15 +649,24 @@ public class V1Controller extends KubernetesController {
     }
   }
 
-  private void configureExecutorContainer(List<String> executorCommand, Resource resource,
-                                          int numberOfInstances, final V1Container container) {
+  /**
+   * Configures the <code>Heron</code> container with values for parameters Heron requires for functioning.
+   * @param resource Resource limits.
+   * @param numberOfInstances Required number of <code>executor</code> containers which is used to configure ports.
+   * @param container The <code>executor</code> container to be configured.
+   * @param isExecutor Flag indicating whether to set a <code>executor</code> or <code>manager</code> command.
+   */
+  private void configureHeronContainer(Resource resource, int numberOfInstances,
+                                       final V1Container container, boolean isExecutor) {
     final Config configuration = getConfiguration();
 
     // Set up the container images.
     container.setImage(KubernetesContext.getExecutorDockerImage(configuration));
 
     // Set up the container command.
-    container.setCommand(executorCommand);
+    final List<String> command =
+        getExecutorCommand("$" + ENV_SHARD_ID, numberOfInstances, isExecutor);
+    container.setCommand(command);
 
     if (KubernetesContext.hasImagePullPolicy(configuration)) {
       container.setImagePullPolicy(KubernetesContext.getKubernetesImagePullPolicy(configuration));
@@ -627,7 +679,7 @@ public class V1Controller extends KubernetesController {
     setSecretKeyRefs(container);
 
     // Set container resources
-    configureContainerResources(container, configuration, resource);
+    configureContainerResources(container, configuration, resource, isExecutor);
 
     // Set container ports.
     final boolean debuggingEnabled =
@@ -639,30 +691,60 @@ public class V1Controller extends KubernetesController {
     mountVolumeIfPresent(container);
   }
 
+  /**
+   * Configures the resources in the <code>container</code> with values in the <code>config</code> taking precedence.
+   * @param container The <code>container</code> to be configured.
+   * @param configuration The <code>Config</code> object to check if a resource request needs to be set.
+   * @param resource User defined resources limits from input.
+   * @param isExecutor
+   */
   @VisibleForTesting
   protected void configureContainerResources(final V1Container container,
-                                             final Config configuration, final Resource resource) {
+                                             final Config configuration, final Resource resource,
+                                             boolean isExecutor) {
     if (container.getResources() == null) {
       container.setResources(new V1ResourceRequirements());
     }
     final V1ResourceRequirements resourceRequirements = container.getResources();
 
-    // Configure resource limits. Deduplicate on limit name with user values taking precedence.
+    // Collect Limits and Requests from CLI.
+    final Map<String, Quantity> limitsCLI = createResourcesRequirement(
+        KubernetesContext.getResourceLimits(configuration, isExecutor));
+    final Map<String, Quantity> requestsCLI = createResourcesRequirement(
+        KubernetesContext.getResourceRequests(configuration, isExecutor));
+
     if (resourceRequirements.getLimits() == null) {
       resourceRequirements.setLimits(new HashMap<>());
     }
+
+    // Set Limits and Resources from CLI <if> available, <else> use Configs. Deduplicate on name
+    // with precedence [1] CLI, [2] Config.
     final Map<String, Quantity> limits = resourceRequirements.getLimits();
-    limits.put(KubernetesConstants.MEMORY,
-        Quantity.fromString(KubernetesUtils.Megabytes(
-            resource.getRam())));
-    limits.put(KubernetesConstants.CPU,
-        Quantity.fromString(Double.toString(roundDecimal(
-            resource.getCpu(), 3))));
+    final Quantity limitCPU = limitsCLI.getOrDefault(KubernetesConstants.CPU,
+        Quantity.fromString(Double.toString(roundDecimal(resource.getCpu(), 3))));
+    final Quantity limitMEMORY = limitsCLI.getOrDefault(KubernetesConstants.MEMORY,
+        Quantity.fromString(KubernetesUtils.Megabytes(resource.getRam())));
+
+    limits.put(KubernetesConstants.MEMORY, limitMEMORY);
+    limits.put(KubernetesConstants.CPU, limitCPU);
 
     // Set the Kubernetes container resource request.
+    // Order: [1] CLI, [2] EQUAL_TO_LIMIT, [3] NOT_SET
     KubernetesContext.KubernetesResourceRequestMode requestMode =
         KubernetesContext.getKubernetesRequestMode(configuration);
-    if (requestMode == KubernetesContext.KubernetesResourceRequestMode.EQUAL_TO_LIMIT) {
+    if (!requestsCLI.isEmpty()) {
+      if (resourceRequirements.getRequests() == null) {
+        resourceRequirements.setRequests(new HashMap<>());
+      }
+      final Map<String, Quantity> requests = resourceRequirements.getRequests();
+
+      if (requestsCLI.containsKey(KubernetesConstants.MEMORY)) {
+        requests.put(KubernetesConstants.MEMORY, requestsCLI.get(KubernetesConstants.MEMORY));
+      }
+      if (requestsCLI.containsKey(KubernetesConstants.CPU)) {
+        requests.put(KubernetesConstants.CPU, requestsCLI.get(KubernetesConstants.CPU));
+      }
+    } else if (requestMode == KubernetesContext.KubernetesResourceRequestMode.EQUAL_TO_LIMIT) {
       LOG.log(Level.CONFIG, "Setting K8s Request equal to Limit");
       resourceRequirements.setRequests(limits);
     } else {
@@ -671,6 +753,38 @@ public class V1Controller extends KubernetesController {
     container.setResources(resourceRequirements);
   }
 
+  /**
+   * Creates <code>Resource Requirements</code> from a Map of <code>Config</code> items for <code>CPU</code>
+   * and <code>Memory</code>.
+   * @param configs <code>Configs</code> to be parsed for configuration.
+   * @return Configured <code>Resource Requirements</code>. An <code>empty</code> map will be returned
+   * if there are no <code>configs</code>.
+   */
+  @VisibleForTesting
+  protected Map<String, Quantity> createResourcesRequirement(Map<String, String> configs) {
+    final Map<String, Quantity> requirements = new HashMap<>();
+
+    if (configs == null || configs.isEmpty()) {
+      return requirements;
+    }
+
+    final String memoryLimit = configs.get(KubernetesConstants.MEMORY);
+    if (memoryLimit != null && !memoryLimit.isEmpty()) {
+      requirements.put(KubernetesConstants.MEMORY, Quantity.fromString(memoryLimit));
+    }
+    final String cpuLimit = configs.get(KubernetesConstants.CPU);
+    if (cpuLimit != null && !cpuLimit.isEmpty()) {
+      requirements.put(KubernetesConstants.CPU, Quantity.fromString(cpuLimit));
+    }
+
+    return requirements;
+  }
+
+  /**
+   * Configures the environment variables in the <code>container</code> with those Heron requires.
+   * Heron's values take precedence.
+   * @param container The <code>container</code> to be configured.
+   */
   @VisibleForTesting
   protected void configureContainerEnvVars(final V1Container container) {
     // Deduplicate on var name with Heron defaults take precedence.
@@ -681,6 +795,10 @@ public class V1Controller extends KubernetesController {
     );
   }
 
+  /**
+   * Generates a list of <code>Environment Variables</code> required by Heron to function.
+   * @return A list of configured <code>Environment Variables</code> required by Heron to function.
+   */
   @VisibleForTesting
   protected static List<V1EnvVar> getExecutorEnvVars() {
     final V1EnvVar envVarHost = new V1EnvVar();
@@ -698,6 +816,12 @@ public class V1Controller extends KubernetesController {
     return Arrays.asList(envVarHost, envVarPodName);
   }
 
+  /**
+   * Configures the ports in the <code>container</code> with those Heron requires. Heron's values take precedence.
+   * @param remoteDebugEnabled Flag used to indicate if debugging ports need to be added.
+   * @param numberOfInstances The number of debugging ports to be opened.
+   * @param container <code>container</code> to be configured.
+   */
   @VisibleForTesting
   protected void configureContainerPorts(boolean remoteDebugEnabled, int numberOfInstances,
                                          final V1Container container) {
@@ -716,6 +840,10 @@ public class V1Controller extends KubernetesController {
     );
   }
 
+  /**
+   * Generates a list of <code>ports</code> required by Heron to function.
+   * @return A list of configured <code>ports</code> required by Heron to function.
+   */
   @VisibleForTesting
   protected static List<V1ContainerPort> getExecutorPorts() {
     List<V1ContainerPort> ports = new LinkedList<>();
@@ -728,6 +856,11 @@ public class V1Controller extends KubernetesController {
     return ports;
   }
 
+  /**
+   * Generate the debugging ports required by Heron.
+   * @param numberOfInstances The number of debugging ports to generate.
+   * @return A list of configured debugging <code>ports</code>.
+   */
   @VisibleForTesting
   protected static List<V1ContainerPort> getDebuggingPorts(int numberOfInstances) {
     List<V1ContainerPort> ports = new LinkedList<>();
@@ -742,6 +875,10 @@ public class V1Controller extends KubernetesController {
     return ports;
   }
 
+  /**
+   * Adds volume mounts to the <code>container</code> that Heron requires. Heron's values taking precedence.
+   * @param container <code>container</code> to be configured.
+   */
   @VisibleForTesting
   protected void mountVolumeIfPresent(final V1Container container) {
     final Config config = getConfiguration();
@@ -789,9 +926,16 @@ public class V1Controller extends KubernetesController {
     return Math.round(value * scale) / scale;
   }
 
+  /**
+   * Initiates the process of locating and loading <code>Pod Template</code> from a <code>ConfigMap</code>.
+   * The loaded text is then parsed into a usable <code>Pod Template</code>.
+   * @param isExecutor Flag to indicate loading of <code>Pod Template</code> for <code>Executor</code>
+   *                   or <code>Manager</code>.
+   * @return A <code>Pod Template</code> which is loaded and parsed from a <code>ConfigMap</code>.
+   */
   @VisibleForTesting
-  protected V1PodTemplateSpec loadPodFromTemplate() {
-    final Pair<String, String> podTemplateConfigMapName = getPodTemplateLocation();
+  protected V1PodTemplateSpec loadPodFromTemplate(boolean isExecutor) {
+    final Pair<String, String> podTemplateConfigMapName = getPodTemplateLocation(isExecutor);
 
     // Default Pod Template.
     if (podTemplateConfigMapName == null) {
@@ -838,10 +982,16 @@ public class V1Controller extends KubernetesController {
     }
   }
 
+  /**
+   * Extracts the <code>ConfigMap</code> and <code>Pod Template</code> names from the CLI parameter.
+   * @param isExecutor Flag to indicate loading of <code>Pod Template</code> for <code>Executor</code>
+   *                   or <code>Manager</code>.
+   * @return A pair of the form <code>(ConfigMap, Pod Template)</code>.
+   */
   @VisibleForTesting
-  protected Pair<String, String> getPodTemplateLocation() {
+  protected Pair<String, String> getPodTemplateLocation(boolean isExecutor) {
     final String podTemplateConfigMapName = KubernetesContext
-        .getPodTemplateConfigMapName(getConfiguration());
+        .getPodTemplateConfigMapName(getConfiguration(), isExecutor);
 
     if (podTemplateConfigMapName == null) {
       return null;
@@ -864,6 +1014,11 @@ public class V1Controller extends KubernetesController {
     }
   }
 
+  /**
+   * Retrieves a <code>ConfigMap</code> from the K8s cluster in the API Server's namespace.
+   * @param configMapName Name of the <code>ConfigMap</code> to retrieve.
+   * @return The retrieved <code>ConfigMap</code>.
+   */
   @VisibleForTesting
   protected V1ConfigMap getConfigMap(String configMapName) {
     try {
@@ -996,12 +1151,14 @@ public class V1Controller extends KubernetesController {
    * Makes a call to generate <code>Volumes</code> and <code>Volume Mounts</code> and then inserts them.
    * @param podSpec All generated <code>V1Volume</code> will be placed in the <code>Pod Spec</code>.
    * @param executor All generated <code>V1VolumeMount</code> will be placed in the <code>Container</code>.
+   * @param configPVC <code>Persistent Volume Claim</code> configurations options.
    */
   @VisibleForTesting
   protected void configurePodWithPersistentVolumeClaimVolumesAndMounts(final V1PodSpec podSpec,
-                                                                       final V1Container executor) {
+      final V1Container executor,
+      final Map<String, Map<KubernetesConstants.VolumeClaimTemplateConfigKeys, String>> configPVC) {
     Pair<List<V1Volume>, List<V1VolumeMount>> volumesAndMounts =
-        createPersistentVolumeClaimVolumesAndMounts(persistentVolumeClaimConfigs);
+        createPersistentVolumeClaimVolumesAndMounts(configPVC);
 
     // Deduplicate on Names with Persistent Volume Claims taking precedence.
 
@@ -1072,7 +1229,7 @@ public class V1Controller extends KubernetesController {
   }
 
   /**
-   * Generates the <code>Label</code> which are attached to a Topologies Persistent Volume Claims.
+   * Generates the <code>Label</code> which are attached to a Topology's Persistent Volume Claims.
    * @param topologyName Attached to the topology match label.
    * @return A map consisting of the <code>label-value</code> pairs to be used in <code>Label</code>s.
    */
@@ -1084,6 +1241,17 @@ public class V1Controller extends KubernetesController {
         put(KubernetesConstants.LABEL_ON_DEMAND, "true");
       }
     };
+  }
+
+  /**
+   * Generates the <code>StatefulSet</code> name depending on if it is a <code>Executor</code> or
+   * <code>Manager</code>.
+   * @param isExecutor Flag used to generate name for <code>Executor</code> or <code>Manager</code>.
+   * @return String <code>"topology-name"-executors</code>.
+   */
+  private String getStatefulSetName(boolean isExecutor) {
+    return String.format("%s-%s", getTopologyName(),
+        isExecutor ? KubernetesConstants.EXECUTOR_NAME + "s" : KubernetesConstants.MANAGER_NAME);
   }
 
   /**

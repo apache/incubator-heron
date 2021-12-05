@@ -53,8 +53,7 @@
     "Schedulers": [
       "schedulers-k8s-by-hand",
       "schedulers-k8s-with-helm",
-      "schedulers-k8s-pod-templates",
-      "schedulers-k8s-persistent-volume-claims",
+      "schedulers-k8s-execution-environment",
       "schedulers-aurora-cluster",
       "schedulers-aurora-local",
       "schedulers-local",
