@@ -96,26 +96,27 @@ public class KubernetesContextTest {
         .getPersistentVolumeClaimDisabled(configWithPodTemplateConfigMapOff));
   }
 
-  @Test
-  public void testGetVolumeClaimTemplates() {
+  /**
+   * Generate <code>Volume</code> Configs for testing.
+   * @param testCases Test case container.
+   *                  Input: [0] Config, [1] Boolean to indicate Manager/Executor.
+   *                  Output: [0] expectedKeys, [1] expectedOptionsKeys, [2] expectedOptionsValues.
+   */
+  private void createVolumeConfigs(List<TestTuple<Pair<Config, Boolean>, Object[]>> testCases,
+                                   String prefix) {
+    final String keyPattern = prefix + "%%s.%%s";
+    final String keyExecutor = String.format(keyPattern, KubernetesConstants.EXECUTOR_NAME);
+    final String keyManager = String.format(keyPattern, KubernetesConstants.MANAGER_NAME);
+
     final String volumeNameOne = "volume-name-one";
     final String volumeNameTwo = "volume-name-two";
     final String claimName = "OnDeMaNd";
-    final String keyPattern = KubernetesContext.KUBERNETES_VOLUME_CLAIM_PREFIX + "%%s.%%s";
-    final String keyExecutor = String.format(keyPattern, KubernetesConstants.EXECUTOR_NAME);
-    final String keyManager = String.format(keyPattern, KubernetesConstants.MANAGER_NAME);
 
     final String storageClassField = VolumeConfigKeys.storageClassName.name();
     final String pathField = VolumeConfigKeys.path.name();
     final String claimNameField = VolumeConfigKeys.claimName.name();
     final String expectedStorageClass = "expected-storage-class";
     final String expectedPath = "/path/for/volume/expected";
-
-
-    // Test case container.
-    // Input: Config to extract options from, Boolean to indicate Manager/Executor.
-    // Output: [0] expectedKeys, [1] expectedOptionsKeys, [2] expectedOptionsValues.
-    final List<TestTuple<Pair<Config, Boolean>, Object[]>> testCases = new LinkedList<>();
 
     // Create test cases for Executor/Manager on even/odd indices respectively.
     for (int idx = 0; idx < 2; ++idx) {
@@ -160,6 +161,95 @@ public class KubernetesContextTest {
           new Pair<>(configPVC, isExecutor),
           new Object[]{expectedKeys, expectedOptionsKeys, expectedOptionsValues}));
     }
+  }
+
+  @Test
+  public void testGetVolumeConfigs() {
+    final String prefix = KubernetesContext.KUBERNETES_VOLUME_CLAIM_PREFIX;
+
+    // Test case container.
+    // Input: [0] Config, [1] Boolean to indicate Manager/Executor.
+    // Output: [0] expectedKeys, [1] expectedOptionsKeys, [2] expectedOptionsValues.
+    final List<TestTuple<Pair<Config, Boolean>, Object[]>> testCases = new LinkedList<>();
+    createVolumeConfigs(testCases, prefix);
+
+    // Test loop.
+    for (TestTuple<Pair<Config, Boolean>, Object[]> testCase : testCases) {
+      final Map<String, Map<VolumeConfigKeys, String>> mapOfPVC =
+          KubernetesContext.getVolumeConfigs(testCase.input.first, prefix, testCase.input.second);
+
+      Assert.assertTrue(testCase.description + ": Contains all provided Volumes",
+          mapOfPVC.keySet().containsAll((List<String>) testCase.expected[0]));
+      for (Map<VolumeConfigKeys, String> items : mapOfPVC.values()) {
+        Assert.assertTrue(testCase.description + ": Contains all provided option keys",
+            items.keySet().containsAll((List<VolumeConfigKeys>) testCase.expected[1]));
+        Assert.assertTrue(testCase.description + ": Contains all provided option values",
+            items.values().containsAll((List<String>) testCase.expected[2]));
+      }
+    }
+
+    // Empty PVC.
+    final Boolean[] emptyPVCTestCases = new Boolean[] {true, false};
+    for (boolean testCase : emptyPVCTestCases) {
+      final Map<String, Map<VolumeConfigKeys, String>> emptyPVC =
+          KubernetesContext.getVolumeClaimTemplates(Config.newBuilder().build(), testCase);
+      Assert.assertTrue("Empty PVC is returned when no options provided", emptyPVC.isEmpty());
+    }
+  }
+
+  @Test
+  public void testGetVolumeConfigsErrors() {
+    final String prefix = KubernetesContext.KUBERNETES_VOLUME_CLAIM_PREFIX;
+    final String volumeNameValid = "volume-name-valid";
+    final String volumeNameInvalid = "volume-Name-Invalid";
+    final String failureValue = "Should-Fail";
+    final String generalFailureMessage = "Invalid Volume configuration";
+    final String keyPattern = String.format(KubernetesContext.KUBERNETES_VOLUME_CLAIM_PREFIX
+        + "%%s.%%s", KubernetesConstants.EXECUTOR_NAME);
+    final List<TestTuple<Config, String>> testCases = new LinkedList<>();
+
+    // Invalid option key test.
+    final Config configInvalidOption = Config.newBuilder()
+        .put(String.format(keyPattern, volumeNameValid, "NonExistentKey"), failureValue)
+        .build();
+    testCases.add(new TestTuple<>("Invalid option key should trigger exception",
+        configInvalidOption, generalFailureMessage));
+
+    // Just the prefix.
+    final Config configJustPrefix = Config.newBuilder()
+        .put(KubernetesContext.KUBERNETES_VOLUME_CLAIM_PREFIX, failureValue)
+        .build();
+    testCases.add(new TestTuple<>("Only a key prefix should trigger exception",
+        configJustPrefix, generalFailureMessage));
+
+    // Invalid Volume Name.
+    final Config configInvalidVolumeName = Config.newBuilder()
+        .put(String.format(keyPattern, volumeNameInvalid, "path"), failureValue)
+        .build();
+    testCases.add(new TestTuple<>("Invalid Volume Name should trigger exception",
+        configInvalidVolumeName, "lowercase RFC-1123"));
+
+    // Testing loop.
+    final Boolean[] executorFlags = new Boolean[] {true, false};
+    for (TestTuple<Config, String> testCase : testCases) {
+      // Test for both Executor and Manager.
+      for (boolean isExecutor : executorFlags) {
+        try {
+          KubernetesContext.getVolumeConfigs(testCase.input, prefix, isExecutor);
+        } catch (TopologySubmissionException e) {
+          Assert.assertTrue(testCase.description, e.getMessage().contains(testCase.expected));
+        }
+      }
+    }
+  }
+
+  @Test
+  public void testGetVolumeClaimTemplates() {
+    // Test case container.
+    // Input: [0] Config, [1] Boolean to indicate Manager/Executor.
+    // Output: [0] expectedKeys, [1] expectedOptionsKeys, [2] expectedOptionsValues.
+    final List<TestTuple<Pair<Config, Boolean>, Object[]>> testCases = new LinkedList<>();
+    createVolumeConfigs(testCases, KubernetesContext.KUBERNETES_VOLUME_CLAIM_PREFIX);
 
     // Test loop.
     for (TestTuple<Pair<Config, Boolean>, Object[]> testCase : testCases) {
