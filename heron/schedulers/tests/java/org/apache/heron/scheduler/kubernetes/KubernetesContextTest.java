@@ -436,4 +436,146 @@ public class KubernetesContextTest {
       }
     }
   }
+
+  /**
+   * Create test cases for <code>Volume Claim Templates</code>.
+   * @param testCases Test case container.
+   *                  Input: [0] Config, [1] Boolean to indicate Manager/Executor.
+   *                  Output: <code>Map<String, Map<VolumeConfigKeys, String></code>
+   * @param isExecutor Boolean to indicate Manager/Executor test case generation.
+   */
+  private void createVolumeEmptyDir(
+      List<TestTuple<Pair<Config, Boolean>, Map<String, Map<VolumeConfigKeys, String>>>> testCases,
+      boolean isExecutor) {
+    final String volumeNameValid = "volume-name-valid";
+    final String passingValue = "should-pass";
+    final String processName = isExecutor ? KubernetesConstants.EXECUTOR_NAME
+        : KubernetesConstants.MANAGER_NAME;
+    final String keyPattern = String.format(KubernetesContext.KUBERNETES_VOLUME_EMPTYDIR_PREFIX
+        + "%%s.%%s", processName);
+
+    // With Medium.
+    final Map<String, Map<VolumeConfigKeys, String>> expectedWithMedium =
+        ImmutableMap.of(volumeNameValid, new HashMap<VolumeConfigKeys, String>() {
+          {
+            put(VolumeConfigKeys.sizeLimit, passingValue);
+            put(VolumeConfigKeys.medium, "Memory");
+            put(VolumeConfigKeys.path, passingValue);
+            put(VolumeConfigKeys.subPath, passingValue);
+          }
+        });
+    final Config configWithMedium = Config.newBuilder()
+        .put(String.format(keyPattern, volumeNameValid, "sizeLimit"), passingValue)
+        .put(String.format(keyPattern, volumeNameValid, "medium"), "Memory")
+        .put(String.format(keyPattern, volumeNameValid, "path"), passingValue)
+        .put(String.format(keyPattern, volumeNameValid, "subPath"), passingValue)
+        .build();
+    testCases.add(new TestTuple<>(processName + ": `emptyDir` with `medium`",
+        new Pair<>(configWithMedium, isExecutor), expectedWithMedium));
+
+    // With empty Medium.
+    final Map<String, Map<VolumeConfigKeys, String>> expectedEmptyMedium =
+        ImmutableMap.of(volumeNameValid, new HashMap<VolumeConfigKeys, String>() {
+          {
+            put(VolumeConfigKeys.sizeLimit, passingValue);
+            put(VolumeConfigKeys.medium, "");
+            put(VolumeConfigKeys.path, passingValue);
+            put(VolumeConfigKeys.subPath, passingValue);
+          }
+        });
+    final Config configEmptyMedium = Config.newBuilder()
+        .put(String.format(keyPattern, volumeNameValid, "sizeLimit"), passingValue)
+        .put(String.format(keyPattern, volumeNameValid, "medium"), "")
+        .put(String.format(keyPattern, volumeNameValid, "path"), passingValue)
+        .put(String.format(keyPattern, volumeNameValid, "subPath"), passingValue)
+        .build();
+    testCases.add(new TestTuple<>(processName + ": `emptyDir` with empty `medium`",
+        new Pair<>(configEmptyMedium, isExecutor), expectedEmptyMedium));
+
+    // Without Medium.
+    final Map<String, Map<VolumeConfigKeys, String>> expectedNoMedium =
+        ImmutableMap.of(volumeNameValid, new HashMap<VolumeConfigKeys, String>() {
+          {
+            put(VolumeConfigKeys.sizeLimit, passingValue);
+            put(VolumeConfigKeys.path, passingValue);
+            put(VolumeConfigKeys.subPath, passingValue);
+          }
+        });
+    final Config configNoMedium = Config.newBuilder()
+        .put(String.format(keyPattern, volumeNameValid, "sizeLimit"), passingValue)
+        .put(String.format(keyPattern, volumeNameValid, "path"), passingValue)
+        .put(String.format(keyPattern, volumeNameValid, "subPath"), passingValue)
+        .build();
+    testCases.add(new TestTuple<>(processName + ": `emptyDir` without `medium`",
+        new Pair<>(configNoMedium, isExecutor), expectedNoMedium));
+
+    // Ignored.
+    final Config configIgnored = Config.newBuilder()
+        .put(String.format(keyPattern, volumeNameValid, "sizeLimit"), passingValue)
+        .put(String.format(keyPattern, volumeNameValid, "medium"), "")
+        .put(String.format(keyPattern, volumeNameValid, "path"), passingValue)
+        .put(String.format(keyPattern, volumeNameValid, "subPath"), passingValue)
+        .build();
+    testCases.add(new TestTuple<>(processName + ": `emptyDir` without ignored",
+        new Pair<>(configIgnored, !isExecutor), new HashMap<>()));
+  }
+
+  @Test
+  public void testGetVolumeEmptyDir() {
+    final List<TestTuple<Pair<Config, Boolean>, Map<String, Map<VolumeConfigKeys, String>>>>
+        testCases = new LinkedList<>();
+    createVolumeEmptyDir(testCases, true);
+    createVolumeEmptyDir(testCases, false);
+
+    // Testing loop.
+    for (TestTuple<Pair<Config, Boolean>, Map<String, Map<VolumeConfigKeys, String>>> testCase
+        : testCases) {
+      Map<String, Map<VolumeConfigKeys, String>> actual =
+          KubernetesContext.getVolumeEmptyDir(testCase.input.first, testCase.input.second);
+      Assert.assertEquals(testCase.description, testCase.expected, actual);
+    }
+  }
+
+  /**
+   * Create test cases for <code>Volume Claim Templates</code>.
+   * @param testCases Test case container.
+   *                  Input: [0] Config, [1] Boolean to indicate Manager/Executor.
+   *                  Output: Error message
+   * @param isExecutor Boolean to indicate Manager/Executor test case generation.
+   */
+  private void createVolumeEmptyDirError(
+      List<TestTuple<Pair<Config, Boolean>, String>> testCases, boolean isExecutor) {
+    final String volumeNameValid = "volume-name-valid";
+    final String passingValue = "should-pass";
+    final String failureValue = "Should-Fail";
+    final String processName = isExecutor ? KubernetesConstants.EXECUTOR_NAME
+        : KubernetesConstants.MANAGER_NAME;
+    final String keyPattern = String.format(KubernetesContext.KUBERNETES_VOLUME_EMPTYDIR_PREFIX
+        + "%%s.%%s", processName);
+
+    // Medium is invalid.
+    final Config configInvalidMedium = Config.newBuilder()
+        .put(String.format(keyPattern, volumeNameValid, "path"), passingValue)
+        .put(String.format(keyPattern, volumeNameValid, "sizeLimit"), passingValue)
+        .put(String.format(keyPattern, volumeNameValid, "medium"), failureValue)
+        .build();
+    testCases.add(new TestTuple<>(processName + ": Invalid `medium` should trigger exception",
+        new Pair<>(configInvalidMedium, isExecutor), "must be `Memory` or empty."));
+  }
+
+  @Test
+  public void testGetVolumeEmptyDirErrors() {
+    final List<TestTuple<Pair<Config, Boolean>, String>> testCases = new LinkedList<>();
+    createVolumeEmptyDirError(testCases, true);
+    createVolumeEmptyDirError(testCases, false);
+
+    // Testing loop.
+    for (TestTuple<Pair<Config, Boolean>, String> testCase : testCases) {
+      try {
+        KubernetesContext.getVolumeEmptyDir(testCase.input.first, testCase.input.second);
+      } catch (TopologySubmissionException e) {
+        Assert.assertTrue(testCase.description, e.getMessage().contains(testCase.expected));
+      }
+    }
+  }
 }
