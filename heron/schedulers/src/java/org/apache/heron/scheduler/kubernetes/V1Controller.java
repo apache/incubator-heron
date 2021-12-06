@@ -1086,12 +1086,8 @@ public class V1Controller extends KubernetesController {
             claim.getSpec().setVolumeMode(optionValue);
             break;
           // Valid ignored options not used in a PVC.
-          case path: case subPath: case claimName:
-            break;
           default:
-            throw new TopologySubmissionException(
-                String.format("Invalid Persistent Volume Claim type option for '%s'",
-                    option.getKey()));
+            break;
         }
       }
       listOfPVCs.add(claim);
@@ -1116,11 +1112,6 @@ public class V1Controller extends KubernetesController {
           .get(KubernetesConstants.VolumeConfigKeys.path);
       final String subPath = configs.getValue()
           .get(KubernetesConstants.VolumeConfigKeys.subPath);
-
-      if (path == null || path.isEmpty()) {
-        throw new TopologySubmissionException(
-            String.format("A mount path is required and missing from '%s'", volumeName));
-      }
 
       // Do not create Volumes for `OnDemand`.
       final String claimName = configs.getValue()
