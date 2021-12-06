@@ -121,6 +121,15 @@ public final class KubernetesContext extends Context {
   // heron.kubernetes.[executor | manager].volumes.persistentVolumeClaim.VOLUME_NAME.OPTION=VALUE
   public static final String KUBERNETES_VOLUME_CLAIM_PREFIX =
       "heron.kubernetes.%s.volumes.persistentVolumeClaim.";
+  // heron.kubernetes.[executor | manager].volumes.emptyDir.VOLUME_NAME.OPTION=VALUE
+  public static final String KUBERNETES_VOLUME_EMPTYDIR_PREFIX =
+      "heron.kubernetes.%s.volumes.emptyDir.";
+  // heron.kubernetes.[executor | manager].volumes.hostPath.VOLUME_NAME.OPTION=VALUE
+  public static final String KUBERNETES_VOLUME_HOSTPATH_PREFIX =
+      "heron.kubernetes.%s.volumes.hostPath.";
+  // heron.kubernetes.[executor | manager].volumes.nfs.VOLUME_NAME.OPTION=VALUE
+  public static final String KUBERNETES_VOLUME_NFS_PREFIX =
+      "heron.kubernetes.%s.volumes.nfs.";
   // heron.kubernetes.[executor | manager].limits.OPTION=VALUE
   public static final String KUBERNETES_RESOURCE_LIMITS_PREFIX =
       "heron.kubernetes.%s.limits.";
