@@ -332,13 +332,13 @@ public final class KubernetesContext extends Context {
 
       // Claim name is required.
       if (!volume.getValue().containsKey(KubernetesConstants.VolumeConfigKeys.claimName)) {
-        throw new TopologySubmissionException(String.format("Volume `%s`: `Persistent Volume"
+        throw new TopologySubmissionException(String.format("Volume `%s`: Persistent Volume"
             + " Claims require a `claimName`.", volume.getKey()));
       }
 
       final String path = volume.getValue().get(KubernetesConstants.VolumeConfigKeys.path);
       if (path == null || path.isEmpty()) {
-        throw new TopologySubmissionException(String.format("Volume `%s`: `Persistent Volume"
+        throw new TopologySubmissionException(String.format("Volume `%s`: Persistent Volume"
             + " Claims require a `path`.", volume.getKey()));
       }
 
@@ -368,6 +368,31 @@ public final class KubernetesContext extends Context {
             throw new TopologySubmissionException(String.format("Volume `%s`: Invalid Persistent"
                 + " Volume Claim type option for '%s'", volume.getKey(), key));
         }
+      }
+    }
+
+    return volumes;
+  }
+
+  /**
+   * Collects parameters form the <code>CLI</code> and validates options for <code>Empty Directory</code>s.
+   * @param config Contains the configuration options collected from the <code>CLI</code>.
+   * @param isExecutor Flag used to collect CLI commands for the <code>Executor</code> and <code>Manager</code>.
+   * @return A mapping between <code>Volumes</code> and their configuration <code>key-value</code> pairs.
+   * Will return an empty list if there are no Volume Claim Templates to be generated.
+   */
+  public static Map<String, Map<KubernetesConstants.VolumeConfigKeys, String>>
+      getVolumeEmptyDir(Config config, boolean isExecutor) {
+    final Map<String, Map<KubernetesConstants.VolumeConfigKeys, String>> volumes =
+        getVolumeConfigs(config, KubernetesContext.KUBERNETES_VOLUME_EMPTYDIR_PREFIX, isExecutor);
+
+    for (Map.Entry<String, Map<KubernetesConstants.VolumeConfigKeys, String>> volume
+        : volumes.entrySet()) {
+      final String medium = volume.getValue().get(KubernetesConstants.VolumeConfigKeys.medium);
+
+      if (medium != null && !medium.isEmpty() && !"Memory".equals(medium)) {
+        throw new TopologySubmissionException(String.format("Volume `%s`: Empty Directory"
+            + " `medium` must be `Memory` or empty.", volume.getKey()));
       }
     }
 
