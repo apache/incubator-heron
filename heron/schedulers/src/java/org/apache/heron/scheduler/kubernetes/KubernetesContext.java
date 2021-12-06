@@ -27,6 +27,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 
+import com.google.common.annotations.VisibleForTesting;
+
 import org.apache.heron.scheduler.TopologySubmissionException;
 import org.apache.heron.spi.common.Config;
 import org.apache.heron.spi.common.Context;
@@ -256,7 +258,8 @@ public final class KubernetesContext extends Context {
    * @return A mapping between <code>Volumes</code> and their configuration <code>key-value</code> pairs.
    * Will return an empty list if there are no Volume Claim Templates to be generated.
    */
-  public static Map<String, Map<KubernetesConstants.VolumeConfigKeys, String>>
+  @VisibleForTesting
+  protected static Map<String, Map<KubernetesConstants.VolumeConfigKeys, String>>
       getVolumeConfigs(Config config, String prefix, boolean isExecutor) {
     final Logger LOG = Logger.getLogger(V1Controller.class.getName());
 
@@ -302,10 +305,9 @@ public final class KubernetesContext extends Context {
   }
 
   /**
-   * Collects parameters form the <code>CLI</code> and generates a mapping between <code>Volumes</code>
-   * and their configuration <code>key-value</code> pairs for <code>Persistent Volume Claim Templates</code>.
+   * Collects parameters form the <code>CLI</code> and validates options for <code>PVC</code>s.
    * @param config Contains the configuration options collected from the <code>CLI</code>.
-   * @param isExecutor Flag used to collect CLI commands for the <code>executor</code> and <code>manager</code>.
+   * @param isExecutor Flag used to collect CLI commands for the <code>Executor</code> and <code>Manager</code>.
    * @return A mapping between <code>Volumes</code> and their configuration <code>key-value</code> pairs.
    * Will return an empty list if there are no Volume Claim Templates to be generated.
    */
@@ -323,6 +325,12 @@ public final class KubernetesContext extends Context {
       if (!volume.getValue().containsKey(KubernetesConstants.VolumeConfigKeys.claimName)) {
         throw new TopologySubmissionException(String.format("Volume `%s`: `Persistent Volume"
             + " Claims require a `claimName`.", volume.getKey()));
+      }
+
+      final String path = volume.getValue().get(KubernetesConstants.VolumeConfigKeys.path);
+      if (path == null || path.isEmpty()) {
+        throw new TopologySubmissionException(String.format("Volume `%s`: `Persistent Volume"
+            + " Claims require a `path`.", volume.getKey()));
       }
 
       for (Map.Entry<KubernetesConstants.VolumeConfigKeys, String> volumeConfig
