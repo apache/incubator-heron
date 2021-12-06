@@ -251,6 +251,60 @@ public final class KubernetesContext extends Context {
    * Collects parameters form the <code>CLI</code> and generates a mapping between <code>Volumes</code>
    * and their configuration <code>key-value</code> pairs.
    * @param config Contains the configuration options collected from the <code>CLI</code>.
+   * @param prefix Configuration key to lookup for options.
+   * @param isExecutor Flag used to switch CLI commands for the <code>Executor</code> and <code>Manager</code>.
+   * @return A mapping between <code>Volumes</code> and their configuration <code>key-value</code> pairs.
+   * Will return an empty list if there are no Volume Claim Templates to be generated.
+   */
+  public static Map<String, Map<KubernetesConstants.VolumeConfigKeys, String>>
+      getVolumeConfigs(Config config, String prefix, boolean isExecutor) {
+    final Logger LOG = Logger.getLogger(V1Controller.class.getName());
+
+    final String prefixKey = String.format(prefix,
+        isExecutor ? KubernetesConstants.EXECUTOR_NAME : KubernetesConstants.MANAGER_NAME);
+    final Set<String> completeConfigParam = getConfigKeys(config, prefixKey);
+    final int prefixLength = prefixKey.length();
+    final int volumeNameIdx = 0;
+    final int optionIdx = 1;
+    final Matcher matcher = KubernetesConstants.VALID_LOWERCASE_RFC_1123_REGEX.matcher("");
+
+    final Map<String, Map<KubernetesConstants.VolumeConfigKeys, String>> volumes = new HashMap<>();
+
+    try {
+      for (String param : completeConfigParam) {
+        final String[] tokens = param.substring(prefixLength).split("\\.");
+        final String volumeName = tokens[volumeNameIdx];
+        final KubernetesConstants.VolumeConfigKeys key =
+            KubernetesConstants.VolumeConfigKeys.valueOf(tokens[optionIdx]);
+        final String value = config.getStringValue(param);
+
+        Map<KubernetesConstants.VolumeConfigKeys, String> volume = volumes.get(volumeName);
+        if (volume == null) {
+          // Validate new Volume Names.
+          if (!matcher.reset(volumeName).matches()) {
+            throw new TopologySubmissionException(
+                String.format("Volume name `%s` does not match lowercase RFC-1123 pattern",
+                    volumeName));
+          }
+          volume = new HashMap<>();
+          volumes.put(volumeName, volume);
+        }
+
+        volume.put(key, value);
+      }
+    } catch (IndexOutOfBoundsException | IllegalArgumentException e) {
+      final String message = "Invalid Volume configuration option provided on CLI";
+      LOG.log(Level.CONFIG, message);
+      throw new TopologySubmissionException(message);
+    }
+
+    return volumes;
+  }
+
+  /**
+   * Collects parameters form the <code>CLI</code> and generates a mapping between <code>Volumes</code>
+   * and their configuration <code>key-value</code> pairs.
+   * @param config Contains the configuration options collected from the <code>CLI</code>.
    * @param isExecutor Flag used to collect CLI commands for the <code>executor</code> and <code>manager</code>.
    * @return A mapping between <code>Volumes</code> and their configuration <code>key-value</code> pairs.
    * Will return an empty list if there are no Volume Claim Templates to be generated.
@@ -295,8 +349,7 @@ public final class KubernetesContext extends Context {
           Conditions [1] OR [2] are True, then...
           [3] Check for a valid lowercase RFC-1123 pattern.
          */
-        boolean claimNameNotOnDemand =
-            KubernetesConstants.VolumeConfigKeys.claimName.equals(key)
+        boolean claimNameNotOnDemand = KubernetesConstants.VolumeConfigKeys.claimName.equals(key)
                 && !KubernetesConstants.LABEL_ON_DEMAND.equalsIgnoreCase(value);
         if ((claimNameNotOnDemand // [1]
             || KubernetesConstants.VolumeConfigKeys.storageClassName.equals(key)) // [2]
