@@ -101,6 +101,7 @@ public class KubernetesContextTest {
    * @param testCases Test case container.
    *                  Input: [0] Config, [1] Boolean to indicate Manager/Executor.
    *                  Output: [0] expectedKeys, [1] expectedOptionsKeys, [2] expectedOptionsValues.
+   * @param prefix Configuration prefix key to use in lookup.
    */
   private void createVolumeConfigs(List<TestTuple<Pair<Config, Boolean>, Object[]>> testCases,
                                    String prefix) {
@@ -202,6 +203,7 @@ public class KubernetesContextTest {
     final String prefix = KubernetesContext.KUBERNETES_VOLUME_CLAIM_PREFIX;
     final String volumeNameValid = "volume-name-valid";
     final String volumeNameInvalid = "volume-Name-Invalid";
+    final String passingValue = "should-pass";
     final String failureValue = "Should-Fail";
     final String generalFailureMessage = "Invalid Volume configuration";
     final String keyPattern = String.format(KubernetesContext.KUBERNETES_VOLUME_CLAIM_PREFIX
@@ -210,6 +212,17 @@ public class KubernetesContextTest {
 
     // Invalid option key test.
     final Config configInvalidOption = Config.newBuilder()
+        .put(String.format(keyPattern, volumeNameValid, "claimName"), passingValue)
+        .put(String.format(keyPattern, volumeNameValid, "storageClassName"), passingValue)
+        .put(String.format(keyPattern, volumeNameValid, "sizeLimit"), passingValue)
+        .put(String.format(keyPattern, volumeNameValid, "accessModes"), passingValue)
+        .put(String.format(keyPattern, volumeNameValid, "volumeMode"), passingValue)
+        .put(String.format(keyPattern, volumeNameValid, "path"), passingValue)
+        .put(String.format(keyPattern, volumeNameValid, "subPath"), passingValue)
+        .put(String.format(keyPattern, volumeNameValid, "server"), passingValue)
+        .put(String.format(keyPattern, volumeNameValid, "readOnly"), passingValue)
+        .put(String.format(keyPattern, volumeNameValid, "type"), passingValue)
+        .put(String.format(keyPattern, volumeNameValid, "medium"), passingValue)
         .put(String.format(keyPattern, volumeNameValid, "NonExistentKey"), failureValue)
         .build();
     testCases.add(new TestTuple<>("Invalid option key should trigger exception",
@@ -245,80 +258,50 @@ public class KubernetesContextTest {
 
   @Test
   public void testGetVolumeClaimTemplates() {
-    // Test case container.
-    // Input: [0] Config, [1] Boolean to indicate Manager/Executor.
-    // Output: [0] expectedKeys, [1] expectedOptionsKeys, [2] expectedOptionsValues.
-    final List<TestTuple<Pair<Config, Boolean>, Object[]>> testCases = new LinkedList<>();
-    createVolumeConfigs(testCases, KubernetesContext.KUBERNETES_VOLUME_CLAIM_PREFIX);
-
-    // Test loop.
-    for (TestTuple<Pair<Config, Boolean>, Object[]> testCase : testCases) {
-      final Map<String, Map<VolumeConfigKeys, String>> mapOfPVC =
-          KubernetesContext.getVolumeClaimTemplates(testCase.input.first, testCase.input.second);
-
-      Assert.assertTrue(testCase.description + ": Contains all provided Volumes",
-          mapOfPVC.keySet().containsAll((List<String>) testCase.expected[0]));
-      for (Map<VolumeConfigKeys, String> items : mapOfPVC.values()) {
-        Assert.assertTrue(testCase.description + ": Contains all provided option keys",
-            items.keySet().containsAll((List<VolumeConfigKeys>) testCase.expected[1]));
-        Assert.assertTrue(testCase.description + ": Contains all provided option values",
-            items.values().containsAll((List<String>) testCase.expected[2]));
-      }
-    }
-
-    // Empty PVC.
-    final Boolean[] emptyPVCTestCases = new Boolean[] {true, false};
-    for (boolean testCase : emptyPVCTestCases) {
-      final Map<String, Map<VolumeConfigKeys, String>> emptyPVC =
-          KubernetesContext.getVolumeClaimTemplates(Config.newBuilder().build(), testCase);
-      Assert.assertTrue("Empty PVC is returned when no options provided", emptyPVC.isEmpty());
-    }
-  }
-
-  @Test
-  public void testGetPersistentVolumeClaimsErrors() {
     final String volumeNameValid = "volume-name-valid";
-    final String volumeNameInvalid = "volume-Name-Invalid";
+    final String passingValue = "should-pass";
     final String failureValue = "Should-Fail";
-    final String generalFailureMessage = "Invalid Persistent Volume";
     final String keyPattern = String.format(KubernetesContext.KUBERNETES_VOLUME_CLAIM_PREFIX
         + "%%s.%%s", KubernetesConstants.EXECUTOR_NAME);
     final List<TestTuple<Config, String>> testCases = new LinkedList<>();
 
-    // Invalid option key test.
-    final Config configInvalidOption = Config.newBuilder()
-        .put(String.format(keyPattern, volumeNameValid, "NonExistentKey"), failureValue)
+    // Required Claim Name.
+    final Config configRequiredClaimName = Config.newBuilder()
+        .put(String.format(keyPattern, volumeNameValid, "storageClassName"), passingValue)
         .build();
-    testCases.add(new TestTuple<>("Invalid option key should trigger exception",
-        configInvalidOption, generalFailureMessage));
-
-    // Just the prefix.
-    final Config configJustPrefix = Config.newBuilder()
-        .put(KubernetesContext.KUBERNETES_VOLUME_CLAIM_PREFIX, failureValue)
-        .build();
-    testCases.add(new TestTuple<>("Only a key prefix should trigger exception",
-        configJustPrefix, generalFailureMessage));
-
-    // Invalid Volume Name.
-    final Config configInvalidVolumeName = Config.newBuilder()
-        .put(String.format(keyPattern, volumeNameInvalid, "path"), failureValue)
-        .build();
-    testCases.add(new TestTuple<>("Invalid Volume Name should trigger exception",
-        configInvalidVolumeName, "lowercase RFC-1123"));
+    testCases.add(new TestTuple<>("Missing Claim Name should trigger exception",
+        configRequiredClaimName,
+        String.format("Volume `%s`: `Persistent Volume", volumeNameValid)));
 
     // Invalid Claim Name.
     final Config configInvalidClaimName = Config.newBuilder()
         .put(String.format(keyPattern, volumeNameValid, "claimName"), failureValue)
         .build();
     testCases.add(new TestTuple<>("Invalid Claim Name should trigger exception",
-        configInvalidClaimName, "Option `claimName`"));
+        configInvalidClaimName, String.format("Volume `%s`: `claimName`", volumeNameValid)));
 
     // Invalid Storage Class Name.
     final Config configInvalidStorageClassName = Config.newBuilder()
+        .put(String.format(keyPattern, volumeNameValid, "claimName"), passingValue)
         .put(String.format(keyPattern, volumeNameValid, "storageClassName"), failureValue)
         .build();
     testCases.add(new TestTuple<>("Invalid Storage Class Name should trigger exception",
-        configInvalidStorageClassName, "Option `storageClassName`"));
+        configInvalidStorageClassName,
+        String.format("Volume `%s`: `storageClassName`", volumeNameValid)));
+
+    // Invalid Storage Class Name.
+    final Config configInvalidOption = Config.newBuilder()
+        .put(String.format(keyPattern, volumeNameValid, "claimName"), passingValue)
+        .put(String.format(keyPattern, volumeNameValid, "storageClassName"), passingValue)
+        .put(String.format(keyPattern, volumeNameValid, "sizeLimit"), passingValue)
+        .put(String.format(keyPattern, volumeNameValid, "accessModes"), passingValue)
+        .put(String.format(keyPattern, volumeNameValid, "volumeMode"), passingValue)
+        .put(String.format(keyPattern, volumeNameValid, "path"), passingValue)
+        .put(String.format(keyPattern, volumeNameValid, "subPath"), passingValue)
+        .put(String.format(keyPattern, volumeNameValid, "server"), passingValue)
+        .build();
+    testCases.add(new TestTuple<>("Invalid option should trigger exception",
+        configInvalidOption, String.format("Volume `%s`: Invalid Persistent", volumeNameValid)));
 
     // Testing loop.
     final Boolean[] executorFlags = new Boolean[] {true, false};
