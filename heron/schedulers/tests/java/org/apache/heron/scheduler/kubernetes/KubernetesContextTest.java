@@ -20,9 +20,12 @@
 package org.apache.heron.scheduler.kubernetes;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+
+import com.google.common.collect.ImmutableMap;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -256,37 +259,150 @@ public class KubernetesContextTest {
     }
   }
 
+  /**
+   * Create test cases for <code>Volume Claim Templates</code>.
+   * @param testCases Test case container.
+   *                  Input: [0] Config, [1] Boolean to indicate Manager/Executor.
+   *                  Output: <code>Map<String, Map<VolumeConfigKeys, String></code>
+   * @param isExecutor Boolean to indicate Manager/Executor test case generation.
+   */
+  private void createVolumeClaimTemplates(
+      List<TestTuple<Pair<Config, Boolean>, Map<String, Map<VolumeConfigKeys, String>>>> testCases,
+      boolean isExecutor) {
+    final String volumeNameValid = "volume-name-valid";
+    final String passingValue = "should-pass";
+    final String processName = isExecutor ? KubernetesConstants.EXECUTOR_NAME
+        : KubernetesConstants.MANAGER_NAME;
+    final String keyPattern = String.format(KubernetesContext.KUBERNETES_VOLUME_CLAIM_PREFIX
+        + "%%s.%%s", processName);
+
+    // With Storage Class Name.
+    final Map<String, Map<VolumeConfigKeys, String>> expectedWithStorageClassName =
+        ImmutableMap.of(volumeNameValid, new HashMap<VolumeConfigKeys, String>() {
+          {
+            put(VolumeConfigKeys.claimName, passingValue);
+            put(VolumeConfigKeys.storageClassName, passingValue);
+            put(VolumeConfigKeys.sizeLimit, passingValue);
+            put(VolumeConfigKeys.accessModes, passingValue);
+            put(VolumeConfigKeys.volumeMode, passingValue);
+            put(VolumeConfigKeys.path, passingValue);
+            put(VolumeConfigKeys.subPath, passingValue);
+          }
+        });
+    final Config configWithStorageClass = Config.newBuilder()
+        .put(String.format(keyPattern, volumeNameValid, "claimName"), passingValue)
+        .put(String.format(keyPattern, volumeNameValid, "storageClassName"), passingValue)
+        .put(String.format(keyPattern, volumeNameValid, "sizeLimit"), passingValue)
+        .put(String.format(keyPattern, volumeNameValid, "accessModes"), passingValue)
+        .put(String.format(keyPattern, volumeNameValid, "volumeMode"), passingValue)
+        .put(String.format(keyPattern, volumeNameValid, "path"), passingValue)
+        .put(String.format(keyPattern, volumeNameValid, "subPath"), passingValue)
+        .build();
+    testCases.add(new TestTuple<>(processName + ": PVC with Storage Class name",
+        new Pair<>(configWithStorageClass, isExecutor), expectedWithStorageClassName));
+
+    // Without Storage Class Name.
+    final Map<String, Map<VolumeConfigKeys, String>> expectedWithoutStorageClassName =
+        ImmutableMap.of(volumeNameValid, new HashMap<VolumeConfigKeys, String>() {
+          {
+            put(VolumeConfigKeys.claimName, passingValue);
+            put(VolumeConfigKeys.sizeLimit, passingValue);
+            put(VolumeConfigKeys.accessModes, passingValue);
+            put(VolumeConfigKeys.volumeMode, passingValue);
+            put(VolumeConfigKeys.path, passingValue);
+            put(VolumeConfigKeys.subPath, passingValue);
+          }
+        });
+    final Config configWithoutStorageClass = Config.newBuilder()
+        .put(String.format(keyPattern, volumeNameValid, "claimName"), passingValue)
+        .put(String.format(keyPattern, volumeNameValid, "sizeLimit"), passingValue)
+        .put(String.format(keyPattern, volumeNameValid, "accessModes"), passingValue)
+        .put(String.format(keyPattern, volumeNameValid, "volumeMode"), passingValue)
+        .put(String.format(keyPattern, volumeNameValid, "path"), passingValue)
+        .put(String.format(keyPattern, volumeNameValid, "subPath"), passingValue)
+        .build();
+    testCases.add(new TestTuple<>(processName + ": PVC with Storage Class name",
+        new Pair<>(configWithoutStorageClass, isExecutor), expectedWithoutStorageClassName));
+
+    // Ignored.
+    final Config configIgnored = Config.newBuilder()
+        .put(String.format(keyPattern, volumeNameValid, "claimName"), passingValue)
+        .put(String.format(keyPattern, volumeNameValid, "storageClassName"), passingValue)
+        .put(String.format(keyPattern, volumeNameValid, "sizeLimit"), passingValue)
+        .put(String.format(keyPattern, volumeNameValid, "accessModes"), passingValue)
+        .put(String.format(keyPattern, volumeNameValid, "volumeMode"), passingValue)
+        .put(String.format(keyPattern, volumeNameValid, "path"), passingValue)
+        .put(String.format(keyPattern, volumeNameValid, "subPath"), passingValue)
+        .build();
+    testCases.add(new TestTuple<>(processName + ": PVC with ignored keys",
+        new Pair<>(configIgnored, !isExecutor), new HashMap<>()));
+  }
+
   @Test
   public void testGetVolumeClaimTemplates() {
+    final List<TestTuple<Pair<Config, Boolean>, Map<String, Map<VolumeConfigKeys, String>>>>
+        testCases = new LinkedList<>();
+    createVolumeClaimTemplates(testCases, true);
+    createVolumeClaimTemplates(testCases, false);
+
+    // Testing loop.
+    for (TestTuple<Pair<Config, Boolean>, Map<String, Map<VolumeConfigKeys, String>>> testCase
+        : testCases) {
+      Map<String, Map<VolumeConfigKeys, String>> actual =
+          KubernetesContext.getVolumeClaimTemplates(testCase.input.first, testCase.input.second);
+      Assert.assertEquals(testCase.description, testCase.expected, actual);
+    }
+  }
+
+  /**
+   * Create test cases for <code>Volume Claim Templates</code>.
+   * @param testCases Test case container.
+   *                  Input: [0] Config, [1] Boolean to indicate Manager/Executor.
+   *                  Output: Error message
+   * @param isExecutor Boolean to indicate Manager/Executor test case generation.
+   */
+  private void createVolumeClaimTemplatesErrors(
+      List<TestTuple<Pair<Config, Boolean>, String>> testCases, boolean isExecutor) {
     final String volumeNameValid = "volume-name-valid";
     final String passingValue = "should-pass";
     final String failureValue = "Should-Fail";
+    final String processName = isExecutor ? KubernetesConstants.EXECUTOR_NAME
+        : KubernetesConstants.MANAGER_NAME;
     final String keyPattern = String.format(KubernetesContext.KUBERNETES_VOLUME_CLAIM_PREFIX
-        + "%%s.%%s", KubernetesConstants.EXECUTOR_NAME);
-    final List<TestTuple<Config, String>> testCases = new LinkedList<>();
+        + "%%s.%%s", processName);
 
     // Required Claim Name.
     final Config configRequiredClaimName = Config.newBuilder()
-        .put(String.format(keyPattern, volumeNameValid, "storageClassName"), passingValue)
+        .put(String.format(keyPattern, volumeNameValid, "path"), passingValue)
         .build();
-    testCases.add(new TestTuple<>("Missing Claim Name should trigger exception",
-        configRequiredClaimName,
-        String.format("Volume `%s`: `Persistent Volume", volumeNameValid)));
+    testCases.add(new TestTuple<>(processName + ": Missing Claim Name should trigger exception",
+        new Pair<>(configRequiredClaimName, isExecutor), "require a `claimName`"));
 
     // Invalid Claim Name.
     final Config configInvalidClaimName = Config.newBuilder()
+        .put(String.format(keyPattern, volumeNameValid, "path"), passingValue)
         .put(String.format(keyPattern, volumeNameValid, "claimName"), failureValue)
         .build();
-    testCases.add(new TestTuple<>("Invalid Claim Name should trigger exception",
-        configInvalidClaimName, String.format("Volume `%s`: `claimName`", volumeNameValid)));
+    testCases.add(new TestTuple<>(processName + ": Invalid Claim Name should trigger exception",
+        new Pair<>(configInvalidClaimName, isExecutor),
+        String.format("Volume `%s`: `claimName`", volumeNameValid)));
+
+    // Required Path.
+    final Config configRequiredPath = Config.newBuilder()
+        .put(String.format(keyPattern, volumeNameValid, "claimName"), passingValue)
+        .build();
+    testCases.add(new TestTuple<>(processName + ": Invalid Claim Name should trigger exception",
+        new Pair<>(configRequiredPath, isExecutor), "require a `path`"));
 
     // Invalid Storage Class Name.
     final Config configInvalidStorageClassName = Config.newBuilder()
         .put(String.format(keyPattern, volumeNameValid, "claimName"), passingValue)
+        .put(String.format(keyPattern, volumeNameValid, "path"), passingValue)
         .put(String.format(keyPattern, volumeNameValid, "storageClassName"), failureValue)
         .build();
-    testCases.add(new TestTuple<>("Invalid Storage Class Name should trigger exception",
-        configInvalidStorageClassName,
+    testCases.add(new TestTuple<>(processName
+        + ": Invalid Storage Class Name should trigger exception",
+        new Pair<>(configInvalidStorageClassName, isExecutor),
         String.format("Volume `%s`: `storageClassName`", volumeNameValid)));
 
     // Invalid Storage Class Name.
@@ -300,19 +416,23 @@ public class KubernetesContextTest {
         .put(String.format(keyPattern, volumeNameValid, "subPath"), passingValue)
         .put(String.format(keyPattern, volumeNameValid, "server"), passingValue)
         .build();
-    testCases.add(new TestTuple<>("Invalid option should trigger exception",
-        configInvalidOption, String.format("Volume `%s`: Invalid Persistent", volumeNameValid)));
+    testCases.add(new TestTuple<>(processName + ": Invalid option should trigger exception",
+        new Pair<>(configInvalidOption, isExecutor),
+        String.format("Volume `%s`: Invalid Persistent", volumeNameValid)));
+  }
+
+  @Test
+  public void testGetVolumeClaimTemplatesErrors() {
+    final List<TestTuple<Pair<Config, Boolean>, String>> testCases = new LinkedList<>();
+    createVolumeClaimTemplatesErrors(testCases, true);
+    createVolumeClaimTemplatesErrors(testCases, false);
 
     // Testing loop.
-    final Boolean[] executorFlags = new Boolean[] {true, false};
-    for (TestTuple<Config, String> testCase : testCases) {
-      // Test for both Executor and Manager.
-      for (boolean isExecutor : executorFlags) {
-        try {
-          KubernetesContext.getVolumeClaimTemplates(testCase.input, isExecutor);
-        } catch (TopologySubmissionException e) {
-          Assert.assertTrue(testCase.description, e.getMessage().contains(testCase.expected));
-        }
+    for (TestTuple<Pair<Config, Boolean>, String> testCase : testCases) {
+      try {
+        KubernetesContext.getVolumeClaimTemplates(testCase.input.first, testCase.input.second);
+      } catch (TopologySubmissionException e) {
+        Assert.assertTrue(testCase.description, e.getMessage().contains(testCase.expected));
       }
     }
   }
