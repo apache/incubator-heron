@@ -231,13 +231,6 @@ public class KubernetesContextTest {
     testCases.add(new TestTuple<>("Invalid option key should trigger exception",
         configInvalidOption, generalFailureMessage));
 
-    // Just the prefix.
-    final Config configJustPrefix = Config.newBuilder()
-        .put(KubernetesContext.KUBERNETES_VOLUME_CLAIM_PREFIX, failureValue)
-        .build();
-    testCases.add(new TestTuple<>("Only a key prefix should trigger exception",
-        configJustPrefix, generalFailureMessage));
-
     // Invalid Volume Name.
     final Config configInvalidVolumeName = Config.newBuilder()
         .put(String.format(keyPattern, volumeNameInvalid, "path"), failureValue)
@@ -259,15 +252,17 @@ public class KubernetesContextTest {
         .put(String.format(keyPattern, volumeNameValid, "medium"), passingValue)
         .build();
     testCases.add(new TestTuple<>("Missing path should trigger exception",
-        configRequiredPath, "All Volumes require a `path`."));
+        configRequiredPath, "All Volumes require a 'path'."));
 
     // Testing loop.
     for (TestTuple<Config, String> testCase : testCases) {
+      String message = "";
       try {
         KubernetesContext.getVolumeConfigs(testCase.input, prefix, true);
       } catch (TopologySubmissionException e) {
-        Assert.assertTrue(testCase.description, e.getMessage().contains(testCase.expected));
+        message = e.getMessage();
       }
+      Assert.assertTrue(testCase.description, message.contains(testCase.expected));
     }
   }
 
@@ -434,11 +429,13 @@ public class KubernetesContextTest {
 
     // Testing loop.
     for (TestTuple<Pair<Config, Boolean>, String> testCase : testCases) {
+      String message = "";
       try {
         KubernetesContext.getVolumeClaimTemplates(testCase.input.first, testCase.input.second);
       } catch (TopologySubmissionException e) {
-        Assert.assertTrue(testCase.description, e.getMessage().contains(testCase.expected));
+        message = e.getMessage();
       }
+      Assert.assertTrue(testCase.description, message.contains(testCase.expected));
     }
   }
 
@@ -587,11 +584,13 @@ public class KubernetesContextTest {
 
     // Testing loop.
     for (TestTuple<Pair<Config, Boolean>, String> testCase : testCases) {
+      String message = "";
       try {
         KubernetesContext.getVolumeEmptyDir(testCase.input.first, testCase.input.second);
       } catch (TopologySubmissionException e) {
-        Assert.assertTrue(testCase.description, e.getMessage().contains(testCase.expected));
+        message = e.getMessage();
       }
+      Assert.assertTrue(testCase.description, message.contains(testCase.expected));
     }
   }
 
@@ -741,11 +740,13 @@ public class KubernetesContextTest {
 
     // Testing loop.
     for (TestTuple<Pair<Config, Boolean>, String> testCase : testCases) {
+      String message = "";
       try {
         KubernetesContext.getVolumeHostPath(testCase.input.first, testCase.input.second);
       } catch (TopologySubmissionException e) {
-        Assert.assertTrue(testCase.description, e.getMessage().contains(testCase.expected));
+        message = e.getMessage();
       }
+      Assert.assertTrue(testCase.description, message.contains(testCase.expected));
     }
   }
 
@@ -884,11 +885,13 @@ public class KubernetesContextTest {
 
     // Testing loop.
     for (TestTuple<Pair<Config, Boolean>, String> testCase : testCases) {
+      String message = "";
       try {
         KubernetesContext.getVolumeNFS(testCase.input.first, testCase.input.second);
       } catch (TopologySubmissionException e) {
-        Assert.assertTrue(testCase.description, e.getMessage().contains(testCase.expected));
+        message = e.getMessage();
       }
+      Assert.assertTrue(testCase.description, message.contains(testCase.expected));
     }
   }
 }
