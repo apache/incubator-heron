@@ -452,6 +452,43 @@ public final class KubernetesContext extends Context {
     return volumes;
   }
 
+  /**
+   * Collects parameters form the <code>CLI</code> and validates options for <code>NFS</code>s.
+   * @param config Contains the configuration options collected from the <code>CLI</code>.
+   * @param isExecutor Flag used to collect CLI commands for the <code>Executor</code> and <code>Manager</code>.
+   * @return A mapping between <code>Volumes</code> and their configuration <code>key-value</code> pairs.
+   * Will return an empty list if there are no Volume Claim Templates to be generated.
+   */
+  public static Map<String, Map<KubernetesConstants.VolumeConfigKeys, String>>
+      getVolumeNFS(Config config, boolean isExecutor) {
+    final Map<String, Map<KubernetesConstants.VolumeConfigKeys, String>> volumes =
+        getVolumeConfigs(config, KubernetesContext.KUBERNETES_VOLUME_NFS_PREFIX, isExecutor);
+
+    for (Map.Entry<String, Map<KubernetesConstants.VolumeConfigKeys, String>> volume
+        : volumes.entrySet()) {
+      final String server = volume.getValue().get(KubernetesConstants.VolumeConfigKeys.server);
+      if (server == null || server.isEmpty()) {
+        throw new TopologySubmissionException(String.format("Volume `%s`: `NFS` volumes require a"
+            + " `server` to be specified", volume.getKey()));
+      }
+
+      for (Map.Entry<KubernetesConstants.VolumeConfigKeys, String> volumeConfig
+          : volume.getValue().entrySet()) {
+        final KubernetesConstants.VolumeConfigKeys key = volumeConfig.getKey();
+
+        switch (key) {
+          case readOnly: case server: case path: case subPath:
+            break;
+          default:
+            throw new TopologySubmissionException(String.format("Volume `%s`: Invalid NFS type"
+                + " option for '%s'", volume.getKey(), key));
+        }
+      }
+    }
+
+    return volumes;
+  }
+
   static Set<String> getConfigKeys(Config config, String keyPrefix) {
     Set<String> annotations = new HashSet<>();
     for (String s : config.getKeySet()) {
