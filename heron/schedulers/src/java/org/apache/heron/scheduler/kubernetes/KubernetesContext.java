@@ -316,7 +316,7 @@ public final class KubernetesContext extends Context {
       final String path = volume.getValue().get(KubernetesConstants.VolumeConfigKeys.path);
       if (path == null || path.isEmpty()) {
         throw new TopologySubmissionException(String.format("Volume `%s`: All Volumes require a"
-            + " `path`.", volume.getKey()));
+            + " 'path'.", volume.getKey()));
       }
     }
 
