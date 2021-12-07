@@ -245,16 +245,28 @@ public class KubernetesContextTest {
     testCases.add(new TestTuple<>("Invalid Volume Name should trigger exception",
         configInvalidVolumeName, "lowercase RFC-1123"));
 
+    // Required Path.
+    final Config configRequiredPath = Config.newBuilder()
+        .put(String.format(keyPattern, volumeNameValid, "claimName"), passingValue)
+        .put(String.format(keyPattern, volumeNameValid, "storageClassName"), passingValue)
+        .put(String.format(keyPattern, volumeNameValid, "sizeLimit"), passingValue)
+        .put(String.format(keyPattern, volumeNameValid, "accessModes"), passingValue)
+        .put(String.format(keyPattern, volumeNameValid, "volumeMode"), passingValue)
+        .put(String.format(keyPattern, volumeNameValid, "subPath"), passingValue)
+        .put(String.format(keyPattern, volumeNameValid, "server"), passingValue)
+        .put(String.format(keyPattern, volumeNameValid, "readOnly"), passingValue)
+        .put(String.format(keyPattern, volumeNameValid, "type"), passingValue)
+        .put(String.format(keyPattern, volumeNameValid, "medium"), passingValue)
+        .build();
+    testCases.add(new TestTuple<>("Missing path should trigger exception",
+        configRequiredPath, "All Volumes require a `path`."));
+
     // Testing loop.
-    final Boolean[] executorFlags = new Boolean[] {true, false};
     for (TestTuple<Config, String> testCase : testCases) {
-      // Test for both Executor and Manager.
-      for (boolean isExecutor : executorFlags) {
-        try {
-          KubernetesContext.getVolumeConfigs(testCase.input, prefix, isExecutor);
-        } catch (TopologySubmissionException e) {
-          Assert.assertTrue(testCase.description, e.getMessage().contains(testCase.expected));
-        }
+      try {
+        KubernetesContext.getVolumeConfigs(testCase.input, prefix, true);
+      } catch (TopologySubmissionException e) {
+        Assert.assertTrue(testCase.description, e.getMessage().contains(testCase.expected));
       }
     }
   }
@@ -386,13 +398,6 @@ public class KubernetesContextTest {
     testCases.add(new TestTuple<>(processName + ": Invalid Claim Name should trigger exception",
         new Pair<>(configInvalidClaimName, isExecutor),
         String.format("Volume `%s`: `claimName`", volumeNameValid)));
-
-    // Required Path.
-    final Config configRequiredPath = Config.newBuilder()
-        .put(String.format(keyPattern, volumeNameValid, "claimName"), passingValue)
-        .build();
-    testCases.add(new TestTuple<>(processName + ": Invalid Claim Name should trigger exception",
-        new Pair<>(configRequiredPath, isExecutor), "require a `path`"));
 
     // Invalid Storage Class Name.
     final Config configInvalidStorageClassName = Config.newBuilder()

@@ -310,6 +310,16 @@ public final class KubernetesContext extends Context {
       throw new TopologySubmissionException(message);
     }
 
+    // All Volumes must contain a path.
+    for (Map.Entry<String, Map<KubernetesConstants.VolumeConfigKeys, String>> volume
+        : volumes.entrySet()) {
+      final String path = volume.getValue().get(KubernetesConstants.VolumeConfigKeys.path);
+      if (path == null || path.isEmpty()) {
+        throw new TopologySubmissionException(String.format("Volume `%s`: All Volumes require a"
+            + " `path`.", volume.getKey()));
+      }
+    }
+
     return volumes;
   }
 
@@ -334,12 +344,6 @@ public final class KubernetesContext extends Context {
       if (!volume.getValue().containsKey(KubernetesConstants.VolumeConfigKeys.claimName)) {
         throw new TopologySubmissionException(String.format("Volume `%s`: Persistent Volume"
             + " Claims require a `claimName`.", volume.getKey()));
-      }
-
-      final String path = volume.getValue().get(KubernetesConstants.VolumeConfigKeys.path);
-      if (path == null || path.isEmpty()) {
-        throw new TopologySubmissionException(String.format("Volume `%s`: Persistent Volume"
-            + " Claims require a `path`.", volume.getKey()));
       }
 
       for (Map.Entry<KubernetesConstants.VolumeConfigKeys, String> volumeConfig
