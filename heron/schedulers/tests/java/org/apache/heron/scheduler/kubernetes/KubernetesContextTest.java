@@ -773,6 +773,7 @@ public class KubernetesContextTest {
           {
             put(VolumeConfigKeys.server, "nfs-server.default.local");
             put(VolumeConfigKeys.readOnly, "true");
+            put(VolumeConfigKeys.pathOnNFS, passingValue);
             put(VolumeConfigKeys.path, passingValue);
             put(VolumeConfigKeys.subPath, passingValue);
           }
@@ -780,6 +781,7 @@ public class KubernetesContextTest {
     final Config configWithReadOnly = Config.newBuilder()
         .put(String.format(keyPattern, volumeNameValid, "server"), "nfs-server.default.local")
         .put(String.format(keyPattern, volumeNameValid, "readOnly"), "true")
+        .put(String.format(keyPattern, volumeNameValid, "pathOnNFS"), passingValue)
         .put(String.format(keyPattern, volumeNameValid, "path"), passingValue)
         .put(String.format(keyPattern, volumeNameValid, "subPath"), passingValue)
         .build();
@@ -791,12 +793,14 @@ public class KubernetesContextTest {
         ImmutableMap.of(volumeNameValid, new HashMap<VolumeConfigKeys, String>() {
           {
             put(VolumeConfigKeys.server, "nfs-server.default.local");
+            put(VolumeConfigKeys.pathOnNFS, passingValue);
             put(VolumeConfigKeys.path, passingValue);
             put(VolumeConfigKeys.subPath, passingValue);
           }
         });
     final Config configWithoutReadOnly = Config.newBuilder()
         .put(String.format(keyPattern, volumeNameValid, "server"), "nfs-server.default.local")
+        .put(String.format(keyPattern, volumeNameValid, "pathOnNFS"), passingValue)
         .put(String.format(keyPattern, volumeNameValid, "path"), passingValue)
         .put(String.format(keyPattern, volumeNameValid, "subPath"), passingValue)
         .build();
@@ -807,6 +811,7 @@ public class KubernetesContextTest {
     final Config configIgnored = Config.newBuilder()
         .put(String.format(keyPattern, volumeNameValid, "server"), "nfs-server.default.local")
         .put(String.format(keyPattern, volumeNameValid, "readOnly"), "true")
+        .put(String.format(keyPattern, volumeNameValid, "pathOnNFS"), passingValue)
         .put(String.format(keyPattern, volumeNameValid, "path"), passingValue)
         .put(String.format(keyPattern, volumeNameValid, "subPath"), passingValue)
         .build();
@@ -850,6 +855,7 @@ public class KubernetesContextTest {
     final Config configNoServer = Config.newBuilder()
         .put(String.format(keyPattern, volumeNameValid, "readOnly"), "false")
         .put(String.format(keyPattern, volumeNameValid, "path"), passingValue)
+        .put(String.format(keyPattern, volumeNameValid, "pathOnNFS"), passingValue)
         .put(String.format(keyPattern, volumeNameValid, "subPath"), passingValue)
         .build();
     testCases.add(new TestTuple<>(processName + ": No `server` should trigger exception",
@@ -859,22 +865,45 @@ public class KubernetesContextTest {
     final Config configInvalidServer = Config.newBuilder()
         .put(String.format(keyPattern, volumeNameValid, "server"), "")
         .put(String.format(keyPattern, volumeNameValid, "readOnly"), "false")
+        .put(String.format(keyPattern, volumeNameValid, "pathOnNFS"), passingValue)
         .put(String.format(keyPattern, volumeNameValid, "path"), passingValue)
         .put(String.format(keyPattern, volumeNameValid, "subPath"), passingValue)
         .build();
     testCases.add(new TestTuple<>(processName + ": Invalid `server` should trigger exception",
         new Pair<>(configInvalidServer, isExecutor), "`NFS` volumes require a"));
 
+    // Path on NFS missing.
+    final Config configNoNFSPath = Config.newBuilder()
+        .put(String.format(keyPattern, volumeNameValid, "server"), "nfs-server.default.local")
+        .put(String.format(keyPattern, volumeNameValid, "readOnly"), "false")
+        .put(String.format(keyPattern, volumeNameValid, "path"), passingValue)
+        .put(String.format(keyPattern, volumeNameValid, "subPath"), passingValue)
+        .build();
+    testCases.add(new TestTuple<>(processName + ": No path on NFS should trigger exception",
+        new Pair<>(configNoNFSPath, isExecutor), "NFS requires a path on"));
+
+    // Path on NFS is empty.
+    final Config configEmptyNFSPath = Config.newBuilder()
+        .put(String.format(keyPattern, volumeNameValid, "server"), "nfs-server.default.local")
+        .put(String.format(keyPattern, volumeNameValid, "readOnly"), "false")
+        .put(String.format(keyPattern, volumeNameValid, "pathOnNFS"), "")
+        .put(String.format(keyPattern, volumeNameValid, "path"), passingValue)
+        .put(String.format(keyPattern, volumeNameValid, "subPath"), passingValue)
+        .build();
+    testCases.add(new TestTuple<>(processName + ": No path on NFS should trigger exception",
+        new Pair<>(configEmptyNFSPath, isExecutor), "NFS requires a path on"));
+
     // Invalid option.
     final Config configInvalidOption = Config.newBuilder()
         .put(String.format(keyPattern, volumeNameValid, "server"), "nfs-server.default.local")
         .put(String.format(keyPattern, volumeNameValid, "readOnly"), "false")
+        .put(String.format(keyPattern, volumeNameValid, "pathOnNFS"), passingValue)
         .put(String.format(keyPattern, volumeNameValid, "path"), passingValue)
         .put(String.format(keyPattern, volumeNameValid, "subPath"), passingValue)
         .put(String.format(keyPattern, volumeNameValid, "accessModes"), passingValue)
         .build();
     testCases.add(new TestTuple<>(processName + ": Invalid option should trigger exception",
-        new Pair<>(configInvalidOption, isExecutor), "Invalid NFS type"));
+        new Pair<>(configInvalidOption, isExecutor), "Invalid NFS option"));
   }
 
   @Test
