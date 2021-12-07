@@ -542,7 +542,7 @@ public class KubernetesContextTest {
   }
 
   /**
-   * Create test cases for <code>Volume Claim Templates</code>.
+   * Create test cases for <code>Empty Directory</code> errors.
    * @param testCases Test case container.
    *                  Input: [0] Config, [1] Boolean to indicate Manager/Executor.
    *                  Output: Error message
@@ -671,7 +671,7 @@ public class KubernetesContextTest {
   }
 
   /**
-   * Create test cases for <code>Volume Claim Templates</code>.
+   * Create test cases for <code>Host Path</code> errors.
    * @param testCases Test case container.
    *                  Input: [0] Config, [1] Boolean to indicate Manager/Executor.
    *                  Output: Error message
@@ -723,4 +723,146 @@ public class KubernetesContextTest {
     }
   }
 
+  /**
+   * Create test cases for <code>NFS</code>.
+   * @param testCases Test case container.
+   *                  Input: [0] Config, [1] Boolean to indicate Manager/Executor.
+   *                  Output: <code>Map<String, Map<VolumeConfigKeys, String></code>
+   * @param isExecutor Boolean to indicate Manager/Executor test case generation.
+   */
+  private void createVolumeNFS(
+      List<TestTuple<Pair<Config, Boolean>, Map<String, Map<VolumeConfigKeys, String>>>> testCases,
+      boolean isExecutor) {
+    final String volumeNameValid = "volume-name-valid";
+    final String passingValue = "should-pass";
+    final String processName = isExecutor ? KubernetesConstants.EXECUTOR_NAME
+        : KubernetesConstants.MANAGER_NAME;
+    final String keyPattern = String.format(KubernetesContext.KUBERNETES_VOLUME_NFS_PREFIX
+        + "%%s.%%s", processName);
+
+    // With readOnly.
+    final Map<String, Map<VolumeConfigKeys, String>> expectedWithReadOnly =
+        ImmutableMap.of(volumeNameValid, new HashMap<VolumeConfigKeys, String>() {
+          {
+            put(VolumeConfigKeys.server, "nfs-server.default.local");
+            put(VolumeConfigKeys.readOnly, "true");
+            put(VolumeConfigKeys.path, passingValue);
+            put(VolumeConfigKeys.subPath, passingValue);
+          }
+        });
+    final Config configWithReadOnly = Config.newBuilder()
+        .put(String.format(keyPattern, volumeNameValid, "server"), "nfs-server.default.local")
+        .put(String.format(keyPattern, volumeNameValid, "readOnly"), "true")
+        .put(String.format(keyPattern, volumeNameValid, "path"), passingValue)
+        .put(String.format(keyPattern, volumeNameValid, "subPath"), passingValue)
+        .build();
+    testCases.add(new TestTuple<>(processName + ": `NFS` with `readOnly`",
+        new Pair<>(configWithReadOnly, isExecutor), expectedWithReadOnly));
+
+    // With readOnly.
+    final Map<String, Map<VolumeConfigKeys, String>> expectedWithoutReadOnly =
+        ImmutableMap.of(volumeNameValid, new HashMap<VolumeConfigKeys, String>() {
+          {
+            put(VolumeConfigKeys.server, "nfs-server.default.local");
+            put(VolumeConfigKeys.path, passingValue);
+            put(VolumeConfigKeys.subPath, passingValue);
+          }
+        });
+    final Config configWithoutReadOnly = Config.newBuilder()
+        .put(String.format(keyPattern, volumeNameValid, "server"), "nfs-server.default.local")
+        .put(String.format(keyPattern, volumeNameValid, "path"), passingValue)
+        .put(String.format(keyPattern, volumeNameValid, "subPath"), passingValue)
+        .build();
+    testCases.add(new TestTuple<>(processName + ": `NFS` without `readOnly`",
+        new Pair<>(configWithoutReadOnly, isExecutor), expectedWithoutReadOnly));
+
+    // Ignored.
+    final Config configIgnored = Config.newBuilder()
+        .put(String.format(keyPattern, volumeNameValid, "server"), "nfs-server.default.local")
+        .put(String.format(keyPattern, volumeNameValid, "readOnly"), "true")
+        .put(String.format(keyPattern, volumeNameValid, "path"), passingValue)
+        .put(String.format(keyPattern, volumeNameValid, "subPath"), passingValue)
+        .build();
+    testCases.add(new TestTuple<>(processName + ": `NFS` ignored",
+        new Pair<>(configIgnored, !isExecutor), new HashMap<>()));
+  }
+
+  @Test
+  public void testGetVolumeNFS() {
+    final List<TestTuple<Pair<Config, Boolean>, Map<String, Map<VolumeConfigKeys, String>>>>
+        testCases = new LinkedList<>();
+    createVolumeNFS(testCases, true);
+    createVolumeNFS(testCases, false);
+
+    // Testing loop.
+    for (TestTuple<Pair<Config, Boolean>, Map<String, Map<VolumeConfigKeys, String>>> testCase
+        : testCases) {
+      Map<String, Map<VolumeConfigKeys, String>> actual =
+          KubernetesContext.getVolumeNFS(testCase.input.first, testCase.input.second);
+      Assert.assertEquals(testCase.description, testCase.expected, actual);
+    }
+  }
+  /**
+   * Create test cases for <code>NFS</code> errors.
+   * @param testCases Test case container.
+   *                  Input: [0] Config, [1] Boolean to indicate Manager/Executor.
+   *                  Output: Error message
+   * @param isExecutor Boolean to indicate Manager/Executor test case generation.
+   */
+  private void createVolumeNFSError(
+      List<TestTuple<Pair<Config, Boolean>, String>> testCases, boolean isExecutor) {
+    final String volumeNameValid = "volume-name-valid";
+    final String passingValue = "should-pass";
+    final String failureValue = "Should-Fail";
+    final String processName = isExecutor ? KubernetesConstants.EXECUTOR_NAME
+        : KubernetesConstants.MANAGER_NAME;
+    final String keyPattern = String.format(KubernetesContext.KUBERNETES_VOLUME_NFS_PREFIX
+        + "%%s.%%s", processName);
+
+    // Server is missing.
+    final Config configNoServer = Config.newBuilder()
+        .put(String.format(keyPattern, volumeNameValid, "readOnly"), "false")
+        .put(String.format(keyPattern, volumeNameValid, "path"), passingValue)
+        .put(String.format(keyPattern, volumeNameValid, "subPath"), passingValue)
+        .build();
+    testCases.add(new TestTuple<>(processName + ": No `server` should trigger exception",
+        new Pair<>(configNoServer, isExecutor), "`NFS` volumes require a"));
+
+    // Server is invalid.
+    final Config configInvalidServer = Config.newBuilder()
+        .put(String.format(keyPattern, volumeNameValid, "server"), "")
+        .put(String.format(keyPattern, volumeNameValid, "readOnly"), "false")
+        .put(String.format(keyPattern, volumeNameValid, "path"), passingValue)
+        .put(String.format(keyPattern, volumeNameValid, "subPath"), passingValue)
+        .build();
+    testCases.add(new TestTuple<>(processName + ": Invalid `server` should trigger exception",
+        new Pair<>(configInvalidServer, isExecutor), "`NFS` volumes require a"));
+
+    // Invalid option.
+    final Config configInvalidOption = Config.newBuilder()
+        .put(String.format(keyPattern, volumeNameValid, "server"), "nfs-server.default.local")
+        .put(String.format(keyPattern, volumeNameValid, "readOnly"), "false")
+        .put(String.format(keyPattern, volumeNameValid, "path"), passingValue)
+        .put(String.format(keyPattern, volumeNameValid, "subPath"), passingValue)
+        .put(String.format(keyPattern, volumeNameValid, "accessModes"), passingValue)
+        .build();
+    testCases.add(new TestTuple<>(processName + ": Invalid option should trigger exception",
+        new Pair<>(configInvalidOption, isExecutor), "Invalid NFS type"));
+  }
+
+  @Test
+  public void testGetVolumeNFSErrors() {
+    final List<TestTuple<Pair<Config, Boolean>, String>> testCases = new LinkedList<>();
+    createVolumeNFSError(testCases, true);
+    createVolumeNFSError(testCases, false);
+
+    // Testing loop.
+    for (TestTuple<Pair<Config, Boolean>, String> testCase : testCases) {
+      try {
+        KubernetesContext.getVolumeNFS(testCase.input.first, testCase.input.second);
+      } catch (TopologySubmissionException e) {
+        Assert.assertTrue(testCase.description, e.getMessage().contains(testCase.expected));
+      }
+    }
+  }
 }
