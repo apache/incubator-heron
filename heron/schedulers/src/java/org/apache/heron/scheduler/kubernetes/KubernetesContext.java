@@ -398,6 +398,18 @@ public final class KubernetesContext extends Context {
         throw new TopologySubmissionException(String.format("Volume `%s`: Empty Directory"
             + " `medium` must be `Memory` or empty.", volume.getKey()));
       }
+      for (Map.Entry<KubernetesConstants.VolumeConfigKeys, String> volumeConfig
+          : volume.getValue().entrySet()) {
+        final KubernetesConstants.VolumeConfigKeys key = volumeConfig.getKey();
+
+        switch (key) {
+          case sizeLimit: case medium: case path: case subPath:
+            break;
+          default:
+            throw new TopologySubmissionException(String.format("Volume `%s`: Invalid Empty"
+                + " Directory type option for '%s'", volume.getKey(), key));
+        }
+      }
     }
 
     return volumes;
