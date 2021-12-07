@@ -1096,7 +1096,30 @@ public class V1Controller extends KubernetesController {
   }
 
   /**
-   * Generates the <code>Volume</code> and <code>Volume Mounts</code> to be placed in the <code>executor container</code>.
+   * Generates the <code>Volume Mounts</code> to be placed in the <code>Executor</code>
+   * and <code>Manager</code> from options on the CLI.
+   * @param volumeName Name of the <code>Volume</code>.
+   * @param configs Mapping of <code>Volume</code> option <code>key-value</code> configuration pairs.
+   * @return A pair of configured lists of <code>V1VolumeMount</code>.
+   */
+  @VisibleForTesting
+  protected V1VolumeMount createVolumeMountsCLI(String volumeName,
+      Map<KubernetesConstants.VolumeConfigKeys, String> configs) {
+    final V1VolumeMountBuilder volumeMount = new V1VolumeMountBuilder()
+        .withName(volumeName)
+        .withMountPath(configs.get(KubernetesConstants.VolumeConfigKeys.path));
+
+    final String subPath = configs.get(KubernetesConstants.VolumeConfigKeys.subPath);
+    if (subPath != null && !subPath.isEmpty()) {
+      volumeMount.withSubPath(subPath);
+    }
+
+    return volumeMount.build();
+  }
+
+  /**
+   * Generates the <code>Volume</code>s and <code>Volume Mounts</code> to be placed in the <code>Executor</code>
+   * and <code>Manager</code> from options on the CLI.
    * @param mapConfig Mapping of <code>Volumes</code> to <code>key-value</code> configuration pairs.
    * @return A pair of configured lists of <code>V1Volume</code> and <code>V1VolumeMount</code>.
    */
