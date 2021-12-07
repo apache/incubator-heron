@@ -367,7 +367,7 @@ public class KubernetesContextTest {
   }
 
   /**
-   * Create test cases for <code>Volume Claim Templates</code>.
+   * Create test cases for <code>Volume Claim Templates</code> errors.
    * @param testCases Test case container.
    *                  Input: [0] Config, [1] Boolean to indicate Manager/Executor.
    *                  Output: Error message
@@ -443,7 +443,7 @@ public class KubernetesContextTest {
   }
 
   /**
-   * Create test cases for <code>Volume Claim Templates</code>.
+   * Create test cases for <code>Empty Directory</code>.
    * @param testCases Test case container.
    *                  Input: [0] Config, [1] Boolean to indicate Manager/Executor.
    *                  Output: <code>Map<String, Map<VolumeConfigKeys, String></code>
@@ -521,7 +521,7 @@ public class KubernetesContextTest {
         .put(String.format(keyPattern, volumeNameValid, "path"), passingValue)
         .put(String.format(keyPattern, volumeNameValid, "subPath"), passingValue)
         .build();
-    testCases.add(new TestTuple<>(processName + ": `emptyDir` without ignored",
+    testCases.add(new TestTuple<>(processName + ": `emptyDir` ignored",
         new Pair<>(configIgnored, !isExecutor), new HashMap<>()));
   }
 
@@ -567,7 +567,7 @@ public class KubernetesContextTest {
     testCases.add(new TestTuple<>(processName + ": Invalid `medium` should trigger exception",
         new Pair<>(configInvalidMedium, isExecutor), "must be `Memory` or empty."));
 
-    // Medium is invalid.
+    // Invalid option.
     final Config configInvalidOption = Config.newBuilder()
         .put(String.format(keyPattern, volumeNameValid, "path"), passingValue)
         .put(String.format(keyPattern, volumeNameValid, "subPath"), passingValue)
@@ -594,4 +594,133 @@ public class KubernetesContextTest {
       }
     }
   }
+
+  /**
+   * Create test cases for <code>Host Path</code>.
+   * @param testCases Test case container.
+   *                  Input: [0] Config, [1] Boolean to indicate Manager/Executor.
+   *                  Output: <code>Map<String, Map<VolumeConfigKeys, String></code>
+   * @param isExecutor Boolean to indicate Manager/Executor test case generation.
+   */
+  private void createVolumeHostPath(
+      List<TestTuple<Pair<Config, Boolean>, Map<String, Map<VolumeConfigKeys, String>>>> testCases,
+      boolean isExecutor) {
+    final String volumeNameValid = "volume-name-valid";
+    final String passingValue = "should-pass";
+    final String processName = isExecutor ? KubernetesConstants.EXECUTOR_NAME
+        : KubernetesConstants.MANAGER_NAME;
+    final String keyPattern = String.format(KubernetesContext.KUBERNETES_VOLUME_HOSTPATH_PREFIX
+        + "%%s.%%s", processName);
+
+    // With type.
+    final Map<String, Map<VolumeConfigKeys, String>> expectedWithType =
+        ImmutableMap.of(volumeNameValid, new HashMap<VolumeConfigKeys, String>() {
+          {
+            put(VolumeConfigKeys.type, "DirectoryOrCreate");
+            put(VolumeConfigKeys.path, passingValue);
+            put(VolumeConfigKeys.subPath, passingValue);
+          }
+        });
+    final Config configWithType = Config.newBuilder()
+        .put(String.format(keyPattern, volumeNameValid, "type"), "DirectoryOrCreate")
+        .put(String.format(keyPattern, volumeNameValid, "path"), passingValue)
+        .put(String.format(keyPattern, volumeNameValid, "subPath"), passingValue)
+        .build();
+    testCases.add(new TestTuple<>(processName + ": `hostPath` with `type`",
+        new Pair<>(configWithType, isExecutor), expectedWithType));
+
+    // Without type.
+    final Map<String, Map<VolumeConfigKeys, String>> expectedWithoutType =
+        ImmutableMap.of(volumeNameValid, new HashMap<VolumeConfigKeys, String>() {
+          {
+            put(VolumeConfigKeys.path, passingValue);
+            put(VolumeConfigKeys.subPath, passingValue);
+          }
+        });
+    final Config configWithoutType = Config.newBuilder()
+        .put(String.format(keyPattern, volumeNameValid, "path"), passingValue)
+        .put(String.format(keyPattern, volumeNameValid, "subPath"), passingValue)
+        .build();
+    testCases.add(new TestTuple<>(processName + ": `hostPath` without `type`",
+        new Pair<>(configWithoutType, isExecutor), expectedWithoutType));
+
+    // Ignored.
+    final Config configIgnored = Config.newBuilder()
+        .put(String.format(keyPattern, volumeNameValid, "type"), "BlockDevice")
+        .put(String.format(keyPattern, volumeNameValid, "path"), passingValue)
+        .put(String.format(keyPattern, volumeNameValid, "subPath"), passingValue)
+        .build();
+    testCases.add(new TestTuple<>(processName + ": `hostPath` ignored",
+        new Pair<>(configIgnored, !isExecutor), new HashMap<>()));
+  }
+
+  @Test
+  public void testGetVolumeHostPath() {
+    final List<TestTuple<Pair<Config, Boolean>, Map<String, Map<VolumeConfigKeys, String>>>>
+        testCases = new LinkedList<>();
+    createVolumeHostPath(testCases, true);
+    createVolumeHostPath(testCases, false);
+
+    // Testing loop.
+    for (TestTuple<Pair<Config, Boolean>, Map<String, Map<VolumeConfigKeys, String>>> testCase
+        : testCases) {
+      Map<String, Map<VolumeConfigKeys, String>> actual =
+          KubernetesContext.getVolumeHostPath(testCase.input.first, testCase.input.second);
+      Assert.assertEquals(testCase.description, testCase.expected, actual);
+    }
+  }
+
+  /**
+   * Create test cases for <code>Volume Claim Templates</code>.
+   * @param testCases Test case container.
+   *                  Input: [0] Config, [1] Boolean to indicate Manager/Executor.
+   *                  Output: Error message
+   * @param isExecutor Boolean to indicate Manager/Executor test case generation.
+   */
+  private void createVolumeHostPathError(
+      List<TestTuple<Pair<Config, Boolean>, String>> testCases, boolean isExecutor) {
+    final String volumeNameValid = "volume-name-valid";
+    final String passingValue = "should-pass";
+    final String failureValue = "Should-Fail";
+    final String processName = isExecutor ? KubernetesConstants.EXECUTOR_NAME
+        : KubernetesConstants.MANAGER_NAME;
+    final String keyPattern = String.format(KubernetesContext.KUBERNETES_VOLUME_HOSTPATH_PREFIX
+        + "%%s.%%s", processName);
+
+    // Type is invalid.
+    final Config configInvalidMedium = Config.newBuilder()
+        .put(String.format(keyPattern, volumeNameValid, "type"), failureValue)
+        .put(String.format(keyPattern, volumeNameValid, "path"), passingValue)
+        .put(String.format(keyPattern, volumeNameValid, "subPath"), passingValue)
+        .build();
+    testCases.add(new TestTuple<>(processName + ": Invalid `type should trigger exception",
+        new Pair<>(configInvalidMedium, isExecutor), "Host Path `type` of"));
+
+    // Invalid option.
+    final Config configInvalidOption = Config.newBuilder()
+        .put(String.format(keyPattern, volumeNameValid, "type"), "BlockDevice")
+        .put(String.format(keyPattern, volumeNameValid, "path"), passingValue)
+        .put(String.format(keyPattern, volumeNameValid, "subPath"), passingValue)
+        .put(String.format(keyPattern, volumeNameValid, "accessModes"), passingValue)
+        .build();
+    testCases.add(new TestTuple<>(processName + ": Invalid option should trigger exception",
+        new Pair<>(configInvalidOption, isExecutor), "Invalid Host Path type option for"));
+  }
+
+  @Test
+  public void testGetVolumeHostPathErrors() {
+    final List<TestTuple<Pair<Config, Boolean>, String>> testCases = new LinkedList<>();
+    createVolumeHostPathError(testCases, true);
+    createVolumeHostPathError(testCases, false);
+
+    // Testing loop.
+    for (TestTuple<Pair<Config, Boolean>, String> testCase : testCases) {
+      try {
+        KubernetesContext.getVolumeHostPath(testCase.input.first, testCase.input.second);
+      } catch (TopologySubmissionException e) {
+        Assert.assertTrue(testCase.description, e.getMessage().contains(testCase.expected));
+      }
+    }
+  }
+
 }
