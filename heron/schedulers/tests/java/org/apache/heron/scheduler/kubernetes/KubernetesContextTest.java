@@ -564,8 +564,8 @@ public class KubernetesContextTest {
         .put(String.format(keyPattern, volumeNameValid, "sizeLimit"), passingValue)
         .put(String.format(keyPattern, volumeNameValid, "medium"), failureValue)
         .build();
-    testCases.add(new TestTuple<>(processName + ": Invalid `medium` should trigger exception",
-        new Pair<>(configInvalidMedium, isExecutor), "must be `Memory` or empty."));
+    testCases.add(new TestTuple<>(processName + ": Invalid 'medium' should trigger exception",
+        new Pair<>(configInvalidMedium, isExecutor), "must be 'Memory' or empty."));
 
     // Invalid option.
     final Config configInvalidOption = Config.newBuilder()
@@ -618,39 +618,44 @@ public class KubernetesContextTest {
           {
             put(VolumeConfigKeys.type, "DirectoryOrCreate");
             put(VolumeConfigKeys.path, passingValue);
+            put(VolumeConfigKeys.pathOnHost, passingValue);
             put(VolumeConfigKeys.subPath, passingValue);
           }
         });
     final Config configWithType = Config.newBuilder()
         .put(String.format(keyPattern, volumeNameValid, "type"), "DirectoryOrCreate")
+        .put(String.format(keyPattern, volumeNameValid, "pathOnHost"), passingValue)
         .put(String.format(keyPattern, volumeNameValid, "path"), passingValue)
         .put(String.format(keyPattern, volumeNameValid, "subPath"), passingValue)
         .build();
-    testCases.add(new TestTuple<>(processName + ": `hostPath` with `type`",
+    testCases.add(new TestTuple<>(processName + ": 'hostPath' with 'type'",
         new Pair<>(configWithType, isExecutor), expectedWithType));
 
     // Without type.
     final Map<String, Map<VolumeConfigKeys, String>> expectedWithoutType =
         ImmutableMap.of(volumeNameValid, new HashMap<VolumeConfigKeys, String>() {
           {
+            put(VolumeConfigKeys.pathOnHost, passingValue);
             put(VolumeConfigKeys.path, passingValue);
             put(VolumeConfigKeys.subPath, passingValue);
           }
         });
     final Config configWithoutType = Config.newBuilder()
+        .put(String.format(keyPattern, volumeNameValid, "pathOnHost"), passingValue)
         .put(String.format(keyPattern, volumeNameValid, "path"), passingValue)
         .put(String.format(keyPattern, volumeNameValid, "subPath"), passingValue)
         .build();
-    testCases.add(new TestTuple<>(processName + ": `hostPath` without `type`",
+    testCases.add(new TestTuple<>(processName + ": 'hostPath' without 'type'",
         new Pair<>(configWithoutType, isExecutor), expectedWithoutType));
 
     // Ignored.
     final Config configIgnored = Config.newBuilder()
         .put(String.format(keyPattern, volumeNameValid, "type"), "BlockDevice")
+        .put(String.format(keyPattern, volumeNameValid, "pathOnHost"), passingValue)
         .put(String.format(keyPattern, volumeNameValid, "path"), passingValue)
         .put(String.format(keyPattern, volumeNameValid, "subPath"), passingValue)
         .build();
-    testCases.add(new TestTuple<>(processName + ": `hostPath` ignored",
+    testCases.add(new TestTuple<>(processName + ": 'hostPath' ignored",
         new Pair<>(configIgnored, !isExecutor), new HashMap<>()));
   }
 
@@ -690,21 +695,42 @@ public class KubernetesContextTest {
     // Type is invalid.
     final Config configInvalidMedium = Config.newBuilder()
         .put(String.format(keyPattern, volumeNameValid, "type"), failureValue)
+        .put(String.format(keyPattern, volumeNameValid, "pathOnHost"), passingValue)
         .put(String.format(keyPattern, volumeNameValid, "path"), passingValue)
         .put(String.format(keyPattern, volumeNameValid, "subPath"), passingValue)
         .build();
-    testCases.add(new TestTuple<>(processName + ": Invalid `type should trigger exception",
-        new Pair<>(configInvalidMedium, isExecutor), "Host Path `type` of"));
+    testCases.add(new TestTuple<>(processName + ": Invalid 'type' should trigger exception",
+        new Pair<>(configInvalidMedium, isExecutor), "Host Path 'type' of"));
+
+    // Path on Host is missing.
+    final Config configNoHostOnPath = Config.newBuilder()
+        .put(String.format(keyPattern, volumeNameValid, "type"), "BlockDevice")
+        .put(String.format(keyPattern, volumeNameValid, "path"), passingValue)
+        .put(String.format(keyPattern, volumeNameValid, "subPath"), passingValue)
+        .build();
+    testCases.add(new TestTuple<>(processName + ": No 'hostOnPath' should trigger exception",
+        new Pair<>(configNoHostOnPath, isExecutor), "requires a path on the host"));
+
+    // Path on Host is empty.
+    final Config configEmptyHostOnPath = Config.newBuilder()
+        .put(String.format(keyPattern, volumeNameValid, "type"), "BlockDevice")
+        .put(String.format(keyPattern, volumeNameValid, "pathOnHost"), "")
+        .put(String.format(keyPattern, volumeNameValid, "path"), passingValue)
+        .put(String.format(keyPattern, volumeNameValid, "subPath"), passingValue)
+        .build();
+    testCases.add(new TestTuple<>(processName + ": Empty 'hostOnPath' should trigger exception",
+        new Pair<>(configEmptyHostOnPath, isExecutor), "requires a path on the host"));
 
     // Invalid option.
     final Config configInvalidOption = Config.newBuilder()
         .put(String.format(keyPattern, volumeNameValid, "type"), "BlockDevice")
+        .put(String.format(keyPattern, volumeNameValid, "pathOnHost"), passingValue)
         .put(String.format(keyPattern, volumeNameValid, "path"), passingValue)
         .put(String.format(keyPattern, volumeNameValid, "subPath"), passingValue)
         .put(String.format(keyPattern, volumeNameValid, "accessModes"), passingValue)
         .build();
     testCases.add(new TestTuple<>(processName + ": Invalid option should trigger exception",
-        new Pair<>(configInvalidOption, isExecutor), "Invalid Host Path type option for"));
+        new Pair<>(configInvalidOption, isExecutor), "Invalid Host Path option for"));
   }
 
   @Test

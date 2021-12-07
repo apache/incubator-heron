@@ -396,7 +396,7 @@ public final class KubernetesContext extends Context {
 
       if (medium != null && !medium.isEmpty() && !"Memory".equals(medium)) {
         throw new TopologySubmissionException(String.format("Volume `%s`: Empty Directory"
-            + " `medium` must be `Memory` or empty.", volume.getKey()));
+            + " 'medium' must be 'Memory' or empty.", volume.getKey()));
       }
       for (Map.Entry<KubernetesConstants.VolumeConfigKeys, String> volumeConfig
           : volume.getValue().entrySet()) {
@@ -432,7 +432,13 @@ public final class KubernetesContext extends Context {
       final String type = volume.getValue().get(KubernetesConstants.VolumeConfigKeys.type);
       if (type != null && !KubernetesConstants.VALID_VOLUME_HOSTPATH_TYPES.contains(type)) {
         throw new TopologySubmissionException(String.format("Volume `%s`: Host Path"
-            + " `type` of '%s' is invalid.", volume.getKey(), type));
+            + " 'type' of '%s' is invalid.", volume.getKey(), type));
+      }
+      final String hostOnPath =
+          volume.getValue().get(KubernetesConstants.VolumeConfigKeys.pathOnHost);
+      if (hostOnPath == null || hostOnPath.isEmpty()) {
+        throw new TopologySubmissionException(String.format("Volume `%s`: Host Path"
+            + " requires a path on the host.", volume.getKey()));
       }
 
       for (Map.Entry<KubernetesConstants.VolumeConfigKeys, String> volumeConfig
@@ -440,11 +446,11 @@ public final class KubernetesContext extends Context {
         final KubernetesConstants.VolumeConfigKeys key = volumeConfig.getKey();
 
         switch (key) {
-          case type: case path: case subPath:
+          case type: case pathOnHost: case path: case subPath:
             break;
           default:
             throw new TopologySubmissionException(String.format("Volume `%s`: Invalid Host Path"
-                + " type option for '%s'", volume.getKey(), key));
+                + " option for '%s'", volume.getKey(), key));
         }
       }
     }
