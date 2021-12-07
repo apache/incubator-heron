@@ -127,6 +127,8 @@ public final class KubernetesConstants {
     type,
     readOnly,
     server,
+    pathOnHost,
+    pathOnNFS,
     path,               // Added to container, nfsVolume, hostPath.
     subPath,            // Added to container.
   }
