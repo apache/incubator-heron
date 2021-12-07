@@ -566,6 +566,17 @@ public class KubernetesContextTest {
         .build();
     testCases.add(new TestTuple<>(processName + ": Invalid `medium` should trigger exception",
         new Pair<>(configInvalidMedium, isExecutor), "must be `Memory` or empty."));
+
+    // Medium is invalid.
+    final Config configInvalidOption = Config.newBuilder()
+        .put(String.format(keyPattern, volumeNameValid, "path"), passingValue)
+        .put(String.format(keyPattern, volumeNameValid, "subPath"), passingValue)
+        .put(String.format(keyPattern, volumeNameValid, "sizeLimit"), passingValue)
+        .put(String.format(keyPattern, volumeNameValid, "medium"), "Memory")
+        .put(String.format(keyPattern, volumeNameValid, "accessModes"), passingValue)
+        .build();
+    testCases.add(new TestTuple<>(processName + ": Invalid option should trigger exception",
+        new Pair<>(configInvalidOption, isExecutor), "Directory type option"));
   }
 
   @Test
