@@ -304,12 +304,13 @@ The currently supported CLI `options` are:
 * `volumeMode`
 * `path`
 * `subPath`
+* `readOnly`
 
 ***Note:*** A `claimName` of `OnDemand` will create unique Volumes for each `Heron container` as well as deploy a Persistent Volume Claim for each Volume. Any other claim name will result in a shared Volume being created between all Pods in the topology.
 
 ***Note:*** The `accessModes` must be a comma-separated list of values *without* any white space. Valid values can be found in the [Kubernetes documentation](https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes).
 
-***Note:*** If a `storageClassName` is specified and there are no matching Persistent Volumes then [dynamic provisioning](https://kubernetes.io/docs/concepts/storage/dynamic-provisioning/) must be enabled. Kubernetes will attempt to locate a Persistent Volume that matches the `storageClassName` before it attempts to use dynamic provisioning. If a `storageClassName` is not specified there must be [Persistent Volumes](https://kubernetes.io/docs/tasks/configure-pod-container/configure-persistent-volume-storage/) provisioned manually with the `storageClassName` of `standard`.
+***Note:*** If a `storageClassName` is specified and there are no matching Persistent Volumes then [dynamic provisioning](https://kubernetes.io/docs/concepts/storage/dynamic-provisioning/) must be enabled. Kubernetes will attempt to locate a Persistent Volume that matches the `storageClassName` before it attempts to use dynamic provisioning. If a `storageClassName` is not specified there must be [Persistent Volumes](https://kubernetes.io/docs/tasks/configure-pod-container/configure-persistent-volume-storage/) provisioned manually. For more on statically and dynamically provisioned volumes please read [this](https://kubernetes.io/docs/concepts/storage/persistent-volumes/#lifecycle-of-a-volume-and-claim).
 
 <br>
 
@@ -458,6 +459,7 @@ The following table outlines CLI options which are either ***required*** ( &#x27
 | `accessModes` | &#x2705; | &#x2705; | &#x274c;
 | `sizeLimit` | &#x2754; | &#x2754; | &#x274c;
 | `volumeMode` | &#x2754; | &#x2754; | &#x274c;
+| `readOnly` | &#x2754; | &#x2754; | &#x2754;
 
 <br>
 

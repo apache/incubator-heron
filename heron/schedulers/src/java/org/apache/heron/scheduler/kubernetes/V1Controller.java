@@ -1070,6 +1070,7 @@ public class V1Controller extends KubernetesController {
             .withLabels(getPersistentVolumeClaimLabels(getTopologyName()))
           .endMetadata()
           .withNewSpec()
+            .withStorageClassName("")
           .endSpec()
           .build();
 

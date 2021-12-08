@@ -921,6 +921,7 @@ public class V1ControllerTest {
           .withLabels(V1Controller.getPersistentVolumeClaimLabels(topologyName))
         .endMetadata()
         .withNewSpec()
+          .withStorageClassName("")
           .withAccessModes(Collections.singletonList(accessModes))
           .withVolumeMode(volumeMode)
           .withNewResources()
