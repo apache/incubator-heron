@@ -415,9 +415,21 @@ public class V1Controller extends KubernetesController {
     final String topologyName = getTopologyName();
     final Config runtimeConfiguration = getRuntimeConfiguration();
 
-    // Get and then create Persistent Volume Claims from the CLI.
+    final List<V1Volume> volumes = new LinkedList<>();
+    final List<V1VolumeMount> volumeMounts = new LinkedList<>();
+
+    // Collect Persistent Volume Claim configurations from the CLI.
     final Map<String, Map<KubernetesConstants.VolumeConfigKeys, String>> configsPVC =
         KubernetesContext.getVolumeClaimTemplates(getConfiguration(), isExecutor);
+
+    // Collect all Volume configurations from the CLI and generate Volumes and Volume Mounts.
+    createVolumeAndMountsPVCCLI(configsPVC, volumes, volumeMounts);
+    createVolumeAndMountsHostPathCLI(
+        KubernetesContext.getVolumeHostPath(getConfiguration(), isExecutor), volumes, volumeMounts);
+    createVolumeAndMountsEmptyDirCLI(
+        KubernetesContext.getVolumeEmptyDir(getConfiguration(), isExecutor), volumes, volumeMounts);
+    createVolumeAndMountsNFSCLI(
+        KubernetesContext.getVolumeNFS(getConfiguration(), isExecutor), volumes, volumeMounts);
 
     final V1StatefulSet statefulSet = new V1StatefulSet();
 
