@@ -1113,16 +1113,26 @@ public class V1Controller extends KubernetesController {
   @VisibleForTesting
   protected V1VolumeMount createVolumeMountsCLI(String volumeName,
       Map<KubernetesConstants.VolumeConfigKeys, String> configs) {
-    final V1VolumeMountBuilder volumeMount = new V1VolumeMountBuilder()
+    final V1VolumeMount volumeMount = new V1VolumeMountBuilder()
         .withName(volumeName)
-        .withMountPath(configs.get(KubernetesConstants.VolumeConfigKeys.path));
-
-    final String subPath = configs.get(KubernetesConstants.VolumeConfigKeys.subPath);
-    if (subPath != null && !subPath.isEmpty()) {
-      volumeMount.withSubPath(subPath);
+        .build();
+    for (Map.Entry<KubernetesConstants.VolumeConfigKeys, String> config : configs.entrySet()) {
+      switch (config.getKey()) {
+        case path:
+          volumeMount.mountPath(config.getValue());
+          break;
+        case subPath:
+          volumeMount.subPath(config.getValue());
+          break;
+        case readOnly:
+          volumeMount.readOnly(Boolean.parseBoolean(config.getValue()));
+          break;
+        default:
+          break;
+      }
     }
 
-    return volumeMount.build();
+    return volumeMount;
   }
 
   /**

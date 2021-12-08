@@ -301,6 +301,7 @@ public class KubernetesContextTest {
             put(VolumeConfigKeys.volumeMode, passingValue);
             put(VolumeConfigKeys.path, passingValue);
             put(VolumeConfigKeys.subPath, passingValue);
+            put(VolumeConfigKeys.readOnly, passingValue);
           }
         });
     final Config configWithStorageClass = Config.newBuilder()
@@ -311,6 +312,7 @@ public class KubernetesContextTest {
         .put(String.format(keyPattern, volumeNameValid, "volumeMode"), passingValue)
         .put(String.format(keyPattern, volumeNameValid, "path"), passingValue)
         .put(String.format(keyPattern, volumeNameValid, "subPath"), passingValue)
+        .put(String.format(keyPattern, volumeNameValid, "readOnly"), passingValue)
         .build();
     testCases.add(new TestTuple<>(processName + ": PVC with Storage Class name",
         new Pair<>(configWithStorageClass, isExecutor), expectedWithStorageClassName));
@@ -325,6 +327,7 @@ public class KubernetesContextTest {
             put(VolumeConfigKeys.volumeMode, passingValue);
             put(VolumeConfigKeys.path, passingValue);
             put(VolumeConfigKeys.subPath, passingValue);
+            put(VolumeConfigKeys.readOnly, passingValue);
           }
         });
     final Config configWithoutStorageClass = Config.newBuilder()
@@ -334,6 +337,7 @@ public class KubernetesContextTest {
         .put(String.format(keyPattern, volumeNameValid, "volumeMode"), passingValue)
         .put(String.format(keyPattern, volumeNameValid, "path"), passingValue)
         .put(String.format(keyPattern, volumeNameValid, "subPath"), passingValue)
+        .put(String.format(keyPattern, volumeNameValid, "readOnly"), passingValue)
         .build();
     testCases.add(new TestTuple<>(processName + ": PVC with Storage Class name",
         new Pair<>(configWithoutStorageClass, isExecutor), expectedWithoutStorageClassName));
@@ -347,6 +351,7 @@ public class KubernetesContextTest {
         .put(String.format(keyPattern, volumeNameValid, "volumeMode"), passingValue)
         .put(String.format(keyPattern, volumeNameValid, "path"), passingValue)
         .put(String.format(keyPattern, volumeNameValid, "subPath"), passingValue)
+        .put(String.format(keyPattern, volumeNameValid, "readOnly"), passingValue)
         .build();
     testCases.add(new TestTuple<>(processName + ": PVC with ignored keys",
         new Pair<>(configIgnored, !isExecutor), new HashMap<>()));
@@ -471,6 +476,7 @@ public class KubernetesContextTest {
             put(VolumeConfigKeys.medium, "Memory");
             put(VolumeConfigKeys.path, passingValue);
             put(VolumeConfigKeys.subPath, passingValue);
+            put(VolumeConfigKeys.readOnly, passingValue);
           }
         });
     final Config configWithMedium = Config.newBuilder()
@@ -478,6 +484,7 @@ public class KubernetesContextTest {
         .put(String.format(keyPattern, volumeNameValid, "medium"), "Memory")
         .put(String.format(keyPattern, volumeNameValid, "path"), passingValue)
         .put(String.format(keyPattern, volumeNameValid, "subPath"), passingValue)
+        .put(String.format(keyPattern, volumeNameValid, "readOnly"), passingValue)
         .build();
     testCases.add(new TestTuple<>(processName + ": `emptyDir` with `medium`",
         new Pair<>(configWithMedium, isExecutor), expectedWithMedium));
@@ -490,6 +497,7 @@ public class KubernetesContextTest {
             put(VolumeConfigKeys.medium, "");
             put(VolumeConfigKeys.path, passingValue);
             put(VolumeConfigKeys.subPath, passingValue);
+            put(VolumeConfigKeys.readOnly, passingValue);
           }
         });
     final Config configEmptyMedium = Config.newBuilder()
@@ -497,6 +505,7 @@ public class KubernetesContextTest {
         .put(String.format(keyPattern, volumeNameValid, "medium"), "")
         .put(String.format(keyPattern, volumeNameValid, "path"), passingValue)
         .put(String.format(keyPattern, volumeNameValid, "subPath"), passingValue)
+        .put(String.format(keyPattern, volumeNameValid, "readOnly"), passingValue)
         .build();
     testCases.add(new TestTuple<>(processName + ": `emptyDir` with empty `medium`",
         new Pair<>(configEmptyMedium, isExecutor), expectedEmptyMedium));
@@ -508,12 +517,14 @@ public class KubernetesContextTest {
             put(VolumeConfigKeys.sizeLimit, passingValue);
             put(VolumeConfigKeys.path, passingValue);
             put(VolumeConfigKeys.subPath, passingValue);
+            put(VolumeConfigKeys.readOnly, passingValue);
           }
         });
     final Config configNoMedium = Config.newBuilder()
         .put(String.format(keyPattern, volumeNameValid, "sizeLimit"), passingValue)
         .put(String.format(keyPattern, volumeNameValid, "path"), passingValue)
         .put(String.format(keyPattern, volumeNameValid, "subPath"), passingValue)
+        .put(String.format(keyPattern, volumeNameValid, "readOnly"), passingValue)
         .build();
     testCases.add(new TestTuple<>(processName + ": `emptyDir` without `medium`",
         new Pair<>(configNoMedium, isExecutor), expectedNoMedium));
@@ -524,6 +535,7 @@ public class KubernetesContextTest {
         .put(String.format(keyPattern, volumeNameValid, "medium"), "")
         .put(String.format(keyPattern, volumeNameValid, "path"), passingValue)
         .put(String.format(keyPattern, volumeNameValid, "subPath"), passingValue)
+        .put(String.format(keyPattern, volumeNameValid, "readOnly"), passingValue)
         .build();
     testCases.add(new TestTuple<>(processName + ": `emptyDir` ignored",
         new Pair<>(configIgnored, !isExecutor), new HashMap<>()));
@@ -626,6 +638,7 @@ public class KubernetesContextTest {
             put(VolumeConfigKeys.path, passingValue);
             put(VolumeConfigKeys.pathOnHost, passingValue);
             put(VolumeConfigKeys.subPath, passingValue);
+            put(VolumeConfigKeys.readOnly, passingValue);
           }
         });
     final Config configWithType = Config.newBuilder()
@@ -633,6 +646,7 @@ public class KubernetesContextTest {
         .put(String.format(keyPattern, volumeNameValid, "pathOnHost"), passingValue)
         .put(String.format(keyPattern, volumeNameValid, "path"), passingValue)
         .put(String.format(keyPattern, volumeNameValid, "subPath"), passingValue)
+        .put(String.format(keyPattern, volumeNameValid, "readOnly"), passingValue)
         .build();
     testCases.add(new TestTuple<>(processName + ": 'hostPath' with 'type'",
         new Pair<>(configWithType, isExecutor), expectedWithType));
@@ -644,12 +658,14 @@ public class KubernetesContextTest {
             put(VolumeConfigKeys.pathOnHost, passingValue);
             put(VolumeConfigKeys.path, passingValue);
             put(VolumeConfigKeys.subPath, passingValue);
+            put(VolumeConfigKeys.readOnly, passingValue);
           }
         });
     final Config configWithoutType = Config.newBuilder()
         .put(String.format(keyPattern, volumeNameValid, "pathOnHost"), passingValue)
         .put(String.format(keyPattern, volumeNameValid, "path"), passingValue)
         .put(String.format(keyPattern, volumeNameValid, "subPath"), passingValue)
+        .put(String.format(keyPattern, volumeNameValid, "readOnly"), passingValue)
         .build();
     testCases.add(new TestTuple<>(processName + ": 'hostPath' without 'type'",
         new Pair<>(configWithoutType, isExecutor), expectedWithoutType));
@@ -660,6 +676,7 @@ public class KubernetesContextTest {
         .put(String.format(keyPattern, volumeNameValid, "pathOnHost"), passingValue)
         .put(String.format(keyPattern, volumeNameValid, "path"), passingValue)
         .put(String.format(keyPattern, volumeNameValid, "subPath"), passingValue)
+        .put(String.format(keyPattern, volumeNameValid, "readOnly"), passingValue)
         .build();
     testCases.add(new TestTuple<>(processName + ": 'hostPath' ignored",
         new Pair<>(configIgnored, !isExecutor), new HashMap<>()));
@@ -783,6 +800,7 @@ public class KubernetesContextTest {
             put(VolumeConfigKeys.pathOnNFS, passingValue);
             put(VolumeConfigKeys.path, passingValue);
             put(VolumeConfigKeys.subPath, passingValue);
+            put(VolumeConfigKeys.readOnly, passingValue);
           }
         });
     final Config configWithReadOnly = Config.newBuilder()
@@ -791,6 +809,7 @@ public class KubernetesContextTest {
         .put(String.format(keyPattern, volumeNameValid, "pathOnNFS"), passingValue)
         .put(String.format(keyPattern, volumeNameValid, "path"), passingValue)
         .put(String.format(keyPattern, volumeNameValid, "subPath"), passingValue)
+        .put(String.format(keyPattern, volumeNameValid, "readOnly"), passingValue)
         .build();
     testCases.add(new TestTuple<>(processName + ": `NFS` with `readOnly`",
         new Pair<>(configWithReadOnly, isExecutor), expectedWithReadOnly));
@@ -803,6 +822,7 @@ public class KubernetesContextTest {
             put(VolumeConfigKeys.pathOnNFS, passingValue);
             put(VolumeConfigKeys.path, passingValue);
             put(VolumeConfigKeys.subPath, passingValue);
+            put(VolumeConfigKeys.readOnly, passingValue);
           }
         });
     final Config configWithoutReadOnly = Config.newBuilder()
@@ -810,6 +830,7 @@ public class KubernetesContextTest {
         .put(String.format(keyPattern, volumeNameValid, "pathOnNFS"), passingValue)
         .put(String.format(keyPattern, volumeNameValid, "path"), passingValue)
         .put(String.format(keyPattern, volumeNameValid, "subPath"), passingValue)
+        .put(String.format(keyPattern, volumeNameValid, "readOnly"), passingValue)
         .build();
     testCases.add(new TestTuple<>(processName + ": `NFS` without `readOnly`",
         new Pair<>(configWithoutReadOnly, isExecutor), expectedWithoutReadOnly));
@@ -821,6 +842,7 @@ public class KubernetesContextTest {
         .put(String.format(keyPattern, volumeNameValid, "pathOnNFS"), passingValue)
         .put(String.format(keyPattern, volumeNameValid, "path"), passingValue)
         .put(String.format(keyPattern, volumeNameValid, "subPath"), passingValue)
+        .put(String.format(keyPattern, volumeNameValid, "readOnly"), passingValue)
         .build();
     testCases.add(new TestTuple<>(processName + ": `NFS` ignored",
         new Pair<>(configIgnored, !isExecutor), new HashMap<>()));

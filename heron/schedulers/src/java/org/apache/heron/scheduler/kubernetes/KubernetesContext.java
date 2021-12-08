@@ -373,7 +373,7 @@ public final class KubernetesContext extends Context {
                   + " does not match lowercase RFC-1123 pattern", volume.getKey()));
             }
             break;
-          case sizeLimit: case accessModes: case volumeMode: case path: case subPath:
+          case sizeLimit: case accessModes: case volumeMode: case readOnly: case path: case subPath:
             break;
           default:
             throw new TopologySubmissionException(String.format("Volume `%s`: Invalid Persistent"
@@ -410,7 +410,7 @@ public final class KubernetesContext extends Context {
         final KubernetesConstants.VolumeConfigKeys key = volumeConfig.getKey();
 
         switch (key) {
-          case sizeLimit: case medium: case path: case subPath:
+          case sizeLimit: case medium: case readOnly: case path: case subPath:
             break;
           default:
             throw new TopologySubmissionException(String.format("Volume `%s`: Invalid Empty"
@@ -453,7 +453,7 @@ public final class KubernetesContext extends Context {
         final KubernetesConstants.VolumeConfigKeys key = volumeConfig.getKey();
 
         switch (key) {
-          case type: case pathOnHost: case path: case subPath:
+          case type: case pathOnHost: case readOnly: case path: case subPath:
             break;
           default:
             throw new TopologySubmissionException(String.format("Volume `%s`: Invalid Host Path"
@@ -496,7 +496,7 @@ public final class KubernetesContext extends Context {
         final KubernetesConstants.VolumeConfigKeys key = volumeConfig.getKey();
 
         switch (key) {
-          case readOnly: case server: case pathOnNFS: case path: case subPath:
+          case server: case pathOnNFS: case readOnly: case path: case subPath:
             break;
           default:
             throw new TopologySubmissionException(String.format("Volume `%s`: Invalid NFS option"
