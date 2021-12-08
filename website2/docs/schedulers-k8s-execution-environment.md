@@ -42,9 +42,15 @@ This document demonstrates how you can customize various aspects of the Heron ex
     - [Submitting](#submitting-1)
     - [Required and Optional Configuration Items](#required-and-optional-configuration-items)
     - [Configuration Items Created and Entries Made](#configuration-items-created-and-entries-made)
-  - [Setting Limits and Requests via the Command Line Interface](#setting-limits-and-requests-via-the-command-line-interface)
+  - [Adding Empty Directory, Host Path, and Nework File Storage Volumes via the Command Line Interface](#adding-empty-directory-host-path-and-nework-file-storage-volumes-via-the-command-line-interface)
     - [Usage](#usage-1)
       - [Example](#example-1)
+    - [Submitting](#submitting-2)
+    - [Required and Optional Configuration Items](#required-and-optional-configuration-items-1)
+    - [Configuration Items Created and Entries Made](#configuration-items-created-and-entries-made-1)
+  - [Setting Limits and Requests via the Command Line Interface](#setting-limits-and-requests-via-the-command-line-interface)
+    - [Usage](#usage-2)
+      - [Example](#example-2)
 
 <br>
 
@@ -403,7 +409,7 @@ spec:
   resources:
     requests:
       storage: 555Gi
-  storageClassName: standard
+  storageClassName: ""
   volumeMode: volume-mode-of-choice
 ```
 
@@ -475,15 +481,244 @@ A `Volume` and a `Volume Mount` will be created for each `volume name` which you
 
 | Name | Description | Policy |
 |---|---|---|
-| `VOLUME NAME` | The `name` of the `Volume`. | Entries made in the `Persistent Volume Claim`'s spec, the Pod Spec's `Volumes`, and the `Heron containers` `volumeMounts`.
+| `VOLUME NAME` | The `name` of the `Volume`. | Entries made in the `Persistent Volume Claim`'s spec, the Pod Spec's `Volumes`, and the `Heron container`'s `volumeMounts`.
 | `claimName` | A Claim name for the Persistent Volume. | If `OnDemand` is provided as the parameter then a unique Volume and Persistent Volume Claim will be created. Any other name will result in a shared Volume between all Pods in the topology with only a Volume and Volume Mount being added.
-| `path` | The `mountPath` of the `Volume`. | Entries made in the `Heron containers` `volumeMounts`.
-| `subPath` | The `subPath` of the `Volume`. | Entries made in the `Heron containers` `volumeMounts`.
+| `path` | The `mountPath` of the `Volume`. | Entries made in the `Heron container`'s `volumeMounts`.
+| `subPath` | The `subPath` of the `Volume`. | Entries made in the `Heron container`'s `volumeMounts`.
 | `storageClassName` | The identifier name used to reference the dynamic `StorageClass`. | Entries made in the `Persistent Volume Claim` and Pod Spec's `Volume`.
 | `accessModes` | A comma-separated list of [access modes](https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes). | Entries made in the `Persistent Volume Claim`.
 | `sizeLimit` | A resource request for storage space [units](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#meaning-of-memory). | Entries made in the `Persistent Volume Claim`.
 | `volumeMode` | Either `FileSystem` (default) or `Block` (raw block). [Read more](https://kubernetes.io/docs/concepts/storage/_print/#volume-mode). | Entries made in the `Persistent Volume Claim`.
 | Labels | Two labels for `topology` and `onDemand` provisioning are added. | These labels are only added to dynamically backed `Persistent Volume Claim`s created by Heron to support the removal of any claims created when a topology is terminated.
+
+<br>
+
+---
+
+<br>
+
+## Adding Empty Directory, Host Path, and Nework File Storage Volumes via the Command Line Interface
+
+<br>
+
+> This section demonstrates how you can specify configurations for `Empty Dir`, `Host Path`, and `NFS` volumes via the Command Line Interface during the submit process.
+
+<br/>
+
+It is possible to allocate and configure Volumes with Pod Templates but the CLI commands extend this to being able to specify Volumes at submission time.
+
+<br>
+
+> ***System Administrators:***
+>
+> * You may wish to disable the ability to configure Volume configurations specified via the CLI. To achieve this, you must pass the define option `-D heron.kubernetes.volume.from.cli.disabled=true`to the Heron API Server on the command line when launching. This command has been added to the Kubernetes configuration files to deploy the Heron API Server and is set to `false` by default.
+> * &#x26a0; ***WARNING*** &#x26a0; `Host Path` Volumes have inherent [security concerns](https://kubernetes.io/docs/concepts/storage/volumes/#hostpath).
+
+<br>
+
+### Usage
+
+To configure a Volume on the CLI you must use the `--config-property` option in combination with the following prefixes:
+
+ * [Empty Directory](https://kubernetes.io/docs/concepts/storage/volumes/#emptydir): `heron.kubernetes.[executor | manager].volumes.emptyDir.`
+ * [Host Path](https://kubernetes.io/docs/concepts/storage/volumes/#hostpath): `heron.kubernetes.[executor | manager].volumes.hostPath.`
+ * [Network File System](https://kubernetes.io/docs/concepts/storage/volumes/#nfs): `heron.kubernetes.[executor | manager].volumes.nfs.`
+
+ Heron will not validate your Volume configurations, so please validate them to ensure they are well-formed. All Volume names must comply with the [*lowercase RFC-1123*](https://kubernetes.io/docs/concepts/overview/working-with-objects/names/) standard.
+
+The command patterns are as follows:
+
+ * Empty Directory: `heron.kubernetes.[executor | manager].volumes.emptyDir.[VOLUME NAME].[OPTION]=[VALUE]`
+ * Host Path: `heron.kubernetes.[executor | manager].volumes.hostPath.[VOLUME NAME].[OPTION]=[VALUE]`
+ * Network File System: `heron.kubernetes.[executor | manager].volumes.nfs.[VOLUME NAME].[OPTION]=[VALUE]`
+
+The currently supported CLI `options` are:
+
+* `medium`
+* `type`
+* `server`
+* `sizeLimit`
+* `pathOnHost`
+* `pathOnNFS`
+* `path`
+* `subPath`
+* `readOnly`
+
+<br>
+
+#### Example
+
+A series of example commands to add Volumes to a `Manager`, and the `YAML` entries they make in their respective configurations, are as follows.
+
+***Empty Directory:***
+
+```bash
+--config-property heron.kubernetes.manager.volumes.emptyDir.manager-empty-dir.medium="Memory"
+--config-property heron.kubernetes.manager.volumes.emptyDir.manager-empty-dir.sizeLimit="50Mi"
+--config-property heron.kubernetes.manager.volumes.emptyDir.manager-empty-dir.path="empty/dir/path"
+--config-property heron.kubernetes.manager.volumes.emptyDir.manager-empty-dir.subPath="empty/dir/sub/path"
+--config-property heron.kubernetes.manager.volumes.emptyDir.manager-empty-dir.readOnly="true"
+```
+
+Generated `Volume` entry:
+
+```yaml
+volumes:
+- emptyDir:
+    medium: Memory
+    sizeLimit: 50Mi
+  name: manager-empty-dir
+```
+
+Generated `Volume Mount` entry:
+
+```yaml
+volumeMounts:
+- mountPath: empty/dir/path
+  name: manager-empty-dir
+  readOnly: true
+  subPath: empty/dir/sub/path
+```
+
+<br>
+
+***Host Path:***
+
+```bash
+--config-property heron.kubernetes.manager.volumes.hostPath.manager-host-path.type="File"
+--config-property heron.kubernetes.manager.volumes.hostPath.manager-host-path.pathOnHost="/dev/null"
+--config-property heron.kubernetes.manager.volumes.hostPath.manager-host-path.path="host/path/path"
+--config-property heron.kubernetes.manager.volumes.hostPath.manager-host-path.subPath="host/path/sub/path"
+--config-property heron.kubernetes.manager.volumes.hostPath.manager-host-path.readOnly="true"
+```
+
+Generated `Volume` entry:
+
+```yaml
+volumes:
+- hostPath:
+    path: /dev/null
+    type: File
+  name: manager-host-path
+```
+
+Generated `Volume Mount` entry:
+
+```yaml
+volumeMounts:
+- mountPath: host/path/path
+  name: manager-host-path
+  readOnly: true
+  subPath: host/path/sub/path
+```
+
+<br>
+
+***NFS:***
+
+```bash
+--config-property heron.kubernetes.manager.volumes.nfs.manager-nfs.server="nfs-server.address"
+--config-property heron.kubernetes.manager.volumes.nfs.manager-nfs.readOnly="true"
+--config-property heron.kubernetes.manager.volumes.nfs.manager-nfs.pathOnNFS="/dev/null"
+--config-property heron.kubernetes.manager.volumes.nfs.manager-nfs.path="nfs/path"
+--config-property heron.kubernetes.manager.volumes.nfs.manager-nfs.subPath="nfs/sub/path"
+--config-property heron.kubernetes.manager.volumes.nfs.manager-nfs.readOnly="true"
+```
+
+Generated `Volume` entry:
+
+```yaml
+volumes:
+- name: manager-nfs
+  nfs:
+    path: /dev/null
+    readOnly: true
+    server: nfs-server.address
+```
+
+Generated `Volume Mount` entry:
+
+```yaml
+volumeMounts:
+- mountPath: nfs/path
+  name: manager-nfs
+  readOnly: true
+  subPath: nfs/sub/path
+```
+
+<br>
+
+### Submitting
+
+A series of example commands to sumbit a topology using the example CLI commands above:
+
+```bash
+heron submit kubernetes \
+  --service-url=http://localhost:8001/api/v1/namespaces/default/services/heron-apiserver:9000/proxy \
+  ~/.heron/examples/heron-api-examples.jar \
+  org.apache.heron.examples.api.AckingTopology acking \
+\
+--config-property heron.kubernetes.manager.volumes.emptyDir.manager-empty-dir.medium="Memory" \
+--config-property heron.kubernetes.manager.volumes.emptyDir.manager-empty-dir.sizeLimit="50Mi" \
+--config-property heron.kubernetes.manager.volumes.emptyDir.manager-empty-dir.path="empty/dir/path" \
+--config-property heron.kubernetes.manager.volumes.emptyDir.manager-empty-dir.subPath="empty/dir/sub/path" \
+--config-property heron.kubernetes.manager.volumes.emptyDir.manager-empty-dir.readOnly="true" \
+\
+--config-property heron.kubernetes.manager.volumes.hostPath.manager-host-path.type="File" \
+--config-property heron.kubernetes.manager.volumes.hostPath.manager-host-path.pathOnHost="/dev/null" \
+--config-property heron.kubernetes.manager.volumes.hostPath.manager-host-path.path="host/path/path" \
+--config-property heron.kubernetes.manager.volumes.hostPath.manager-host-path.subPath="host/path/sub/path" \
+--config-property heron.kubernetes.manager.volumes.hostPath.manager-host-path.readOnly="true" \
+\
+--config-property heron.kubernetes.manager.volumes.nfs.manager-nfs.server="nfs-server.address" \
+--config-property heron.kubernetes.manager.volumes.nfs.manager-nfs.readOnly="true" \
+--config-property heron.kubernetes.manager.volumes.nfs.manager-nfs.pathOnNFS="/dev/null" \
+--config-property heron.kubernetes.manager.volumes.nfs.manager-nfs.path="nfs/path" \
+--config-property heron.kubernetes.manager.volumes.nfs.manager-nfs.subPath="nfs/sub/path" \
+--config-property heron.kubernetes.manager.volumes.nfs.manager-nfs.readOnly="true"
+```
+
+### Required and Optional Configuration Items
+
+The following table outlines CLI options which are either ***required*** ( &#x2705; ), ***optional*** ( &#x2754; ), or ***not available*** ( &#x274c; ) depending on the type of `Volume`.
+
+| Option | emptyDir | hostPath | NFS
+|---|---|---|---|
+| `VOLUME NAME` | &#x2705; | &#x2705; | &#x2705;
+| `path` | &#x2705; | &#x2705; | &#x2705;
+| `subPath` | &#x2754; | &#x2754; | &#x2754;
+| `readOnly` | &#x2754; | &#x2754; | &#x2754;
+| `pathOnHost` | &#x274c; | &#x2705; | &#x274c;
+| `pathOnNFS` | &#x274c; | &#x274c; | &#x2705;
+| `server` | &#x274c; | &#x274c; | &#x2705;
+| `type` | &#x274c; | &#x2754; | &#x274c;
+| `medium` | &#x2754; | &#x274c; | &#x274c;
+| `sizeLimit` | &#x2754; | &#x274c; | &#x274c;
+
+<br>
+
+***Note:*** The `VOLUME NAME` will be extracted from the CLI command.
+
+<br>
+
+### Configuration Items Created and Entries Made
+
+The configuration items and entries in the tables below will made in their respective areas.
+
+A `Volume` and a `Volume Mount` will be created for each `volume name` which you specify.
+
+| Name | Description | Policy |
+|---|---|---|
+| `VOLUME NAME` | The `name` of the `Volume`. | Entries are made in the Pod Spec's `Volumes`, and the `Heron containers` `volumeMounts`.
+| `path` | The `mountPath` of the `Volume`. | Entries are made in the `Heron container`s `volumeMounts`.
+| `subPath` | The `subPath` of the `Volume`. | Entries are made in the `Heron container`s `volumeMounts`.
+| `readOnly` | A boolean value which defaults to `false` and indicates whether the medium has read-write permissions. | Entries are made in the `Heron container`s `volumeMount`. When used with an `NFS` volume an entry is also made in the associated `Volume`.
+| `medium` | The type of storage medium that will back the `EmptyDir` and defaults to "", please read more [here](https://kubernetes.io/docs/concepts/storage/volumes#emptydir). | An entry is made in the `EmptyDir`'s `Volume`.
+| `sizeLimit` | Total amount of local storage required for this `EmptyDir` volume. | An entry is made `EmptyDir`'s `Volume`.
+| `pathOnHost` | The directory path to be mounted the host. | A `path` entry is made `hostPath`'s `Volume`.
+| `type` | The type of the `hostPath` volume and defaults to "", please read more [here](https://kubernetes.io/docs/concepts/storage/volumes#hostpath). | An entry is made `hostPath`'s `Volume`.
+| `pathOnNFS` | The directory path to be mounted the NFS server. | A `path` entry is made `NFS`'s `Volume`.
+| `server` | The hostname or IP address of the NFS server. | An entry is made `NFS`'s `Volume`.
 
 <br>
 
