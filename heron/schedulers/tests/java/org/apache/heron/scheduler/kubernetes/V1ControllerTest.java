@@ -1239,11 +1239,13 @@ public class V1ControllerTest {
         .put(VolumeConfigKeys.volumeMode, value)
         .put(VolumeConfigKeys.path, value)
         .put(VolumeConfigKeys.subPath, value)
+        .put(VolumeConfigKeys.readOnly, "true")
         .build();
     final V1VolumeMount volumeMountPVC = new V1VolumeMountBuilder()
         .withName(volumeNamePVC)
         .withMountPath(value)
         .withSubPath(value)
+        .withReadOnly(true)
         .build();
     testCases.add(new TestTuple<>("PVC volume mount",
         new Pair<>(volumeNamePVC, configPVC), volumeMountPVC));
@@ -1255,11 +1257,13 @@ public class V1ControllerTest {
             .put(VolumeConfigKeys.pathOnHost, value)
             .put(VolumeConfigKeys.path, value)
             .put(VolumeConfigKeys.subPath, value)
+            .put(VolumeConfigKeys.readOnly, "true")
             .build();
     final V1VolumeMount volumeMountHostPath = new V1VolumeMountBuilder()
         .withName(volumeNameHostPath)
         .withMountPath(value)
         .withSubPath(value)
+        .withReadOnly(true)
         .build();
     testCases.add(new TestTuple<>("Host Path volume mount",
         new Pair<>(volumeNameHostPath, configHostPath), volumeMountHostPath));
@@ -1271,11 +1275,13 @@ public class V1ControllerTest {
             .put(VolumeConfigKeys.medium, "Memory")
             .put(VolumeConfigKeys.path, value)
             .put(VolumeConfigKeys.subPath, value)
+            .put(VolumeConfigKeys.readOnly, "true")
             .build();
     final V1VolumeMount volumeMountEmptyDir = new V1VolumeMountBuilder()
         .withName(volumeNameEmptyDir)
         .withMountPath(value)
         .withSubPath(value)
+        .withReadOnly(true)
         .build();
     testCases.add(new TestTuple<>("Empty Dir volume mount",
         new Pair<>(volumeNameEmptyDir, configEmptyDir), volumeMountEmptyDir));
@@ -1292,6 +1298,7 @@ public class V1ControllerTest {
         .withName(volumeNameNFS)
         .withMountPath(value)
         .withSubPath(value)
+        .withReadOnly(true)
         .build();
     testCases.add(new TestTuple<>("NFS volume mount",
         new Pair<>(volumeNameNFS, configNFS), volumeMountNFS));
@@ -1425,6 +1432,7 @@ public class V1ControllerTest {
             .withName(volumeName)
             .withMountPath(path)
             .withSubPath(subPath)
+            .withReadOnly(true)
             .build()
     );
 
