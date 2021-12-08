@@ -981,13 +981,13 @@ public class V1ControllerTest {
         .build();
 
     // Test case container.
-    final List<TestTuple<Pair<List<V1Volume>, List<V1VolumeMount>>,
+    // Input: Map of Volume configurations.
+    // Output: The expected lists of Volumes and Volume Mounts.
+    final List<TestTuple<Map<String, Map<VolumeConfigKeys, String>>,
         Pair<List<V1Volume>, List<V1VolumeMount>>>> testCases = new LinkedList<>();
 
     // Default case: No PVC provided.
-    final Pair<List<V1Volume>, List<V1VolumeMount>> actualEmpty =
-        v1ControllerPodTemplate.createPersistentVolumeClaimVolumesAndMounts(new HashMap<>());
-    testCases.add(new TestTuple<>("Generated an empty list of Volumes", actualEmpty,
+    testCases.add(new TestTuple<>("Generated an empty list of Volumes", new HashMap<>(),
         new Pair<>(new LinkedList<>(), new LinkedList<>())));
 
     // PVC Provided.
@@ -995,18 +995,21 @@ public class V1ControllerTest {
         new Pair<>(
             new LinkedList<>(Arrays.asList(volumeOne, volumeTwo)),
             new LinkedList<>(Arrays.asList(volumeMountOne, volumeMountTwo)));
-    final Pair<List<V1Volume>, List<V1VolumeMount>> actualFull =
-        v1ControllerPodTemplate.createPersistentVolumeClaimVolumesAndMounts(mapOfOpts);
-    testCases.add(new TestTuple<>("Generated a list of Volumes", actualFull,
+    testCases.add(new TestTuple<>("Generated a list of Volumes", mapOfOpts,
         new Pair<>(expectedFull.first, expectedFull.second)));
 
     // Testing loop.
-    for (TestTuple<Pair<List<V1Volume>, List<V1VolumeMount>>,
+    for (TestTuple<Map<String, Map<VolumeConfigKeys, String>>,
              Pair<List<V1Volume>, List<V1VolumeMount>>> testCase : testCases) {
+      List<V1Volume> actualVolume = new LinkedList<>();
+      List<V1VolumeMount> actualVolumeMount = new LinkedList<>();
+      v1ControllerPodTemplate.createVolumeAndMountsPVCCLI(testCase.input, actualVolume,
+          actualVolumeMount);
+
       Assert.assertTrue(testCase.description,
-          (testCase.expected.first).containsAll(testCase.input.first));
+          (testCase.expected.first).containsAll(actualVolume));
       Assert.assertTrue(testCase.description + " Mounts",
-          (testCase.expected.second).containsAll(testCase.input.second));
+          (testCase.expected.second).containsAll(actualVolumeMount));
     }
   }
 
