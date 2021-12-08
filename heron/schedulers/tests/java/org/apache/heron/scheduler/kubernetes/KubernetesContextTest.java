@@ -85,18 +85,18 @@ public class KubernetesContextTest {
   }
 
   @Test
-  public void testPersistentVolumeClaimDisabled() {
-    Assert.assertFalse(KubernetesContext.getPersistentVolumeClaimDisabled(config));
+  public void testVolumesFromCLIDisabled() {
+    Assert.assertFalse(KubernetesContext.getVolumesFromCLIDisabled(config));
     Assert.assertFalse(KubernetesContext
-        .getPersistentVolumeClaimDisabled(configWithPodTemplateConfigMap));
+        .getVolumesFromCLIDisabled(configWithPodTemplateConfigMap));
 
     final Config configWithPodTemplateConfigMapOff = Config.newBuilder()
         .put(KubernetesContext.KUBERNETES_POD_TEMPLATE_LOCATION,
             POD_TEMPLATE_CONFIGMAP_NAME)
-        .put(KubernetesContext.KUBERNETES_PERSISTENT_VOLUME_CLAIMS_CLI_DISABLED, "TRUE")
+        .put(KubernetesContext.KUBERNETES_VOLUME_FROM_CLI_DISABLED, "TRUE")
         .build();
     Assert.assertTrue(KubernetesContext
-        .getPersistentVolumeClaimDisabled(configWithPodTemplateConfigMapOff));
+        .getVolumesFromCLIDisabled(configWithPodTemplateConfigMapOff));
   }
 
   /**
@@ -253,6 +253,13 @@ public class KubernetesContextTest {
         .build();
     testCases.add(new TestTuple<>("Missing path should trigger exception",
         configRequiredPath, "All Volumes require a 'path'."));
+
+    // Disabled.
+    final Config configDisabled = Config.newBuilder()
+        .put(KubernetesContext.KUBERNETES_VOLUME_FROM_CLI_DISABLED, "true")
+        .build();
+    testCases.add(new TestTuple<>("Disabled functionality should trigger exception",
+        configDisabled, "Configuring Volumes from the CLI is disabled."));
 
     // Testing loop.
     for (TestTuple<Config, String> testCase : testCases) {

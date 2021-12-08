@@ -269,7 +269,7 @@ metadata:
 
 > ***System Administrators:***
 >
-> * You may wish to disable the ability to configure Persistent Volume Claims specified via the CLI. To achieve this, you must pass the define option `-D heron.kubernetes.persistent.volume.claims.cli.disabled=true`to the Heron API Server on the command line when launching. This command has been added to the Kubernetes configuration files to deploy the Heron API Server and is set to `false` by default.
+> * You may wish to disable the ability to configure Persistent Volume Claims specified via the CLI. To achieve this, you must pass the define option `-D heron.kubernetes.volume.from.cli.disabled=true`to the Heron API Server on the command line when launching. This command has been added to the Kubernetes configuration files to deploy the Heron API Server and is set to `false` by default.
 > * If you have a custom `Role`/`ClusterRole` for the Heron API Server you will need to ensure the `ServiceAccount` attached to the API server has the correct permissions to access the `Persistent Volume Claim`s:
 >
 >```yaml

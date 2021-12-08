@@ -159,7 +159,7 @@ spec:
               {{- end }}
               -D heron.kubernetes.resource.request.mode={{ .Values.topologyResourceRequestMode }}
               -D heron.kubernetes.pod.template.disabled={{ .Values.disablePodTemplates }}
-              -D heron.kubernetes.persistent.volume.claims.cli.disabled={{ .Values.disablePersistentVolumeMountsCLI }}
+              -D heron.kubernetes.volume.from.cli.disabled={{ .Values.disableVolumesFromCLI }}
           envFrom:
             - configMapRef:
                 name: {{ .Release.Name }}-tools-config

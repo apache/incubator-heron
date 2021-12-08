@@ -418,14 +418,6 @@ public class V1Controller extends KubernetesController {
     // Get and then create Persistent Volume Claims from the CLI.
     final Map<String, Map<KubernetesConstants.VolumeConfigKeys, String>> configsPVC =
         KubernetesContext.getVolumeClaimTemplates(getConfiguration(), isExecutor);
-    if (KubernetesContext.getPersistentVolumeClaimDisabled(getConfiguration())
-        && !configsPVC.isEmpty()) {
-      final String message =
-          String.format("'%s': Configuring Persistent Volume Claim from CLI is disabled",
-              topologyName);
-      LOG.log(Level.WARNING, message);
-      throw new TopologySubmissionException(message);
-    }
 
     final V1StatefulSet statefulSet = new V1StatefulSet();
 
