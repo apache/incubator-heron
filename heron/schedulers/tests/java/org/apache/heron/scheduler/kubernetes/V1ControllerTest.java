@@ -67,7 +67,6 @@ import io.kubernetes.client.openapi.models.V1VolumeMount;
 import io.kubernetes.client.openapi.models.V1VolumeMountBuilder;
 
 import static org.apache.heron.scheduler.kubernetes.KubernetesConstants.VolumeConfigKeys;
-import static org.mockito.Matchers.anyMap;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doReturn;
 
@@ -1003,8 +1002,8 @@ public class V1ControllerTest {
              Pair<List<V1Volume>, List<V1VolumeMount>>> testCase : testCases) {
       List<V1Volume> actualVolume = new LinkedList<>();
       List<V1VolumeMount> actualVolumeMount = new LinkedList<>();
-      v1ControllerPodTemplate.createVolumeAndMountsPVCCLI(testCase.input, actualVolume,
-          actualVolumeMount);
+      v1ControllerPodTemplate.createVolumeAndMountsPersistentVolumeClaimCLI(testCase.input,
+          actualVolume, actualVolumeMount);
 
       Assert.assertTrue(testCase.description,
           (testCase.expected.first).containsAll(actualVolume));
@@ -1014,7 +1013,7 @@ public class V1ControllerTest {
   }
 
   @Test
-  public void testConfigurePodWithPersistentVolumeClaims() {
+  public void testConfigurePodWithVolumesAndMountsFromCLI() {
     final String volumeNameClashing = "clashing-volume";
     final String volumeMountNameClashing = "original-volume-mount";
     V1Volume baseVolume = new V1VolumeBuilder()
@@ -1049,8 +1048,8 @@ public class V1ControllerTest {
         .build();
 
     // Test case container.
-    // Input: Pod Spec to modify, Executor to modify, Volumes and Mounts to return from
-    // <createPersistentVolumeClaimVolumesAndMounts>.
+    // Input: [0] Pod Spec to modify, [1] Heron container to modify, [2] List of Volumes
+    // [3] List of Volume Mounts.
     // Output: The expected <V1PodSpec> and <V1Container>.
     final List<TestTuple<Object[], Pair<V1PodSpec, V1Container>>> testCases = new LinkedList<>();
 
@@ -1061,11 +1060,9 @@ public class V1ControllerTest {
     final V1PodSpec expectedEmptyPodSpec = new V1PodSpecBuilder().withVolumes(baseVolume).build();
     final V1Container expectedEmptyExecutor =
         new V1ContainerBuilder().withVolumeMounts(baseVolumeMount).build();
-    Pair<List<V1Volume>, List<V1VolumeMount>> emptyVolumeAndMount =
-        new Pair<>(new LinkedList<>(), new LinkedList<>());
 
     testCases.add(new TestTuple<>("Empty",
-        new Object[]{podSpecEmptyCase, executorEmptyCase, emptyVolumeAndMount},
+        new Object[]{podSpecEmptyCase, executorEmptyCase, new LinkedList<>(), new LinkedList<>()},
         new Pair<>(expectedEmptyPodSpec, expectedEmptyExecutor)));
 
     // Non-clashing Persistent Volume Claim.
@@ -1084,12 +1081,10 @@ public class V1ControllerTest {
         .addToVolumeMounts(secondaryVolumeMount)
         .build();
 
-    Pair<List<V1Volume>, List<V1VolumeMount>> noClashVolumeAndMount = new Pair<>(
-        new LinkedList<>(Collections.singletonList(secondaryVolume)),
-        new LinkedList<>(Collections.singletonList(secondaryVolumeMount)));
-
     testCases.add(new TestTuple<>("No Clash",
-        new Object[]{podSpecNoClashCase, executorNoClashCase, noClashVolumeAndMount},
+        new Object[]{podSpecNoClashCase, executorNoClashCase,
+            Collections.singletonList(secondaryVolume),
+            Collections.singletonList(secondaryVolumeMount)},
         new Pair<>(expectedNoClashPodSpec, expectedNoClashExecutor)));
 
     // Clashing Persistent Volume Claim.
@@ -1108,24 +1103,18 @@ public class V1ControllerTest {
         .addToVolumeMounts(secondaryVolumeMount)
         .build();
 
-    Pair<List<V1Volume>, List<V1VolumeMount>> clashVolumeAndMount = new Pair<>(
-        new LinkedList<>(Arrays.asList(clashingVolume, secondaryVolume)),
-        new LinkedList<>(Arrays.asList(clashingVolumeMount, secondaryVolumeMount)));
-
     testCases.add(new TestTuple<>("Clashing",
-        new Object[]{podSpecClashCase, executorClashCase, clashVolumeAndMount},
+        new Object[]{podSpecClashCase, executorClashCase,
+            Arrays.asList(clashingVolume, secondaryVolume),
+            Arrays.asList(clashingVolumeMount, secondaryVolumeMount)},
         new Pair<>(expectedClashPodSpec, expectedClashExecutor)));
 
     // Testing loop.
     for (TestTuple<Object[], Pair<V1PodSpec, V1Container>> testCase : testCases) {
-      doReturn(testCase.input[2])
-          .when(v1ControllerWithPodTemplate)
-          .createPersistentVolumeClaimVolumesAndMounts(anyMap());
-
-      // <configPVC> parameter is used in mock above, so we can set it to <null> as it is not used.
       v1ControllerWithPodTemplate
-          .configurePodWithPersistentVolumeClaimVolumesAndMounts((V1PodSpec) testCase.input[0],
-              (V1Container) testCase.input[1], null);
+          .configurePodWithVolumesAndMountsFromCLI((V1PodSpec) testCase.input[0],
+              (V1Container) testCase.input[1], (List<V1Volume>) testCase.input[2],
+              (List<V1VolumeMount>) testCase.input[3]);
 
       Assert.assertEquals("Pod Specs match " + testCase.description,
           testCase.input[0], testCase.expected.first);

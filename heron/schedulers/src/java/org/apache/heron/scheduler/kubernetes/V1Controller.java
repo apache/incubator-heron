@@ -423,7 +423,7 @@ public class V1Controller extends KubernetesController {
         KubernetesContext.getVolumeClaimTemplates(getConfiguration(), isExecutor);
 
     // Collect all Volume configurations from the CLI and generate Volumes and Volume Mounts.
-    createVolumeAndMountsPVCCLI(configsPVC, volumes, volumeMounts);
+    createVolumeAndMountsPersistentVolumeClaimCLI(configsPVC, volumes, volumeMounts);
     createVolumeAndMountsHostPathCLI(
         KubernetesContext.getVolumeHostPath(getConfiguration(), isExecutor), volumes, volumeMounts);
     createVolumeAndMountsEmptyDirCLI(
@@ -469,7 +469,8 @@ public class V1Controller extends KubernetesController {
     templateMetaData.setAnnotations(annotations);
     podTemplateSpec.setMetadata(templateMetaData);
 
-    configurePodSpec(podTemplateSpec, containerResource, numberOfInstances, isExecutor, configsPVC);
+    configurePodSpec(podTemplateSpec, containerResource, numberOfInstances, isExecutor,
+        volumes, volumeMounts);
 
     statefulSetSpec.setTemplate(podTemplateSpec);
 
@@ -523,11 +524,12 @@ public class V1Controller extends KubernetesController {
    * @param resource Passed down to configure the resource limits.
    * @param numberOfInstances Passed down to configure the ports.
    * @param isExecutor Flag used to configure components specific to <code>Executor</code> and <code>Manager</code>.
-   * @param configPVC <code>Persistent Volume Claim</code> configurations options.
+   * @param volumes <code>Volumes</code> generated from configurations options.
+   * @param volumeMounts <code>Volume Mounts</code> generated from configurations options.
    */
   private void configurePodSpec(final V1PodTemplateSpec podTemplateSpec, Resource resource,
-      int numberOfInstances, boolean isExecutor,
-      final Map<String, Map<KubernetesConstants.VolumeConfigKeys, String>> configPVC) {
+      int numberOfInstances, boolean isExecutor, List<V1Volume> volumes,
+      List<V1VolumeMount> volumeMounts) {
     if (podTemplateSpec.getSpec() == null) {
       podTemplateSpec.setSpec(new V1PodSpec());
     }
@@ -565,8 +567,9 @@ public class V1Controller extends KubernetesController {
       containers.add(heronContainer);
     }
 
-    if (!configPVC.isEmpty()) {
-      configurePodWithPersistentVolumeClaimVolumesAndMounts(podSpec, heronContainer, configPVC);
+    if (!volumes.isEmpty() || !volumeMounts.isEmpty()) {
+      configurePodWithVolumesAndMountsFromCLI(podSpec, heronContainer, volumes,
+          volumeMounts);
     }
 
     configureHeronContainer(resource, numberOfInstances, heronContainer, isExecutor);
@@ -1247,7 +1250,7 @@ public class V1Controller extends KubernetesController {
    * @param volumeMounts A list of <code>Volume Mounts</code> to append to.
    */
   @VisibleForTesting
-  protected void createVolumeAndMountsPVCCLI(
+  protected void createVolumeAndMountsPersistentVolumeClaimCLI(
       Map<String, Map<KubernetesConstants.VolumeConfigKeys, String>> mapConfig,
       List<V1Volume> volumes, List<V1VolumeMount> volumeMounts) {
     for (Map.Entry<String, Map<KubernetesConstants.VolumeConfigKeys, String>> configs
@@ -1270,68 +1273,32 @@ public class V1Controller extends KubernetesController {
       volumeMounts.add(createVolumeMountsCLI(volumeName, configs.getValue()));
     }
   }
-
   /**
-   * Generates the <code>Volume</code>s and <code>Volume Mounts</code> for <code>Persistent Volume Claims</code>
-   * to be placed in the <code>Executor</code> and <code>Manager</code> from options on the CLI.
-   * @param mapConfig Mapping of <code>Volumes</code> to <code>key-value</code> configuration pairs.
-   * @return A pair of configured lists of <code>V1Volume</code> and <code>V1VolumeMount</code>.
-   */
-  @VisibleForTesting
-  protected Pair<List<V1Volume>, List<V1VolumeMount>> createPersistentVolumeClaimVolumesAndMounts(
-      final Map<String, Map<KubernetesConstants.VolumeConfigKeys, String>> mapConfig) {
-    final List<V1Volume> volumeList = new LinkedList<>();
-    final List<V1VolumeMount> mountList = new LinkedList<>();
-    for (Map.Entry<String, Map<KubernetesConstants.VolumeConfigKeys, String>> configs
-        : mapConfig.entrySet()) {
-      final String volumeName = configs.getKey();
-
-      // Do not create Volumes for `OnDemand`.
-      final String claimName = configs.getValue()
-          .get(KubernetesConstants.VolumeConfigKeys.claimName);
-      if (claimName != null && !KubernetesConstants.LABEL_ON_DEMAND.equalsIgnoreCase(claimName)) {
-        volumeList.add(
-            new V1VolumeBuilder()
-            .withName(volumeName)
-            .withNewPersistentVolumeClaim()
-              .withClaimName(claimName)
-            .endPersistentVolumeClaim()
-            .build()
-        );
-      }
-      mountList.add(createVolumeMountsCLI(volumeName, configs.getValue()));
-    }
-    return new Pair<>(volumeList, mountList);
-  }
-
-  /**
-   * Makes a call to generate <code>Volumes</code> and <code>Volume Mounts</code> and then inserts them.
+   * Configures the Pod Spec and Heron container with <code>Volumes</code> and <code>Volume Mounts</code>.
    * @param podSpec All generated <code>V1Volume</code> will be placed in the <code>Pod Spec</code>.
    * @param executor All generated <code>V1VolumeMount</code> will be placed in the <code>Container</code>.
-   * @param configPVC <code>Persistent Volume Claim</code> configurations options.
+   * @param volumes <code>Volumes</code> to be inserted in the Pod Spec.
+   * @param volumeMounts <code>Volumes Mounts</code> to be inserted in the Heron container.
    */
   @VisibleForTesting
-  protected void configurePodWithPersistentVolumeClaimVolumesAndMounts(final V1PodSpec podSpec,
-      final V1Container executor,
-      final Map<String, Map<KubernetesConstants.VolumeConfigKeys, String>> configPVC) {
-    Pair<List<V1Volume>, List<V1VolumeMount>> volumesAndMounts =
-        createPersistentVolumeClaimVolumesAndMounts(configPVC);
+  protected void configurePodWithVolumesAndMountsFromCLI(final V1PodSpec podSpec,
+      final V1Container executor, List<V1Volume> volumes, List<V1VolumeMount> volumeMounts) {
 
     // Deduplicate on Names with Persistent Volume Claims taking precedence.
-
-    KubernetesUtils.V1ControllerUtils<V1VolumeMount> utilsMounts =
-        new KubernetesUtils.V1ControllerUtils<>();
-    executor.setVolumeMounts(
-        utilsMounts.mergeListsDedupe(volumesAndMounts.second, executor.getVolumeMounts(),
-            Comparator.comparing(V1VolumeMount::getName),
-            "Executor and Persistent Volume Claim Volume Mounts"));
 
     KubernetesUtils.V1ControllerUtils<V1Volume> utilsVolumes =
         new KubernetesUtils.V1ControllerUtils<>();
     podSpec.setVolumes(
-        utilsVolumes.mergeListsDedupe(volumesAndMounts.first, podSpec.getVolumes(),
+        utilsVolumes.mergeListsDedupe(volumes, podSpec.getVolumes(),
             Comparator.comparing(V1Volume::getName),
-            "Pod and Persistent Volume Claim Volumes"));
+            "Pod with Volumes"));
+
+    KubernetesUtils.V1ControllerUtils<V1VolumeMount> utilsMounts =
+        new KubernetesUtils.V1ControllerUtils<>();
+    executor.setVolumeMounts(
+        utilsMounts.mergeListsDedupe(volumeMounts, executor.getVolumeMounts(),
+            Comparator.comparing(V1VolumeMount::getName),
+            "Heron container with Volume Mounts"));
   }
 
   /**
