@@ -116,8 +116,8 @@ public final class KubernetesContext extends Context {
       "heron.kubernetes.pod.secretKeyRef.";
 
   // Persistent Volume Claims
-  public static final String KUBERNETES_PERSISTENT_VOLUME_CLAIMS_CLI_DISABLED =
-      "heron.kubernetes.persistent.volume.claims.cli.disabled";
+  public static final String KUBERNETES_VOLUME_FROM_CLI_DISABLED =
+      "heron.kubernetes.volume.from.cli.disabled";
   // heron.kubernetes.[executor | manager].volumes.persistentVolumeClaim.VOLUME_NAME.OPTION=VALUE
   public static final String KUBERNETES_VOLUME_CLAIM_PREFIX =
       "heron.kubernetes.%s.volumes.persistentVolumeClaim.";
@@ -253,8 +253,8 @@ public final class KubernetesContext extends Context {
     return getConfigItemsByPrefix(config, key);
   }
 
-  public static boolean getPersistentVolumeClaimDisabled(Config config) {
-    final String disabled = config.getStringValue(KUBERNETES_PERSISTENT_VOLUME_CLAIMS_CLI_DISABLED);
+  public static boolean getVolumesFromCLIDisabled(Config config) {
+    final String disabled = config.getStringValue(KUBERNETES_VOLUME_FROM_CLI_DISABLED);
     return "true".equalsIgnoreCase(disabled);
   }
 
@@ -271,6 +271,13 @@ public final class KubernetesContext extends Context {
   protected static Map<String, Map<KubernetesConstants.VolumeConfigKeys, String>>
       getVolumeConfigs(Config config, String prefix, boolean isExecutor) {
     final Logger LOG = Logger.getLogger(V1Controller.class.getName());
+
+    // Check to see if functionality is disabled.
+    if (KubernetesContext.getVolumesFromCLIDisabled(config)) {
+      final String message = "Configuring Volumes from the CLI is disabled.";
+      LOG.log(Level.WARNING, message);
+      throw new TopologySubmissionException(message);
+    }
 
     final String prefixKey = String.format(prefix,
         isExecutor ? KubernetesConstants.EXECUTOR_NAME : KubernetesConstants.MANAGER_NAME);
