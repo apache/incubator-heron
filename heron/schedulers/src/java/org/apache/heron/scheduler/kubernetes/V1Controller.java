@@ -1100,7 +1100,7 @@ public class V1Controller extends KubernetesController {
    * and <code>Manager</code> from options on the CLI.
    * @param volumeName Name of the <code>Volume</code>.
    * @param configs Mapping of <code>Volume</code> option <code>key-value</code> configuration pairs.
-   * @return A pair of configured lists of <code>V1VolumeMount</code>.
+   * @return A configured <code>V1VolumeMount</code>.
    */
   @VisibleForTesting
   protected V1VolumeMount createVolumeMountsCLI(String volumeName,
@@ -1118,8 +1118,125 @@ public class V1Controller extends KubernetesController {
   }
 
   /**
-   * Generates the <code>Volume</code>s and <code>Volume Mounts</code> to be placed in the <code>Executor</code>
-   * and <code>Manager</code> from options on the CLI.
+   * Generates the <code>Volume</code>s and <code>Volume Mounts</code> for <code>emptyDir</code>s to be
+   * placed in the <code>Executor</code> and <code>Manager</code> from options on the CLI.
+   * @param mapOfOpts Mapping of <code>Volume</code> option <code>key-value</code> configuration pairs.
+   * @param volumes A list of <code>Volume</code> to append to.
+   * @param volumeMounts A list of <code>Volume Mounts</code> to append to.
+   */
+  @VisibleForTesting
+  protected void createVolumeAndMountsEmptyDirCLI(
+      Map<String, Map<KubernetesConstants.VolumeConfigKeys, String>> mapOfOpts,
+      List<V1Volume> volumes, List<V1VolumeMount> volumeMounts) {
+    for (Map.Entry<String, Map<KubernetesConstants.VolumeConfigKeys, String>> configs
+        : mapOfOpts.entrySet()) {
+      final String volumeName = configs.getKey();
+      final V1Volume volume = new V1VolumeBuilder()
+          .withName(volumeName)
+          .withNewEmptyDir()
+          .endEmptyDir()
+          .build();
+
+      for (Map.Entry<KubernetesConstants.VolumeConfigKeys, String> config
+          : configs.getValue().entrySet()) {
+        switch(config.getKey()) {
+          case medium:
+            volume.getEmptyDir().medium(config.getValue());
+            break;
+          case sizeLimit:
+            volume.getEmptyDir().sizeLimit(new Quantity(config.getValue()));
+            break;
+          default:
+            break;
+        }
+      }
+      volumes.add(volume);
+      volumeMounts.add(createVolumeMountsCLI(volumeName, configs.getValue()));
+    }
+  }
+
+  /**
+   * Generates the <code>Volume</code>s and <code>Volume Mounts</code> for <code>Host Path</code>s to be
+   * placed in the <code>Executor</code> and <code>Manager</code> from options on the CLI.
+   * @param mapOfOpts Mapping of <code>Volume</code> option <code>key-value</code> configuration pairs.
+   * @param volumes A list of <code>Volume</code> to append to.
+   * @param volumeMounts A list of <code>Volume Mounts</code> to append to.
+   */
+  @VisibleForTesting
+  protected void createVolumeAndMountsHostPathCLI(
+      Map<String, Map<KubernetesConstants.VolumeConfigKeys, String>> mapOfOpts,
+      List<V1Volume> volumes, List<V1VolumeMount> volumeMounts) {
+    for (Map.Entry<String, Map<KubernetesConstants.VolumeConfigKeys, String>> configs
+        : mapOfOpts.entrySet()) {
+      final String volumeName = configs.getKey();
+      final V1Volume volume = new V1VolumeBuilder()
+          .withName(volumeName)
+          .withNewHostPath()
+          .endHostPath()
+          .build();
+
+      for (Map.Entry<KubernetesConstants.VolumeConfigKeys, String> config
+          : configs.getValue().entrySet()) {
+        switch(config.getKey()) {
+          case type:
+            volume.getHostPath().setType(config.getValue());
+            break;
+          case pathOnHost:
+            volume.getHostPath().setPath(config.getValue());
+            break;
+          default:
+            break;
+        }
+      }
+      volumes.add(volume);
+      volumeMounts.add(createVolumeMountsCLI(volumeName, configs.getValue()));
+    }
+  }
+
+  /**
+   * Generates the <code>Volume</code>s and <code>Volume Mounts</code> for <code>NFS</code>s to be
+   * placed in the <code>Executor</code> and <code>Manager</code> from options on the CLI.
+   * @param mapOfOpts Mapping of <code>Volume</code> option <code>key-value</code> configuration pairs.
+   * @param volumes A list of <code>Volume</code> to append to.
+   * @param volumeMounts A list of <code>Volume Mounts</code> to append to.
+   */
+  @VisibleForTesting
+  protected void createVolumeAndMountsNFSCLI(
+      Map<String, Map<KubernetesConstants.VolumeConfigKeys, String>> mapOfOpts,
+      List<V1Volume> volumes, List<V1VolumeMount> volumeMounts) {
+    for (Map.Entry<String, Map<KubernetesConstants.VolumeConfigKeys, String>> configs
+        : mapOfOpts.entrySet()) {
+      final String volumeName = configs.getKey();
+      final V1Volume volume = new V1VolumeBuilder()
+          .withName(volumeName)
+          .withNewNfs()
+          .endNfs()
+          .build();
+
+      for (Map.Entry<KubernetesConstants.VolumeConfigKeys, String> config
+          : configs.getValue().entrySet()) {
+        switch(config.getKey()) {
+          case server:
+            volume.getNfs().setServer(config.getValue());
+            break;
+          case pathOnNFS:
+            volume.getNfs().setPath(config.getValue());
+            break;
+          case readOnly:
+            volume.getNfs().setReadOnly(Boolean.parseBoolean(config.getValue()));
+            break;
+          default:
+            break;
+        }
+      }
+      volumes.add(volume);
+      volumeMounts.add(createVolumeMountsCLI(volumeName, configs.getValue()));
+    }
+  }
+
+  /**
+   * Generates the <code>Volume</code>s and <code>Volume Mounts</code> for <code>Persistent Volume Claims</code>
+   * to be placed in the <code>Executor</code> and <code>Manager</code> from options on the CLI.
    * @param mapConfig Mapping of <code>Volumes</code> to <code>key-value</code> configuration pairs.
    * @return A pair of configured lists of <code>V1Volume</code> and <code>V1VolumeMount</code>.
    */
@@ -1131,31 +1248,21 @@ public class V1Controller extends KubernetesController {
     for (Map.Entry<String, Map<KubernetesConstants.VolumeConfigKeys, String>> configs
         : mapConfig.entrySet()) {
       final String volumeName = configs.getKey();
-      final String path = configs.getValue()
-          .get(KubernetesConstants.VolumeConfigKeys.path);
-      final String subPath = configs.getValue()
-          .get(KubernetesConstants.VolumeConfigKeys.subPath);
 
       // Do not create Volumes for `OnDemand`.
       final String claimName = configs.getValue()
           .get(KubernetesConstants.VolumeConfigKeys.claimName);
       if (claimName != null && !KubernetesConstants.LABEL_ON_DEMAND.equalsIgnoreCase(claimName)) {
-        final V1Volume volume = new V1VolumeBuilder()
+        volumeList.add(
+            new V1VolumeBuilder()
             .withName(volumeName)
             .withNewPersistentVolumeClaim()
               .withClaimName(claimName)
             .endPersistentVolumeClaim()
-            .build();
-        volumeList.add(volume);
+            .build()
+        );
       }
-
-      final V1VolumeMountBuilder volumeMount = new V1VolumeMountBuilder()
-          .withName(volumeName)
-          .withMountPath(path);
-      if (subPath != null && !subPath.isEmpty()) {
-        volumeMount.withSubPath(subPath);
-      }
-      mountList.add(volumeMount.build());
+      mountList.add(createVolumeMountsCLI(volumeName, configs.getValue()));
     }
     return new Pair<>(volumeList, mountList);
   }

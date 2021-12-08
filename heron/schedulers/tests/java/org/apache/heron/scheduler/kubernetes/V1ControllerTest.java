@@ -1289,8 +1289,9 @@ public class V1ControllerTest {
 
     // NFS.
     final Map<VolumeConfigKeys, String> configNFS = ImmutableMap.<VolumeConfigKeys, String>builder()
-        .put(VolumeConfigKeys.type, "DirectoryOrCreate")
-        .put(VolumeConfigKeys.pathOnHost, value)
+        .put(VolumeConfigKeys.server, "nfs.server.address")
+        .put(VolumeConfigKeys.readOnly, "true")
+        .put(VolumeConfigKeys.pathOnNFS, value)
         .put(VolumeConfigKeys.path, value)
         .put(VolumeConfigKeys.subPath, value)
         .build();
@@ -1310,5 +1311,134 @@ public class V1ControllerTest {
       Assert.assertEquals(testCase.description, testCase.expected, actual);
     }
 
+  }
+
+  @Test
+  public void testCreateVolumeAndMountsEmptyDirCLI() {
+    final String volumeName = "volume-name-empty-dir";
+    final String medium = "Memory";
+    final String sizeLimit = "1Gi";
+    final String path = "/path/to/mount";
+    final String subPath = "/sub/path/to/mount";
+
+    // Empty Dir.
+    final Map<String, Map<VolumeConfigKeys, String>> config =
+        ImmutableMap.of(volumeName, new HashMap<VolumeConfigKeys, String>() {
+          {
+            put(VolumeConfigKeys.sizeLimit, sizeLimit);
+            put(VolumeConfigKeys.medium, "Memory");
+            put(VolumeConfigKeys.path, path);
+            put(VolumeConfigKeys.subPath, subPath);
+          }
+        });
+    final List<V1Volume> expectedVolumes = Collections.singletonList(
+        new V1VolumeBuilder()
+            .withName(volumeName)
+            .withNewEmptyDir()
+              .withMedium(medium)
+              .withNewSizeLimit(sizeLimit)
+            .endEmptyDir()
+            .build()
+    );
+    final List<V1VolumeMount> expectedMounts = Collections.singletonList(
+        new V1VolumeMountBuilder()
+            .withName(volumeName)
+              .withMountPath(path)
+              .withSubPath(subPath)
+            .build()
+    );
+
+    List<V1Volume> actualVolumes = new LinkedList<>();
+    List<V1VolumeMount> actualMounts = new LinkedList<>();
+    v1ControllerPodTemplate.createVolumeAndMountsEmptyDirCLI(config, actualVolumes, actualMounts);
+    Assert.assertEquals("Empty Dir Volume populated", expectedVolumes, actualVolumes);
+    Assert.assertEquals("Empty Dir Volume Mount populated", expectedMounts, actualMounts);
+  }
+
+  @Test
+  public void testCreateVolumeAndMountsHostPathCLI() {
+    final String volumeName = "volume-name-host-path";
+    final String type = "DirectoryOrCreate";
+    final String pathOnHost = "path.on.host";
+    final String path = "/path/to/mount";
+    final String subPath = "/sub/path/to/mount";
+
+    // Host Path.
+    final Map<String, Map<VolumeConfigKeys, String>> config =
+        ImmutableMap.of(volumeName, new HashMap<VolumeConfigKeys, String>() {
+          {
+            put(VolumeConfigKeys.type, type);
+            put(VolumeConfigKeys.pathOnHost, pathOnHost);
+            put(VolumeConfigKeys.path, path);
+            put(VolumeConfigKeys.subPath, subPath);
+          }
+        });
+    final List<V1Volume> expectedVolumes = Collections.singletonList(
+        new V1VolumeBuilder()
+            .withName(volumeName)
+            .withNewHostPath()
+              .withNewType(type)
+              .withNewPath(pathOnHost)
+            .endHostPath()
+            .build()
+    );
+    final List<V1VolumeMount> expectedMounts = Collections.singletonList(
+        new V1VolumeMountBuilder()
+            .withName(volumeName)
+              .withMountPath(path)
+              .withSubPath(subPath)
+            .build()
+    );
+
+    List<V1Volume> actualVolumes = new LinkedList<>();
+    List<V1VolumeMount> actualMounts = new LinkedList<>();
+    v1ControllerPodTemplate.createVolumeAndMountsHostPathCLI(config, actualVolumes, actualMounts);
+    Assert.assertEquals("Host Path Volume populated", expectedVolumes, actualVolumes);
+    Assert.assertEquals("Host Path Volume Mount populated", expectedMounts, actualMounts);
+  }
+
+  @Test
+  public void testCreateVolumeAndMountsNFSCLI() {
+    final String volumeName = "volume-name-nfs";
+    final String server = "nfs.server.address";
+    final String pathOnNFS = "path.on.host";
+    final String readOnly = "true";
+    final String path = "/path/to/mount";
+    final String subPath = "/sub/path/to/mount";
+
+    // NFS.
+    final Map<String, Map<VolumeConfigKeys, String>> config =
+        ImmutableMap.of(volumeName, new HashMap<VolumeConfigKeys, String>() {
+          {
+            put(VolumeConfigKeys.server, server);
+            put(VolumeConfigKeys.readOnly, readOnly);
+            put(VolumeConfigKeys.pathOnNFS, pathOnNFS);
+            put(VolumeConfigKeys.path, path);
+            put(VolumeConfigKeys.subPath, subPath);
+          }
+        });
+    final List<V1Volume> expectedVolumes = Collections.singletonList(
+        new V1VolumeBuilder()
+            .withName(volumeName)
+            .withNewNfs()
+              .withServer(server)
+              .withNewPath(pathOnNFS)
+              .withNewReadOnly(readOnly)
+            .endNfs()
+            .build()
+    );
+    final List<V1VolumeMount> expectedMounts = Collections.singletonList(
+        new V1VolumeMountBuilder()
+            .withName(volumeName)
+            .withMountPath(path)
+            .withSubPath(subPath)
+            .build()
+    );
+
+    List<V1Volume> actualVolumes = new LinkedList<>();
+    List<V1VolumeMount> actualMounts = new LinkedList<>();
+    v1ControllerPodTemplate.createVolumeAndMountsNFSCLI(config, actualVolumes, actualMounts);
+    Assert.assertEquals("NFS Volume populated", expectedVolumes, actualVolumes);
+    Assert.assertEquals("NFS Volume Mount populated", expectedMounts, actualMounts);
   }
 }
