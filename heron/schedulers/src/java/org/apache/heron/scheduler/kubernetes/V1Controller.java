@@ -1136,6 +1136,38 @@ public class V1Controller extends KubernetesController {
   }
 
   /**
+   * Generates the <code>Volume</code>s and <code>Volume Mounts</code> for <code>Persistent Volume Claims</code>s
+   *  to be placed in the <code>Executor</code> and <code>Manager</code> from options on the CLI.
+   * @param mapConfig Mapping of <code>Volume</code> option <code>key-value</code> configuration pairs.
+   * @param volumes A list of <code>Volume</code> to append to.
+   * @param volumeMounts A list of <code>Volume Mounts</code> to append to.
+   */
+  @VisibleForTesting
+  protected void createVolumeAndMountsPersistentVolumeClaimCLI(
+      Map<String, Map<KubernetesConstants.VolumeConfigKeys, String>> mapConfig,
+      List<V1Volume> volumes, List<V1VolumeMount> volumeMounts) {
+    for (Map.Entry<String, Map<KubernetesConstants.VolumeConfigKeys, String>> configs
+        : mapConfig.entrySet()) {
+      final String volumeName = configs.getKey();
+
+      // Do not create Volumes for `OnDemand`.
+      final String claimName = configs.getValue()
+          .get(KubernetesConstants.VolumeConfigKeys.claimName);
+      if (claimName != null && !KubernetesConstants.LABEL_ON_DEMAND.equalsIgnoreCase(claimName)) {
+        volumes.add(
+            new V1VolumeBuilder()
+                .withName(volumeName)
+                .withNewPersistentVolumeClaim()
+                  .withClaimName(claimName)
+                .endPersistentVolumeClaim()
+                .build()
+        );
+      }
+      volumeMounts.add(createVolumeMountsCLI(volumeName, configs.getValue()));
+    }
+  }
+
+  /**
    * Generates the <code>Volume</code>s and <code>Volume Mounts</code> for <code>emptyDir</code>s to be
    * placed in the <code>Executor</code> and <code>Manager</code> from options on the CLI.
    * @param mapOfOpts Mapping of <code>Volume</code> option <code>key-value</code> configuration pairs.
@@ -1252,38 +1284,6 @@ public class V1Controller extends KubernetesController {
     }
   }
 
-
-  /**
-   * Generates the <code>Volume</code>s and <code>Volume Mounts</code> for <code>Persistent Volume Claims</code>s
-   *  to be placed in the <code>Executor</code> and <code>Manager</code> from options on the CLI.
-   * @param mapConfig Mapping of <code>Volume</code> option <code>key-value</code> configuration pairs.
-   * @param volumes A list of <code>Volume</code> to append to.
-   * @param volumeMounts A list of <code>Volume Mounts</code> to append to.
-   */
-  @VisibleForTesting
-  protected void createVolumeAndMountsPersistentVolumeClaimCLI(
-      Map<String, Map<KubernetesConstants.VolumeConfigKeys, String>> mapConfig,
-      List<V1Volume> volumes, List<V1VolumeMount> volumeMounts) {
-    for (Map.Entry<String, Map<KubernetesConstants.VolumeConfigKeys, String>> configs
-        : mapConfig.entrySet()) {
-      final String volumeName = configs.getKey();
-
-      // Do not create Volumes for `OnDemand`.
-      final String claimName = configs.getValue()
-          .get(KubernetesConstants.VolumeConfigKeys.claimName);
-      if (claimName != null && !KubernetesConstants.LABEL_ON_DEMAND.equalsIgnoreCase(claimName)) {
-        volumes.add(
-            new V1VolumeBuilder()
-                .withName(volumeName)
-                .withNewPersistentVolumeClaim()
-                  .withClaimName(claimName)
-                .endPersistentVolumeClaim()
-                .build()
-        );
-      }
-      volumeMounts.add(createVolumeMountsCLI(volumeName, configs.getValue()));
-    }
-  }
   /**
    * Configures the Pod Spec and Heron container with <code>Volumes</code> and <code>Volume Mounts</code>.
    * @param podSpec All generated <code>V1Volume</code> will be placed in the <code>Pod Spec</code>.
