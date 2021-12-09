@@ -36,13 +36,13 @@ This document demonstrates how you can customize various aspects of the Heron ex
     - [Heron Configured Items in Pod Templates](#heron-configured-items-in-pod-templates)
       - [Executor and Manager Containers](#executor-and-manager-containers)
       - [Pod](#pod)
-  - [Adding Persistent Volumes via the Command Line Interface](#adding-persistent-volumes-via-the-command-line-interface)
+  - [Adding Persistent Volumes via the Command-line Interface](#adding-persistent-volumes-via-the-command-line-interface)
     - [Usage](#usage)
       - [Example](#example)
     - [Submitting](#submitting-1)
     - [Required and Optional Configuration Items](#required-and-optional-configuration-items)
     - [Configuration Items Created and Entries Made](#configuration-items-created-and-entries-made)
-  - [Adding Empty Directory, Host Path, and Nework File Storage Volumes via the Command Line Interface](#adding-empty-directory-host-path-and-nework-file-storage-volumes-via-the-command-line-interface)
+  - [Adding Empty Directory, Host Path, and Nework File System Volumes via the Command-line Interface](#adding-empty-directory-host-path-and-nework-file-system-volumes-via-the-command-line-interface)
     - [Usage](#usage-1)
       - [Example](#example-1)
     - [Submitting](#submitting-2)
@@ -249,7 +249,7 @@ The following items will be set in the Pod Template's `spec` by Heron.
 ---
 <br>
 
-## Adding Persistent Volumes via the Command Line Interface
+## Adding Persistent Volumes via the Command-line Interface
 
 <br>
 
@@ -497,7 +497,7 @@ A `Volume` and a `Volume Mount` will be created for each `volume name` which you
 
 <br>
 
-## Adding Empty Directory, Host Path, and Nework File Storage Volumes via the Command Line Interface
+## Adding Empty Directory, Host Path, and Nework File System Volumes via the Command-line Interface
 
 <br>
 
@@ -688,12 +688,12 @@ The following table outlines CLI options which are either ***required*** ( &#x27
 | `path` | &#x2705; | &#x2705; | &#x2705;
 | `subPath` | &#x2754; | &#x2754; | &#x2754;
 | `readOnly` | &#x2754; | &#x2754; | &#x2754;
-| `pathOnHost` | &#x274c; | &#x2705; | &#x274c;
-| `pathOnNFS` | &#x274c; | &#x274c; | &#x2705;
-| `server` | &#x274c; | &#x274c; | &#x2705;
-| `type` | &#x274c; | &#x2754; | &#x274c;
 | `medium` | &#x2754; | &#x274c; | &#x274c;
 | `sizeLimit` | &#x2754; | &#x274c; | &#x274c;
+| `pathOnHost` | &#x274c; | &#x2705; | &#x274c;
+| `type` | &#x274c; | &#x2754; | &#x274c;
+| `pathOnNFS` | &#x274c; | &#x274c; | &#x2705;
+| `server` | &#x274c; | &#x274c; | &#x2705;
 
 <br>
 
@@ -709,14 +709,14 @@ A `Volume` and a `Volume Mount` will be created for each `volume name` which you
 
 | Name | Description | Policy |
 |---|---|---|
-| `VOLUME NAME` | The `name` of the `Volume`. | Entries are made in the Pod Spec's `Volumes`, and the `Heron containers` `volumeMounts`.
-| `path` | The `mountPath` of the `Volume`. | Entries are made in the `Heron container`s `volumeMounts`.
-| `subPath` | The `subPath` of the `Volume`. | Entries are made in the `Heron container`s `volumeMounts`.
+| `VOLUME NAME` | The `name` of the `Volume`. | Entries are made in the Pod Spec's `Volumes`, and the `Heron container`'s `volumeMounts`.
+| `path` | The `mountPath` of the `Volume`. | Entries are made in the `Heron container`'s `volumeMounts`.
+| `subPath` | The `subPath` of the `Volume`. | Entries are made in the `Heron container`'s `volumeMounts`.
 | `readOnly` | A boolean value which defaults to `false` and indicates whether the medium has read-write permissions. | Entries are made in the `Heron container`s `volumeMount`. When used with an `NFS` volume an entry is also made in the associated `Volume`.
-| `medium` | The type of storage medium that will back the `EmptyDir` and defaults to "", please read more [here](https://kubernetes.io/docs/concepts/storage/volumes#emptydir). | An entry is made in the `EmptyDir`'s `Volume`.
-| `sizeLimit` | Total amount of local storage required for this `EmptyDir` volume. | An entry is made `EmptyDir`'s `Volume`.
-| `pathOnHost` | The directory path to be mounted the host. | A `path` entry is made `hostPath`'s `Volume`.
-| `type` | The type of the `hostPath` volume and defaults to "", please read more [here](https://kubernetes.io/docs/concepts/storage/volumes#hostpath). | An entry is made `hostPath`'s `Volume`.
+| `medium` | The type of storage medium that will back the `Empty Dir` and defaults to "", please read more [here](https://kubernetes.io/docs/concepts/storage/volumes#emptydir). | An entry is made in the `Empty Dir`'s `Volume`.
+| `sizeLimit` | Total [amount](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#meaning-of-memory) of local storage required for this `Empty Dir` Volume. | An entry is made `Empty Dir`'s `Volume`.
+| `pathOnHost` | The directory path to be mounted the host. | A `path` entry is made `Host Path`'s `Volume`.
+| `type` | The type of the `Host Path` volume and defaults to "", please read more [here](https://kubernetes.io/docs/concepts/storage/volumes#hostpath). | An entry is made `Host Path`'s `Volume`.
 | `pathOnNFS` | The directory path to be mounted the NFS server. | A `path` entry is made `NFS`'s `Volume`.
 | `server` | The hostname or IP address of the NFS server. | An entry is made `NFS`'s `Volume`.
 
