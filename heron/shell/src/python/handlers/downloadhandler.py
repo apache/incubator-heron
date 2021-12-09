@@ -23,7 +23,6 @@
 import os
 import logging
 import tornado.web
-import anticrlf
 
 from heron.shell.src.python import utils
 
@@ -36,7 +35,7 @@ class DownloadHandler(tornado.web.RequestHandler):
     """ get method """
 
     handler = logging.StreamHandler()
-    handler.setFormatter(anticrlf.LogFormatter('%(levelname)s:%(name)s:%(message)s'))
+    handler.setFormatter(logging.Formatter('%(levelname)s:%(name)s:%(message)s'))
     logger = logging.getLogger(__name__)
     logger.addHandler(handler)
     logger.setLevel(logging.DEBUG)
