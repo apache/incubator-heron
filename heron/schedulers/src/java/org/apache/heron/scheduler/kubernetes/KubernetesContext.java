@@ -269,7 +269,7 @@ public final class KubernetesContext extends Context {
    */
   @VisibleForTesting
   protected static Map<String, Map<KubernetesConstants.VolumeConfigKeys, String>>
-      getVolumeConfigs(Config config, String prefix, boolean isExecutor) {
+      getVolumeConfigs(final Config config, final String prefix, final boolean isExecutor) {
     final Logger LOG = Logger.getLogger(V1Controller.class.getName());
 
     // Check to see if functionality is disabled.
@@ -338,7 +338,7 @@ public final class KubernetesContext extends Context {
    * Will return an empty list if there are no Volume Claim Templates to be generated.
    */
   public static Map<String, Map<KubernetesConstants.VolumeConfigKeys, String>>
-      getVolumeClaimTemplates(Config config, boolean isExecutor) {
+      getVolumeClaimTemplates(final Config config, final boolean isExecutor) {
     final Matcher matcher = KubernetesConstants.VALID_LOWERCASE_RFC_1123_REGEX.matcher("");
 
     final Map<String, Map<KubernetesConstants.VolumeConfigKeys, String>> volumes =
@@ -393,7 +393,7 @@ public final class KubernetesContext extends Context {
    * Will return an empty list if there are no Volume Claim Templates to be generated.
    */
   public static Map<String, Map<KubernetesConstants.VolumeConfigKeys, String>>
-      getVolumeEmptyDir(Config config, boolean isExecutor) {
+      getVolumeEmptyDir(final Config config, final boolean isExecutor) {
     final Map<String, Map<KubernetesConstants.VolumeConfigKeys, String>> volumes =
         getVolumeConfigs(config, KubernetesContext.KUBERNETES_VOLUME_EMPTYDIR_PREFIX, isExecutor);
 
@@ -430,7 +430,7 @@ public final class KubernetesContext extends Context {
    * Will return an empty list if there are no Volume Claim Templates to be generated.
    */
   public static Map<String, Map<KubernetesConstants.VolumeConfigKeys, String>>
-      getVolumeHostPath(Config config, boolean isExecutor) {
+      getVolumeHostPath(final Config config, final boolean isExecutor) {
     final Map<String, Map<KubernetesConstants.VolumeConfigKeys, String>> volumes =
         getVolumeConfigs(config, KubernetesContext.KUBERNETES_VOLUME_HOSTPATH_PREFIX, isExecutor);
 
@@ -473,7 +473,7 @@ public final class KubernetesContext extends Context {
    * Will return an empty list if there are no Volume Claim Templates to be generated.
    */
   public static Map<String, Map<KubernetesConstants.VolumeConfigKeys, String>>
-      getVolumeNFS(Config config, boolean isExecutor) {
+      getVolumeNFS(final Config config, final boolean isExecutor) {
     final Map<String, Map<KubernetesConstants.VolumeConfigKeys, String>> volumes =
         getVolumeConfigs(config, KubernetesContext.KUBERNETES_VOLUME_NFS_PREFIX, isExecutor);
 
