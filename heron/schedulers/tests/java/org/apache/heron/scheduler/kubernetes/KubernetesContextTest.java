@@ -164,6 +164,21 @@ public class KubernetesContextTest {
       testCases.add(new TestTuple<>(description,
           new Pair<>(configPVC, isExecutor),
           new Object[]{expectedKeys, expectedOptionsKeys, expectedOptionsValues}));
+
+      final Config configPVCDisabled = Config.newBuilder()
+          .put(KubernetesContext.KUBERNETES_VOLUME_FROM_CLI_DISABLED, "true")
+          .put(pathKeyOne, expectedPath)
+          .put(pathKeyTwo, expectedPath)
+          .put(claimNameKeyOne, claimName)
+          .put(claimNameKeyTwo, claimName)
+          .put(storageClassKeyOne, expectedStorageClass)
+          .put(storageClassKeyTwo, expectedStorageClass)
+          .build();
+
+      testCases.add(new TestTuple<>(description + " Disabled should not error",
+          new Pair<>(configPVCDisabled, !isExecutor),
+          new Object[]{new LinkedList<String>(), new LinkedList<VolumeConfigKeys>(),
+              new LinkedList<String>()}));
     }
   }
 
@@ -257,6 +272,17 @@ public class KubernetesContextTest {
     // Disabled.
     final Config configDisabled = Config.newBuilder()
         .put(KubernetesContext.KUBERNETES_VOLUME_FROM_CLI_DISABLED, "true")
+        .put(String.format(keyPattern, volumeNameValid, "claimName"), passingValue)
+        .put(String.format(keyPattern, volumeNameValid, "storageClassName"), passingValue)
+        .put(String.format(keyPattern, volumeNameValid, "sizeLimit"), passingValue)
+        .put(String.format(keyPattern, volumeNameValid, "accessModes"), passingValue)
+        .put(String.format(keyPattern, volumeNameValid, "volumeMode"), passingValue)
+        .put(String.format(keyPattern, volumeNameValid, "path"), passingValue)
+        .put(String.format(keyPattern, volumeNameValid, "subPath"), passingValue)
+        .put(String.format(keyPattern, volumeNameValid, "server"), passingValue)
+        .put(String.format(keyPattern, volumeNameValid, "readOnly"), passingValue)
+        .put(String.format(keyPattern, volumeNameValid, "type"), passingValue)
+        .put(String.format(keyPattern, volumeNameValid, "medium"), passingValue)
         .build();
     testCases.add(new TestTuple<>("Disabled functionality should trigger exception",
         configDisabled, "Configuring Volumes from the CLI is disabled."));

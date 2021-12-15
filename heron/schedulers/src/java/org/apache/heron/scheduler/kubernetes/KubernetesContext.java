@@ -272,13 +272,6 @@ public final class KubernetesContext extends Context {
       getVolumeConfigs(final Config config, final String prefix, final boolean isExecutor) {
     final Logger LOG = Logger.getLogger(V1Controller.class.getName());
 
-    // Check to see if functionality is disabled.
-    if (KubernetesContext.getVolumesFromCLIDisabled(config)) {
-      final String message = "Configuring Volumes from the CLI is disabled.";
-      LOG.log(Level.WARNING, message);
-      throw new TopologySubmissionException(message);
-    }
-
     final String prefixKey = String.format(prefix,
         isExecutor ? KubernetesConstants.EXECUTOR_NAME : KubernetesConstants.MANAGER_NAME);
     final Set<String> completeConfigParam = getConfigKeys(config, prefixKey);
@@ -325,6 +318,13 @@ public final class KubernetesContext extends Context {
         throw new TopologySubmissionException(String.format("Volume `%s`: All Volumes require a"
             + " 'path'.", volume.getKey()));
       }
+    }
+
+    // Check to see if functionality is disabled.
+    if (KubernetesContext.getVolumesFromCLIDisabled(config) && !volumes.isEmpty()) {
+      final String message = "Configuring Volumes from the CLI is disabled.";
+      LOG.log(Level.WARNING, message);
+      throw new TopologySubmissionException(message);
     }
 
     return volumes;
