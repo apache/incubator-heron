@@ -1,7 +1,8 @@
 ---
 id: schedulers-k8s-execution-environment
 title: Kubernetes Execution Environment Customization
-sidebar_label:  Kubernetes Execution Environment Customization
+hide_title: true
+sidebar_label: Kubernetes Environment Customization
 ---
 <!--
     Licensed to the Apache Software Foundation (ASF) under one
@@ -20,37 +21,9 @@ sidebar_label:  Kubernetes Execution Environment Customization
     under the License.
 -->
 
-# Customizing the Heron Execution Environment
+# Customizing the Heron Execution Environment in Kubernetes
 
 This document demonstrates how you can customize various aspects of the Heron execution environment when using the Kubernetes Scheduler.
-
-<br>
-
-***Table of contents:***
-- [Customizing the Heron Execution Environment](#customizing-the-heron-execution-environment)
-  - [Customizing a Topology's Execution Environment Using Pod Templates](#customizing-a-topologys-execution-environment-using-pod-templates)
-    - [Preparation](#preparation)
-      - [Pod Templates](#pod-templates)
-      - [Configuration Maps](#configuration-maps)
-    - [Submitting](#submitting)
-    - [Heron Configured Items in Pod Templates](#heron-configured-items-in-pod-templates)
-      - [Executor and Manager Containers](#executor-and-manager-containers)
-      - [Pod](#pod)
-  - [Adding Persistent Volumes via the Command-line Interface](#adding-persistent-volumes-via-the-command-line-interface)
-    - [Usage](#usage)
-      - [Example](#example)
-    - [Submitting](#submitting-1)
-    - [Required and Optional Configuration Items](#required-and-optional-configuration-items)
-    - [Configuration Items Created and Entries Made](#configuration-items-created-and-entries-made)
-  - [Adding Empty Directory, Host Path, and Nework File System Volumes via the Command-line Interface](#adding-empty-directory-host-path-and-nework-file-system-volumes-via-the-command-line-interface)
-    - [Usage](#usage-1)
-      - [Example](#example-1)
-    - [Submitting](#submitting-2)
-    - [Required and Optional Configuration Items](#required-and-optional-configuration-items-1)
-    - [Configuration Items Created and Entries Made](#configuration-items-created-and-entries-made-1)
-  - [Setting Limits and Requests via the Command Line Interface](#setting-limits-and-requests-via-the-command-line-interface)
-    - [Usage](#usage-2)
-      - [Example](#example-2)
 
 <br>
 
