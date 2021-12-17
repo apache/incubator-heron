@@ -103,8 +103,10 @@ public class V1Controller extends KubernetesController {
     super(configuration, runtimeConfiguration);
 
     isPodTemplateDisabled = KubernetesContext.getPodTemplateDisabled(configuration);
-    LOG.log(Level.WARNING, String.format("Custom Pod Templates are %s",
+    LOG.log(Level.WARNING, String.format("Pod Template configuration is %s",
         isPodTemplateDisabled ? "DISABLED" : "ENABLED"));
+    LOG.log(Level.WARNING, String.format("Volume configuration from CLI is %s",
+        KubernetesContext.getVolumesFromCLIDisabled(configuration) ? "DISABLED" : "ENABLED"));
 
     try {
       final ApiClient apiClient = io.kubernetes.client.util.Config.defaultClient();
