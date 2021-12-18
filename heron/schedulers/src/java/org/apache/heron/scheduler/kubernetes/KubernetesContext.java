@@ -27,6 +27,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 
+import com.google.common.annotations.VisibleForTesting;
+
 import org.apache.heron.scheduler.TopologySubmissionException;
 import org.apache.heron.spi.common.Config;
 import org.apache.heron.spi.common.Context;
@@ -114,11 +116,20 @@ public final class KubernetesContext extends Context {
       "heron.kubernetes.pod.secretKeyRef.";
 
   // Persistent Volume Claims
-  public static final String KUBERNETES_PERSISTENT_VOLUME_CLAIMS_CLI_DISABLED =
-      "heron.kubernetes.persistent.volume.claims.cli.disabled";
+  public static final String KUBERNETES_VOLUME_FROM_CLI_DISABLED =
+      "heron.kubernetes.volume.from.cli.disabled";
   // heron.kubernetes.[executor | manager].volumes.persistentVolumeClaim.VOLUME_NAME.OPTION=VALUE
   public static final String KUBERNETES_VOLUME_CLAIM_PREFIX =
       "heron.kubernetes.%s.volumes.persistentVolumeClaim.";
+  // heron.kubernetes.[executor | manager].volumes.emptyDir.VOLUME_NAME.OPTION=VALUE
+  public static final String KUBERNETES_VOLUME_EMPTYDIR_PREFIX =
+      "heron.kubernetes.%s.volumes.emptyDir.";
+  // heron.kubernetes.[executor | manager].volumes.hostPath.VOLUME_NAME.OPTION=VALUE
+  public static final String KUBERNETES_VOLUME_HOSTPATH_PREFIX =
+      "heron.kubernetes.%s.volumes.hostPath.";
+  // heron.kubernetes.[executor | manager].volumes.nfs.VOLUME_NAME.OPTION=VALUE
+  public static final String KUBERNETES_VOLUME_NFS_PREFIX =
+      "heron.kubernetes.%s.volumes.nfs.";
   // heron.kubernetes.[executor | manager].limits.OPTION=VALUE
   public static final String KUBERNETES_RESOURCE_LIMITS_PREFIX =
       "heron.kubernetes.%s.limits.";
@@ -242,8 +253,8 @@ public final class KubernetesContext extends Context {
     return getConfigItemsByPrefix(config, key);
   }
 
-  public static boolean getPersistentVolumeClaimDisabled(Config config) {
-    final String disabled = config.getStringValue(KUBERNETES_PERSISTENT_VOLUME_CLAIMS_CLI_DISABLED);
+  public static boolean getVolumesFromCLIDisabled(Config config) {
+    final String disabled = config.getStringValue(KUBERNETES_VOLUME_FROM_CLI_DISABLED);
     return "true".equalsIgnoreCase(disabled);
   }
 
@@ -251,15 +262,17 @@ public final class KubernetesContext extends Context {
    * Collects parameters form the <code>CLI</code> and generates a mapping between <code>Volumes</code>
    * and their configuration <code>key-value</code> pairs.
    * @param config Contains the configuration options collected from the <code>CLI</code>.
-   * @param isExecutor Flag used to collect CLI commands for the <code>executor</code> and <code>manager</code>.
+   * @param prefix Configuration key to lookup for options.
+   * @param isExecutor Flag used to switch CLI commands for the <code>Executor</code> and <code>Manager</code>.
    * @return A mapping between <code>Volumes</code> and their configuration <code>key-value</code> pairs.
    * Will return an empty list if there are no Volume Claim Templates to be generated.
    */
-  public static Map<String, Map<KubernetesConstants.VolumeClaimTemplateConfigKeys, String>>
-      getVolumeClaimTemplates(Config config, boolean isExecutor) {
+  @VisibleForTesting
+  protected static Map<String, Map<KubernetesConstants.VolumeConfigKeys, String>>
+      getVolumeConfigs(final Config config, final String prefix, final boolean isExecutor) {
     final Logger LOG = Logger.getLogger(V1Controller.class.getName());
 
-    final String prefixKey = String.format(KUBERNETES_VOLUME_CLAIM_PREFIX,
+    final String prefixKey = String.format(prefix,
         isExecutor ? KubernetesConstants.EXECUTOR_NAME : KubernetesConstants.MANAGER_NAME);
     final Set<String> completeConfigParam = getConfigKeys(config, prefixKey);
     final int prefixLength = prefixKey.length();
@@ -267,19 +280,17 @@ public final class KubernetesContext extends Context {
     final int optionIdx = 1;
     final Matcher matcher = KubernetesConstants.VALID_LOWERCASE_RFC_1123_REGEX.matcher("");
 
-    final Map<String, Map<KubernetesConstants.VolumeClaimTemplateConfigKeys, String>> volumes
-        = new HashMap<>();
+    final Map<String, Map<KubernetesConstants.VolumeConfigKeys, String>> volumes = new HashMap<>();
 
     try {
       for (String param : completeConfigParam) {
         final String[] tokens = param.substring(prefixLength).split("\\.");
         final String volumeName = tokens[volumeNameIdx];
-        final KubernetesConstants.VolumeClaimTemplateConfigKeys key =
-            KubernetesConstants.VolumeClaimTemplateConfigKeys.valueOf(tokens[optionIdx]);
+        final KubernetesConstants.VolumeConfigKeys key =
+            KubernetesConstants.VolumeConfigKeys.valueOf(tokens[optionIdx]);
         final String value = config.getStringValue(param);
 
-        Map<KubernetesConstants.VolumeClaimTemplateConfigKeys, String> volume =
-            volumes.get(volumeName);
+        Map<KubernetesConstants.VolumeConfigKeys, String> volume = volumes.get(volumeName);
         if (volume == null) {
           // Validate new Volume Names.
           if (!matcher.reset(volumeName).matches()) {
@@ -291,31 +302,209 @@ public final class KubernetesContext extends Context {
           volumes.put(volumeName, volume);
         }
 
-        /* Validate Claim and Storage Class names.
-          [1] `claimNameNotOnDemand`: checks for a `claimName` which is not `OnDemand`.
-          [2] `storageClassName`: Check if it is the provided `option`.
-          Conditions [1] OR [2] are True, then...
-          [3] Check for a valid lowercase RFC-1123 pattern.
-         */
-        boolean claimNameNotOnDemand =
-            KubernetesConstants.VolumeClaimTemplateConfigKeys.claimName.equals(key)
-                && !KubernetesConstants.LABEL_ON_DEMAND.equalsIgnoreCase(value);
-        if ((claimNameNotOnDemand // [1]
-            ||
-            KubernetesConstants.VolumeClaimTemplateConfigKeys.storageClassName.equals(key)) // [2]
-            && !matcher.reset(value).matches()) { // [3]
-          throw new TopologySubmissionException(
-              String.format("Option `%s` value `%s` does not match lowercase RFC-1123 pattern",
-                  key, value));
-        }
-
         volume.put(key, value);
       }
     } catch (IndexOutOfBoundsException | IllegalArgumentException e) {
-      final String message = "Invalid Persistent Volume Claim CLI parameter provided";
+      final String message = "Invalid Volume configuration option provided on CLI";
       LOG.log(Level.CONFIG, message);
       throw new TopologySubmissionException(message);
     }
+
+    // All Volumes must contain a path.
+    for (Map.Entry<String, Map<KubernetesConstants.VolumeConfigKeys, String>> volume
+        : volumes.entrySet()) {
+      final String path = volume.getValue().get(KubernetesConstants.VolumeConfigKeys.path);
+      if (path == null || path.isEmpty()) {
+        throw new TopologySubmissionException(String.format("Volume `%s`: All Volumes require a"
+            + " 'path'.", volume.getKey()));
+      }
+    }
+
+    // Check to see if functionality is disabled.
+    if (KubernetesContext.getVolumesFromCLIDisabled(config) && !volumes.isEmpty()) {
+      final String message = "Configuring Volumes from the CLI is disabled.";
+      LOG.log(Level.WARNING, message);
+      throw new TopologySubmissionException(message);
+    }
+
+    return volumes;
+  }
+
+  /**
+   * Collects parameters form the <code>CLI</code> and validates options for <code>PVC</code>s.
+   * @param config Contains the configuration options collected from the <code>CLI</code>.
+   * @param isExecutor Flag used to collect CLI commands for the <code>Executor</code> and <code>Manager</code>.
+   * @return A mapping between <code>Volumes</code> and their configuration <code>key-value</code> pairs.
+   * Will return an empty list if there are no Volume Claim Templates to be generated.
+   */
+  public static Map<String, Map<KubernetesConstants.VolumeConfigKeys, String>>
+      getVolumeClaimTemplates(final Config config, final boolean isExecutor) {
+    final Matcher matcher = KubernetesConstants.VALID_LOWERCASE_RFC_1123_REGEX.matcher("");
+
+    final Map<String, Map<KubernetesConstants.VolumeConfigKeys, String>> volumes =
+        getVolumeConfigs(config, KubernetesContext.KUBERNETES_VOLUME_CLAIM_PREFIX, isExecutor);
+
+    for (Map.Entry<String, Map<KubernetesConstants.VolumeConfigKeys, String>> volume
+        : volumes.entrySet()) {
+
+      // Claim name is required.
+      if (!volume.getValue().containsKey(KubernetesConstants.VolumeConfigKeys.claimName)) {
+        throw new TopologySubmissionException(String.format("Volume `%s`: Persistent Volume"
+            + " Claims require a `claimName`.", volume.getKey()));
+      }
+
+      for (Map.Entry<KubernetesConstants.VolumeConfigKeys, String> volumeConfig
+          : volume.getValue().entrySet()) {
+        final KubernetesConstants.VolumeConfigKeys key = volumeConfig.getKey();
+        final String value = volumeConfig.getValue();
+
+        switch (key) {
+          case claimName:
+            // Claim names which are not OnDemand should be lowercase RFC-1123.
+            if (!matcher.reset(value).matches()
+                && !KubernetesConstants.LABEL_ON_DEMAND.equalsIgnoreCase(value)) {
+              throw new TopologySubmissionException(String.format("Volume `%s`: `claimName` does"
+                  + " not match lowercase RFC-1123 pattern", volume.getKey()));
+            }
+            break;
+          case storageClassName:
+            if (!matcher.reset(value).matches()) {
+              throw new TopologySubmissionException(String.format("Volume `%s`: `storageClassName`"
+                  + " does not match lowercase RFC-1123 pattern", volume.getKey()));
+            }
+            break;
+          case sizeLimit: case accessModes: case volumeMode: case readOnly: case path: case subPath:
+            break;
+          default:
+            throw new TopologySubmissionException(String.format("Volume `%s`: Invalid Persistent"
+                + " Volume Claim type option for '%s'", volume.getKey(), key));
+        }
+      }
+    }
+
+    return volumes;
+  }
+
+  /**
+   * Collects parameters form the <code>CLI</code> and validates options for <code>Empty Directory</code>s.
+   * @param config Contains the configuration options collected from the <code>CLI</code>.
+   * @param isExecutor Flag used to collect CLI commands for the <code>Executor</code> and <code>Manager</code>.
+   * @return A mapping between <code>Volumes</code> and their configuration <code>key-value</code> pairs.
+   * Will return an empty list if there are no Volume Claim Templates to be generated.
+   */
+  public static Map<String, Map<KubernetesConstants.VolumeConfigKeys, String>>
+      getVolumeEmptyDir(final Config config, final boolean isExecutor) {
+    final Map<String, Map<KubernetesConstants.VolumeConfigKeys, String>> volumes =
+        getVolumeConfigs(config, KubernetesContext.KUBERNETES_VOLUME_EMPTYDIR_PREFIX, isExecutor);
+
+    for (Map.Entry<String, Map<KubernetesConstants.VolumeConfigKeys, String>> volume
+        : volumes.entrySet()) {
+      final String medium = volume.getValue().get(KubernetesConstants.VolumeConfigKeys.medium);
+
+      if (medium != null && !medium.isEmpty() && !"Memory".equals(medium)) {
+        throw new TopologySubmissionException(String.format("Volume `%s`: Empty Directory"
+            + " 'medium' must be 'Memory' or empty.", volume.getKey()));
+      }
+      for (Map.Entry<KubernetesConstants.VolumeConfigKeys, String> volumeConfig
+          : volume.getValue().entrySet()) {
+        final KubernetesConstants.VolumeConfigKeys key = volumeConfig.getKey();
+
+        switch (key) {
+          case sizeLimit: case medium: case readOnly: case path: case subPath:
+            break;
+          default:
+            throw new TopologySubmissionException(String.format("Volume `%s`: Invalid Empty"
+                + " Directory type option for '%s'", volume.getKey(), key));
+        }
+      }
+    }
+
+    return volumes;
+  }
+
+  /**
+   * Collects parameters form the <code>CLI</code> and validates options for <code>Host Path</code>s.
+   * @param config Contains the configuration options collected from the <code>CLI</code>.
+   * @param isExecutor Flag used to collect CLI commands for the <code>Executor</code> and <code>Manager</code>.
+   * @return A mapping between <code>Volumes</code> and their configuration <code>key-value</code> pairs.
+   * Will return an empty list if there are no Volume Claim Templates to be generated.
+   */
+  public static Map<String, Map<KubernetesConstants.VolumeConfigKeys, String>>
+      getVolumeHostPath(final Config config, final boolean isExecutor) {
+    final Map<String, Map<KubernetesConstants.VolumeConfigKeys, String>> volumes =
+        getVolumeConfigs(config, KubernetesContext.KUBERNETES_VOLUME_HOSTPATH_PREFIX, isExecutor);
+
+    for (Map.Entry<String, Map<KubernetesConstants.VolumeConfigKeys, String>> volume
+        : volumes.entrySet()) {
+      final String type = volume.getValue().get(KubernetesConstants.VolumeConfigKeys.type);
+      if (type != null && !KubernetesConstants.VALID_VOLUME_HOSTPATH_TYPES.contains(type)) {
+        throw new TopologySubmissionException(String.format("Volume `%s`: Host Path"
+            + " 'type' of '%s' is invalid.", volume.getKey(), type));
+      }
+      final String hostOnPath =
+          volume.getValue().get(KubernetesConstants.VolumeConfigKeys.pathOnHost);
+      if (hostOnPath == null || hostOnPath.isEmpty()) {
+        throw new TopologySubmissionException(String.format("Volume `%s`: Host Path  requires a"
+            + " path on the host.", volume.getKey()));
+      }
+
+      for (Map.Entry<KubernetesConstants.VolumeConfigKeys, String> volumeConfig
+          : volume.getValue().entrySet()) {
+        final KubernetesConstants.VolumeConfigKeys key = volumeConfig.getKey();
+
+        switch (key) {
+          case type: case pathOnHost: case readOnly: case path: case subPath:
+            break;
+          default:
+            throw new TopologySubmissionException(String.format("Volume `%s`: Invalid Host Path"
+                + " option for '%s'", volume.getKey(), key));
+        }
+      }
+    }
+
+    return volumes;
+  }
+
+  /**
+   * Collects parameters form the <code>CLI</code> and validates options for <code>NFS</code>s.
+   * @param config Contains the configuration options collected from the <code>CLI</code>.
+   * @param isExecutor Flag used to collect CLI commands for the <code>Executor</code> and <code>Manager</code>.
+   * @return A mapping between <code>Volumes</code> and their configuration <code>key-value</code> pairs.
+   * Will return an empty list if there are no Volume Claim Templates to be generated.
+   */
+  public static Map<String, Map<KubernetesConstants.VolumeConfigKeys, String>>
+      getVolumeNFS(final Config config, final boolean isExecutor) {
+    final Map<String, Map<KubernetesConstants.VolumeConfigKeys, String>> volumes =
+        getVolumeConfigs(config, KubernetesContext.KUBERNETES_VOLUME_NFS_PREFIX, isExecutor);
+
+    for (Map.Entry<String, Map<KubernetesConstants.VolumeConfigKeys, String>> volume
+        : volumes.entrySet()) {
+      final String server = volume.getValue().get(KubernetesConstants.VolumeConfigKeys.server);
+      if (server == null || server.isEmpty()) {
+        throw new TopologySubmissionException(String.format("Volume `%s`: `NFS` volumes require a"
+            + " `server` to be specified", volume.getKey()));
+      }
+      final String hostOnNFS =
+          volume.getValue().get(KubernetesConstants.VolumeConfigKeys.pathOnNFS);
+      if (hostOnNFS == null || hostOnNFS.isEmpty()) {
+        throw new TopologySubmissionException(String.format("Volume `%s`: NFS requires a path on"
+            + " the NFS server.", volume.getKey()));
+      }
+
+      for (Map.Entry<KubernetesConstants.VolumeConfigKeys, String> volumeConfig
+          : volume.getValue().entrySet()) {
+        final KubernetesConstants.VolumeConfigKeys key = volumeConfig.getKey();
+
+        switch (key) {
+          case server: case pathOnNFS: case readOnly: case path: case subPath:
+            break;
+          default:
+            throw new TopologySubmissionException(String.format("Volume `%s`: Invalid NFS option"
+                + " for '%s'", volume.getKey(), key));
+        }
+      }
+    }
+
     return volumes;
   }
 
