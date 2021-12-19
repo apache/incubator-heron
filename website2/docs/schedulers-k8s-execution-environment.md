@@ -485,7 +485,7 @@ It is possible to allocate and configure Volumes with Pod Templates but the CLI 
 > ***System Administrators:***
 >
 > * You may wish to disable the ability to configure Volume configurations specified via the CLI. To achieve this, you must pass the define option `-D heron.kubernetes.volume.from.cli.disabled=true`to the Heron API Server on the command line when launching. This command has been added to the Kubernetes configuration files to deploy the Heron API Server and is set to `false` by default.
-> * &#x26a0; ***WARNING*** &#x26a0; `Host Path` volumes have inherent [security concerns](https://kubernetes.io/docs/concepts/storage/volumes/#hostpath). `Host Path`s can breach the containment provided by containerisation and should be exclusively used with volume mounts set to `read-only`, with usage limited to testing and development environments.
+> * &#x26a0; ***WARNING*** &#x26a0; `Host Path` volumes have inherent [security concerns](https://kubernetes.io/docs/concepts/storage/volumes/#hostpath). `Host Path`s can breach the containment provided by containerization and should be exclusively used with volume mounts set to `read-only`, with usage limited to testing and development environments.
 
 <br>
 
