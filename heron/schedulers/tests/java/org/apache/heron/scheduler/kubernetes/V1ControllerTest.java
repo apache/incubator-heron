@@ -66,8 +66,7 @@ import io.kubernetes.client.openapi.models.V1VolumeBuilder;
 import io.kubernetes.client.openapi.models.V1VolumeMount;
 import io.kubernetes.client.openapi.models.V1VolumeMountBuilder;
 
-import static org.apache.heron.scheduler.kubernetes.KubernetesConstants.VolumeClaimTemplateConfigKeys;
-import static org.mockito.Matchers.anyMap;
+import static org.apache.heron.scheduler.kubernetes.KubernetesConstants.VolumeConfigKeys;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doReturn;
 
@@ -866,37 +865,37 @@ public class V1ControllerTest {
     final String volumeMode = "VolumeMode";
     final String path = "/path/to/mount/";
     final String subPath = "/sub/path/to/mount/";
-    final Map<String, Map<VolumeClaimTemplateConfigKeys, String>> mapPVCOpts =
+    final Map<String, Map<VolumeConfigKeys, String>> mapPVCOpts =
         ImmutableMap.of(
-            volumeNameOne, new HashMap<VolumeClaimTemplateConfigKeys, String>() {
+            volumeNameOne, new HashMap<VolumeConfigKeys, String>() {
               {
-                put(VolumeClaimTemplateConfigKeys.claimName, claimNameOne);
-                put(VolumeClaimTemplateConfigKeys.storageClassName, storageClassName);
-                put(VolumeClaimTemplateConfigKeys.sizeLimit, sizeLimit);
-                put(VolumeClaimTemplateConfigKeys.accessModes, accessModesList);
-                put(VolumeClaimTemplateConfigKeys.volumeMode, volumeMode);
-                put(VolumeClaimTemplateConfigKeys.path, path);
+                put(VolumeConfigKeys.claimName, claimNameOne);
+                put(VolumeConfigKeys.storageClassName, storageClassName);
+                put(VolumeConfigKeys.sizeLimit, sizeLimit);
+                put(VolumeConfigKeys.accessModes, accessModesList);
+                put(VolumeConfigKeys.volumeMode, volumeMode);
+                put(VolumeConfigKeys.path, path);
               }
             },
-            volumeNameTwo, new HashMap<VolumeClaimTemplateConfigKeys, String>() {
+            volumeNameTwo, new HashMap<VolumeConfigKeys, String>() {
               {
-                put(VolumeClaimTemplateConfigKeys.claimName, claimNameTwo);
-                put(VolumeClaimTemplateConfigKeys.storageClassName, storageClassName);
-                put(VolumeClaimTemplateConfigKeys.sizeLimit, sizeLimit);
-                put(VolumeClaimTemplateConfigKeys.accessModes, accessModes);
-                put(VolumeClaimTemplateConfigKeys.volumeMode, volumeMode);
-                put(VolumeClaimTemplateConfigKeys.path, path);
-                put(VolumeClaimTemplateConfigKeys.subPath, subPath);
+                put(VolumeConfigKeys.claimName, claimNameTwo);
+                put(VolumeConfigKeys.storageClassName, storageClassName);
+                put(VolumeConfigKeys.sizeLimit, sizeLimit);
+                put(VolumeConfigKeys.accessModes, accessModes);
+                put(VolumeConfigKeys.volumeMode, volumeMode);
+                put(VolumeConfigKeys.path, path);
+                put(VolumeConfigKeys.subPath, subPath);
               }
             },
-            volumeNameStatic, new HashMap<VolumeClaimTemplateConfigKeys, String>() {
+            volumeNameStatic, new HashMap<VolumeConfigKeys, String>() {
               {
-                put(VolumeClaimTemplateConfigKeys.claimName, claimNameStatic);
-                put(VolumeClaimTemplateConfigKeys.sizeLimit, sizeLimit);
-                put(VolumeClaimTemplateConfigKeys.accessModes, accessModes);
-                put(VolumeClaimTemplateConfigKeys.volumeMode, volumeMode);
-                put(VolumeClaimTemplateConfigKeys.path, path);
-                put(VolumeClaimTemplateConfigKeys.subPath, subPath);
+                put(VolumeConfigKeys.claimName, claimNameStatic);
+                put(VolumeConfigKeys.sizeLimit, sizeLimit);
+                put(VolumeConfigKeys.accessModes, accessModes);
+                put(VolumeConfigKeys.volumeMode, volumeMode);
+                put(VolumeConfigKeys.path, path);
+                put(VolumeConfigKeys.subPath, subPath);
               }
             }
         );
@@ -922,6 +921,7 @@ public class V1ControllerTest {
           .withLabels(V1Controller.getPersistentVolumeClaimLabels(topologyName))
         .endMetadata()
         .withNewSpec()
+          .withStorageClassName("")
           .withAccessModes(Collections.singletonList(accessModes))
           .withVolumeMode(volumeMode)
           .withNewResources()
@@ -948,15 +948,15 @@ public class V1ControllerTest {
     final String mountPathOne = "/mount/path/ONE";
     final String mountPathTwo = "/mount/path/TWO";
     final String mountSubPathTwo = "/mount/sub/path/TWO";
-    Map<String, Map<VolumeClaimTemplateConfigKeys, String>> mapOfOpts =
+    Map<String, Map<VolumeConfigKeys, String>> mapOfOpts =
         ImmutableMap.of(
             volumeNameOne, ImmutableMap.of(
-                VolumeClaimTemplateConfigKeys.claimName, claimNameOne,
-                VolumeClaimTemplateConfigKeys.path, mountPathOne),
+                VolumeConfigKeys.claimName, claimNameOne,
+                VolumeConfigKeys.path, mountPathOne),
             volumeNameTwo, ImmutableMap.of(
-                VolumeClaimTemplateConfigKeys.claimName, claimNameTwo,
-                VolumeClaimTemplateConfigKeys.path, mountPathTwo,
-                VolumeClaimTemplateConfigKeys.subPath, mountSubPathTwo)
+                VolumeConfigKeys.claimName, claimNameTwo,
+                VolumeConfigKeys.path, mountPathTwo,
+                VolumeConfigKeys.subPath, mountSubPathTwo)
         );
     final V1Volume volumeOne = new V1VolumeBuilder()
         .withName(volumeNameOne)
@@ -981,13 +981,13 @@ public class V1ControllerTest {
         .build();
 
     // Test case container.
-    final List<TestTuple<Pair<List<V1Volume>, List<V1VolumeMount>>,
+    // Input: Map of Volume configurations.
+    // Output: The expected lists of Volumes and Volume Mounts.
+    final List<TestTuple<Map<String, Map<VolumeConfigKeys, String>>,
         Pair<List<V1Volume>, List<V1VolumeMount>>>> testCases = new LinkedList<>();
 
     // Default case: No PVC provided.
-    final Pair<List<V1Volume>, List<V1VolumeMount>> actualEmpty =
-        v1ControllerPodTemplate.createPersistentVolumeClaimVolumesAndMounts(new HashMap<>());
-    testCases.add(new TestTuple<>("Generated an empty list of Volumes", actualEmpty,
+    testCases.add(new TestTuple<>("Generated an empty list of Volumes", new HashMap<>(),
         new Pair<>(new LinkedList<>(), new LinkedList<>())));
 
     // PVC Provided.
@@ -995,23 +995,26 @@ public class V1ControllerTest {
         new Pair<>(
             new LinkedList<>(Arrays.asList(volumeOne, volumeTwo)),
             new LinkedList<>(Arrays.asList(volumeMountOne, volumeMountTwo)));
-    final Pair<List<V1Volume>, List<V1VolumeMount>> actualFull =
-        v1ControllerPodTemplate.createPersistentVolumeClaimVolumesAndMounts(mapOfOpts);
-    testCases.add(new TestTuple<>("Generated a list of Volumes", actualFull,
+    testCases.add(new TestTuple<>("Generated a list of Volumes", mapOfOpts,
         new Pair<>(expectedFull.first, expectedFull.second)));
 
     // Testing loop.
-    for (TestTuple<Pair<List<V1Volume>, List<V1VolumeMount>>,
+    for (TestTuple<Map<String, Map<VolumeConfigKeys, String>>,
              Pair<List<V1Volume>, List<V1VolumeMount>>> testCase : testCases) {
+      List<V1Volume> actualVolume = new LinkedList<>();
+      List<V1VolumeMount> actualVolumeMount = new LinkedList<>();
+      v1ControllerPodTemplate.createVolumeAndMountsPersistentVolumeClaimCLI(testCase.input,
+          actualVolume, actualVolumeMount);
+
       Assert.assertTrue(testCase.description,
-          (testCase.expected.first).containsAll(testCase.input.first));
+          (testCase.expected.first).containsAll(actualVolume));
       Assert.assertTrue(testCase.description + " Mounts",
-          (testCase.expected.second).containsAll(testCase.input.second));
+          (testCase.expected.second).containsAll(actualVolumeMount));
     }
   }
 
   @Test
-  public void testConfigurePodWithPersistentVolumeClaims() {
+  public void testConfigurePodWithVolumesAndMountsFromCLI() {
     final String volumeNameClashing = "clashing-volume";
     final String volumeMountNameClashing = "original-volume-mount";
     V1Volume baseVolume = new V1VolumeBuilder()
@@ -1046,8 +1049,8 @@ public class V1ControllerTest {
         .build();
 
     // Test case container.
-    // Input: Pod Spec to modify, Executor to modify, Volumes and Mounts to return from
-    // <createPersistentVolumeClaimVolumesAndMounts>.
+    // Input: [0] Pod Spec to modify, [1] Heron container to modify, [2] List of Volumes
+    // [3] List of Volume Mounts.
     // Output: The expected <V1PodSpec> and <V1Container>.
     final List<TestTuple<Object[], Pair<V1PodSpec, V1Container>>> testCases = new LinkedList<>();
 
@@ -1058,11 +1061,9 @@ public class V1ControllerTest {
     final V1PodSpec expectedEmptyPodSpec = new V1PodSpecBuilder().withVolumes(baseVolume).build();
     final V1Container expectedEmptyExecutor =
         new V1ContainerBuilder().withVolumeMounts(baseVolumeMount).build();
-    Pair<List<V1Volume>, List<V1VolumeMount>> emptyVolumeAndMount =
-        new Pair<>(new LinkedList<>(), new LinkedList<>());
 
     testCases.add(new TestTuple<>("Empty",
-        new Object[]{podSpecEmptyCase, executorEmptyCase, emptyVolumeAndMount},
+        new Object[]{podSpecEmptyCase, executorEmptyCase, new LinkedList<>(), new LinkedList<>()},
         new Pair<>(expectedEmptyPodSpec, expectedEmptyExecutor)));
 
     // Non-clashing Persistent Volume Claim.
@@ -1081,12 +1082,10 @@ public class V1ControllerTest {
         .addToVolumeMounts(secondaryVolumeMount)
         .build();
 
-    Pair<List<V1Volume>, List<V1VolumeMount>> noClashVolumeAndMount = new Pair<>(
-        new LinkedList<>(Collections.singletonList(secondaryVolume)),
-        new LinkedList<>(Collections.singletonList(secondaryVolumeMount)));
-
     testCases.add(new TestTuple<>("No Clash",
-        new Object[]{podSpecNoClashCase, executorNoClashCase, noClashVolumeAndMount},
+        new Object[]{podSpecNoClashCase, executorNoClashCase,
+            Collections.singletonList(secondaryVolume),
+            Collections.singletonList(secondaryVolumeMount)},
         new Pair<>(expectedNoClashPodSpec, expectedNoClashExecutor)));
 
     // Clashing Persistent Volume Claim.
@@ -1105,24 +1104,18 @@ public class V1ControllerTest {
         .addToVolumeMounts(secondaryVolumeMount)
         .build();
 
-    Pair<List<V1Volume>, List<V1VolumeMount>> clashVolumeAndMount = new Pair<>(
-        new LinkedList<>(Arrays.asList(clashingVolume, secondaryVolume)),
-        new LinkedList<>(Arrays.asList(clashingVolumeMount, secondaryVolumeMount)));
-
     testCases.add(new TestTuple<>("Clashing",
-        new Object[]{podSpecClashCase, executorClashCase, clashVolumeAndMount},
+        new Object[]{podSpecClashCase, executorClashCase,
+            Arrays.asList(clashingVolume, secondaryVolume),
+            Arrays.asList(clashingVolumeMount, secondaryVolumeMount)},
         new Pair<>(expectedClashPodSpec, expectedClashExecutor)));
 
     // Testing loop.
     for (TestTuple<Object[], Pair<V1PodSpec, V1Container>> testCase : testCases) {
-      doReturn(testCase.input[2])
-          .when(v1ControllerWithPodTemplate)
-          .createPersistentVolumeClaimVolumesAndMounts(anyMap());
-
-      // <configPVC> parameter is used in mock above, so we can set it to <null> as it is not used.
       v1ControllerWithPodTemplate
-          .configurePodWithPersistentVolumeClaimVolumesAndMounts((V1PodSpec) testCase.input[0],
-              (V1Container) testCase.input[1], null);
+          .configurePodWithVolumesAndMountsFromCLI((V1PodSpec) testCase.input[0],
+              (V1Container) testCase.input[1], (List<V1Volume>) testCase.input[2],
+              (List<V1VolumeMount>) testCase.input[3]);
 
       Assert.assertEquals("Pod Specs match " + testCase.description,
           testCase.input[0], testCase.expected.first);
@@ -1221,5 +1214,232 @@ public class V1ControllerTest {
           v1ControllerPodTemplate.createResourcesRequirement(testCase.input);
       Assert.assertEquals(testCase.description, testCase.expected, actual);
     }
+  }
+
+  @Test
+  public void testCreateVolumeMountsCLI() {
+    final String volumeNamePVC = "volume-name-pvc";
+    final String volumeNameHostPath = "volume-name-host-path";
+    final String volumeNameEmptyDir = "volume-name-empty-dir";
+    final String volumeNameNFS = "volume-name-nfs";
+    final String value = "inserted-value";
+
+    // Test case container.
+    // Input: [0] volume name, [1] volume options
+    // Output: The expected <V1VolumeMount>.
+    final List<TestTuple<Pair<String, Map<VolumeConfigKeys, String>>, V1VolumeMount>> testCases =
+        new LinkedList<>();
+
+    // PVC.
+    final Map<VolumeConfigKeys, String> configPVC = ImmutableMap.<VolumeConfigKeys, String>builder()
+        .put(VolumeConfigKeys.claimName, value)
+        .put(VolumeConfigKeys.storageClassName, value)
+        .put(VolumeConfigKeys.sizeLimit, value)
+        .put(VolumeConfigKeys.accessModes, value)
+        .put(VolumeConfigKeys.volumeMode, value)
+        .put(VolumeConfigKeys.path, value)
+        .put(VolumeConfigKeys.subPath, value)
+        .put(VolumeConfigKeys.readOnly, "true")
+        .build();
+    final V1VolumeMount volumeMountPVC = new V1VolumeMountBuilder()
+        .withName(volumeNamePVC)
+        .withMountPath(value)
+        .withSubPath(value)
+        .withReadOnly(true)
+        .build();
+    testCases.add(new TestTuple<>("PVC volume mount",
+        new Pair<>(volumeNamePVC, configPVC), volumeMountPVC));
+
+    // Host Path.
+    final Map<VolumeConfigKeys, String> configHostPath =
+        ImmutableMap.<VolumeConfigKeys, String>builder()
+            .put(VolumeConfigKeys.type, "DirectoryOrCreate")
+            .put(VolumeConfigKeys.pathOnHost, value)
+            .put(VolumeConfigKeys.path, value)
+            .put(VolumeConfigKeys.subPath, value)
+            .put(VolumeConfigKeys.readOnly, "true")
+            .build();
+    final V1VolumeMount volumeMountHostPath = new V1VolumeMountBuilder()
+        .withName(volumeNameHostPath)
+        .withMountPath(value)
+        .withSubPath(value)
+        .withReadOnly(true)
+        .build();
+    testCases.add(new TestTuple<>("Host Path volume mount",
+        new Pair<>(volumeNameHostPath, configHostPath), volumeMountHostPath));
+
+    // Empty Dir.
+    final Map<VolumeConfigKeys, String> configEmptyDir =
+        ImmutableMap.<VolumeConfigKeys, String>builder()
+            .put(VolumeConfigKeys.sizeLimit, value)
+            .put(VolumeConfigKeys.medium, "Memory")
+            .put(VolumeConfigKeys.path, value)
+            .put(VolumeConfigKeys.subPath, value)
+            .put(VolumeConfigKeys.readOnly, "true")
+            .build();
+    final V1VolumeMount volumeMountEmptyDir = new V1VolumeMountBuilder()
+        .withName(volumeNameEmptyDir)
+        .withMountPath(value)
+        .withSubPath(value)
+        .withReadOnly(true)
+        .build();
+    testCases.add(new TestTuple<>("Empty Dir volume mount",
+        new Pair<>(volumeNameEmptyDir, configEmptyDir), volumeMountEmptyDir));
+
+    // NFS.
+    final Map<VolumeConfigKeys, String> configNFS = ImmutableMap.<VolumeConfigKeys, String>builder()
+        .put(VolumeConfigKeys.server, "nfs.server.address")
+        .put(VolumeConfigKeys.readOnly, "true")
+        .put(VolumeConfigKeys.pathOnNFS, value)
+        .put(VolumeConfigKeys.path, value)
+        .put(VolumeConfigKeys.subPath, value)
+        .build();
+    final V1VolumeMount volumeMountNFS = new V1VolumeMountBuilder()
+        .withName(volumeNameNFS)
+        .withMountPath(value)
+        .withSubPath(value)
+        .withReadOnly(true)
+        .build();
+    testCases.add(new TestTuple<>("NFS volume mount",
+        new Pair<>(volumeNameNFS, configNFS), volumeMountNFS));
+
+    // Test loop.
+    for (TestTuple<Pair<String, Map<VolumeConfigKeys, String>>, V1VolumeMount> testCase
+        : testCases) {
+      V1VolumeMount actual = v1ControllerPodTemplate.createVolumeMountsCLI(
+          testCase.input.first, testCase.input.second);
+      Assert.assertEquals(testCase.description, testCase.expected, actual);
+    }
+
+  }
+
+  @Test
+  public void testCreateVolumeAndMountsEmptyDirCLI() {
+    final String volumeName = "volume-name-empty-dir";
+    final String medium = "Memory";
+    final String sizeLimit = "1Gi";
+    final String path = "/path/to/mount";
+    final String subPath = "/sub/path/to/mount";
+
+    // Empty Dir.
+    final Map<String, Map<VolumeConfigKeys, String>> config =
+        ImmutableMap.of(volumeName, new HashMap<VolumeConfigKeys, String>() {
+          {
+            put(VolumeConfigKeys.sizeLimit, sizeLimit);
+            put(VolumeConfigKeys.medium, "Memory");
+            put(VolumeConfigKeys.path, path);
+            put(VolumeConfigKeys.subPath, subPath);
+          }
+        });
+    final List<V1Volume> expectedVolumes = Collections.singletonList(
+        new V1VolumeBuilder()
+            .withName(volumeName)
+            .withNewEmptyDir()
+              .withMedium(medium)
+              .withNewSizeLimit(sizeLimit)
+            .endEmptyDir()
+            .build()
+    );
+    final List<V1VolumeMount> expectedMounts = Collections.singletonList(
+        new V1VolumeMountBuilder()
+            .withName(volumeName)
+              .withMountPath(path)
+              .withSubPath(subPath)
+            .build()
+    );
+
+    List<V1Volume> actualVolumes = new LinkedList<>();
+    List<V1VolumeMount> actualMounts = new LinkedList<>();
+    v1ControllerPodTemplate.createVolumeAndMountsEmptyDirCLI(config, actualVolumes, actualMounts);
+    Assert.assertEquals("Empty Dir Volume populated", expectedVolumes, actualVolumes);
+    Assert.assertEquals("Empty Dir Volume Mount populated", expectedMounts, actualMounts);
+  }
+
+  @Test
+  public void testCreateVolumeAndMountsHostPathCLI() {
+    final String volumeName = "volume-name-host-path";
+    final String type = "DirectoryOrCreate";
+    final String pathOnHost = "path.on.host";
+    final String path = "/path/to/mount";
+    final String subPath = "/sub/path/to/mount";
+
+    // Host Path.
+    final Map<String, Map<VolumeConfigKeys, String>> config =
+        ImmutableMap.of(volumeName, new HashMap<VolumeConfigKeys, String>() {
+          {
+            put(VolumeConfigKeys.type, type);
+            put(VolumeConfigKeys.pathOnHost, pathOnHost);
+            put(VolumeConfigKeys.path, path);
+            put(VolumeConfigKeys.subPath, subPath);
+          }
+        });
+    final List<V1Volume> expectedVolumes = Collections.singletonList(
+        new V1VolumeBuilder()
+            .withName(volumeName)
+            .withNewHostPath()
+              .withNewType(type)
+              .withNewPath(pathOnHost)
+            .endHostPath()
+            .build()
+    );
+    final List<V1VolumeMount> expectedMounts = Collections.singletonList(
+        new V1VolumeMountBuilder()
+            .withName(volumeName)
+              .withMountPath(path)
+              .withSubPath(subPath)
+            .build()
+    );
+
+    List<V1Volume> actualVolumes = new LinkedList<>();
+    List<V1VolumeMount> actualMounts = new LinkedList<>();
+    v1ControllerPodTemplate.createVolumeAndMountsHostPathCLI(config, actualVolumes, actualMounts);
+    Assert.assertEquals("Host Path Volume populated", expectedVolumes, actualVolumes);
+    Assert.assertEquals("Host Path Volume Mount populated", expectedMounts, actualMounts);
+  }
+
+  @Test
+  public void testCreateVolumeAndMountsNFSCLI() {
+    final String volumeName = "volume-name-nfs";
+    final String server = "nfs.server.address";
+    final String pathOnNFS = "path.on.host";
+    final String readOnly = "true";
+    final String path = "/path/to/mount";
+    final String subPath = "/sub/path/to/mount";
+
+    // NFS.
+    final Map<String, Map<VolumeConfigKeys, String>> config =
+        ImmutableMap.of(volumeName, new HashMap<VolumeConfigKeys, String>() {
+          {
+            put(VolumeConfigKeys.server, server);
+            put(VolumeConfigKeys.readOnly, readOnly);
+            put(VolumeConfigKeys.pathOnNFS, pathOnNFS);
+            put(VolumeConfigKeys.path, path);
+            put(VolumeConfigKeys.subPath, subPath);
+          }
+        });
+    final List<V1Volume> expectedVolumes = Collections.singletonList(
+        new V1VolumeBuilder()
+            .withName(volumeName)
+            .withNewNfs()
+              .withServer(server)
+              .withNewPath(pathOnNFS)
+              .withNewReadOnly(readOnly)
+            .endNfs()
+            .build()
+    );
+    final List<V1VolumeMount> expectedMounts = Collections.singletonList(
+        new V1VolumeMountBuilder()
+            .withName(volumeName)
+            .withMountPath(path)
+            .withSubPath(subPath)
+            .withReadOnly(true)
+            .build()
+    );
+
+    List<V1Volume> actualVolumes = new LinkedList<>();
+    List<V1VolumeMount> actualMounts = new LinkedList<>();
+    v1ControllerPodTemplate.createVolumeAndMountsNFSCLI(config, actualVolumes, actualMounts);
+    Assert.assertEquals("NFS Volume populated", expectedVolumes, actualVolumes);
+    Assert.assertEquals("NFS Volume Mount populated", expectedMounts, actualMounts);
   }
 }

@@ -83,7 +83,7 @@ spec:
               -D heron.statefulstorage.classname=org.apache.heron.statefulstorage.dlog.DlogStorage
               -D heron.statefulstorage.dlog.namespace.uri=distributedlog://zookeeper:2181/heronbkdl
               -D heron.kubernetes.pod.template.disabled=false
-              -D heron.kubernetes.persistent.volume.claims.cli.disabled=false
+              -D heron.kubernetes.volume.from.cli.disabled=false
 
 ---
 apiVersion: v1

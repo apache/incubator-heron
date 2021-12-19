@@ -22,8 +22,10 @@ package org.apache.heron.scheduler.kubernetes;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 import org.apache.heron.scheduler.utils.SchedulerUtils.ExecutorPort;
@@ -115,13 +117,34 @@ public final class KubernetesConstants {
       )
   );
 
-  enum VolumeClaimTemplateConfigKeys {
+  protected enum VolumeConfigKeys {
     claimName,
     storageClassName,
     sizeLimit,
     accessModes,
     volumeMode,
-    path,               // Added to container.
+    medium,
+    type,
+    readOnly,
+    server,
+    pathOnHost,
+    pathOnNFS,
+    path,               // Added to container, nfsVolume, hostPath.
     subPath,            // Added to container.
   }
+
+  protected static final Set<String> VALID_VOLUME_HOSTPATH_TYPES = Collections.unmodifiableSet(
+      new HashSet<String>() {
+        {
+          add("");
+          add("DirectoryOrCreate");
+          add("Directory");
+          add("FileOrCreate");
+          add("File");
+          add("Socket");
+          add("CharDevice");
+          add("BlockDevice");
+        }
+      }
+  );
 }

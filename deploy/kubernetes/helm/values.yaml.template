@@ -77,8 +77,8 @@ packing: RoundRobin # ResourceCompliantRR, FirstFitDecreasing
 # Support for ConfigMap mounted PodTemplates
 disablePodTemplates: false
 
-# Support for Dynamic Persistent Volume Mounts from CLI input
-disablePersistentVolumeMountsCLI: false
+# Support for Voume specification from CLI input
+disableVolumesFromCLI: false
 
 # Number of replicas for storage bookies, memory and storage requirements
 bookieReplicas: 3
