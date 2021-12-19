@@ -22,18 +22,29 @@ package org.apache.heron.api.metric;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Interface for a metric that can be tracked
- * @param <T> the type of the metric value being tracked
- */
-public interface IMetric<T> {
-  T getValueAndReset();
+// A thread safe count metric
+public class ConcurrentCountMetricWithTag implements IMetric<CountMetric> {
+  private CountMetricWithTag counter;
 
-  /**
-   * Get the <tag list, value> pairs of the metric and reset it to the identity value.
-   * @return a map of <tag list, value> pairs. Return null if this function is not supported.
-   */
-  default Map<List<String>, T> getTaggedMetricsAndReset() {
-    return null;
+  public ConcurrentCountMetricWithTag() {
+    counter = new CountMetricWithTag();
+  }
+
+  public synchronized void incr(String... tags) {
+    counter.incr(tags);
+  }
+
+  public synchronized void incrBy(long incrementBy, String... tags) {
+    counter.incrBy(incrementBy, tags);
+  }
+
+  @Override
+  public CountMetric getValueAndReset() {
+    return null; // Not needed. `getTaggedMetricsAndReset` should be used instead.
+  }
+
+  @Override
+  public Map<List<String>, CountMetric> getTaggedMetricsAndReset() {
+    return counter.getTaggedMetricsAndReset();
   }
 }

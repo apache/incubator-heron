@@ -110,12 +110,12 @@ public class MetricsCollector implements IMetricsRegister {
 
     for (List<String> metricNames : timeBucketToMetricNames.values()) {
       for (String metricName : metricNames) {
-        gatherOneMetric(metricName, builder);
+        gatherOneMetric(builder, metricName);
       }
     }
 
     metricCollectionCount.incr();
-    addDataToMetricPublisher(builder, COLLECTION_COUNT_NAME, metricCollectionCount);
+    addDataToMetricPublisher(builder, COLLECTION_COUNT_NAME, metricCollectionCount, null);
 
     Metrics.MetricPublisherPublishMessage msg = builder.build();
 
@@ -124,7 +124,8 @@ public class MetricsCollector implements IMetricsRegister {
 
   private void addDataToMetricPublisher(Metrics.MetricPublisherPublishMessage.Builder builder,
                                         String metricName,
-                                        Object metricValue) {
+                                        Object metricValue,
+                                        List<String> tagList) {
     // Metric name is discarded if value is of type MetricsDatum or ExceptionData.
     if (metricValue instanceof Metrics.MetricDatum.Builder) {
       builder.addMetrics((Metrics.MetricDatum.Builder) metricValue);
@@ -134,6 +135,11 @@ public class MetricsCollector implements IMetricsRegister {
       assert metricName != null;
       Metrics.MetricDatum.Builder d = Metrics.MetricDatum.newBuilder();
       d.setName(metricName).setValue(metricValue.toString());
+      if (tagList != null) {
+        for (String tag : tagList) {
+          d.addTag(tag);
+        }
+      }
       builder.addMetrics(d);
     }
   }
@@ -149,12 +155,11 @@ public class MetricsCollector implements IMetricsRegister {
       Metrics.MetricPublisherPublishMessage.Builder builder =
           Metrics.MetricPublisherPublishMessage.newBuilder();
       for (String metricName : timeBucketToMetricNames.get(timeBucketSizeInSecs)) {
-        gatherOneMetric(metricName, builder);
+        gatherOneMetric(builder, metricName);
       }
 
       metricCollectionCount.incr();
-      addDataToMetricPublisher(builder, COLLECTION_COUNT_NAME,
-                               metricCollectionCount.getValueAndReset());
+      addDataToMetricPublisher(builder, COLLECTION_COUNT_NAME, metricCollectionCount.getValueAndReset(), null);
 
       Metrics.MetricPublisherPublishMessage msg = builder.build();
 
@@ -171,13 +176,36 @@ public class MetricsCollector implements IMetricsRegister {
     }
   }
 
-  // Gather the value of given metricName, convert it  into protobuf,
+  // Gather the value of given metricName, convert it into protobuf,
   // and add it to MetricPublisherPublishMessage builder given.
   @SuppressWarnings("unchecked")
   private void gatherOneMetric(
+      Metrics.MetricPublisherPublishMessage.Builder builder,
+      String metricName) {
+    IMetric metric = metrics.get(metricName);
+
+    Map<List<String>, IMetric> taggedMetrics = metric.getTaggedMetricsAndReset();
+    if (taggedMetrics != null) {
+      // If taggedMetrics is not null, it means the metric is tagged, and
+      // the tags should be reported to MetricPublisher. No need to report
+      // the non-tagged value of the metric in this case.
+      for (Map.Entry<List<String>, IMetric> entry : taggedMetrics.entrySet()) {
+        gatherOneMetricValue(builder, metricName, entry.getValue().getValueAndReset(), entry.getKey());
+      }
+    } else {
+      // Regular metric without tag support.
+      Object metricValue = metric.getValueAndReset();
+      gatherOneMetricValue(builder, metricName, metricValue, null);
+    }
+  }
+
+  @SuppressWarnings("unchecked")
+  private void gatherOneMetricValue(
+      Metrics.MetricPublisherPublishMessage.Builder builder,
       String metricName,
-      Metrics.MetricPublisherPublishMessage.Builder builder) {
-    Object metricValue = metrics.get(metricName).getValueAndReset();
+      Object metricValue,
+      List<String> tagList) {
+
     // Decide how to handle the metric based on type
     if (metricValue == null) {
       return;
@@ -186,16 +214,16 @@ public class MetricsCollector implements IMetricsRegister {
       for (Map.Entry<Object, Object> entry : ((Map<Object, Object>) metricValue).entrySet()) {
         if (entry.getKey() != null && entry.getValue() != null) {
           addDataToMetricPublisher(
-              builder, metricName + "/" + entry.getKey().toString(), entry.getValue());
+              builder, metricName + "/" + entry.getKey().toString(), entry.getValue(), tagList);
         }
       }
     } else if (metricValue instanceof Collection) {
       int index = 0;
       for (Object value : (Collection) metricValue) {
-        addDataToMetricPublisher(builder, metricName + "/" + (index++), value);
+        addDataToMetricPublisher(builder, metricName + "/" + (index++), value, tagList);
       }
     } else {
-      addDataToMetricPublisher(builder, metricName, metricValue);
+      addDataToMetricPublisher(builder, metricName, metricValue, tagList);
     }
   }
 }

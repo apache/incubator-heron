@@ -19,6 +19,8 @@
 
 package org.apache.heron.spi.metricsmgr.metrics;
 
+import java.util.List;
+
 /**
  * An immutable class providing a view of MetricsInfo
  * The value is in type String, and IMetricsSink would determine how to parse it.
@@ -26,10 +28,16 @@ package org.apache.heron.spi.metricsmgr.metrics;
 public class MetricsInfo {
   private final String name;
   private final String value;
+  private final List<String> tags;
 
   public MetricsInfo(String name, String value) {
+    this(name, value, null);
+  }
+
+  public MetricsInfo(String name, String value, List<String> tags) {
     this.name = name;
     this.value = value;
+    this.tags = tags;
   }
 
   /**
@@ -50,8 +58,21 @@ public class MetricsInfo {
     return value;
   }
 
+  /**
+   * Get the tags of the metric
+   *
+   * @return the tags of the metric
+   */
+  public List<String> getTags() {
+    return tags;
+  }
+
   @Override
   public String toString() {
-    return String.format("%s = %s", getName(), getValue());
+    if (tags == null) {
+      return name + "=" + value;
+    } else {
+      return name + "=" + value + " tags=" + tags;
+    }
   }
 }

@@ -267,7 +267,8 @@ public class MetricsManagerServer extends HeronServer {
 
     List<MetricsInfo> metricsInfos = new ArrayList<MetricsInfo>(message.getMetricsCount());
     for (Metrics.MetricDatum metricDatum : message.getMetricsList()) {
-      MetricsInfo info = new MetricsInfo(metricDatum.getName(), metricDatum.getValue());
+      // TODO: support tags. metricDatum.getTags()
+      MetricsInfo info = new MetricsInfo(metricDatum.getName(), metricDatum.getValue(), metricDatum.getTagList());
       metricsInfos.add(info);
     }
 
