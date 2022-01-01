@@ -170,14 +170,21 @@ jar_jar_repositories()
 
 http_archive(
     name = "rules_python",
-    sha256 = "b5668cde8bb6e3515057ef465a35ad712214962f0b3a314e551204266c7be90c",
-    strip_prefix = "rules_python-0.0.2",
-    url = "https://github.com/bazelbuild/rules_python/releases/download/0.0.2/rules_python-0.0.2.tar.gz",
+    url = "https://github.com/bazelbuild/rules_python/releases/download/0.5.0/rules_python-0.5.0.tar.gz",
+    sha256 = "cd6730ed53a002c56ce4e2f396ba3b3be262fd7cb68339f0377a45e8227fe332",
+)
+
+load("@rules_python//python:pip.bzl", "pip_install")
+# Create a central external repo, @heron_py_deps, that contains Bazel targets for all the
+# third-party packages specified in the requirements.txt file.
+pip_install(
+   name = "heron_py_deps",
+   requirements = "//tools/python:requirements.txt",
 )
 
 load("@rules_python//python:repositories.bzl", "py_repositories")
 
-py_repositories()
+#py_repositories()
 # Only needed if using the packaging rules.
 # load("@rules_python//python:pip.bzl", "pip_repositories")
 # pip_repositories()
@@ -369,13 +376,11 @@ http_archive(
 # end helm
 
 # for docker image building
-DOCKER_RULES_VERSION = "0.14.4"
-
 http_archive(
     name = "io_bazel_rules_docker",
-    sha256 = "4521794f0fba2e20f3bf15846ab5e01d5332e587e9ce81629c7f96c793bb7036",
-    strip_prefix = "rules_docker-%s" % DOCKER_RULES_VERSION,
-    urls = ["https://github.com/bazelbuild/rules_docker/archive/v%s.tar.gz" % DOCKER_RULES_VERSION],
+    sha256 = "59536e6ae64359b716ba9c46c39183403b01eabfbd57578e84398b4829ca499a",
+    strip_prefix = "rules_docker-0.22.0",
+    urls = ["https://github.com/bazelbuild/rules_docker/releases/download/v0.22.0/rules_docker-v0.22.0.tar.gz"],
 )
 
 load(
@@ -387,10 +392,6 @@ container_repositories()
 load("@io_bazel_rules_docker//repositories:deps.bzl", container_deps = "deps")
 
 container_deps()
-
-load("@io_bazel_rules_docker//repositories:pip_repositories.bzl", "pip_deps")
-
-pip_deps()
 
 load(
     "@io_bazel_rules_docker//container:container.bzl",

@@ -18,6 +18,7 @@
 load("@rules_java//java:defs.bzl", "java_library")
 load("@rules_cc//cc:defs.bzl", "cc_library")
 load("//tools/rules/pex:pex_rules.bzl", "pex_library")
+load("@rules_python//python:defs.bzl", "py_binary")
 
 def proto_package_impl(ctx):
     return struct(proto_src = ctx.file.src)
@@ -182,7 +183,7 @@ def proto_library(
             srcs = proto_deps,
             cmd = proto_cmd,
         )
-        pex_library(
+        py_binary(
             name = proto_lib,
             visibility = visibility,
             srcs = [proto_src],
