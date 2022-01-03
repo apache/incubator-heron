@@ -65,7 +65,7 @@ jetty_version = "9.4.6.v20170531"
 
 jersey_version = "2.25.1"
 
-kubernetes_client_version = "11.0.0"
+kubernetes_client_version = "14.0.0"
 
 maven_install(
     name = "maven",
@@ -141,6 +141,7 @@ maven_install(
             packaging = "test-jar",
         ),
     ],
+    fail_if_repin_required = True,
     fetch_sources = True,
     maven_install_json = "//:maven_install.json",
     repositories = [
@@ -153,9 +154,8 @@ maven_install(
 
 # https://github.com/bazelbuild/rules_jvm_external#updating-maven_installjson
 # To update `maven_install.json` run the following command:
-# `bazel run @unpinned_maven//:pin`
+# `REPIN=1 bazel run @unpinned_maven//:pin`
 load("@maven//:defs.bzl", "pinned_maven_install")
-fail_if_repin_required = True
 pinned_maven_install()
 
 load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
