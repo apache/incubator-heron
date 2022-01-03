@@ -294,7 +294,7 @@ public class V1Controller extends KubernetesController {
    */
   V1StatefulSet getStatefulSet() throws ApiException {
     return appsClient.readNamespacedStatefulSet(getStatefulSetName(true), getNamespace(),
-        null, null, null);
+        null);
   }
 
   /**
@@ -1115,8 +1115,6 @@ public class V1Controller extends KubernetesController {
       return coreClient.readNamespacedConfigMap(
           configMapName,
           getNamespace(),
-          null,
-          null,
           null);
     } catch (ApiException e) {
       final String message = "Error retrieving ConfigMaps";
