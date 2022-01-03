@@ -730,7 +730,7 @@ public class V1Controller extends KubernetesController {
     // with precedence [1] CLI, [2] Config.
     final Map<String, Quantity> limits = resourceRequirements.getLimits();
     final Quantity limitCPU = limitsCLI.getOrDefault(KubernetesConstants.CPU,
-        Quantity.fromString(Double.toString(roundDecimal(resource.getCpu(), 3))));
+        Quantity.fromString(Double.toString(KubernetesUtils.roundDecimal(resource.getCpu(), 3))));
     final Quantity limitMEMORY = limitsCLI.getOrDefault(KubernetesConstants.MEMORY,
         Quantity.fromString(KubernetesUtils.Megabytes(resource.getRam())));
 
@@ -928,11 +928,6 @@ public class V1Controller extends KubernetesController {
                           .name(name)));
       container.addEnvItem(envVar);
     }
-  }
-
-  public static double roundDecimal(double value, int places) {
-    double scale = Math.pow(10, places);
-    return Math.round(value * scale) / scale;
   }
 
   /**
