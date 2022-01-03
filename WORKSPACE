@@ -65,7 +65,7 @@ jetty_version = "9.4.6.v20170531"
 
 jersey_version = "2.25.1"
 
-kubernetes_client_version = "14.0.0"
+kubernetes_client_version = "11.0.0"
 
 maven_install(
     name = "maven",
