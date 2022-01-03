@@ -90,6 +90,11 @@ final class KubernetesUtils {
     return String.format("%sMi", Long.toString(amount.asMegabytes()));
   }
 
+  static double roundDecimal(double value, int places) {
+    double scale = Math.pow(10, places);
+    return Math.round(value * scale) / scale;
+  }
+
   static class V1ControllerUtils<T> {
     private static final Logger LOG = Logger.getLogger(V1Controller.class.getName());
 
