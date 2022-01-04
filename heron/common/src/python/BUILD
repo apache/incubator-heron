@@ -1,12 +1,13 @@
 package(default_visibility = ["//visibility:public"])
 
-pex_library(
+load("@rules_python//python:defs.bzl", "py_library")
+load("@heron_py_deps//:requirements.bzl", "requirement")
+
+py_library(
     name = "common-py",
     srcs = glob(["**/*.py"]),
-    reqs = [
-        "colorlog==2.6.1",
-    ],
     deps = [
         "//heron/proto:proto-py",
+        requirement("colorlog")
     ],
 )
