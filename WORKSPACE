@@ -113,7 +113,6 @@ maven_install(
         "org.slf4j:slf4j-api:" + slf4j_version,
         "org.slf4j:slf4j-jdk14:" + slf4j_version,
         "log4j:log4j:1.2.17",
-        "org.yaml:snakeyaml:1.30",
         "tech.tablesaw:tablesaw-core:0.11.4",
         "org.glassfish.hk2.external:aopalliance-repackaged:2.5.0-b32",
         "org.apache.commons:commons-compress:1.14",
