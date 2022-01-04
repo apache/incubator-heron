@@ -65,7 +65,7 @@ jetty_version = "9.4.6.v20170531"
 
 jersey_version = "2.25.1"
 
-kubernetes_client_version = "11.0.0"
+kubernetes_client_version = "14.0.0"
 
 maven_install(
     name = "maven",
@@ -73,6 +73,7 @@ maven_install(
         "antlr:antlr:2.7.7",
         "org.apache.zookeeper:zookeeper:3.6.3",
         "io.kubernetes:client-java:" + kubernetes_client_version,
+        "io.kubernetes:client-java-api-fluent:" + kubernetes_client_version,
         "com.esotericsoftware:kryo:5.2.0",
         "org.apache.avro:avro:1.7.4",
         "org.apache.mesos:mesos:0.22.0",
@@ -112,7 +113,6 @@ maven_install(
         "org.slf4j:slf4j-api:" + slf4j_version,
         "org.slf4j:slf4j-jdk14:" + slf4j_version,
         "log4j:log4j:1.2.17",
-        "org.yaml:snakeyaml:1.15",
         "tech.tablesaw:tablesaw-core:0.11.4",
         "org.glassfish.hk2.external:aopalliance-repackaged:2.5.0-b32",
         "org.apache.commons:commons-compress:1.14",

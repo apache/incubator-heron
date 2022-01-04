@@ -1422,8 +1422,8 @@ public class V1ControllerTest {
             .withName(volumeName)
             .withNewNfs()
               .withServer(server)
-              .withNewPath(pathOnNFS)
-              .withNewReadOnly(readOnly)
+              .withPath(pathOnNFS)
+              .withReadOnly(Boolean.parseBoolean(readOnly))
             .endNfs()
             .build()
     );
