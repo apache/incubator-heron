@@ -1,10 +1,11 @@
 load("@rules_python//python:defs.bzl", "py_library")
+load("@rules_python//python:defs.bzl", "py_binary")
 load("@heron_py_deps//:requirements.bzl", "requirement")
 
 package(default_visibility = ["//visibility:public"])
 
 py_library(
-  name = "cli_py_2",
+  name = "cli-py",
   srcs = glob(
                  ["**/*.py"],
              ),
@@ -18,27 +19,12 @@ py_library(
   ]
 )
 
-pex_library(
-    name = "cli-py",
-    srcs = glob(
-        ["**/*.py"],
-    ),
-    reqs = [
-        "PyYAML==3.13",
-        "requests==2.12.3",
-        "netifaces==0.10.6",
-    ],
-    deps = [
-        "//heron/common/src/python:common-py",
-        "//heron/proto:proto-py",
-        "//heron/tools/common/src/python:common-py",
-    ],
-)
-
-pex_binary(
+py_binary(
     name = "heron",
     srcs = [
-        "main.py",
+        "main.py"
     ],
-    deps = [":cli-py"],
+    deps = [
+        "cli-py"
+    ]
 )
