@@ -87,7 +87,7 @@ maven_install(
         "org.apache.httpcomponents:httpclient:" + http_client_version,
         "org.apache.httpcomponents:httpmime:" + http_client_version,
         "com.google.apis:google-api-services-storage:v1-rev108-1.22.0",
-        "com.microsoft.dhalion:dhalion:0.2.3",
+        "com.microsoft.dhalion:dhalion:0.2.6",
         "org.objenesis:objenesis:2.1",
         "com.amazonaws:aws-java-sdk-s3:" + aws_version,
         "org.eclipse.jetty:jetty-server:" + jetty_version,
