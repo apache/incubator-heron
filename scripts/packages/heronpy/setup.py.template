@@ -43,9 +43,9 @@ setup(
 
   url='https://github.com/apache/incubator-heron',
 
-  author='Heron Team',
-  author_email='heronstreaming@gmail.com',
-
+  author='Apache Heron (incubating)',
+  author_email='dev@heron.apache.org',
+  license='Apache License v2.0',
   classifiers=[
     'Development Status :: 3 - Alpha',
 
@@ -58,7 +58,7 @@ setup(
     'Programming Language :: Python :: 3.8',
   ],
 
-  keywords='heron topology python',
+  keywords='heron streaming analytics topology python',
   packages=find_packages(),
 
   install_requires=requirements,
