@@ -598,6 +598,7 @@ pkg_tar(
 genrule(
     name = "generate-heronpy-package",
     srcs = [
+        "//:disclaimers",
         "heronpy/requirements.txt",
         "heronpy/setup.py.template",
         "heronpy/README.txt",
