@@ -22,8 +22,10 @@ package org.apache.heron.scheduler.kubernetes;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 import org.apache.heron.scheduler.utils.SchedulerUtils.ExecutorPort;
@@ -34,6 +36,9 @@ public final class KubernetesConstants {
 
   public static final String MEMORY = "memory";
   public static final String CPU = "cpu";
+
+  public static final String EXECUTOR_NAME = "executor";
+  public static final String MANAGER_NAME = "manager";
 
   // container env constants
   public static final String ENV_HOST = "HOST";
@@ -50,6 +55,7 @@ public final class KubernetesConstants {
   public static final String LABEL_APP = "app";
   public static final String LABEL_APP_VALUE = "heron";
   public static final String LABEL_TOPOLOGY = "topology";
+  public static final String LABEL_ON_DEMAND = "onDemand";
 
   // prometheus annotation keys
   public static final String ANNOTATION_PROMETHEUS_SCRAPE = "prometheus.io/scrape";
@@ -68,7 +74,7 @@ public final class KubernetesConstants {
   public static final int CHECKPOINT_MGR_PORT = 6009;
   // port number the start with when more than one port needed for remote debugging
   public static final int JVM_REMOTE_DEBUGGER_PORT = 6010;
-  public static final String JVM_REMOTE_DEBUGGER_PORT_NAME = "remote-debugger";
+  public static final String JVM_REMOTE_DEBUGGER_PORT_NAME = "rmt-debug";
 
   public static final Map<ExecutorPort, Integer> EXECUTOR_PORTS = new HashMap<>();
   static {
@@ -86,10 +92,15 @@ public final class KubernetesConstants {
   public static final String JOB_LINK =
       "/api/v1/namespaces/kube-system/services/kubernetes-dashboard/proxy/#/pod";
 
+  protected static final String JSON_PATCH_STATEFUL_SET_REPLICAS_FORMAT =
+      "[{\"op\":\"replace\",\"path\":\"/spec/replicas\",\"value\":%d}]";
 
   public static final Pattern VALID_POD_NAME_REGEX =
       Pattern.compile("[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*",
           Pattern.CASE_INSENSITIVE);
+
+  public static final Pattern VALID_LOWERCASE_RFC_1123_REGEX =
+      Pattern.compile("[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*");
 
   public static final List<String> VALID_IMAGE_PULL_POLICIES = Collections.unmodifiableList(
       Arrays.asList(
@@ -102,8 +113,38 @@ public final class KubernetesConstants {
   static final List<String> TOLERATIONS = Collections.unmodifiableList(
       Arrays.asList(
           "node.kubernetes.io/not-ready",
-          "node.alpha.kubernetes.io/notReady",
-          "node.alpha.kubernetes.io/unreachable"
+          "node.kubernetes.io/unreachable"
       )
+  );
+
+  protected enum VolumeConfigKeys {
+    claimName,
+    storageClassName,
+    sizeLimit,
+    accessModes,
+    volumeMode,
+    medium,
+    type,
+    readOnly,
+    server,
+    pathOnHost,
+    pathOnNFS,
+    path,               // Added to container, nfsVolume, hostPath.
+    subPath,            // Added to container.
+  }
+
+  protected static final Set<String> VALID_VOLUME_HOSTPATH_TYPES = Collections.unmodifiableSet(
+      new HashSet<String>() {
+        {
+          add("");
+          add("DirectoryOrCreate");
+          add("Directory");
+          add("FileOrCreate");
+          add("File");
+          add("Socket");
+          add("CharDevice");
+          add("BlockDevice");
+        }
+      }
   );
 }

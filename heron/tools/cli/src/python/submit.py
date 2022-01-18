@@ -79,6 +79,7 @@ def create_parser(subparsers):
   cli_args.add_service_url(parser)
   cli_args.add_system_property(parser)
   cli_args.add_verbose(parser)
+  cli_args.add_verbose_gc(parser)
 
   parser.set_defaults(subcommand='submit')
   return parser
@@ -126,7 +127,10 @@ def launch_a_topology(cl_args, tmp_dir, topology_file, topology_defn_file, topol
   if Log.getEffectiveLevel() == logging.DEBUG:
     args.append("--verbose")
 
-  if cl_args["dry_run"]:
+  if cl_args["verbose_gc"]:
+    args.append("--verbose_gc")
+
+  if cl_args['dry_run']:
     args.append("--dry_run")
     if "dry_run_format" in cl_args:
       args += ["--dry_run_format", cl_args["dry_run_format"]]
@@ -182,6 +186,9 @@ def launch_topology_server(cl_args, topology_file, topology_defn_file, topology_
 
   if cl_args['dry_run']:
     data["dry_run"] = True
+
+  if cl_args['verbose_gc']:
+    data['verbose_gc'] = True
 
   files = dict(
       definition=open(topology_defn_file, 'rb'),

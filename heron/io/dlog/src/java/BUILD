@@ -3,9 +3,8 @@ load("@rules_java//java:defs.bzl", "java_binary", "java_library")
 package(default_visibility = ["//visibility:public"])
 
 dlog_deps = [
-    "@maven//:org_apache_distributedlog_distributedlog_core_shaded",
-    "@maven//:io_netty_netty_all",
     "//third_party/java:dlog-java",
+    "@maven//:io_netty_netty_all",
 ]
 
 java_library(

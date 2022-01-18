@@ -62,6 +62,9 @@ public enum Key {
   DRY_RUN                  ("heron.config.dry_run",             Boolean.FALSE),
   DRY_RUN_FORMAT_TYPE      ("heron.config.dry_run_format_type", Type.DRY_RUN_FORMAT_TYPE),
   VERBOSE                  ("heron.config.verbose",             Boolean.FALSE),
+  // Used to enable verbose JVM GC logging
+  VERBOSE_GC               ("heron.config.verbose_gc",          Boolean.FALSE),
+
   CONFIG_PROPERTY          ("heron.config.property",            Type.STRING),
 
   //keys for release/build information

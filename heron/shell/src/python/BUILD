@@ -6,6 +6,7 @@ pex_library(
         ["**/*.py"],
     ),
     reqs = [
+        "logging-formatter-anticrlf==1.2",
         "requests==2.25.0",
         "tornado==4.5.3",
     ],

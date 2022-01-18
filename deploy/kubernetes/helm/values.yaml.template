@@ -28,7 +28,7 @@
 platform: minikube
 
 # Heron image to use
-image: heron/heron:VERSION
+image: apache/heron:VERSION
 
 # Heron image pull policy
 imagePullPolicy: IfNotPresent
@@ -36,12 +36,32 @@ imagePullPolicy: IfNotPresent
 # Number of replicas for the job binary in bookkeeper
 jobReplicas: 1
 
-# amount of memory to provide for API server
-apiServerMemory: 512M
-heron:
+apiServer:
+  # amount of memory to provide for API server
+  memory: 512M
+  nodePort:
+    enabled: false
+    # port can be left empty and Kubernetes will assign a random NodePort
+    port:
+
+tracker:
+  nodePort:
+    enabled: false
+    # port can be left empty and Kubernetes will assign a random NodePort
+    port:
+
+ui:
+  nodePort:
+    enabled: false
+    # port can be left empty and Kubernetes will assign a random NodePort
+    port:
   # set to `-` to set base-url to the default k8s proxy URL
   # set to `null` to remove the use of base_url
   url: "-"
+
+# Can be EQUAL_TO_LIMIT or NOT_SET
+topologyResourceRequestMode: EQUAL_TO_LIMIT
+
 # Topologies uploader
 uploader:
   class: dlog # s3
@@ -53,6 +73,12 @@ uploader:
 
 # Packing algorithms
 packing: RoundRobin # ResourceCompliantRR, FirstFitDecreasing
+
+# Support for ConfigMap mounted PodTemplates
+disablePodTemplates: false
+
+# Support for Voume specification from CLI input
+disableVolumesFromCLI: false
 
 # Number of replicas for storage bookies, memory and storage requirements
 bookieReplicas: 3
@@ -72,7 +98,7 @@ bookieLogSizeLimit: 10000000
 zkReplicas: 3
 
 bookkeeper:
-  image: apache/bookkeeper:4.11.0
+  image: apache/bookkeeper:4.13.0
   imagePullPolicy: IfNotPresent
   
   # set storageClassName to "none" to not use storageClassName

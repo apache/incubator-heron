@@ -8,6 +8,7 @@ pex_binary(
     main = "main.py",
     reqs = [
         "tornado==4.5.3",
+        "werkzeug==2.0.2",
     ],
     deps = [
         "//heron/common/src/python:common-py",

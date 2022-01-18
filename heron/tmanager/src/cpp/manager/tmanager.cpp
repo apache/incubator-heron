@@ -205,7 +205,7 @@ void TManager::OnPackingPlanFetch(shared_ptr<proto::system::PackingPlan> newPack
         LOG(INFO) << "Packing plan changed. Deleting physical plan and restarting TManager to "
                   << "reset internal state. Exiting.";
         state_mgr_->DeletePhysicalPlan(tmanager_location_->topology_name(),
-          [this](proto::system::StatusCode status) {
+          [](proto::system::StatusCode status) {
             ::exit(1);
           });
       } else {
@@ -221,7 +221,7 @@ void TManager::EstablishTManager(EventLoop::Status) {
   state_mgr_->SetTManagerLocation(*tmanager_location_, std::move(cb));
 
   // if zk lost the tmanager location, tmanager quits to bail out and re-establish its location
-  auto cb2 = [this]() {
+  auto cb2 = []() {
     LOG(ERROR) << " lost tmanager location in zk state manager. Bailing out..." << std::endl;
     ::exit(1);
   };

@@ -18,7 +18,7 @@
 {{- $platform := .Values.platform -}}
 {{- $jobReplicas := .Values.jobReplicas -}}
 {{- $defaultUrl := (printf "/api/v1/namespaces/%s/services/%s-ui:8889/proxy" .Release.Namespace .Release.Name) -}}
-{{- $apiServerMemory := .Values.apiServerMemory }}
+{{- $apiServerMemory := .Values.apiServer.memory }}
 
 apiVersion: v1
 kind: ConfigMap
@@ -56,11 +56,7 @@ spec:
           operator: "Equal"
           effect: "NoExecute"
           tolerationSeconds: 10
-        - key: "node.alpha.kubernetes.io/notReady"
-          operator: "Equal"
-          effect: "NoExecute"
-          tolerationSeconds: 10
-        - key: "node.alpha.kubernetes.io/unreachable"
+        - key: "node.kubernetes.io/unreachable"
           operator: "Equal"
           effect: "NoExecute"
           tolerationSeconds: 10
@@ -116,8 +112,8 @@ spec:
             - >-
               heron-ui
               --port=8889
-              {{- if not (kindIs "invalid" .Values.heron.url) }}
-              --base-url={{ eq .Values.heron.url "-" | ternary $defaultUrl .Values.heron.url }}
+              {{- if not (kindIs "invalid" .Values.ui.url) }}
+              --base-url={{ eq .Values.ui.url "-" | ternary $defaultUrl .Values.ui.url }}
               {{- end }}
         - name: heron-apiserver
           image: {{ .Values.image }}
@@ -161,6 +157,9 @@ spec:
               -D heron.class.packing.algorithm=org.apache.heron.packing.binpacking.FirstFitDecreasingPacking
               -D heron.class.repacking.algorithm=org.apache.heron.packing.binpacking.FirstFitDecreasingPacking
               {{- end }}
+              -D heron.kubernetes.resource.request.mode={{ .Values.topologyResourceRequestMode }}
+              -D heron.kubernetes.pod.template.disabled={{ .Values.disablePodTemplates }}
+              -D heron.kubernetes.volume.from.cli.disabled={{ .Values.disableVolumesFromCLI }}
           envFrom:
             - configMapRef:
                 name: {{ .Release.Name }}-tools-config
@@ -183,6 +182,14 @@ spec:
     - port: 8889
       targetPort: 8889
       protocol: TCP
+      {{- if .Values.ui.nodePort.enabled }}
+      nodePort: {{ .Values.ui.nodePort.port }}
+      {{- end }}
+  {{- if .Values.ui.nodePort.enabled }}
+  type: NodePort
+  {{- else }}
+  type: ClusterIP
+  {{- end }}      
   selector:
     app: {{ .Release.Name }}-tools
     release: {{ .Release.Name }}
@@ -205,6 +212,44 @@ spec:
     - port: 8888
       targetPort: 8888
       protocol: TCP
+      {{- if .Values.tracker.nodePort.enabled }}
+      nodePort: {{ .Values.tracker.nodePort.port }}
+      {{- end }}
+  {{- if .Values.tracker.nodePort.enabled }}
+  type: NodePort
+  {{- else }}
+  type: ClusterIP
+  {{- end }}
+  selector:
+    app: {{ .Release.Name }}-tools
+    release: {{ .Release.Name }}
+
+---
+##
+## Service to expose the heron-apiserver
+##
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-apiserver
+  labels:
+    app: {{ .Release.Name }}-tools
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  ports:
+    - port: 9000
+      targetPort: 9000
+      protocol: TCP
+      {{- if .Values.apiServer.nodePort.enabled }}
+      nodePort: {{ .Values.apiServer.nodePort.port }}
+      {{- end }}
+  {{- if .Values.apiServer.nodePort.enabled }}
+  type: NodePort
+  {{- else }}
+  type: ClusterIP
+  {{- end }}
   selector:
     app: {{ .Release.Name }}-tools
     release: {{ .Release.Name }}
@@ -252,6 +297,13 @@ rules:
   - patch
   - update
   - watch
+  - deletecollection
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  verbs:
+  - deletecollection
 - apiGroups:
   - ""
   resources:
@@ -264,23 +316,20 @@ rules:
   - patch
   - update
   - watch
-
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: {{ .Release.Name }}-apiserver
-  labels:
-    app: {{ .Release.Name }}-tools
-    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
-    release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
-spec:
-  ports:
-    - port: 9000
-      targetPort: 9000
-      protocol: TCP
-  type: NodePort
-  selector:
-    app: {{ .Release.Name }}-tools
-    release: {{ .Release.Name }}
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  verbs:
+  - get
+  - list
+- apiGroups:
+  - ""
+  resources:
+  - persistentvolumeclaims
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - deletecollection

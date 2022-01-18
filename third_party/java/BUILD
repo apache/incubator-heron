@@ -70,16 +70,6 @@ java_library(
 )
 
 java_library(
-    name = "jarjar",
-    srcs = ["Empty.java"],
-    exports = ["@maven//:org_sonatype_plugins_jarjar_maven_plugin"],
-    deps = [
-        "@maven//:org_ow2_asm_asm_all",
-        "@maven//:org_sonatype_plugins_jarjar_maven_plugin",
-    ],
-)
-
-java_library(
     name = "logging",
     srcs = ["Empty.java"],
     exports = ["@maven//:org_slf4j_slf4j_api"],
@@ -248,6 +238,7 @@ java_library(
         "@maven//:io_gsonfire_gson_fire",
         "@maven//:io_kubernetes_client_java",
         "@maven//:io_kubernetes_client_java_api",
+        "@maven//:io_kubernetes_client_java_api_fluent",
         "@maven//:io_kubernetes_client_java_proto",
         "@maven//:io_swagger_swagger_annotations",
         "@maven//:log4j_log4j",
@@ -352,7 +343,8 @@ java_library(
     srcs = ["Empty.java"],
     exports = [
         "@maven//:io_netty_netty_all",
-        "@maven//:org_apache_distributedlog_distributedlog_core_shaded",
+        "@maven//:org_apache_distributedlog_distributedlog_core",
+        "@maven//:org_apache_distributedlog_distributedlog_protocol",
     ],
     deps = [
         "@maven//:commons_collections_commons_collections",
@@ -360,7 +352,8 @@ java_library(
         "@maven//:commons_lang_commons_lang",
         "@maven//:commons_logging_commons_logging",
         "@maven//:io_netty_netty_all",
-        "@maven//:org_apache_distributedlog_distributedlog_core_shaded",
+        "@maven//:org_apache_distributedlog_distributedlog_core",
+        "@maven//:org_apache_distributedlog_distributedlog_protocol",
         "@maven//:org_slf4j_slf4j_api",
         "@maven//:org_slf4j_slf4j_jdk14",
     ],

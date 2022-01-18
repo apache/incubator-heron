@@ -4,6 +4,7 @@
     "Getting Started": [
       "getting-started-local-single-node",
       "getting-started-migrate-storm-topologies",
+      "getting-started-docker",
       "getting-started-troubleshooting-guide"
     ],
     "Deployment": [
@@ -52,6 +53,7 @@
     "Schedulers": [
       "schedulers-k8s-by-hand",
       "schedulers-k8s-with-helm",
+      "schedulers-k8s-execution-environment",
       "schedulers-aurora-cluster",
       "schedulers-aurora-local",
       "schedulers-local",

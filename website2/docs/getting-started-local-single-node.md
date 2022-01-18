@@ -21,37 +21,25 @@ sidebar_label: Local (Single Node)
 -->
 
 > The current version of Heron is {{heron:version}}
+For other platforms, you need to build from source. Please refer to the [guide to compiling Heron](compiling-overview).
 
-The current way to get started learning Heron is to build from source. 
-Please refer to the [guide to compiling Heron](compiling-overview). The Heron community is working to add release scripts and Heron
-binaries available from Apache mirrors soon.
+## Step 1 --- Download the Heron tools
 
-* [MacOS](#macos-homebrew)
-* [Ubuntu 18.04](#using-installation-scripts)
-* [CentOS](#using-installation-scripts)
+Heron tools can be installed using [installation scripts](#using-installation-scripts).
 
-## Building installation scripts
+> Note: As of version  0.20.4-incubating, there is a python compatibility on OSX.
+> The supported platforms are CentOS7, Debian10, and Ubuntu18.04.
 
-The only way to obtain the installation scripts at this time are to compile from source.  We are working to add release scripts and Heron
-binaries available from Apache mirrors soon.
+## Using installation scripts
 
-See how to get setup building Heron see the notes [here](compiling-overview.md)
+To install Heron binaries directly, using installation scripts, go to Heron's [download page](https://heron.apache.org/download)
+and see a full listing of Heron releases for each available platform. The installation script for macOS (`debian10`), for example, is named
+`heron-install-{{% heronVersion %}}-debian10.sh`.
 
-If you already have Bazel and the other required tools installed for your platform you can execute the following:
+Once you've downloaded the script, make it executable using [chmod](https://en.wikipedia.org/wiki/Chmod):
 
 ```bash
-$ bazel build --config=[platform] scripts/packages:binpkgs
-```
-Options for the config flag are:
-* `debian` (Debian10)
-* `ubuntu` (Ubuntu)
-* `darwin` (OSX)
-
-This command will take approximately 45 minutes to compile based on your machine settings. 
- It will output a script called `heron-install.sh`  You will be able to find it relative to the Heron root folder:
- 
- ```bash
-$ ./bazel-bin/scripts/packages/heron-install.sh 
+$ chmod +x heron-*.sh
 ```
 
 Now run the [Heron client](user-manuals-heron-cli) installation script with the `--user` flag set. Here's an example:
@@ -59,7 +47,7 @@ Now run the [Heron client](user-manuals-heron-cli) installation script with the 
 > The script will install executables in the `~/bin` folder. You should add that folder to your `PATH` using `export PATH=~/bin:$PATH`.
 
 ```bash
-$ ./heron-install.sh --user
+$ ./heron-install-{{% heronVersion %}}-ubuntu.sh --user
 Heron installer
 ---------------
 
@@ -214,7 +202,7 @@ Available commands:
     submit             Submit a topology
     version            Print version of heron-cli
 
-For detailed documentation, go to https://heron.incubator.apache.org
+For detailed documentation, go to https://heron.apache.org
 ```
 
 To invoke help output for a command, run `heron help COMMAND`. Here's an

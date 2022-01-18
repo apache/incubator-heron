@@ -226,6 +226,12 @@ See project link for details.
       -> heron/tools/ui/resources/static/js/JSXTransformer.0.10.0.js
     React (v0.10.0, https://github.com/facebook/react/blob/0.10-stable/LICENSE)
       -> heron/tools/ui/resources/static/js/react.0.10.0.js
+    RobotoSlab(https://github.com/googlefonts/robotoslab/blob/master/LICENSE.txt)
+      -> heron/tools/ui/resources/static/fonts/robotoslab-regular.eot
+      -> heron/tools/ui/resources/static/fonts/robotoslab-regular.svg
+      -> heron/tools/ui/resources/static/fonts/robotoslab-regular.ttf
+      -> heron/tools/ui/resources/static/fonts/robotoslab-regular.woff
+      -> heron/tools/ui/resources/static/fonts/robotoslab-regular.woff2
     bazel_jar_jar(https://github.com/johnynek/bazel_jar_jar/blob/master/LICENSE)
       -> tools/rules/jarjar_rules.bzl
     gerrit(https://gerrit.googlesource.com/gerrit/+/master/COPYING)

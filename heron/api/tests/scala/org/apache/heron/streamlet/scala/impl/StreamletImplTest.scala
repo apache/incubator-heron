@@ -54,7 +54,7 @@ import org.apache.heron.streamlet.impl.streamlets.{
   UnionStreamlet
 }
 
-import org.apache.heron.streamlet.scala.{Builder, Streamlet}
+import org.apache.heron.streamlet.scala.{Builder, Streamlet, StreamletReducers}
 import org.apache.heron.streamlet.scala.common.{
   BaseFunSuite,
   TestIncrementSerializableTransformer,
@@ -623,7 +623,7 @@ class StreamletImplTest extends BaseFunSuite {
     supplierStreamlet
       .reduceByKey[Int, Int]((x: Int) => x * 100,
                              (x: Int) => x,
-                             (x: Int, y: Int) => x + y)  // sum operation
+                             StreamletReducers.sum(_: Int, _: Int))
       .setName("Reduce_Streamlet_1")
       .setNumPartitions(5)
 
@@ -651,7 +651,7 @@ class StreamletImplTest extends BaseFunSuite {
     supplierStreamlet
       .reduceByKey[Int, Int]((key: Int) => key * 100,
                              0,
-                             (x: Int, y: Int) => x + y)  // sum operation
+                             StreamletReducers.sum(_: Int, _: Int))
       .setName("Reduce_Streamlet_1")
       .setNumPartitions(5)
 
@@ -680,7 +680,7 @@ class StreamletImplTest extends BaseFunSuite {
       .reduceByKeyAndWindow[Int, Int]((key: Int) => key * 100,
                                       (value: Int) => 1,
                                       WindowConfig.TumblingCountWindow(10),
-                                      (x: Int, y: Int) => x + y)
+                                      StreamletReducers.sum(_: Int, _: Int))
       .setName("Reduce_Streamlet_1")
       .setNumPartitions(5)
 

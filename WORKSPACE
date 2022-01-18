@@ -19,9 +19,8 @@ workspace(name = "org_apache_heron")
 
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive", "http_file")
 
-RULES_JVM_EXTERNAL_TAG = "3.1"
-
-RULES_JVM_EXTERNAL_SHA = "e246373de2353f3d34d35814947aa8b7d0dd1a58c2f7a6c41cfeaff3007c2d14"
+RULES_JVM_EXTERNAL_TAG = "4.2"
+RULES_JVM_EXTERNAL_SHA = "cd1a77b7b02e8e008439ca76fd34f5b07aecb8c752961f9640dea15e9e5ba1ca"
 
 http_archive(
     name = "rules_jvm_external",
@@ -30,10 +29,22 @@ http_archive(
     url = "https://github.com/bazelbuild/rules_jvm_external/archive/%s.zip" % RULES_JVM_EXTERNAL_TAG,
 )
 
+load("@rules_jvm_external//:repositories.bzl", "rules_jvm_external_deps")
+
+rules_jvm_external_deps()
+
+load("@rules_jvm_external//:setup.bzl", "rules_jvm_external_setup")
+
+rules_jvm_external_setup()
+
+load("@rules_jvm_external//:defs.bzl", "maven_install")
+load("@rules_jvm_external//:defs.bzl", "artifact")
+load("@rules_jvm_external//:specs.bzl", "maven")
+
 # versions shared across artifacts that should be upgraded together
 aws_version = "1.11.58"
 
-curator_version = "2.9.0"
+curator_version = "5.1.0"
 
 google_client_version = "1.22.0"
 
@@ -45,7 +56,7 @@ reef_version = "0.14.0"
 
 slf4j_version = "1.7.30"
 
-distributedlog_version = "4.11.0"
+distributedlog_version = "4.13.0"
 
 http_client_version = "4.5.2"
 
@@ -54,21 +65,16 @@ jetty_version = "9.4.6.v20170531"
 
 jersey_version = "2.25.1"
 
-kubernetes_client_version = "8.0.0"
-
-load("@rules_jvm_external//:defs.bzl", "maven_install")
-load("@rules_jvm_external//:specs.bzl", "maven")
-load("@rules_jvm_external//migration:maven_jar_migrator_deps.bzl", "maven_jar_migrator_repositories")
-
-maven_jar_migrator_repositories()
+kubernetes_client_version = "14.0.0"
 
 maven_install(
     name = "maven",
     artifacts = [
         "antlr:antlr:2.7.7",
-        "org.apache.zookeeper:zookeeper:3.5.8",
+        "org.apache.zookeeper:zookeeper:3.6.3",
         "io.kubernetes:client-java:" + kubernetes_client_version,
-        "com.esotericsoftware:kryo:5.0.0",
+        "io.kubernetes:client-java-api-fluent:" + kubernetes_client_version,
+        "com.esotericsoftware:kryo:5.2.0",
         "org.apache.avro:avro:1.7.4",
         "org.apache.mesos:mesos:0.22.0",
         "com.hashicorp.nomad:nomad-sdk:0.7.0",
@@ -81,10 +87,8 @@ maven_install(
         "org.apache.httpcomponents:httpclient:" + http_client_version,
         "org.apache.httpcomponents:httpmime:" + http_client_version,
         "com.google.apis:google-api-services-storage:v1-rev108-1.22.0",
-        "com.microsoft.dhalion:dhalion:0.2.3",
+        "com.microsoft.dhalion:dhalion:0.2.6",
         "org.objenesis:objenesis:2.1",
-        "org.ow2.asm:asm-all:5.1",
-        "org.ow2.asm:asm:5.0.4",
         "com.amazonaws:aws-java-sdk-s3:" + aws_version,
         "org.eclipse.jetty:jetty-server:" + jetty_version,
         "org.eclipse.jetty:jetty-http:" + jetty_version,
@@ -97,11 +101,11 @@ maven_install(
         "org.glassfish.jersey.media:jersey-media-json-jackson:" + jersey_version,
         "org.glassfish.jersey.media:jersey-media-multipart:" + jersey_version,
         "org.glassfish.jersey.containers:jersey-container-servlet:" + jersey_version,
-        "org.apache.distributedlog:distributedlog-core-shaded:" + distributedlog_version,
-        "io.netty:netty-all:4.1.22.Final",
+        "org.apache.distributedlog:distributedlog-core:" + distributedlog_version,
+        "io.netty:netty-all:4.1.72.Final",
         "aopalliance:aopalliance:1.0",
         "org.roaringbitmap:RoaringBitmap:0.6.51",
-        "com.google.guava:guava:18.0",
+        "com.google.guava:guava:23.6-jre",
         "io.gsonfire:gson-fire:1.8.3",
         "org.apache.curator:curator-framework:" + curator_version,
         "org.apache.curator:curator-recipes:" + curator_version,
@@ -109,7 +113,6 @@ maven_install(
         "org.slf4j:slf4j-api:" + slf4j_version,
         "org.slf4j:slf4j-jdk14:" + slf4j_version,
         "log4j:log4j:1.2.17",
-        "org.yaml:snakeyaml:1.15",
         "tech.tablesaw:tablesaw-core:0.11.4",
         "org.glassfish.hk2.external:aopalliance-repackaged:2.5.0-b32",
         "org.apache.commons:commons-compress:1.14",
@@ -126,7 +129,6 @@ maven_install(
         "javax.xml.bind:jaxb-api:2.3.0",
         "javax.activation:activation:1.1.1",
         "org.mockito:mockito-all:1.10.19",
-        "org.sonatype.plugins:jarjar-maven-plugin:1.9",
         "org.powermock:powermock-api-mockito:" + powermock_version,
         "org.powermock:powermock-module-junit4:" + powermock_version,
         "com.puppycrawl.tools:checkstyle:6.17",
@@ -139,6 +141,7 @@ maven_install(
             packaging = "test-jar",
         ),
     ],
+    fail_if_repin_required = True,
     fetch_sources = True,
     maven_install_json = "//:maven_install.json",
     repositories = [
@@ -151,10 +154,24 @@ maven_install(
 
 # https://github.com/bazelbuild/rules_jvm_external#updating-maven_installjson
 # To update `maven_install.json` run the following command:
-# `bazel run @unpinned_maven//:pin`
+# `REPIN=1 bazel run @unpinned_maven//:pin`
 load("@maven//:defs.bzl", "pinned_maven_install")
-
 pinned_maven_install()
+
+load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
+
+git_repository(
+    name = "com_github_johnynek_bazel_jar_jar",
+    commit = "171f268569384c57c19474b04aebe574d85fde0d", # Latest commit SHA as at 2019/02/13
+    remote = "git://github.com/johnynek/bazel_jar_jar.git",
+    shallow_since = "1594234634 -1000",
+)
+
+load(
+    "@com_github_johnynek_bazel_jar_jar//:jar_jar.bzl",
+    "jar_jar_repositories",
+)
+jar_jar_repositories()
 
 http_archive(
     name = "rules_python",
@@ -171,7 +188,7 @@ py_repositories()
 # pip_repositories()
 
 # for pex repos
-PEX_PKG = "https://files.pythonhosted.org/packages/7a/52/666d2a5bcb56b260d6f4fb8ce253845fbae9cb4f97806c190e6e61c3a81b/pex-2.1.21-py2.py3-none-any.whl"
+PEX_PKG = "https://pypi.python.org/packages/fa/c4/5dbdce75117b60b6ffec65bc92ac25ee873b84158a55cfbffa1d49db6eb1/pex-2.1.54-py2.py3-none-any.whl"
 
 PYTEST_PKG = "https://files.pythonhosted.org/packages/b1/ee/53945d50284906adb1e613fabf2e1b8b25926e8676854bb25b93564c0ce7/pytest-6.1.2-py3-none-any.whl"
 
@@ -233,8 +250,8 @@ http_file(
 
 http_file(
     name = "pex_pkg",
-    downloaded_file_path = "pex-2.1.21-py2.py3-none-any.whl",
-    sha256 = "c53ae65103b3fbfeb67ecbde0d87ce9faf87331201fea28d45f55f99ba4b1577",
+    downloaded_file_path = "pex-2.1.54-py2.py3-none-any.whl",
+    sha256 = "e60b006abe8abfd3c3377128e22c33f30cc6dea89e2beb463cf8360e3626db62",
     urls = [PEX_PKG],
 )
 
@@ -266,9 +283,9 @@ http_archive(
 # 3rdparty C++ dependencies
 http_archive(
     name = "com_github_gflags_gflags",
-    sha256 = "ae27cdbcd6a2f935baa78e4f21f675649271634c092b1be01469440495609d0e",
-    strip_prefix = "gflags-2.2.1",
-    urls = ["https://github.com/gflags/gflags/archive/v2.2.1.tar.gz"],
+    sha256 = "34af2f15cf7367513b352bdcd2493ab14ce43692d2dcd9dfc499492966c64dcf",
+    strip_prefix = "gflags-2.2.2",
+    urls = ["https://github.com/gflags/gflags/archive/v2.2.2.tar.gz"],
 )
 
 http_archive(
@@ -290,8 +307,11 @@ http_archive(
 http_archive(
     name = "org_apache_zookeeper",
     build_file = "@//:third_party/zookeeper/BUILD",
-    strip_prefix = "apache-zookeeper-3.5.8",
-    urls = ["https://archive.apache.org/dist/zookeeper/zookeeper-3.5.8/apache-zookeeper-3.5.8.tar.gz"],
+    patch_args = ["-p1"],
+    patches = ["//third_party/zookeeper:zookeeper_jute.patch"],
+    sha256 = "1c52a4ea012c12c87e49298343eae44f89ce0d61133f7e07384d5fb64f8eaa77",
+    strip_prefix = "apache-zookeeper-3.6.3",
+    urls = ["https://downloads.apache.org/zookeeper/zookeeper-3.6.3/apache-zookeeper-3.6.3.tar.gz"],
 )
 
 http_archive(
@@ -304,10 +324,9 @@ http_archive(
 
 http_archive(
     name = "com_github_google_glog",
-    build_file = "@//:third_party/glog/glog.BUILD",
-    sha256 = "7580e408a2c0b5a89ca214739978ce6ff480b5e7d8d7698a2aa92fadc484d1e0",
-    strip_prefix = "glog-0.3.5",
-    urls = ["https://github.com/google/glog/archive/v0.3.5.tar.gz"],
+    sha256 = "21bc744fb7f2fa701ee8db339ded7dce4f975d0d55837a97be7d46e8382dea5a",
+    strip_prefix = "glog-0.5.0",
+    urls = ["https://github.com/google/glog/archive/v0.5.0.zip"],
 )
 
 http_archive(
@@ -367,17 +386,17 @@ http_archive(
 http_archive(
     name = "helm_mac",
     build_file = "@//:third_party/helm/helm.BUILD",
-    sha256 = "05c7748da0ea8d5f85576491cd3c615f94063f20986fd82a0f5658ddc286cdb1",
+    sha256 = "5a0738afb1e194853aab00258453be8624e0a1d34fcc3c779989ac8dbcd59436",
     strip_prefix = "darwin-amd64",
-    urls = ["https://get.helm.sh/helm-v3.0.2-darwin-amd64.tar.gz"],
+    urls = ["https://get.helm.sh/helm-v3.7.2-darwin-amd64.tar.gz"],
 )
 
 http_archive(
     name = "helm_linux",
     build_file = "@//:third_party/helm/helm.BUILD",
-    sha256 = "c6b7aa7e4ffc66e8abb4be328f71d48c643cb8f398d95c74d075cfb348710e1d",
+    sha256 = "4ae30e48966aba5f807a4e140dad6736ee1a392940101e4d79ffb4ee86200a9e",
     strip_prefix = "linux-amd64",
-    urls = ["https://get.helm.sh/helm-v3.0.2-linux-amd64.tar.gz"],
+    urls = ["https://get.helm.sh/helm-v3.7.2-linux-amd64.tar.gz"],
 )
 # end helm
 

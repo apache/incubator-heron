@@ -23,7 +23,7 @@ localfs_deps_files = \
 dlog_deps_files = \
     common_deps_files + \
     spi_deps_files + [
-        "@maven//:org_apache_distributedlog_distributedlog_core_shaded",
+        "//third_party/java:dlog-java",
         "@maven//:io_netty_netty_all",
         "//heron/uploaders/src/java:dlog-uploader-java",
     ]

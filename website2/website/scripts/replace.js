@@ -38,7 +38,9 @@ const bazelVersions = {
     '0.20.0-incubating': '0.14.1',
     '0.20.1-incubating': '0.26.0',
     '0.20.2-incubating': '0.26.0',
-    'latest': '3.7.0',
+    '0.20.3-incubating': '3.7.0',
+    '0.20.4-incubating': '3.7.2',
+    'latest': '4.1.0',
 }
 
 function replaceBazel(version) {

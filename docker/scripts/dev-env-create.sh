@@ -78,7 +78,7 @@ verify_dockerfile_exists $DOCKER_FILE
 copy_extra_files
 
 echo "Building docker image for Heron development environment on $TARGET_PLATFORM"
-docker build -t $REPOSITORY:$TARGET_PLATFORM -f $DOCKER_FILE $SCRATCH_DIR
+docker buildx build -t $REPOSITORY:$TARGET_PLATFORM -f $DOCKER_FILE $SCRATCH_DIR
 
 echo "Creating and starting container and mapping the current dir to /heron"
 docker container run -it \

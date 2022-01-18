@@ -24,7 +24,7 @@ import scala.util.Random
 
 import org.apache.heron.examples.streamlet.scala.common.ScalaTopologyExampleUtils
 import org.apache.heron.streamlet.{Config, KeyValue, KeyedWindow, WindowConfig}
-import org.apache.heron.streamlet.scala.{Builder, Runner}
+import org.apache.heron.streamlet.scala.{Builder, Runner, StreamletReducers}
 
 /**
   * This topology is an implementation of the classic word count example
@@ -62,7 +62,7 @@ object ScalaWindowedWordCountTopology {
       .reduceByKeyAndWindow[String, Int]((word: String) => word,
                                          (x: String) => 1,
                                          WindowConfig.TumblingCountWindow(50),
-                                         (x: Int, y: Int) => x + y)
+                                         StreamletReducers.sum(_: Int, _: Int))
       .setName("reduce-operation")
       .consume((kv: KeyValue[KeyedWindow[String], Int]) =>
         log.info(s"word: ${kv.getKey.getKey} - count: ${kv.getValue}"))

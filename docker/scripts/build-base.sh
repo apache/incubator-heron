@@ -60,19 +60,19 @@ run_build() {
   DOCKER_LATEST_TAG="heron/base:latest"
 
   if [ "$TARGET_PLATFORM" == "debian9" ]; then
-    DOCKER_TAG="heron/base:$HERON_VERSION"
-    DOCKER_LATEST_TAG="heron/base:latest"
+    DOCKER_TAG="apache/heron:$HERON_VERSION"
+    DOCKER_LATEST_TAG="apache/heron:latest"
     DOCKER_IMAGE_FILE="$OUTPUT_DIRECTORY/base-$HERON_VERSION.tar"
   else
-    DOCKER_TAG="heron/heron-$TARGET_PLATFORM:$HERON_VERSION"
-    DOCKER_LATEST_TAG="heron/base-$TARGET_PLATFORM:latest"
+    DOCKER_TAG="apache/heron-$TARGET_PLATFORM:$HERON_VERSION"
+    DOCKER_LATEST_TAG="apache/heron-$TARGET_PLATFORM:latest"
     DOCKER_IMAGE_FILE="$OUTPUT_DIRECTORY/base-$TARGET_PLATFORM-$HERON_VERSION.tar"
   fi
 
   export HERON_VERSION
 
   echo "Building heron base docker image with tag:$DOCKER_TAG"
-  docker build --squash -t "$DOCKER_TAG" -t "$DOCKER_LATEST_TAG" -f "$DOCKER_FILE" "$SCRATCH_DIR"
+  docker buildx build -t "$DOCKER_TAG" -t "$DOCKER_LATEST_TAG" -f "$DOCKER_FILE" "$SCRATCH_DIR"
 
   echo "Saving docker image to $DOCKER_IMAGE_FILE"
   docker save -o $DOCKER_IMAGE_FILE $DOCKER_TAG

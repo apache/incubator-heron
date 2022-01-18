@@ -301,7 +301,7 @@ heron.nomad.driver: "docker"
 You can also adjust which docker image to use for running Heron via the `heron.executor.docker.image` in `~/.heron/conf/nomad/scheduler.yaml` e.g.
 
 ```yaml
-heron.executor.docker.image: 'heron/heron:latest'
+heron.executor.docker.image: 'apache/heron:latest'
 ```
 
 You'll need to use a topology uploader to deploy topology packages to nodes in your cluster. You can use one of the following uploaders:

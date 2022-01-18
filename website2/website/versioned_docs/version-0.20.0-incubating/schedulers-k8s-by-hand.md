@@ -558,7 +558,7 @@ You can configure Heron on Kubernetes using a variety of YAML config files, list
 | heron.directory.sandbox.java.home | location of java - pick it up from shell environment        | $JAVA_HOME                                                |
 | heron.kubernetes.scheduler.uri    | The URI of the Kubernetes API                               |                                                           |
 | heron.scheduler.is.service        | Invoke the IScheduler as a library directly                 | false                                                     |
-| heron.executor.docker.image       | docker repo for executor                                    | heron/heron:latest                                        |
+| heron.executor.docker.image       | docker repo for executor                                    | apache/heron:latest                                        |
 
 ### stateful.yaml
 

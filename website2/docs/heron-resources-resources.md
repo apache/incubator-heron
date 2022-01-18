@@ -24,7 +24,7 @@ Heron Resources outside this documentation:
 
 ## Books
 
-* [Stream Processing with Heron](http://shop.oreilly.com/product/0636920203131.do)
+* [Heron Streaming: Fundamentals, Applications, Operations, and Insights](https://www.springer.com/us/book/9783030600938)
 
 ## Conference & Journal Papers
 

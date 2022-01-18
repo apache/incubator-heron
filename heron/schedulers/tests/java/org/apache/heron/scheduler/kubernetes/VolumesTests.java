@@ -39,8 +39,8 @@ public class VolumesTests {
   public void testHostPathVolume() {
     final String path = "/test/dir1";
     final Config config = Config.newBuilder()
-        .put(KubernetesContext.HERON_KUBERNETES_VOLUME_TYPE, "hostPath")
-        .put(KubernetesContext.HERON_KUBERNETES_VOLUME_HOSTPATH_PATH, path)
+        .put(KubernetesContext.KUBERNETES_VOLUME_TYPE, "hostPath")
+        .put(KubernetesContext.KUBERNETES_VOLUME_HOSTPATH_PATH, path)
         .build();
 
     final V1Volume volume = Volumes.get().create(config);
@@ -54,9 +54,9 @@ public class VolumesTests {
     final String path = "/test/dir1";
     final String server = "10.10.10.10";
     final Config config = Config.newBuilder()
-        .put(KubernetesContext.HERON_KUBERNETES_VOLUME_TYPE, "nfs")
-        .put(KubernetesContext.HERON_KUBERNETES_VOLUME_NFS_PATH, path)
-        .put(KubernetesContext.HERON_KUBERNETES_VOLUME_NFS_SERVER, server)
+        .put(KubernetesContext.KUBERNETES_VOLUME_TYPE, "nfs")
+        .put(KubernetesContext.KUBERNETES_VOLUME_NFS_PATH, path)
+        .put(KubernetesContext.KUBERNETES_VOLUME_NFS_SERVER, server)
         .build();
 
     final V1Volume volume = Volumes.get().create(config);
@@ -71,9 +71,9 @@ public class VolumesTests {
     final String volumeId = "aws-ebs-1";
     final String fsType = "ext4";
     final Config config = Config.newBuilder()
-        .put(KubernetesContext.HERON_KUBERNETES_VOLUME_TYPE, "awsElasticBlockStore")
-        .put(KubernetesContext.HERON_KUBERNETES_VOLUME_AWS_EBS_VOLUME_ID, volumeId)
-        .put(KubernetesContext.HERON_KUBERNETES_VOLUME_AWS_EBS_FS_TYPE, fsType)
+        .put(KubernetesContext.KUBERNETES_VOLUME_TYPE, "awsElasticBlockStore")
+        .put(KubernetesContext.KUBERNETES_VOLUME_AWS_EBS_VOLUME_ID, volumeId)
+        .put(KubernetesContext.KUBERNETES_VOLUME_AWS_EBS_FS_TYPE, fsType)
         .build();
 
     final V1Volume volume = Volumes.get().create(config);

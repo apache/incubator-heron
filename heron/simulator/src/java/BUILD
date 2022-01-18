@@ -40,13 +40,10 @@ java_binary(
     ],
 )
 
-jarjar_binary(
+jar_jar(
     name = "simulator-shaded",
-    src = ":simulator-unshaded_deploy.jar",
-    shade = "shade.conf",
-    deps = [
-        "@maven//:org_sonatype_plugins_jarjar_maven_plugin",
-    ],
+    input_jar = ":simulator-unshaded_deploy.jar",
+    rules = "shade.conf",
 )
 
 genrule(

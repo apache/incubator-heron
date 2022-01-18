@@ -29,7 +29,6 @@ RUN apt-get update && apt-get -y install \
       automake \
       libtool-bin \
       libunwind8 \
-      libcppunit-dev \
       patch \
       python-is-python3 \
       python3-dev \
@@ -45,11 +44,12 @@ RUN apt-get update && apt-get -y install \
 
 ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk-amd64
 
-ENV bazelVersion 3.7.0
+ENV bazelVersion 4.1.0
 
 RUN wget -O /tmp/bazel.sh https://github.com/bazelbuild/bazel/releases/download/$bazelVersion/bazel-$bazelVersion-installer-linux-x86_64.sh \
       && chmod +x /tmp/bazel.sh \
-      && /tmp/bazel.sh
+      && /tmp/bazel.sh \
+      && rm -rf /tmp/bazel.sh
 
 ADD bazelrc /root/.bazelrc
 ADD scripts/compile-platform.sh /compile-platform.sh

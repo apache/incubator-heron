@@ -76,4 +76,5 @@ public abstract class KubernetesController implements IScalable {
   abstract boolean killTopology();
 
   abstract boolean restart(int shardId);
+
 }

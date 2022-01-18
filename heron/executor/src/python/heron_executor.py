@@ -102,6 +102,7 @@ Log = log.Log
 @click.option("--topology-defn-file", required=True)
 @click.option("--topology-id", required=True)
 @click.option("--topology-name", required=True)
+@click.option("--verbose-gc", is_flag=True)
 @click.option("--jvm-remote-debugger-ports",
               help="comma separated list of ports to be used"
                    " by a remote debugger for JVM instances")
@@ -342,6 +343,7 @@ class HeronExecutor:
     self.health_manager_mode = parsed_args.health_manager_mode
     self.health_manager_classpath = '%s:%s'\
         % (self.scheduler_classpath, parsed_args.health_manager_classpath)
+    self.verbose_gc = parsed_args.verbose_gc
     self.jvm_remote_debugger_ports = \
       parsed_args.jvm_remote_debugger_ports.split(",") \
         if parsed_args.jvm_remote_debugger_ports else None
@@ -574,36 +576,16 @@ class HeronExecutor:
     return int(self._get_jvm_version().split(".")[0])
 
   def _get_java_gc_instance_cmd(self, cmd, gc_name):
-    gc_cmd = ['-verbosegc']
-    if self._get_java_major_version() >= 9:
-      gc_cmd += [
-          '-XX:+UseG1GC',
-          '-XX:+ParallelRefProcEnabled',
-          '-XX:+UseStringDeduplication',
-          '-XX:MaxGCPauseMillis=100',
-          '-XX:InitiatingHeapOccupancyPercent=30',
-          '-XX:+HeapDumpOnOutOfMemoryError',
-          '-XX:ParallelGCThreads=4',
-          '-Xlog:gc*,safepoint=info:file=' + self.log_dir + '/gc.' + gc_name +
-          '.log:tags,time,uptime,level:filecount=5,filesize=100M']
-    else:
-      gc_cmd += [
-          '-XX:+UseConcMarkSweepGC',
-          '-XX:+CMSScavengeBeforeRemark',
-          '-XX:TargetSurvivorRatio=90',
-          '-XX:+PrintGCDetails',
-          '-XX:+PrintGCTimeStamps',
-          '-XX:+PrintGCDateStamps',
-          '-XX:+PrintGCCause',
-          '-XX:+UseGCLogFileRotation',
-          '-XX:NumberOfGCLogFiles=5',
-          '-XX:GCLogFileSize=100M',
-          '-XX:+PrintPromotionFailure',
-          '-XX:+PrintTenuringDistribution',
-          '-XX:+PrintHeapAtGC',
-          '-XX:+HeapDumpOnOutOfMemoryError',
-          '-XX:ParallelGCThreads=4',
-          '-Xloggc:' + self.log_dir + '/gc.' + gc_name + '.log']
+    gc_cmd = [
+        '-XX:+UseG1GC',
+        '-XX:+ParallelRefProcEnabled',
+        '-XX:+UseStringDeduplication',
+        '-XX:MaxGCPauseMillis=100',
+        '-XX:InitiatingHeapOccupancyPercent=30',
+        '-XX:ParallelGCThreads=4']
+    if self.verbose_gc:
+      gc_cmd += ['-Xlog:gc*,safepoint=info:file=' + self.log_dir + '/gc.' + gc_name +
+                 '.log:tags,time,uptime,level:filecount=5,filesize=100M']
     try:
       cp_index = cmd.index('-cp')
       return list(itertools.chain(*[cmd[0:cp_index], gc_cmd, cmd[cp_index:]]))

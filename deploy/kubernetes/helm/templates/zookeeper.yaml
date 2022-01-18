@@ -18,7 +18,7 @@
 {{- $platform := .Values.platform }}
 {{- $zkReplicas := .Values.zkReplicas }}
 
-apiVersion: policy/v1beta1
+apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
   name: {{ .Release.Name }}-zookeeper
@@ -118,10 +118,6 @@ spec:
           value: "{{ .Values.zookeeper.serverPort }}"
         - name: ZK_ELECTION_PORT
           value: "{{ .Values.zookeeper.leaderElectionPort }}"
-        - name: ZOOKEEPER_SERVERS
-          {{- $replicaCount := int .Values.zkReplicas }}
-          {{- $fullName := printf "%s-%s" .Release.Name "zookeeper" }}
-          value: "{{ range $i, $e := until $replicaCount }}{{ $fullName }}-{{ $e }},{{ end }}"
         command:
         - sh
         - -c

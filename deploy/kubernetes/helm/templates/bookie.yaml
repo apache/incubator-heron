@@ -160,9 +160,6 @@ spec:
           ports:
             - name: client
               containerPort: 3181
-              # we are using `status.hostIP` for the bookie's advertised address. export 3181 as the hostPort,
-              # so that the containers are able to access the host port
-              hostPort: 3181
           envFrom:
             - configMapRef:
                 name: {{ .Release.Name }}-bookie-config

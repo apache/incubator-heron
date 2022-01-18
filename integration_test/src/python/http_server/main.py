@@ -21,6 +21,7 @@ import sys
 import tornado.ioloop
 import tornado.escape
 import tornado.web
+from werkzeug.utils import secure_filename
 
 from heron.common.src.python.utils import log
 
@@ -32,7 +33,7 @@ class MainHandler(tornado.web.RequestHandler):
 
 class FileHandler(tornado.web.RequestHandler):
   def get(self, fileName):
-    jsonFilePath = RESULTS_DIRECTORY + "/" + fileName + ".json"
+    jsonFilePath = RESULTS_DIRECTORY + "/" + secure_filename(fileName) + ".json"
 
     if not os.path.exists(jsonFilePath):
       self.clear()
@@ -46,7 +47,7 @@ class FileHandler(tornado.web.RequestHandler):
       self.write(data)
 
   def post(self, fileName):
-    jsonFilePath = RESULTS_DIRECTORY + "/" + fileName + ".json"
+    jsonFilePath = RESULTS_DIRECTORY + "/" + secure_filename(fileName) + ".json"
 
     #Overwrites the existing file
     with open(jsonFilePath, "w") as jsonFile:

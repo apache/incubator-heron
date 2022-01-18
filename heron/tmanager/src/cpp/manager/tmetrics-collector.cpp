@@ -400,7 +400,7 @@ TMetricsCollector::Metric::Metric(const sp_string& name,
       all_time_nitems_(0),
       bucket_interval_(bucket_interval) {
   for (sp_int32 i = 0; i < nbuckets; ++i) {
-    data_.push_back(std::move(make_unique<TimeBucket>(bucket_interval_)));
+    data_.push_back(make_unique<TimeBucket>(bucket_interval_));
   }
 }
 
@@ -408,7 +408,7 @@ TMetricsCollector::Metric::~Metric() {}
 
 void TMetricsCollector::Metric::Purge() {
   data_.pop_back();
-  data_.push_front(std::move(make_unique<TimeBucket>(bucket_interval_)));
+  data_.push_front(make_unique<TimeBucket>(bucket_interval_));
 }
 
 void TMetricsCollector::Metric::AddValueToMetric(const sp_string& _value) {
