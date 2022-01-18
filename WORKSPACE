@@ -190,7 +190,7 @@ py_repositories()
 # for pex repos
 PEX_PKG = "https://pypi.python.org/packages/fa/c4/5dbdce75117b60b6ffec65bc92ac25ee873b84158a55cfbffa1d49db6eb1/pex-2.1.54-py2.py3-none-any.whl"
 
-PYTEST_PKG = "https://files.pythonhosted.org/packages/b1/ee/53945d50284906adb1e613fabf2e1b8b25926e8676854bb25b93564c0ce7/pytest-6.1.2-py3-none-any.whl"
+PYTEST_PKG = "https://files.pythonhosted.org/packages/40/76/86f886e750b81a4357b6ed606b2bcf0ce6d6c27ad3c09ebf63ed674fc86e/pytest-6.2.5-py3-none-any.whl"
 
 REQUESTS_PKG = "https://files.pythonhosted.org/packages/39/fc/f91eac5a39a65f75a7adb58eac7fa78871ea9872283fb9c44e6545998134/requests-2.25.0-py2.py3-none-any.whl"
 
@@ -236,15 +236,15 @@ http_file(
 
 http_file(
     name = "pytest_pkg",
-    downloaded_file_path = "pytest-6.1.2-py3-none-any.whl",
-    sha256 = "4288fed0d9153d9646bfcdf0c0428197dba1ecb27a33bb6e031d002fa88653fe",
+    downloaded_file_path = "pytest-6.2.5-py3-none-any.whl",
+    sha256 = "7310f8d27bc79ced999e760ca304d69f6ba6c6649c0b60fb0e04a4a77cacc134",
     urls = [PYTEST_PKG],
 )
 
 http_file(
     name = "wheel_pkg",
     downloaded_file_path = "wheel-0.36.1.tar.gz",
-    #sha256 = "906864fb722c0ab5f2f9c35b2c65e3af3c009402c108a709c0aca27bc2c9187b",
+    sha256 = "aaef9b8c36db72f8bf7f1e54f85f875c4d466819940863ca0b3f3f77f0a1646f",
     urls = [WHEEL_PKG],
 )
 
