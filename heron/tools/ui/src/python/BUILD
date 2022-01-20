@@ -7,13 +7,13 @@ pex_library(
         exclude = ["main.py"],
     ),
     reqs = [
-        "requests==2.25.0",
+        "requests==2.25.1",
         "click==7.1.2",
         "fastapi==0.60.1",
         "jinja2==2.11.2",
         "aiofiles==0.5.0",
         "uvicorn==0.11.7",
-        "uvloop==0.14.0",
+        "uvloop==0.16.0",
     ],
     deps = [
         "//heron/common/src/python:common-py",

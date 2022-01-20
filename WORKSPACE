@@ -188,50 +188,50 @@ py_repositories()
 # pip_repositories()
 
 # for pex repos
-PEX_PKG = "https://pypi.python.org/packages/fa/c4/5dbdce75117b60b6ffec65bc92ac25ee873b84158a55cfbffa1d49db6eb1/pex-2.1.54-py2.py3-none-any.whl"
+PEX_PKG = "https://files.pythonhosted.org/packages/d4/73/4c76e06824baadba81b39125721c97fb22e201b35fcd17b32b5a5fa77c59/pex-2.1.62-py2.py3-none-any.whl"
 
 PYTEST_PKG = "https://files.pythonhosted.org/packages/40/76/86f886e750b81a4357b6ed606b2bcf0ce6d6c27ad3c09ebf63ed674fc86e/pytest-6.2.5-py3-none-any.whl"
 
-REQUESTS_PKG = "https://files.pythonhosted.org/packages/39/fc/f91eac5a39a65f75a7adb58eac7fa78871ea9872283fb9c44e6545998134/requests-2.25.0-py2.py3-none-any.whl"
+REQUESTS_PKG = "https://files.pythonhosted.org/packages/2d/61/08076519c80041bc0ffa1a8af0cbd3bf3e2b62af10435d269a9d0f40564d/requests-2.27.1-py2.py3-none-any.whl"
 
 SETUPTOOLS_PKG = "https://files.pythonhosted.org/packages/3d/f2/1489d3b6c72d68bf79cd0fba6b6c7497df4ebf7d40970e2d7eceb8d0ea9c/setuptools-51.0.0-py3-none-any.whl"
 
 WHEEL_PKG = "https://files.pythonhosted.org/packages/d4/cf/732e05dce1e37b63d54d1836160b6e24fb36eeff2313e93315ad047c7d90/wheel-0.36.1.tar.gz"
 
-CHARDET_PKG = "https://files.pythonhosted.org/packages/bc/a9/01ffebfb562e4274b6487b4bb1ddec7ca55ec7510b22e4c51f14098443b8/chardet-3.0.4-py2.py3-none-any.whl"
+CHARSET_PKG = "https://files.pythonhosted.org/packages/84/3e/1037abe6498e65d645ce7a22d3402605d49a3b2c7f20c3abb027760da4f0/charset_normalizer-2.0.10-py3-none-any.whl"
 
-IDNA_PKG = "https://files.pythonhosted.org/packages/a2/38/928ddce2273eaa564f6f50de919327bf3a00f091b5baba8dfa9460f3a8a8/idna-2.10-py2.py3-none-any.whl"
+IDNA_PKG = "https://files.pythonhosted.org/packages/04/a2/d918dcd22354d8958fe113e1a3630137e0fc8b44859ade3063982eacd2a4/idna-3.3-py3-none-any.whl"
 
-CERTIFI_PKG = "https://files.pythonhosted.org/packages/5e/a0/5f06e1e1d463903cf0c0eebeb751791119ed7a4b3737fdc9a77f1cdfb51f/certifi-2020.12.5-py2.py3-none-any.whl"
+CERTIFI_PKG = "https://files.pythonhosted.org/packages/37/45/946c02767aabb873146011e665728b680884cd8fe70dde973c640e45b775/certifi-2021.10.8-py2.py3-none-any.whl"
 
-URLLIB3_PKG = "https://files.pythonhosted.org/packages/f5/71/45d36a8df68f3ebb098d6861b2c017f3d094538c0fb98fa61d4dc43e69b9/urllib3-1.26.2-py2.py3-none-any.whl"
+URLLIB3_PKG = "https://files.pythonhosted.org/packages/4e/b8/f5a25b22e803f0578e668daa33ba3701bb37858ec80e08a150bd7d2cf1b1/urllib3-1.26.8-py2.py3-none-any.whl"
 
 http_file(
     name = "urllib3_pkg",
-    downloaded_file_path = "urllib3-1.26.2-py2.py3-none-any.whl",
-    sha256 = "d8ff90d979214d7b4f8ce956e80f4028fc6860e4431f731ea4a8c08f23f99473",
+    downloaded_file_path = "urllib3-1.26.8-py2.py3-none-any.whl",
+    sha256 = "000ca7f471a233c2251c6c7023ee85305721bfdf18621ebff4fd17a8653427ed",
     urls = [URLLIB3_PKG],
 )
 
 http_file(
     name = "certifi_pkg",
-    downloaded_file_path = "certifi-2020.12.5-py2.py3-none-any.whl",
-    sha256 = "719a74fb9e33b9bd44cc7f3a8d94bc35e4049deebe19ba7d8e108280cfd59830",
+    downloaded_file_path = "certifi-2021.10.8-py2.py3-none-any.whl",
+    sha256 = "d62a0163eb4c2344ac042ab2bdf75399a71a2d8c7d47eac2e2ee91b9d6339569",
     urls = [CERTIFI_PKG],
 )
 
 http_file(
     name = "idna_pkg",
-    downloaded_file_path = "idna-2.10-py2.py3-none-any.whl",
-    sha256 = "b97d804b1e9b523befed77c48dacec60e6dcb0b5391d57af6a65a312a90648c0",
+    downloaded_file_path = "idna-3.3-py2.py3-none-any.whl",
+    sha256 = "84d9dd047ffa80596e0f246e2eab0b391788b0503584e8945f2368256d2735ff",
     urls = [IDNA_PKG],
 )
 
 http_file(
-    name = "chardet_pkg",
-    downloaded_file_path = "chardet-3.0.4-py2.py3-none-any.whl",
-    sha256 = "fc323ffcaeaed0e0a02bf4d117757b98aed530d9ed4531e3e15460124c106691",
-    urls = [CHARDET_PKG],
+    name = "charset_pkg",
+    downloaded_file_path = "charset_normalizer-2.0.10-py3-none-any.whl",
+    sha256 = "cb957888737fc0bbcd78e3df769addb41fd1ff8cf950dc9e7ad7793f1bf44455",
+    urls = [CHARSET_PKG],
 )
 
 http_file(
@@ -250,15 +250,15 @@ http_file(
 
 http_file(
     name = "pex_pkg",
-    downloaded_file_path = "pex-2.1.54-py2.py3-none-any.whl",
-    sha256 = "e60b006abe8abfd3c3377128e22c33f30cc6dea89e2beb463cf8360e3626db62",
+    downloaded_file_path = "pex-2.1.62-py2.py3-none-any.whl",
+    sha256 = "7667c6c6d7a9b07c3ff3c3125c1928bd5279dfc077dd5cf4cc0440f40427c484",
     urls = [PEX_PKG],
 )
 
 http_file(
     name = "requests_pkg",
-    downloaded_file_path = "requests-2.25.0-py2.py3-none-any.whl",
-    sha256 = "e786fa28d8c9154e6a4de5d46a1d921b8749f8b74e28bde23768e5e16eece998",
+    downloaded_file_path = "requests-2.27.1-py2.py3-none-any.whl",
+    sha256 = "f22fa1e554c9ddfd16e6e41ac79759e17be9e492b3587efa038054674760e72d",
     urls = [REQUESTS_PKG],
 )
 
@@ -300,8 +300,8 @@ http_archive(
     name = "org_nongnu_libunwind",
     build_file = "@//:third_party/libunwind/libunwind.BUILD",
     sha256 = "0a4b5a78d8c0418dfa610245f75fa03ad45d8e5e4cc091915d2dbed34c01178e",
-    strip_prefix = "libunwind-1.3.2",
-    urls = ["https://github.com/libunwind/libunwind/releases/download/v1.3.2/libunwind-1.3.2.tar.gz"],
+    strip_prefix = "libunwind-1.6.2",
+    urls = ["https://github.com/libunwind/libunwind/releases/download/v1.6.2/libunwind-1.6.2.tar.gz"],
 )
 
 http_archive(

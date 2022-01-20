@@ -47,7 +47,7 @@ POST_EXECUTE = [
             --find-links $$(dirname $(location @pex_pkg//file)) \
             --find-links $$(dirname $(location @setuptools_pkg//file)) \
             --find-links $$(dirname $(location @requests_pkg//file)) \
-            --find-links $$(dirname $(location @chardet_pkg//file)) \
+            --find-links $$(dirname $(location @charset_pkg//file)) \
             --find-links $$(dirname $(location @idna_pkg//file)) \
             --find-links $$(dirname $(location @urllib3_pkg//file)) \
             --find-links $$(dirname $(location @certifi_pkg//file)) \
@@ -64,7 +64,7 @@ genrule(
         "@wheel_pkg//file",
         "@pex_pkg//file",
         "@requests_pkg//file",
-        "@chardet_pkg//file",
+        "@charset_pkg//file",
         "@idna_pkg//file",
         "@urllib3_pkg//file",
         "@certifi_pkg//file",

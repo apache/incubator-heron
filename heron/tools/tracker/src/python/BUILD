@@ -11,7 +11,7 @@ pex_library(
         "javaobj-py3==0.4.1",
         "networkx==2.5",
         "protobuf==3.14.0",
-        "tornado==4.0.2",
+        "tornado==6.1",
     ],
     deps = [
         "//heron/common/src/python:common-py",

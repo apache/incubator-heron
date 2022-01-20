@@ -7,8 +7,8 @@ pex_library(
     ),
     reqs = [
         "logging-formatter-anticrlf==1.2",
-        "requests==2.25.0",
-        "tornado==4.5.3",
+        "requests==2.25.1",
+        "tornado==6.1",
     ],
     deps = [
         "//heron/common/src/python:common-py",

@@ -4,7 +4,7 @@ pex_library(
     name = "statemgr-py",
     srcs = glob(["**/*.py"]),
     reqs = [
-        "PyYAML==3.13",
+        "PyYAML==6.0",
         "kazoo==2.8.0",
         "zope.interface==4.0.5",
     ],
