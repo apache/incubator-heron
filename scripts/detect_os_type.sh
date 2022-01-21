@@ -20,10 +20,7 @@ function platform {
      PLATFORM=darwin
      ;;
    linux*)
-     PLATFORM=ubuntu
-     if [ -f /etc/redhat-release ] ; then
-       PLATFORM=centos
-     fi
+     PLATFORM=linux
      ;;
    *)
      echo "WARNING: Your platform is not currently supported!" >&2
