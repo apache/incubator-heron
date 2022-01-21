@@ -17,6 +17,12 @@
 
 FROM ubuntu:18.04
 
+# Configure locale.
+RUN apt-get update && apt-get -y install locales && locale-gen en_US.UTF-8
+ENV LANG en_US.UTF-8 \
+    LANGUAGE en_US.UTF-8 \
+    LC_ALL en_US.UTF-8
+
 # This is passed to the heron build command via the --config flag
 ENV TARGET_PLATFORM ubuntu
 
