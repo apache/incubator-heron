@@ -1,8 +1,6 @@
 ---
 
-group: edge
-
-dist: bionic
+dist: focal
 
 language: java
 
@@ -19,7 +17,6 @@ addons:
       - pkg-config
       - python3.8-dev
       - python3.8-venv
-      - python3.8-distutil
       - wget
       - zip
       - zlib1g-dev
