@@ -1,19 +1,27 @@
 package(default_visibility = ["//visibility:public"])
 
-pex_library(
+load("@rules_python//python:defs.bzl", "py_library")
+load("@rules_python//python:defs.bzl", "py_binary")
+load("@heron_py_deps//:requirements.bzl", "requirement")
+
+py_library(
     name = "executor-py",
     srcs = ["heron_executor.py"],
-    reqs = ["PyYAML==3.13", "click==7.1.2"],
     deps = [
         "//heron/common/src/python:common-py",
         "//heron/statemgrs/src/python:statemgr-py",
+        requirement("PyYAML"),
+        requirement("click"),
+
     ],
 )
 
-pex_binary(
+py_binary(
     name = "heron-executor",
     srcs = ["heron_executor.py"],
     deps = [
         ":executor-py",
     ],
 )
+
+

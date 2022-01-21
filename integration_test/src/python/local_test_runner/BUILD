@@ -1,12 +1,12 @@
 package(default_visibility = ["//visibility:public"])
 
-pex_binary(
+load("@rules_python//python:defs.bzl", "py_binary")
+
+py_binary(
     name = "local-test-runner",
     srcs = glob(["*.py"]),
     main = "main.py",
-    reqs = [
-    ],
-    resources = [
+    data = [
         "resources/test.conf",
     ],
     deps = [

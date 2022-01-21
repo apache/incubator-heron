@@ -1,6 +1,10 @@
 package(default_visibility = ["//visibility:public"])
 
-pex_library(
+load("@rules_python//python:defs.bzl", "py_library")
+load("@rules_python//python:defs.bzl", "py_binary")
+load("@heron_py_deps//:requirements.bzl", "requirement")
+
+py_library(
     name = "instance-py",
     srcs = glob(["**/*.py"]),
     deps = [
@@ -13,13 +17,20 @@ pex_library(
 )
 
 # build binary for single thread python heron instance
-pex_binary(
+py_binary(
     name = "heron-python-instance",
     srcs = ["instance.py"],
-    reqs = [
-        "PyYAML==3.13",
-        "click==7.1.2",
-        "colorlog==2.6.1",
-    ],
-    deps = [":instance-py"],
+    deps = [
+        ":instance-py",
+        requirement("PyYAML"),
+        requirement("click"),
+        requirement("colorlog"),
+        ],
+
 )
+
+
+
+
+
+
