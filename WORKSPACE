@@ -272,9 +272,9 @@ http_archive(
 http_archive(
     name = "org_nongnu_libunwind",
     build_file = "@//:third_party/libunwind/libunwind.BUILD",
-    sha256 = "0a4b5a78d8c0418dfa610245f75fa03ad45d8e5e4cc091915d2dbed34c01178e",
-    strip_prefix = "libunwind-1.3.2",
-    urls = ["https://github.com/libunwind/libunwind/releases/download/v1.3.2/libunwind-1.3.2.tar.gz"],
+    sha256 = "90337653d92d4a13de590781371c604f9031cdb50520366aa1e3a91e1efb1017",
+    strip_prefix = "libunwind-1.5.0",
+    urls = ["https://github.com/libunwind/libunwind/releases/download/v1.5/libunwind-1.5.0.tar.gz"],
 )
 
 http_archive(
