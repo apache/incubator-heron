@@ -92,18 +92,15 @@ function print_timer_summary {
 
 # Discover the platform that we are running on
 function discover_platform {
-  discover="${PLATFORM-$(python3 -mplatform)}"
-  if [[ $discover =~ ^.*centos.*$ ]]; then
-    echo "centos"
-  elif [[ $discover =~ ^.*Ubuntu.*$ ]]; then
-    echo "ubuntu"
-  elif [[ $discover =~ ^.*debian.*$ ]]; then
-    echo "debian"
-  elif [[ $discover =~ ^Darwin.*$ ]]; then
-    echo "darwin"
+  platform='unknown'
+  unamestr=$(uname)
+  if [[ "$unamestr" == 'Linux' ]]; then
+    platform='linux'
+  elif [[ "$unamestr" == 'Darwin' ]]; then
+    platform='darwin'
   else
-    mysterious=`echo $discover | awk -F- '{print $6}'`
-    echo "$mysterious platform not supported"
+    mysterious=`echo $unamestr | awk -F- '{print $6}'`
+    echo "$unamestr platform not supported"
     exit 1
   fi
 }
