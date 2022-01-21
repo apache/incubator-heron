@@ -59,7 +59,7 @@ run_build() {
   DOCKER_TAG="heron/base:$HERON_VERSION"
   DOCKER_LATEST_TAG="heron/base:latest"
 
-  if [ "$TARGET_PLATFORM" == "debian9" ]; then
+  if [ "$TARGET_PLATFORM" == "debian10" ]; then
     DOCKER_TAG="apache/heron:$HERON_VERSION"
     DOCKER_LATEST_TAG="apache/heron:latest"
     DOCKER_IMAGE_FILE="$OUTPUT_DIRECTORY/base-$HERON_VERSION.tar"
@@ -91,10 +91,10 @@ case $# in
     echo "  "
     echo "Usage: $0 <platform> <version_string> <output-directory>"
     echo "  "
-    echo "Platforms Supported: darwin, debian9, ubuntu14.04, ubuntu16.04, ubuntu18.04, centos7"
+    echo "Platforms Supported: darwin, debian10, ubuntu20.04, centos8"
     echo "  "
     echo "Example:"
-    echo "  ./build-base.sh ubuntu14.04 0.12.0 ~/ubuntu"
+    echo "  ./build-base.sh ubuntu20.04 0.12.0 ~/ubuntu"
     echo "  "
     exit 1
     ;;

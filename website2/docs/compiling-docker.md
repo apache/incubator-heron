@@ -24,7 +24,7 @@ For developing Heron, you will need to compile it for the environment that you
 want to use it in. If you'd like to use Docker to create that build environment,
 Heron provides a convenient script to make that process easier.
 
-Currently Debian10 and Ubuntu 18.04 are actively being supported.  There is also limited support for Ubuntu 14.04, Debian9, and CentOS 7. If you
+Currently Debian10 and Ubuntu 20.04 are actively being supported.  There is also limited support for Ubuntu 18.04, and CentOS 8. If you
 need another platform there are instructions for adding new ones
 [below](#contributing-new-environments).
 
@@ -65,13 +65,13 @@ Script to build heron docker image for different platforms
 Usage: ./docker/scripts/build-docker.sh <platform> <version_string> <artifact-directory> [-s|--squash]
   
 Argument options:
-  <platform>: darwin, debian9, debian10, ubuntu14.04, ubuntu18.04, centos7
+  <platform>: darwin, debian10, ubuntu20.04, centos8
   <version_string>: Version of Heron build, e.g. v0.17.5.1-rc
   <artifact-directory>: Location of compiled Heron artifact
   [-s|--squash]: Enables using Docker experimental feature --squash
   
 Example:
-  ./build-docker.sh ubuntu18.04 0.12.0 ~/ubuntu
+  ./build-docker.sh ubuntu20.04 0.12.0 ~/ubuntu
 
 NOTE: If running on OSX, the output directory will need to
       be under /Users so virtualbox has access to.
@@ -79,15 +79,14 @@ NOTE: If running on OSX, the output directory will need to
 
 The following arguments are required:
 
-* `platform` --- Currently we are focused on supporting the `debian10` and `ubuntu18.04` platforms.  
+* `platform` --- Currently we are focused on supporting the `debian10` and `ubuntu20.04` platforms.  
 We also support building Heron locally on OSX.  You can specify this as listing `darwin` as the platform.
  All options are:
-   - `centos7`
+   - `centos8`
    - `darwin`
-   - `debian9`
    - `debian10`
-   - `ubuntu14.04`
    - `ubuntu18.04`
+   - `ubuntu20.04`
     
    
   You can add other platforms using the [instructions
@@ -185,7 +184,7 @@ following:
 Here's an example:
 
 ```dockerfile
-FROM centos:centos7
+FROM centos:centos8
  ```
 
 ### Step 2 --- A `TARGET_PLATFORM` environment variable using the [`ENV`](https://docs.docker.com/engine/reference/builder/#env) instruction.

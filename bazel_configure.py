@@ -25,9 +25,8 @@
 # on a mac. Then verify the other environments by doing this:
 #
 #  cd docker
-#  ./build-artifacts.sh ubuntu15.10 0.12.0 .
-#  ./build-artifacts.sh ubuntu14.04 0.12.0 .
-#  ./build-artifacts.sh centos7 0.12.0 .
+#  ./build-artifacts.sh ubuntu20.04 0.12.0 .
+#  ./build-artifacts.sh centos8 0.12.0 .
 #
 import os
 import re
