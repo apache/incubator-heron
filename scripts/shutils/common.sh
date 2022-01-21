@@ -95,9 +95,9 @@ function discover_platform {
   platform='unknown'
   unamestr=$(uname)
   if [[ "$unamestr" == 'Linux' ]]; then
-    platform='linux'
+    echo "linux"
   elif [[ "$unamestr" == 'Darwin' ]]; then
-    platform='darwin'
+    echo "darwin"
   else
     mysterious=`echo $unamestr | awk -F- '{print $6}'`
     echo "$unamestr platform not supported"
