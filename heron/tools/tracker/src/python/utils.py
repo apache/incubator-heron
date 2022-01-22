@@ -174,4 +174,4 @@ def parse_config_file(config_file: str) -> Optional[str]:
 
   # Read the configuration file
   with open(expanded_config_file_path, 'r') as f:
-    return yaml.load(f)
+    return yaml.safe_load(f)
