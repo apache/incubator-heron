@@ -17,7 +17,7 @@ pex_binary(
     name = "heron-python-instance",
     srcs = ["instance.py"],
     reqs = [
-        "PyYAML==6.0",
+        "PyYAML==5.4.1",
         "click==7.1.2",
         "colorlog==2.6.1",
     ],
