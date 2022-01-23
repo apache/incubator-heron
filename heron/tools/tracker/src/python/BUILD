@@ -8,10 +8,12 @@ pex_library(
     ),
     reqs = [
         "click==7.1.2",
+        "fastapi==0.62.0",
+        "httpx==0.16.1",
         "javaobj-py3==0.4.1",
         "networkx==2.5",
         "protobuf==3.14.0",
-        "tornado==6.1",
+        "uvicorn==0.11.7",
     ],
     deps = [
         "//heron/common/src/python:common-py",

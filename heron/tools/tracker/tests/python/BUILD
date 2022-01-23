@@ -18,6 +18,7 @@ pex_pytest(
     ],
     reqs = [
         "pytest==6.1.2",
+        "pytest-asyncio==0.14.0",
     ],
     deps = [
         "//heron/proto:proto-py",
@@ -32,6 +33,21 @@ pex_pytest(
     srcs = ["query_operator_unittest.py"],
     reqs = [
         "pytest==6.1.2",
+        "pytest-asyncio==0.14.0",
+    ],
+    deps = [
+        "//heron/tools/tracker/src/python:tracker-py",
+    ],
+)
+
+pex_pytest(
+    name = "app_unittest",
+    size = "small",
+    srcs = ["app_unittest.py"],
+    reqs = [
+        "pytest==6.1.2",
+        "pytest-asyncio==0.14.0",
+        "requests==2.25.1",
     ],
     deps = [
         "//heron/tools/tracker/src/python:tracker-py",
@@ -44,6 +60,7 @@ pex_pytest(
     srcs = ["query_unittest.py"],
     reqs = [
         "pytest==6.1.2",
+        "pytest-asyncio==0.14.0",
     ],
     deps = [
         "//heron/tools/tracker/src/python:tracker-py",
@@ -59,6 +76,7 @@ pex_pytest(
     ],
     reqs = [
         "pytest==6.1.2",
+        "pytest-asyncio==0.14.0",
     ],
     deps = [
         "//heron/proto:proto-py",
