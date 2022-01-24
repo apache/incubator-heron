@@ -44,7 +44,7 @@ install_marathon() {
     service marathon start
 }
 
-bazelVersion=4.1.0
+bazelVersion=4.2.2
 bazel_install() {
     apt-get install -y automake cmake gcc g++ zlib1g-dev zip pkg-config wget libssl-dev libunwind-dev
     mkdir -p /opt/bazel
