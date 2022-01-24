@@ -7,7 +7,7 @@ pex_library(
         exclude = ["main.py"],
     ),
     reqs = [
-        "requests==2.25.1",
+        "requests==2.27.1",
         "click==7.1.2",
         "fastapi==0.60.1",
         "jinja2==2.11.2",

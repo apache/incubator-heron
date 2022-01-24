@@ -6,7 +6,7 @@ pex_library(
     reqs = [
         "tabulate==0.7.4",
         "click==7.1.2",
-        "requests==2.25.1",
+        "requests==2.27.1",
     ],
     deps = [
         "//heron/common/src/python:common-py",
