@@ -43,7 +43,7 @@ RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 10
 
 ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk-amd64
 
-ENV bazelVersion 4.1.0
+ENV bazelVersion 4.2.2
 
 RUN wget -O /tmp/bazel.sh https://github.com/bazelbuild/bazel/releases/download/$bazelVersion/bazel-$bazelVersion-installer-linux-x86_64.sh \
       && chmod +x /tmp/bazel.sh \

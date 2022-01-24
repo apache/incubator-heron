@@ -29,7 +29,7 @@ addons:
       - libgoogle-perftools-dev
 
 env:
-  - BAZEL_VERSION=4.1.0 ENABLE_HEAPCHECK=1
+  - BAZEL_VERSION=4.2.2 ENABLE_HEAPCHECK=1
 
 before_install:
   # download and install bazel
