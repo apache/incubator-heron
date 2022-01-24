@@ -47,7 +47,7 @@ pex_pytest(
     reqs = [
         "pytest==6.1.2",
         "pytest-asyncio==0.14.0",
-        "requests==2.25.1",
+        "requests==2.27.1",
     ],
     deps = [
         "//heron/tools/tracker/src/python:tracker-py",
