@@ -304,10 +304,9 @@ http_archive(
 
 http_archive(
     name = "com_google_googletest",
-    build_file = "@//:third_party/gtest/gtest.BUILD",
-    sha256 = "58a6f4277ca2bc8565222b3bbd58a177609e9c488e8a72649359ba51450db7d8",
-    strip_prefix = "googletest-release-1.8.0",
-    urls = ["https://github.com/google/googletest/archive/release-1.8.0.tar.gz"],
+    sha256 = "b4870bf121ff7795ba20d20bcdd8627b8e088f2d1dab299a031c1034eddc93d5",
+    strip_prefix = "googletest-release-1.11.0",
+    urls = ["https://github.com/google/googletest/archive/release-1.11.0.tar.gz"],
 )
 
 http_archive(
