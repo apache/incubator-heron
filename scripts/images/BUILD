@@ -8,7 +8,7 @@ container_image(
         "-n",
     ],
     directory = "/heron",
-    stamp = "1",
+    stamp = "@io_bazel_rules_docker//stamp:always",
     symlinks = {
         "/usr/local/bin/heron": "/heron/heron-tools/bin/heron",
         "/usr/local/bin/heron-explorer": "/heron/heron-tools/bin/heron-explorer",
