@@ -25,9 +25,8 @@
 # on a mac. Then verify the other environments by doing this:
 #
 #  cd docker
-#  ./build-artifacts.sh ubuntu15.10 0.12.0 .
-#  ./build-artifacts.sh ubuntu14.04 0.12.0 .
-#  ./build-artifacts.sh centos7 0.12.0 .
+#  ./build-artifacts.sh ubuntu20.04 0.12.0 .
+#  ./build-artifacts.sh centos8 0.12.0 .
 #
 import os
 import re
@@ -419,7 +418,7 @@ def main():
   env_map['AUTOMAKE'] = discover_tool('automake', 'Automake', 'AUTOMAKE', '1.9.6')
   env_map['AUTOCONF'] = discover_tool('autoconf', 'Autoconf', 'AUTOCONF', '2.6.3')
   env_map['MAKE'] = discover_tool('make', 'Make', 'MAKE', '3.81')
-  env_map['PYTHON3'] = discover_tool('python3', 'Python3', 'PYTHON3', '3.6')
+  env_map['PYTHON3'] = discover_tool('python3', 'Python3', 'PYTHON3', '3.8')
   test_venv()
 
   if platform == 'Darwin':

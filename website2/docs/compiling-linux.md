@@ -96,14 +96,14 @@ $ ./bazel_configure.py
 ### Step 10 --- Build the project
 
 ```bash
-$ bazel build --config=ubuntu heron/...
+$ bazel build --config=linux heron/...
 ```
 
 ### Step 11 --- Build the packages
 
 ```bash
-$ bazel build --config=ubuntu scripts/packages:binpkgs
-$ bazel build --config=ubuntu scripts/packages:tarpkgs
+$ bazel build --config=linux scripts/packages:binpkgs
+$ bazel build --config=linux scripts/packages:tarpkgs
 ```
 
 This will install Heron packages in the `bazel-bin/scripts/packages/` directory.
@@ -198,14 +198,14 @@ bazelVersion %}}).
 ```bash
 $ git clone https://github.com/apache/incubator-heron.git && cd heron
 $ ./bazel_configure.py
-$ bazel build --config=centos heron/...
+$ bazel build --config=linux heron/...
 ```
 
 ### Step 7 --- Build the binary packages
 
 ```bash
-$ bazel build --config=centos scripts/packages:binpkgs
-$ bazel build --config=centos scripts/packages:tarpkgs
+$ bazel build --config=linux scripts/packages:binpkgs
+$ bazel build --config=linux scripts/packages:tarpkgs
 ```
 
 This will install Heron packages in the `bazel-bin/scripts/packages/` directory.

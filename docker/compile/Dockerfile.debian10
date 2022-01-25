@@ -18,7 +18,7 @@
 FROM openjdk:11.0.6-jdk-buster
 
 # This is passed to the heron build command via the --config flag
-ENV TARGET_PLATFORM debian
+ENV TARGET_PLATFORM linux
 
 RUN apt-get update && apt-get -y install \
       ant \
@@ -42,7 +42,7 @@ RUN apt-get update && apt-get -y install \
       wget \
       zip
 
-ENV bazelVersion 4.1.0
+ENV bazelVersion 4.2.2
 
 RUN wget -O /tmp/bazel.sh https://github.com/bazelbuild/bazel/releases/download/$bazelVersion/bazel-$bazelVersion-installer-linux-x86_64.sh \
       && chmod +x /tmp/bazel.sh \

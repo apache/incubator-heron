@@ -17,7 +17,8 @@ pex_pytest(
         "topology_unittest.py",
     ],
     reqs = [
-        "pytest==3.2.2",
+        "pytest==6.1.2",
+        "pytest-asyncio==0.14.0",
     ],
     deps = [
         "//heron/proto:proto-py",
@@ -31,7 +32,22 @@ pex_pytest(
     size = "small",
     srcs = ["query_operator_unittest.py"],
     reqs = [
-        "pytest==3.2.2",
+        "pytest==6.1.2",
+        "pytest-asyncio==0.14.0",
+    ],
+    deps = [
+        "//heron/tools/tracker/src/python:tracker-py",
+    ],
+)
+
+pex_pytest(
+    name = "app_unittest",
+    size = "small",
+    srcs = ["app_unittest.py"],
+    reqs = [
+        "pytest==6.1.2",
+        "pytest-asyncio==0.14.0",
+        "requests==2.27.1",
     ],
     deps = [
         "//heron/tools/tracker/src/python:tracker-py",
@@ -43,7 +59,8 @@ pex_pytest(
     size = "small",
     srcs = ["query_unittest.py"],
     reqs = [
-        "pytest==3.2.2",
+        "pytest==6.1.2",
+        "pytest-asyncio==0.14.0",
     ],
     deps = [
         "//heron/tools/tracker/src/python:tracker-py",
@@ -58,7 +75,8 @@ pex_pytest(
         "tracker_unittest.py",
     ],
     reqs = [
-        "pytest==3.2.2",
+        "pytest==6.1.2",
+        "pytest-asyncio==0.14.0",
     ],
     deps = [
         "//heron/proto:proto-py",

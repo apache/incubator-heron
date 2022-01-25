@@ -34,7 +34,7 @@ $ /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/inst
 
 ### Step 2 -- Install Bazel
 ```bash
-wget -O /tmp/bazel.sh https://github.com/bazelbuild/bazel/releases/download/4.1.0/bazel-4.1.0-installer-darwin-x86_64.sh
+wget -O /tmp/bazel.sh https://github.com/bazelbuild/bazel/releases/download/4.2.2/bazel-4.2.2-installer-darwin-x86_64.sh
 chmod +x /tmp/bazel.sh
 /tmp/bazel.sh --user
 ```

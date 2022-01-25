@@ -37,21 +37,13 @@ echo "Extracting source"
 tar -C . -xzf $SOURCE_TARBALL
 
 if [[ "$TARGET_PLATFORM" =~ "ubuntu" ]]; then
-  CONFIG_PLATFORM=ubuntu
+  CONFIG_PLATFORM=linux_nostyle
 elif [[ "$TARGET_PLATFORM" =~ "centos" ]]; then
-  CONFIG_PLATFORM=centos
+  CONFIG_PLATFORM=linux_nostyle
 elif [[ "$TARGET_PLATFORM" =~ "darwin" ]]; then
   CONFIG_PLATFORM=darwin
 elif [[ "$TARGET_PLATFORM" =~ "debian" ]]; then
-  CONFIG_PLATFORM=debian
-elif [[ "$TARGET_PLATFORM" =~ "ubuntu_nostyle" ]]; then
-  CONFIG_PLATFORM=ubuntu
-elif [[ "$TARGET_PLATFORM" =~ "centos_nostyle" ]]; then
-  CONFIG_PLATFORM=centos
-elif [[ "$TARGET_PLATFORM" =~ "darwin_nostyle" ]]; then
-  CONFIG_PLATFORM=darwin
-elif [[ "$TARGET_PLATFORM" =~ "debian_nostyle" ]]; then
-  CONFIG_PLATFORM=debian
+  CONFIG_PLATFORM=linux_nostyle
 else
   echo "Unknown platform: $TARGET_PLATFORM"
   exit 1

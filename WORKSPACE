@@ -19,9 +19,8 @@ workspace(name = "org_apache_heron")
 
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive", "http_file")
 
-RULES_JVM_EXTERNAL_TAG = "3.1"
-
-RULES_JVM_EXTERNAL_SHA = "e246373de2353f3d34d35814947aa8b7d0dd1a58c2f7a6c41cfeaff3007c2d14"
+RULES_JVM_EXTERNAL_TAG = "4.2"
+RULES_JVM_EXTERNAL_SHA = "cd1a77b7b02e8e008439ca76fd34f5b07aecb8c752961f9640dea15e9e5ba1ca"
 
 http_archive(
     name = "rules_jvm_external",
@@ -29,6 +28,18 @@ http_archive(
     strip_prefix = "rules_jvm_external-%s" % RULES_JVM_EXTERNAL_TAG,
     url = "https://github.com/bazelbuild/rules_jvm_external/archive/%s.zip" % RULES_JVM_EXTERNAL_TAG,
 )
+
+load("@rules_jvm_external//:repositories.bzl", "rules_jvm_external_deps")
+
+rules_jvm_external_deps()
+
+load("@rules_jvm_external//:setup.bzl", "rules_jvm_external_setup")
+
+rules_jvm_external_setup()
+
+load("@rules_jvm_external//:defs.bzl", "maven_install")
+load("@rules_jvm_external//:defs.bzl", "artifact")
+load("@rules_jvm_external//:specs.bzl", "maven")
 
 # versions shared across artifacts that should be upgraded together
 aws_version = "1.11.58"
@@ -54,13 +65,7 @@ jetty_version = "9.4.6.v20170531"
 
 jersey_version = "2.25.1"
 
-kubernetes_client_version = "11.0.0"
-
-load("@rules_jvm_external//:defs.bzl", "maven_install")
-load("@rules_jvm_external//:specs.bzl", "maven")
-load("@rules_jvm_external//migration:maven_jar_migrator_deps.bzl", "maven_jar_migrator_repositories")
-
-maven_jar_migrator_repositories()
+kubernetes_client_version = "14.0.0"
 
 maven_install(
     name = "maven",
@@ -68,6 +73,7 @@ maven_install(
         "antlr:antlr:2.7.7",
         "org.apache.zookeeper:zookeeper:3.6.3",
         "io.kubernetes:client-java:" + kubernetes_client_version,
+        "io.kubernetes:client-java-api-fluent:" + kubernetes_client_version,
         "com.esotericsoftware:kryo:5.2.0",
         "org.apache.avro:avro:1.7.4",
         "org.apache.mesos:mesos:0.22.0",
@@ -81,7 +87,7 @@ maven_install(
         "org.apache.httpcomponents:httpclient:" + http_client_version,
         "org.apache.httpcomponents:httpmime:" + http_client_version,
         "com.google.apis:google-api-services-storage:v1-rev108-1.22.0",
-        "com.microsoft.dhalion:dhalion:0.2.3",
+        "com.microsoft.dhalion:dhalion:0.2.6",
         "org.objenesis:objenesis:2.1",
         "com.amazonaws:aws-java-sdk-s3:" + aws_version,
         "org.eclipse.jetty:jetty-server:" + jetty_version,
@@ -96,7 +102,7 @@ maven_install(
         "org.glassfish.jersey.media:jersey-media-multipart:" + jersey_version,
         "org.glassfish.jersey.containers:jersey-container-servlet:" + jersey_version,
         "org.apache.distributedlog:distributedlog-core:" + distributedlog_version,
-        "io.netty:netty-all:4.1.70.Final",
+        "io.netty:netty-all:4.1.72.Final",
         "aopalliance:aopalliance:1.0",
         "org.roaringbitmap:RoaringBitmap:0.6.51",
         "com.google.guava:guava:23.6-jre",
@@ -107,7 +113,6 @@ maven_install(
         "org.slf4j:slf4j-api:" + slf4j_version,
         "org.slf4j:slf4j-jdk14:" + slf4j_version,
         "log4j:log4j:1.2.17",
-        "org.yaml:snakeyaml:1.15",
         "tech.tablesaw:tablesaw-core:0.11.4",
         "org.glassfish.hk2.external:aopalliance-repackaged:2.5.0-b32",
         "org.apache.commons:commons-compress:1.14",
@@ -136,6 +141,7 @@ maven_install(
             packaging = "test-jar",
         ),
     ],
+    fail_if_repin_required = True,
     fetch_sources = True,
     maven_install_json = "//:maven_install.json",
     repositories = [
@@ -148,9 +154,8 @@ maven_install(
 
 # https://github.com/bazelbuild/rules_jvm_external#updating-maven_installjson
 # To update `maven_install.json` run the following command:
-# `bazel run @unpinned_maven//:pin`
+# `REPIN=1 bazel run @unpinned_maven//:pin`
 load("@maven//:defs.bzl", "pinned_maven_install")
-
 pinned_maven_install()
 
 load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
@@ -170,8 +175,8 @@ jar_jar_repositories()
 
 http_archive(
     name = "rules_python",
-    url = "https://github.com/bazelbuild/rules_python/releases/download/0.5.0/rules_python-0.5.0.tar.gz",
-    sha256 = "cd6730ed53a002c56ce4e2f396ba3b3be262fd7cb68339f0377a45e8227fe332",
+    sha256 = "b6d46438523a3ec0f3cead544190ee13223a52f6a6765a29eae7b7cc24cc83a0",
+    url = "https://github.com/bazelbuild/rules_python/releases/download/0.1.0/rules_python-0.1.0.tar.gz",
 )
 
 load("@rules_python//python:pip.bzl", "pip_install")
@@ -190,58 +195,85 @@ load("@rules_python//python:repositories.bzl", "py_repositories")
 # pip_repositories()
 
 # for pex repos
-PEX_WHEEL = "https://pypi.python.org/packages/fa/c4/5dbdce75117b60b6ffec65bc92ac25ee873b84158a55cfbffa1d49db6eb1/pex-2.1.54-py2.py3-none-any.whl"
+PEX_PKG = "https://files.pythonhosted.org/packages/d4/73/4c76e06824baadba81b39125721c97fb22e201b35fcd17b32b5a5fa77c59/pex-2.1.62-py2.py3-none-any.whl"
 
-PY_WHEEL = "https://pypi.python.org/packages/53/67/9620edf7803ab867b175e4fd23c7b8bd8eba11cb761514dcd2e726ef07da/py-1.4.34-py2.py3-none-any.whl"
+PYTEST_PKG = "https://files.pythonhosted.org/packages/40/76/86f886e750b81a4357b6ed606b2bcf0ce6d6c27ad3c09ebf63ed674fc86e/pytest-6.2.5-py3-none-any.whl"
 
-PYTEST_WHEEL = "https://pypi.python.org/packages/fd/3e/d326a05d083481746a769fc051ae8d25f574ef140ad4fe7f809a2b63c0f0/pytest-3.1.3-py2.py3-none-any.whl"
+REQUESTS_PKG = "https://files.pythonhosted.org/packages/2d/61/08076519c80041bc0ffa1a8af0cbd3bf3e2b62af10435d269a9d0f40564d/requests-2.27.1-py2.py3-none-any.whl"
 
-REQUESTS_SRC = "https://pypi.python.org/packages/d9/03/155b3e67fe35fe5b6f4227a8d9e96a14fda828b18199800d161bcefc1359/requests-2.12.3.tar.gz"
+SETUPTOOLS_PKG = "https://files.pythonhosted.org/packages/3d/f2/1489d3b6c72d68bf79cd0fba6b6c7497df4ebf7d40970e2d7eceb8d0ea9c/setuptools-51.0.0-py3-none-any.whl"
 
-SETUPTOOLS_WHEEL = "https://pypi.python.org/packages/a0/df/635cdb901ee4a8a42ec68e480c49f85f4c59e8816effbf57d9e6ee8b3588/setuptools-46.1.3-py3-none-any.whl"
+WHEEL_PKG = "https://files.pythonhosted.org/packages/d4/cf/732e05dce1e37b63d54d1836160b6e24fb36eeff2313e93315ad047c7d90/wheel-0.36.1.tar.gz"
 
-WHEEL_SRC = "https://pypi.python.org/packages/c9/1d/bd19e691fd4cfe908c76c429fe6e4436c9e83583c4414b54f6c85471954a/wheel-0.29.0.tar.gz"
+CHARSET_PKG = "https://files.pythonhosted.org/packages/84/3e/1037abe6498e65d645ce7a22d3402605d49a3b2c7f20c3abb027760da4f0/charset_normalizer-2.0.10-py3-none-any.whl"
+
+IDNA_PKG = "https://files.pythonhosted.org/packages/04/a2/d918dcd22354d8958fe113e1a3630137e0fc8b44859ade3063982eacd2a4/idna-3.3-py3-none-any.whl"
+
+CERTIFI_PKG = "https://files.pythonhosted.org/packages/37/45/946c02767aabb873146011e665728b680884cd8fe70dde973c640e45b775/certifi-2021.10.8-py2.py3-none-any.whl"
+
+URLLIB3_PKG = "https://files.pythonhosted.org/packages/4e/b8/f5a25b22e803f0578e668daa33ba3701bb37858ec80e08a150bd7d2cf1b1/urllib3-1.26.8-py2.py3-none-any.whl"
 
 http_file(
-    name = "pytest_whl",
-    downloaded_file_path = "pytest-3.1.3-py2.py3-none-any.whl",
-    sha256 = "2a4f483468954621fcc8f74784f3b42531e5b5008d49fc609b37bc4dbc6dead1",
-    urls = [PYTEST_WHEEL],
+    name = "urllib3_pkg",
+    downloaded_file_path = "urllib3-1.26.8-py2.py3-none-any.whl",
+    sha256 = "000ca7f471a233c2251c6c7023ee85305721bfdf18621ebff4fd17a8653427ed",
+    urls = [URLLIB3_PKG],
 )
 
 http_file(
-    name = "py_whl",
-    downloaded_file_path = "py-1.4.34-py2.py3-none-any.whl",
-    sha256 = "2ccb79b01769d99115aa600d7eed99f524bf752bba8f041dc1c184853514655a",
-    urls = [PY_WHEEL],
+    name = "certifi_pkg",
+    downloaded_file_path = "certifi-2021.10.8-py2.py3-none-any.whl",
+    sha256 = "d62a0163eb4c2344ac042ab2bdf75399a71a2d8c7d47eac2e2ee91b9d6339569",
+    urls = [CERTIFI_PKG],
 )
 
 http_file(
-    name = "wheel_src",
-    downloaded_file_path = "wheel-0.29.0.tar.gz",
-    sha256 = "1ebb8ad7e26b448e9caa4773d2357849bf80ff9e313964bcaf79cbf0201a1648",
-    urls = [WHEEL_SRC],
+    name = "idna_pkg",
+    downloaded_file_path = "idna-3.3-py2.py3-none-any.whl",
+    sha256 = "84d9dd047ffa80596e0f246e2eab0b391788b0503584e8945f2368256d2735ff",
+    urls = [IDNA_PKG],
 )
 
 http_file(
-    name = "pex_src",
-    downloaded_file_path = "pex-2.1.54-py2.py3-none-any.whl",
-    sha256 = "e60b006abe8abfd3c3377128e22c33f30cc6dea89e2beb463cf8360e3626db62",
-    urls = [PEX_WHEEL],
+    name = "charset_pkg",
+    downloaded_file_path = "charset_normalizer-2.0.10-py3-none-any.whl",
+    sha256 = "cb957888737fc0bbcd78e3df769addb41fd1ff8cf950dc9e7ad7793f1bf44455",
+    urls = [CHARSET_PKG],
 )
 
 http_file(
-    name = "requests_src",
-    downloaded_file_path = "requests-2.12.3.tar.gz",
-    sha256 = "de5d266953875e9647e37ef7bfe6ef1a46ff8ddfe61b5b3652edf7ea717ee2b2",
-    urls = [REQUESTS_SRC],
+    name = "pytest_pkg",
+    downloaded_file_path = "pytest-6.2.5-py3-none-any.whl",
+    sha256 = "7310f8d27bc79ced999e760ca304d69f6ba6c6649c0b60fb0e04a4a77cacc134",
+    urls = [PYTEST_PKG],
 )
 
 http_file(
-    name = "setuptools_wheel",
-    downloaded_file_path = "setuptools-46.1.3-py3-none-any.whl",
-    sha256 = "4fe404eec2738c20ab5841fa2d791902d2a645f32318a7850ef26f8d7215a8ee",
-    urls = [SETUPTOOLS_WHEEL],
+    name = "wheel_pkg",
+    downloaded_file_path = "wheel-0.36.1.tar.gz",
+    sha256 = "aaef9b8c36db72f8bf7f1e54f85f875c4d466819940863ca0b3f3f77f0a1646f",
+    urls = [WHEEL_PKG],
+)
+
+http_file(
+    name = "pex_pkg",
+    downloaded_file_path = "pex-2.1.62-py2.py3-none-any.whl",
+    sha256 = "7667c6c6d7a9b07c3ff3c3125c1928bd5279dfc077dd5cf4cc0440f40427c484",
+    urls = [PEX_PKG],
+)
+
+http_file(
+    name = "requests_pkg",
+    downloaded_file_path = "requests-2.27.1-py2.py3-none-any.whl",
+    sha256 = "f22fa1e554c9ddfd16e6e41ac79759e17be9e492b3587efa038054674760e72d",
+    urls = [REQUESTS_PKG],
+)
+
+http_file(
+    name = "setuptools_pkg",
+    downloaded_file_path = "setuptools-51.0.0-py3-none-any.whl",
+    sha256 = "8c177936215945c9a37ef809ada0fab365191952f7a123618432bbfac353c529",
+    urls = [SETUPTOOLS_PKG],
 )
 
 # end pex repos
@@ -274,9 +306,9 @@ http_archive(
 http_archive(
     name = "org_nongnu_libunwind",
     build_file = "@//:third_party/libunwind/libunwind.BUILD",
-    sha256 = "0a4b5a78d8c0418dfa610245f75fa03ad45d8e5e4cc091915d2dbed34c01178e",
-    strip_prefix = "libunwind-1.3.2",
-    urls = ["https://github.com/libunwind/libunwind/releases/download/v1.3.2/libunwind-1.3.2.tar.gz"],
+    sha256 = "90337653d92d4a13de590781371c604f9031cdb50520366aa1e3a91e1efb1017",
+    strip_prefix = "libunwind-1.5.0",
+    urls = ["https://github.com/libunwind/libunwind/releases/download/v1.5/libunwind-1.5.0.tar.gz"],
 )
 
 http_archive(
@@ -306,10 +338,9 @@ http_archive(
 
 http_archive(
     name = "com_google_googletest",
-    build_file = "@//:third_party/gtest/gtest.BUILD",
-    sha256 = "58a6f4277ca2bc8565222b3bbd58a177609e9c488e8a72649359ba51450db7d8",
-    strip_prefix = "googletest-release-1.8.0",
-    urls = ["https://github.com/google/googletest/archive/release-1.8.0.tar.gz"],
+    sha256 = "b4870bf121ff7795ba20d20bcdd8627b8e088f2d1dab299a031c1034eddc93d5",
+    strip_prefix = "googletest-release-1.11.0",
+    urls = ["https://github.com/google/googletest/archive/release-1.11.0.tar.gz"],
 )
 
 http_archive(
@@ -361,17 +392,17 @@ http_archive(
 http_archive(
     name = "helm_mac",
     build_file = "@//:third_party/helm/helm.BUILD",
-    sha256 = "3a9efe337c61a61b3e160da919ac7af8cded8945b75706e401f3655a89d53ef5",
+    sha256 = "5a0738afb1e194853aab00258453be8624e0a1d34fcc3c779989ac8dbcd59436",
     strip_prefix = "darwin-amd64",
-    urls = ["https://get.helm.sh/helm-v3.7.1-darwin-amd64.tar.gz"],
+    urls = ["https://get.helm.sh/helm-v3.7.2-darwin-amd64.tar.gz"],
 )
 
 http_archive(
     name = "helm_linux",
     build_file = "@//:third_party/helm/helm.BUILD",
-    sha256 = "6cd6cad4b97e10c33c978ff3ac97bb42b68f79766f1d2284cfd62ec04cd177f4",
+    sha256 = "4ae30e48966aba5f807a4e140dad6736ee1a392940101e4d79ffb4ee86200a9e",
     strip_prefix = "linux-amd64",
-    urls = ["https://get.helm.sh/helm-v3.7.1-linux-amd64.tar.gz"],
+    urls = ["https://get.helm.sh/helm-v3.7.2-linux-amd64.tar.gz"],
 )
 # end helm
 

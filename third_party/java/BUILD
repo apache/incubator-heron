@@ -238,6 +238,7 @@ java_library(
         "@maven//:io_gsonfire_gson_fire",
         "@maven//:io_kubernetes_client_java",
         "@maven//:io_kubernetes_client_java_api",
+        "@maven//:io_kubernetes_client_java_api_fluent",
         "@maven//:io_kubernetes_client_java_proto",
         "@maven//:io_swagger_swagger_annotations",
         "@maven//:log4j_log4j",

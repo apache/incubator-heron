@@ -682,9 +682,7 @@ void TearCommonResources(CommonResources& common) {
 
   common.ss_list_.clear();
 
-  for (auto itr = common.instanceid_instance_.begin();
-       itr != common.instanceid_instance_.end(); ++itr)
-      common.instanceid_instance_.erase(itr->first);
+  common.instanceid_instance_.clear();
 
   // Clean up the local filesystem state
   FileUtils::removeRecursive(common.dpath_, true);

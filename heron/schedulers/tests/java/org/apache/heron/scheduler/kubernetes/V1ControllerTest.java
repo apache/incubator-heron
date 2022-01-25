@@ -566,11 +566,11 @@ public class V1ControllerTest {
     final Quantity defaultRAM = Quantity.fromString(
         KubernetesUtils.Megabytes(resourceDefault.getRam()));
     final Quantity defaultCPU = Quantity.fromString(
-        Double.toString(V1Controller.roundDecimal(resourceDefault.getCpu(), 3)));
+        Double.toString(KubernetesUtils.roundDecimal(resourceDefault.getCpu(), 3)));
     final Quantity customRAM = Quantity.fromString(
         KubernetesUtils.Megabytes(resourceCustom.getRam()));
     final Quantity customCPU = Quantity.fromString(
-        Double.toString(V1Controller.roundDecimal(resourceCustom.getCpu(), 3)));
+        Double.toString(KubernetesUtils.roundDecimal(resourceCustom.getCpu(), 3)));
     final Quantity customDisk = Quantity.fromString(
         KubernetesUtils.Megabytes(resourceCustom.getDisk()));
 
@@ -1422,8 +1422,8 @@ public class V1ControllerTest {
             .withName(volumeName)
             .withNewNfs()
               .withServer(server)
-              .withNewPath(pathOnNFS)
-              .withNewReadOnly(readOnly)
+              .withPath(pathOnNFS)
+              .withReadOnly(Boolean.parseBoolean(readOnly))
             .endNfs()
             .build()
     );

@@ -26,7 +26,6 @@ py_binary(
         requirement("click"),
         requirement("colorlog"),
         ],
-
 )
 
 

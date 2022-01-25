@@ -16,7 +16,7 @@
 # vi: set ft=ruby :
 
 SECONDARIES=0
-NET_PREFIX="192.168.25."
+NET_PREFIX="192.168.56."
 
 NODES={"primary" => NET_PREFIX + "5"}
 (0..SECONDARIES-1).each do |i| NODES["secondary#{i}"] = NET_PREFIX + (6 + i).to_s end
