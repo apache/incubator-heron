@@ -1,6 +1,9 @@
 package(default_visibility = ["//visibility:public"])
 
-pex_library(
+load("@rules_python//python:defs.bzl", "py_library")
+load("@rules_python//python:defs.bzl", "py_binary")
+
+py_library(
     name = "heron-python-streamlet-py",
     srcs = glob(["**/*.py"]),
     deps = [
@@ -9,7 +12,7 @@ pex_library(
 )
 
 # for egg production
-pex_binary(
+py_binary(
     name = "heron-python-streamlet-api-package",
     srcs = glob(["**/*.py"]),
     deps = [
@@ -17,3 +20,4 @@ pex_binary(
         "//heronpy/api:heron-python-py",
     ],
 )
+
