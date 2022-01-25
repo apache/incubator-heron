@@ -5,3 +5,6 @@ PyYAML==3.13
 requests==2.12.3
 protobuf==3.14.0
 setuptools==51.0.0
+kazoo==2.8.0
+zope.interface==4.0.5
+
