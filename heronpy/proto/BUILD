@@ -2,6 +2,10 @@ load("//tools/rules:genproto.bzl", "proto_library")
 
 package(default_visibility = ["//visibility:public"])
 
+load("@rules_python//python:defs.bzl", "py_library")
+load("@rules_python//python:defs.bzl", "py_binary")
+load("@heron_py_deps//:requirements.bzl", "requirement")
+
 genrule(
     name = "protobuf-srcs",
     srcs = ["//heron/proto:proto-srcs"],
@@ -23,13 +27,9 @@ genrule(
     cmd = "cp $(SRCS) $$(pwd)/$(@D)",
 )
 
-pex_library(
+py_library(
     name = "proto-py",
     srcs = glob(["**/*.py"]),
-    reqs = [
-        "protobuf==3.14.0",
-        "setuptools==51.0.0",
-    ],
     deps = [
         ":proto_ckptmgr_py",
         ":proto_common_py",
@@ -43,16 +43,14 @@ pex_library(
         ":proto_tmanager_py",
         ":proto_topology_py",
         ":proto_tuple_py",
+        requirement("protobuf"),
+        requirement("setuptools"),
     ],
 )
 
-pex_binary(
+py_binary(
     name = "proto-py-package",
     srcs = glob(["**/*.py"]),
-    reqs = [
-        "protobuf==3.14.0",
-        "setuptools==51.0.0",
-    ],
     deps = [
         ":proto_ckptmgr_py",
         ":proto_common_py",
@@ -66,6 +64,8 @@ pex_binary(
         ":proto_tmanager_py",
         ":proto_topology_py",
         ":proto_tuple_py",
+        requirement("protobuf"),
+        requirement("setuptools"),
     ],
 )
 
