@@ -1,22 +1,25 @@
 package(default_visibility = ["//visibility:public"])
 
-pex_library(
+load("@rules_python//python:defs.bzl", "py_library")
+load("@rules_python//python:defs.bzl", "py_binary")
+load("@heron_py_deps//:requirements.bzl", "requirement")
+
+py_library(
     name = "heron-shell-lib",
     srcs = glob(
         ["**/*.py"],
     ),
-    reqs = [
-        "logging-formatter-anticrlf==1.2",
-        "requests==2.27.1",
-        "tornado==6.1",
-    ],
     deps = [
         "//heron/common/src/python:common-py",
+        requirement(logging-formatter-anticrlf),
+        requirement(requests),
+        requirement(tornado),
     ],
 )
 
-pex_binary(
+py_binary(
     name = "heron-shell",
+    main = "main.py"
     srcs = ["main.py"],
     resources = [
         "//heron/shell/assets",
