@@ -1,8 +1,6 @@
 ---
 
-group: edge
-
-dist: bionic
+dist: focal
 
 language: java
 
@@ -17,11 +15,8 @@ addons:
       - libtool-bin
       - libcppunit-dev
       - pkg-config
-      - python3-dev
-      - python3-pip
-      - python3-setuptools
-      - python3-wheel
-      - python3-venv
+      - python3.8-dev
+      - python3.8-venv
       - wget
       - zip
       - zlib1g-dev
@@ -29,7 +24,7 @@ addons:
       - libgoogle-perftools-dev
 
 env:
-  - BAZEL_VERSION=4.2.2 ENABLE_HEAPCHECK=1
+  - BAZEL_VERSION=4.2.2 ENABLE_HEAPCHECK=1 LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8 LANGUAGE=en_US.UTF-8
 
 before_install:
   # download and install bazel

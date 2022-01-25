@@ -22,33 +22,19 @@ build --ignore_unsupported_sandboxing
 build --spawn_strategy=standalone
 build --workspace_status_command scripts/release/status.sh
 
-# For centos
-# To use it: bazel build --config=centos
-build:centos --experimental_action_listener=tools/cpp:compile_cpp
-build:centos --experimental_action_listener=tools/java:compile_java
-build:centos --experimental_action_listener=tools/python:compile_python
-build:centos --genrule_strategy=standalone
-build:centos --ignore_unsupported_sandboxing
-build:centos --linkopt -lm
-build:centos --linkopt -lpthread
-build:centos --linkopt -lrt
-build:centos --spawn_strategy=standalone
-build:centos --workspace_status_command scripts/release/status.sh
-build:centos --copt=-O3
-
-# For debian
-# To use it: bazel build --config=debian
-build:debian --experimental_action_listener=tools/cpp:compile_cpp
-build:debian --experimental_action_listener=tools/java:compile_java
-build:debian --experimental_action_listener=tools/python:compile_python
-build:debian --genrule_strategy=standalone
-build:debian --ignore_unsupported_sandboxing
-build:debian --linkopt -lm
-build:debian --linkopt -lpthread
-build:debian --linkopt -lrt
-build:debian --spawn_strategy=standalone
-build:debian --workspace_status_command scripts/release/status.sh
-build:debian --copt=-O3
+# For Linux
+# To use it: bazel build --config=linux
+build:linux --experimental_action_listener=tools/cpp:compile_cpp
+build:linux --experimental_action_listener=tools/java:compile_java
+build:linux --experimental_action_listener=tools/python:compile_python
+build:linux --genrule_strategy=standalone
+build:linux --ignore_unsupported_sandboxing
+build:linux --linkopt -lm
+build:linux --linkopt -lpthread
+build:linux --linkopt -lrt
+build:linux --spawn_strategy=standalone
+build:linux --workspace_status_command scripts/release/status.sh
+build:linux --copt=-O3
 
 # For Mac
 # To use it: bazel build --config=darwin
@@ -61,43 +47,18 @@ build:darwin --spawn_strategy=standalone
 build:darwin --workspace_status_command scripts/release/status.sh
 build:darwin --copt=-O3
 
-# For Ubuntu
-# To use it: bazel build --config=ubuntu
-build:ubuntu --experimental_action_listener=tools/java:compile_java
-build:ubuntu --experimental_action_listener=tools/cpp:compile_cpp
-build:ubuntu --experimental_action_listener=tools/python:compile_python
-build:ubuntu --genrule_strategy=standalone
-build:ubuntu --ignore_unsupported_sandboxing
-build:ubuntu --linkopt -lm
-build:ubuntu --linkopt -lpthread
-build:ubuntu --linkopt -lrt
-build:ubuntu --spawn_strategy=standalone
-build:ubuntu --workspace_status_command scripts/release/status.sh
-build:ubuntu --copt=-O3
-
 ### Disabled checkstyle
 
-# For centos
-# To use it: bazel build --config=centos_nostyle
-build:centos_nostyle --genrule_strategy=standalone
-build:centos_nostyle --ignore_unsupported_sandboxing
-build:centos_nostyle --linkopt -lm
-build:centos_nostyle --linkopt -lpthread
-build:centos_nostyle --linkopt -lrt
-build:centos_nostyle --spawn_strategy=standalone
-build:centos_nostyle --workspace_status_command scripts/release/status.sh
-build:centos_nostyle --copt=-O3
-
-# For debian
-# To use it: bazel build --config=debian_nostyle
-build:debian_nostyle --genrule_strategy=standalone
-build:debian_nostyle --ignore_unsupported_sandboxing
-build:debian_nostyle --linkopt -lm
-build:debian_nostyle --linkopt -lpthread
-build:debian_nostyle --linkopt -lrt
-build:debian_nostyle --spawn_strategy=standalone
-build:debian_nostyle --workspace_status_command scripts/release/status.sh
-build:debian_nostyle --copt=-O3
+# For Linux
+# To use it: bazel build --config=linux_nostyle
+build:linux_nostyle --genrule_strategy=standalone
+build:linux_nostyle --ignore_unsupported_sandboxing
+build:linux_nostyle --linkopt -lm
+build:linux_nostyle --linkopt -lpthread
+build:linux_nostyle --linkopt -lrt
+build:linux_nostyle --spawn_strategy=standalone
+build:linux_nostyle --workspace_status_command scripts/release/status.sh
+build:linux_nostyle --copt=-O3
 
 # For Mac
 # To use it: bazel build --config=darwin_nostyle
@@ -106,14 +67,3 @@ build:darwin_nostyle --ignore_unsupported_sandboxing
 build:darwin_nostyle --spawn_strategy=standalone
 build:darwin_nostyle --workspace_status_command scripts/release/status.sh
 build:darwin_nostyle --copt=-O3
-
-# For Ubuntu
-# To use it: bazel build --config=ubuntu_nostyle
-build:ubuntu_nostyle --genrule_strategy=standalone
-build:ubuntu_nostyle --ignore_unsupported_sandboxing
-build:ubuntu_nostyle --linkopt -lm
-build:ubuntu_nostyle --linkopt -lpthread
-build:ubuntu_nostyle --linkopt -lrt
-build:ubuntu_nostyle --spawn_strategy=standalone
-build:ubuntu_nostyle --workspace_status_command scripts/release/status.sh
-build:ubuntu_nostyle --copt=-O3

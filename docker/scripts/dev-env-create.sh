@@ -28,8 +28,8 @@
 # After the container is started, you can build Heron with bazel
 # (ubuntu config is used in the example):
 #   ./bazel_configure.py
-#   bazel build --config=ubuntu heron/...
-#   bazel build --config=ubuntu scripts/packages:binpkgs
+#   bazel build --config=linux heron/...
+#   bazel build --config=linux scripts/packages:binpkgs
 
 set -o nounset
 set -o errexit
@@ -43,7 +43,7 @@ case $# in
 esac
 
 # Default platform is ubuntu18.04. Other available platforms
-# include centos7, debian9, debian10, ubuntu18.04
+# include centos8, debian10, ubuntu18.04
 TARGET_PLATFORM=${2:-"ubuntu18.04"}
 SCRATCH_DIR="$HOME/.heron-docker"
 REPOSITORY="heron-dev"

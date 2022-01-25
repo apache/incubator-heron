@@ -61,8 +61,8 @@ class Download extends React.Component {
     const latestDebian10TarUrl =  getTarUrl(latestHeronVersion, "debian10");
     const latestArchiveUrl = distUrl(latestHeronVersion, 'bin');
     const latestSrcArchiveUrl = distUrl(latestHeronVersion, 'src')
-    const centos7InstallUrl = getInstallScriptMirrorUrl(latestHeronVersion, "centos7")
-    const centos7InstallCryptoUrl = getInstallScriptCryptoUrl(latestHeronVersion, "centos7")
+    const centos8InstallUrl = getInstallScriptMirrorUrl(latestHeronVersion, "centos8")
+    const centos8InstallCryptoUrl = getInstallScriptCryptoUrl(latestHeronVersion, "centos8")
     const debian10InstallUrl = getInstallScriptMirrorUrl(latestHeronVersion, "debian10")
     const debian10InstallCryptoUrl = getInstallScriptCryptoUrl(latestHeronVersion, "debian10")
     const ubuntu1804InstallUrl = getInstallScriptMirrorUrl(latestHeronVersion, "ubuntu18.04")
@@ -149,13 +149,13 @@ class Download extends React.Component {
 
 
                   <tr key={'centos-install'}>
-                    <th>CentOS7</th>
+                    <th>centos8</th>
                     <td>
-                      <a href={`${centos7InstallUrl}`}> heron-install-0.20.4-incubating-centos7.sh</a>
+                      <a href={`${centos8InstallUrl}`}> heron-install-0.20.4-incubating-centos8.sh</a>
                     </td>
                     <td>
-                      <a href={`${centos7InstallCryptoUrl}.asc`}>asc</a>,&nbsp;
-                      <a href={`${centos7InstallCryptoUrl}.sha512`}>sha512</a>
+                      <a href={`${centos8InstallCryptoUrl}.asc`}>asc</a>,&nbsp;
+                      <a href={`${centos8InstallCryptoUrl}.sha512`}>sha512</a>
                     </td>
                   </tr>
                   <tr key={'debian10-install'}>

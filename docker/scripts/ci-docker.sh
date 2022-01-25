@@ -50,7 +50,7 @@ build_exec_image() {
   OUTPUT_DIRECTORY=$(realpath $4)
 
   if [ "$INPUT_TARGET_PLATFORM" == "latest" ]; then
-    TARGET_PLATFORM="ubuntu14.04"
+    TARGET_PLATFORM="ubuntu20.04"
     DOCKER_TAG="$DOCKER_TAG_PREFIX/heron:$HERON_VERSION"
     DOCKER_LATEST_TAG="$DOCKER_TAG_PREFIX/heron:latest"
     DOCKER_IMAGE_FILE="$OUTPUT_DIRECTORY/heron-$HERON_VERSION.tar"
@@ -97,7 +97,7 @@ publish_exec_image() {
   INPUT_DIRECTORY=$(realpath $4)
 
   if [ "$INPUT_TARGET_PLATFORM" == "latest" ]; then
-    TARGET_PLATFORM="ubuntu14.04"
+    TARGET_PLATFORM="ubuntu20.04"
     DOCKER_TAG="$DOCKER_TAG_PREFIX/heron:$HERON_VERSION"
     DOCKER_LATEST_TAG="$DOCKER_TAG_PREFIX/heron:latest"
     DOCKER_IMAGE_FILE="$INPUT_DIRECTORY/heron-$HERON_VERSION.tar"
@@ -139,11 +139,11 @@ case $# in
   *)
     echo "Usage: $0 <operation> <platform> <version_string> <tag-prefix> <input-output-directory> "
     echo "  "
-    echo "Platforms Supported: latest, ubuntu14.04, ubuntu16.04, centos7, debian9"
+    echo "Platforms Supported: latest, ubuntu20.04, centos8, debian10"
     echo "  "
     echo "Example:"
-    echo "  $0 build ubuntu14.04 0.12.0 heron ."
-    echo "  $0 publish ubuntu14.04 0.12.0 streamlio ~/ubuntu"
+    echo "  $0 build ubuntu20.04 0.12.0 heron ."
+    echo "  $0 publish ubuntu20.04 0.12.0 streamlio ~/ubuntu"
     echo "  "
     exit 1
     ;;

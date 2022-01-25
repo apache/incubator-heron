@@ -265,7 +265,7 @@ def parse_cluster_role_env(cluster_role_env, config_path):
     else:
       cli_confs = {}
       with open(cli_conf_file, 'r') as conf_file:
-        tmp_confs = yaml.load(conf_file)
+        tmp_confs = yaml.safe_load(conf_file)
         # the return value of yaml.load can be None if conf_file is an empty file
         if tmp_confs is not None:
           cli_confs = tmp_confs
@@ -321,7 +321,7 @@ def direct_mode_cluster_role_env(cluster_role_env, config_path):
 
   client_confs = {}
   with open(cli_conf_file, 'r') as conf_file:
-    client_confs = yaml.load(conf_file)
+    client_confs = yaml.safe_load(conf_file)
 
     # the return value of yaml.load can be None if conf_file is an empty file
     if not client_confs:
@@ -440,7 +440,7 @@ def print_build_info():
   release_file = get_heron_release_file()
 
   with open(release_file) as release_info:
-    release_map = yaml.load(release_info)
+    release_map = yaml.safe_load(release_info)
     release_items = sorted(list(release_map.items()), key=lambda tup: tup[0])
     for key, value in release_items:
       print("%s : %s" % (key, value))

@@ -412,7 +412,7 @@ class HeronExecutor:
   # pylint: disable=no-self-use
   def _load_logging_dir(self, heron_internals_config_file):
     with open(heron_internals_config_file, 'r') as stream:
-      heron_internals_config = yaml.load(stream)
+      heron_internals_config = yaml.safe_load(stream)
     return heron_internals_config['heron.logging.directory']
 
   def _get_metricsmgr_cmd(self, metricsManagerId, sink_config_file, port):
@@ -1058,7 +1058,7 @@ class HeronExecutor:
     Log.info("Start state manager watches")
 
     with open(self.override_config_file, 'r') as stream:
-      overrides = yaml.load(stream)
+      overrides = yaml.safe_load(stream)
       if overrides is None:
         overrides = {}
     overrides["heron.statemgr.connection.string"] = self.state_manager_connection

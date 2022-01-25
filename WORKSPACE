@@ -175,9 +175,8 @@ jar_jar_repositories()
 
 http_archive(
     name = "rules_python",
-    sha256 = "b5668cde8bb6e3515057ef465a35ad712214962f0b3a314e551204266c7be90c",
-    strip_prefix = "rules_python-0.0.2",
-    url = "https://github.com/bazelbuild/rules_python/releases/download/0.0.2/rules_python-0.0.2.tar.gz",
+    sha256 = "b6d46438523a3ec0f3cead544190ee13223a52f6a6765a29eae7b7cc24cc83a0",
+    url = "https://github.com/bazelbuild/rules_python/releases/download/0.1.0/rules_python-0.1.0.tar.gz",
 )
 
 load("@rules_python//python:repositories.bzl", "py_repositories")
@@ -188,58 +187,85 @@ py_repositories()
 # pip_repositories()
 
 # for pex repos
-PEX_WHEEL = "https://pypi.python.org/packages/fa/c4/5dbdce75117b60b6ffec65bc92ac25ee873b84158a55cfbffa1d49db6eb1/pex-2.1.54-py2.py3-none-any.whl"
+PEX_PKG = "https://files.pythonhosted.org/packages/d4/73/4c76e06824baadba81b39125721c97fb22e201b35fcd17b32b5a5fa77c59/pex-2.1.62-py2.py3-none-any.whl"
 
-PY_WHEEL = "https://pypi.python.org/packages/53/67/9620edf7803ab867b175e4fd23c7b8bd8eba11cb761514dcd2e726ef07da/py-1.4.34-py2.py3-none-any.whl"
+PYTEST_PKG = "https://files.pythonhosted.org/packages/40/76/86f886e750b81a4357b6ed606b2bcf0ce6d6c27ad3c09ebf63ed674fc86e/pytest-6.2.5-py3-none-any.whl"
 
-PYTEST_WHEEL = "https://pypi.python.org/packages/fd/3e/d326a05d083481746a769fc051ae8d25f574ef140ad4fe7f809a2b63c0f0/pytest-3.1.3-py2.py3-none-any.whl"
+REQUESTS_PKG = "https://files.pythonhosted.org/packages/2d/61/08076519c80041bc0ffa1a8af0cbd3bf3e2b62af10435d269a9d0f40564d/requests-2.27.1-py2.py3-none-any.whl"
 
-REQUESTS_SRC = "https://pypi.python.org/packages/d9/03/155b3e67fe35fe5b6f4227a8d9e96a14fda828b18199800d161bcefc1359/requests-2.12.3.tar.gz"
+SETUPTOOLS_PKG = "https://files.pythonhosted.org/packages/3d/f2/1489d3b6c72d68bf79cd0fba6b6c7497df4ebf7d40970e2d7eceb8d0ea9c/setuptools-51.0.0-py3-none-any.whl"
 
-SETUPTOOLS_WHEEL = "https://pypi.python.org/packages/a0/df/635cdb901ee4a8a42ec68e480c49f85f4c59e8816effbf57d9e6ee8b3588/setuptools-46.1.3-py3-none-any.whl"
+WHEEL_PKG = "https://files.pythonhosted.org/packages/d4/cf/732e05dce1e37b63d54d1836160b6e24fb36eeff2313e93315ad047c7d90/wheel-0.36.1.tar.gz"
 
-WHEEL_SRC = "https://pypi.python.org/packages/c9/1d/bd19e691fd4cfe908c76c429fe6e4436c9e83583c4414b54f6c85471954a/wheel-0.29.0.tar.gz"
+CHARSET_PKG = "https://files.pythonhosted.org/packages/84/3e/1037abe6498e65d645ce7a22d3402605d49a3b2c7f20c3abb027760da4f0/charset_normalizer-2.0.10-py3-none-any.whl"
+
+IDNA_PKG = "https://files.pythonhosted.org/packages/04/a2/d918dcd22354d8958fe113e1a3630137e0fc8b44859ade3063982eacd2a4/idna-3.3-py3-none-any.whl"
+
+CERTIFI_PKG = "https://files.pythonhosted.org/packages/37/45/946c02767aabb873146011e665728b680884cd8fe70dde973c640e45b775/certifi-2021.10.8-py2.py3-none-any.whl"
+
+URLLIB3_PKG = "https://files.pythonhosted.org/packages/4e/b8/f5a25b22e803f0578e668daa33ba3701bb37858ec80e08a150bd7d2cf1b1/urllib3-1.26.8-py2.py3-none-any.whl"
 
 http_file(
-    name = "pytest_whl",
-    downloaded_file_path = "pytest-3.1.3-py2.py3-none-any.whl",
-    sha256 = "2a4f483468954621fcc8f74784f3b42531e5b5008d49fc609b37bc4dbc6dead1",
-    urls = [PYTEST_WHEEL],
+    name = "urllib3_pkg",
+    downloaded_file_path = "urllib3-1.26.8-py2.py3-none-any.whl",
+    sha256 = "000ca7f471a233c2251c6c7023ee85305721bfdf18621ebff4fd17a8653427ed",
+    urls = [URLLIB3_PKG],
 )
 
 http_file(
-    name = "py_whl",
-    downloaded_file_path = "py-1.4.34-py2.py3-none-any.whl",
-    sha256 = "2ccb79b01769d99115aa600d7eed99f524bf752bba8f041dc1c184853514655a",
-    urls = [PY_WHEEL],
+    name = "certifi_pkg",
+    downloaded_file_path = "certifi-2021.10.8-py2.py3-none-any.whl",
+    sha256 = "d62a0163eb4c2344ac042ab2bdf75399a71a2d8c7d47eac2e2ee91b9d6339569",
+    urls = [CERTIFI_PKG],
 )
 
 http_file(
-    name = "wheel_src",
-    downloaded_file_path = "wheel-0.29.0.tar.gz",
-    sha256 = "1ebb8ad7e26b448e9caa4773d2357849bf80ff9e313964bcaf79cbf0201a1648",
-    urls = [WHEEL_SRC],
+    name = "idna_pkg",
+    downloaded_file_path = "idna-3.3-py2.py3-none-any.whl",
+    sha256 = "84d9dd047ffa80596e0f246e2eab0b391788b0503584e8945f2368256d2735ff",
+    urls = [IDNA_PKG],
 )
 
 http_file(
-    name = "pex_src",
-    downloaded_file_path = "pex-2.1.54-py2.py3-none-any.whl",
-    sha256 = "e60b006abe8abfd3c3377128e22c33f30cc6dea89e2beb463cf8360e3626db62",
-    urls = [PEX_WHEEL],
+    name = "charset_pkg",
+    downloaded_file_path = "charset_normalizer-2.0.10-py3-none-any.whl",
+    sha256 = "cb957888737fc0bbcd78e3df769addb41fd1ff8cf950dc9e7ad7793f1bf44455",
+    urls = [CHARSET_PKG],
 )
 
 http_file(
-    name = "requests_src",
-    downloaded_file_path = "requests-2.12.3.tar.gz",
-    sha256 = "de5d266953875e9647e37ef7bfe6ef1a46ff8ddfe61b5b3652edf7ea717ee2b2",
-    urls = [REQUESTS_SRC],
+    name = "pytest_pkg",
+    downloaded_file_path = "pytest-6.2.5-py3-none-any.whl",
+    sha256 = "7310f8d27bc79ced999e760ca304d69f6ba6c6649c0b60fb0e04a4a77cacc134",
+    urls = [PYTEST_PKG],
 )
 
 http_file(
-    name = "setuptools_wheel",
-    downloaded_file_path = "setuptools-46.1.3-py3-none-any.whl",
-    sha256 = "4fe404eec2738c20ab5841fa2d791902d2a645f32318a7850ef26f8d7215a8ee",
-    urls = [SETUPTOOLS_WHEEL],
+    name = "wheel_pkg",
+    downloaded_file_path = "wheel-0.36.1.tar.gz",
+    sha256 = "aaef9b8c36db72f8bf7f1e54f85f875c4d466819940863ca0b3f3f77f0a1646f",
+    urls = [WHEEL_PKG],
+)
+
+http_file(
+    name = "pex_pkg",
+    downloaded_file_path = "pex-2.1.62-py2.py3-none-any.whl",
+    sha256 = "7667c6c6d7a9b07c3ff3c3125c1928bd5279dfc077dd5cf4cc0440f40427c484",
+    urls = [PEX_PKG],
+)
+
+http_file(
+    name = "requests_pkg",
+    downloaded_file_path = "requests-2.27.1-py2.py3-none-any.whl",
+    sha256 = "f22fa1e554c9ddfd16e6e41ac79759e17be9e492b3587efa038054674760e72d",
+    urls = [REQUESTS_PKG],
+)
+
+http_file(
+    name = "setuptools_pkg",
+    downloaded_file_path = "setuptools-51.0.0-py3-none-any.whl",
+    sha256 = "8c177936215945c9a37ef809ada0fab365191952f7a123618432bbfac353c529",
+    urls = [SETUPTOOLS_PKG],
 )
 
 # end pex repos
@@ -373,13 +399,12 @@ http_archive(
 # end helm
 
 # for docker image building
-DOCKER_RULES_VERSION = "0.14.4"
 
 http_archive(
     name = "io_bazel_rules_docker",
-    sha256 = "4521794f0fba2e20f3bf15846ab5e01d5332e587e9ce81629c7f96c793bb7036",
-    strip_prefix = "rules_docker-%s" % DOCKER_RULES_VERSION,
-    urls = ["https://github.com/bazelbuild/rules_docker/archive/v%s.tar.gz" % DOCKER_RULES_VERSION],
+    sha256 = "59536e6ae64359b716ba9c46c39183403b01eabfbd57578e84398b4829ca499a",
+    strip_prefix = "rules_docker-0.22.0",
+    urls = ["https://github.com/bazelbuild/rules_docker/releases/download/v0.22.0/rules_docker-v0.22.0.tar.gz"],
 )
 
 load(
@@ -392,9 +417,9 @@ load("@io_bazel_rules_docker//repositories:deps.bzl", container_deps = "deps")
 
 container_deps()
 
-load("@io_bazel_rules_docker//repositories:pip_repositories.bzl", "pip_deps")
+load("@io_bazel_rules_docker//repositories:py_repositories.bzl", "py_deps")
 
-pip_deps()
+py_deps()
 
 load(
     "@io_bazel_rules_docker//container:container.bzl",

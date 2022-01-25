@@ -4,7 +4,7 @@ pex_library(
     name = "instance-tests-py",
     srcs = ["mock_protobuf.py"],
     reqs = [
-        "pytest==3.2.2",
+        "pytest==6.1.2",
     ],
     deps = [
         "//heron/proto:proto-py",

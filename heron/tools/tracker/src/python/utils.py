@@ -23,20 +23,86 @@ utils.py
 Contains utility functions used by tracker.
 '''
 
+import json
 import os
 import sys
 import subprocess
 
+from asyncio import iscoroutinefunction
+from functools import wraps
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any, Generic, Literal, Optional, TypeVar
 
+from heron.common.src.python.utils.log import Log
+from heron.tools.tracker.src.python import constants
+from heron.proto import topology_pb2
+
+import javaobj.v1 as javaobj
 import yaml
+
+from fastapi import APIRouter, HTTPException
+from pydantic import Field
+from pydantic.generics import GenericModel
 
 
 # directories for heron tools distribution
 BIN_DIR = "bin"
 CONF_DIR = "conf"
 LIB_DIR = "lib"
+
+ResultType = TypeVar("ResultType")
+
+
+class ResponseEnvelope(GenericModel, Generic[ResultType]):
+  execution_time: float = Field(0.0, alias="executiontime")
+  message: str
+  result: Optional[ResultType] = None
+  status: Literal[
+      constants.RESPONSE_STATUS_FAILURE, constants.RESPONSE_STATUS_SUCCESS
+  ]
+  tracker_version: str = constants.API_VERSION
+
+class BadRequest(HTTPException):
+  """Raised when bad input is recieved."""
+  def __init__(self, detail: str = None) -> None:
+    super().__init__(400, detail)
+
+class EnvelopingAPIRouter(APIRouter):
+  """Router which wraps response_models with ResponseEnvelope."""
+
+  def api_route(self, response_model=None, **kwargs):
+    """This provides the decorator used by router.<method>."""
+    if not response_model:
+      return super().api_route(response_model=response_model, **kwargs)
+
+    wrapped_response_model = ResponseEnvelope[response_model]
+    decorator = super().api_route(response_model=wrapped_response_model, **kwargs)
+
+    @wraps(decorator)
+    def new_decorator(f):
+      if iscoroutinefunction(f):
+        @wraps(f)
+        async def envelope(*args, **kwargs):
+          result = await f(*args, **kwargs)
+          return wrapped_response_model(
+              result=result,
+              execution_time=0.0,
+              message="ok",
+              status="success",
+          )
+      else:
+        @wraps(f)
+        def envelope(*args, **kwargs):
+          result = f(*args, **kwargs)
+          return wrapped_response_model(
+              result=result,
+              execution_time=0.0,
+              message="ok",
+              status="success",
+          )
+      return decorator(envelope)
+
+    return new_decorator
 
 
 def make_shell_endpoint(topology_info: dict, instance_id: int) -> str:
@@ -174,4 +240,59 @@ def parse_config_file(config_file: str) -> Optional[str]:
 
   # Read the configuration file
   with open(expanded_config_file_path, 'r') as f:
-    return yaml.load(f)
+    return yaml.safe_load(f)
+
+################################################################################
+# utils for parsing protobuf key-value pairs from the API
+################################################################################
+def convert_pb_kvs(kvs, include_non_primitives=True) -> dict:
+  """
+  converts pb kvs to dict
+  """
+  config = {}
+  for kv in kvs:
+    if kv.value:
+      config[kv.key] = kv.value
+    elif kv.serialized_value:
+      # add serialized_value support for python values (fixme)
+
+      # is this a serialized java object
+      if topology_pb2.JAVA_SERIALIZED_VALUE == kv.type:
+        jv = _convert_java_value(kv, include_non_primitives=include_non_primitives)
+        if jv is not None:
+          config[kv.key] = jv
+      else:
+        config[kv.key] = _raw_value(kv)
+  return config
+
+def _convert_java_value(kv, include_non_primitives=True):
+  try:
+    pobj = javaobj.loads(kv.serialized_value)
+    if isinstance(pobj, str):
+      return pobj
+
+    if isinstance(pobj, javaobj.transformers.DefaultObjectTransformer.JavaPrimitiveClass):
+      return pobj.value
+
+    if include_non_primitives:
+      # java objects that are not strings return value and encoded value
+      # Hexadecimal byte array for Serialized objects that
+      return {
+          'value' : json.dumps(pobj,
+                               default=lambda custom_field: custom_field.__dict__,
+                               sort_keys=True,
+                               indent=2),
+          'raw' : kv.serialized_value.hex()}
+
+    return None
+  except Exception:
+    Log.exception("Failed to parse data as java object")
+    if include_non_primitives:
+      return _raw_value(kv)
+    return None
+
+def _raw_value(kv):
+  return {
+      # The value should be a valid json object
+      'value' : '{}',
+      'raw' : kv.serialized_value.hex()}

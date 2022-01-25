@@ -30,7 +30,7 @@ test --test_strategy=standalone
 # Bazel doesn't calculate the memory ceiling correctly when running under Docker.
 # Limit Bazel to consuming 4G ram and 2 cores.
 build --local_ram_resources=4096
-build --local_cpu_resources=2
+# build --local_cpu_resources=2
 
 # Echo all the configuration settings and their source
  build --announce_rc

@@ -33,7 +33,7 @@ def load_state_manager_locations(cluster, state_manager_config_file='heron-conf/
   locations. Handles a subset of config wildcard substitution supported in the substitute method in
   org.apache.heron.spi.common.Misc.java"""
   with open(state_manager_config_file, 'r') as stream:
-    config = yaml.load(stream)
+    config = yaml.safe_load(stream)
 
   home_dir = os.path.expanduser("~")
   wildcards = {

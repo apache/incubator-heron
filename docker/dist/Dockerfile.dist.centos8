@@ -16,7 +16,7 @@
 #  under the License.
 
 #syntax=docker/dockerfile:1.2
-FROM centos:centos7
+FROM centos:centos8
 
 ENV LC_ALL en_US.utf8
 
@@ -26,13 +26,15 @@ RUN yum -y install epel-release \
     java-11-openjdk-headless \
     supervisor \
     nmap-ncat \
-    python3 \
-    python3-setuptools \
+    python39 \
+    python39-setuptools \
     unzip \
     which \
     && yum clean all
 
 ENV JAVA_HOME /usr/
+
+RUN update-alternatives --set python /usr/bin/python3.9
 
 # run Heron installer
 RUN --mount=type=bind,source=artifacts,target=/tmp/heron /tmp/heron/heron-install.sh \

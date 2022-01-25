@@ -455,8 +455,7 @@ def pex_pytest(
         deps = deps,
         data = data,
         eggs = eggs + [
-            "@pytest_whl//file",
-            "@py_whl//file",
+            "@pytest_pkg//file",
         ],
         entrypoint = "pytest",
         testonly = True,

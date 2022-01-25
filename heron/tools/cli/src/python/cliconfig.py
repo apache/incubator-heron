@@ -94,6 +94,6 @@ def _cluster_config(cluster):
   cluster_config_file = get_cluster_config_file(cluster)
   if os.path.isfile(cluster_config_file):
     with open(cluster_config_file, 'r') as cf:
-      config = yaml.load(cf)
+      config = yaml.safe_load(cf)
 
   return config

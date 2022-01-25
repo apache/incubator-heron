@@ -322,7 +322,7 @@ def yaml_config_reader(config_path):
     raise ValueError("Config file not yaml")
 
   with open(config_path, 'r') as f:
-    config = yaml.load(f)
+    config = yaml.safe_load(f)
 
   return config
 
