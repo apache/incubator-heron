@@ -19,3 +19,5 @@ uvicorn==0.11.7
 uvloop==0.16.0
 logging-formatter-anticrlf==1.2
 tornado==6.1
+pylint==2.5.0
+cpplint==1.3.0

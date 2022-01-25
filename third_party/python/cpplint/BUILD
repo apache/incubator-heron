@@ -2,8 +2,13 @@ licenses(["notice"])
 
 package(default_visibility = ["//visibility:public"])
 
-pex_binary(
+load("@rules_python//python:defs.bzl", "py_binary")
+load("@heron_py_deps//:requirements.bzl", "requirement")
+
+py_binary(
     name = "cpplint",
     entrypoint = "cpplint",
-    reqs = ["cpplint==1.3.0"],
+    deps = [
+        requirement(cpplint),
+    ],
 )
