@@ -8,3 +8,8 @@ setuptools==51.0.0
 kazoo==2.8.0
 zope.interface==4.0.5
 tabulate==0.7.4
+fastapi==0.62.0
+httpx==0.16.1
+javaobj-py3==0.4.1
+networkx==2.5
+uvicorn==0.11.7

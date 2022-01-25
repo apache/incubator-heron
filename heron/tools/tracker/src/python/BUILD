@@ -1,31 +1,34 @@
 package(default_visibility = ["//visibility:public"])
 
-pex_library(
+load("@rules_python//python:defs.bzl", "py_library")
+load("@rules_python//python:defs.bzl", "py_binary")
+load("@heron_py_deps//:requirements.bzl", "requirement")
+
+py_library(
     name = "tracker-py",
     srcs = glob(
         ["**/*.py"],
         exclude = ["main.py"],
     ),
-    reqs = [
-        "click==7.1.2",
-        "fastapi==0.62.0",
-        "httpx==0.16.1",
-        "javaobj-py3==0.4.1",
-        "networkx==2.5",
-        "protobuf==3.14.0",
-        "uvicorn==0.11.7",
-    ],
     deps = [
         "//heron/common/src/python:common-py",
         "//heron/proto:proto-py",
         "//heron/statemgrs/src/python:statemgr-py",
         "//heron/tools/common/src/python:common-py",
         "//heronpy/api:heron-python-py",
+        requirement(click),
+        requirement(fastapi),
+        requirement(httpx),
+        requirement(javaobj),
+        requirement(networkx),
+        requirement(protobuf),
+        requirement(uvicorn),
     ],
 )
 
-pex_binary(
+py_binary(
     name = "heron-tracker",
+    main = "main.py",
     srcs = ["main.py"],
     deps = [
         ":tracker-py",
