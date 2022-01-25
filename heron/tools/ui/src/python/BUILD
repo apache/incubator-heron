@@ -1,29 +1,32 @@
 package(default_visibility = ["//visibility:public"])
 
-pex_library(
+load("@rules_python//python:defs.bzl", "py_library")
+load("@rules_python//python:defs.bzl", "py_binary")
+load("@heron_py_deps//:requirements.bzl", "requirement")
+
+py_library(
     name = "heron-ui-lib",
     srcs = glob(
         ["**/*.py"],
         exclude = ["main.py"],
     ),
-    reqs = [
-        "requests==2.27.1",
-        "click==7.1.2",
-        "fastapi==0.60.1",
-        "jinja2==2.11.2",
-        "aiofiles==0.5.0",
-        "uvicorn==0.11.7",
-        "uvloop==0.16.0",
-    ],
     deps = [
         "//heron/common/src/python:common-py",
         "//heron/tools/common/src/python:common-py",
         "//heron/tools/common/src/python:tracker-py",
+        requirement(requests),
+        requirement(click),
+        requirement(fastapi),
+        requirement(jinja2),
+        requirement(aiofiles),
+        requirement(uvicorn),
+        requirement(uvloop),
     ],
 )
 
-pex_binary(
+py_binary(
     name = "heron-ui",
+    main = "main.py"
     srcs = ["main.py"],
     resources = [
         "//heron/tools/ui/resources:static",
