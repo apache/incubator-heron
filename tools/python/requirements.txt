@@ -1,7 +1,7 @@
 click==7.1.2
 colorlog==2.6.1
 netifaces==0.10.6
-PyYAML==3.13
+PyYAML==5.4.1
 requests==2.27.1
 protobuf==3.14.0
 setuptools==51.0.0
