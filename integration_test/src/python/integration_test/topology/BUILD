@@ -1,11 +1,14 @@
 package(default_visibility = ["//visibility:public"])
 
+load("@rules_python//python:defs.bzl", "py_library")
+load("@rules_python//python:defs.bzl", "py_binary")
+
 filegroup(
     name = "test-data-files",
     srcs = glob(["**/*.json"]),
 )
 
-pex_library(
+py_library(
     name = "integration-topologies-py",
     srcs = glob(
         ["**/*.py"],
@@ -20,7 +23,7 @@ pex_library(
     ],
 )
 
-pex_binary(
+py_binary(
     name = "heron_integ_topology",
     srcs = ["test_topology_main.py"],
     main = "test_topology_main.py",
