@@ -1,6 +1,8 @@
 package(default_visibility = ["//visibility:public"])
 
-pex_library(
+load("@rules_python//python:defs.bzl", "py_library")
+
+py_library(
     name = "mock_proto",
     srcs = ["mock_proto.py"],
     deps = [
