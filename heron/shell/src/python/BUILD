@@ -19,7 +19,7 @@ py_binary(
     name = "heron-shell",
     main = "main.py",
     srcs = ["main.py"],
-    resources = [
+    data = [
         "//heron/shell/assets",
     ],
     deps = [

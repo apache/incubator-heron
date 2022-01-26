@@ -28,7 +28,7 @@ py_binary(
     name = "heron-ui",
     main = "main.py",
     srcs = ["main.py"],
-    resources = [
+    data = [
         "//heron/tools/ui/resources:static",
         "//heron/tools/ui/resources:templates",
         "//scripts/packages:release_files",
