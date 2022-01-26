@@ -1,6 +1,10 @@
 package(default_visibility = ["//visibility:public"])
 
-pex_library(
+load("@rules_python//python:defs.bzl", "py_library")
+load("@rules_python//python:defs.bzl", "py_binary")
+load("@heron_py_deps//:requirements.bzl", "requirement")
+
+py_library(
     name = "heron-python-py",
     srcs = glob(
         ["**/*.py"],
@@ -8,14 +12,12 @@ pex_library(
     ),
     deps = [
         "//heronpy/proto:proto-py",
-    ],
-    reqs = [
-        "cloudpickle~=1.5.0",
+        requirement(cloudpickle)
     ],
 )
 
 # for egg production
-pex_binary(
+py_binary(
     name = "heron-python-package",
     srcs = glob(
         ["**/*.py"],
