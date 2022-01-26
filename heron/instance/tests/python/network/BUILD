@@ -1,6 +1,9 @@
 package(default_visibility = ["//visibility:public"])
 
-pex_library(
+load("@rules_python//python:defs.bzl", "py_library")
+load("@heron_py_deps//:requirements.bzl", "requirement")
+
+py_library(
     name = "instance-network-mock",
     srcs = ["mock_generator.py"],
     reqs = [
@@ -10,7 +13,7 @@ pex_library(
     ],
 )
 
-pex_library(
+py_library(
     name = "instance-network-mock-client",
     srcs = ["mock_generator_client.py"],
     reqs = [
@@ -48,14 +51,14 @@ pex_pytest(
     ],
 )
 
-pex_library(
+py_library(
     name = "pytest-network-py",
     srcs = ["mock_generator.py"],
     reqs = [
-        "pytest==6.1.2",
     ],
     deps = [
         ":instance-network-mock-client",
+        requirement(pytest),
     ],
 )
 
