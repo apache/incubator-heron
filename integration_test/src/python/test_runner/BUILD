@@ -1,6 +1,8 @@
 package(default_visibility = ["//visibility:public"])
 
-pex_binary(
+load("@rules_python//python:defs.bzl", "py_binary")
+
+py_binary(
     name = "test-runner",
     srcs = [
         "main.py",
