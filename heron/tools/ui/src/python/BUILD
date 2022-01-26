@@ -33,7 +33,7 @@ py_binary(
         "//heron/tools/ui/resources:templates",
         "//scripts/packages:release_files",
     ],
-    zip_safe = False,
+    # zip_safe = False, ## pex_binary attribute not available in py_binary
     deps = [
         ":heron-ui-lib",
     ],
