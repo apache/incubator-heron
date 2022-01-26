@@ -2,6 +2,9 @@ load("//tools/rules:genproto.bzl", "proto_library")
 load("@rules_java//java:defs.bzl", "java_library")
 load("@rules_cc//cc:defs.bzl", "cc_library")
 
+load("@rules_python//python:defs.bzl", "py_library")
+load("@heron_py_deps//:requirements.bzl", "requirement")
+
 package(default_visibility = ["//visibility:public"])
 
 filegroup(
@@ -178,12 +181,8 @@ java_library(
     ],
 )
 
-pex_library(
+py_library(
     name = "proto-py",
-    reqs = [
-        "protobuf==3.14.0",
-        "setuptools==51.0.0",
-    ],
     deps = [
         ":proto_ckptmgr_py",
         ":proto_common_py",
@@ -197,6 +196,8 @@ pex_library(
         ":proto_tmanager_py",
         ":proto_topology_py",
         ":proto_tuple_py",
+        requirement(protobuf),
+        requirement(setuptools),
     ],
 )
 
