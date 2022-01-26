@@ -1,13 +1,16 @@
 package(default_visibility = ["//visibility:public"])
 
-pex_library(
+load("@rules_python//python:defs.bzl", "py_library")
+load("@heron_py_deps//:requirements.bzl", "requirement")
+
+py_library(
     name = "instance-tests-py",
     srcs = ["mock_protobuf.py"],
     reqs = [
-        "pytest==6.1.2",
     ],
     deps = [
         "//heron/proto:proto-py",
         "//heronpy/api:heron-python-py",
+        requirement(pytest),
     ],
 )
