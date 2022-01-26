@@ -7,7 +7,8 @@ load("@heron_py_deps//:requirements.bzl", "requirement")
 
 py_binary(
     name = "cpplint",
-    entrypoint = "cpplint",
+    srcs = ["empty.py"],
+    main = "cpplint",
     deps = [
         requirement("cpplint"),
     ],

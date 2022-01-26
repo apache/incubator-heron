@@ -7,6 +7,7 @@ load("@heron_py_deps//:requirements.bzl", "requirement")
 
 py_binary(
     name = "pylint",
+    srcs = ["empty.py"],
     main = "pylint",
     deps = [
         requirement("pylint"),
