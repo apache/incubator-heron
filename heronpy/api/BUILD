@@ -12,7 +12,7 @@ py_library(
     ),
     deps = [
         "//heronpy/proto:proto-py",
-        requirement(cloudpickle)
+        requirement("cloudpickle")
     ],
 )
 

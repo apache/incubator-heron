@@ -6,20 +6,18 @@ load("@heron_py_deps//:requirements.bzl", "requirement")
 
 py_library(
     name = "heron-shell-lib",
-    srcs = glob(
-        ["**/*.py"],
-    ),
+    srcs = glob(["**/*.py"]),
     deps = [
         "//heron/common/src/python:common-py",
-        requirement(logging-formatter-anticrlf),
-        requirement(requests),
-        requirement(tornado),
+        requirement("logging-formatter-anticrlf"),
+        requirement("requests"),
+        requirement("tornado"),
     ],
 )
 
 py_binary(
     name = "heron-shell",
-    main = "main.py"
+    main = "main.py",
     srcs = ["main.py"],
     resources = [
         "//heron/shell/assets",

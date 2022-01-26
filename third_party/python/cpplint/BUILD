@@ -9,6 +9,6 @@ py_binary(
     name = "cpplint",
     entrypoint = "cpplint",
     deps = [
-        requirement(cpplint),
+        requirement("cpplint"),
     ],
 )

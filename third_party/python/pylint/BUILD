@@ -9,6 +9,6 @@ py_binary(
     name = "pylint",
     entrypoint = "pylint",
     deps = [
-        requirement(pylint),
+        requirement("pylint"),
     ],
 )

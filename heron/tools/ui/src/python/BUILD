@@ -14,19 +14,19 @@ py_library(
         "//heron/common/src/python:common-py",
         "//heron/tools/common/src/python:common-py",
         "//heron/tools/common/src/python:tracker-py",
-        requirement(requests),
-        requirement(click),
-        requirement(fastapi),
-        requirement(jinja2),
-        requirement(aiofiles),
-        requirement(uvicorn),
-        requirement(uvloop),
+        requirement("requests"),
+        requirement("click"),
+        requirement("fastapi"),
+        requirement("jinja2"),
+        requirement("aiofiles"),
+        requirement("uvicorn"),
+        requirement("uvloop"),
     ],
 )
 
 py_binary(
     name = "heron-ui",
-    main = "main.py"
+    main = "main.py",
     srcs = ["main.py"],
     resources = [
         "//heron/tools/ui/resources:static",

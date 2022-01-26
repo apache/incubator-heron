@@ -11,7 +11,7 @@ py_binary(
     main = "main.py",
     deps = [
         "//heron/common/src/python:common-py",
-        requirement(tornado),
-        requirement(werkzeug),
+        requirement("tornado"),
+        requirement("werkzeug"),
     ],
 )

@@ -6,11 +6,9 @@ load("@heron_py_deps//:requirements.bzl", "requirement")
 py_library(
     name = "instance-tests-py",
     srcs = ["mock_protobuf.py"],
-    reqs = [
-    ],
     deps = [
         "//heron/proto:proto-py",
         "//heronpy/api:heron-python-py",
-        requirement(pytest),
+        requirement("pytest"),
     ],
 )

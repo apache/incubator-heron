@@ -5,8 +5,6 @@ load("@rules_python//python:defs.bzl", "py_library")
 py_library(
     name = "common-utils-mock",
     srcs = ["mock_generator.py"],
-    reqs = [
-    ],
     deps = [
         "//heron/instance/src/python:instance-py",
         "//heron/instance/tests/python:instance-tests-py",

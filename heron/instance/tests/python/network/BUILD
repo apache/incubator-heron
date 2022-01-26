@@ -6,8 +6,6 @@ load("@heron_py_deps//:requirements.bzl", "requirement")
 py_library(
     name = "instance-network-mock",
     srcs = ["mock_generator.py"],
-    reqs = [
-    ],
     deps = [
         "//heron/instance/tests/python:instance-tests-py",
     ],
@@ -16,8 +14,6 @@ py_library(
 py_library(
     name = "instance-network-mock-client",
     srcs = ["mock_generator_client.py"],
-    reqs = [
-    ],
     deps = [
         "//heron/instance/tests/python:instance-tests-py",
     ],
@@ -54,11 +50,9 @@ pex_pytest(
 py_library(
     name = "pytest-network-py",
     srcs = ["mock_generator.py"],
-    reqs = [
-    ],
     deps = [
         ":instance-network-mock-client",
-        requirement(pytest),
+        requirement("pytest"),
     ],
 )
 

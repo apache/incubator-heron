@@ -196,8 +196,8 @@ py_library(
         ":proto_tmanager_py",
         ":proto_topology_py",
         ":proto_tuple_py",
-        requirement(protobuf),
-        requirement(setuptools),
+        requirement("protobuf"),
+        requirement("setuptools"),
     ],
 )
 
