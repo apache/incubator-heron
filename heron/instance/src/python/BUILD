@@ -25,7 +25,7 @@ py_binary(
         requirement("PyYAML"),
         requirement("click"),
         requirement("colorlog"),
-        ],
+    ],
 )
 
 
