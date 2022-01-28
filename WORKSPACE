@@ -189,13 +189,6 @@ pip_install(
 )
 
 
-load("@rules_python//python:repositories.bzl", "py_repositories")
-
-py_repositories()
-# Only needed if using the packaging rules.
-# load("@rules_python//python:pip.bzl", "pip_repositories")
-# pip_repositories()
-
 # for pex repos
 PEX_PKG = "https://files.pythonhosted.org/packages/d4/73/4c76e06824baadba81b39125721c97fb22e201b35fcd17b32b5a5fa77c59/pex-2.1.62-py2.py3-none-any.whl"
 
