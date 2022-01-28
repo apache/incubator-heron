@@ -179,6 +179,16 @@ http_archive(
     url = "https://github.com/bazelbuild/rules_python/releases/download/0.1.0/rules_python-0.1.0.tar.gz",
 )
 
+
+load("@rules_python//python:pip.bzl", "pip_install")
+# Create a central external repo, @heron_py_deps, that contains Bazel targets for all the
+# third-party packages specified in the requirements.txt file.
+pip_install(
+   name = "heron_py_deps",
+   requirements = "//tools/python:requirements.txt",
+)
+
+
 load("@rules_python//python:repositories.bzl", "py_repositories")
 
 py_repositories()
