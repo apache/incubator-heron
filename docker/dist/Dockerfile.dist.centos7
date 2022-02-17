@@ -16,7 +16,11 @@
 #  under the License.
 
 #syntax=docker/dockerfile:1.2
+<<<<<<< HEAD:docker/dist/Dockerfile.dist.centos7
 FROM centos:centos7
+=======
+FROM rockylinux:8.5
+>>>>>>> 9ce047445ac (Change centos to RockyLinux-8):docker/dist/Dockerfile.dist.centos8
 
 ENV TARGET_PLATFORM linux
 ENV LC_ALL en_US.utf8
