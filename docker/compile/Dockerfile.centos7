@@ -46,10 +46,7 @@ RUN yum -y install \
       java-11-openjdk-devel
 
 ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk
-ENV PATH /opt/rh/rh-python38/root/usr/bin:${PATH}
-ENV LD_LIBRARY_PATH /opt/rh/rh-python38/root/usr/lib64:/usr/local/lib:${LD_LIBRARY_PATH}
-ENV MANPATH /opt/rh/rh-python38/root/usr/share/man
-ENV PKG_CONFIG_PATH /opt/rh/rh-python38/root/usr/lib64/pkgconfig:${PKG_CONFIG_PATH}
+
 ENV bazelVersion 4.2.2
 
 RUN wget -O /tmp/bazel.sh https://github.com/bazelbuild/bazel/releases/download/$bazelVersion/bazel-$bazelVersion-installer-linux-x86_64.sh \
@@ -57,8 +54,13 @@ RUN wget -O /tmp/bazel.sh https://github.com/bazelbuild/bazel/releases/download/
       && /tmp/bazel.sh \
       && rm -rf /tmp/bazel.sh
 
+ENV PATH /opt/rh/rh-python38/root/usr/bin:${PATH}
+ENV LD_LIBRARY_PATH /opt/rh/rh-python38/root/usr/lib64:/usr/local/lib:${LD_LIBRARY_PATH}
+ENV MANPATH /opt/rh/rh-python38/root/usr/share/man
+ENV PKG_CONFIG_PATH /opt/rh/rh-python38/root/usr/lib64/pkgconfig:${PKG_CONFIG_PATH}
+
 RUN /usr/bin/ln -sf /opt/rh/rh-python38/root/usr/bin/python3 /usr/bin/python3 \
-    && /usr/bin/ln -sf /opt/rh/rh-python38/root/usr/bin/python3.8 /usr/bin/python3.8
+      && /usr/bin/ln -sf /opt/rh/rh-python38/root/usr/bin/python3.8 /usr/bin/python3.8
 
 ADD bazelrc /root/.bazelrc
 ADD scripts/compile-platform.sh /compile-platform.sh
