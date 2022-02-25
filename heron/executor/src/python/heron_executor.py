@@ -602,7 +602,7 @@ class HeronExecutor:
              "cache size: %dM, metaspace size: %dM"
              % (component_name, self.component_ram_map[component_name],
                 total_jvm_size, code_cache_size_mb, java_metasize_mb))
-    xmn_size = int(heap_size_mb / 2)
+    # xmn_size = int(heap_size_mb / 2)
 
     java_version = self._get_jvm_version()
     java_metasize_param = 'MetaspaceSize'
@@ -614,7 +614,7 @@ class HeronExecutor:
     instance_options = [
         '-Xmx%dM' % heap_size_mb,
         '-Xms%dM' % heap_size_mb,
-        '-Xmn%dM' % xmn_size,
+        # '-Xmn%dM' % xmn_size,
         '-XX:Max%s=%dM' % (java_metasize_param, java_metasize_mb),
         '-XX:%s=%dM' % (java_metasize_param, java_metasize_mb),
         '-XX:ReservedCodeCacheSize=%dM' % code_cache_size_mb,
