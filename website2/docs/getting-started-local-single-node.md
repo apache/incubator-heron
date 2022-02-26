@@ -28,7 +28,7 @@ For other platforms, you need to build from source. Please refer to the [guide t
 Heron tools can be installed using [installation scripts](#using-installation-scripts).
 
 > Note: As of version  0.20.4-incubating, there is a python compatibility on OSX.
-> The supported platforms are centos8, Debian10, and Ubuntu18.04.
+> The supported platforms are rocky8, Debian10, and Ubuntu18.04.
 
 ## Using installation scripts
 

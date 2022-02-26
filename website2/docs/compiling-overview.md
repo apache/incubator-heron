@@ -20,8 +20,8 @@ sidebar_label: Compiling Overview
     under the License.
 -->
 
-Heron is currently available for [Mac OS X 11.01](compiling-osx),
-[Ubuntu 18.04](compiling-linux), and [Debian10](compiling-docker#building-heron).
+Heron is currently available for [Mac OS X 12](compiling-osx),
+[Ubuntu 20.04](compiling-linux), and [Debian10](compiling-docker#building-heron).
  This guide describes the basics of the
 Heron build system. For step-by-step build instructions for other platforms,
 the following guides are available:
@@ -93,9 +93,9 @@ OS-specific configuration using the `--config` flag. The following OS values
 are supported:
 
 * `darwin` (Mac OS X)
-* `ubuntu` (Ubuntu 18.04)
+* `ubuntu` (Ubuntu 20.04)
 * `debian` (Debian10)
-* `centos5` (CentOS 7)
+* `rocky8` (Rocky 8)
 
 For example, on Mac OS X (`darwin`), the following command will build all
 packages:

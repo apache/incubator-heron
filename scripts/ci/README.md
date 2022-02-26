@@ -32,9 +32,9 @@ set -o pipefail
 # Install bazel (linux build) because CI hosts may not have it installed
 bash scripts/ci/setup_bazel.sh linux
 
-# Build v0.20.1-incubating packages for centos8 and put in artifacts folder
+# Build v0.20.1-incubating packages for rocky8 and put in artifacts folder
 HERON_BUILD_USER=release-agent
-bash scripts/ci/build_release_packages.sh v0.20.1-incubating centos8 artifacts
+bash scripts/ci/build_release_packages.sh v0.20.1-incubating rocky8 artifacts
 
 ```
 

@@ -65,7 +65,7 @@ Script to build heron docker image for different platforms
 Usage: ./docker/scripts/build-docker.sh <platform> <version_string> <artifact-directory> [-s|--squash]
   
 Argument options:
-  <platform>: darwin, debian10, ubuntu20.04, centos8
+  <platform>: darwin, debian10, ubuntu20.04, rocky8
   <version_string>: Version of Heron build, e.g. v0.17.5.1-rc
   <artifact-directory>: Location of compiled Heron artifact
   [-s|--squash]: Enables using Docker experimental feature --squash
@@ -82,8 +82,8 @@ The following arguments are required:
 * `platform` --- Currently we are focused on supporting the `debian10` and `ubuntu20.04` platforms.  
 We also support building Heron locally on OSX.  You can specify this as listing `darwin` as the platform.
  All options are:
-   - `centos8`
    - `darwin`
+   - `rocky8`
    - `debian10`
    - `ubuntu18.04`
    - `ubuntu20.04`
@@ -172,7 +172,7 @@ platforms.
 
 To add support for a new platform, add a new `Dockerfile` to that directory and
 append the name of the platform to the name of the file. If you'd like to add
-support for Debian 8, for example, add a file named `Dockerfile.debian8`. Once
+support for Debian 8, for example, add a file named `Dockerfile.debian10`. Once
 you've done that, follow the instructions in the [Docker
 documentation](https://docs.docker.com/engine/articles/dockerfile_best-practices/).
 
@@ -184,7 +184,7 @@ following:
 Here's an example:
 
 ```dockerfile
-FROM centos:centos8
+FROM rockylinux:8.5
  ```
 
 ### Step 2 --- A `TARGET_PLATFORM` environment variable using the [`ENV`](https://docs.docker.com/engine/reference/builder/#env) instruction.
@@ -192,7 +192,7 @@ FROM centos:centos8
 Here's an example:
 
 ```dockerfile
-ENV TARGET_PLATFORM centos
+ENV TARGET_PLATFORM rocky
 ```
 
 ### Step 3 --- A general dependency installation script using a [`RUN`](https://docs.docker.com/engine/reference/builder/#run) instruction.
