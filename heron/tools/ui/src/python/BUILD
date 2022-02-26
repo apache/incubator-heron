@@ -10,7 +10,7 @@ pex_library(
         "requests==2.27.1",
         "click==7.1.2",
         "fastapi==0.60.1",
-        "jinja2==2.11.2",
+        "jinja2==3.0.3",
         "aiofiles==0.5.0",
         "uvicorn==0.11.7",
         "uvloop==0.16.0",
