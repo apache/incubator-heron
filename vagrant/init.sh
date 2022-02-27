@@ -16,34 +16,6 @@ set -o errexit -o nounset -o pipefail
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# NB: Apache Mesos requires the use of "master"/"slave"
-install_mesos() {
-    mode=$1 # master | slave
-    apt-get -qy install mesos=0.25.0*
-
-    echo "zk://primary:2181/mesos" > /etc/mesos/zk
-    echo '5mins' > /etc/mesos-slave/executor_registration_timeout
-
-    ip=$(cat /etc/hosts | grep `hostname` | grep -E -o "([0-9]{1,3}[\.]){3}[0-9]{1,3}")
-    echo $ip > "/etc/mesos-$mode/ip"
-
-    if [ "$mode" == "master" ]; then
-        ln -s /lib/init/upstart-job /etc/init.d/mesos-master
-        service mesos-master start
-    else
-        apt-get -qy remove zookeeper
-    fi
-
-    ln -s /lib/init/upstart-job /etc/init.d/mesos-slave
-    echo 'docker,mesos' > /etc/mesos-slave/containerizers
-    service mesos-slave start
-}
-
-install_marathon() {
-    apt-get install -qy marathon=0.10.0*
-    service marathon start
-}
-
 bazelVersion=4.2.2
 bazel_install() {
     apt-get install -y automake cmake gcc g++ zlib1g-dev zip pkg-config wget libssl-dev libunwind-dev
@@ -52,14 +24,6 @@ bazel_install() {
         wget -O /tmp/bazel.sh https://github.com/bazelbuild/bazel/releases/download/${bazelVersion}/bazel-${bazelVersion}-installer-linux-x86_64.sh
         chmod +x /tmp/bazel.sh
         /tmp/bazel.sh
-    popd
-}
-
-build_heron() {
-    pushd /vagrant
-        bazel clean
-        ./bazel_configure.py
-        bazel --bazelrc=tools/travis/bazel.rc build heron/...
     popd
 }
 
@@ -74,31 +38,9 @@ cd /vagrant/vagrant
 # name resolution
 cp .vagrant/hosts /etc/hosts
 
-# XXX: not needed?
-# ssh key
-key=".vagrant/ssh_key.pub"
-if [ -f "$key" ]; then
-    cat $key >> /home/vagrant/.ssh/authorized_keys
-fi
-
 # disable ipv6
 echo -e "\nnet.ipv6.conf.all.disable_ipv6 = 1\n" >> /etc/sysctl.conf
 sysctl -p
-
-# use apt-proxy if present
-if [ -f ".vagrant/apt-proxy" ]; then
-    apt_proxy=$(cat ".vagrant/apt-proxy")
-    echo "Using apt-proxy: $apt_proxy";
-    echo "Acquire::http::Proxy \"$apt_proxy\";" > /etc/apt/apt.conf.d/90-apt-proxy.conf
-fi
-
-:<<'REMOVED'
-# add mesosphere repo
-apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv E56151BF
-DISTRO=$(lsb_release -is | tr '[:upper:]' '[:lower:]')
-CODENAME=$(lsb_release -cs)
-echo "deb http://repos.mesosphere.io/${DISTRO} cosmic main" | tee /etc/apt/sources.list.d/mesosphere.list
-REMOVED
 
 # install docker repo
 apt-get install -qy ca-certificates curl gnupg lsb-release
@@ -117,10 +59,6 @@ apt-get install -qy ant vim zip mc curl wget openjdk-11-jdk scala git python3-se
 apt-get install -qy docker-ce docker-ce-cli containerd.io
 usermod -aG docker vagrant
 
-# install_mesos $mode
 if [ $mode == "master" ]; then 
-    # install_marathon
     bazel_install
-    # switch to non-root so bazel cache can be reused when SSHing in
-    # su --login vagrant /vagrant/scripts/travis/ci.sh
 fi
