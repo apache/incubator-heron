@@ -28,8 +28,8 @@
 # After the container is started, you can build Heron with bazel
 # (ubuntu config is used in the example):
 #   ./bazel_configure.py
-#   bazel build --config=linux heron/...
-#   bazel build --config=linux scripts/packages:binpkgs
+#   bazel build heron/...
+#   bazel build scripts/packages:binpkgs
 
 set -o nounset
 set -o errexit
