@@ -69,7 +69,6 @@ dockerfile_path_for_platform() {
 
 copy_extra_files() {
   mkdir -p $SCRATCH_DIR/scripts
-  cp $PROJECT_DIR/tools/docker/bazel.rc $SCRATCH_DIR/bazelrc
   cp $DOCKER_DIR/scripts/compile-docker.sh $SCRATCH_DIR/scripts/compile-platform.sh
 }
 
