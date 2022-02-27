@@ -43,7 +43,7 @@ import org.apache.commons.cli.ParseException;
  * Usage: java org.apache.bazel.checkstyle.CppCheckstyle -f &lt;extra_action_file&gt; -c &lt;cpplint_file&gt;
  * <p>
  * To test:
- * $ bazel build --config=darwin --experimental_action_listener=tools/cpp:compile_cpp heron/stmgr/src/cpp:grouping-cxx
+ * $ bazel build --experimental_action_listener=tools/cpp:compile_cpp heron/stmgr/src/cpp:grouping-cxx
  */
 public final class CppCheckstyle {
   public static final Logger LOG = Logger.getLogger(CppCheckstyle.class.getName());
