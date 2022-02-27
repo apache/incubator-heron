@@ -63,10 +63,6 @@ fi
 
 set +x
 
-# Autodiscover the platform
-PLATFORM=$(discover_platform)
-echo "Using $PLATFORM platform"
-
 # Run this manually, since if it fails when run
 # as -workspace_status_command we don't get good output
 ./scripts/release/status.sh
@@ -80,7 +76,7 @@ echo "Using $PLATFORM platform"
 T="heron build"
 start_timer "$T"
 ${UTILS}/save-logs.py "heron_build.txt" bazel\
-  --bazelrc=tools/applatix/bazel.rc build --config=$PLATFORM heron/...
+  --bazelrc=tools/applatix/bazel.rc build heron/...
 end_timer "$T"
 
 # run heron unit tests
@@ -89,7 +85,7 @@ start_timer "$T"
 ${UTILS}/save-logs.py "heron_test_non_flaky.txt" bazel\
   --bazelrc=tools/applatix/bazel.rc test\
   --test_summary=detailed --test_output=errors\
-  --config=$PLATFORM --test_tag_filters=-flaky heron/...
+  --test_tag_filters=-flaky heron/...
 end_timer "$T"
 
 # flaky tests are often due to test port race conditions,
@@ -99,21 +95,21 @@ start_timer "$T"
 ${UTILS}/save-logs.py "heron_test_flaky.txt" bazel\
   --bazelrc=tools/applatix/bazel.rc test\
   --test_summary=detailed --test_output=errors\
-  --config=$PLATFORM --test_tag_filters=flaky --jobs=1 heron/...
+  --test_tag_filters=flaky --jobs=1 heron/...
 end_timer "$T"
 
 T="heron build binpkgs"
 start_timer "$T"
 ${UTILS}/save-logs.py "heron_build_binpkgs.txt" bazel\
   --bazelrc=tools/applatix/bazel.rc build\
-  --config=$PLATFORM scripts/packages:binpkgs
+  scripts/packages:binpkgs
 end_timer "$T"
 
 T="heron build testpkgs"
 start_timer "$T"
 ${UTILS}/save-logs.py "heron_build_binpkgs.txt" bazel\
   --bazelrc=tools/applatix/bazel.rc build\
-  --config=$PLATFORM scripts/packages:testpkgs
+  scripts/packages:testpkgs
 end_timer "$T"
 
 T="heron clear tar and zip files"

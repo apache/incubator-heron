@@ -17,8 +17,8 @@
 
 FROM ubuntu:18.04
 
-# This is passed to the heron build command via the --config flag
-ENV TARGET_PLATFORM linux
+ENV LC_ALL C.UTF-8
+ENV LANG C.UTF-8
 
 RUN apt-get update && apt-get -y install \
       g++ \

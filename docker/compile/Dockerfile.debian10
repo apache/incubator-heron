@@ -17,9 +17,6 @@
 
 FROM openjdk:11.0.6-jdk-buster
 
-# This is passed to the heron build command via the --config flag
-ENV TARGET_PLATFORM linux
-
 ENV LC_ALL C.UTF-8
 ENV LANG C.UTF-8
 

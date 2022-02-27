@@ -90,21 +90,6 @@ function print_timer_summary {
   done
 }
 
-# Discover the platform that we are running on
-function discover_platform {
-  platform='unknown'
-  unamestr=$(uname)
-  if [[ "$unamestr" == 'Linux' ]]; then
-    echo "linux"
-  elif [[ "$unamestr" == 'Darwin' ]]; then
-    echo "darwin"
-  else
-    mysterious=`echo $unamestr | awk -F- '{print $6}'`
-    echo "$unamestr platform not supported"
-    exit 1
-  fi
-}
-
 # Check the ci environment is valid
 function ci_environ {
   environ=$1

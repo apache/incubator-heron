@@ -24,10 +24,6 @@ DIR=`dirname $0`
 UTILS=${DIR}/../shutils
 source ${UTILS}/common.sh
 
-# Autodiscover the platform
-PLATFORM=$(discover_platform)
-echo "Using $PLATFORM platform"
-
 # include HOME directory bin in PATH for heron cli, tools and tests
 export PATH=${HOME}/bin:$PATH
 

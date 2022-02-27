@@ -21,8 +21,8 @@ set -eu
 set +e
 # Build everything
 DIR=`dirname $0`
-source ${DIR}/detect_os_type.sh
-bazel build --config=`platform`_nostyle {heron,integration_test,tools/java,examples,heronpy,storm-compatibility/v0.10.2,storm-compatibility-examples,eco,eco-storm-examples,eco-heron-examples}/...
+
+bazel build {heron,integration_test,tools/java,examples,heronpy,storm-compatibility/v0.10.2,storm-compatibility-examples,eco,eco-storm-examples,eco-heron-examples}/...
 result=$?
 if [ "${result}" -eq "0" ] ; then
   echo "Bazel build successful!!"

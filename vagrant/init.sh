@@ -59,7 +59,7 @@ build_heron() {
     pushd /vagrant
         bazel clean
         ./bazel_configure.py
-        bazel --bazelrc=tools/travis/bazel.rc build --config=linux heron/...
+        bazel --bazelrc=tools/travis/bazel.rc build heron/...
     popd
 }
 

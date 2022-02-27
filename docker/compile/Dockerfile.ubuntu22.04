@@ -17,9 +17,6 @@
 
 FROM ubuntu:22.04
 
-# This is passed to the heron build command via the --config flag
-ENV TARGET_PLATFORM ubuntu
-
 ARG DEBIAN_FRONTEND=noninteractive
 
 ENV LC_ALL C.UTF-8
