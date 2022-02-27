@@ -73,7 +73,7 @@ set +x
 T="heron build"
 start_timer "$T"
 ${UTILS}/save-logs.py "heron_build.txt" bazel\
-  --bazelrc=tools/travis/bazel.rc build --config=stylecheck heron/... \
+  build --config=stylecheck heron/... \
   heronpy/... examples/... storm-compatibility-examples/v0.10.2/... \
   eco-storm-examples/... eco-heron-examples/... contrib/...
 end_timer "$T"
@@ -82,7 +82,7 @@ end_timer "$T"
 T="heron test non-flaky"
 start_timer "$T"
 ${UTILS}/save-logs.py "heron_test_non_flaky.txt" bazel\
-  --bazelrc=tools/travis/bazel.rc test\
+  test\
   --test_summary=detailed --test_output=errors\
   --config=stylecheck --test_tag_filters=-flaky heron/... \
   heronpy/... examples/... storm-compatibility-examples/v0.10.2/... \
@@ -94,7 +94,7 @@ end_timer "$T"
 T="heron test flaky"
 start_timer "$T"
 ${UTILS}/save-logs.py "heron_test_flaky.txt" bazel\
-  --bazelrc=tools/travis/bazel.rc test\
+  test\
   --test_summary=detailed --test_output=errors\
   --config=stylecheck --test_tag_filters=flaky --jobs=1 heron/... \
   heronpy/... examples/... storm-compatibility-examples/v0.10.2/... \
@@ -105,21 +105,21 @@ end_timer "$T"
 T="heron build tarpkgs"
 start_timer "$T"
 ${UTILS}/save-logs.py "heron_build_tarpkgs.txt" bazel\
-  --bazelrc=tools/travis/bazel.rc build\
+  build\
   --config=stylecheck scripts/packages:tarpkgs
 end_timer "$T"
 
 T="heron build binpkgs"
 start_timer "$T"
 ${UTILS}/save-logs.py "heron_build_binpkgs.txt" bazel\
-  --bazelrc=tools/travis/bazel.rc build\
+  build\
   --config=stylecheck scripts/packages:binpkgs
 end_timer "$T"
 
 T="heron build docker images"
 start_timer "$T"
 ${UTILS}/save-logs.py "heron_build_binpkgs.txt" bazel\
-  --bazelrc=tools/travis/bazel.rc build\
+  build\
   --config=stylecheck scripts/images:heron.tar
 end_timer "$T"
 
