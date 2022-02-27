@@ -64,9 +64,6 @@ set +x
 # as -workspace_status_command we don't get good output
 ./scripts/release/status.sh
 
-# append the bazel default bazelrc to travis/bazel.rc
-# for using rules provided by bazel
-# cat ~/.bazelrc >> tools/travis/bazel.rc
 ./bazel_configure.py
 
 # build heron
