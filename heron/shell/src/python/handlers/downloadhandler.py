@@ -46,12 +46,12 @@ class DownloadHandler(web.RequestHandler):
     self.set_header("Content-Disposition", "attachment")
     if not utils.check_path(path):
       self.set_status(403)
-      self.finish("Only relative paths are allowed")
+      await self.finish("Only relative paths are allowed")
       return
 
     if path is None or not os.path.isfile(path):
       self.set_status(404)
-      self.finish("File %s  not found" % path)
+      await self.finish("File %s  not found" % path)
       return
 
     chunk_size = int(4 * 1024 * 1024)

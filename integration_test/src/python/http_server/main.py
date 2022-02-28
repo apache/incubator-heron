@@ -153,7 +153,7 @@ def main():
 
   logging.info("Starting server at port " + str(port))
   application.listen(port)
-  tornado.ioloop.IOLoop.instance().start()
+  tornado.ioloop.IOLoop.current().start()
 
 if __name__ == '__main__':
   main()
