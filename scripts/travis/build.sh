@@ -78,10 +78,10 @@ end_timer "$T"
 # run heron unit tests
 T="heron test non-flaky"
 start_timer "$T"
-${UTILS}/save-logs.py "heron_test_non_flaky.txt" bazel\
-  test\
-  --test_summary=detailed --test_output=errors\
-  --config=stylecheck --test_tag_filters=-flaky heron/... \
+${UTILS}/save-logs.py "heron_test_non_flaky.txt" bazel \
+  test --config=stylecheck \
+  --test_summary=detailed --test_output=errors \
+  --test_tag_filters=-flaky heron/... \
   heronpy/... examples/... storm-compatibility-examples/v0.10.2/... \
   eco-storm-examples/... eco-heron-examples/... contrib/... 
 end_timer "$T"
@@ -90,10 +90,10 @@ end_timer "$T"
 # which should be fixed. For now, run them serially
 T="heron test flaky"
 start_timer "$T"
-${UTILS}/save-logs.py "heron_test_flaky.txt" bazel\
-  test\
-  --test_summary=detailed --test_output=errors\
-  --config=stylecheck --test_tag_filters=flaky --jobs=1 heron/... \
+${UTILS}/save-logs.py "heron_test_flaky.txt" bazel \
+  test --config=stylecheck \
+  --test_summary=detailed --test_output=errors \
+  --test_tag_filters=flaky --jobs=1 heron/... \
   heronpy/... examples/... storm-compatibility-examples/v0.10.2/... \
   eco-storm-examples/... eco-heron-examples/...
 end_timer "$T"
