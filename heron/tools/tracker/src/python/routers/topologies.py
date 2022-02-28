@@ -33,6 +33,7 @@ from heron.tools.tracker.src.python.topology import (
     TopologyInfoExecutionState,
     TopologyInfoLogicalPlan,
     TopologyInfoMetadata,
+    TopologyInfoPackingPlan,
     TopologyInfoPhysicalPlan,
     TopologyInfoSchedulerLocation,
 )
@@ -114,6 +115,15 @@ async def get_topology_config(
   topology_info = topology.info
   return topology_info.physical_plan.config
 
+@router.get("/packingplan", response_model=TopologyInfoPackingPlan)
+async def get_topology_packing_plan(
+  cluster: str,
+  environ: str,
+  topology: str,
+  role: Optional[str] = Query(None, deprecated=True),
+):
+  topology = state.tracker.get_topology(cluster, role, environ, topology)
+  return topology.info.packing_plan
 
 @router.get("/physicalplan", response_model=TopologyInfoPhysicalPlan)
 async def get_topology_physical_plan(
