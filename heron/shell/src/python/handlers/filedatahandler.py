@@ -47,5 +47,5 @@ class FileDataHandler(tornado.web.RequestHandler):
     if not os.path.isfile(path):
       return {}
     data = utils.read_chunk(path, offset=offset, length=length, escape_data=True)
-    
+
     await self.finish(json.dumps(data))
