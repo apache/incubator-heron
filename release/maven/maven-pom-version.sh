@@ -27,28 +27,87 @@ cat ./maven/heron-no-kryo.template.pom | \
     sed "s/VERSION/$1/g" | \
     sed "s/ARTIFACT_ID/heron-api/g" | \
     sed "s/NAME/heron-api/g" | \
-    sed "s/DESCRIPTION/Heron API/g" \
+    sed "s/DESCRIPTION/Heron API/g" | \
+    awk '{gsub("DEPS", "<dependency>\
+                          <groupId>org.apache.commons</groupId>\
+                            <artifactId>commons-lang3</artifactId>\
+                            <version>3.12.0</version>\
+                        </dependency>\
+                        <dependency>\
+                            <groupId>org.glassfish.jersey.media</groupId>\
+                             <artifactId>jersey-media-jaxb</artifactId>\
+                              <version>2.25.1</version>\
+                        </dependency>", $0); print}' | \
+    xmllint --format - \
     >> ./heron-api-$1.pom
 
 cat ./maven/heron-no-kryo.template.pom | \
     sed "s/VERSION/$1/g" | \
     sed "s/ARTIFACT_ID/heron-spi/g" | \
     sed "s/NAME/heron-spi/g" | \
-    sed "s/DESCRIPTION/Heron SPI/g" \
+    sed "s/DESCRIPTION/Heron SPI/g" | \
+    awk '{gsub("DEPS", "<dependency>\
+                            <groupId>com.google.protobuf</groupId>\
+                            <artifactId>protobuf-java</artifactId>\
+                            <version>3.19.1</version>\
+                        </dependency>\
+                         <dependency>\
+                             <groupId>com.google.guava</groupId>\
+                             <artifactId>guava</artifactId>\
+                             <version>23.6-jre</version>\
+                         </dependency>\
+                         <dependency>\
+                             <groupId>org.yaml</groupId>\
+                             <artifactId>snakeyaml</artifactId>\
+                             <version>1.29</version>\
+                         </dependency>", $0); print}' | \
+    xmllint --format - \
     >> ./heron-spi-$1.pom
 
 cat ./maven/heron-with-kryo.template.pom | \
     sed "s/VERSION/$1/g" | \
     sed "s/ARTIFACT_ID/heron-storm/g" | \
     sed "s/NAME/heron-storm/g" | \
-    sed "s/DESCRIPTION/Heron Storm/g" \
+    sed "s/DESCRIPTION/Heron Storm/g" | \
+    awk '{gsub("DEPS", "<dependency>\
+                          <groupId>org.apache.commons</groupId>\
+                            <artifactId>commons-lang3</artifactId>\
+                            <version>3.12.0</version>\
+                        </dependency>\
+                        <dependency>\
+                           <groupId>org.yaml</groupId>\
+                           <artifactId>snakeyaml</artifactId>\
+                           <version>1.29</version>\
+                         </dependency>\
+                         <dependency>\
+                             <groupId>com.googlecode.json-simple</groupId>\
+                             <artifactId>json-simple</artifactId>\
+                             <version>1.1</version>\
+                         </dependency>", $0); print}' | \
+    xmllint --format - \
     >> ./heron-storm-$1.pom
 
 cat ./maven/heron-with-kryo.template.pom | \
     sed "s/VERSION/$1/g" | \
     sed "s/ARTIFACT_ID/heron-simulator/g" | \
     sed "s/NAME/heron-simulator/g" | \
-    sed "s/DESCRIPTION/Heron Simulator/g" \
+    sed "s/DESCRIPTION/Heron Simulator/g" | \
+    awk '{gsub("DEPS", "<dependency>\
+                          <groupId>org.apache.commons</groupId>\
+                            <artifactId>commons-lang3</artifactId>\
+                            <version>3.12.0</version>\
+                        </dependency>\
+                        <dependency>\
+                           <groupId>org.yaml</groupId>\
+                           <artifactId>snakeyaml</artifactId>\
+                           <version>1.29</version>\
+                        </dependency>\
+                        <dependency>\
+                            <groupId>org.glassfish.jersey.media</groupId>\
+                             <artifactId>jersey-media-jaxb</artifactId>\
+                              <version>2.25.1</version>\
+                        </dependency>", $0); print}' | \
+    xmllint --format - \
     >> ./heron-simulator-$1.pom
 
 cat ./maven/heron-kafka.template.pom | \
