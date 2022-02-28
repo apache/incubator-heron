@@ -33,16 +33,14 @@ class BrowseHandler(tornado.web.RequestHandler):
   """
 
   # pylint: disable=attribute-defined-outside-init
-  @tornado.web.asynchronous
   def get(self, path):
     ''' get method '''
     if not path:
       path = "."
 
     if not utils.check_path(path):
-      self.write("Only relative paths are allowed")
       self.set_status(403)
-      self.finish()
+      self.finish("Only relative paths are allowed")
       return
 
     t = Template(utils.get_asset("browse.html"))
@@ -55,5 +53,4 @@ class BrowseHandler(tornado.web.RequestHandler):
         os=os,
         css=utils.get_asset("bootstrap.css")
     )
-    self.write(t.generate(**args))
-    self.finish()
+    self.finish(t.generate(**args))

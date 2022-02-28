@@ -20,19 +20,19 @@
 
 
 ''' downloadhandler.py '''
+import mimetypes
 import os
 import logging
-import tornado.web
+from tornado import web, iostream, gen
 import anticrlf
 
 from heron.shell.src.python import utils
 
-class DownloadHandler(tornado.web.RequestHandler):
+class DownloadHandler(web.RequestHandler):
   """
   Responsible for downloading the files.
   """
-  @tornado.web.asynchronous
-  def get(self, path):
+  async def get(self, path):
     """ get method """
 
     handler = logging.StreamHandler()
@@ -43,41 +43,37 @@ class DownloadHandler(tornado.web.RequestHandler):
 
     logger.debug("request to download: %s", path)
 
-    # If the file is large, we want to abandon downloading
-    # if user cancels the requests.
-    # pylint: disable=attribute-defined-outside-init
-    self.connection_closed = False
-
     self.set_header("Content-Disposition", "attachment")
     if not utils.check_path(path):
-      self.write("Only relative paths are allowed")
       self.set_status(403)
-      self.finish()
+      self.finish("Only relative paths are allowed")
       return
 
     if path is None or not os.path.isfile(path):
-      self.write("File %s  not found" % path)
       self.set_status(404)
-      self.finish()
+      self.finish("File %s  not found" % path)
       return
 
-    length = int(4 * 1024 * 1024)
-    offset = int(0)
-    while True:
-      data = utils.read_chunk(path, offset=offset, length=length, escape_data=False)
-      if self.connection_closed or 'data' not in data or len(data['data']) < length:
-        break
-      offset += length
-      self.write(data['data'])
-      self.flush()
-
-    if 'data' in data:
-      self.write(data['data'])
-    self.finish()
-
-def on_connection_close(self):
-  '''
-  :return:
-  '''
-  # pylint: disable=attribute-defined-outside-init
-  self.connection_closed = True
+    chunk_size = int(4 * 1024 * 1024)
+    content_type = mimetypes.guess_type(path)
+    self.set_header("Content-Type", content_type[0])
+    with open(path, 'rb') as f:
+      while True:
+        chunk = f.read(chunk_size)
+        if not chunk:
+          break
+        try:
+          self.write(chunk)  # write the chunk to response
+          await self.flush() # send the chunk to client
+        except iostream.StreamCloseError:
+          # this means the client has closed the connection
+          # so break the loop
+          break
+        finally:
+          # deleting the chunk is very important because
+          # if many client are downloading files at the
+          # same time, the chunks in memory will keep
+          # increasing and will eat up the RAM
+          del chunk
+          # pause the coroutine so other handlers can run
+          await gen.sleep(0.000000001) # 1 nanosecond

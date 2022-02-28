@@ -31,8 +31,7 @@ class FileDataHandler(tornado.web.RequestHandler):
   Responsible for reading and returning the file data given the offset
   and length of file to be read.
   """
-  @tornado.web.asynchronous
-  def get(self, path):
+  async def get(self, path):
     """ get method """
     if path is None:
       return {}
@@ -48,6 +47,5 @@ class FileDataHandler(tornado.web.RequestHandler):
     if not os.path.isfile(path):
       return {}
     data = utils.read_chunk(path, offset=offset, length=length, escape_data=True)
-    self.write(json.dumps(data))
-    self.finish()
-    return None
+    
+    await self.finish(json.dumps(data))

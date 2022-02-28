@@ -32,8 +32,7 @@ class KillExecutorHandler(tornado.web.RequestHandler):
   """
   Responsible for killing heron-executor process.
   """
-  @tornado.web.asynchronous
-  def post(self):
+  async def post(self):
     """ post method """
     def status_finish(ret):
       self.set_status(ret)
@@ -69,7 +68,7 @@ class KillExecutorHandler(tornado.web.RequestHandler):
           fh.close()
           logger.info("Killing process %s %s", instanceId, firstLine)
           os.kill(firstLine, signal.SIGTERM)
-          status_finish(200)
+          await status_finish(200)
       else: # instance_id not found
         logger.info("%s not found", filepath)
         status_finish(422)
