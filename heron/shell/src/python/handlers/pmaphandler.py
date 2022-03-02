@@ -31,10 +31,8 @@ class PmapHandler(tornado.web.RequestHandler):
   """
 
   # pylint: disable=attribute-defined-outside-init
-  @tornado.web.asynchronous
-  def get(self, pid):
+  async def get(self, pid):
     ''' get method '''
     body = utils.str_cmd(['pmap', '-pXX', pid], None, None)
     self.content_type = 'application/json'
-    self.write(json.dumps(body))
-    self.finish()
+    await self.finish(json.dumps(body))

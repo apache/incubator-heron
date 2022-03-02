@@ -31,9 +31,7 @@ class PidHandler(tornado.web.RequestHandler):
   """
 
   # pylint: disable=attribute-defined-outside-init
-  @tornado.web.asynchronous
-  def get(self, instance_id):
+  async def get(self, instance_id):
     ''' get method '''
     self.content_type = 'application/json'
-    self.write(json.dumps(utils.chain([['cat', "%s.pid" % instance_id]])).strip())
-    self.finish()
+    await self.finish(json.dumps(utils.chain([['cat', "%s.pid" % instance_id]])).strip())
