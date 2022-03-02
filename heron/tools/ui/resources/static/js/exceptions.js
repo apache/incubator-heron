@@ -170,9 +170,9 @@ var InstanceExceptionLogs = React.createClass({
         }
         if (instanceInfo) {
           var logfile = instanceInfo.logfile;
-          var stmgrId = instanceInfo.stmgrId;
-          var jobUrl = pplan.stmgrs[stmgrId].joburl;
-          var host = "http://" + pplan.stmgrs[stmgrId].host + ":1338";
+          var stmgr_id = instanceInfo.stmgr_id;
+          var jobUrl = pplan.stmgrs[stmgr_id].joburl;
+          var host = "http://" + pplan.stmgrs[stmgr_id].host + ":1338";
           mainLinks = mainLinks.concat([['Logs', logfile], ['Aurora', jobUrl], ['Host', host]]);
         }
       }

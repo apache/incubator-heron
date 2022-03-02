@@ -462,7 +462,7 @@ def pid_snippet(
 ) -> Response:
   """Render a HTML snippet containing topology output of container."""
   physical_plan = tracker.get_physical_plan(cluster, environment, topology)
-  host = physical_plan["stmgrs"][physical_plan["instances"][instance]["stmgrId"]][
+  host = physical_plan["stmgrs"][physical_plan["instances"][instance]["stmgr_id"]][
       "host"
   ]
   info = tracker.get_instance_pid(cluster, environment, topology, instance)
@@ -492,7 +492,7 @@ def jstack_snippet(
 ) -> HTMLResponse:
   """Render a HTML snippet containing jstack output of container."""
   physical_plan = tracker.get_physical_plan(cluster, environment, topology)
-  host = physical_plan["stmgrs"][physical_plan["instances"][instance]["stmgrId"]][
+  host = physical_plan["stmgrs"][physical_plan["instances"][instance]["stmgr_id"]][
       "host"
   ]
   info = tracker.get_instance_jstack(cluster, environment, topology, instance)
@@ -521,7 +521,7 @@ def jmap_snippet(
 ) -> HTMLResponse:
   """Render a HTML snippet containing jmap output of container."""
   physical_plan = tracker.get_physical_plan(cluster, environment, topology)
-  host = physical_plan["stmgrs"][physical_plan["instances"][instance]["stmgrId"]][
+  host = physical_plan["stmgrs"][physical_plan["instances"][instance]["stmgr_id"]][
       "host"
   ]
   info = tracker.run_instance_jmap(cluster, environment, topology, instance)
@@ -558,7 +558,7 @@ def histogram_snippet(
   """Render a HTML snippet containing jmap histogram output of container."""
   # use a function to DRY up these container API methods
   physical_plan = tracker.get_physical_plan(cluster, environment, topology)
-  host = physical_plan["stmgrs"][physical_plan["instances"][instance]["stmgrId"]][
+  host = physical_plan["stmgrs"][physical_plan["instances"][instance]["stmgr_id"]][
       "host"
   ]
   info = tracker.get_instance_mem_histogram(

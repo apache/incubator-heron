@@ -45,7 +45,7 @@ function PlanController(baseUrl, cluster, environ, toponame, physicalPlan, logic
     var containers = {}, instances = {};
     d3instances.each(function (d) {
       if (!d3.select(this).classed('fade')) {
-        containers[d.stmgrId] = true;
+        containers[d.stmgr_id] = true;
         instances[d.id] = true;
       }
     });
