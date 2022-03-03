@@ -190,7 +190,7 @@ def metrics(
   return result
 
 query_handler = tracker.HeronQueryHandler()
-@topologies_router.get("/metrics/timeline")
+@topologies_router.get("/metricstimeline")
 def timeline(
     cluster: str,
     environ: str,

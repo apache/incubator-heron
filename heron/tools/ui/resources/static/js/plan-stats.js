@@ -375,7 +375,7 @@
     }
 
     function createMetricsUrl(metric, component, instance, start, end) {
-      var url = baseUrl + '/topologies/metrics/timeline?';
+      var url = baseUrl + '/topologies/metricstimeline?';
       return [
         url + 'cluster=' + cluster,
         'environ=' + environ,
