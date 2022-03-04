@@ -63,7 +63,7 @@ public class TrackerMetricsProvider implements MetricsProvider {
     Client client = ClientBuilder.newClient();
 
     this.baseTarget = client.target(trackerURL)
-        .path("topologies/metricstimeline")
+        .path("topologies/metrics/timeline")
         .queryParam("cluster", cluster)
         .queryParam("environ", environ)
         .queryParam("topology", topologyName);

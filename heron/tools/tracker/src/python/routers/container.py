@@ -37,7 +37,7 @@ from starlette.responses import StreamingResponse
 router = EnvelopingAPIRouter()
 
 
-@router.get("/containerfiledata")
+@router.get("/container/filedata")
 async def get_container_file_slice(  # pylint: disable=too-many-arguments
     cluster: str,
     environ: str,
@@ -64,7 +64,7 @@ async def get_container_file_slice(  # pylint: disable=too-many-arguments
     return response.json()
 
 
-@router.get("/containerfiledownload", response_class=StreamingResponse)
+@router.get("/container/filedownload", response_class=StreamingResponse)
 async def get_container_file(  # pylint: disable=too-many-arguments
     cluster: str,
     environ: str,
@@ -86,7 +86,7 @@ async def get_container_file(  # pylint: disable=too-many-arguments
     )
 
 
-@router.get("/containerfilestats")
+@router.get("/container/filestats")
 async def get_container_file_listing(  # pylint: disable=too-many-arguments
     cluster: str,
     environ: str,

@@ -54,8 +54,8 @@ PACKINGPLAN_URL_FMT         = "%s/packingplan"        % TOPOLOGIES_URL_FMT
 SCHEDULER_LOCATION_URL_FMT  = "%s/schedulerlocation"  % TOPOLOGIES_URL_FMT
 
 METRICS_URL_FMT             = "%s/metrics"            % TOPOLOGIES_URL_FMT
-METRICS_QUERY_URL_FMT       = "%s/metricsquery"       % TOPOLOGIES_URL_FMT
-METRICS_TIMELINE_URL_FMT    = "%s/metricstimeline"    % TOPOLOGIES_URL_FMT
+METRICS_QUERY_URL_FMT       = "%s/metrics/query"       % TOPOLOGIES_URL_FMT
+METRICS_TIMELINE_URL_FMT    = "%s/metrics/timeline"    % TOPOLOGIES_URL_FMT
 
 EXCEPTIONS_URL_FMT          = "%s/exceptions"         % TOPOLOGIES_URL_FMT
 EXCEPTION_SUMMARY_URL_FMT   = "%s/exceptionsummary"   % TOPOLOGIES_URL_FMT
@@ -66,9 +66,9 @@ JSTACK_URL_FMT              = "%s/jstack"             % TOPOLOGIES_URL_FMT
 JMAP_URL_FMT                = "%s/jmap"               % TOPOLOGIES_URL_FMT
 HISTOGRAM_URL_FMT           = "%s/histo"              % TOPOLOGIES_URL_FMT
 
-FILE_DATA_URL_FMT           = "%s/containerfiledata"  % TOPOLOGIES_URL_FMT
-FILE_DOWNLOAD_URL_FMT       = "%s/containerfiledownload"  % TOPOLOGIES_URL_FMT
-FILESTATS_URL_FMT           = "%s/containerfilestats" % TOPOLOGIES_URL_FMT
+FILE_DATA_URL_FMT           = "%s/container/filedata"  % TOPOLOGIES_URL_FMT
+FILE_DOWNLOAD_URL_FMT       = "%s/container/filedownload"  % TOPOLOGIES_URL_FMT
+FILESTATS_URL_FMT           = "%s/container/filestats" % TOPOLOGIES_URL_FMT
 
 
 def strip_whitespace(s):

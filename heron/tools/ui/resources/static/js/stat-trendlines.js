@@ -259,7 +259,7 @@ function StatTrendlines(baseUrl, cluster, environ, toponame, physicalPlan, logic
     executeMetricsQuery();
 
     function executeMetricsQuery() {
-      var u = baseUrl + '/topologies/metricstimeline?'
+      var u = baseUrl + '/topologies/metrics/timeline?'
       var request = [
         u + 'cluster=' + cluster,
         'environ=' + environ,
