@@ -15,26 +15,28 @@
 #  specific language governing permissions and limitations
 #  under the License.
 
-FROM centos:centos8
+FROM centos:centos7
 
 # This is passed to the heron build command via the --config flag
 ENV TARGET_PLATFORM linux
+ENV LC_ALL en_US.utf8
 
-RUN yum -y upgrade
+RUN yum -y upgrade && yum -y install centos-release-scl-rh
 RUN yum -y install \
       automake \
       curl \
       cmake \
       openssl-devel \
       file \
-      gcc \
-      gcc-c++ \
+      devtoolset-8-gcc \
+      devtoolset-8-gcc-c++ \
       git \
       kernel-devel \
       libtool \
       make \
       patch \
-      python39-devel \
+      ant \
+      rh-python38-python-devel \
       zip \
       unzip \
       wget \
@@ -42,7 +44,12 @@ RUN yum -y install \
       tree \
       java-11-openjdk-devel
 
-RUN update-alternatives --set python /usr/bin/python3.9
+RUN /usr/bin/ln -sfT /opt/rh/rh-python38/root/usr/bin/python3 /usr/bin/python3 \
+      && /usr/bin/ln -sfT /opt/rh/rh-python38/root/usr/bin/python3 /usr/bin/python \
+      && /usr/bin/ln -sfT /opt/rh/rh-python38/root/usr/bin/python3.8 /usr/bin/python3.8 \
+      && /usr/bin/ln -sfT /opt/rh/devtoolset-8/root/bin/gcc /usr/bin/gcc \
+      && /usr/bin/ln -sfT /opt/rh/devtoolset-8/root/bin/g++ /usr/bin/g++ \
+      && /usr/bin/ln -sfT /opt/rh/devtoolset-8/root/bin/cpp /usr/bin/cpp
 
 ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk
 
