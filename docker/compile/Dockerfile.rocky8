@@ -31,6 +31,7 @@ RUN yum -y install \
       gcc \
       gcc-c++ \
       git \
+      glibc-langpack-en \
       kernel-devel \
       libtool \
       make \
@@ -42,8 +43,7 @@ RUN yum -y install \
       which \
       tree \
       java-11-openjdk \
-      java-11-openjdk-devel \
-      glibc-langpack-en
+      java-11-openjdk-devel 
 
 RUN update-alternatives --set python /usr/bin/python3.9
 

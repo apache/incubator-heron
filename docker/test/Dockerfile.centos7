@@ -15,6 +15,7 @@
 #  specific language governing permissions and limitations
 #  under the License.
 
+<<<<<<< HEAD
 <<<<<<< HEAD:docker/test/Dockerfile.centos7
 FROM centos:centos7
 =======
@@ -32,6 +33,14 @@ ENV LC_ALL en_US.utf8
 
 RUN yum -y upgrade
 >>>>>>>> b1eb04dfd33 (Documentation cleanup):docker/test/Dockerfile.rocky8
+=======
+FROM centos:centos7
+
+# This is passed to the heron build command via the --config flag
+ENV TARGET_PLATFORM linux
+
+RUN yum -y upgrade && yum -y install centos-release-scl-rh
+>>>>>>> 65e3725aa60 (Adding in centos7 to resolve conflicts)
 RUN yum -y install \
       automake \
       curl \
@@ -52,7 +61,12 @@ RUN yum -y install \
       wget \
       which \
       tree \
+<<<<<<< HEAD
       java-11-openjdk-devel
+=======
+      java-11-openjdk-devel \
+      glibc-langpack-en
+>>>>>>> 65e3725aa60 (Adding in centos7 to resolve conflicts)
 
 RUN /usr/bin/ln -sfT /opt/rh/rh-python38/root/usr/bin/python3 /usr/bin/python3 \
       && /usr/bin/ln -sfT /opt/rh/rh-python38/root/usr/bin/python3 /usr/bin/python \
@@ -61,6 +75,10 @@ RUN /usr/bin/ln -sfT /opt/rh/rh-python38/root/usr/bin/python3 /usr/bin/python3 \
       && /usr/bin/ln -sfT /opt/rh/devtoolset-8/root/bin/g++ /usr/bin/g++ \
       && /usr/bin/ln -sfT /opt/rh/devtoolset-8/root/bin/cpp /usr/bin/cpp
 
+<<<<<<< HEAD
+=======
+ENV LC_ALL en_US.utf8
+>>>>>>> 65e3725aa60 (Adding in centos7 to resolve conflicts)
 ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk
 
 ENV bazelVersion 4.2.2
@@ -70,4 +88,8 @@ RUN wget -O /tmp/bazel.sh https://github.com/bazelbuild/bazel/releases/download/
       && /tmp/bazel.sh
 
 ADD bazelrc /root/.bazelrc
+<<<<<<< HEAD
 ADD scripts/test-platform.sh /test-platform.sh
+=======
+ADD scripts/test-platform.sh /test-platform.sh
+>>>>>>> 65e3725aa60 (Adding in centos7 to resolve conflicts)
