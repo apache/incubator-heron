@@ -16,20 +16,10 @@
 #  under the License.
 
 #syntax=docker/dockerfile:1.2
-<<<<<<< HEAD
-<<<<<<< HEAD:docker/dist/Dockerfile.dist.centos7
 FROM centos:centos7
-=======
-FROM rockylinux:8.5
->>>>>>> 9ce047445ac (Change centos to RockyLinux-8):docker/dist/Dockerfile.dist.centos8
 
 ENV TARGET_PLATFORM linux
 ENV LC_ALL en_US.utf8
-=======
-FROM centos:centos7
-
-ENV TARGET_PLATFORM linux
->>>>>>> 65e3725aa60 (Adding in centos7 to resolve conflicts)
 
 RUN yum -y upgrade && yum -y install centos-release-scl-rh
 RUN yum -y install epel-release \
@@ -42,15 +32,8 @@ RUN yum -y install epel-release \
     rh-python38-python-devel \
     unzip \
     which \
-<<<<<<< HEAD
     && yum clean all
 
-=======
-    glibc-langpack-en \
-    && yum clean all
-
-ENV LC_ALL en_US.utf8
->>>>>>> 65e3725aa60 (Adding in centos7 to resolve conflicts)
 ENV JAVA_HOME /usr/
 
 RUN /usr/bin/ln -sfT /opt/rh/rh-python38/root/usr/bin/python3 /usr/bin/python \
@@ -82,8 +65,4 @@ ARG ZK_DIST=zookeeper-3.5.8
 RUN --mount=type=bind,source=dist,target=/opt/heron-docker/ sh /opt/heron-docker/scripts/install-zookeeper.sh $ZK_DIST
 
 ADD dist/conf/zookeeper.conf /opt/zookeeper/conf/zookeeper.conf
-<<<<<<< HEAD
 ADD dist/conf/sandbox.conf /etc/supervisor/conf.d/
-=======
-ADD dist/conf/sandbox.conf /etc/supervisor/conf.d/
->>>>>>> 65e3725aa60 (Adding in centos7 to resolve conflicts)

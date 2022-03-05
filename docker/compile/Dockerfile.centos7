@@ -19,10 +19,6 @@ FROM centos:centos7
 
 # This is passed to the heron build command via the --config flag
 ENV TARGET_PLATFORM linux
-<<<<<<< HEAD
-ENV LC_ALL en_US.utf8
-=======
->>>>>>> 65e3725aa60 (Adding in centos7 to resolve conflicts)
 
 RUN yum -y upgrade && yum -y install centos-release-scl-rh
 RUN yum -y install \
@@ -35,10 +31,7 @@ RUN yum -y install \
       devtoolset-8-gcc \
       devtoolset-8-gcc-c++ \
       git \
-<<<<<<< HEAD
-=======
       glibc-langpack-en \
->>>>>>> 65e3725aa60 (Adding in centos7 to resolve conflicts)
       kernel-devel \
       libtool \
       make \
@@ -53,10 +46,7 @@ RUN yum -y install \
       java-11-openjdk \
       java-11-openjdk-devel
 
-<<<<<<< HEAD
-=======
 ENV LC_ALL en_US.utf8
->>>>>>> 65e3725aa60 (Adding in centos7 to resolve conflicts)
 ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk
 
 ENV bazelVersion 4.2.2
@@ -79,8 +69,4 @@ RUN /usr/bin/ln -sfT /opt/rh/rh-python38/root/usr/bin/python3 /usr/bin/python3 \
       && /usr/bin/ln -sfT /opt/rh/devtoolset-8/root/bin/cpp /usr/bin/cpp
 
 ADD bazelrc /root/.bazelrc
-<<<<<<< HEAD
 ADD scripts/compile-platform.sh /compile-platform.sh
-=======
-ADD scripts/compile-platform.sh /compile-platform.sh
->>>>>>> 65e3725aa60 (Adding in centos7 to resolve conflicts)

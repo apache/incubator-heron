@@ -16,19 +16,8 @@
 #  under the License.
 
 #syntax=docker/dockerfile:1.2
-<<<<<<< HEAD:docker/dist/Dockerfile.dist.centos7
-FROM centos:centos7
-=======
 FROM rockylinux:8.5
->>>>>>> 9ce047445ac (Change centos to RockyLinux-8):docker/dist/Dockerfile.dist.centos8
 
-<<<<<<< HEAD
-ENV TARGET_PLATFORM linux
-ENV LC_ALL en_US.utf8
-
-RUN yum -y upgrade && yum -y install centos-release-scl-rh
-=======
->>>>>>> 5e9468763f0 (Add glibc-langpack-en for LC_ALL)
 RUN yum -y install epel-release \
     && yum -y install \
     curl \
