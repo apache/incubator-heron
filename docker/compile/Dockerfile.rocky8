@@ -20,8 +20,6 @@ FROM rockylinux:8.5
 # This is passed to the heron build command via the --config flag
 ENV TARGET_PLATFORM linux
 
-ENV LC_ALL en_US.utf8
-
 RUN yum -y upgrade
 RUN yum -y install \
       ant \
@@ -44,10 +42,12 @@ RUN yum -y install \
       which \
       tree \
       java-11-openjdk \
-      java-11-openjdk-devel
+      java-11-openjdk-devel \
+      glibc-langpack-en
 
 RUN update-alternatives --set python /usr/bin/python3.9
 
+ENV LC_ALL en_US.utf8
 ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk
 
 ENV bazelVersion 4.2.2

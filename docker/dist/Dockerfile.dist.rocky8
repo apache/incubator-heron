@@ -22,10 +22,13 @@ FROM centos:centos7
 FROM rockylinux:8.5
 >>>>>>> 9ce047445ac (Change centos to RockyLinux-8):docker/dist/Dockerfile.dist.centos8
 
+<<<<<<< HEAD
 ENV TARGET_PLATFORM linux
 ENV LC_ALL en_US.utf8
 
 RUN yum -y upgrade && yum -y install centos-release-scl-rh
+=======
+>>>>>>> 5e9468763f0 (Add glibc-langpack-en for LC_ALL)
 RUN yum -y install epel-release \
     && yum -y install \
     curl \
@@ -36,8 +39,10 @@ RUN yum -y install epel-release \
     rh-python38-python-devel \
     unzip \
     which \
+    glibc-langpack-en \
     && yum clean all
 
+ENV LC_ALL en_US.utf8
 ENV JAVA_HOME /usr/
 
 RUN /usr/bin/ln -sfT /opt/rh/rh-python38/root/usr/bin/python3 /usr/bin/python \
