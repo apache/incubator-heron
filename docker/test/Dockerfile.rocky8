@@ -19,7 +19,6 @@ FROM rockylinux:8.5
 
 # This is passed to the heron build command via the --config flag
 ENV TARGET_PLATFORM linux
-ENV LC_ALL en_US.utf8
 
 RUN yum -y upgrade
 RUN yum -y install \
@@ -28,29 +27,25 @@ RUN yum -y install \
       cmake \
       openssl-devel \
       file \
-      devtoolset-8-gcc \
-      devtoolset-8-gcc-c++ \
+      gcc \
+      gcc-c++ \
       git \
+      glibc-langpack-en \
       kernel-devel \
       libtool \
       make \
       patch \
       ant \
-      rh-python38-python-devel \
+      python39 \
+      python39-devel \
       zip \
       unzip \
       wget \
       which \
       tree \
-      java-11-openjdk-devel \
-      glibc-langpack-en
+      java-11-openjdk-devel
 
-RUN /usr/bin/ln -sfT /opt/rh/rh-python38/root/usr/bin/python3 /usr/bin/python3 \
-      && /usr/bin/ln -sfT /opt/rh/rh-python38/root/usr/bin/python3 /usr/bin/python \
-      && /usr/bin/ln -sfT /opt/rh/rh-python38/root/usr/bin/python3.8 /usr/bin/python3.8 \
-      && /usr/bin/ln -sfT /opt/rh/devtoolset-8/root/bin/gcc /usr/bin/gcc \
-      && /usr/bin/ln -sfT /opt/rh/devtoolset-8/root/bin/g++ /usr/bin/g++ \
-      && /usr/bin/ln -sfT /opt/rh/devtoolset-8/root/bin/cpp /usr/bin/cpp
+RUN update-alternatives --set python /usr/bin/python3.9
 
 ENV LC_ALL en_US.utf8
 ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk
