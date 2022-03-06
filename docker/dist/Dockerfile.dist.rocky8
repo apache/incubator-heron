@@ -24,19 +24,17 @@ RUN yum -y install epel-release \
     java-11-openjdk-headless \
     supervisor \
     nmap-ncat \
-    rh-python38-python \
-    rh-python38-python-devel \
+    python39 \
+    python39-devel \
     unzip \
     which \
     glibc-langpack-en \
     && yum clean all
 
+RUN update-alternatives --set python /usr/bin/python3.9
+
 ENV LC_ALL en_US.utf8
 ENV JAVA_HOME /usr/
-
-RUN /usr/bin/ln -sfT /opt/rh/rh-python38/root/usr/bin/python3 /usr/bin/python \
-      && /usr/bin/ln -sfT /opt/rh/rh-python38/root/usr/bin/python3 /usr/bin/python3 \
-      && /usr/bin/ln -sfT /opt/rh/rh-python38/root/usr/bin/python3.8 /usr/bin/python3.8
 
 # run Heron installer
 RUN --mount=type=bind,source=artifacts,target=/tmp/heron /tmp/heron/heron-install.sh \
