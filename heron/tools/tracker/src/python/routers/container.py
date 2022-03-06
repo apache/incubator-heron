@@ -68,9 +68,9 @@ async def get_container_file_slice(  # pylint: disable=too-many-arguments
 async def get_container_file(  # pylint: disable=too-many-arguments
     cluster: str,
     environ: str,
-    role: Optional[str],
     container: str,
     path: str,
+    role: Optional[str] = None,
     topology_name: str = Query(..., alias="topology"),
 ):
   """Return a given raw file."""
@@ -90,9 +90,9 @@ async def get_container_file(  # pylint: disable=too-many-arguments
 async def get_container_file_listing(  # pylint: disable=too-many-arguments
     cluster: str,
     environ: str,
-    role: Optional[str],
     container: str,
     path: str,
+    role: Optional[str] = None,
     topology_name: str = Query(..., alias="topology"),
 ):
   """Return the stats for a given directory."""
@@ -186,9 +186,9 @@ async def _get_exception_log_response(
 @router.get("/exceptions", response_model=List[ExceptionLog])
 async def get_exceptions(  # pylint: disable=too-many-arguments
     cluster: str,
-    role: Optional[str],
     environ: str,
     component: str,
+    role: Optional[str] = None,
     instances: List[str] = Query(..., alias="instance"),
     topology_name: str = Query(..., alias="topology"),
 ):
@@ -220,9 +220,9 @@ class ExceptionSummaryItem(BaseModel):
 @router.get("/exceptionsummary", response_model=List[ExceptionSummaryItem])
 async def get_exceptions_summary(  # pylint: disable=too-many-arguments
     cluster: str,
-    role: Optional[str],
     environ: str,
     component: str,
+    role: Optional[str] = None,
     instances: List[str] = Query(..., alias="instance"),
     topology_name: str = Query(..., alias="topology"),
 ):
@@ -269,9 +269,9 @@ async def get_container_heron_pid(
 @router.get("/jstack", response_model=ShellResponse)
 async def get_container_heron_jstack(
     cluster: str,
-    role: Optional[str],
     environ: str,
     instance: str,
+    role: Optional[str] = None,
     topology_name: str = Query(..., alias="topology"),
 ):
   """Get jstack output for the heron process."""
@@ -289,9 +289,9 @@ async def get_container_heron_jstack(
 @router.get("/jmap", response_model=ShellResponse)
 async def get_container_heron_jmap(
     cluster: str,
-    role: Optional[str],
     environ: str,
     instance: str,
+    role: Optional[str] = None,
     topology_name: str = Query(..., alias="topology"),
 ):
   """Get jmap output for the heron process."""
@@ -309,9 +309,9 @@ async def get_container_heron_jmap(
 @router.get("/histo", response_model=ShellResponse)
 async def get_container_heron_memory_histogram(
     cluster: str,
-    role: Optional[str],
     environ: str,
     instance: str,
+    role: Optional[str] = None,
     topology_name: str = Query(..., alias="topology"),
 ):
   """Get memory usage histogram the heron process. This uses the ouput of the last jmap run."""

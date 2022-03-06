@@ -87,9 +87,9 @@ class Tracker:
   def get_topology(
       self,
       cluster: str,
-      role: Optional[str],
       environ: str,
       topology_name: str,
+      role: Optional[str] = None,
   ) -> Any:
     """
     Find and return the topology given its cluster, environ, topology name, and

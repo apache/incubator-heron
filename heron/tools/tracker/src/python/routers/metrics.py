@@ -100,9 +100,9 @@ async def get_component_metrics(
 @router.get("/metrics", response_model=ComponentMetrics)
 async def get_metrics( # pylint: disable=too-many-arguments
     cluster: str,
-    role: Optional[str],
     environ: str,
     component: str,
+    role: Optional[str] = None,
     topology_name: str = Query(..., alias="topology"),
     metric_names: Optional[List[str]] = Query(None, alias="metricname"),
     instances: Optional[List[str]] = Query(None, alias="instance"),
@@ -122,11 +122,11 @@ async def get_metrics( # pylint: disable=too-many-arguments
 @router.get("/metrics/timeline", response_model=metricstimeline.MetricsTimeline)
 async def get_metrics_timeline( # pylint: disable=too-many-arguments
     cluster: str,
-    role: Optional[str],
     environ: str,
     component: str,
     start_time: int,
     end_time: int,
+    role: Optional[str] = None,
     topology_name: str = Query(..., alias="topology"),
     metric_names: Optional[List[str]] = Query(None, alias="metricname"),
     instances: Optional[List[str]] = Query(None, alias="instance"),
@@ -161,9 +161,9 @@ class MetricsQueryResponse(BaseModel): # pylint: disable=too-few-public-methods
 @router.get("/metrics/query", response_model=MetricsQueryResponse)
 async def get_metrics_query( # pylint: disable=too-many-arguments
     cluster: str,
-    role: Optional[str],
     environ: str,
     query: str,
+    role: Optional[str] = None,
     start_time: int = Query(..., alias="starttime"),
     end_time: int = Query(..., alias="endtime"),
     topology_name: str = Query(..., alias="topology"),
