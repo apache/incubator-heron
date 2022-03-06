@@ -91,7 +91,7 @@ case $# in
     echo "  "
     echo "Usage: $0 <platform> <version_string> <output-directory>"
     echo "  "
-    echo "Platforms Supported: darwin, debian10, ubuntu20.04, centos8"
+    echo "Platforms Supported: darwin, debian10, ubuntu20.04, rocky8"
     echo "  "
     echo "Example:"
     echo "  ./build-base.sh ubuntu20.04 0.12.0 ~/ubuntu"

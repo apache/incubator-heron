@@ -26,7 +26,7 @@
 #
 #  cd docker
 #  ./build-artifacts.sh ubuntu20.04 0.12.0 .
-#  ./build-artifacts.sh centos8 0.12.0 .
+#  ./build-artifacts.sh rocky8 0.12.0 .
 #
 import os
 import re

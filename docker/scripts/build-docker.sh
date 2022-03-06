@@ -96,7 +96,7 @@ case $# in
     echo "Usage: $0 <platform> <version_string> <artifact-directory> [-s|--squash]"
     echo "  "
     echo "Argument options:"
-    echo "  <platform>: darwin, debian10, ubuntu20.04, centos8"
+    echo "  <platform>: darwin, debian10, ubuntu20.04, rocky8"
     echo "  <version_string>: Version of Heron build, e.g. v0.17.5.1-rc"
     echo "  <artifact-directory>: Location of compiled Heron artifact"
     echo "  [-s|--squash]: Enables using Docker experimental feature --squash"

@@ -43,7 +43,7 @@ case $# in
 esac
 
 # Default platform is ubuntu18.04. Other available platforms
-# include centos8, debian10, ubuntu18.04
+# include rocky8, debian10, ubuntu18.04
 TARGET_PLATFORM=${2:-"ubuntu18.04"}
 SCRATCH_DIR="$HOME/.heron-docker"
 REPOSITORY="heron-dev"

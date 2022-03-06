@@ -15,12 +15,12 @@
 #  specific language governing permissions and limitations
 #  under the License.
 
-FROM centos:centos7
+FROM rockylinux:8.5
 
 # This is passed to the heron build command via the --config flag
 ENV TARGET_PLATFORM linux
 
-RUN yum -y upgrade && yum -y install centos-release-scl-rh
+RUN yum -y upgrade
 RUN yum -y install \
       ant \
       automake \
@@ -28,23 +28,24 @@ RUN yum -y install \
       cmake \
       openssl-devel \
       file \
-      devtoolset-8-gcc \
-      devtoolset-8-gcc-c++ \
+      gcc \
+      gcc-c++ \
       git \
       glibc-langpack-en \
       kernel-devel \
       libtool \
       make \
       patch \
-      rh-python38-python \
-      rh-python38-python-devel \
+      python39-devel \
       zip \
       unzip \
       wget \
       which \
       tree \
       java-11-openjdk \
-      java-11-openjdk-devel
+      java-11-openjdk-devel 
+
+RUN update-alternatives --set python /usr/bin/python3.9
 
 ENV LC_ALL en_US.utf8
 ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk
@@ -55,18 +56,6 @@ RUN wget -O /tmp/bazel.sh https://github.com/bazelbuild/bazel/releases/download/
       && chmod +x /tmp/bazel.sh \
       && /tmp/bazel.sh \
       && rm -rf /tmp/bazel.sh
-
-ENV PATH /opt/rh/devtoolset-8/root/bin:/opt/rh/rh-python38/root/usr/bin:${PATH}
-ENV LD_LIBRARY_PATH /opt/rh/devtoolset-8/root/lib64:/opt/rh/rh-python38/root/usr/lib64:/usr/local/lib:${LD_LIBRARY_PATH}
-ENV MANPATH /opt/rh/devtoolset-8/root/usr/share/man:/opt/rh/rh-python38/root/usr/share/man
-ENV PKG_CONFIG_PATH /opt/rh/rh-python38/root/usr/lib64/pkgconfig:${PKG_CONFIG_PATH}
-
-RUN /usr/bin/ln -sfT /opt/rh/rh-python38/root/usr/bin/python3 /usr/bin/python3 \
-      && /usr/bin/ln -sfT /opt/rh/rh-python38/root/usr/bin/python3 /usr/bin/python \
-      && /usr/bin/ln -sfT /opt/rh/rh-python38/root/usr/bin/python3.8 /usr/bin/python3.8 \
-      && /usr/bin/ln -sfT /opt/rh/devtoolset-8/root/bin/gcc /usr/bin/gcc \
-      && /usr/bin/ln -sfT /opt/rh/devtoolset-8/root/bin/g++ /usr/bin/g++ \
-      && /usr/bin/ln -sfT /opt/rh/devtoolset-8/root/bin/cpp /usr/bin/cpp
 
 ADD bazelrc /root/.bazelrc
 ADD scripts/compile-platform.sh /compile-platform.sh
