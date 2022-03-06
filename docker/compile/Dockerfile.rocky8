@@ -17,8 +17,8 @@
 
 FROM rockylinux:8.5
 
-RUN yum -y upgrade
-RUN yum -y install \
+RUN yum -y upgrade \
+   && yum -y install \
       ant \
       automake \
       curl \
