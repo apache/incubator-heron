@@ -37,9 +37,8 @@ var AllExceptions = React.createClass({
   },
   fetchExceptionSummary: function() {
     var compName = this.props.info.comp_name ? this.props.info.comp_name : 'All';
-    var instance = this.props.info.instance;
     var fetchUrl = './' + this.props.info.topology
-        + '/' + compName + '/' + instance + '/exceptionsummary.json'
+        + '/' + compName + '/exceptionsummary.json'
     console.log('fetching url ' + fetchUrl);
     $.ajax({
         url: fetchUrl,
