@@ -296,7 +296,7 @@ is greater than `10800` seconds, the values will be for all-time metrics.
 
 ---
 
-### <a name="topologies_metricstimeline">/topologies/metricstimeline</a>
+### <a name="topologies_metricstimeline">/topologies/metrics/timeline</a>
 
 Returns a JSON map of instances of the topology to their respective metrics timeline.
 To filter instances returned use the `instance` parameter discussed below.
