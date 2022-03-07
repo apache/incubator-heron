@@ -85,9 +85,9 @@ async def get_metrics_timeline(
   response_data = tmanager_pb2.MetricResponse()
   response_data.ParseFromString(result.content)
 
-  if response_data.status.status == common_pb2.NOTOK:
-    if response_data.status.HasField("message"):
-      Log.warn("Received response from Tmanager: %s", response_data.status.message)
+  # if response_data.status.status == common_pb2.NOTOK:
+  #   if response_data.status.HasField("message"):
+  #     Log.warn("Received response from Tmanager: %s", response_data.status.message)
 
   timeline = {}
   # Loop through all the metrics
@@ -99,6 +99,8 @@ async def get_metrics_timeline(
     # Loop through all individual metrics.
     for im in metric.metric:
       metricname = im.name
+      if metricname not in timeline:
+        timeline.setdefault(metricname, {})
       if instance not in timeline[metricname]:
         timeline.setdefault(metricname, {})[instance] = {}
 

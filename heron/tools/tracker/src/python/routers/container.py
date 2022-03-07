@@ -41,11 +41,11 @@ router = EnvelopingAPIRouter()
 async def get_container_file_slice(  # pylint: disable=too-many-arguments
     cluster: str,
     environ: str,
-    role: Optional[str],
     container: str,
     path: str,
     offset: int,
     length: int,
+    role: Optional[str] = None,
     topology_name: str = Query(..., alias="topology"),
 ):
   """
@@ -55,11 +55,11 @@ async def get_container_file_slice(  # pylint: disable=too-many-arguments
 
   """
   topology = state.tracker.get_topology(cluster, role, environ, topology_name)
-  stmgr = state.tracker.pb2_to_api(topology)["physical_plan"]["stmgrs"][f"stmgr-{container}"]
-  url = f"http://{stmgr['host']}:{stmgr['shell_port']}/filedata/{path}"
+  stmgr = topology.info.physical_plan.stmgrs[f"stmgr-{container}"]
+  url = f"http://{stmgr.host}:{stmgr.shell_port}/filedata/{path}"
   params = {"offset": offset, "length": length}
 
-  with httpx.AsyncClient() as client:
+  async with httpx.AsyncClient() as client:
     response = await client.get(url, params=params)
     return response.json()
 
@@ -75,8 +75,8 @@ async def get_container_file(  # pylint: disable=too-many-arguments
 ):
   """Return a given raw file."""
   topology = state.tracker.get_topology(cluster, role, environ, topology_name)
-  stmgr = state.tracker.pb2_to_api(topology)["physical_plan"]["stmgrs"][f"stmgr-{container}"]
-  url = f"http://{stmgr['host']}:{stmgr['shell_port']}/download/{path}"
+  stmgr = topology.info.physical_plan.stmgrs[f"stmgr-{container}"]
+  url = f"http://{stmgr.host}:{stmgr.shell_port}/download/{path}"
 
   _, _, filename = path.rpartition("/")
   with httpx.stream("GET", url) as response:
@@ -84,7 +84,6 @@ async def get_container_file(  # pylint: disable=too-many-arguments
         content=response.iter_bytes(),
         headers={"Content-Disposition": f"attachment; filename={filename}"},
     )
-
 
 @router.get("/container/filestats")
 async def get_container_file_listing(  # pylint: disable=too-many-arguments
@@ -97,9 +96,9 @@ async def get_container_file_listing(  # pylint: disable=too-many-arguments
 ):
   """Return the stats for a given directory."""
   topology = state.tracker.get_topology(cluster, role, environ, topology_name)
-  stmgr = state.tracker.pb2_to_api(topology)["physical_plan"]["stmgrs"][f"stmgr-{container}"]
-  url = utils.make_shell_filestats_url(stmgr["host"], stmgr["shell_port"], path)
-  with httpx.AsyncClient() as client:
+  stmgr = topology.info.physical_plan.stmgrs[f"stmgr-{container}"]
+  url = utils.make_shell_filestats_url(stmgr.host, stmgr.shell_port, path)
+  async with httpx.AsyncClient() as client:
     response = await client.get(url)
     return response.json()
 
@@ -107,8 +106,8 @@ async def get_container_file_listing(  # pylint: disable=too-many-arguments
 @router.get("/runtimestate")
 async def get_container_runtime_state(
     cluster: str,
-    role: Optional[str],
     environ: str,
+    role: Optional[str] = None,
     topology_name: str = Query(..., alias="topology"),
 ):
   """Return the runtime state."""
@@ -120,7 +119,7 @@ async def get_container_runtime_state(
   if not (tmanager and tmanager.host and tmanager.stats_port):
     raise ValueError("TManager not set yet")
   url = f"http://{tmanager.host}:{tmanager.stats_port}/stmgrsregistrationsummary"
-  with httpx.AsyncClient() as client:
+  async with httpx.AsyncClient() as client:
     response = await client.post(
         url,
         data=tmanager_pb2.StmgrsRegistrationSummaryRequest().SerializeToString(),
@@ -167,7 +166,7 @@ async def _get_exception_log_response(
   exception_request.instances.extend(instances)
   url_suffix = "ummary" if summary else ""
   url = f"http://{tmanager.host}:{tmanager.stats_port}/exceptions{url_suffix}"
-  with httpx.AsyncClient() as client:
+  async with httpx.AsyncClient() as client:
     response = await client.post(url, data=exception_request.SerializeToString())
   response.raise_for_status()
 
@@ -188,9 +187,9 @@ async def get_exceptions(  # pylint: disable=too-many-arguments
     cluster: str,
     environ: str,
     component: str,
-    role: Optional[str] = None,
     instances: List[str] = Query(..., alias="instance"),
     topology_name: str = Query(..., alias="topology"),
+    role: Optional[str] = None,
 ):
   """Return info about exceptions that have occurred per instance."""
   exception_response = await _get_exception_log_response(
@@ -253,16 +252,16 @@ class ShellResponse(BaseModel):  # pylint: disable=too-few-public-methods
 @router.get("/pid", response_model=ShellResponse)
 async def get_container_heron_pid(
     cluster: str,
-    role: Optional[str],
     environ: str,
     instance: str,
+    role: Optional[str] = None,
     topology_name: str = Query(..., alias="topology"),
 ):
   """Get the PId of the heron process."""
   topology = state.tracker.get_topology(cluster, role, environ, topology_name)
-  base_url = utils.make_shell_endpoint(state.tracker.pb2_to_api(topology), instance)
+  base_url = utils.make_shell_endpoint(topology, instance)
   url = f"{base_url}/pid/{instance}"
-  with httpx.AsyncClient() as client:
+  async with httpx.AsyncClient() as client:
     return await client.get(url).json()
 
 
@@ -280,9 +279,9 @@ async def get_container_heron_jstack(
   pid_response = await get_container_heron_pid(cluster, role, environ, instance, topology_name)
   pid = pid_response["stdout"].strip()
 
-  base_url = utils.make_shell_endpoint(state.tracker.pb2_to_api(topology), instance)
+  base_url = utils.make_shell_endpoint(topology, instance)
   url = f"{base_url}/jstack/{pid}"
-  with httpx.AsyncClient() as client:
+  async with httpx.AsyncClient() as client:
     return await client.get(url).json()
 
 
@@ -300,9 +299,9 @@ async def get_container_heron_jmap(
   pid_response = await get_container_heron_pid(cluster, role, environ, instance, topology_name)
   pid = pid_response["stdout"].strip()
 
-  base_url = utils.make_shell_endpoint(state.tracker.pb2_to_api(topology), instance)
+  base_url = utils.make_shell_endpoint(topology, instance)
   url = f"{base_url}/jmap/{pid}"
-  with httpx.AsyncClient() as client:
+  async with httpx.AsyncClient() as client:
     return await client.get(url).json()
 
 
@@ -320,7 +319,7 @@ async def get_container_heron_memory_histogram(
   pid_response = await get_container_heron_pid(cluster, role, environ, instance, topology_name)
   pid = pid_response["stdout"].strip()
 
-  base_url = utils.make_shell_endpoint(state.tracker.pb2_to_api(topology), instance)
+  base_url = utils.make_shell_endpoint(topology, instance)
   url = f"{base_url}/histo/{pid}"
-  with httpx.AsyncClient() as client:
+  async with httpx.AsyncClient() as client:
     return await client.get(url).json()
