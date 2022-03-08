@@ -151,7 +151,7 @@ class TS(Operator):
 
     # Put a blank timeline.
     if not metrics.timeline:
-      metrics["timeline"] = {
+      metrics.timeline = {
           self.metric_name: {}
       }
     timelines = metrics.timeline[self.metric_name]
@@ -460,14 +460,15 @@ class _SimpleArithmaticOperator(Operator):
       for key, metric in metrics2.items():
         # Initialize with first metrics timeline, but second metric's instance
         # because that is multivariate
-        met = Metrics(None, None, metric.instance, start, end, metrics[""].timeline.copy())
-        for timestamp in list(met.timeline.keys()):
-          v = self._f(met.timeline[timestamp], metric.timeline.get(timestamp))
-          if v is None:
-            met.timeline.pop(timestamp, None)
-          else:
-            met.timeline[timestamp] = v
-        all_metrics.append(met)
+        if metrics:
+          met = Metrics(None, None, metric.instance, start, end, metrics[""].timeline.copy())
+          for timestamp in list(met.timeline.keys()):
+            v = self._f(met.timeline[timestamp], metric.timeline[timestamp])
+            if v is None:
+              met.timeline.pop(timestamp, None)
+            else:
+              met.timeline[timestamp] = v
+          all_metrics.append(met)
       return all_metrics
 
     # If second is univariate
@@ -476,7 +477,7 @@ class _SimpleArithmaticOperator(Operator):
       # Initialize with first metrics timeline and its instance
       met = Metrics(None, None, metric.instance, start, end, metric.timeline.copy())
       for timestamp in list(met.timeline.keys()):
-        v = self._f(met.timeline[timestamp], metrics2[""].timeline.get(timestamp))
+        v = self._f(met.timeline[timestamp], metrics2[""].timeline[timestamp])
         if v is None:
           met.timeline.pop(timestamp, None)
         else:
