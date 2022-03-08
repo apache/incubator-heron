@@ -151,8 +151,8 @@ class TimelinePoint(BaseModel): # pylint: disable=too-few-public-methods
 
 class MetricsQueryResponse(BaseModel): # pylint: disable=too-few-public-methods
   """A metrics timeline over an interval."""
-  start_time: int = Field(..., alias="starttime")
-  end_time: int = Field(..., alias="endtime")
+  starttime: int = Field(..., alias="starttime")
+  endtime: int = Field(..., alias="endtime")
   timeline: List[TimelinePoint] = Field(
       ..., description="list of timeline point objects",
   )
@@ -180,7 +180,7 @@ async def get_metrics_query( # pylint: disable=too-many-arguments
   ]
 
   return MetricsQueryResponse(
-      startime=start_time,
+      starttime=start_time,
       endtime=end_time,
       timeline=timeline,
   )
