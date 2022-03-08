@@ -32,9 +32,9 @@ from pydantic import BaseModel, Field
 
 class MetricsTimeline(BaseModel):
   component: str
-  start_time: int = Field(..., alias="starttime")
-  end_time: int = Field(..., alias="enddtime")
-  timeline: Dict[str, Dict[str, Dict[int, int]]] = Field(
+  starttime: int = Field(..., alias="starttime")
+  endtime: int = Field(..., alias="endtime")
+  timeline: Dict[str, Dict[str, Dict[int, str]]] = Field(
       ...,
       description="map of (metric name, instance, start) to metric value",
   )

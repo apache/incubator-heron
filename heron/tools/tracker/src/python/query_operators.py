@@ -150,11 +150,11 @@ class TS(Operator):
       raise Exception(metrics["message"])
 
     # Put a blank timeline.
-    if not metrics.get("timeline"):
+    if not metrics.timeline:
       metrics["timeline"] = {
           self.metric_name: {}
       }
-    timelines = metrics["timeline"][self.metric_name]
+    timelines = metrics.timeline[self.metric_name]
     all_metrics = [
         Metrics(self.component, self.metric_name, instance, start, end, {
             k: float(v)
