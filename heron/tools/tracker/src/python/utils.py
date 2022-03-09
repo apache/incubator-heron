@@ -31,7 +31,7 @@ import subprocess
 from asyncio import iscoroutinefunction
 from functools import wraps
 from pathlib import Path
-from typing import Any, Generic, Literal, Optional, TypeVar
+from typing import Any, Optional, TypeVar
 
 from heron.common.src.python.utils.log import Log
 from heron.tools.tracker.src.python import constants
@@ -52,58 +52,10 @@ LIB_DIR = "lib"
 
 ResultType = TypeVar("ResultType")
 
-
-class ResponseEnvelope(GenericModel, Generic[ResultType]):
-  execution_time: float = Field(0.0, alias="executiontime")
-  message: str
-  result: Optional[ResultType] = None
-  status: Literal[
-      constants.RESPONSE_STATUS_FAILURE, constants.RESPONSE_STATUS_SUCCESS
-  ]
-  tracker_version: str = constants.API_VERSION
-
 class BadRequest(HTTPException):
   """Raised when bad input is recieved."""
   def __init__(self, detail: str = None) -> None:
     super().__init__(400, detail)
-
-class EnvelopingAPIRouter(APIRouter):
-  """Router which wraps response_models with ResponseEnvelope."""
-
-  def api_route(self, response_model=None, **kwargs):
-    """This provides the decorator used by router.<method>."""
-    if not response_model:
-      return super().api_route(response_model=response_model, **kwargs)
-
-    wrapped_response_model = ResponseEnvelope[response_model]
-    decorator = super().api_route(response_model=wrapped_response_model, **kwargs)
-
-    @wraps(decorator)
-    def new_decorator(f):
-      if iscoroutinefunction(f):
-        @wraps(f)
-        async def envelope(*args, **kwargs):
-          result = await f(*args, **kwargs)
-          return wrapped_response_model(
-              result=result,
-              execution_time=0.0,
-              message="ok",
-              status="success",
-          )
-      else:
-        @wraps(f)
-        def envelope(*args, **kwargs):
-          result = f(*args, **kwargs)
-          return wrapped_response_model(
-              result=result,
-              execution_time=0.0,
-              message="ok",
-              status="success",
-          )
-      return decorator(envelope)
-
-    return new_decorator
-
 
 def make_shell_endpoint(topology_info: dict, instance_id: int) -> str:
   """

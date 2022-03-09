@@ -37,11 +37,10 @@ from heron.tools.tracker.src.python.topology import (
     TopologyInfoPhysicalPlan,
     TopologyInfoSchedulerLocation,
 )
-from heron.tools.tracker.src.python.utils import EnvelopingAPIRouter
 
-from fastapi import Query
+from fastapi import Query, APIRouter
 
-router = EnvelopingAPIRouter()
+router = APIRouter()
 
 
 @router.get("", response_model=Dict[str, Dict[str, Dict[str, List[str]]]])

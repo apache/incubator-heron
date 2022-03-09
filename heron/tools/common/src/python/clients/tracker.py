@@ -133,16 +133,14 @@ def api_get(url: str, params=None) -> dict:
     return None
   end = time.time()
   data = response.json()
-  if data["status"] != "success":
-    Log.error("error from tracker: %s", data["message"])
+  if response.status_code != requests.codes.ok:
+    Log.error("error from tracker: %s", response.status_code)
     return None
 
-  execution = data["executiontime"] * 1000
   duration = (end - start) * 1000
-  Log.debug(f"URL fetch took {execution:.2}ms server time for {url}")
   Log.debug(f"URL fetch took {duration:.2}ms round trip time for {url}")
 
-  return data["result"]
+  return data
 
 
 def create_url(fmt: str) -> str:
@@ -233,6 +231,7 @@ def get_component_exceptionsummary(
     environ: str,
     topology: str,
     component: str,
+    instance: str,
     role: Optional[str]=None,
 ) -> Any:
   """Get summary of exception for a component."""
@@ -243,15 +242,18 @@ def get_component_exceptionsummary(
       "topology": topology,
       "role": role,
       "component": component,
+      "instance": instance,
+      "summary": True,
   }
   return api_get(base_url, params)
 
 
-def get_component_exceptions(
+def get_comp_instance_exceptions(
     cluster: str,
     environ: str,
     topology: str,
     component: str,
+    instance: str,
     role: Optional[str]=None,
 ) -> Any:
   """Get exceptions for 'component' for 'topology'."""
@@ -262,6 +264,8 @@ def get_component_exceptions(
       "topology": topology,
       "role": role,
       "component": component,
+      "instance": instance,
+      "summary": False,
   }
   return api_get(base_url, params)
 

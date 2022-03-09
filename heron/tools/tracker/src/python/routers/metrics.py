@@ -28,14 +28,15 @@ from heron.proto import common_pb2
 from heron.proto import tmanager_pb2
 from heron.tools.tracker.src.python import metricstimeline, state
 from heron.tools.tracker.src.python.query import Query as TManagerQuery
-from heron.tools.tracker.src.python.utils import EnvelopingAPIRouter, BadRequest
+from heron.tools.tracker.src.python.utils import BadRequest
 
 import httpx
 
 from fastapi import Query
+from fastapi import Query, APIRouter
 from pydantic import BaseModel, Field
 
-router = EnvelopingAPIRouter()
+router = APIRouter()
 
 class ComponentMetrics(BaseModel):
   interval: int

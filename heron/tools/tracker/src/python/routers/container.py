@@ -26,15 +26,15 @@ from typing import List, Optional
 
 from heron.proto import common_pb2, tmanager_pb2
 from heron.tools.tracker.src.python import state, utils
-from heron.tools.tracker.src.python.utils import EnvelopingAPIRouter
 
 import httpx
 
-from fastapi import Query
+# from fastapi import Query
+from fastapi import Query, APIRouter
 from pydantic import BaseModel, Field
 from starlette.responses import StreamingResponse
 
-router = EnvelopingAPIRouter()
+router = APIRouter()
 
 
 @router.get("/container/filedata")
