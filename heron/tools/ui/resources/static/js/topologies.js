@@ -1480,7 +1480,7 @@ var InstanceCounters = React.createClass({
           }
         }
         if (instanceInfo) {
-          var stmgrId = instanceInfo.stmgrId;
+          var stmgrId = instanceInfo.stmgr_id;
           var container = stmgrId.split("-")[1]
           var topologyParams = this.props.info.cluster + '/' + this.props.info.environ
               + '/' + this.props.info.topology
