@@ -612,13 +612,8 @@ class HeronExecutor:
       java_metasize_param = 'PermSize'
     xmn_param = '-Xmn%dM' % xmn_size
     if self._get_java_major_version() >= 11:
-        # For Java 11 and above.
-        # The Xmx value is 25% of the available memory with a maximum of 25 GB.
-        # However, where there is 2 GB or less of physical memory,
-        # the value set is 50% of available memory with a minimum value of 16 MB and a maximum value of 512 MB.
-        # For Java 8
-        # The Xmx value is half the available memory with a minimum of 16 MB and a maximum of 512 MB.
-        xmn_param = None
+      # Remove '-Xmn'
+      xmn_param = None
 
     instance_options = [
         '-Xmx%dM' % heap_size_mb,
