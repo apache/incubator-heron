@@ -177,21 +177,6 @@ def str_cmd(cmd, cwd, env):
   stdout, stderr = stdout_builder.result(), stderr_builder.result()
   return {'command': ' '.join(cmd), 'stderr': stderr, 'stdout': stdout}
 
-# pylint: disable=unnecessary-lambda
-def chain(cmd_list):
-  """
-  Feed output of one command to the next and return final output
-  Returns string output of chained application of commands.
-  """
-  command = ' | '.join([' '.join(x) for x in cmd_list])
-  chained_proc = functools.reduce(pipe, [None] + cmd_list)
-  stdout_builder = proc.async_stdout_builder(chained_proc)
-  chained_proc.wait()
-  return {
-      'command': command,
-      'stdout': stdout_builder.result()
-  }
-
 def get_container_id(instance_id):
   ''' get container id '''
   return instance_id.split('_')[1]  # Format: container_<index>_component_name_<index>

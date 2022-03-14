@@ -258,7 +258,7 @@ class Topology:
       link[EXTRA_LINK_URL_KEY] = string.Template(link[EXTRA_LINK_FORMATTER_KEY]).substitute(subs)
 
   def _rebuild_info(self, t_state: TopologyState) -> Optional[TopologyInfo]:
-    # Execution state is the most basic info. If returnecution state, just return
+    # Execution state is the most basic info. If return execution state, just return
     # as the rest of the things don't matter.
     execution_state = t_state.execution_state
     if not execution_state:

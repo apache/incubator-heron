@@ -31,8 +31,7 @@ class DownloadHandler(tornado.web.RequestHandler):
   """
   Responsible for downloading the files.
   """
-  @tornado.web.asynchronous
-  def get(self, path):
+  async def get(self, path):
     """ get method """
 
     handler = logging.StreamHandler()
@@ -64,7 +63,7 @@ class DownloadHandler(tornado.web.RequestHandler):
     length = int(4 * 1024 * 1024)
     offset = int(0)
     while True:
-      data = utils.read_chunk(path, offset=offset, length=length, escape_data=False)
+      data = await utils.read_chunk(path, offset=offset, length=length, escape_data=False)
       if self.connection_closed or 'data' not in data or len(data['data']) < length:
         break
       offset += length

@@ -58,6 +58,9 @@ DEFAULT_BASE_URL = ""
 base_url = DEFAULT_BASE_URL
 tracker_url = DEFAULT_TRACKER_URL
 
+Log = log.Log
+Log.setLevel(logging.DEBUG)
+
 app = FastAPI(title="Heron UI", version=VERSION)
 
 templates = Jinja2Templates(
@@ -105,7 +108,7 @@ def config_page(
   )
 
 
-@topologies_router.get("/{cluster}/{environment}/{topology}/{instance}/{component}/exceptions")
+@topologies_router.get("/{cluster}/{environment}/{topology}/{component}/{instance}/exceptions")
 def exceptions_page(
     cluster: str, environment: str, topology: str, component: str, instance: str,
     request: Request
@@ -316,17 +319,26 @@ class ApiEnvelope(pydantic.BaseModel):
   executiontime: int
   result: dict
 
-
 def api_topology_json(method: Callable[[], dict]) -> ApiEnvelope:
   """Wrap the output of a method with a response envelope."""
   started = time.time()
   result = method()
-  return ApiEnvelope(
-      status="success",
-      message="",
+  print(f"NICK: API Topology result: {type(result)}: {result}")
+  Log.debug(f"Api topology: {result}")
+  if type(result) is None:
+    return ApiEnvelope(
+      status="failure",
+      message="No topology found",
       executiontime=time.time() - started,
-      result=result,
-  )
+      result={},
+    )
+  else:
+    return ApiEnvelope(
+        status="success",
+        message="",
+        executiontime=time.time() - started,
+        result=result,
+    )
 
 @topologies_router.get("/list.json")
 def topologies_json() -> dict:
@@ -392,7 +404,7 @@ def execution_state_json(cluster: str, environment: str, topology: str) -> ApiEn
 )
 def scheduler_location_json(cluster: str, environment: str, topology: str) -> ApiEnvelope:
   """Unimplemented method which is currently a duplicate of execution state."""
-  return api_topology_json(lambda: tracker.get_execution_state(
+  return api_topology_json(lambda: tracker.get_scheduler_location(
       cluster, environment, topology,
   ))
 
@@ -462,7 +474,7 @@ def pid_snippet(
 ) -> Response:
   """Render a HTML snippet containing topology output of container."""
   physical_plan = tracker.get_physical_plan(cluster, environment, topology)
-  host = physical_plan["stmgrs"][physical_plan["instances"][instance]["stmgrId"]][
+  host = physical_plan["stmgrs"][physical_plan["instances"][instance]["stmgr_id"]][
       "host"
   ]
   info = tracker.get_instance_pid(cluster, environment, topology, instance)
@@ -492,7 +504,7 @@ def jstack_snippet(
 ) -> HTMLResponse:
   """Render a HTML snippet containing jstack output of container."""
   physical_plan = tracker.get_physical_plan(cluster, environment, topology)
-  host = physical_plan["stmgrs"][physical_plan["instances"][instance]["stmgrId"]][
+  host = physical_plan["stmgrs"][physical_plan["instances"][instance]["stmgr_id"]][
       "host"
   ]
   info = tracker.get_instance_jstack(cluster, environment, topology, instance)
@@ -521,7 +533,7 @@ def jmap_snippet(
 ) -> HTMLResponse:
   """Render a HTML snippet containing jmap output of container."""
   physical_plan = tracker.get_physical_plan(cluster, environment, topology)
-  host = physical_plan["stmgrs"][physical_plan["instances"][instance]["stmgrId"]][
+  host = physical_plan["stmgrs"][physical_plan["instances"][instance]["stmgr_id"]][
       "host"
   ]
   info = tracker.run_instance_jmap(cluster, environment, topology, instance)
@@ -558,7 +570,7 @@ def histogram_snippet(
   """Render a HTML snippet containing jmap histogram output of container."""
   # use a function to DRY up these container API methods
   physical_plan = tracker.get_physical_plan(cluster, environment, topology)
-  host = physical_plan["stmgrs"][physical_plan["instances"][instance]["stmgrId"]][
+  host = physical_plan["stmgrs"][physical_plan["instances"][instance]["stmgr_id"]][
       "host"
   ]
   info = tracker.get_instance_mem_histogram(
@@ -616,7 +628,9 @@ def cli(
   """Start a web UI for heron which renders information from the tracker."""
   global base_url, tracker_url
   base_url = base_url_option
-  log.configure(level=logging.DEBUG if verbose else logging.INFO)
+  log_level = logging.DEBUG if verbose else logging.INFO
+  log.configure(log_level)
+  Log = log.Log
   tracker.tracker_url = tracker_url_option
 
   uvicorn.run(app, host=host, port=port, log_config=None)

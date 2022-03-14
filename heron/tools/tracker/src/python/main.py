@@ -37,7 +37,7 @@ import click
 import uvicorn
 
 Log = log.Log
-
+Log.setLevel(logging.DEBUG)
 
 def create_tracker_config(config_file: str, stmgr_override: dict) -> dict:
   # try to parse the config file if we find one
@@ -125,6 +125,7 @@ def cli(
 
   log_level = logging.DEBUG if verbose else logging.INFO
   log.configure(log_level)
+  Log = log.Log
 
   stmgr_override = {
       "type": stmgr_type,

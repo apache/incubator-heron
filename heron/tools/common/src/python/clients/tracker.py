@@ -126,10 +126,11 @@ def api_get(url: str, params=None) -> dict:
   """Make a GET request to a tracker URL and return the result."""
   start = time.time()
   try:
+    Log.debug(f"Requesting URL: {url} with params: {params}")
     response = requests.get(url, params)
     response.raise_for_status()
   except Exception as e:
-    Log.error(f"Unable to get response from {url}: {e}")
+    Log.error(f"Unable to get response from {url} with params {params}: {e}")
     return None
   end = time.time()
   data = response.json()
@@ -231,7 +232,6 @@ def get_component_exceptionsummary(
     environ: str,
     topology: str,
     component: str,
-    instance: str,
     role: Optional[str]=None,
 ) -> Any:
   """Get summary of exception for a component."""
@@ -242,18 +242,15 @@ def get_component_exceptionsummary(
       "topology": topology,
       "role": role,
       "component": component,
-      "instance": instance,
-      "summary": True,
   }
   return api_get(base_url, params)
 
 
-def get_comp_instance_exceptions(
+def get_component_exceptions(
     cluster: str,
     environ: str,
     topology: str,
     component: str,
-    instance: str,
     role: Optional[str]=None,
 ) -> Any:
   """Get exceptions for 'component' for 'topology'."""
@@ -264,8 +261,6 @@ def get_comp_instance_exceptions(
       "topology": topology,
       "role": role,
       "component": component,
-      "instance": instance,
-      "summary": False,
   }
   return api_get(base_url, params)
 

@@ -22,6 +22,7 @@
 ''' pidhandler.py '''
 import json
 import tornado.web
+import subprocess
 
 from heron.shell.src.python import utils
 
@@ -33,5 +34,9 @@ class PidHandler(tornado.web.RequestHandler):
   # pylint: disable=attribute-defined-outside-init
   async def get(self, instance_id):
     ''' get method '''
-    self.content_type = 'application/json'
-    await self.finish(json.dumps(utils.chain([['cat', "%s.pid" % instance_id]])).strip())
+    pid = subprocess.run(['cat', "%s.pid" % instance_id], capture_output=True, text=True)
+    await self.finish({
+      'command': ' '.join(pid.args),
+      'stdout': pid.stdout,
+      'stderr': pid.stderr,
+      })

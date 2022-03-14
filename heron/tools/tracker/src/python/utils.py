@@ -64,10 +64,10 @@ def make_shell_endpoint(topology_info: dict, instance_id: int) -> str:
 
   """
   # Format: container_<id>_<instance_id>
-  pplan = topology_info["physical_plan"]
-  stmgrId = pplan["instances"][instance_id]["stmgrId"]
-  host = pplan["stmgrs"][stmgrId]["host"]
-  shell_port = pplan["stmgrs"][stmgrId]["shell_port"]
+  pplan = topology_info.physical_plan
+  stmgrId = pplan.instances[instance_id].stmgr_id
+  host = pplan.stmgrs[stmgrId].host
+  shell_port = pplan.stmgrs[stmgrId].shell_port
   return f"http://{host}:{shell_port}"
 
 def make_shell_job_url(host: str, shell_port: int, _) -> Optional[str]:
