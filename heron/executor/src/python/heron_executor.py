@@ -412,7 +412,7 @@ class HeronExecutor:
   # pylint: disable=no-self-use
   def _load_logging_dir(self, heron_internals_config_file):
     with open(heron_internals_config_file, 'r') as stream:
-      heron_internals_config = yaml.load(stream)
+      heron_internals_config = yaml.safe_load(stream)
     return heron_internals_config['heron.logging.directory']
 
   def _get_metricsmgr_cmd(self, metricsManagerId, sink_config_file, port):
@@ -602,7 +602,7 @@ class HeronExecutor:
              "cache size: %dM, metaspace size: %dM"
              % (component_name, self.component_ram_map[component_name],
                 total_jvm_size, code_cache_size_mb, java_metasize_mb))
-    # xmn_size = int(heap_size_mb / 2)
+    xmn_size = int(heap_size_mb / 2)
 
     java_version = self._get_jvm_version()
     java_metasize_param = 'MetaspaceSize'
@@ -610,11 +610,15 @@ class HeronExecutor:
             java_version.startswith("1.6") or \
             java_version.startswith("1.5"):
       java_metasize_param = 'PermSize'
+    xmn_param = '-Xmn%dM' % xmn_size
+    if self._get_java_major_version() >= 11:
+        # Remove '-Xmn'
+        xmn_param = None
 
     instance_options = [
         '-Xmx%dM' % heap_size_mb,
         '-Xms%dM' % heap_size_mb,
-        # '-Xmn%dM' % xmn_size,
+        xmn_param,
         '-XX:Max%s=%dM' % (java_metasize_param, java_metasize_mb),
         '-XX:%s=%dM' % (java_metasize_param, java_metasize_mb),
         '-XX:ReservedCodeCacheSize=%dM' % code_cache_size_mb,
@@ -635,7 +639,7 @@ class HeronExecutor:
     if component_name in self.component_jvm_opts:
       instance_options.extend(self.component_jvm_opts[component_name].split())
 
-    return instance_options
+    return list(filter(None, instance_options))
 
   def _get_jvm_instance_arguments(self, instance_id, component_name, global_task_id,
                                   component_index, remote_debugger_port):
@@ -1058,7 +1062,7 @@ class HeronExecutor:
     Log.info("Start state manager watches")
 
     with open(self.override_config_file, 'r') as stream:
-      overrides = yaml.load(stream)
+      overrides = yaml.safe_load(stream)
       if overrides is None:
         overrides = {}
     overrides["heron.statemgr.connection.string"] = self.state_manager_connection

@@ -4,6 +4,7 @@ package(default_visibility = ["//visibility:public"])
 
 dlog_deps = [
     "//third_party/java:dlog-java",
+    "@maven//:org_slf4j_log4j_over_slf4j",
     "@maven//:io_netty_netty_all",
 ]
 

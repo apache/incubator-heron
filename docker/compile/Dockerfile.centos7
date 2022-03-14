@@ -41,6 +41,7 @@ RUN yum -y install \
       wget \
       which \
       tree \
+      ant \
       java-11-openjdk \
       java-11-openjdk-devel
 

@@ -43,7 +43,9 @@ powermock_version = "1.6.2"
 
 reef_version = "0.14.0"
 
-slf4j_version = "1.7.30"
+slf4j_version = "1.7.36"
+
+logback_verison = "1.2.11"
 
 distributedlog_version = "4.13.0"
 
@@ -65,6 +67,11 @@ maven_jar_migrator_repositories()
 maven_install(
     name = "maven",
     artifacts = [
+        "org.slf4j:slf4j-api:%s" % slf4j_version,
+        "org.slf4j:log4j-over-slf4j:%s" % slf4j_version,
+        "org.slf4j:jul-to-slf4j:%s" % slf4j_version,
+        "org.slf4j:jcl-over-slf4j:%s" % slf4j_version,
+        "ch.qos.logback:logback-classic:%s" % logback_verison,
         "antlr:antlr:2.7.7",
         "org.apache.zookeeper:zookeeper:3.6.3",
         "io.kubernetes:client-java:" + kubernetes_client_version,
@@ -81,7 +88,7 @@ maven_install(
         "org.apache.httpcomponents:httpclient:" + http_client_version,
         "org.apache.httpcomponents:httpmime:" + http_client_version,
         "com.google.apis:google-api-services-storage:v1-rev108-1.22.0",
-        "com.microsoft.dhalion:dhalion:0.2.3",
+        "com.microsoft.dhalion:dhalion:0.2.6",
         "org.objenesis:objenesis:2.1",
         "com.amazonaws:aws-java-sdk-s3:" + aws_version,
         "org.eclipse.jetty:jetty-server:" + jetty_version,
@@ -104,9 +111,6 @@ maven_install(
         "org.apache.curator:curator-framework:" + curator_version,
         "org.apache.curator:curator-recipes:" + curator_version,
         "org.apache.curator:curator-client:" + curator_version,
-        "org.slf4j:slf4j-api:" + slf4j_version,
-        "org.slf4j:slf4j-jdk14:" + slf4j_version,
-        "log4j:log4j:1.2.17",
         "org.yaml:snakeyaml:1.15",
         "tech.tablesaw:tablesaw-core:0.11.4",
         "org.glassfish.hk2.external:aopalliance-repackaged:2.5.0-b32",
@@ -116,11 +120,11 @@ maven_install(
         "commons-cli:commons-cli:1.3.1",
         "org.apache.commons:commons-compress:1.14",
         "com.jayway.jsonpath:json-path:2.1.0",
-        "com.fasterxml.jackson.core:jackson-core:" + jackson_version,
-        "com.fasterxml.jackson.core:jackson-annotations:" + jackson_version,
-        "com.fasterxml.jackson.core:jackson-databind:" + jackson_version,
-        "com.fasterxml.jackson.jaxrs:jackson-jaxrs-base:2.8.8",
-        "com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider:2.8.8",
+        "com.fasterxml.jackson.core:jackson-core:%s" % jackson_version,
+        "com.fasterxml.jackson.core:jackson-annotations:%s" % jackson_version,
+        "com.fasterxml.jackson.core:jackson-databind:%s" % jackson_version,
+        "com.fasterxml.jackson.jaxrs:jackson-jaxrs-base:%s" % jackson_version,
+        "com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider:%s" % jackson_version,
         "javax.xml.bind:jaxb-api:2.3.0",
         "javax.activation:activation:1.1.1",
         "org.mockito:mockito-all:1.10.19",
@@ -143,12 +147,18 @@ maven_install(
         "https://maven.google.com",
         "https://repo1.maven.org/maven2",
     ],
+    excluded_artifacts = [
+        "org.slf4j:slf4j-jdk14",
+        "org.slf4j:slf4j-log4j12",
+        "log4j:log4j",
+        "commons-logging:commons-logging",
+    ],
     version_conflict_policy = "pinned",
 )
 
 # https://github.com/bazelbuild/rules_jvm_external#updating-maven_installjson
 # To update `maven_install.json` run the following command:
-# `bazel run @unpinned_maven//:pin`
+# `REPIN=1 bazel run @unpinned_maven//:pin`
 load("@maven//:defs.bzl", "pinned_maven_install")
 
 pinned_maven_install()
