@@ -112,7 +112,6 @@ spec:
                       values:
                         - {{ .Release.Name }}-bookkeeper
                 topologyKey: "kubernetes.io/hostname"
-{{- end }}
       terminationGracePeriodSeconds: 0
 
 {{- if or .Release.IsInstall .Values.initialize}}
@@ -148,6 +147,7 @@ spec:
               mountPath: /bookkeeper/data/journal
             - name: ledgers-disk
               mountPath: /bookkeeper/data/ledgers
+{{- end }}
 {{- end }}
       containers:
         - name: bookie
