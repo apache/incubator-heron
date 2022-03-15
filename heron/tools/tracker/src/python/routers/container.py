@@ -199,19 +199,20 @@ async def get_exceptions(  # pylint: disable=too-many-arguments
   exception_response = await _get_exception_log_response(
       cluster, role, environ, component, instances, topology_name, summary=False
   )
+  print(f"NICK: exception response: {exception_response}")
 
-  return [
-      ExceptionLog(
-          hostname=exception_log.hostname,
-          instance_id=exception_log.instance_id,
-          stack_trace=exception_log.stacktrace,
-          lasttime=exception_log.lasttime,
-          firsttime=exception_log.firsttime,
-          count=str(exception_log.count),
-          logging=exception_log.logging,
-      )
-      for exception_log in exception_response.exceptions
-  ]
+  ret = []
+  for exception_log in exception_response.exceptions:
+    ret.append(ExceptionLog(
+      hostname = exception_log.hostname,
+      instance_id = exception_log.instance_id,
+      stacktrace = exception_log.stacktrace,
+      lasttime = exception_log.lasttime,
+      firsttime = exception_log.firsttime,
+      count = str(exception_log.count),
+      logging = exception_log.logging,
+    ))
+  return ret
 
 
 class ExceptionSummaryItem(BaseModel):

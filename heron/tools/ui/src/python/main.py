@@ -309,6 +309,34 @@ def file_download(
       headers={"Content-Disposition": f"attachment; filename={filename}"},
   )
 
+# List envelope for Exceptions response
+class ApiListEnvelope(pydantic.BaseModel):
+  """Envelope for heron-ui JSON API."""
+  status: str
+  message: str
+  version: str = VERSION
+  executiontime: int
+  result: list
+
+def api_topology_list_json(method: Callable[[], dict]) -> ApiListEnvelope:
+  """Wrap the output of a method with a response envelope."""
+  started = time.time()
+  result = method()
+  Log.debug(f"Api topology: {result}")
+  if type(result) is None:
+    return ApiEnvelope(
+      status="failure",
+      message="No topology found",
+      executiontime=time.time() - started,
+      result={},
+    )
+  else:
+    return ApiListEnvelope(
+        status="success",
+        message="",
+        executiontime=time.time() - started,
+        result=result,
+    )
 
 # topology list and plan handlers
 class ApiEnvelope(pydantic.BaseModel):
@@ -323,7 +351,6 @@ def api_topology_json(method: Callable[[], dict]) -> ApiEnvelope:
   """Wrap the output of a method with a response envelope."""
   started = time.time()
   result = method()
-  print(f"NICK: API Topology result: {type(result)}: {result}")
   Log.debug(f"Api topology: {result}")
   if type(result) is None:
     return ApiEnvelope(
@@ -411,14 +438,13 @@ def scheduler_location_json(cluster: str, environment: str, topology: str) -> Ap
 
 @topologies_router.get(
     "/{cluster}/{environment}/{topology}/{component}/exceptions.json",
-    response_model=ApiEnvelope,
+    response_model=ApiListEnvelope,
 )
-def exceptions_json(cluster: str, environment: str, topology: str, component: str) -> ApiEnvelope:
+def exceptions_json(cluster: str, environment: str, topology: str, component: str) -> ApiListEnvelope:
   """Return a list of exceptions for a component."""
-  return api_topology_json(lambda: tracker.get_component_exceptions(
+  return api_topology_list_json(lambda: tracker.get_component_exceptions(
       cluster, environment, topology, component,
   ))
-
 
 @topologies_router.get(
     "/{cluster}/{environment}/{topology}/{component}/exceptionsummary.json",

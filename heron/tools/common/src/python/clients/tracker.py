@@ -122,7 +122,7 @@ queries = dict(
     backpressure=backpressure
 )
 
-def api_get(url: str, params=None) -> dict:
+def api_get(url: str, params=None) -> Any:
   """Make a GET request to a tracker URL and return the result."""
   start = time.time()
   try:

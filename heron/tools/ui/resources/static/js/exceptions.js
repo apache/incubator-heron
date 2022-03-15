@@ -109,7 +109,7 @@ var InstanceExceptionLogs = React.createClass({
     var uniqExceptions = {};
 
     for (i = 0; i < exceptionLogs.length; ++i) {
-      var trace = exceptionLogs[i].stack_trace;
+      var trace = exceptionLogs[i].stacktrace;
       var tokens = trace.split("\n", 3);
       if (filterId != 'All' && filterId != exceptionLogs[i].instance_id) {
         continue;
@@ -124,7 +124,7 @@ var InstanceExceptionLogs = React.createClass({
           fontSize: '80%',
         }
         uniqExceptions[key] = {'instance': exceptionLogs[i].instance_id,
-                               'stack_trace': (<pre style={exceptionStyle}>{trace}</pre>),
+                               'stacktrace': (<pre style={exceptionStyle}>{trace}</pre>),
                                'count': parseFloat(exceptionLogs[i].count),
                                'firsttime': exceptionLogs[i].firsttime,
                                'lasttime': exceptionLogs[i].lasttime,
@@ -176,8 +176,8 @@ var InstanceExceptionLogs = React.createClass({
           mainLinks = mainLinks.concat([['Logs', logfile], ['Aurora', jobUrl], ['Host', host]]);
         }
       }
-      row = [ exceptionLogs[i].stack_trace,
-              exceptionLogs[i].instance,
+      row = [ exceptionLogs[i].stacktrace,
+              exceptionLogs[i].instance_id,
               exceptionLogs[i].firsttime,
               exceptionLogs[i].lasttime,
               exceptionLogs[i].count,
