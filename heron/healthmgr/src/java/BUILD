@@ -23,6 +23,7 @@ healthmgr_deps_files = [
     "//heron/spi/src/java:metricsmgr-spi-java",
     "//heron/scheduler-core/src/java:scheduler-java",
     "//third_party/java:jackson",
+    "//third_party/java:logging",
     "@maven//:commons_cli_commons_cli",
     "@maven//:com_fasterxml_jackson_jaxrs_jackson_jaxrs_json_provider",
     "@maven//:com_fasterxml_jackson_jaxrs_jackson_jaxrs_base",
