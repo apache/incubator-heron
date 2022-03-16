@@ -379,13 +379,16 @@ public class PrometheusSink extends AbstractWebSink {
     return null;
   }
 
+  private static final Pattern NUMBER_FORMAT_RE = Pattern.compile("^[0-9eE\\-.]+$");
   static Map<String, Double> processMetrics(Iterable<MetricsInfo> metrics) {
     Map<String, Double> map = new HashMap<>();
     for (MetricsInfo r : metrics) {
       try {
-        map.put(r.getName(), Double.valueOf(r.getValue()));
+        if (NUMBER_FORMAT_RE.matcher(r.getValue()).matches()) {
+          map.put(r.getName(), Double.valueOf(r.getValue()));
+        }
       } catch (NumberFormatException ne) {
-        LOG.log(Level.SEVERE, "Could not parse metric, Name: "
+        LOG.log(Level.INFO, "Could not parse metric, Name: "
             + r.getName() + " Value: " + r.getValue(), ne);
       }
     }
