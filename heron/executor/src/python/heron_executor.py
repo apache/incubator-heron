@@ -612,8 +612,8 @@ class HeronExecutor:
       java_metasize_param = 'PermSize'
     xmn_param = '-Xmn%dM' % xmn_size
     if self._get_java_major_version() >= 11:
-        # Remove '-Xmn'
-        xmn_param = None
+      # Remove '-Xmn'
+      xmn_param = None
 
     instance_options = [
         '-Xmx%dM' % heap_size_mb,
