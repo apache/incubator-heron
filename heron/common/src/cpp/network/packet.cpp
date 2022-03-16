@@ -144,12 +144,12 @@ sp_int32 IncomingPacket::InternalRead(struct bufferevent* _buf, char* _buffer, s
     return 1;
   }
   int removed = evbuffer_remove(bufferevent_get_input(_buf), _buffer, _size);
-  if (removed != _size) {
-    LOG(ERROR) << "evbuffer remove failed. Expected to remove " << _size
-               << " but removed only " << removed;
-    return -1;
+  if (removed >= 0 && ((unsigned) removed) == _size) {
+    return 0;
   }
-  return 0;
+  LOG(ERROR) << "evbuffer remove failed. Expected to remove " << _size
+             << " but removed only " << removed;
+  return -1;
 }
 
 OutgoingPacket::OutgoingPacket(sp_uint32 _packet_size) {
