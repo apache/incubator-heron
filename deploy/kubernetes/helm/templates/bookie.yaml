@@ -29,7 +29,6 @@
 {{- $bookieStorageCapacity := .Values.bookieStorageCapacity }}
 {{- $bookieStorageHostPath := .Values.bookieStorageHostPath }}
 
-{{- if or .Release.IsInstall .Values.initialize}}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -115,6 +114,8 @@ spec:
                 topologyKey: "kubernetes.io/hostname"
 {{- end }}
       terminationGracePeriodSeconds: 0
+
+{{- if or .Release.IsInstall .Values.initialize}}
       initContainers:
         # Wait until the zookeeper pods are up and running
         - name: bookie-init-container
@@ -132,6 +133,7 @@ spec:
                 echo 'Zookeeper {{ .Release.Name }}-zookeeper:{{ .Values.zookeeper.clientPort }} not ready';
                 sleep 4;
               done
+{{ end }}
 {{- if eq .Values.platform "minikube" }}
         # The first time, initialize BK to wipe data for minikube
         - name: bookie-format
@@ -238,5 +240,3 @@ spec:
   selector:
     app: {{ .Release.Name }}-bookkeeper
     component: {{ .Release.Name }}-bookie
-
-{{- end }}
