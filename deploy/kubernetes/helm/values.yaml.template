@@ -33,6 +33,8 @@ image: apache/heron:VERSION
 # Heron image pull policy
 imagePullPolicy: IfNotPresent
 
+initialize: false
+
 # Number of replicas for the job binary in bookkeeper
 jobReplicas: 1
 
