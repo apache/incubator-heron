@@ -29,6 +29,7 @@
 {{- $bookieStorageCapacity := .Values.bookieStorageCapacity }}
 {{- $bookieStorageHostPath := .Values.bookieStorageHostPath }}
 
+{{- if or .Release.IsInstall .Values.initialize}}
 apiVersion: v1
 kind: ConfigMap
 metadata:
