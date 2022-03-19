@@ -116,7 +116,6 @@ spec:
                 topologyKey: "kubernetes.io/hostname"
       terminationGracePeriodSeconds: 0
 {{- end }}
-{{- if or .Release.IsInstall .Values.initialize}}
       initContainers:
         # Wait until the zookeeper pods are up and running
         - name: bookie-init-container
@@ -134,7 +133,6 @@ spec:
                 echo 'Zookeeper {{ .Release.Name }}-zookeeper:{{ .Values.zookeeper.clientPort }} not ready';
                 sleep 4;
               done
-{{- end }}
       containers:
         - name: bookie
           image: {{ .Values.bookkeeper.image }}
