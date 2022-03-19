@@ -238,3 +238,5 @@ spec:
   selector:
     app: {{ .Release.Name }}-bookkeeper
     component: {{ .Release.Name }}-bookie
+
+{{- end }}
