@@ -19,6 +19,9 @@
 
 ## A reference of https://github.com/apache/incubator-pulsar/blob/master/kubernetes/google-container-engine/bookie.yaml
 
+
+{{- if or .Release.IsInstall .Values.initialize}}
+
 {{- $platform := .Values.platform }}
 {{- $bookieReplicas := .Values.bookieReplicas }}
 {{- $bookieCpuMin := .Values.bookieCpuMin }}
@@ -113,8 +116,7 @@ spec:
                         - {{ .Release.Name }}-bookkeeper
                 topologyKey: "kubernetes.io/hostname"
       terminationGracePeriodSeconds: 0
-
-{{- if or .Release.IsInstall .Values.initialize}}
+{{- end }}
       initContainers:
         # Wait until the zookeeper pods are up and running
         - name: bookie-init-container
@@ -132,7 +134,6 @@ spec:
                 echo 'Zookeeper {{ .Release.Name }}-zookeeper:{{ .Values.zookeeper.clientPort }} not ready';
                 sleep 4;
               done
-{{ end }}
 {{- if eq .Values.platform "minikube" }}
         # The first time, initialize BK to wipe data for minikube
         - name: bookie-format
@@ -147,7 +148,6 @@ spec:
               mountPath: /bookkeeper/data/journal
             - name: ledgers-disk
               mountPath: /bookkeeper/data/ledgers
-{{- end }}
 {{- end }}
       containers:
         - name: bookie
@@ -240,3 +240,4 @@ spec:
   selector:
     app: {{ .Release.Name }}-bookkeeper
     component: {{ .Release.Name }}-bookie
+{{- end }}
