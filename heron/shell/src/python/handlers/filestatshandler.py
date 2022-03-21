@@ -31,8 +31,7 @@ class FileStatsHandler(tornado.web.RequestHandler):
   """
   Get the file stats in JSON format given the path.
   """
-  @tornado.web.asynchronous
-  def get(self, path):
+  async def get(self, path):
     ''' get method '''
     path = tornado.escape.url_unescape(path)
     if not path:
@@ -43,9 +42,8 @@ class FileStatsHandler(tornado.web.RequestHandler):
     # sandboxing. So we don't allow absolute paths and parent
     # accessing.
     if not utils.check_path(path):
-      self.write("Only relative paths are allowed")
       self.set_status(403)
-      self.finish()
+      await self.finish("Only relative paths are allowed")
       return
 
     listing = utils.get_listing(path)
@@ -69,5 +67,4 @@ class FileStatsHandler(tornado.web.RequestHandler):
             file_stats[fn]["path"] = tornado.escape.url_escape("/".join(path_fragments[:-1]))
       except:
         continue
-    self.write(json.dumps(file_stats))
-    self.finish()
+    await self.finish(json.dumps(file_stats))

@@ -16,25 +16,29 @@
 #  under the License.
 
 #syntax=docker/dockerfile:1.2
-FROM centos:centos8
+FROM centos:centos7
 
+ENV TARGET_PLATFORM linux
 ENV LC_ALL en_US.utf8
 
+RUN yum -y upgrade && yum -y install centos-release-scl-rh
 RUN yum -y install epel-release \
     && yum -y install \
     curl \
     java-11-openjdk-headless \
     supervisor \
     nmap-ncat \
-    python39 \
-    python39-setuptools \
+    rh-python38-python \
+    rh-python38-python-devel \
     unzip \
     which \
     && yum clean all
 
 ENV JAVA_HOME /usr/
 
-RUN update-alternatives --set python /usr/bin/python3.9
+RUN /usr/bin/ln -sfT /opt/rh/rh-python38/root/usr/bin/python3 /usr/bin/python \
+      && /usr/bin/ln -sfT /opt/rh/rh-python38/root/usr/bin/python3 /usr/bin/python3 \
+      && /usr/bin/ln -sfT /opt/rh/rh-python38/root/usr/bin/python3.8 /usr/bin/python3.8
 
 # run Heron installer
 RUN --mount=type=bind,source=artifacts,target=/tmp/heron /tmp/heron/heron-install.sh \

@@ -25,7 +25,7 @@ function platform {
    *)
      echo "WARNING: Your platform is not currently supported!" >&2
      echo "Currently supported platforms are:" >&2
-     echo "  darwin, ubuntu, and centos"
+     echo "  darwin, ubuntu, rocky and centos"
      exit 1
      ;;
  esac

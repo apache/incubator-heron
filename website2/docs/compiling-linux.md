@@ -22,12 +22,12 @@ sidebar_label: Compiling on Linux
 
 Heron can currently be built on the following Linux platforms:
 
-* [Ubuntu 18.04](#building-on-ubuntu-18.04)
-* [CentOS 7](#building-on-centos-7)
+* [Ubuntu 20.04](#building-on-ubuntu-20.04)
+* [Rocky 8](#building-on-rocky-8)
 
-## Building on Ubuntu 18.04
+## Building on Ubuntu 20.04
 
-To build Heron on a fresh Ubuntu 18.04 installation:
+To build Heron on a fresh Ubuntu 20.04 installation:
 
 ### Step 1 --- Update Ubuntu
 
@@ -147,9 +147,9 @@ $ make
 $ sudo make install
 ```
 
-## Building on CentOS 7
+## Building on Rocky 8
 
-To build Heron on a fresh CentOS 7 installation:
+To build Heron on a fresh Rocky 8 installation:
 
 ### Step 1 --- Install the required dependencies
 
