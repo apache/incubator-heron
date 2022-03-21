@@ -19,7 +19,7 @@ java_library(
         "@maven//:com_fasterxml_jackson_core_jackson_core",
         "@maven//:com_fasterxml_jackson_core_jackson_databind",
         "@maven//:commons_codec_commons_codec",
-        "@maven//:commons_logging_commons_logging",
+        "@maven//:org_slf4j_jcl_over_slf4j",
         "@maven//:org_apache_httpcomponents_httpclient",
         "@maven//:org_apache_httpcomponents_httpcore",
     ],
@@ -36,7 +36,7 @@ java_library(
         "@maven//:commons_beanutils_commons_beanutils",
         "@maven//:commons_cli_commons_cli",
         "@maven//:commons_collections_commons_collections",
-        "@maven//:commons_logging_commons_logging",
+        "@maven//:org_slf4j_jcl_over_slf4j",
     ],
 )
 
@@ -75,7 +75,9 @@ java_library(
     exports = ["@maven//:org_slf4j_slf4j_api"],
     deps = [
         "@maven//:org_slf4j_slf4j_api",
-        "@maven//:org_slf4j_slf4j_jdk14",
+        "@maven//:org_slf4j_jul_to_slf4j",
+        "@maven//:org_slf4j_log4j_over_slf4j",
+        "@maven//:org_slf4j_jcl_over_slf4j",
     ],
 )
 
@@ -207,7 +209,7 @@ java_library(
         "@maven//:com_google_http_client_google_http_client_jackson2",
         "@maven//:com_google_oauth_client_google_oauth_client",
         "@maven//:commons_codec_commons_codec",
-        "@maven//:commons_logging_commons_logging",
+        "@maven//:org_slf4j_jcl_over_slf4j",
         "@maven//:org_apache_httpcomponents_httpclient",
         "@maven//:org_apache_httpcomponents_httpcore",
     ],
@@ -241,7 +243,7 @@ java_library(
         "@maven//:io_kubernetes_client_java_api_fluent",
         "@maven//:io_kubernetes_client_java_proto",
         "@maven//:io_swagger_swagger_annotations",
-        "@maven//:log4j_log4j",
+        "@maven//:org_slf4j_log4j_over_slf4j",
         "@maven//:org_yaml_snakeyaml",
     ],
     deps = [
@@ -257,7 +259,7 @@ java_library(
         "@maven//:io_kubernetes_client_java_api",
         "@maven//:io_kubernetes_client_java_proto",
         "@maven//:io_swagger_swagger_annotations",
-        "@maven//:log4j_log4j",
+        "@maven//:org_slf4j_log4j_over_slf4j",
         "@maven//:org_yaml_snakeyaml",
     ],
 )
@@ -347,14 +349,15 @@ java_library(
         "@maven//:org_apache_distributedlog_distributedlog_protocol",
     ],
     deps = [
+        "@maven//:org_slf4j_slf4j_api",
+        "@maven//:org_slf4j_jul_to_slf4j",
+        "@maven//:org_slf4j_log4j_over_slf4j",
+        "@maven//:org_slf4j_jcl_over_slf4j",
         "@maven//:commons_collections_commons_collections",
         "@maven//:commons_configuration_commons_configuration",
         "@maven//:commons_lang_commons_lang",
-        "@maven//:commons_logging_commons_logging",
         "@maven//:io_netty_netty_all",
         "@maven//:org_apache_distributedlog_distributedlog_core",
         "@maven//:org_apache_distributedlog_distributedlog_protocol",
-        "@maven//:org_slf4j_slf4j_api",
-        "@maven//:org_slf4j_slf4j_jdk14",
     ],
 )
