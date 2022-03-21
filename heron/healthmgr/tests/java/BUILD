@@ -34,6 +34,7 @@ test_deps_files = \
         "@maven//:javax_annotation_javax_annotation_api",
         "@maven//:org_glassfish_hk2_external_javax_inject",
         "@maven//:javax_ws_rs_javax_ws_rs_api",
+        "@maven//:javax_activation_activation",
         "@maven//:net_minidev_json_smart",
         "@maven//:org_apache_commons_commons_math3",
         "@maven//:org_glassfish_hk2_hk2_api",
