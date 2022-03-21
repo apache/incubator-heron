@@ -610,11 +610,15 @@ class HeronExecutor:
             java_version.startswith("1.6") or \
             java_version.startswith("1.5"):
       java_metasize_param = 'PermSize'
+    xmn_param = '-Xmn%dM' % xmn_size
+    if self._get_java_major_version() >= 11:
+      # Remove '-Xmn'
+      xmn_param = None
 
     instance_options = [
         '-Xmx%dM' % heap_size_mb,
         '-Xms%dM' % heap_size_mb,
-        '-Xmn%dM' % xmn_size,
+        xmn_param,
         '-XX:Max%s=%dM' % (java_metasize_param, java_metasize_mb),
         '-XX:%s=%dM' % (java_metasize_param, java_metasize_mb),
         '-XX:ReservedCodeCacheSize=%dM' % code_cache_size_mb,
@@ -635,7 +639,7 @@ class HeronExecutor:
     if component_name in self.component_jvm_opts:
       instance_options.extend(self.component_jvm_opts[component_name].split())
 
-    return instance_options
+    return list(filter(None, instance_options))
 
   def _get_jvm_instance_arguments(self, instance_id, component_name, global_task_id,
                                   component_index, remote_debugger_port):
