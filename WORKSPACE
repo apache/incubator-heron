@@ -254,9 +254,9 @@ http_file(
 # protobuf dependencies for C++ and Java
 http_archive(
     name = "com_google_protobuf",
-    sha256 = "03d2e5ef101aee4c2f6ddcf145d2a04926b9c19e7086944df3842b1b8502b783",
-    strip_prefix = "protobuf-3.8.0",
-    urls = ["https://github.com/protocolbuffers/protobuf/archive/v3.8.0.tar.gz"],
+    sha256 = "fb9158b00b2df4949f66da0bb8a9eaf662b842c7987d096b260759d629805d7f",
+    strip_prefix = "protobuf-3.16.1",
+    urls = ["https://github.com/protocolbuffers/protobuf/archive/v3.16.1.tar.gz"],
 )
 # end protobuf dependencies for C++ and Java
 
