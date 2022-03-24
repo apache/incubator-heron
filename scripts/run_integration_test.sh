@@ -75,7 +75,6 @@ set -e
 
 # building tar packages
 DIR=`dirname $0`
-source ${DIR}/detect_os_type.sh
 bazel run -- scripts/packages:heron-install.sh --user
 bazel build {heron/...,scripts/packages:tarpkgs,integration_test/src/...}
 
