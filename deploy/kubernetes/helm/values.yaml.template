@@ -33,6 +33,15 @@ image: apache/heron:VERSION
 # Heron image pull policy
 imagePullPolicy: IfNotPresent
 
+# Optional Variables
+useHostNameAsBookieID: true
+useStatefulSet: true
+createReplicas: true
+affinityPods: false
+mountLocalDisk: false
+formatDisks: true
+tolerateUnreadyEndpoints: true
+
 # Number of replicas for the job binary in bookkeeper
 jobReplicas: 1
 
