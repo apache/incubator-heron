@@ -109,6 +109,7 @@ maven_install(
         "com.google.inject:guice:5.1.0",
         "com.google.inject.extensions:guice-assistedinject:5.1.0",
         "com.google.guava:guava:23.6-jre",
+        "com.google.protobuf:protobuf-java:3.16.1",
         "io.gsonfire:gson-fire:1.8.3",
         "org.apache.curator:curator-framework:" + curator_version,
         "org.apache.curator:curator-recipes:" + curator_version,
@@ -135,12 +136,18 @@ maven_install(
         "com.puppycrawl.tools:checkstyle:6.17",
         "com.googlecode.json-simple:json-simple:1.1",
         maven.artifact(
-            group = "org.apache.httpcomponents",
             artifact = "httpclient",
-            version = http_client_version,
             classifier = "tests",
+            group = "org.apache.httpcomponents",
             packaging = "test-jar",
+            version = http_client_version,
         ),
+    ],
+    excluded_artifacts = [
+        "org.slf4j:slf4j-jdk14",
+        "org.slf4j:slf4j-log4j12",
+        "log4j:log4j",
+        "commons-logging:commons-logging",
     ],
     fetch_sources = True,
     maven_install_json = "//:maven_install.json",
@@ -148,12 +155,6 @@ maven_install(
         "https://jcenter.bintray.com",
         "https://maven.google.com",
         "https://repo1.maven.org/maven2",
-    ],
-    excluded_artifacts = [
-        "org.slf4j:slf4j-jdk14",
-        "org.slf4j:slf4j-log4j12",
-        "log4j:log4j",
-        "commons-logging:commons-logging",
     ],
     version_conflict_policy = "pinned",
 )
@@ -169,7 +170,7 @@ load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
 
 git_repository(
     name = "com_github_johnynek_bazel_jar_jar",
-    commit = "171f268569384c57c19474b04aebe574d85fde0d", # Latest commit SHA as at 2019/02/13
+    commit = "171f268569384c57c19474b04aebe574d85fde0d",  # Latest commit SHA as at 2019/02/13
     remote = "https://github.com/johnynek/bazel_jar_jar.git",
     shallow_since = "1594234634 -1000",
 )
@@ -178,6 +179,7 @@ load(
     "@com_github_johnynek_bazel_jar_jar//:jar_jar.bzl",
     "jar_jar_repositories",
 )
+
 jar_jar_repositories()
 
 http_archive(
@@ -395,6 +397,7 @@ load(
     "@io_bazel_rules_docker//repositories:repositories.bzl",
     container_repositories = "repositories",
 )
+
 container_repositories()
 
 load("@io_bazel_rules_docker//repositories:deps.bzl", container_deps = "deps")
@@ -421,13 +424,15 @@ container_pull(
 
 http_archive(
     name = "rules_pkg",
+    sha256 = "aeca78988341a2ee1ba097641056d168320ecc51372ef7ff8e64b139516a4937",
     urls = [
         "https://github.com/bazelbuild/rules_pkg/releases/download/0.2.6/rules_pkg-0.2.6.tar.gz",
         "https://mirror.bazel.build/github.com/bazelbuild/rules_pkg/releases/download/0.2.6/rules_pkg-0.2.6.tar.gz",
     ],
-    sha256 = "aeca78988341a2ee1ba097641056d168320ecc51372ef7ff8e64b139516a4937",
 )
+
 load("@rules_pkg//:deps.bzl", "rules_pkg_dependencies")
+
 rules_pkg_dependencies()
 
 # scala integration
@@ -435,8 +440,8 @@ rules_scala_version = "358ab829626c6c2d34ec27f856485d3121e299c7"  # Jan 15 2020 
 
 http_archive(
     name = "io_bazel_rules_scala",
-    strip_prefix = "rules_scala-%s" % rules_scala_version,
     sha256 = "5abd638278de10ccccb0b4d614158f394278b828708ba990461334ecc01529a6",
+    strip_prefix = "rules_scala-%s" % rules_scala_version,
     type = "zip",
     url = "https://github.com/bazelbuild/rules_scala/archive/%s.zip" % rules_scala_version,
 )
