@@ -20,6 +20,7 @@ workspace(name = "org_apache_heron")
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive", "http_file")
 
 RULES_JVM_EXTERNAL_TAG = "4.2"
+
 RULES_JVM_EXTERNAL_SHA = "cd1a77b7b02e8e008439ca76fd34f5b07aecb8c752961f9640dea15e9e5ba1ca"
 
 http_archive(
@@ -115,6 +116,7 @@ maven_install(
         "com.google.inject:guice:5.1.0",
         "com.google.inject.extensions:guice-assistedinject:5.1.0",
         "com.google.guava:guava:23.6-jre",
+        "com.google.protobuf:protobuf-java:3.16.1",
         "io.gsonfire:gson-fire:1.8.3",
         "org.apache.curator:curator-framework:" + curator_version,
         "org.apache.curator:curator-recipes:" + curator_version,
@@ -140,12 +142,18 @@ maven_install(
         "com.puppycrawl.tools:checkstyle:6.17",
         "com.googlecode.json-simple:json-simple:1.1",
         maven.artifact(
-            group = "org.apache.httpcomponents",
             artifact = "httpclient",
-            version = http_client_version,
             classifier = "tests",
+            group = "org.apache.httpcomponents",
             packaging = "test-jar",
+            version = http_client_version,
         ),
+    ],
+    excluded_artifacts = [
+        "org.slf4j:slf4j-jdk14",
+        "org.slf4j:slf4j-log4j12",
+        "log4j:log4j",
+        "commons-logging:commons-logging",
     ],
     fail_if_repin_required = True,
     fetch_sources = True,
@@ -155,12 +163,6 @@ maven_install(
         "https://maven.google.com",
         "https://repo1.maven.org/maven2",
     ],
-    excluded_artifacts = [
-        "org.slf4j:slf4j-jdk14",
-        "org.slf4j:slf4j-log4j12",
-        "log4j:log4j",
-        "commons-logging:commons-logging",
-    ],
     version_conflict_policy = "pinned",
 )
 
@@ -168,13 +170,14 @@ maven_install(
 # To update `maven_install.json` run the following command:
 # `REPIN=1 bazel run @unpinned_maven//:pin`
 load("@maven//:defs.bzl", "pinned_maven_install")
+
 pinned_maven_install()
 
 load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
 
 git_repository(
     name = "com_github_johnynek_bazel_jar_jar",
-    commit = "171f268569384c57c19474b04aebe574d85fde0d", # Latest commit SHA as at 2019/02/13
+    commit = "171f268569384c57c19474b04aebe574d85fde0d",  # Latest commit SHA as at 2019/02/13
     remote = "https://github.com/johnynek/bazel_jar_jar.git",
     shallow_since = "1594234634 -1000",
 )
@@ -183,6 +186,7 @@ load(
     "@com_github_johnynek_bazel_jar_jar//:jar_jar.bzl",
     "jar_jar_repositories",
 )
+
 jar_jar_repositories()
 
 http_archive(
@@ -285,9 +289,9 @@ http_file(
 # protobuf dependencies for C++ and Java
 http_archive(
     name = "com_google_protobuf",
-    sha256 = "03d2e5ef101aee4c2f6ddcf145d2a04926b9c19e7086944df3842b1b8502b783",
-    strip_prefix = "protobuf-3.8.0",
-    urls = ["https://github.com/protocolbuffers/protobuf/archive/v3.8.0.tar.gz"],
+    sha256 = "fb9158b00b2df4949f66da0bb8a9eaf662b842c7987d096b260759d629805d7f",
+    strip_prefix = "protobuf-3.16.1",
+    urls = ["https://github.com/protocolbuffers/protobuf/archive/v3.16.1.tar.gz"],
 )
 # end protobuf dependencies for C++ and Java
 
@@ -423,6 +427,7 @@ load(
     "@io_bazel_rules_docker//repositories:repositories.bzl",
     container_repositories = "repositories",
 )
+
 container_repositories()
 
 load("@io_bazel_rules_docker//repositories:deps.bzl", container_deps = "deps")
@@ -449,13 +454,15 @@ container_pull(
 
 http_archive(
     name = "rules_pkg",
+    sha256 = "aeca78988341a2ee1ba097641056d168320ecc51372ef7ff8e64b139516a4937",
     urls = [
         "https://github.com/bazelbuild/rules_pkg/releases/download/0.2.6/rules_pkg-0.2.6.tar.gz",
         "https://mirror.bazel.build/github.com/bazelbuild/rules_pkg/releases/download/0.2.6/rules_pkg-0.2.6.tar.gz",
     ],
-    sha256 = "aeca78988341a2ee1ba097641056d168320ecc51372ef7ff8e64b139516a4937",
 )
+
 load("@rules_pkg//:deps.bzl", "rules_pkg_dependencies")
+
 rules_pkg_dependencies()
 
 # scala integration
@@ -463,8 +470,8 @@ rules_scala_version = "358ab829626c6c2d34ec27f856485d3121e299c7"  # Jan 15 2020 
 
 http_archive(
     name = "io_bazel_rules_scala",
-    strip_prefix = "rules_scala-%s" % rules_scala_version,
     sha256 = "5abd638278de10ccccb0b4d614158f394278b828708ba990461334ecc01529a6",
+    strip_prefix = "rules_scala-%s" % rules_scala_version,
     type = "zip",
     url = "https://github.com/bazelbuild/rules_scala/archive/%s.zip" % rules_scala_version,
 )
