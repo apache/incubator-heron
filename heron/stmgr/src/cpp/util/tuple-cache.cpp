@@ -191,7 +191,7 @@ void TupleCache::TupleList::add_ack_tuple(sp_int32 _src_task_id,
     current_->set_src_task_id(_src_task_id);
     current_size_ = 0;
   }
-  sp_int64 tuple_size = _tuple.ByteSize();
+  sp_int64 tuple_size = _tuple.ByteSizeLong();
   current_size_ += tuple_size;
   *_total_size += tuple_size;
   current_->mutable_control()->add_acks()->CopyFrom(_tuple);
@@ -209,7 +209,7 @@ void TupleCache::TupleList::add_fail_tuple(sp_int32 _src_task_id,
     current_->set_src_task_id(_src_task_id);
     current_size_ = 0;
   }
-  sp_int64 tuple_size = _tuple.ByteSize();
+  sp_int64 tuple_size = _tuple.ByteSizeLong();
   current_size_ += tuple_size;
   *_total_size += tuple_size;
   current_->mutable_control()->add_fails()->CopyFrom(_tuple);
@@ -228,7 +228,7 @@ void TupleCache::TupleList::add_emit_tuple(sp_int32 _src_task_id,
     current_->set_src_task_id(_src_task_id);
     current_size_ = 0;
   }
-  sp_int64 tuple_size = _tuple.ByteSize();
+  sp_int64 tuple_size = _tuple.ByteSizeLong();
   current_size_ += tuple_size;
   *_total_size += tuple_size;
   current_->mutable_control()->add_emits()->CopyFrom(_tuple);
@@ -242,7 +242,7 @@ void TupleCache::TupleList::add_checkpoint_tuple(
     current_ = NULL;
     current_size_ = 0;
   }
-  sp_int64 tuple_size = _message->ByteSize();
+  sp_int64 tuple_size = _message->ByteSizeLong();
   *_total_size += tuple_size;
   tuples_.push_front(_message);
 }

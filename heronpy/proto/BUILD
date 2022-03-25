@@ -27,7 +27,7 @@ pex_library(
     name = "proto-py",
     srcs = glob(["**/*.py"]),
     reqs = [
-        "protobuf==3.8.0",
+        "protobuf==3.16.0",
         "setuptools==46.1.3",
     ],
     deps = [
@@ -50,7 +50,7 @@ pex_binary(
     name = "proto-py-package",
     srcs = glob(["**/*.py"]),
     reqs = [
-        "protobuf==3.8.0",
+        "protobuf==3.16.0",
         "setuptools==18.8.1",
     ],
     deps = [
