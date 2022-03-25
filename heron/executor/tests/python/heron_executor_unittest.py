@@ -146,7 +146,7 @@ class HeronExecutorTest(unittest.TestCase):
 
   def get_expected_instance_command(component_name, instance_id, container_id):
     instance_name = "container_%d_%s_%d" % (container_id, component_name, instance_id)
-    return "heron_java_home/bin/java -Xmx320M -Xms320M -Xmn160M -XX:MaxMetaspaceSize=128M " \
+    return "heron_java_home/bin/java -Xmx320M -Xms320M -XX:MaxMetaspaceSize=128M " \
            "-XX:MetaspaceSize=128M -XX:ReservedCodeCacheSize=64M -XX:+PrintCommandLineFlags " \
            "-Djava.net.preferIPv4Stack=true " \
            "-XX:+UseG1GC -XX:+ParallelRefProcEnabled -XX:+UseStringDeduplication " \
