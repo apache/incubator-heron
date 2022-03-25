@@ -147,8 +147,8 @@ After the commands, a new docker container is started with all the libraries and
 installed. The operation system is Ubuntu 18.04 by default. Now you can build Heron
 like:
 ```bash
-\# bazel build --config=linux scripts/packages:binpkgs
-\# bazel build --config=linux scripts/packages:tarpkgs
+\# bazel build scripts/packages:binpkgs
+\# bazel build scripts/packages:tarpkgs
 ```
 
 The current folder is mapped to the '/heron' directory in the container and any changes
@@ -243,9 +243,8 @@ RUN wget -O /tmp/bazel.sh https://github.com/bazelbuild/bazel/releases/download/
          && /tmp/bazel.sh
 ```
 
-### Step 6 --- Add the `bazelrc` configuration file for Bazel and the `compile.sh` script (from the `docker` folder) that compiles Heron
+### Step 6 --- Add the `compile.sh` script (from the `docker` folder) that compiles Heron
 
 ```dockerfile
-ADD bazelrc /root/.bazelrc
 ADD compile.sh /compile.sh
 ```

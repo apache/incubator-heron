@@ -17,10 +17,6 @@
 
 FROM centos:centos7
 
-# This is passed to the heron build command via the --config flag
-ENV TARGET_PLATFORM linux
-ENV LC_ALL en_US.utf8
-
 RUN yum -y upgrade && yum -y install centos-release-scl-rh
 RUN yum -y install \
       automake \
@@ -31,6 +27,7 @@ RUN yum -y install \
       devtoolset-8-gcc \
       devtoolset-8-gcc-c++ \
       git \
+      glibc-langpack-en \
       kernel-devel \
       libtool \
       make \
@@ -51,6 +48,7 @@ RUN /usr/bin/ln -sfT /opt/rh/rh-python38/root/usr/bin/python3 /usr/bin/python3 \
       && /usr/bin/ln -sfT /opt/rh/devtoolset-8/root/bin/g++ /usr/bin/g++ \
       && /usr/bin/ln -sfT /opt/rh/devtoolset-8/root/bin/cpp /usr/bin/cpp
 
+ENV LC_ALL en_US.utf8
 ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk
 
 ENV bazelVersion 4.2.2
@@ -59,5 +57,4 @@ RUN wget -O /tmp/bazel.sh https://github.com/bazelbuild/bazel/releases/download/
       && chmod +x /tmp/bazel.sh \
       && /tmp/bazel.sh
 
-ADD bazelrc /root/.bazelrc
 ADD scripts/test-platform.sh /test-platform.sh

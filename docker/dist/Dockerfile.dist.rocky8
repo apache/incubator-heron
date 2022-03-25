@@ -18,7 +18,7 @@
 #syntax=docker/dockerfile:1.2
 FROM rockylinux:8.5
 
-RUN yum -y install epel-release \
+RUN yum -y upgrade \
     && yum -y install \
     curl \
     java-11-openjdk-headless \

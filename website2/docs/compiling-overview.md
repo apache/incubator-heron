@@ -86,30 +86,21 @@ $ ./bazel_configure.py
 
 ## Building
 
-### Bazel OS Environments
-
-Bazel builds are specific to a given OS. When building you must specify an
-OS-specific configuration using the `--config` flag. The following OS values
-are supported:
-
-* `darwin` (Mac OS X)
-* `ubuntu` (Ubuntu 20.04)
-* `debian` (Debian10)
-* `rocky8` (Rocky 8)
-
-For example, on Mac OS X (`darwin`), the following command will build all
-packages:
-
 ```bash
-$ bazel build --config=darwin heron/...
+$ bazel build heron/...
 ```
 
-Production release packages include additional performance optimizations
-not enabled by default. Enabling these optimizations increases build time.
-To enable production optimizations, include the `opt` flag:
+This will build in the Bazel default `fastbuild` mode. Production release packages include additional performance optimizations not enabled by default. To enable production optimizations, include the `opt` flag. This defaults to optimization level `-O2`. The second option overrides the setting to bump it to `-CO3`.
+
 ```bash
-$ bazel build -c opt --config=PLATFORM heron/...
+$ bazel build -c opt heron/...
 ```
+
+```bash
+$ bazel build -c opt --copt=-O3 heron/...
+```
+
+If you wish to add the code syntax style check, add `--config=stylecheck`.
 
 ### Building All Components
 
@@ -118,8 +109,8 @@ bundled tars. To build executables or tars for all Heron components at once,
 use the following `bazel build` commands, respectively:
 
 ```bash
-$ bazel build --config=PLATFORM scripts/packages:binpkgs
-$ bazel build --config=PLATFORM scripts/packages:tarpkgs
+$ bazel build scripts/packages:binpkgs
+$ bazel build scripts/packages:tarpkgs
 ```
 
 Resulting artifacts can be found in subdirectories below the `bazel-bin`
@@ -134,7 +125,7 @@ Tracker](user-manuals-heron-tracker-runbook)) by passing a target to the `bazel
 build` command. For example, the following command would build the Heron Tracker:
 
 ```bash
-$ bazel build --config=darwin heron/tools/tracker/src/python:heron-tracker
+$ bazel build heron/tools/tracker/src/python:heron-tracker
 ```
 
 ## Testing Heron

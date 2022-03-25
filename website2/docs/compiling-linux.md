@@ -96,14 +96,14 @@ $ ./bazel_configure.py
 ### Step 10 --- Build the project
 
 ```bash
-$ bazel build --config=linux heron/...
+$ bazel build heron/...
 ```
 
 ### Step 11 --- Build the packages
 
 ```bash
-$ bazel build --config=linux scripts/packages:binpkgs
-$ bazel build --config=linux scripts/packages:tarpkgs
+$ bazel build scripts/packages:binpkgs
+$ bazel build scripts/packages:tarpkgs
 ```
 
 This will install Heron packages in the `bazel-bin/scripts/packages/` directory.
@@ -182,30 +182,52 @@ $ sudo yum install java-11-openjdk java-11-openjdk-devel
 $ export JAVA_HOME=/usr/lib/jvm/java-11-openjdk
 ```
 
-#### Step 5 - Install Bazel {{% bazelVersion %}}
+#### Step 5 - Install Bazelisk
+
+Bazelisk helps automate the management of Bazel versions
 
 ```bash
-wget -O /tmp/bazel.sh https://github.com/bazelbuild/bazel/releases/download/0.26.0/bazel-0.26.0-installer-linux-x86_64.sh
-chmod +x /tmp/bazel.sh
-/tmp/bazel.sh --user
+wget -O /tmp/bazelisk https://github.com/bazelbuild/bazelisk/releases/download/v1.11.0/bazelisk-darwin-amd64
+chmod +x /tmp/bazelisk
+sudo mv /tmp/bazelisk /usr/local/bin/bazel
 ```
 
-Make sure to download the appropriate version of Bazel (currently {{%
-bazelVersion %}}).
-
-### Step 6 --- Download Heron and compile it
+### Step 6 --- Fetch the latest version of Heron's source code
 
 ```bash
-$ git clone https://github.com/apache/incubator-heron.git && cd heron
+$ git clone https://github.com/apache/incubator-heron.git && cd incubator-heron
+```
+
+
+### Step 7 --- Configure Heron for building with Bazel
+
+```bash
 $ ./bazel_configure.py
-$ bazel build --config=linux heron/...
 ```
 
-### Step 7 --- Build the binary packages
+### Step 8 --- Build the project
 
 ```bash
-$ bazel build --config=linux scripts/packages:binpkgs
-$ bazel build --config=linux scripts/packages:tarpkgs
+$ bazel build heron/...
+```
+
+This will build in the Bazel default `fastbuild` mode. Production release packages include additional performance optimizations not enabled by default. To enable production optimizations, include the `opt` flag. This defaults to optimization level `-O2`. The second option overrides the setting to bump it to `-CO3`.
+
+```bash
+$ bazel build -c opt heron/...
+```
+
+```bash
+$ bazel build -c opt --copt=-O3 heron/...
+```
+
+If you wish to add the code syntax style check, add `--config=stylecheck`.
+
+### Step 9 --- Build the binary packages
+
+```bash
+$ bazel build scripts/packages:binpkgs
+$ bazel build scripts/packages:tarpkgs
 ```
 
 This will install Heron packages in the `bazel-bin/scripts/packages/` directory.

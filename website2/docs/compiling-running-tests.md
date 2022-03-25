@@ -29,14 +29,14 @@ as described in [Compiling Heron](compiling-overview).
 The following command will run all tests:
 
 ```bash
-$ bazel test --config=darwin heron/...
+$ bazel test heron/...
 ```
 
 To run a specific [test
 target](http://bazel.io/docs/test-encyclopedia.html), pass the test target name.
 
 ```bash
-$ bazel test --config=darwin heron/statemgrs/tests/java:localfs-statemgr_unittest
+$ bazel test heron/statemgrs/tests/java:localfs-statemgr_unittest
 ```
 
 ### Discovering Unit Test Targets
@@ -86,6 +86,6 @@ Integration tests are divided into two categories:
     To run the failure integration tests on a Mac OS X, do the following:
 
     ```bash
-    $ bazel build --config=darwin integration_test/src/...
+    $ bazel build integration_test/src/...
     $ ./bazel-bin/integration_test/src/python/local_test_runner/local-test-runner
     ```

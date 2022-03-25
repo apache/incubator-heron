@@ -28,8 +28,8 @@
 # After the container is started, you can build Heron with bazel
 # (ubuntu config is used in the example):
 #   ./bazel_configure.py
-#   bazel build --config=linux heron/...
-#   bazel build --config=linux scripts/packages:binpkgs
+#   bazel build heron/...
+#   bazel build scripts/packages:binpkgs
 
 set -o nounset
 set -o errexit
@@ -69,7 +69,6 @@ dockerfile_path_for_platform() {
 
 copy_extra_files() {
   mkdir -p $SCRATCH_DIR/scripts
-  cp $PROJECT_DIR/tools/docker/bazel.rc $SCRATCH_DIR/bazelrc
   cp $DOCKER_DIR/scripts/compile-docker.sh $SCRATCH_DIR/scripts/compile-platform.sh
 }
 

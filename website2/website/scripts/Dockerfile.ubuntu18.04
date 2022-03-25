@@ -56,6 +56,5 @@ RUN wget -O /tmp/bazel.sh https://github.com/bazelbuild/bazel/releases/download/
       && chmod +x /tmp/bazel.sh \
       && /tmp/bazel.sh --user
 
-ADD bazelrc /root/.bazelrc
 ENV PATH="/root/bin:${PATH}"
 

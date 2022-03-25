@@ -43,7 +43,7 @@ import org.apache.commons.cli.ParseException;
  * Usage: java org.apache.bazel.checkstyle.PythonCheckstyle -f &lt;extra_action_file&gt; -p &lt;pylint_file&gt;
  * <p>
  * To test:
- * $ bazel build --config=darwin --experimental_action_listener=tools/python:compile_python heron/cli/src/python/...
+ * $ bazel build --experimental_action_listener=tools/python:compile_python heron/cli/src/python/...
  */
 public final class PythonCheckstyle {
   public static final Logger LOG = Logger.getLogger(PythonCheckstyle.class.getName());

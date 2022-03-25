@@ -17,9 +17,6 @@
 
 FROM ubuntu:18.04
 
-# This is passed to the heron build command via the --config flag
-ENV TARGET_PLATFORM linux
-
 ARG DEBIAN_FRONTEND=noninteractive
 
 ENV LC_ALL C.UTF-8
@@ -57,5 +54,4 @@ RUN wget -O /tmp/bazel.sh https://github.com/bazelbuild/bazel/releases/download/
       && /tmp/bazel.sh \
       && rm -rf /tmp/bazel.sh
 
-ADD bazelrc /root/.bazelrc
 ADD scripts/compile-platform.sh /compile-platform.sh
