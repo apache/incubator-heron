@@ -22,6 +22,7 @@ ARG DEBIAN_FRONTEND=noninteractive
 ENV LC_ALL C.UTF-8
 ENV LANG C.UTF-8
 
+# Docker 20.10.10 or older will not work
 RUN apt-get update && apt-get -y install \
       ant \
       g++ \
