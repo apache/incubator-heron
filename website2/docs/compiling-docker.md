@@ -243,9 +243,8 @@ RUN wget -O /tmp/bazel.sh https://github.com/bazelbuild/bazel/releases/download/
          && /tmp/bazel.sh
 ```
 
-### Step 6 --- Add the `bazelrc` configuration file for Bazel and the `compile.sh` script (from the `docker` folder) that compiles Heron
+### Step 6 --- Add the `compile.sh` script (from the `docker` folder) that compiles Heron
 
 ```dockerfile
-ADD bazelrc /root/.bazelrc
 ADD compile.sh /compile.sh
 ```
