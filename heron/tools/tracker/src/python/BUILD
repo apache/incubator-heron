@@ -10,7 +10,7 @@ pex_library(
         "click==7.1.2",
         "javaobj-py3==0.4.1",
         "networkx==2.4",
-        "protobuf==3.8.0",
+        "protobuf==3.16.0",
         "tornado==4.0.2",
     ],
     deps = [
