@@ -58,7 +58,6 @@ run_build() {
       break
     fi
   done
-  echo $DOCKER_SQUASH
 
   DOCKER_FILE="$SCRATCH_DIR/dist/Dockerfile.dist.$TARGET_PLATFORM"
   DOCKER_TAG="apache/heron:$HERON_VERSION"

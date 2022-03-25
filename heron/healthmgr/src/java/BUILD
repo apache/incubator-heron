@@ -30,6 +30,7 @@ healthmgr_deps_files = [
     "@maven//:com_jayway_jsonpath_json_path",
     "@maven//:net_minidev_json_smart",
     "@maven//:javax_ws_rs_javax_ws_rs_api",
+    "@maven//:javax_activation_activation",
     "@maven//:javax_annotation_javax_annotation_api",
     "@maven//:org_glassfish_hk2_external_javax_inject",
     "@maven//:org_glassfish_jersey_core_jersey_client",

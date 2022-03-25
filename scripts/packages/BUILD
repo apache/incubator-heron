@@ -207,7 +207,7 @@ pkg_tar(
     srcs = [
         "@com_google_protobuf//:protobuf_java",
         "@maven//:org_slf4j_slf4j_api",
-        "@maven//:org_slf4j_slf4j_jdk14",
+        "@maven//:org_slf4j_jul_to_slf4j",
     ],
     package_dir = "heron-tools/lib/third_party",
 )
@@ -409,7 +409,7 @@ pkg_tar(
     srcs = [
         "@com_google_protobuf//:protobuf_java",
         "@maven//:org_slf4j_slf4j_api",
-        "@maven//:org_slf4j_slf4j_jdk14",
+        "@maven//:org_slf4j_jul_to_slf4j",
     ],
     package_dir = "lib/third_party",
 )
