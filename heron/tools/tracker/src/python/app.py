@@ -92,7 +92,6 @@ async def handle_exception(_, exc: Exception):
 @app.get("/clusters")
 async def clusters() -> List[str]:
   return (s.name for s in state.tracker.state_managers)
-  
 @app.get(
     "/machines",
     response_model=Dict[str, Dict[str, Dict[str, List[str]]]],
