@@ -89,7 +89,7 @@ class Tracker:
       cluster: str,
       role: Optional[str],
       environ: str,
-      topology_name: str,      
+      topology_name: str,
   ) -> Any:
     """
     Find and return the topology given its cluster, environ, topology name, and
