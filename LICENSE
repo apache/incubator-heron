@@ -243,7 +243,6 @@ See project link for details.
       -> tools/rules/pex/wrapper/pex_wrapper.py
     bazel_authors(https://github.com/bazelbuild/bazel/blob/master/LICENSE)
       -> scripts/setup-eclipse.sh
-      -> scripts/detect_os_type.sh
       -> scripts/get_all_heron_paths.sh
       -> scripts/packages/template_bin.sh
       -> scripts/packages/self_extract_binary.bzl
