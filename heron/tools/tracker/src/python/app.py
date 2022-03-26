@@ -81,7 +81,7 @@ async def shutdown_event():
 
 @app.exception_handler(Exception)
 async def handle_exception(_, exc: Exception):
-  message=f"request failed: {exc}"
+  message = f"request failed: {exc}"
   status_code = 500
   if isinstance(exc, StarletteHTTPException):
     status_code = exc.status_code
