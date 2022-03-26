@@ -24,8 +24,6 @@ To only run integration tests:
 To run the full ci pipeline:
   ./local-ci.sh ci
 
-The VM does not report the platform in python as expected, so PLATFORM=Ubuntu is needed to work around that for the CI script's platform discovery.
-
 DOC
 
 set -o errexit -o nounset -o pipefail
@@ -41,7 +39,7 @@ fi
 
 # allows you to do `$0 test` to run only integration tests
 script="${1-ci}"
-env="PLATFORM=Ubuntu JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64/"
+env="JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64/"
 # run the CI, if it fails drop into a shell
 vagrant ssh primary --command "cd /vagrant && $env ./scripts/travis/$script.sh" \
     || vagrant ssh primary --command "cd /vagrant && $env exec bash"

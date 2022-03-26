@@ -22,48 +22,8 @@ build --ignore_unsupported_sandboxing
 build --spawn_strategy=standalone
 build --workspace_status_command scripts/release/status.sh
 
-# For Linux
-# To use it: bazel build --config=linux
-build:linux --experimental_action_listener=tools/cpp:compile_cpp
-build:linux --experimental_action_listener=tools/java:compile_java
-build:linux --experimental_action_listener=tools/python:compile_python
-build:linux --genrule_strategy=standalone
-build:linux --ignore_unsupported_sandboxing
-build:linux --linkopt -lm
-build:linux --linkopt -lpthread
-build:linux --linkopt -lrt
-build:linux --spawn_strategy=standalone
-build:linux --workspace_status_command scripts/release/status.sh
-build:linux --copt=-O3
-
-# For Mac
-# To use it: bazel build --config=darwin
-build:darwin --experimental_action_listener=tools/cpp:compile_cpp
-build:darwin --experimental_action_listener=tools/java:compile_java
-build:darwin --experimental_action_listener=tools/python:compile_python
-build:darwin --genrule_strategy=standalone
-build:darwin --ignore_unsupported_sandboxing
-build:darwin --spawn_strategy=standalone
-build:darwin --workspace_status_command scripts/release/status.sh
-build:darwin --copt=-O3
-
-### Disabled checkstyle
-
-# For Linux
-# To use it: bazel build --config=linux_nostyle
-build:linux_nostyle --genrule_strategy=standalone
-build:linux_nostyle --ignore_unsupported_sandboxing
-build:linux_nostyle --linkopt -lm
-build:linux_nostyle --linkopt -lpthread
-build:linux_nostyle --linkopt -lrt
-build:linux_nostyle --spawn_strategy=standalone
-build:linux_nostyle --workspace_status_command scripts/release/status.sh
-build:linux_nostyle --copt=-O3
-
-# For Mac
-# To use it: bazel build --config=darwin_nostyle
-build:darwin_nostyle --genrule_strategy=standalone
-build:darwin_nostyle --ignore_unsupported_sandboxing
-build:darwin_nostyle --spawn_strategy=standalone
-build:darwin_nostyle --workspace_status_command scripts/release/status.sh
-build:darwin_nostyle --copt=-O3
+# To enable stylecheck
+# To use it: bazel build --config=stylecheck
+build:stylecheck --experimental_action_listener=tools/cpp:compile_cpp
+build:stylecheck --experimental_action_listener=tools/java:compile_java
+build:stylecheck --experimental_action_listener=tools/python:compile_python

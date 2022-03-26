@@ -12,7 +12,7 @@ pex_library(
         "httpx==0.16.1",
         "javaobj-py3==0.4.1",
         "networkx==2.5",
-        "protobuf==3.14.0",
+        "protobuf==3.16.0",
         "uvicorn==0.11.7",
     ],
     deps = [

@@ -60,24 +60,17 @@ fi
 
 set +x
 
-# Autodiscover the platform
-PLATFORM=$(discover_platform)
-echo "Using $PLATFORM platform"
-
 # Run this manually, since if it fails when run
 # as -workspace_status_command we don't get good output
 ./scripts/release/status.sh
 
-# append the bazel default bazelrc to travis/bazel.rc
-# for using rules provided by bazel
-# cat ~/.bazelrc >> tools/travis/bazel.rc
 ./bazel_configure.py
 
 # build heron
 T="heron build"
 start_timer "$T"
 ${UTILS}/save-logs.py "heron_build.txt" bazel\
-  --bazelrc=tools/travis/bazel.rc build --config=$PLATFORM heron/... \
+  build --config=stylecheck heron/... \
   heronpy/... examples/... storm-compatibility-examples/v0.10.2/... \
   eco-storm-examples/... eco-heron-examples/... contrib/...
 end_timer "$T"
@@ -85,10 +78,10 @@ end_timer "$T"
 # run heron unit tests
 T="heron test non-flaky"
 start_timer "$T"
-${UTILS}/save-logs.py "heron_test_non_flaky.txt" bazel\
-  --bazelrc=tools/travis/bazel.rc test\
-  --test_summary=detailed --test_output=errors\
-  --config=$PLATFORM --test_tag_filters=-flaky heron/... \
+${UTILS}/save-logs.py "heron_test_non_flaky.txt" bazel \
+  test --config=stylecheck \
+  --test_summary=detailed --test_output=errors \
+  --test_tag_filters=-flaky heron/... \
   heronpy/... examples/... storm-compatibility-examples/v0.10.2/... \
   eco-storm-examples/... eco-heron-examples/... contrib/... 
 end_timer "$T"
@@ -97,10 +90,10 @@ end_timer "$T"
 # which should be fixed. For now, run them serially
 T="heron test flaky"
 start_timer "$T"
-${UTILS}/save-logs.py "heron_test_flaky.txt" bazel\
-  --bazelrc=tools/travis/bazel.rc test\
-  --test_summary=detailed --test_output=errors\
-  --config=$PLATFORM --test_tag_filters=flaky --jobs=1 heron/... \
+${UTILS}/save-logs.py "heron_test_flaky.txt" bazel \
+  test --config=stylecheck \
+  --test_summary=detailed --test_output=errors \
+  --test_tag_filters=flaky --jobs=1 heron/... \
   heronpy/... examples/... storm-compatibility-examples/v0.10.2/... \
   eco-storm-examples/... eco-heron-examples/...
 end_timer "$T"
@@ -109,22 +102,22 @@ end_timer "$T"
 T="heron build tarpkgs"
 start_timer "$T"
 ${UTILS}/save-logs.py "heron_build_tarpkgs.txt" bazel\
-  --bazelrc=tools/travis/bazel.rc build\
-  --config=$PLATFORM scripts/packages:tarpkgs
+  build\
+  --config=stylecheck scripts/packages:tarpkgs
 end_timer "$T"
 
 T="heron build binpkgs"
 start_timer "$T"
 ${UTILS}/save-logs.py "heron_build_binpkgs.txt" bazel\
-  --bazelrc=tools/travis/bazel.rc build\
-  --config=$PLATFORM scripts/packages:binpkgs
+  build\
+  --config=stylecheck scripts/packages:binpkgs
 end_timer "$T"
 
 T="heron build docker images"
 start_timer "$T"
 ${UTILS}/save-logs.py "heron_build_binpkgs.txt" bazel\
-  --bazelrc=tools/travis/bazel.rc build\
-  --config=$PLATFORM scripts/images:heron.tar
+  build\
+  --config=stylecheck scripts/images:heron.tar
 end_timer "$T"
 
 

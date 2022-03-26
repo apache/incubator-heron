@@ -54,7 +54,7 @@ cc_library(
         "@com_github_corvusoft_kashmir_cpp//:kashmir-cxx",
         "@com_google_protobuf//:protobuf",
     ] + select({
-        "//tools/platform:darwin": [],
+        "@platforms//os:osx": [],
         "//conditions:default": ["@org_nongnu_libunwind//:libunwind"],
     }),
 )

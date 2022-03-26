@@ -44,7 +44,7 @@ import org.apache.commons.lang.ArrayUtils;
  * Usage: java org.apache.bazel.checkstyle.JavaCheckstyle -f &lt;extra_action_file&gt; -c &lt;checkstyle_config&gt;
  * <p>
  * To test:
- * $ bazel build --config=darwin heron/spi/src/java:heron-spi --experimental_action_listener=tools/java:compile_java
+ * $ bazel build heron/spi/src/java:heron-spi --experimental_action_listener=tools/java:compile_java
  */
 public final class JavaCheckstyle {
   public static final Logger LOG = Logger.getLogger(JavaCheckstyle.class.getName());

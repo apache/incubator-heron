@@ -71,7 +71,7 @@ genrule(
     ],
     outs = ["pex_wrapper.pex"],
     cmd = select({
-        "//tools/platform:darwin": "\n".join(PRE_EXECUTE + DARWIN_EXECUTE + POST_EXECUTE),
+        "@platforms//os:osx": "\n".join(PRE_EXECUTE + DARWIN_EXECUTE + POST_EXECUTE),
         "//conditions:default": "\n".join(PRE_EXECUTE + LINUX_EXECUTE + POST_EXECUTE),
     }),
     executable = True,

@@ -112,8 +112,8 @@ spec:
                       values:
                         - {{ .Release.Name }}-bookkeeper
                 topologyKey: "kubernetes.io/hostname"
-{{- end }}
       terminationGracePeriodSeconds: 0
+{{- end }}
       initContainers:
         # Wait until the zookeeper pods are up and running
         - name: bookie-init-container
@@ -131,21 +131,6 @@ spec:
                 echo 'Zookeeper {{ .Release.Name }}-zookeeper:{{ .Values.zookeeper.clientPort }} not ready';
                 sleep 4;
               done
-{{- if eq .Values.platform "minikube" }}
-        # The first time, initialize BK to wipe data for minikube
-        - name: bookie-format
-          image: {{ .Values.bookkeeper.image }}
-          args: ["/opt/bookkeeper/bin/bookkeeper", "shell", "bookieformat", "-nonInteractive", "-force"]
-          command: [ "/bin/bash", "/opt/bookkeeper/scripts/entrypoint.sh" ]
-          envFrom:
-            - configMapRef:
-                name: {{ .Release.Name }}-bookie-config
-          volumeMounts:
-            - name: journal-disk
-              mountPath: /bookkeeper/data/journal
-            - name: ledgers-disk
-              mountPath: /bookkeeper/data/ledgers
-{{- end }}
       containers:
         - name: bookie
           image: {{ .Values.bookkeeper.image }}
