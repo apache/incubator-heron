@@ -66,9 +66,10 @@ JSTACK_URL_FMT              = "%s/jstack"             % TOPOLOGIES_URL_FMT
 JMAP_URL_FMT                = "%s/jmap"               % TOPOLOGIES_URL_FMT
 HISTOGRAM_URL_FMT           = "%s/histo"              % TOPOLOGIES_URL_FMT
 
-FILE_DATA_URL_FMT           = "%s/container/filedata"  % TOPOLOGIES_URL_FMT
-FILE_DOWNLOAD_URL_FMT       = "%s/container/filedownload"  % TOPOLOGIES_URL_FMT
-FILESTATS_URL_FMT           = "%s/container/filestats" % TOPOLOGIES_URL_FMT
+CONTAINER_URL_FMT           = "%s/container"
+FILE_DATA_URL_FMT           = CONTAINER_URL_FMT     % "%s/filedata"     % TOPOLOGIES_URL_FMT
+FILE_DOWNLOAD_URL_FMT       = CONTAINER_URL_FMT     % "%s/filedownload" % TOPOLOGIES_URL_FMT
+FILESTATS_URL_FMT           = CONTAINER_URL_FMT     % "%s/filestats"    % TOPOLOGIES_URL_FMT
 
 
 def strip_whitespace(s):
