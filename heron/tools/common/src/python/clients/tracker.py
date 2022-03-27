@@ -45,6 +45,8 @@ tracker_url = "http://127.0.0.1:8888"
 
 # pylint: disable=bad-whitespace
 CLUSTER_URL_FMT             = "%s/clusters"
+
+# Nested under /topologies
 TOPOLOGIES_URL_FMT          = "%s/topologies"
 TOPOLOGIES_STATS_URL_FMT    = "%s/states"             % TOPOLOGIES_URL_FMT
 EXECUTION_STATE_URL_FMT     = "%s/executionstate"     % TOPOLOGIES_URL_FMT
@@ -52,10 +54,6 @@ LOGICALPLAN_URL_FMT         = "%s/logicalplan"        % TOPOLOGIES_URL_FMT
 PHYSICALPLAN_URL_FMT        = "%s/physicalplan"       % TOPOLOGIES_URL_FMT
 PACKINGPLAN_URL_FMT         = "%s/packingplan"        % TOPOLOGIES_URL_FMT
 SCHEDULER_LOCATION_URL_FMT  = "%s/schedulerlocation"  % TOPOLOGIES_URL_FMT
-
-METRICS_URL_FMT             = "%s/metrics"            % TOPOLOGIES_URL_FMT
-METRICS_QUERY_URL_FMT       = METRICS_URL_FMT       % "%s/query"        % TOPOLOGIES_URL_FMT
-METRICS_TIMELINE_URL_FMT    = METRICS_URL_FMT       % "%s/timeline"     % TOPOLOGIES_URL_FMT
 
 EXCEPTIONS_URL_FMT          = "%s/exceptions"         % TOPOLOGIES_URL_FMT
 EXCEPTION_SUMMARY_URL_FMT   = "%s/exceptionsummary"   % TOPOLOGIES_URL_FMT
@@ -66,10 +64,16 @@ JSTACK_URL_FMT              = "%s/jstack"             % TOPOLOGIES_URL_FMT
 JMAP_URL_FMT                = "%s/jmap"               % TOPOLOGIES_URL_FMT
 HISTOGRAM_URL_FMT           = "%s/histo"              % TOPOLOGIES_URL_FMT
 
-CONTAINER_URL_FMT           = "%s/container"
-FILE_DATA_URL_FMT           = CONTAINER_URL_FMT     % "%s/filedata"     % TOPOLOGIES_URL_FMT
-FILE_DOWNLOAD_URL_FMT       = CONTAINER_URL_FMT     % "%s/filedownload" % TOPOLOGIES_URL_FMT
-FILESTATS_URL_FMT           = CONTAINER_URL_FMT     % "%s/filestats"    % TOPOLOGIES_URL_FMT
+# nested under /topologies/metrics/
+METRICS_URL_FMT             = "%s/metrics"            % TOPOLOGIES_URL_FMT
+METRICS_QUERY_URL_FMT       = "%s/query"              % METRICS_URL_FMT
+METRICS_TIMELINE_URL_FMT    = "%s/timeline"           % METRICS_URL_FMT
+
+# nested under /topologies/container/
+CONTAINER_URL_FMT           = "%s/container"          % TOPOLOGIES_URL_FMT
+FILE_DATA_URL_FMT           = "%s/filedata"           % CONTAINER_URL_FMT
+FILE_DOWNLOAD_URL_FMT       = "%s/filedownload"       % CONTAINER_URL_FMT
+FILESTATS_URL_FMT           = "%s/filestats"          % CONTAINER_URL_FMT
 
 
 def strip_whitespace(s):
