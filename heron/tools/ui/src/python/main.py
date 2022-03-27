@@ -325,10 +325,10 @@ def api_topology_list_json(method: Callable[[], dict]) -> ApiListEnvelope:
   Log.debug(f"Api topology: {result}")
   if type(result) is None:
     return ApiEnvelope(
-      status="failure",
-      message="No topology found",
-      executiontime=time.time() - started,
-      result={},
+        status="failure",
+        message="No topology found",
+        executiontime=time.time() - started,
+        result={},
     )
   else:
     return ApiListEnvelope(
@@ -354,10 +354,10 @@ def api_topology_json(method: Callable[[], dict]) -> ApiEnvelope:
   Log.debug(f"Api topology: {result}")
   if type(result) is None:
     return ApiEnvelope(
-      status="failure",
-      message="No topology found",
-      executiontime=time.time() - started,
-      result={},
+        status="failure",
+        message="No topology found",
+        executiontime=time.time() - started,
+        result={},
     )
   else:
     return ApiEnvelope(
@@ -440,7 +440,8 @@ def scheduler_location_json(cluster: str, environment: str, topology: str) -> Ap
     "/{cluster}/{environment}/{topology}/{component}/exceptions.json",
     response_model=ApiListEnvelope,
 )
-def exceptions_json(cluster: str, environment: str, topology: str, component: str) -> ApiListEnvelope:
+def exceptions_json(cluster: str, environment: str, topology: str,
+                    component: str) -> ApiListEnvelope:
   """Return a list of exceptions for a component."""
   return api_topology_list_json(lambda: tracker.get_component_exceptions(
       cluster, environment, topology, component,
