@@ -125,6 +125,7 @@ def cli(
 
   log_level = logging.DEBUG if verbose else logging.INFO
   log.configure(log_level)
+  global Log
   Log = log.Log
 
   stmgr_override = {
