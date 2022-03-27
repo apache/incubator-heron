@@ -21,8 +21,6 @@
 """ metricstimeline.py """
 from typing import Dict, List
 
-from heron.common.src.python.utils.log import Log
-from heron.proto import common_pb2
 from heron.proto import tmanager_pb2
 
 import httpx

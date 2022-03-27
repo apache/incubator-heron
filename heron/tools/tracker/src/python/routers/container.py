@@ -22,10 +22,7 @@ These methods provide information and data about the state of a running
 topology, particularly data about heron containers.
 
 """
-from asyncio import constants
-from subprocess import CompletedProcess
 from typing import List, Optional
-from heron.common.src.python.utils.log import Log
 
 from heron.proto import common_pb2, tmanager_pb2
 from heron.tools.tracker.src.python import state, utils

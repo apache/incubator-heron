@@ -28,21 +28,16 @@ import os
 import sys
 import subprocess
 
-from asyncio import iscoroutinefunction
-from functools import wraps
 from pathlib import Path
 from typing import Any, Optional, TypeVar
 
 from heron.common.src.python.utils.log import Log
-from heron.tools.tracker.src.python import constants
 from heron.proto import topology_pb2
 
 import javaobj.v1 as javaobj
 import yaml
 
-from fastapi import APIRouter, HTTPException
-from pydantic import Field
-from pydantic.generics import GenericModel
+from fastapi import HTTPException
 
 
 # directories for heron tools distribution

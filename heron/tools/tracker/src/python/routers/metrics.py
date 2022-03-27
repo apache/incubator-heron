@@ -32,7 +32,6 @@ from heron.tools.tracker.src.python.utils import BadRequest
 
 import httpx
 
-from fastapi import Query
 from fastapi import Query, APIRouter
 from pydantic import BaseModel, Field
 

@@ -19,7 +19,6 @@
 #  under the License.
 
 ''' utils.py '''
-import functools
 import grp
 import os
 import pkgutil
