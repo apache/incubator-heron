@@ -201,13 +201,13 @@ async def get_exceptions(  # pylint: disable=too-many-arguments
   ret = []
   for exception_log in exception_response.exceptions:
     ret.append(ExceptionLog(
-      hostname = exception_log.hostname,
-      instance_id = exception_log.instance_id,
-      stacktrace = exception_log.stacktrace,
-      lasttime = exception_log.lasttime,
-      firsttime = exception_log.firsttime,
-      count = str(exception_log.count),
-      logging = exception_log.logging,
+        hostname=exception_log.hostname,
+        instance_id=exception_log.instance_id,
+        stacktrace=exception_log.stacktrace,
+        lasttime=exception_log.lasttime,
+        firsttime=exception_log.firsttime,
+        count=str(exception_log.count),
+        logging=exception_log.logging,
     ))
   return ret
 
