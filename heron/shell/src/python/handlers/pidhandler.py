@@ -36,7 +36,7 @@ class PidHandler(tornado.web.RequestHandler):
     ''' get method '''
     pid = subprocess.run(['cat', "%s.pid" % instance_id], capture_output=True, text=True)
     await self.finish({
-      'command': ' '.join(pid.args),
-      'stdout': pid.stdout,
-      'stderr': pid.stderr,
-      })
+        'command': ' '.join(pid.args),
+        'stdout': pid.stdout,
+        'stderr': pid.stderr,
+    })
