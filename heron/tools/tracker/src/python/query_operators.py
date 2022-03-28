@@ -150,11 +150,11 @@ class TS(Operator):
       raise Exception(metrics["message"])
 
     # Put a blank timeline.
-    if not metrics.timeline:
-      metrics.timeline = {
+    if not metrics.get("timeline"):
+      metrics["timeline"] = {
           self.metric_name: {}
       }
-    timelines = metrics.timeline[self.metric_name]
+    timelines = metrics["timeline"][self.metric_name]
     all_metrics = [
         Metrics(self.component, self.metric_name, instance, start, end, {
             k: float(v)
@@ -463,7 +463,7 @@ class _SimpleArithmaticOperator(Operator):
         if metrics:
           met = Metrics(None, None, metric.instance, start, end, metrics[""].timeline.copy())
           for timestamp in list(met.timeline.keys()):
-            v = self._f(met.timeline[timestamp], metric.timeline[timestamp])
+            v = self._f(met.timeline[timestamp], metric.timeline.get(timestamp))
             if v is None:
               met.timeline.pop(timestamp, None)
             else:
@@ -477,7 +477,7 @@ class _SimpleArithmaticOperator(Operator):
       # Initialize with first metrics timeline and its instance
       met = Metrics(None, None, metric.instance, start, end, metric.timeline.copy())
       for timestamp in list(met.timeline.keys()):
-        v = self._f(met.timeline[timestamp], metrics2[""].timeline[timestamp])
+        v = self._f(met.timeline[timestamp], metrics2[""].timeline.get(timestamp))
         if v is None:
           met.timeline.pop(timestamp, None)
         else:
