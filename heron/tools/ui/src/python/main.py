@@ -323,20 +323,19 @@ def api_topology_list_json(method: Callable[[], dict]) -> ApiListEnvelope:
   started = time.time()
   result = method()
   Log.debug(f"Api topology: {result}")
-  if type(result) is None:
+  if result is None:
     return ApiEnvelope(
         status="failure",
         message="No topology found",
         executiontime=time.time() - started,
         result={},
     )
-  else:
-    return ApiListEnvelope(
-        status="success",
-        message="",
-        executiontime=time.time() - started,
-        result=result,
-    )
+  return ApiListEnvelope(
+      status="success",
+      message="",
+      executiontime=time.time() - started,
+      result=result,
+  )
 
 # topology list and plan handlers
 class ApiEnvelope(pydantic.BaseModel):
@@ -352,20 +351,19 @@ def api_topology_json(method: Callable[[], dict]) -> ApiEnvelope:
   started = time.time()
   result = method()
   Log.debug(f"Api topology: {result}")
-  if type(result) is None:
+  if result is None:
     return ApiEnvelope(
         status="failure",
         message="No topology found",
         executiontime=time.time() - started,
         result={},
     )
-  else:
-    return ApiEnvelope(
-        status="success",
-        message="",
-        executiontime=time.time() - started,
-        result=result,
-    )
+  return ApiEnvelope(
+      status="success",
+      message="",
+      executiontime=time.time() - started,
+      result=result,
+  )
 
 @topologies_router.get("/list.json")
 def topologies_json() -> dict:
