@@ -72,8 +72,10 @@ java_library(
 java_library(
     name = "logging",
     srcs = ["Empty.java"],
+    resources = ["logback.xml"],
     exports = ["@maven//:org_slf4j_slf4j_api"],
     deps = [
+        "@maven//:ch_qos_logback_logback_classic",
         "@maven//:org_slf4j_jcl_over_slf4j",
         "@maven//:org_slf4j_jul_to_slf4j",
         "@maven//:org_slf4j_log4j_over_slf4j",
