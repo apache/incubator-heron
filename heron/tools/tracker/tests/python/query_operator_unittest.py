@@ -20,6 +20,7 @@
 # pylint: disable=bad-continuation
 # pylint: disable=unused-argument, unused-variable
 from unittest.mock import patch, Mock
+from heron.tools.tracker.src.python.metricstimeline import MetricsTimeline
 
 from heron.tools.tracker.src.python.query_operators import *
 
@@ -37,11 +38,11 @@ async def test_TS_execute():
   # Return mocked timeline
   def getMetricTimelineSideEffect(*args):
     assert (tmanager, "a", ["c"], ["b"], 40, 360) == args
-    return ({
-        "starttime": 40,
-        "endtime": 360,
-        "component": "a",
-        "timeline": {
+    return MetricsTimeline(
+      starttime = 40,
+      endtime = 360,
+      component = "a",
+      timeline = {
             "c": {
                 "b": {
                     40: "1.0",
@@ -52,8 +53,8 @@ async def test_TS_execute():
                     340: "1.0"
                 }
             }
-        }
-    })
+        },
+    )
 
   with patch("heron.tools.tracker.src.python.query_operators.get_metrics_timeline",
              side_effect=getMetricTimelineSideEffect):
@@ -101,11 +102,11 @@ async def test_TS_execute_with_multiple_instances():
   # With multiple instances
   def getMetricTimelineSideEffect(*args):
     assert (tmanager, "a", ["c"], [], 40, 360) == args
-    return ({
-        "starttime": 40,
-        "endtime": 360,
-        "component": "a",
-        "timeline": {
+    return MetricsTimeline(
+      starttime = 40,
+      endtime = 360,
+      component = "a",
+      timeline = {
             "c": {
                 "b": {
                     40: "1.0",
@@ -124,8 +125,7 @@ async def test_TS_execute_with_multiple_instances():
                     340: "2.0"
                 }
             }
-        }
-    })
+        })
 
   # pylint: disable=unused-variable
   with patch("heron.tools.tracker.src.python.query_operators.get_metrics_timeline",
