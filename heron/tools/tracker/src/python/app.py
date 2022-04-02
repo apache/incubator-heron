@@ -23,12 +23,13 @@ running topologies, and uses data from that to communicate with topology manager
 when prompted to.
 
 """
+import time
 from typing import Dict, List, Optional
 
 from heron.tools.tracker.src.python import constants, state, query
 from heron.tools.tracker.src.python.routers import topologies, container, metrics
 
-from fastapi import FastAPI, Query
+from fastapi import FastAPI, Query, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
@@ -68,6 +69,13 @@ app.include_router(container.router, prefix="/topologies", tags=["container"])
 app.include_router(metrics.router, prefix="/topologies", tags=["metrics"])
 app.include_router(topologies.router, prefix="/topologies", tags=["topologies"])
 
+@app.middleware("http")
+async def wrap_response(request: Request, call_next):
+  start_time = time.time()
+  response = await call_next(request)
+  process_time = time.time() - start_time
+  response.headers["x-process-time"] = str(process_time)
+  return response
 
 @app.on_event("startup")
 async def startup_event():

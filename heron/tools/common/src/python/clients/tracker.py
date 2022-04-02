@@ -143,8 +143,10 @@ def api_get(url: str, params=None) -> Any:
     Log.error("error from tracker: %s", response.status_code)
     return None
 
+  execution = float(response.headers.get("x-process-time")) * 1000
   duration = (end - start) * 1000
-  Log.debug(f"URL fetch took {duration:.2}ms round trip time for {url}")
+  Log.debug(f"URL fetch took {execution:.2} ms server time for {url}")
+  Log.debug(f"URL fetch took {duration:.2} ms round trip time for {url}")
 
   return data
 
