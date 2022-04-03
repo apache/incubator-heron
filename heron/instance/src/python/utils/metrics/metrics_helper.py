@@ -122,7 +122,7 @@ class GatewayMetrics(BaseMetricsHelper):
 
   def __init__(self, metrics_collector):
     sys_config = system_config.get_sys_config()
-    super(GatewayMetrics, self).__init__(self.metrics)
+    _ = super().__init__(self.metrics)
     interval = float(sys_config[constants.HERON_METRICS_EXPORT_INTERVAL_SEC])
     self.register_metrics(metrics_collector, interval)
 
@@ -168,7 +168,7 @@ class ComponentMetrics(BaseMetricsHelper):
   def __init__(self, additional_metrics):
     metrics = self.component_metrics
     metrics.update(additional_metrics)
-    super(ComponentMetrics, self).__init__(metrics)
+    _ = super().__init__(metrics)
 
   # pylint: disable=arguments-differ
   def register_metrics(self, context):
@@ -179,7 +179,7 @@ class ComponentMetrics(BaseMetricsHelper):
     sys_config = system_config.get_sys_config()
     interval = float(sys_config[constants.HERON_METRICS_EXPORT_INTERVAL_SEC])
     collector = context.get_metrics_collector()
-    super(ComponentMetrics, self).register_metrics(collector, interval)
+    _ = super().register_metrics(collector, interval)
 
   def update_out_queue_full_count(self):
     """Apply update to the out-queue full count"""
@@ -213,7 +213,7 @@ class SpoutMetrics(ComponentMetrics):
                    TIMEOUT_COUNT, ComponentMetrics.EMIT_COUNT]
 
   def __init__(self, pplan_helper):
-    super(SpoutMetrics, self).__init__(self.spout_metrics)
+    _ = super().__init__(self.spout_metrics)
     self._init_multi_count_metrics(pplan_helper)
 
   def _init_multi_count_metrics(self, pplan_helper):
@@ -269,7 +269,7 @@ class BoltMetrics(ComponentMetrics):
   outputs_init = [ComponentMetrics.EMIT_COUNT]
 
   def __init__(self, pplan_helper):
-    super(BoltMetrics, self).__init__(self.bolt_metrics)
+    _ = super().__init__(self.bolt_metrics)
     self._init_multi_count_metrics(pplan_helper)
 
   def _init_multi_count_metrics(self, pplan_helper):
