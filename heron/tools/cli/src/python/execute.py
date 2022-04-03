@@ -83,6 +83,7 @@ def heron_class(class_name, lib_jars, extra_jars=None, args=None, java_defines=N
   Log.debug("Heron options: {%s}", str(heron_env["HERON_OPTIONS"]))
 
   # invoke the command with subprocess and print error message, if any
+  # pylint: disable=consider-using-with
   process = subprocess.Popen(all_args, env=heron_env, stdout=subprocess.PIPE,
                              stderr=subprocess.PIPE, universal_newlines=True, bufsize=1)
   # stdout message has the information Java program sends back
@@ -134,6 +135,7 @@ def heron_pex(topology_pex, topology_class_name, args=None):
     Log.debug("Invoking class using command: ``%s''", ' '.join(cmd))
     Log.debug('Heron options: {%s}', str(heron_env['HERON_OPTIONS']))
     # invoke the command with subprocess and print error message, if any
+    # pylint: disable=consider-using-with
     process = subprocess.Popen(cmd, env=heron_env, stdout=subprocess.PIPE,
                                stderr=subprocess.PIPE, universal_newlines=True, bufsize=1)
     # pylint: disable=fixme
@@ -170,6 +172,7 @@ def heron_cpp(topology_binary, args=None):
   print(f"""Invoking class using command: ``{' '.join(cmd)}''""")
   print(f"Heron options: {str(heron_env['HERON_OPTIONS'])}")
   # invoke the command with subprocess and print error message, if any
+  # pylint: disable=consider-using-with
   proc = subprocess.Popen(cmd, env=heron_env, stdout=subprocess.PIPE,
                           stderr=subprocess.PIPE, universal_newlines=True, bufsize=1)
   return ProcessResult(proc)

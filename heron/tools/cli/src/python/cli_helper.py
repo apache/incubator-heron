@@ -21,7 +21,7 @@
 ''' cli_helper.py '''
 import logging
 import requests
-import heron.tools.common.src.python.utils.config as config
+from heron.tools.common.src.python.utils import config
 from heron.tools.cli.src.python.result import SimpleResult, Status
 from heron.tools.cli.src.python import args
 from heron.tools.cli.src.python import execute
