@@ -22,15 +22,15 @@
 import os
 from collections import namedtuple
 
-import heronpy.api.api_constants as api_constants
+from heronpy.api import api_constants
 from heronpy.api.topology_context import TopologyContext
 from heronpy.api.task_hook import (ITaskHook, EmitInfo, SpoutAckInfo,
                                    SpoutFailInfo, BoltExecuteInfo,
                                    BoltAckInfo, BoltFailInfo)
 
 from heron.instance.src.python.utils.metrics import MetricsCollector
-import heron.instance.src.python.utils.system_constants as system_constants
-import heron.common.src.python.pex_loader as pex_loader
+from heron.instance.src.python.utils import system_constants
+from heron.common.src.python import pex_loader
 
 class TopologyContextImpl(TopologyContext):
   """Implemention of TopologyContext
@@ -120,8 +120,8 @@ class TopologyContextImpl(TopologyContext):
     :param task_hook: Implementation of ITaskHook
     """
     if not isinstance(task_hook, ITaskHook):
-      raise TypeError("In add_task_hook(): attempt to add non ITaskHook instance, given: %s"
-                      % str(type(task_hook)))
+      raise TypeError(f"In add_task_hook(): attempt to add non ITaskHook instance, given: "
+                      f"{str(type(task_hook))}")
     self.task_hooks.append(task_hook)
 
   ##### Other exposed implementation specific methods #####
@@ -190,11 +190,11 @@ class TopologyContextImpl(TopologyContext):
         task_hook_instance = task_hook_cls()
         assert isinstance(task_hook_instance, ITaskHook)
         self.task_hooks.append(task_hook_instance)
-      except AssertionError:
-        raise RuntimeError("Auto-registered task hook not instance of ITaskHook")
+      except AssertionError as e:
+        raise RuntimeError("Auto-registered task hook not instance of ITaskHook") from e
       except Exception as e:
-        raise RuntimeError("Error with loading task hook class: %s, with error message: %s"
-                           % (class_name, str(e)))
+        raise RuntimeError(f"Error with loading task hook class: {class_name,}, with error message:"
+                           f"{str(e)}") from e
 
   def invoke_hook_prepare(self):
     """invoke task hooks for after the spout/bolt's initialize() method"""
