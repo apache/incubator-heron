@@ -44,7 +44,7 @@ class SpoutInstance(BaseInstance):
   """The base class for all heron spouts in Python"""
 
   def __init__(self, pplan_helper, in_stream, out_stream, looper):
-    _ = super().__init__(pplan_helper, in_stream, out_stream, looper)
+    super().__init__(pplan_helper, in_stream, out_stream, looper)
     self.topology_state = topology_pb2.TopologyState.Value("PAUSED")
 
     if not self.pplan_helper.is_spout:
@@ -164,7 +164,7 @@ class SpoutInstance(BaseInstance):
     serialize_latency_ns = (time.time() - start_time) * system_constants.SEC_TO_NS
     self.spout_metrics.serialize_data_tuple(stream, serialize_latency_ns)
 
-    _ = super().admit_data_tuple(stream_id=stream, data_tuple=data_tuple,
+    super().admit_data_tuple(stream_id=stream, data_tuple=data_tuple,
                                                 tuple_size_in_bytes=tuple_size_in_bytes)
     self.total_tuples_emitted += 1
     self.spout_metrics.update_emit_count(stream)

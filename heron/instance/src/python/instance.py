@@ -19,13 +19,13 @@
 #  under the License.
 
 '''module for single-thread Heron Instance in python'''
-import click
 import collections
 import logging
 import os
 import resource
 import signal
 import traceback
+import click
 import yaml
 
 from heron.common.src.python.utils import log

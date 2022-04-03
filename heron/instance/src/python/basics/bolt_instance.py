@@ -39,7 +39,7 @@ class BoltInstance(BaseInstance):
   """The base class for all heron bolts in Python"""
 
   def __init__(self, pplan_helper, in_stream, out_stream, looper):
-    _ = super().__init__(pplan_helper, in_stream, out_stream, looper)
+    super().__init__(pplan_helper, in_stream, out_stream, looper)
     self.topology_state = topology_pb2.TopologyState.Value("PAUSED")
 
     if self.pplan_helper.is_spout:
@@ -145,7 +145,7 @@ class BoltInstance(BaseInstance):
     serialize_latency_ns = (time.time() - start_time) * system_constants.SEC_TO_NS
     self.bolt_metrics.serialize_data_tuple(stream, serialize_latency_ns)
 
-    _ = super().admit_data_tuple(stream_id=stream, data_tuple=data_tuple,
+    super().admit_data_tuple(stream_id=stream, data_tuple=data_tuple,
                                                tuple_size_in_bytes=tuple_size_in_bytes)
 
     self.bolt_metrics.update_emit_count(stream)
@@ -260,7 +260,7 @@ class BoltInstance(BaseInstance):
         to_add = ack_tuple.roots.add()
         to_add.CopyFrom(rt)
         tuple_size_in_bytes += rt.ByteSize()
-      _ = super().admit_control_tuple(ack_tuple, tuple_size_in_bytes, True)
+      super().admit_control_tuple(ack_tuple, tuple_size_in_bytes, True)
 
     process_latency_ns = (time.time() - tup.creation_time) * system_constants.SEC_TO_NS
     self.pplan_helper.context.invoke_hook_bolt_ack(tup, process_latency_ns)
@@ -284,7 +284,7 @@ class BoltInstance(BaseInstance):
         to_add = fail_tuple.roots.add()
         to_add.CopyFrom(rt)
         tuple_size_in_bytes += rt.ByteSize()
-      _ = super().admit_control_tuple(fail_tuple, tuple_size_in_bytes, False)
+      super().admit_control_tuple(fail_tuple, tuple_size_in_bytes, False)
 
     fail_latency_ns = (time.time() - tup.creation_time) * system_constants.SEC_TO_NS
     self.pplan_helper.context.invoke_hook_bolt_fail(tup, fail_latency_ns)
