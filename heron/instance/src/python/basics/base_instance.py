@@ -30,11 +30,11 @@ from heron.proto import tuple_pb2
 from heron.instance.src.python.utils.misc import SerializerHelper
 from heron.instance.src.python.utils.misc import OutgoingTupleHelper
 from heron.instance.src.python.utils import system_config
-import heron.instance.src.python.utils.system_constants as system_constants
-import heron.common.src.python.pex_loader as pex_loader
+from heron.instance.src.python.utils import system_constants
+from heron.common.src.python import pex_loader
 
-import heronpy.api.global_metrics as global_metrics
-import heronpy.api.api_constants as api_constants
+from heronpy.api import global_metrics
+from heronpy.api import api_constants
 from heronpy.api.state.stateful_component import StatefulComponent
 
 # pylint: disable=too-many-instance-attributes
@@ -114,11 +114,11 @@ class BaseInstance:
       if is_spout:
         spout_proto = self.pplan_helper.get_my_spout()
         py_classpath = spout_proto.comp.class_name
-        self.logger.info(f"Loading Spout from: {py_classpath}")
+        self.logger.info("Loading Spout from: %s", py_classpath)
       else:
         bolt_proto = self.pplan_helper.get_my_bolt()
         py_classpath = bolt_proto.comp.class_name
-        self.logger.info(f"Loading Bolt from: {py_classpath}")
+        self.logger.info("Loading Bolt from: %s", py_classpath)
 
       pex_loader.load_pex(self.pplan_helper.topology_pex_abs_path)
       spbl_class = pex_loader.import_and_get_class(self.pplan_helper.topology_pex_abs_path,
@@ -126,7 +126,7 @@ class BaseInstance:
     except Exception as e:
       spbl = "spout" if is_spout else "bolt"
       self.logger.error(traceback.format_exc())
-      raise RuntimeError(f"Error when loading a {spbl} from pex: {str(e)}")
+      raise RuntimeError(f"Error when loading a {spbl} from pex: {str(e)}") from e
     return spbl_class
 
   def handle_initiate_stateful_checkpoint(self, ckptmsg, component):
