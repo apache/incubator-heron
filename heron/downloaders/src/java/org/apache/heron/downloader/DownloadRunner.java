@@ -33,6 +33,7 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.heron.spi.common.Config;
 import org.apache.heron.spi.common.ConfigLoader;
+import org.slf4j.bridge.SLF4JBridgeHandler;
 
 public final class DownloadRunner {
 
@@ -127,6 +128,8 @@ public final class DownloadRunner {
 
   // takes topology package URI and extracts it to a directory
   public static void main(String[] args) throws Exception {
+    SLF4JBridgeHandler.removeHandlersForRootLogger();
+    SLF4JBridgeHandler.install();
     CommandLineParser parser = new DefaultParser();
     Options slaManagerCliOptions = constructCliOptions();
 

@@ -32,6 +32,7 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.apache.heron.api.utils.Slf4jUtils;
 import org.apache.heron.common.basics.DryRunFormatType;
 import org.apache.heron.common.basics.SysUtils;
 import org.apache.heron.common.utils.logging.LoggingHelper;
@@ -224,7 +225,7 @@ public class RuntimeManagerMain {
   public static void main(String[] args)
       throws ClassNotFoundException, IllegalAccessException,
       InstantiationException, IOException, ParseException {
-
+    Slf4jUtils.installSLF4JBridge();
     Options options = constructOptions();
     Options helpOptions = constructHelpOptions();
     CommandLineParser parser = new DefaultParser();

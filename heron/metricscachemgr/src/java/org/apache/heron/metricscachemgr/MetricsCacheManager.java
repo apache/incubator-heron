@@ -32,6 +32,7 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.apache.heron.api.utils.Slf4jUtils;
 import org.apache.heron.common.basics.NIOLooper;
 import org.apache.heron.common.basics.SysUtils;
 import org.apache.heron.common.config.SystemConfig;
@@ -284,6 +285,7 @@ public class MetricsCacheManager {
   }
 
   public static void main(String[] args) throws Exception {
+    Slf4jUtils.installSLF4JBridge();
     Options options = constructOptions();
     Options helpOptions = constructHelpOptions();
 

@@ -19,9 +19,9 @@ java_library(
         "@maven//:com_fasterxml_jackson_core_jackson_core",
         "@maven//:com_fasterxml_jackson_core_jackson_databind",
         "@maven//:commons_codec_commons_codec",
-        "@maven//:org_slf4j_jcl_over_slf4j",
         "@maven//:org_apache_httpcomponents_httpclient",
         "@maven//:org_apache_httpcomponents_httpcore",
+        "@maven//:org_slf4j_jcl_over_slf4j",
     ],
 )
 
@@ -72,7 +72,10 @@ java_library(
 java_library(
     name = "logging",
     srcs = ["Empty.java"],
-    resources = ["logback.xml"],
+    resources = [
+        "logback.xml",
+        "logging.properties",
+    ],
     exports = ["@maven//:org_slf4j_slf4j_api"],
     deps = [
         "@maven//:ch_qos_logback_logback_classic",
@@ -211,9 +214,9 @@ java_library(
         "@maven//:com_google_http_client_google_http_client_jackson2",
         "@maven//:com_google_oauth_client_google_oauth_client",
         "@maven//:commons_codec_commons_codec",
-        "@maven//:org_slf4j_jcl_over_slf4j",
         "@maven//:org_apache_httpcomponents_httpclient",
         "@maven//:org_apache_httpcomponents_httpcore",
+        "@maven//:org_slf4j_jcl_over_slf4j",
     ],
 )
 
@@ -351,15 +354,15 @@ java_library(
         "@maven//:org_apache_distributedlog_distributedlog_protocol",
     ],
     deps = [
-        "@maven//:org_slf4j_slf4j_api",
-        "@maven//:org_slf4j_jul_to_slf4j",
-        "@maven//:org_slf4j_log4j_over_slf4j",
-        "@maven//:org_slf4j_jcl_over_slf4j",
         "@maven//:commons_collections_commons_collections",
         "@maven//:commons_configuration_commons_configuration",
         "@maven//:commons_lang_commons_lang",
         "@maven//:io_netty_netty_all",
         "@maven//:org_apache_distributedlog_distributedlog_core",
         "@maven//:org_apache_distributedlog_distributedlog_protocol",
+        "@maven//:org_slf4j_jcl_over_slf4j",
+        "@maven//:org_slf4j_jul_to_slf4j",
+        "@maven//:org_slf4j_log4j_over_slf4j",
+        "@maven//:org_slf4j_slf4j_api",
     ],
 )

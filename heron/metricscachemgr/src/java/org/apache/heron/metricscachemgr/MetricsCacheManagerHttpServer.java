@@ -33,6 +33,7 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 
+import org.apache.heron.api.utils.Slf4jUtils;
 import org.apache.heron.metricscachemgr.metricscache.MetricsCache;
 import org.apache.heron.proto.tmanager.TopologyManager;
 import org.apache.heron.spi.utils.NetworkUtils;
@@ -95,6 +96,7 @@ public class MetricsCacheManagerHttpServer {
    */
   public static void main(String[] args)
       throws ExecutionException, InterruptedException, IOException {
+    Slf4jUtils.installSLF4JBridge();
     if (args.length < 3) {
       System.out.println(
           "Usage: java MetricsQuery <host:port> <component_name> <metrics_name>");

@@ -25,6 +25,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Paths;
 
+import org.apache.heron.api.utils.Slf4jUtils;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
@@ -245,6 +246,7 @@ public final class Runtime {
 
   @SuppressWarnings({"IllegalCatch", "RegexpSinglelineJava"})
   public static void main(String[] args) throws Exception {
+    Slf4jUtils.installSLF4JBridge();
     final Options options = createOptions();
     final Options helpOptions = constructHelpOptions();
 

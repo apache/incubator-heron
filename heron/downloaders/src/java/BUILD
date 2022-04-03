@@ -16,6 +16,7 @@ downloader_deps = [
     "@maven//:commons_cli_commons_cli",
     "//third_party/java:dlog-java",
     "@maven//:io_netty_netty_all",
+    "@maven//:org_slf4j_jul_to_slf4j",
 ]
 
 java_library(

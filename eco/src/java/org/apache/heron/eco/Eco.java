@@ -31,6 +31,7 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.heron.api.Config;
+import org.apache.heron.api.utils.Slf4jUtils;
 import org.apache.heron.eco.builder.BoltBuilder;
 import org.apache.heron.eco.builder.BuilderUtility;
 import org.apache.heron.eco.builder.ComponentBuilder;
@@ -132,6 +133,7 @@ public class Eco {
   }
 
   public static void main(String[] args) throws Exception {
+    Slf4jUtils.installSLF4JBridge();
     Options options = constructOptions();
 
     CommandLineParser parser = new DefaultParser();
