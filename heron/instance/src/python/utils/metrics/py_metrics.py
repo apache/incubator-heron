@@ -80,7 +80,7 @@ class PyMetrics(BaseMetricsHelper):
                     PY_GC_GENERATION_1_THRESHOLD: self.g1_threshold,
                     PY_GC_GENERATION_2_THRESHOLD: self.g2_threshold,
                     PY_GC_GENERATION_3_THRESHOLD: self.g3_threshold}
-    super(PyMetrics, self).__init__(self.metrics)
+    _ = super()
     sys_config = system_config.get_sys_config()
     interval = float(sys_config[constants.HERON_METRICS_EXPORT_INTERVAL_SEC])
     self.register_metrics(metrics_collector, interval)
