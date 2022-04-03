@@ -67,7 +67,7 @@ def get_all_zk_state_managers(conf):
           host = hostandport[0]
           port = int(hostandport[1])
       if not host or not port:
-        raise Exception("Hostport for %s must be of the format 'host:port'." % (name))
+        raise Exception(f"Hostport for {name} must be of the format 'host:port'.")
       hostportlist.append((host, port))
     tunnelhost = location['tunnelhost']
     rootpath = location['rootpath']

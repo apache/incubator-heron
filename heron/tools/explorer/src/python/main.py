@@ -23,15 +23,15 @@ import logging
 import os
 import sys
 
+import click
+import requests
+
 from heron.common.src.python.utils import log
 from heron.tools.common.src.python.clients import tracker
 from heron.tools.common.src.python.utils import config
 from heron.tools.explorer.src.python import logicalplan
 from heron.tools.explorer.src.python import physicalplan
 from heron.tools.explorer.src.python import topologies
-
-import click
-import requests
 
 Log = log.Log
 

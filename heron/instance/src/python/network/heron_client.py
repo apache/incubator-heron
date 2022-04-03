@@ -58,9 +58,9 @@ class HeronClient(asyncore.dispatcher):
     self.socket_options = socket_options
 
     # map <message name -> message.Message object>
-    self.registered_message_map = dict()
-    self.response_message_map = dict()
-    self.context_map = dict()
+    self.registered_message_map = {}
+    self.response_message_map = {}
+    self.context_map = {}
     self.incomplete_pkt = None
 
     self.total_bytes_written = 0
@@ -82,13 +82,13 @@ class HeronClient(asyncore.dispatcher):
 
   # called when connect is ready
   def handle_connect(self):
-    Log.info("Connected to %s:%d" % (self.hostname, self.port))
+    Log.info(f"Connected to {self.hostname}:{self.port}")
     self._connecting = False
     self.on_connect(StatusCode.OK)
 
   # called when close is ready
   def handle_close(self):
-    Log.info("%s: handle_close() called" % self._get_classname())
+    Log.info(f"{self._get_classname()}: handle_close() called")
     self._handle_close()
     self.on_error()
 
@@ -103,9 +103,9 @@ class HeronClient(asyncore.dispatcher):
     self.total_bytes_received = 0
     self.total_pkt_received = 0
 
-    self.registered_message_map = dict()
-    self.response_message_map = dict()
-    self.context_map = dict()
+    self.registered_message_map = {}
+    self.response_message_map = {}
+    self.context_map = {}
     self.incomplete_pkt = None
     self._connecting = False
 
@@ -134,7 +134,7 @@ class HeronClient(asyncore.dispatcher):
       if pkt.is_complete:
         num_pkt_read += 1
         bytes_read += pkt.get_pktsize()
-        Log.debug("Read a complete packet of size %d" % bytes_read)
+        Log.debug(f"Read a complete packet of size {bytes_read}")
         self.incomplete_pkt = None
         read_pkt_list.append(pkt)
       else:
@@ -190,7 +190,7 @@ class HeronClient(asyncore.dispatcher):
 
     ``loop()`` method needs to be called after this.
     """
-    Log.debug("In start_connect() of %s" % self._get_classname())
+    Log.debug(f"In start_connect() of {self._get_classname()}")
     # TODO: specify buffer size, exception handling
     self.create_socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -209,14 +209,14 @@ class HeronClient(asyncore.dispatcher):
     :param msg_builder: callable to create a protobuf message that this client wants to receive
     """
     message = msg_builder()
-    Log.debug("In register_on_message(): %s" % message.DESCRIPTOR.full_name)
+    Log.debug(f"In register_on_message(): {message.DESCRIPTOR.full_name}")
     self.registered_message_map[message.DESCRIPTOR.full_name] = msg_builder
 
   def send_request(self, request, context, response_type, timeout_sec):
     """Sends a request message (REQID is non-zero)"""
     # generates a unique request id
     reqid = REQID.generate()
-    Log.debug("%s: In send_request() with REQID: %s" % (self._get_classname(), str(reqid)))
+    Log.debug(f"{self._get_classname()}: In send_request() with REQID: {str(reqid)}")
     # register response message type
     self.response_message_map[reqid] = response_type
     self.context_map[reqid] = context
@@ -232,7 +232,7 @@ class HeronClient(asyncore.dispatcher):
 
   def send_message(self, message):
     """Sends a message (REQID is zero)"""
-    Log.debug("In send_message() of %s" % self._get_classname())
+    Log.debug(f"In send_message() of {self._get_classname()}")
     outgoing_pkt = OutgoingPacket.create_packet(REQID.generate_zero(), message)
     self._send_packet(outgoing_pkt)
 
@@ -246,9 +246,8 @@ class HeronClient(asyncore.dispatcher):
   def handle_error(self):
     _, t, v, tbinfo = asyncore.compact_traceback()
 
-    self_msg = "%s failed for object at %0x" % (self._get_classname(), id(self))
-    Log.error("Uncaptured python exception, closing channel %s (%s:%s %s)" %
-              (self_msg, t, v, tbinfo))
+    self_msg = f"{self._get_classname()} failed for object at {id(self):x}")
+    Log.error(f"Uncaptured python exception, closing channel {self_msg} ({t}:{v} {tbinfo})")
 
     if self._connecting:
       # Error when trying to connect
@@ -272,7 +271,7 @@ class HeronClient(asyncore.dispatcher):
       try:
         response_msg.ParseFromString(serialized_msg)
       except Exception as e:
-        Log.error("Invalid Packet Error: %s" % str(e))
+        Log.error(f"Invalid Packet Error: {str(e)}")
         self._handle_close()
         self.on_error()
         return
@@ -287,7 +286,7 @@ class HeronClient(asyncore.dispatcher):
       # this is a Message -- no need to send back response
       try:
         if typename not in self.registered_message_map:
-          raise ValueError("%s is not registered in message map" % typename)
+          raise ValueError(f"{typename} is not registered in message map")
         msg_builder = self.registered_message_map[typename]
         message = msg_builder()
         message.ParseFromString(serialized_msg)
@@ -296,13 +295,12 @@ class HeronClient(asyncore.dispatcher):
         else:
           raise RuntimeError("Message not initialized")
       except Exception as e:
-        Log.error("Error when handling message packet: %s" % str(e))
+        Log.error(f"Error when handling message packet: {str(e)}")
         Log.error(traceback.format_exc())
         raise RuntimeError("Problem reading message")
     else:
       # might be a timeout response
-      Log.info("In handle_packet(): Received message whose REQID is not registered: %s"
-               % str(reqid))
+      Log.info(f"In handle_packet(): Received message whose REQID is not registered: {str(reqid)}")
 
   def _send_packet(self, pkt):
     """Pushes a packet to a send buffer, the content of which will be send when available"""

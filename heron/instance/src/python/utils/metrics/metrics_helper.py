@@ -330,9 +330,9 @@ class MetricsCollector:
   def __init__(self, looper, out_metrics):
     self.looper = looper
     # map <metrics name -> IMetric object>
-    self.metrics_map = dict()
+    self.metrics_map = {}
     # map <time_bucket_sec -> metrics name>
-    self.time_bucket_in_sec_to_metrics_name = dict()
+    self.time_bucket_in_sec_to_metrics_name = {}
     # out metrics queue
     self.out_metrics = out_metrics
 
@@ -344,7 +344,7 @@ class MetricsCollector:
     :param time_bucket_in_sec: time interval for update to the metrics manager
     """
     if name in self.metrics_map:
-      raise RuntimeError("Another metric has already been registered with name: %s" % name)
+      raise RuntimeError(f"Another metric has already been registered with name: {name}")
 
     Log.debug("Register metric: %s, with interval: %s", name, str(time_bucket_in_sec))
     self.metrics_map[name] = metric
@@ -382,7 +382,7 @@ class MetricsCollector:
       for key, value in list(metric_value.items()):
         if key is not None and value is not None:
           self._add_data_to_message(message, name + "/" + str(key), value)
-          self._add_data_to_message(message, "%s/%s" % (name, str(key)), value)
+          self._add_data_to_message(message, f"{name}/{str(key)}", value)
         else:
           Log.info("When gathering metric: %s, <%s:%s> is not a valid key-value to output "
                    "as metric. Skipping...", name, str(key), str(value))

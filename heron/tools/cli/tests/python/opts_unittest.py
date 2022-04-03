@@ -48,13 +48,13 @@ class OptsTest(unittest.TestCase):
   def test_many_opts(self):
     opts.clear_config()
     for k in range(1, 100):
-      key = "key-%d" % (k)
-      value = "value-%d" % (k)
+      key = f"key-{k}"
+      value = f"value-{k}"
       opts.set_config(key, value)
 
     for k in range(1, 100):
-      key = "key-%d" % (k)
-      value = "value-%d" % (k)
+      key = f"key-{k}"
+      value = f"value-{k}"
       self.assertEqual(value, opts.get_config(key))
 
   def test_clear_opts(self):

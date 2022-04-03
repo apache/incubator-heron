@@ -40,7 +40,7 @@ class GeneratorSpout(Spout, StatefulComponent, StreamletSpoutBase):
     pass
 
   def initialize(self, config, context):
-    self.logger.debug("GeneratorSpout's Component-specific config: \n%s" % str(config))
+    self.logger.debug("GeneratorSpout's Component-specific config: \n%s", str(config))
     self.emitted = 0
     if GeneratorSpout.GENERATOR in config:
       self._generator = config[GeneratorSpout.GENERATOR]

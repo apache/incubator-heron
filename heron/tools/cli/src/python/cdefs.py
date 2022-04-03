@@ -34,7 +34,7 @@ def read_server_mode_cluster_definition(cluster, cl_args):
   :return:
   '''
 
-  client_confs = dict()
+  client_confs = {}
   client_confs[cluster] = cliconfig.cluster_config(cluster)
 
   # now check if the service-url from command line is set, if so override it

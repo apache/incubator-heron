@@ -36,7 +36,7 @@ class AggregatorBolt(TerminalBolt):
   def initialize(self, config, context):
     self.http_post_url = config[integ_constants.HTTP_POST_URL_KEY]
     self.result = []
-    Log.info("HTTP post url: %s" % self.http_post_url)
+    Log.info("HTTP post url: %s", self.http_post_url)
     self.parsed_url = urlparse(self.http_post_url)
 
   def process(self, tup):
@@ -55,14 +55,14 @@ class AggregatorBolt(TerminalBolt):
 
   def write_finished_data(self):
     json_result = json.dumps(self.result)
-    Log.info("Actual result: %s" % json_result)
-    Log.info("Posting actual result to %s" % self.http_post_url)
+    Log.info("Actual result: %s", json_result)
+    Log.info("Posting actual result to %s", self.http_post_url)
     try:
       response_code = self._post_result_to_server(json_result)
       if response_code != 200:
         # try again
         response_code = self._post_result_to_server(json_result)
         if response_code != 200:
-          raise RuntimeError("Response code: %d" % response_code)
+          raise RuntimeError(f"Response code: {response_code}")
     except Exception as e:
-      raise RuntimeError("Posting result to server failed with: %s" % e.message)
+      raise RuntimeError(f"Posting result to server failed with: {e.message}")

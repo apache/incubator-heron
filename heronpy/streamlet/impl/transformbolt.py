@@ -43,7 +43,7 @@ class TransformBolt(Bolt, StatefulComponent, StreamletBoltBase):
     pass
 
   def initialize(self, config, context):
-    self.logger.debug("TransformBolt's Component-specific config: \n%s" % str(config))
+    self.logger.debug("TransformBolt's Component-specific config: \n%s", str(config))
     self.processed = 0
     self.emitted = 0
     if TransformBolt.OPERATOR in config:

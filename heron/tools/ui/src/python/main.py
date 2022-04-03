@@ -32,10 +32,6 @@ from collections import Counter
 from datetime import datetime
 from typing import Callable, List, Optional
 
-from heron.tools.common.src.python.utils import config
-from heron.tools.common.src.python.clients import tracker
-from heron.common.src.python.utils import log
-
 import click
 import pydantic
 import requests
@@ -47,6 +43,10 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from starlette.responses import RedirectResponse, Response
 from starlette.exceptions import HTTPException as StarletteHTTPException
+
+from heron.tools.common.src.python.utils import config
+from heron.tools.common.src.python.clients import tracker
+from heron.common.src.python.utils import log
 
 
 VERSION = config.get_version_number()
@@ -651,7 +651,7 @@ def cli(
     host: str, port: int, base_url_option: str, tracker_url_option: str, verbose: bool
 ) -> None:
   """Start a web UI for heron which renders information from the tracker."""
-  global base_url, tracker_url, Log
+  global base_url, Log
   base_url = base_url_option
   log_level = logging.DEBUG if verbose else logging.INFO
   log.configure(log_level)

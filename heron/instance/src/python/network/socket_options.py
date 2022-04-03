@@ -47,7 +47,7 @@ def create_socket_options():
     return sock_opt
   except ValueError as e:
     # couldn't convert to int
-    raise ValueError("Invalid value in sys_config: %s" % str(e))
+    raise ValueError(f"Invalid value in sys_config: {str(e)}")
   except KeyError as e:
     # option key was not found
-    raise KeyError("Incomplete sys_config: %s" % str(e))
+    raise KeyError(f"Incomplete sys_config: {str(e)}")

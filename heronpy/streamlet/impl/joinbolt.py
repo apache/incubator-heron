@@ -63,13 +63,13 @@ class JoinBolt(SlidingWindowBolt, StreamletBoltBase):
   def initialize(self, config, context):
     super(JoinBolt, self).initialize(config, context)
     if not JoinBolt.JOINEDCOMPONENT in config:
-      raise RuntimeError("%s must be specified in the JoinBolt" % JoinBolt.JOINEDCOMPONENT)
+      raise RuntimeError(f"{JoinBolt.JOINEDCOMPONENT} must be specified in the JoinBolt")
     self._joined_component = config[JoinBolt.JOINEDCOMPONENT]
     if not JoinBolt.JOINFUNCTION in config:
-      raise RuntimeError("%s must be specified in the JoinBolt" % JoinBolt.JOINFUNCTION)
+      raise RuntimeError(f"{JoinBolt.JOINFUNCTION} must be specified in the JoinBolt")
     self._join_function = config[JoinBolt.JOINFUNCTION]
     if not JoinBolt.JOINTYPE in config:
-      raise RuntimeError("%s must be specified in the JoinBolt" % JoinBolt.JOINTYPE)
+      raise RuntimeError(f"{JoinBolt.JOINTYPE} must be specified in the JoinBolt")
     self._join_type = config[JoinBolt.JOINTYPE]
 
   def processWindow(self, window_config, tuples):
@@ -173,8 +173,8 @@ class JoinStreamlet(Streamlet):
 
   # pylint: disable=superfluous-parens
   def _build_this(self, builder, stage_names):
-    print("join_build_this left: %s right: %s" % (self._left._built, self._right._built))
-    print("left: %s right: %s" % (self._left.get_name(), self._right.get_name()))
+    print(f"join_build_this left: {self._left._built} right: {self._right._built}")
+    print(f"left: {self._left.get_name()} right: {self._right.get_name()}")
     if not self._left._built or not self._right._built:
       return False
     if not self.get_name():

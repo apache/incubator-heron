@@ -163,7 +163,7 @@ class TopologyContextImpl(TopologyContext):
       stream_id = out_stream.stream.id
 
       if comp_name not in out_fields:
-        out_fields[comp_name] = dict()
+        out_fields[comp_name] = {}
 
       # get the fields of a particular output stream
       ret = []

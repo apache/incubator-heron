@@ -73,7 +73,7 @@ class HeronCommunicator:
         self._producer_callback()
       return ret
     except Empty:
-      Log.debug("%s: Empty in poll()" % str(self))
+      Log.debug("%s: Empty in poll()", str(self))
       raise Empty
 
   def offer(self, item):
@@ -88,7 +88,7 @@ class HeronCommunicator:
         self._consumer_callback()
       return True
     except Full:
-      Log.debug("%s: Full in offer()" % str(self))
+      Log.debug("%s: Full in offer()", str(self))
       raise Full
 
   def clear(self):

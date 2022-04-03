@@ -195,7 +195,7 @@ class IncomingPacket:
         if len(self.header) == HeronProtocol.HEADER_SIZE:
           self.is_header_read = True
         else:
-          Log.debug("Header read incomplete; read %d bytes of header" % len(self.header))
+          Log.debug(f"Header read incomplete; read {len(self.header)} bytes of header")
           return
 
       if self.is_header_read and not self.is_complete:
@@ -214,8 +214,7 @@ class IncomingPacket:
         raise RuntimeError("Fatal error occured in IncomingPacket.read()")
 
   def __str__(self):
-    return "Packet ID: %s, header: %s, complete: %s" % \
-           (str(self.id), self.is_header_read, self.is_complete)
+    return f"Packet ID: {str(self.id)}, header: {self.is_header_read}, complete: {self.is_complete}"
 
 
 class REQID:

@@ -78,7 +78,7 @@ def run(command, parser, cl_args, unknown_args):
   # server mode
   if cluster:
     config_file = config.heron_rc_file()
-    client_confs = dict()
+    client_confs = {}
 
     # Read the cluster definition, if not found
     client_confs = cdefs.read_server_mode_cluster_definition(cluster, cl_args, config_file)
@@ -99,10 +99,10 @@ def run(command, parser, cl_args, unknown_args):
     try:
       r = service_method(service_apiurl)
       if r.status_code != requests.codes.ok:
-        Log.error(r.json().get('message', "Unknown error from API server %d" % r.status_code))
+        Log.error(r.json().get('message', f"Unknown error from API server {r.status_code}"))
       sorted_items = sorted(list(r.json().items()), key=lambda tup: tup[0])
       for key, value in sorted_items:
-        print("%s : %s" % (key, value))
+        print(f"{key} : {value}")
     except (requests.exceptions.ConnectionError, requests.exceptions.HTTPError) as err:
       Log.error(err)
       return SimpleResult(Status.HeronError)

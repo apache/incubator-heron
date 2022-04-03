@@ -144,7 +144,7 @@ def real_program_path(program_name):
   return None
 
 def fail(message):
-  print("\nFAILED:  %s" % message)
+  print(f"\nFAILED:  {message}")
   sys.exit(1)
 
 # Assumes the version is at the end of the first line consisting of digits and dots
@@ -158,7 +158,7 @@ def discover_version(path):
     version_flag = "-V"
   else:
     version_flag = "--version"
-  command = "%s %s" % (path, version_flag)
+  command = f"{path} {version_flag}"
   version_output = subprocess.check_output(command, stderr=subprocess.STDOUT, shell=True)
   first_line = version_output.decode('ascii', 'ignore').split("\n")[0]
   version = get_trailing_version(first_line)
@@ -215,12 +215,12 @@ def discover_version(path):
       return version
 
 
-  fail ("Could not determine the version of %s from the following output\n%s\n%s" % (path, command, version_output))
+  fail (f"Could not determine the version of {path} from the following output\n{command}\n{version_output}")
 
 def to_semver(version):
   # is version too short
   if re.search('^[\d]+\.[\d]+$', version):
-    return "%s.0" % version
+    return f"{version}.0"
 
   # is version too long
   version_search = re.search('^([\d]+\.[\d]+\.[\d]+)\.[\d]+$', version)
@@ -231,8 +231,8 @@ def to_semver(version):
 
 def assert_min_version(path, min_version):
   version = discover_version(path)
-  if not semver.match(to_semver(version), ">=%s" % to_semver(min_version)):
-    fail("%s is version %s which is less than the required version %s" % (path, version, min_version))
+  if not semver.match(to_semver(version), f">={to_semver(min_version)}"):
+    fail(f"{path} is version {version} which is less than the required version {min_version}")
   return version
 
 ######################################################################
@@ -391,7 +391,7 @@ def write_heron_config_header(config_file):
 # MAIN program that sets up your workspace for bazel
 ######################################################################
 def main():
-  env_map = dict()
+  env_map = {}
 
   # Discover the platform
   platform = discover_platform()

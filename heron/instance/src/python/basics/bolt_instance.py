@@ -54,7 +54,7 @@ class BoltInstance(BaseInstance):
                                             api_constants.TopologyReliabilityMode.ATMOST_ONCE)
     self.acking_enabled = bool(mode == api_constants.TopologyReliabilityMode.ATLEAST_ONCE)
     self._initialized_metrics_and_tasks = False
-    Log.info("Enable ACK: %s" % str(self.acking_enabled))
+    Log.info(f"Enable ACK: {str(self.acking_enabled)}")
 
     # load user's bolt class
     bolt_impl_class = super(BoltInstance, self).load_py_instance(is_spout=False)
@@ -228,7 +228,7 @@ class BoltInstance(BaseInstance):
     cluster_config = self.pplan_helper.context.get_cluster_config()
     if api_constants.TOPOLOGY_TICK_TUPLE_FREQ_SECS in cluster_config:
       tick_freq_sec = cluster_config[api_constants.TOPOLOGY_TICK_TUPLE_FREQ_SECS]
-      Log.debug("Tick Tuple Frequency: %s sec." % str(tick_freq_sec))
+      Log.debug(f"Tick Tuple Frequency: {str(tick_freq_sec)} sec.")
 
       def send_tick():
         tick = TupleHelper.make_tick_tuple()

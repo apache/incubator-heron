@@ -55,7 +55,7 @@ class DownloadHandler(tornado.web.RequestHandler):
       return
 
     if path is None or not os.path.isfile(path):
-      self.write("File %s  not found" % path)
+      self.write(f"File {path} not found")
       self.set_status(404)
       self.finish()
       return

@@ -31,7 +31,7 @@ class PidHandler(tornado.web.RequestHandler):
   # pylint: disable=attribute-defined-outside-init
   async def get(self, instance_id):
     ''' get method '''
-    pid = subprocess.run(['cat', "%s.pid" % instance_id], capture_output=True, text=True,
+    pid = subprocess.run(['cat', f"{instance_id}.pid"], capture_output=True, text=True,
                          check=True)
     await self.finish({
         'command': ' '.join(pid.args),

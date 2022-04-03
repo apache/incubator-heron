@@ -39,7 +39,7 @@ class LogBolt(Bolt, StatefulComponent, StreamletBoltBase):
     pass
 
   def initialize(self, config, context):
-    self.logger.debug("LogBolt's Component-specific config: \n%s" % str(config))
+    self.logger.debug("LogBolt's Component-specific config: \n%s", str(config))
     self.processed = 0
 
   def process(self, tup):

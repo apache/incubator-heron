@@ -70,7 +70,7 @@ class RepartitionBolt(Bolt, StatefulComponent, StreamletBoltBase):
     pass
 
   def initialize(self, config, context):
-    self.logger.debug("RepartitionBolt's Component-specific config: \n%s" % str(config))
+    self.logger.debug("RepartitionBolt's Component-specific config: \n%s", str(config))
     self.processed = 0
     self.emitted = 0
 

@@ -71,7 +71,7 @@ class SingleThreadHeronInstance:
     self.in_stream = HeronCommunicator(producer_cb=None, consumer_cb=None)
     self.out_stream = HeronCommunicator(producer_cb=None, consumer_cb=None)
 
-    self.socket_map = dict()
+    self.socket_map = {}
     self.looper = GatewayLooper(self.socket_map)
 
     # Initialize metrics related
@@ -153,7 +153,7 @@ class SingleThreadHeronInstance:
     """Called when we receive StartInstanceStatefulProcessing message
     :param start_msg: StartInstanceStatefulProcessing type
     """
-    Log.info("Received start stateful processing for %s" % start_msg.checkpoint_id)
+    Log.info(f"Received start stateful processing for {start_msg.checkpoint_id}")
     self.is_stateful_started = True
     self.start_instance_if_possible()
 
@@ -161,7 +161,7 @@ class SingleThreadHeronInstance:
     """Called when we receive RestoreInstanceStateRequest message
     :param restore_msg: RestoreInstanceStateRequest type
     """
-    Log.info("Restoring instance state to checkpoint %s" % restore_msg.state.checkpoint_id)
+    Log.info(f"Restoring instance state to checkpoint {restore_msg.state.checkpoint_id}")
     # Stop the instance
     if self.is_stateful_started:
       self.my_instance.py_class.stop()
@@ -218,7 +218,7 @@ class SingleThreadHeronInstance:
       elif new_helper.is_topology_paused():
         self.my_instance.py_class.invoke_deactivate()
       else:
-        raise RuntimeError("Unexpected TopologyState update: %s" % new_helper.get_topology_state())
+        raise RuntimeError(f"Unexpected TopologyState update: {new_helper.get_topology_state()}")
     else:
       Log.info("Topology state remains the same.")
 
@@ -245,8 +245,7 @@ class SingleThreadHeronInstance:
       self._handle_assignment_msg(new_helper)
     else:
       Log.info("Received a new Physical Plan with the same assignment -- State Change")
-      Log.info("Old state: %s, new state: %s.",
-               self.my_pplan_helper.get_topology_state(), new_helper.get_topology_state())
+      Log.info(f"Old state: {self.my_pplan_helper.get_topology_state()}, new state: {new_helper.get_topology_state()}.")
       self._handle_state_change_msg(new_helper)
 
   def _handle_assignment_msg(self, pplan_helper):
@@ -256,8 +255,8 @@ class SingleThreadHeronInstance:
     if self.my_pplan_helper.is_spout:
       # Starting a spout
       my_spout = self.my_pplan_helper.get_my_spout()
-      Log.info("Incarnating ourselves as spout: %s with task id %s",
-               self.my_pplan_helper.my_component_name, str(self.my_pplan_helper.my_task_id))
+      Log.info(f"Incarnating ourselves as spout: {self.my_pplan_helper.my_component_name} "\
+               f"with task id {str(self.my_pplan_helper.my_task_id)}")
 
       self.in_stream. \
         register_capacity(self.sys_config[constants.INSTANCE_INTERNAL_SPOUT_READ_QUEUE_CAPACITY])
@@ -313,7 +312,7 @@ class SingleThreadHeronInstance:
       Log.info("Started instance successfully.")
     except Exception as e:
       Log.error(traceback.format_exc())
-      Log.error("Error when starting bolt/spout, bailing out...: %s", str(e))
+      Log.error(f"Error when starting bolt/spout, bailing out...: {str(e)}")
       self.looper.exit_loop()
 
 def yaml_config_reader(config_path):

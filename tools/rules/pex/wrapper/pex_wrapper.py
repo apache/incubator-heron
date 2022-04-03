@@ -119,7 +119,7 @@ def main(args=None):
                     pex_builder._copy = True
                     pex_builder.add_source(dereference_symlinks(src), dst)
                 else:
-                    raise RuntimeError("Failed to add %s: %s" % (src, err))
+                    raise RuntimeError(f"Failed to add {src}: {err}")
 
         # Add resources from the manifest
         for reqmap in manifest.get('resources', []):
@@ -132,11 +132,11 @@ def main(args=None):
             try:
                 pex_builder.add_dist_location(egg)
             except Exception as err:
-                raise RuntimeError("Failed to add %s: %s" % (egg, err))
+                raise RuntimeError(f"Failed to add {egg}: {err}")
 
         # TODO(mikekap): Do something about manifest['nativeLibraries'].
 
-        pexbin.log('Saving PEX file to %s' % poptions.pex_name,
+        pexbin.log(f'Saving PEX file to {poptions.pex_name}',
                    V=poptions.verbosity)
         tmp_name = poptions.pex_name + '~'
         safe_delete(tmp_name)

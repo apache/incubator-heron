@@ -60,8 +60,8 @@ class SpoutInstance(BaseInstance):
     self.enable_message_timeouts = \
       context.get_cluster_config().get(api_constants.TOPOLOGY_ENABLE_MESSAGE_TIMEOUTS)
     self._initialized_metrics_and_tasks = False
-    Log.info("Enable ACK: %s" % str(self.acking_enabled))
-    Log.info("Enable Message Timeouts: %s" % str(self.enable_message_timeouts))
+    Log.info(f"Enable ACK: {str(self.acking_enabled)}")
+    Log.info(f"Enable Message Timeouts: {str(self.enable_message_timeouts)}")
 
     # map <tuple_info.key -> tuple_info>, ordered by insertion time
     self.in_flight_tuples = collections.OrderedDict()
@@ -131,8 +131,7 @@ class SpoutInstance(BaseInstance):
 
     if direct_task is not None:
       if not isinstance(direct_task, int):
-        raise TypeError("direct_task argument needs to be an integer, given: %s"
-                        % str(type(direct_task)))
+        raise TypeError(f"direct_task argument needs to be an integer, given: {str(type(direct_task))}")
       # performing emit-direct
       data_tuple.dest_task_ids.append(direct_task)
     elif custom_target_task_ids is not None:
@@ -351,13 +350,13 @@ class SpoutInstance(BaseInstance):
       self._invoke_ack(tuple_info.tuple_id, tuple_info.stream_id, 0)
 
   def _invoke_ack(self, tuple_id, stream_id, complete_latency_ns):
-    Log.debug("In invoke_ack(): Acking %s from stream: %s" % (str(tuple_id), stream_id))
+    Log.debug(f"In invoke_ack(): Acking {str(tuple_id)} from stream: {stream_id}")
     self.spout_impl.ack(tuple_id)
     self.pplan_helper.context.invoke_hook_spout_ack(tuple_id, complete_latency_ns)
     self.spout_metrics.acked_tuple(stream_id, complete_latency_ns)
 
   def _invoke_fail(self, tuple_id, stream_id, fail_latency_ns):
-    Log.debug("In invoke_fail(): Failing %s from stream: %s" % (str(tuple_id), stream_id))
+    Log.debug(f"In invoke_fail(): Failing {str(tuple_id)} from stream: {stream_id}")
     self.spout_impl.fail(tuple_id)
     self.pplan_helper.context.invoke_hook_spout_fail(tuple_id, fail_latency_ns)
     self.spout_metrics.failed_tuple(stream_id, fail_latency_ns)

@@ -92,7 +92,7 @@ class BaseInstance:
       elif level == "error":
         _log_level = logging.ERROR
       else:
-        raise ValueError("%s is not supported as logging level" % str(level))
+        raise ValueError(f"{str(level)} is not supported as logging level")
 
     self.logger.log(_log_level, message)
 
@@ -114,11 +114,11 @@ class BaseInstance:
       if is_spout:
         spout_proto = self.pplan_helper.get_my_spout()
         py_classpath = spout_proto.comp.class_name
-        self.logger.info("Loading Spout from: %s", py_classpath)
+        self.logger.info(f"Loading Spout from: {py_classpath}")
       else:
         bolt_proto = self.pplan_helper.get_my_bolt()
         py_classpath = bolt_proto.comp.class_name
-        self.logger.info("Loading Bolt from: %s", py_classpath)
+        self.logger.info(f"Loading Bolt from: {py_classpath}")
 
       pex_loader.load_pex(self.pplan_helper.topology_pex_abs_path)
       spbl_class = pex_loader.import_and_get_class(self.pplan_helper.topology_pex_abs_path,
@@ -126,11 +126,11 @@ class BaseInstance:
     except Exception as e:
       spbl = "spout" if is_spout else "bolt"
       self.logger.error(traceback.format_exc())
-      raise RuntimeError("Error when loading a %s from pex: %s" % (spbl, str(e)))
+      raise RuntimeError(f"Error when loading a {spbl} from pex: {str(e)}")
     return spbl_class
 
   def handle_initiate_stateful_checkpoint(self, ckptmsg, component):
-    Log.info("Received initiate state checkpoint message for %s" % ckptmsg.checkpoint_id)
+    Log.info(f"Received initiate state checkpoint message for {ckptmsg.checkpoint_id}")
     if not self.is_stateful:
       raise RuntimeError("Received state checkpoint message but we are not stateful topology")
     if isinstance(component, StatefulComponent):

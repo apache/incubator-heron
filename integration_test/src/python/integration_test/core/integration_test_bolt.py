@@ -41,7 +41,7 @@ class IntegrationTestBolt(Bolt):
 
   @classmethod
   def spec(cls, name, par, inputs, config, user_bolt_classpath, user_output_fields=None):
-    python_class_path = "%s.%s" % (cls.__module__, cls.__name__)
+    python_class_path = f"{cls.__module__}.{cls.__name__}"
     config[integ_const.USER_BOLT_CLASSPATH] = user_bolt_classpath
     # avoid modification to cls.outputs
     _outputs = copy.copy(cls.outputs)
@@ -69,7 +69,7 @@ class IntegrationTestBolt(Bolt):
     self.tuples_processed = 0
     self.current_tuple_processing = None
 
-    Log.info("Terminals to receive: %d" % self.terminal_to_receive)
+    Log.info("Terminals to receive: %d", self.terminal_to_receive)
     self.user_bolt.initialize(config, context)
 
   @staticmethod
@@ -86,7 +86,7 @@ class IntegrationTestBolt(Bolt):
     self.tuple_received += 1
     stream_id = tup.stream
 
-    Log.info("Received a tuple: %s from %s" % (tup, stream_id))
+    Log.info("Received a tuple: %s from %s", (tup, stream_id))
     if stream_id == integ_const.INTEGRATION_TEST_CONTROL_STREAM_ID:
       self.terminal_to_receive -= 1
       if self.is_done:

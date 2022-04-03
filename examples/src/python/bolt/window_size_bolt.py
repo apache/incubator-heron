@@ -34,4 +34,4 @@ class WindowSizeBolt(SlidingWindowBolt):
   def processWindow(self, window_info, tuples):
     self.numerator += len(tuples)
     self.denominator += 1
-    self.logger.info("The current average is %f" % (self.numerator / self.denominator))
+    self.logger.info(f"The current average is {(self.numerator / self.denominator)}")

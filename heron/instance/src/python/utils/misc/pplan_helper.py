@@ -59,7 +59,7 @@ class PhysicalPlanHelper:
         break
 
     if self.my_instance is None:
-      raise RuntimeError("There was no instance that matched my id: %s" % self.my_instance_id)
+      raise RuntimeError(f"There was no instance that matched my id: {self.my_instance_id}")
 
     self.my_component_name = self.my_instance.info.component_name
     self.my_task_id = self.my_instance.info.task_id
@@ -68,7 +68,7 @@ class PhysicalPlanHelper:
     self._my_spbl, self.is_spout = self._get_my_spout_or_bolt(pplan.topology)
 
     # Map <stream id -> number of fields in that stream's schema>
-    self._output_schema = dict()
+    self._output_schema = {}
     outputs = self._my_spbl.outputs
 
     # setup output schema
@@ -122,8 +122,8 @@ class PhysicalPlanHelper:
       raise RuntimeError("%s emitting to stream %s but was not declared in output fields"
                          % (self.my_component_name, stream_id))
     if size != len(tup):
-      raise RuntimeError("Number of fields emitted in stream %s does not match what's expected. "
-                         "Expected: %s, Observed: %s" % (stream_id, size, len(tup)))
+      raise RuntimeError(f"Number of fields emitted in stream {stream_id} does not match what's expected. "\
+                         f"Expected: {size}, Observed: {len(tup)}")
 
   def get_my_spout(self):
     """Returns spout instance, or ``None`` if bolt is assigned"""
@@ -252,7 +252,7 @@ class PhysicalPlanHelper:
             raise NotImplementedError("Java-serialized custom grouping is not yet supported "
                                       "for python topology")
           else:
-            raise ValueError("Unrecognized custom grouping type found: %s" % str(in_stream.type))
+            raise ValueError(f"Unrecognized custom grouping type found: {str(in_stream.type)}")
 
   def _get_taskids_for_component(self, component_name):
     return [instance.info.task_id for instance in self.pplan.instances

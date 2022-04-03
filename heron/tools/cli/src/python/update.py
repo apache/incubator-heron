@@ -55,7 +55,8 @@ def create_parser(subparsers):
     pattern = re.compile(r"^[\w\.-]+:[\d]+$")
     if not pattern.match(value):
       raise argparse.ArgumentTypeError(
-          "Invalid syntax for component parallelism (<component_name:value>): %s" % value)
+          f"Invalid syntax for component parallelism (<component_name:value>): {value}"
+        )
     return value
 
   parser.add_argument(
@@ -70,8 +71,8 @@ def create_parser(subparsers):
     pattern = re.compile(r"^([\w\.-]+:){1,2}[\w\.-]+$")
     if not pattern.match(value):
       raise argparse.ArgumentTypeError(
-          "Invalid syntax for runtime config ([component:]<name:value>): %s"
-          % value)
+          f"Invalid syntax for runtime config ([component:]<name:value>): {value}"
+        )
     return value
 
   parser.add_argument(
@@ -86,8 +87,8 @@ def create_parser(subparsers):
     pattern = re.compile(r"^\d+$")
     if not pattern.match(value):
       raise argparse.ArgumentTypeError(
-          "Invalid syntax for container number (value): %s"
-          % value)
+        f"Invalid syntax for container number (value): {value}"
+      )
     return value
 
   parser.add_argument(
@@ -166,7 +167,7 @@ def run(command, parser, cl_args, unknown_args):
 
   # Build jar list
   extra_lib_jars = jars.packing_jars()
-  action = "update topology%s" % (' in dry-run mode' if cl_args["dry_run"] else '')
+  action = f"""update topology{(' in dry-run mode' if cl_args["dry_run"] else '')}"""
 
   # Build extra args
   dict_extra_args = {}

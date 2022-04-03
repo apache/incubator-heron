@@ -87,7 +87,8 @@ class Result:
       self._do_log(Log.error, self.err_context)
     else:
       raise RuntimeError(
-          "Unknown status type of value %d. Expected value: %s" % (self.status.value, list(Status)))
+          f"Unknown status type of value {self.status.value}. Expected value: {list(Status)}"
+        )
 
   def add_context(self, err_context, succ_context=None):
     """ Prepend msg to add some context information
@@ -107,7 +108,7 @@ class SimpleResult(Result):
   """Simple result: result that already and only
      contains status of the result"""
   def __init__(self, *args):
-    super(SimpleResult, self).__init__(*args)
+    super().__init__(*args)
 
   def render(self):
     self._log_context()
@@ -116,7 +117,7 @@ class SimpleResult(Result):
 class ProcessResult(Result):
   """Process result: a wrapper of result class"""
   def __init__(self, process):
-    super(ProcessResult, self).__init__()
+    super().__init__()
     self.process = process
     self.stdout_builder = proc.async_stdout_builder(process)
     # start redirect stderr in initialization, before render() gets called
@@ -162,9 +163,8 @@ class ProcessResult(Result):
     elif self.status == Status.InvocationError:
       self._do_print(sys.stdout, stdout)
     else:
-      raise RuntimeError(
-          "Unknown status type of value %d. Expected value: %s" % \
-          (self.status.value, list(Status)))
+      raise RuntimeError("Unknown status type of value "\
+        f"{self.status.value}. Expected value: {list(Status)}")
 
   def render(self):
     self.process.wait()
@@ -179,12 +179,12 @@ def render(results):
     for r in results:
       r.render()
   else:
-    raise RuntimeError("Unknown result instance: %s" % (str(results.__class__),))
+    raise RuntimeError(f"Unknown result instance: {(str(results.__class__),)}")
 
 # check if all results are successful
 def is_successful(results):
   if isinstance(results, list):
     return all([is_successful(result) for result in results])
   if isinstance(results, Result):
-    return results.status == Status.Ok or results.status == Status.DryRun
-  raise RuntimeError("Unknown result instance: %s" % (str(results.__class__),))
+    return results.status in (Status.Ok, Status.DryRun)
+  raise RuntimeError(f"Unknown result instance: {(str(results.__class__),)}")

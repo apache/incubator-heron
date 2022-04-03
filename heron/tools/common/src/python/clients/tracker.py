@@ -36,44 +36,42 @@ import time
 from typing import Any, Iterable, List, Optional, Tuple
 from urllib.parse import urlencode
 
-from heron.common.src.python.utils.log import Log
-
 import requests
+from heron.common.src.python.utils.log import Log
 
 # This requires setting
 tracker_url = "http://127.0.0.1:8888"
 
-# pylint: disable=bad-whitespace
 CLUSTER_URL_FMT             = "%s/clusters"
 
 # Nested under /topologies
 TOPOLOGIES_URL_FMT          = "%s/topologies"
-TOPOLOGIES_STATS_URL_FMT    = "%s/states"             % TOPOLOGIES_URL_FMT
-EXECUTION_STATE_URL_FMT     = "%s/executionstate"     % TOPOLOGIES_URL_FMT
-LOGICALPLAN_URL_FMT         = "%s/logicalplan"        % TOPOLOGIES_URL_FMT
-PHYSICALPLAN_URL_FMT        = "%s/physicalplan"       % TOPOLOGIES_URL_FMT
-PACKINGPLAN_URL_FMT         = "%s/packingplan"        % TOPOLOGIES_URL_FMT
-SCHEDULER_LOCATION_URL_FMT  = "%s/schedulerlocation"  % TOPOLOGIES_URL_FMT
+TOPOLOGIES_STATS_URL_FMT    = f"{TOPOLOGIES_URL_FMT}/states"
+EXECUTION_STATE_URL_FMT     = f"{TOPOLOGIES_URL_FMT}/executionstate"
+LOGICALPLAN_URL_FMT         = f"{TOPOLOGIES_URL_FMT}/logicalplan"
+PHYSICALPLAN_URL_FMT        = f"{TOPOLOGIES_URL_FMT}/physicalplan"
+PACKINGPLAN_URL_FMT         = f"{TOPOLOGIES_URL_FMT}/packingplan"
+SCHEDULER_LOCATION_URL_FMT  = f"{TOPOLOGIES_URL_FMT}/schedulerlocation"
 
-EXCEPTIONS_URL_FMT          = "%s/exceptions"         % TOPOLOGIES_URL_FMT
-EXCEPTION_SUMMARY_URL_FMT   = "%s/exceptionsummary"   % TOPOLOGIES_URL_FMT
+EXCEPTIONS_URL_FMT          = f"{TOPOLOGIES_URL_FMT}/exceptions"
+EXCEPTION_SUMMARY_URL_FMT   = f"{TOPOLOGIES_URL_FMT}/exceptionsummary"
 
-INFO_URL_FMT                = "%s/info"               % TOPOLOGIES_URL_FMT
-PID_URL_FMT                 = "%s/pid"                % TOPOLOGIES_URL_FMT
-JSTACK_URL_FMT              = "%s/jstack"             % TOPOLOGIES_URL_FMT
-JMAP_URL_FMT                = "%s/jmap"               % TOPOLOGIES_URL_FMT
-HISTOGRAM_URL_FMT           = "%s/histo"              % TOPOLOGIES_URL_FMT
+INFO_URL_FMT                = f"{TOPOLOGIES_URL_FMT}/info"
+PID_URL_FMT                 = f"{TOPOLOGIES_URL_FMT}/pid"
+JSTACK_URL_FMT              = f"{TOPOLOGIES_URL_FMT}/jstack"
+JMAP_URL_FMT                = f"{TOPOLOGIES_URL_FMT}/jmap"
+HISTOGRAM_URL_FMT           = f"{TOPOLOGIES_URL_FMT}/histo"
 
 # nested under /topologies/metrics/
-METRICS_URL_FMT             = "%s/metrics"            % TOPOLOGIES_URL_FMT
-METRICS_QUERY_URL_FMT       = "%s/query"              % METRICS_URL_FMT
-METRICS_TIMELINE_URL_FMT    = "%s/timeline"           % METRICS_URL_FMT
+METRICS_URL_FMT             = f"{TOPOLOGIES_URL_FMT}/metrics"
+METRICS_QUERY_URL_FMT       = f"{METRICS_URL_FMT}/query"
+METRICS_TIMELINE_URL_FMT    = f"{METRICS_URL_FMT}/timeline"
 
 # nested under /topologies/container/
-CONTAINER_URL_FMT           = "%s/container"          % TOPOLOGIES_URL_FMT
-FILE_DATA_URL_FMT           = "%s/filedata"           % CONTAINER_URL_FMT
-FILE_DOWNLOAD_URL_FMT       = "%s/filedownload"       % CONTAINER_URL_FMT
-FILESTATS_URL_FMT           = "%s/filestats"          % CONTAINER_URL_FMT
+CONTAINER_URL_FMT           = f"{TOPOLOGIES_URL_FMT}/container"
+FILE_DATA_URL_FMT           = f"{CONTAINER_URL_FMT}/filedata"
+FILE_DOWNLOAD_URL_FMT       = f"{CONTAINER_URL_FMT}/filedownload"
+FILESTATS_URL_FMT           = f"{CONTAINER_URL_FMT}/filestats"
 
 
 def strip_whitespace(s):
@@ -575,7 +573,7 @@ class HeronQueryHandler:
     comp_metrics = []
     for comp in components:
       query = self.get_query(metric, comp, instance)
-      max_query = "MAX(%s)" % query
+      max_query = f"MAX({query})"
       comp_metrics.append(get_metrics(cluster, environ, topology, timerange, max_query))
 
     data = self.compute_max(comp_metrics)

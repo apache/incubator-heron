@@ -31,13 +31,12 @@ import subprocess
 from pathlib import Path
 from typing import Any, Optional, TypeVar
 
-from heron.common.src.python.utils.log import Log
-from heron.proto import topology_pb2
-
 import javaobj.v1 as javaobj
 import yaml
-
 from fastapi import HTTPException
+
+from heron.common.src.python.utils.log import Log
+from heron.proto import topology_pb2
 
 
 # directories for heron tools distribution

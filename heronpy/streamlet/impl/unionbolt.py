@@ -39,7 +39,7 @@ class UnionBolt(Bolt, StatefulComponent, StreamletBoltBase):
     pass
 
   def initialize(self, config, context):
-    self.logger.debug("UnionBolt's Component-specific config: \n%s" % str(config))
+    self.logger.debug("UnionBolt's Component-specific config: \n%s", str(config))
     self.processed = 0
     self.emitted = 0
 

@@ -39,7 +39,7 @@ class SupplierSpout(Spout, StatefulComponent, StreamletSpoutBase):
     pass
 
   def initialize(self, config, context):
-    self.logger.debug("SupplierSpout's Component-specific config: \n%s" % str(config))
+    self.logger.debug("SupplierSpout's Component-specific config: \n%s", str(config))
     self.emitted = 0
     if SupplierSpout.FUNCTION in config:
       self._supplier_function = config[SupplierSpout.FUNCTION]

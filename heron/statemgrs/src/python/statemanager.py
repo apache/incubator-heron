@@ -92,8 +92,8 @@ class StateManager(metaclass=abc.ABCMeta):
         socket.create_connection(hostport, StateManager.TIMEOUT_SECONDS)
         return True
       except:
-        LOG.info("StateManager %s Unable to connect to host: %s port %i"
-                 % (self.name, hostport[0], hostport[1]))
+        LOG.info("StateManager %s Unable to connect to host: %s port %i",
+          self.name, hostport[0], hostport[1])
         continue
     return False
 
@@ -114,8 +114,9 @@ class StateManager(metaclass=abc.ABCMeta):
     localportlist = []
     for (host, port) in self.hostportlist:
       localport = self.pick_unused_port()
+      # pylint: disable=consider-using-with
       self.tunnel.append(subprocess.Popen(
-          ('ssh', self.tunnelhost, '-NL127.0.0.1:%d:%s:%d' % (localport, host, port))))
+          ('ssh', self.tunnelhost, f'-NL127.0.0.1:{localport}:{host}:{port}')))
       localportlist.append(('127.0.0.1', localport))
     return localportlist
 
