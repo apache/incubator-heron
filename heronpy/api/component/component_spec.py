@@ -145,13 +145,13 @@ class HeronComponentSpec:
       These values will need to be serialized before adding to a protobuf message.
     """
     if not isinstance(custom_config, dict):
-      raise TypeError("Component-specific configuration must be given as a dict type, given: %s"
-                      % str(type(custom_config)))
+      raise TypeError("Component-specific configuration must be "\
+        f"given as a dict type, given: {str(type(custom_config))}")
     sanitized = {}
     for key, value in list(custom_config.items()):
       if not isinstance(key, str):
-        raise TypeError("Key for component-specific configuration must be string, given: %s:%s"
-                        % (str(type(key)), str(key)))
+        raise TypeError("Key for component-specific configuration "\
+          f"must be string, given: {str(type(key))}:{str(key)}")
 
       if isinstance(value, bool):
         sanitized[key] = "true" if value else "false"
@@ -250,16 +250,18 @@ class HeronComponentSpec:
       return None
 
     if not isinstance(self.outputs, (list, tuple)):
-      raise TypeError(f"Argument to outputs must be either list or tuple, given: {str(type(self.outputs))}")
+      raise TypeError("Argument to outputs must be either "\
+        f"list or tuple, given: {str(type(self.outputs))}")
 
     for output in self.outputs:
       if not isinstance(output, (str, Stream)):
-        raise TypeError(f"Outputs must be a list of strings or Streams, given: {str(output)}")
+        raise TypeError("Outputs must be a list of strings "\
+          f"or Streams, given: {str(output)}")
 
       if isinstance(output, str):
         # it's a default stream
         if Stream.DEFAULT_STREAM_ID not in ret:
-          ret[Stream.DEFAULT_STREAM_ID] = list()
+          ret[Stream.DEFAULT_STREAM_ID] = []
         ret[Stream.DEFAULT_STREAM_ID].append(output)
       else:
         # output is a Stream object
@@ -276,7 +278,8 @@ class HeronComponentSpec:
       return set()
 
     if not isinstance(self.outputs, (list, tuple)):
-      raise TypeError(f"Argument to outputs must be either list or tuple, given: {str(type(self.outputs))}")
+      raise TypeError("Argument to outputs must be either "\
+        f"list or tuple, given: {str(type(self.outputs))}")
     ret_lst = []
     for output in self.outputs:
       if not isinstance(output, (str, Stream)):

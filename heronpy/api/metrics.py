@@ -168,6 +168,7 @@ class MultiAssignableMetrics(IMetric):
 
   def get_value_and_reset(self):
     ret = {}
+    # pylint: disable=consider-using-dict-items
     for k in self.map:
       ret[k] = self.map[k].get_value_and_reset()
     return ret

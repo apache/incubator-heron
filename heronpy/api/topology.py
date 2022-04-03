@@ -25,7 +25,7 @@ topology.py: module for defining Heron topologies in Python
 import os
 import uuid
 
-import heronpy.api.api_constants as api_constants
+from heronpy.api import api_constants
 from heronpy.api.component.component_spec import HeronComponentSpec
 from heronpy.api.serializer import default_serializer
 from heronpy.proto import topology_pb2
@@ -112,7 +112,8 @@ class TopologyType(type):
   def add_spout_specs(mcs, spec, spout_specs):
     if not spec.outputs:
       raise ValueError(
-          f"{spec.python_class_path}: {spec.name} requires at least one output, because it is a spout"
+          f"{spec.python_class_path}: {spec.name} requires "\
+            "at least one output, because it is a spout"
         )
     spout_specs[spec.name] = spec.get_protobuf()
 
@@ -120,7 +121,8 @@ class TopologyType(type):
   def add_bolt_specs(mcs, spec, bolt_specs):
     if not spec.inputs:
       raise ValueError(
-          f"{spec.python_class_path}: {spec.name} requires at least one input, because it is a bolt"
+          f"{spec.python_class_path}: {spec.name} requires "\
+            "at least one input, because it is a bolt"
         )
     bolt_specs[spec.name] = spec.get_protobuf()
 
@@ -243,7 +245,8 @@ class TopologyType(type):
     sanitized = {}
     for key, value in list(custom_config.items()):
       if not isinstance(key, str):
-        raise TypeError(f"Key for topology-wide configuration must be string, given: {str(type(key))}: {str(key)}")
+        raise TypeError("Key for topology-wide configuration must "\
+                        f"be string, given: {str(type(key))}: {str(key)}")
 
       if isinstance(value, bool):
         sanitized[key] = "true" if value else "false"
@@ -345,8 +348,7 @@ class TopologyBuilder:
     """
     for spec in specs:
       if not isinstance(spec, HeronComponentSpec):
-        raise TypeError("Argument to add_spec needs to be HeronComponentSpec, given: %s"
-                        % str(spec))
+        raise TypeError(f"Argument to add_spec needs to be HeronComponentSpec, given: {str(spec)}")
       if spec.name is None:
         raise ValueError("TopologyBuilder cannot take a spec without name")
       if spec.name == "config":

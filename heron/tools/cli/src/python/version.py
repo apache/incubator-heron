@@ -25,9 +25,9 @@ import requests
 from heron.common.src.python.utils.log import Log
 from heron.tools.cli.src.python.result import SimpleResult, Status
 import heron.tools.cli.src.python.args as cli_args
-import heron.tools.common.src.python.utils.config as config
-import heron.tools.cli.src.python.cdefs as cdefs
-import heron.tools.cli.src.python.rest as rest
+from heron.tools.common.src.python.utils import config
+from heron.tools.cli.src.python import cdefs
+from heron.tools.cli.src.python import rest
 
 def add_version_titles(parser):
   '''

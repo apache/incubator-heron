@@ -64,8 +64,8 @@ class TextFileGenerator(Generator):
       return None
     self.logger.info("Now reading file %s", file_to_consume)
     try:
-      filep = open(file_to_consume, 'r')
-      return filep.readlines()
+      with open(file_to_consume, 'r') as filep:
+        return filep.readlines()
     except IOError as e:
       self.logger.info("Could not open the file %s", file_to_consume)
       raise e

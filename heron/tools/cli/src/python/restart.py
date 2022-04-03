@@ -20,9 +20,9 @@
 
 ''' restart.py '''
 from heron.common.src.python.utils.log import Log
-import heron.tools.cli.src.python.args as args
-import heron.tools.cli.src.python.cli_helper as cli_helper
-import heron.tools.common.src.python.utils.config as config
+from heron.tools.cli.src.python import args
+from heron.tools.cli.src.python import cli_helper
+from heron.tools.common.src.python.utils import config
 
 def create_parser(subparsers):
   '''

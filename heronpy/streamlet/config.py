@@ -20,7 +20,7 @@
 
 '''config.py: module for defining config'''
 
-import heronpy.api.api_constants as api_constants
+from heronpy.api import api_constants
 from heronpy.streamlet.resources import Resources
 
 class Config:

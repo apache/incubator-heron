@@ -25,7 +25,7 @@ import tempfile
 
 import pulsar
 
-import heronpy.api.src.python.api_constants as api_constants
+from heronpy.api.src.python import api_constants
 from heronpy.api.src.python.spout.spout import Spout
 
 from heronpy.streamlet.src.python.streamletboltbase import StreamletBoltBase
@@ -46,11 +46,10 @@ log4j.appender.FILE.layout.ConversionPattern=%d{{yy-MM-dd HH:mm:ss.SSS}} %X{{pna
 def GenerateLogConfig(context):
   namePrefix = str(context.get_component_id()) + "-" + str(context.get_task_id())
   logFileName = os.getcwd() + "/" + namePrefix
-  flHandler = tempfile.NamedTemporaryFile(prefix=namePrefix, suffix='.conf',
-                                          dir=os.getcwd(), delete=False)
-  flHandler.write(GenerateLogConfContents(logFileName))
-  flHandler.flush()
-  flHandler.close()
+  with tempfile.NamedTemporaryFile(prefix=namePrefix, suffix='.conf',
+                                          dir=os.getcwd(), delete=False) as flHandler:
+    flHandler.write(GenerateLogConfContents(logFileName))
+    flHandler.flush()
   return flHandler.name
 
 class PulsarSpout(Spout, StreamletBoltBase):

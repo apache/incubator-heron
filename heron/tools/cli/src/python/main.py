@@ -29,20 +29,21 @@ import sys
 import time
 import traceback
 
-import heron.common.src.python.utils.log as log
-import heron.tools.common.src.python.utils.config as config
-import heron.tools.cli.src.python.cdefs as cdefs
-import heron.tools.cli.src.python.cliconfig as cliconfig
-import heron.tools.cli.src.python.help as cli_help
-import heron.tools.cli.src.python.activate as activate
-import heron.tools.cli.src.python.deactivate as deactivate
-import heron.tools.cli.src.python.kill as kill
-import heron.tools.cli.src.python.result as result
-import heron.tools.cli.src.python.restart as restart
-import heron.tools.cli.src.python.submit as submit
-import heron.tools.cli.src.python.update as update
-import heron.tools.cli.src.python.version as version
-import heron.tools.cli.src.python.config as hconfig
+from heron.common.src.python.utils import log
+
+from heron.tools.common.src.python.utils import config
+from heron.tools.cli.src.python import cdefs
+from heron.tools.cli.src.python import cliconfig
+from heron.tools.cli.src.python import help as cli_help
+from heron.tools.cli.src.python import activate
+from heron.tools.cli.src.python import deactivate
+from heron.tools.cli.src.python import kill
+from heron.tools.cli.src.python import result
+from heron.tools.cli.src.python import restart
+from heron.tools.cli.src.python import submit
+from heron.tools.cli.src.python import update
+from heron.tools.cli.src.python import version
+from heron.tools.cli.src.python import config as hconfig
 
 from heron.tools.cli.src.python.opts import cleaned_up_files
 

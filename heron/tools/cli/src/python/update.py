@@ -25,10 +25,10 @@ import re
 from heron.common.src.python.utils.log import Log
 from heron.tools.cli.src.python.result import SimpleResult, Status
 
-import heron.tools.cli.src.python.args as args
-import heron.tools.cli.src.python.cli_helper as cli_helper
-import heron.tools.cli.src.python.jars as jars
-import heron.tools.common.src.python.utils.config as config
+from heron.tools.cli.src.python import args
+from heron.tools.cli.src.python import cli_helper
+from heron.tools.cli.src.python import jars
+from heron.tools.common.src.python.utils import config
 
 def create_parser(subparsers):
   """ Create the parse for the update command """
