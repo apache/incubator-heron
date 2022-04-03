@@ -21,14 +21,14 @@ package org.apache.heron.api.utils;
 
 import org.slf4j.bridge.SLF4JBridgeHandler;
 
-public class Slf4jUtils {
-    private Slf4jUtils() {
-    }
+public final class Slf4jUtils {
+  private Slf4jUtils() {
+  }
 
-    public static void installSLF4JBridge() {
-      if (!SLF4JBridgeHandler.isInstalled()) {
-        SLF4JBridgeHandler.removeHandlersForRootLogger();
-        SLF4JBridgeHandler.install();
-      }
+  public static void installSLF4JBridge() {
+    if (!SLF4JBridgeHandler.isInstalled()) {
+      SLF4JBridgeHandler.removeHandlersForRootLogger();
+      SLF4JBridgeHandler.install();
     }
+  }
 }
