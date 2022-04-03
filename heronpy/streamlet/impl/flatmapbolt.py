@@ -19,7 +19,7 @@
 #  under the License.
 
 """module for flat_map bolt: FlatMapBolt"""
-import collections
+from collections.abc import Iterable
 from heronpy.api.bolt.bolt import Bolt
 from heronpy.api.state.stateful_component import StatefulComponent
 from heronpy.api.component.component_spec import GlobalStreamId
@@ -52,7 +52,7 @@ class FlatMapBolt(Bolt, StatefulComponent, StreamletBoltBase):
 
   def process(self, tup):
     retval = self.flatmap_function(tup.values[0])
-    if isinstance(retval, collections.Iterable):
+    if isinstance(retval, Iterable):
       for value in retval:
         self.emit([value], stream='output')
         self.emitted += 1

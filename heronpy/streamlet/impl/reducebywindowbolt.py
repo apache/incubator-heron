@@ -19,7 +19,7 @@
 #  under the License.
 
 """module for bolt: ReduceByWindowBolt"""
-import collections
+from collections.abc import Iterable
 
 from heronpy.api.bolt.window_bolt import SlidingWindowBolt
 from heronpy.api.custom_grouping import ICustomGrouping
@@ -59,7 +59,7 @@ class ReduceGrouping(ICustomGrouping):
   def choose_tasks(self, values):
     assert isinstance(values, list) and len(values) == 1
     userdata = values[0]
-    if not isinstance(userdata, collections.Iterable) or len(userdata) != 2:
+    if not isinstance(userdata, Iterable) or len(userdata) != 2:
       raise RuntimeError("Tuples going to reduce must be iterable of length 2")
     # only emits to the first task id
     hashvalue = hash(userdata[0])

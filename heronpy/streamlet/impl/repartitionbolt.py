@@ -19,7 +19,7 @@
 #  under the License.
 
 """module for map bolt: RepartitionBolt"""
-import collections
+from collections.abc import Iterable
 import inspect
 
 from heronpy.api.custom_grouping import ICustomGrouping
@@ -50,7 +50,7 @@ class RepartitionCustomGrouping(ICustomGrouping):
     # only emits to the first task id
     targets = self._repartition_function(values, len(self.target_tasks))
     retval = []
-    if isinstance(targets, collections.Iterable):
+    if isinstance(targets, Iterable):
       for target in targets:
         retval.append(self.target_tasks[target % len(self.target_tasks)])
     else:
