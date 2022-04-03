@@ -23,10 +23,10 @@ import logging
 import requests
 import heron.tools.common.src.python.utils.config as config
 from heron.tools.cli.src.python.result import SimpleResult, Status
-import heron.tools.cli.src.python.args as args
-import heron.tools.cli.src.python.execute as execute
-import heron.tools.cli.src.python.jars as jars
-import heron.tools.cli.src.python.rest as rest
+from heron.tools.cli.src.python import args
+from heron.tools.cli.src.python import execute
+from heron.tools.cli.src.python import jars
+from heron.tools.cli.src.python import rest
 
 from heron.common.src.python.utils.log import Log
 

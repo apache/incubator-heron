@@ -26,14 +26,13 @@ when prompted to.
 import time
 from typing import Dict, List, Optional
 
-from heron.tools.tracker.src.python import constants, state, query
-from heron.tools.tracker.src.python.routers import topologies, container, metrics
-
 from fastapi import FastAPI, Query, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
+from heron.tools.tracker.src.python import constants, state, query
+from heron.tools.tracker.src.python.routers import topologies, container, metrics
 
 openapi_tags = [
     {"name": "metrics", "description": query.__doc__},

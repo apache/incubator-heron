@@ -19,7 +19,7 @@
 #  under the License.
 
 ''' config.py '''
-import heron.tools.cli.src.python.cliconfig as cliconfig
+from heron.tools.cli.src.python import cliconfig
 from heron.tools.cli.src.python.result import SimpleResult, Status
 
 

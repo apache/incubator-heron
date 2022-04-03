@@ -23,7 +23,7 @@ import argparse
 import os
 import sys
 
-import heron.tools.common.src.python.utils.config as config
+from heron.tools.common.src.python.utils import config
 
 
 def add_titles(parser):

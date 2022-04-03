@@ -22,10 +22,11 @@
 import dataclasses
 import json
 import string
+
+from typing import Any, Dict, List, Optional
+from copy import deepcopy
 import networkx
 
-from copy import deepcopy
-from typing import Any, Dict, List, Optional
 from pydantic import BaseModel, Field
 
 from heron.proto import topology_pb2

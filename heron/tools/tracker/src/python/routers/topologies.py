@@ -27,6 +27,8 @@ manager has recieved more information from the state manager.
 """
 from typing import List, Optional, Dict, Union
 
+from fastapi import Query, APIRouter
+
 from heron.tools.tracker.src.python import state
 from heron.tools.tracker.src.python.topology import (
     TopologyInfo,
@@ -37,8 +39,6 @@ from heron.tools.tracker.src.python.topology import (
     TopologyInfoPhysicalPlan,
     TopologyInfoSchedulerLocation,
 )
-
-from fastapi import Query, APIRouter
 
 router = APIRouter()
 

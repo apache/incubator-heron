@@ -20,6 +20,7 @@
 
 '''heron_client.py'''
 
+# pylint: disable=deprected-module
 import asyncore
 import socket
 import time

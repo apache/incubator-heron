@@ -21,8 +21,8 @@
 ''' cdefs.py '''
 import os
 
-import heron.tools.cli.src.python.cliconfig as cliconfig
-import heron.tools.common.src.python.utils.config as config
+from heron.tools.cli.src.python import cliconfig
+from heron.tools.common.src.python.utils import config
 
 ################################################################################
 def read_server_mode_cluster_definition(cluster, cl_args):

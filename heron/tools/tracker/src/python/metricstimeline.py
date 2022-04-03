@@ -21,11 +21,11 @@
 """ metricstimeline.py """
 from typing import Dict, List
 
-from heron.proto import tmanager_pb2
-
 import httpx
 
 from pydantic import BaseModel, Field
+
+from heron.proto import tmanager_pb2
 
 
 class MetricsTimeline(BaseModel):

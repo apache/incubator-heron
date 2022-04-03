@@ -31,11 +31,11 @@ from heron.common.src.python.utils.log import Log
 
 from heron.tools.cli.src.python.result import SimpleResult, ProcessResult, Status
 
-import heron.common.src.python.pex_loader as pex_loader
+from heron.common.src.python import pex_loader
 
-import heron.tools.cli.src.python.opts as opts
-import heron.tools.cli.src.python.jars as jars
-import heron.tools.common.src.python.utils.config as config
+from heron.tools.cli.src.python import opts
+from heron.tools.cli.src.python import jars
+from heron.tools.common.src.python.utils import config
 
 ################################################################################
 def heron_class(class_name, lib_jars, extra_jars=None, args=None, java_defines=None):
