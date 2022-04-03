@@ -72,9 +72,9 @@ class HeronCommunicator:
       if self._producer_callback is not None:
         self._producer_callback()
       return ret
-    except Empty:
+    except Empty as e:
       Log.debug("%s: Empty in poll()", str(self))
-      raise Empty
+      raise Empty from e
 
   def offer(self, item):
     """Offer to the buffer
@@ -87,9 +87,9 @@ class HeronCommunicator:
       if self._consumer_callback is not None:
         self._consumer_callback()
       return True
-    except Full:
+    except Full as e:
       Log.debug("%s: Full in offer()", str(self))
-      raise Full
+      raise Full from e
 
   def clear(self):
     """Clear the buffer"""
