@@ -24,6 +24,8 @@ import java.net.URI;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import org.slf4j.bridge.SLF4JBridgeHandler;
+
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -33,8 +35,6 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.heron.spi.common.Config;
 import org.apache.heron.spi.common.ConfigLoader;
-
-import org.slf4j.bridge.SLF4JBridgeHandler;
 
 public final class DownloadRunner {
 
