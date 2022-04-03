@@ -246,7 +246,7 @@ class HeronClient(asyncore.dispatcher):
   def handle_error(self):
     _, t, v, tbinfo = asyncore.compact_traceback()
 
-    self_msg = f"{self._get_classname()} failed for object at {id(self):x}")
+    self_msg = f"{self._get_classname()} failed for object at {id(self):x}"
     Log.error(f"Uncaptured python exception, closing channel {self_msg} ({t}:{v} {tbinfo})")
 
     if self._connecting:
