@@ -23,17 +23,17 @@ Views on Heron metrics.
 """
 from typing import Dict, List, Optional
 
+import httpx
+
+from fastapi import Query, APIRouter
+from pydantic import BaseModel, Field
+
 from heron.common.src.python.utils.log import Log
 from heron.proto import common_pb2
 from heron.proto import tmanager_pb2
 from heron.tools.tracker.src.python import metricstimeline, state
 from heron.tools.tracker.src.python.query import Query as TManagerQuery
 from heron.tools.tracker.src.python.utils import BadRequest
-
-import httpx
-
-from fastapi import Query, APIRouter
-from pydantic import BaseModel, Field
 
 router = APIRouter()
 

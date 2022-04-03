@@ -24,15 +24,15 @@ topology, particularly data about heron containers.
 """
 from typing import List, Optional
 
-from heron.proto import common_pb2, tmanager_pb2
-from heron.tools.tracker.src.python import state, utils
-
 import httpx
 
 # from fastapi import Query
 from fastapi import Query, APIRouter
 from pydantic import BaseModel, Field
 from starlette.responses import StreamingResponse
+
+from heron.proto import common_pb2, tmanager_pb2
+from heron.tools.tracker.src.python import state, utils
 
 router = APIRouter()
 
@@ -201,13 +201,13 @@ async def get_exceptions(  # pylint: disable=too-many-arguments
   ret = []
   for exception_log in exception_response.exceptions:
     ret.append(ExceptionLog(
-        hostname=exception_log.hostname,
-        instance_id=exception_log.instance_id,
-        stacktrace=exception_log.stacktrace,
-        lasttime=exception_log.lasttime,
-        firsttime=exception_log.firsttime,
-        count=str(exception_log.count),
-        logging=exception_log.logging,
+      hostname = exception_log.hostname,
+      instance_id = exception_log.instance_id,
+      stacktrace = exception_log.stacktrace,
+      lasttime = exception_log.lasttime,
+      firsttime = exception_log.firsttime,
+      count = str(exception_log.count),
+      logging = exception_log.logging,
     ))
   return ret
 

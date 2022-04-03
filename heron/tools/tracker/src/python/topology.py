@@ -22,9 +22,11 @@
 import dataclasses
 import json
 import string
+import networkx
 
 from copy import deepcopy
 from typing import Any, Dict, List, Optional
+from pydantic import BaseModel, Field
 
 from heron.proto import topology_pb2
 from heron.proto.execution_state_pb2 import ExecutionState as ExecutionState_pb
@@ -38,11 +40,6 @@ from heron.tools.tracker.src.python.config import (
     EXTRA_LINK_URL_KEY,
 )
 from heron.tools.tracker.src.python import utils
-
-import networkx
-
-from pydantic import BaseModel, Field
-
 
 class TopologyInfoMetadata(BaseModel):
   cluster: str

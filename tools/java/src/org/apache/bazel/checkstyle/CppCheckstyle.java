@@ -137,12 +137,14 @@ public final class CppCheckstyle {
     return Collections2.filter(
             cppInfo.getSourcesAndHeadersList(),
             Predicates.and(
-                    Predicates.not(Predicates.containsPattern("external/")),
-                    Predicates.not(Predicates.containsPattern("third_party/")),
-                    Predicates.not(Predicates.containsPattern("config/heron-config.h")),
-                    Predicates.not(Predicates.containsPattern(".*pb.h$")),
-                    Predicates.not(Predicates.containsPattern(".*cc_wrapper.sh$")),
-                    Predicates.not(Predicates.containsPattern(".*pb.cc$"))
+              Predicates.not(Predicates.containsPattern("external/")),
+              Predicates.not(Predicates.containsPattern("third_party/")),
+              Predicates.not(Predicates.containsPattern("config/heron-config.h")),
+              Predicates.not(Predicates.containsPattern(".*cppmap")),
+              Predicates.not(Predicates.containsPattern(".*srcjar")),
+              Predicates.not(Predicates.containsPattern(".*pb.h$")),
+              Predicates.not(Predicates.containsPattern(".*cc_wrapper.sh$")),
+              Predicates.not(Predicates.containsPattern(".*pb.cc$"))
             )
     );
   }
