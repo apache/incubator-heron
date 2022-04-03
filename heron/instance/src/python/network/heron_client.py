@@ -71,9 +71,8 @@ class HeronClient(asyncore.dispatcher):
     # for compatibility with 2.7.3
     self._connecting = False
 
-    Log.debug("Initializing %s with endpoint: %s, \nsocket_map: %s, \nsocket_options: %s"
-              % (self._get_classname(), str(self.endpoint),
-                 str(socket_map), str(self.socket_options)))
+    Log.debug(f"Initializing {self._get_classname()} with endpoint: {str(self.endpoint)},"
+              f"\nsocket_map: {str(socket_map)}, \nsocket_options: {str(self.socket_options)}")
 
 
   ##################################
@@ -297,7 +296,7 @@ class HeronClient(asyncore.dispatcher):
       except Exception as e:
         Log.error(f"Error when handling message packet: {str(e)}")
         Log.error(traceback.format_exc())
-        raise RuntimeError("Problem reading message")
+        raise RuntimeError("Problem reading message") from e
     else:
       # might be a timeout response
       Log.info(f"In handle_packet(): Received message whose REQID is not registered: {str(reqid)}")
