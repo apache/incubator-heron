@@ -771,7 +771,7 @@ TEST(StMgr, test_pplan_decode) {
               std::find(common.stmgr_ports_.begin(), common.stmgr_ports_.end(),
                         pplan0->stmgrs(i).data_port()));
     EXPECT_NE(common.local_data_ports_.end(),
-              std::find(common.stmgr_ports_.begin(), common.stmgr_ports_.end(),
+              std::find(common.local_data_ports_.begin(), common.local_data_ports_.end(),
                         pplan0->stmgrs(i).local_data_port()));
   }
   EXPECT_EQ(pplan0->instances_size(), common.num_stmgrs_ * num_workers_per_stmgr_);

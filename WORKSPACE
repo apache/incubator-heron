@@ -390,11 +390,9 @@ http_archive(
 http_archive(
     name = "com_github_danmar_cppcheck",
     build_file = "@//:third_party/cppcheck/cppcheck.BUILD",
-    patch_args = ["-p2"],
-    patches = ["//third_party/cppcheck:cppcheck-readdir-fix.patch"],
-    sha256 = "cb0e66cbe2d6b655fce430cfaaa74b83ad11c91f221e3926f1ca3211bb7c906b",
-    strip_prefix = "cppcheck-1.90",
-    urls = ["https://github.com/danmar/cppcheck/archive/1.90.zip"],
+    sha256 = "9285bf64af22a07fb24a7431510cc34fba118cf6950190abc2a08c9f7a7084c8",
+    strip_prefix = "cppcheck-2.7",
+    urls = ["https://github.com/danmar/cppcheck/archive/refs/tags/2.7.zip"],
 )
 
 http_archive(
@@ -464,11 +462,11 @@ container_pull(
 
 http_archive(
     name = "rules_pkg",
-    sha256 = "aeca78988341a2ee1ba097641056d168320ecc51372ef7ff8e64b139516a4937",
     urls = [
-        "https://github.com/bazelbuild/rules_pkg/releases/download/0.2.6/rules_pkg-0.2.6.tar.gz",
-        "https://mirror.bazel.build/github.com/bazelbuild/rules_pkg/releases/download/0.2.6/rules_pkg-0.2.6.tar.gz",
+        "https://mirror.bazel.build/github.com/bazelbuild/rules_pkg/releases/download/0.6.0/rules_pkg-0.6.0.tar.gz",
+        "https://github.com/bazelbuild/rules_pkg/releases/download/0.6.0/rules_pkg-0.6.0.tar.gz",
     ],
+    sha256 = "62eeb544ff1ef41d786e329e1536c1d541bb9bcad27ae984d57f18f314018e66",
 )
 
 load("@rules_pkg//:deps.bzl", "rules_pkg_dependencies")
