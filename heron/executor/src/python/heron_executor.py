@@ -342,7 +342,8 @@ class HeronExecutor:
     self.metricscache_manager_mode = parsed_args.metricscache_manager_mode \
         if parsed_args.metricscache_manager_mode else "disabled"
     self.health_manager_mode = parsed_args.health_manager_mode
-    self.health_manager_classpath = f'{self.scheduler_classpath}:{parsed_args.health_manager_classpath}'
+    self.health_manager_classpath = f'{self.scheduler_classpath}:'\
+      f'{parsed_args.health_manager_classpath}'
     self.verbose_gc = parsed_args.verbose_gc
     self.jvm_remote_debugger_ports = \
       parsed_args.jvm_remote_debugger_ports.split(",") \
@@ -631,7 +632,8 @@ class HeronExecutor:
     instance_options = self._get_java_gc_instance_cmd(instance_options, instance_id)
     # Append debugger ports when it is available
     if remote_debugger_port:
-      instance_options.append(f'-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address={remote_debugger_port}')
+      instance_options.append(f'-agentlib:jdwp=transport=dt_socket,'\
+        f'server=y,suspend=n,address={remote_debugger_port}')
 
     # Append user specified jvm options
     instance_options.extend(self.instance_jvm_opts.split())
@@ -879,6 +881,7 @@ class HeronExecutor:
     try:
       # stderr is redirected to stdout so that it can more easily be logged. stderr has a max buffer
       # size and can cause the child process to deadlock if it fills up
+      # pylint: disable=consider-using-with
       process = subprocess.Popen(cmd.cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
                                  env=cmd.env, universal_newlines=True, bufsize=1)
       proc.async_stream_process_stdout(process, stdout_log_fn(name))
@@ -893,6 +896,7 @@ class HeronExecutor:
     try:
       # stderr is redirected to stdout so that it can more easily be logged. stderr has a max buffer
       # size and can cause the child process to deadlock if it fills up
+      # pylint: disable=consider-using-with
       process = subprocess.Popen(cmd.cmd, shell=is_shell, stdout=subprocess.PIPE,
                                  stderr=subprocess.STDOUT, universal_newlines=True, env=cmd.env)
 

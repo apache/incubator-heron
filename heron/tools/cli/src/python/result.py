@@ -184,6 +184,7 @@ def render(results):
 # check if all results are successful
 def is_successful(results):
   if isinstance(results, list):
+    # pylint: disable=use-a-generator
     return all([is_successful(result) for result in results])
   if isinstance(results, Result):
     return results.status in (Status.Ok, Status.DryRun)
