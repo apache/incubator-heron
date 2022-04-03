@@ -1088,7 +1088,8 @@ class HeronExecutor:
         f"Existing: {str(self.packing_plan)}, New: {str(new_packing_plan)}")
 
       if self.packing_plan != new_packing_plan:
-        Log.info("PackingPlan change detected on shard %s, relaunching effected processes.", self.shard)
+        Log.info("PackingPlan change detected on shard %s, "\
+          "relaunching effected processes.", self.shard)
         self.update_packing_plan(new_packing_plan)
 
         Log.info("Updating executor processes")
