@@ -31,13 +31,13 @@ from heron.common.src.python.utils.log import Log
 from heron.proto import topology_pb2
 from heron.tools.cli.src.python.result import SimpleResult, Status
 import heron.tools.cli.src.python.args as cli_args
-import heron.tools.cli.src.python.execute as execute
-import heron.tools.cli.src.python.jars as jars
-import heron.tools.cli.src.python.opts as opts
-import heron.tools.cli.src.python.result as result
-import heron.tools.cli.src.python.rest as rest
-import heron.tools.common.src.python.utils.config as config
-import heron.tools.common.src.python.utils.classpath as classpath
+from heron.tools.cli.src.python import execute
+from heron.tools.cli.src.python import jars
+from heron.tools.cli.src.python import opts
+from heron.tools.cli.src.python import result
+from heron.tools.cli.src.python import rest
+from heron.tools.common.src.python.utils import config
+from heron.tools.common.src.python.utils import classpath
 
 # pylint: disable=too-many-return-statements
 
@@ -191,6 +191,7 @@ def launch_topology_server(cl_args, topology_file, topology_defn_file, topology_
     data['verbose_gc'] = True
 
   files = dict(
+      # pylint: disable=consider-using-with
       definition=open(topology_defn_file, 'rb'),
       topology=open(topology_file, 'rb'),
   )

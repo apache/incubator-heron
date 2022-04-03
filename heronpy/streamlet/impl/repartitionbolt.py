@@ -84,7 +84,7 @@ class RepartitionBolt(Bolt, StatefulComponent, StreamletBoltBase):
 class RepartitionStreamlet(Streamlet):
   """RepartitionStreamlet"""
   def __init__(self, num_partitions, repartition_function, parent):
-    super(RepartitionStreamlet, self).__init__()
+    super().__init__()
     if not callable(repartition_function):
       raise RuntimeError("Repartition function has to be callable")
     if len(inspect.getargspec(repartition_function)) != 2:

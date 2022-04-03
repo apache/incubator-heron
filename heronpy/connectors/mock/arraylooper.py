@@ -30,7 +30,7 @@ class ArrayLooper(Generator):
   """A ArrayLooper loops the contents of the a user supplied array forever
   """
   def __init__(self, user_iterable, sleep=None):
-    super(ArrayLooper, self).__init__()
+    super().__init__()
     if not isinstance(user_iterable, collections.Iterable):
       raise RuntimeError("ArrayLooper must be passed an iterable")
     self._user_iterable = user_iterable

@@ -61,7 +61,7 @@ class JoinBolt(SlidingWindowBolt, StreamletBoltBase):
       mymap[key][0].append(value)
 
   def initialize(self, config, context):
-    super(JoinBolt, self).initialize(config, context)
+    super().initialize(config, context)
     if not JoinBolt.JOINEDCOMPONENT in config:
       raise RuntimeError(f"{JoinBolt.JOINEDCOMPONENT} must be specified in the JoinBolt")
     self._joined_component = config[JoinBolt.JOINEDCOMPONENT]
@@ -147,7 +147,7 @@ class JoinGrouping(ICustomGrouping):
 class JoinStreamlet(Streamlet):
   """JoinStreamlet"""
   def __init__(self, join_type, window_config, join_function, left, right):
-    super(JoinStreamlet, self).__init__()
+    super().__init__()
     if not join_type in [JoinBolt.INNER, JoinBolt.OUTER_RIGHT, JoinBolt.OUTER_LEFT]:
       raise RuntimeError("join type has to be of one of inner, outer, left")
     if not isinstance(window_config, WindowConfig):

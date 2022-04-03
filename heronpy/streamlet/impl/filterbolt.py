@@ -60,7 +60,7 @@ class FilterBolt(Bolt, StatefulComponent, StreamletBoltBase):
 class FilterStreamlet(Streamlet):
   """FilterStreamlet"""
   def __init__(self, filter_function, parent):
-    super(FilterStreamlet, self).__init__()
+    super().__init__()
     if not callable(filter_function):
       raise RuntimeError("Filter function has to be callable")
     if not isinstance(parent, Streamlet):

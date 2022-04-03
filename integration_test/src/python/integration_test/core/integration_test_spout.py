@@ -114,11 +114,11 @@ class IntegrationTestSpout(Spout):
     else:
       _tup_id = tup_id
 
-    super(IntegrationTestSpout, self).emit(tup, _tup_id, stream, direct_task, need_task_ids)
+    super().emit(tup, _tup_id, stream, direct_task, need_task_ids)
 
   def _emit_terminal_if_needed(self):
     Log.info("is_done: %s, tuples_to_complete: %s", self.is_done, self.tuples_to_complete)
     if self.is_done and self.tuples_to_complete == 0:
       Log.info("Emitting terminals to downstream")
-      super(IntegrationTestSpout, self).emit([integ_const.INTEGRATION_TEST_TERMINAL],
+      super().emit([integ_const.INTEGRATION_TEST_TERMINAL],
                                              stream=integ_const.INTEGRATION_TEST_CONTROL_STREAM_ID)

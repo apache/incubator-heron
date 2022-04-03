@@ -62,7 +62,7 @@ class GeneratorSpout(Spout, StatefulComponent, StreamletSpoutBase):
 class GeneratorStreamlet(Streamlet):
   """GeneratorStreamlet"""
   def __init__(self, generator):
-    super(GeneratorStreamlet, self).__init__()
+    super().__init__()
     if not isinstance(generator, Generator):
       raise RuntimeError("Generator has to be of type Generator")
     self._generator = generator

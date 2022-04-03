@@ -60,7 +60,7 @@ class MapBolt(Bolt, StatefulComponent, StreamletBoltBase):
 class MapStreamlet(Streamlet):
   """MapStreamlet"""
   def __init__(self, map_function, parent):
-    super(MapStreamlet, self).__init__()
+    super().__init__()
     if not callable(map_function):
       raise RuntimeError("Map function has to be callable")
     if not isinstance(parent, Streamlet):

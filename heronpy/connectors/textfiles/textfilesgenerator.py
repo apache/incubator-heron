@@ -28,7 +28,7 @@ class TextFileGenerator(Generator):
   """TextFileGenerator: reads from a list of files"""
 
   def __init__(self, filepattern):
-    super(TextFileGenerator, self).__init__()
+    super().__init__()
     self._files = glob.glob(filepattern)
 
   # pylint: disable=attribute-defined-outside-init

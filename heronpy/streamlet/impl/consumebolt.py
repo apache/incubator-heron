@@ -56,7 +56,7 @@ class ConsumeBolt(Bolt, StatefulComponent, StreamletBoltBase):
 class ConsumeStreamlet(Streamlet):
   """ConsumeStreamlet"""
   def __init__(self, parent):
-    super(ConsumeStreamlet, self).__init__()
+    super().__init__()
     if not isinstance(parent, Streamlet):
       raise RuntimeError("Parent of Consume Streamlet has to be a Streamlet")
     self._parent = parent

@@ -66,7 +66,7 @@ class FlatMapBolt(Bolt, StatefulComponent, StreamletBoltBase):
 class FlatMapStreamlet(Streamlet):
   """FlatMapStreamlet"""
   def __init__(self, flatmap_function, parent):
-    super(FlatMapStreamlet, self).__init__()
+    super().__init__()
     if not callable(flatmap_function):
       raise RuntimeError("FlatMap function has to be callable")
     if not isinstance(parent, Streamlet):

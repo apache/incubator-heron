@@ -102,7 +102,7 @@ class SingleThreadHeronInstance:
 
     # Debugging purposes
     def go_trace(_, stack):
-      with open("/tmp/trace.log", "w") as f:
+      with open("/tmp/trace.log", "w", encoding='utf8') as f:
         traceback.print_stack(stack, file=f)
       self.looper.register_timer_task_in_sec(self.looper.exit_loop, 0.0)
     signal.signal(signal.SIGUSR1, go_trace)
@@ -320,7 +320,7 @@ def yaml_config_reader(config_path):
   if not config_path.endswith(".yaml"):
     raise ValueError("Config file not yaml")
 
-  with open(config_path, 'r') as f:
+  with open(config_path, 'r', encoding='utf8') as f:
     config = yaml.safe_load(f)
 
   return config

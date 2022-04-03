@@ -53,7 +53,7 @@ class UnionBolt(Bolt, StatefulComponent, StreamletBoltBase):
 class UnionStreamlet(Streamlet):
   """UnionStreamlet"""
   def __init__(self, left, right):
-    super(UnionStreamlet, self).__init__()
+    super().__init__()
     if not isinstance(left, Streamlet):
       raise RuntimeError("Left of Union Streamlet has to be a Streamlet")
     if not isinstance(right, Streamlet):

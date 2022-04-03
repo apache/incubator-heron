@@ -25,7 +25,7 @@ from .test_topology_builder import TestTopologyBuilder
 class TestRunner(Runner):
   """Module for running the streamlet API in integration tests"""
   def __init__(self):
-    super(TestRunner, self).__init__()
+    super().__init__()
     pass
 
   def run(self, name, config, builder, http_server_url):

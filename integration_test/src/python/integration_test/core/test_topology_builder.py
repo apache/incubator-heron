@@ -41,7 +41,7 @@ class TestTopologyBuilder(TopologyBuilder):
                     api_constants.TopologyReliabilityMode.ATLEAST_ONCE,
                     api_constants.TOPOLOGY_PROJECT_NAME: "heron-integration-test"}
   def __init__(self, name, http_server_url):
-    super(TestTopologyBuilder, self).__init__(name)
+    super().__init__(name)
     self.output_location = f"{http_server_url}/{self.topology_name}"
     self.set_config(self.DEFAULT_CONFIG)
 

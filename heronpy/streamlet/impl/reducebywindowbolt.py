@@ -39,7 +39,7 @@ class ReduceByWindowBolt(SlidingWindowBolt, StreamletBoltBase):
   SLIDEINTERVAL = SlidingWindowBolt.WINDOW_SLIDEINTERVAL_SECS
 
   def initialize(self, config, context):
-    super(ReduceByWindowBolt, self).initialize(config, context)
+    super().initialize(config, context)
     if ReduceByWindowBolt.FUNCTION not in config:
       raise RuntimeError("FUNCTION not specified in reducebywindow operator")
     self.reduce_function = config[ReduceByWindowBolt.FUNCTION]
@@ -70,7 +70,7 @@ class ReduceGrouping(ICustomGrouping):
 class ReduceByWindowStreamlet(Streamlet):
   """ReduceByWindowStreamlet"""
   def __init__(self, window_config, reduce_function, parent):
-    super(ReduceByWindowStreamlet, self).__init__()
+    super().__init__()
     if not isinstance(window_config, WindowConfig):
       raise RuntimeError("window config has to be of type WindowConfig")
     if not callable(reduce_function):
