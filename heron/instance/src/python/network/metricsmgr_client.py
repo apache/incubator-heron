@@ -97,7 +97,8 @@ class MetricsManagerClient(HeronClient):
 
   # pylint: disable=no-self-use
   def on_incoming_message(self, message):
-    raise RuntimeError(f"Metrics Client got an unknown message from Metrics Manager: {str(message)}")
+    raise RuntimeError(f"Metrics Client got an unknown message from "
+                       f"Metrics Manager: {str(message)}")
 
   def on_error(self):
     Log.error("Disconnected from Metrics Manager")
