@@ -33,6 +33,7 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.heron.spi.common.Config;
 import org.apache.heron.spi.common.ConfigLoader;
+
 import org.slf4j.bridge.SLF4JBridgeHandler;
 
 public final class DownloadRunner {
