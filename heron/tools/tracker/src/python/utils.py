@@ -185,7 +185,7 @@ def parse_config_file(config_file: str) -> Optional[str]:
     return None
 
   # Read the configuration file
-  with open(expanded_config_file_path, 'r') as f:
+  with open(expanded_config_file_path, 'r', encoding='utf8') as f:
     return yaml.safe_load(f)
 
 ################################################################################

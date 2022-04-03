@@ -20,7 +20,7 @@
 
 '''gateway_looper.py'''
 
-# pylint: disable=deprected-module
+# pylint: disable=deprecated-module
 import asyncore
 import errno
 import os
