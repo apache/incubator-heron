@@ -19,6 +19,7 @@
 #  under the License.
 
 '''module for single-thread Heron Instance in python'''
+import click
 import collections
 import logging
 import os
@@ -42,8 +43,6 @@ from heron.instance.src.python.utils import system_config
 
 from heronpy.api import api_constants
 from heronpy.api.state.state import HashMapState
-
-import click
 
 
 Log = log.Log
@@ -179,7 +178,7 @@ class SingleThreadHeronInstance:
       try:
         self.stateful_state = self.serializer.deserialize(restore_msg.state.state)
       except Exception as e:
-        raise RuntimeError("Could not serialize state during restore " + str(e))
+        raise RuntimeError("Could not serialize state during restore " + str(e)) from e
     else:
       Log.info("The restore request does not have an actual state")
     if self.stateful_state is None:
@@ -245,7 +244,8 @@ class SingleThreadHeronInstance:
       self._handle_assignment_msg(new_helper)
     else:
       Log.info("Received a new Physical Plan with the same assignment -- State Change")
-      Log.info(f"Old state: {self.my_pplan_helper.get_topology_state()}, new state: {new_helper.get_topology_state()}.")
+      Log.info(f"Old state: {self.my_pplan_helper.get_topology_state()}, "
+               f"new state: {new_helper.get_topology_state()}.")
       self._handle_state_change_msg(new_helper)
 
   def _handle_assignment_msg(self, pplan_helper):
