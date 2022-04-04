@@ -24,8 +24,6 @@ import java.net.URI;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import org.slf4j.bridge.SLF4JBridgeHandler;
-
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -33,6 +31,7 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.apache.heron.api.utils.Slf4jUtils;
 import org.apache.heron.spi.common.Config;
 import org.apache.heron.spi.common.ConfigLoader;
 
@@ -129,8 +128,7 @@ public final class DownloadRunner {
 
   // takes topology package URI and extracts it to a directory
   public static void main(String[] args) throws Exception {
-    SLF4JBridgeHandler.removeHandlersForRootLogger();
-    SLF4JBridgeHandler.install();
+    Slf4jUtils.installSLF4JBridge();
     CommandLineParser parser = new DefaultParser();
     Options slaManagerCliOptions = constructCliOptions();
 
