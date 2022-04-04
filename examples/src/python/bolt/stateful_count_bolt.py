@@ -21,7 +21,7 @@
 """module for example bolt: CountBolt"""
 from collections import Counter
 
-import heronpy.api.global_metrics as global_metrics
+from heronpy.api import global_metrics
 from heronpy.api.bolt.bolt import Bolt
 from heronpy.api.state.stateful_component import StatefulComponent
 
