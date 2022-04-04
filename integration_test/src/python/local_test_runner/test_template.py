@@ -256,11 +256,11 @@ class TestTemplate:
     response = urlopen(url)
     physical_plan_json = json.loads(response.read())
 
-    if 'result' not in physical_plan_json:
+    if 'instances' not in physical_plan_json:
       raise status.TestFailure(
           f"Could not find result json in physical plan request to tracker: {url}")
 
-    return physical_plan_json['result']
+    return physical_plan_json
 
   def _block_until_topology_running(self, min_instances):
     retries_left = RETRY_COUNT
