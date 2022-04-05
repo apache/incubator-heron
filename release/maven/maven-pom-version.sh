@@ -114,12 +114,34 @@ cat ./maven/heron-kafka.template.pom | \
     sed "s/VERSION/$1/g" | \
     sed "s/ARTIFACT_ID/heron-kafka-spout/g" | \
     sed "s/NAME/heron-kafka-spout/g" | \
-    sed "s/DESCRIPTION/Heron Kafka Spout/g" \
+    sed "s/DESCRIPTION/Heron Kafka Spout/g" | \
+    awk '{gsub("DEPS", "<dependency>\
+                              <groupId>org.slf4j</groupId>\
+                              <artifactId>slf4j-jdk14</artifactId>\
+                              <version>1.7.30</version>\
+                          </dependency>\
+                           <dependency>\
+                               <groupId>org.slf4j</groupId>\
+                               <artifactId>slf4j-api</artifactId>\
+                               <version>1.7.30</version>\
+                           </dependency>", $0); print}' | \
+    xmllint --format - \
     >> ./heron-kafka-spout-$1.pom
 
 cat ./maven/heron-kafka.template.pom | \
     sed "s/VERSION/$1/g" | \
     sed "s/ARTIFACT_ID/heron-kafka-bolt/g" | \
     sed "s/NAME/heron-kafka-bolt/g" | \
-    sed "s/DESCRIPTION/Heron Kafka Bolt/g" \
+    sed "s/DESCRIPTION/Heron Kafka Bolt/g" | \
+    awk '{gsub("DEPS", "<dependency>\
+                            <groupId>org.slf4j</groupId>\
+                            <artifactId>slf4j-jdk14</artifactId>\
+                            <version>1.7.30</version>\
+                        </dependency>\
+                         <dependency>\
+                             <groupId>org.slf4j</groupId>\
+                             <artifactId>slf4j-api</artifactId>\
+                             <version>1.7.30</version>\
+                         </dependency>", $0); print}' | \
+    xmllint --format - \
     >> ./heron-kafka-bolt-$1.pom
