@@ -47,6 +47,11 @@ cat ./maven/heron-no-kryo.template.pom | \
     sed "s/NAME/heron-spi/g" | \
     sed "s/DESCRIPTION/Heron SPI/g" | \
     awk '{gsub("DEPS", "<dependency>\
+                            <groupId>org.apache.heron</groupId>\
+                            <artifactId>heron-api</artifactId>\
+                            <version>HERON_API_VERSION</version>\
+                        </dependency>\
+                        <dependency>\
                             <groupId>com.google.protobuf</groupId>\
                             <artifactId>protobuf-java</artifactId>\
                             <version>3.19.1</version>\
@@ -61,6 +66,7 @@ cat ./maven/heron-no-kryo.template.pom | \
                              <artifactId>snakeyaml</artifactId>\
                              <version>1.29</version>\
                          </dependency>", $0); print}' | \
+    sed "s/HERON_API_VERSION/$1/g" | \
     xmllint --format - \
     >> ./heron-spi-$1.pom
 
@@ -99,6 +105,11 @@ cat ./maven/heron-with-kryo.template.pom | \
     sed "s/NAME/heron-simulator/g" | \
     sed "s/DESCRIPTION/Heron Simulator/g" | \
     awk '{gsub("DEPS", "<dependency>\
+                            <groupId>org.apache.heron</groupId>\
+                            <artifactId>heron-api</artifactId>\
+                            <version>HERON_API_VERSION</version>\
+                        </dependency>\
+                        <dependency>\
                           <groupId>org.apache.commons</groupId>\
                             <artifactId>commons-lang3</artifactId>\
                             <version>3.12.0</version>\
@@ -113,6 +124,7 @@ cat ./maven/heron-with-kryo.template.pom | \
                              <artifactId>jersey-media-jaxb</artifactId>\
                               <version>2.25.1</version>\
                         </dependency>", $0); print}' | \
+    sed "s/HERON_API_VERSION/$1/g" | \
     xmllint --format - \
     >> ./heron-simulator-$1.pom
 
