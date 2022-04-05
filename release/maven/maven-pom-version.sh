@@ -70,7 +70,12 @@ cat ./maven/heron-with-kryo.template.pom | \
     sed "s/NAME/heron-storm/g" | \
     sed "s/DESCRIPTION/Heron Storm/g" | \
     awk '{gsub("DEPS", "<dependency>\
-                          <groupId>org.apache.commons</groupId>\
+                            <groupId>org.apache.heron</groupId>\
+                            <artifactId>heron-api</artifactId>\
+                            <version>HERON_API_VERSION</version>\
+                        </dependency>\
+                        <dependency>\
+                        <groupId>org.apache.commons</groupId>\
                             <artifactId>commons-lang3</artifactId>\
                             <version>3.12.0</version>\
                         </dependency>\
@@ -84,6 +89,7 @@ cat ./maven/heron-with-kryo.template.pom | \
                              <artifactId>json-simple</artifactId>\
                              <version>1.1</version>\
                          </dependency>", $0); print}' | \
+    sed "s/HERON_API_VERSION/$1/g" | \
     xmllint --format - \
     >> ./heron-storm-$1.pom
 
