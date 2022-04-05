@@ -22,6 +22,7 @@ set -e
 
 DIR=`dirname $0`
 UTILS=${DIR}/../shutils
+export log_level=WARN
 source ${UTILS}/common.sh
 
 # integration test binaries have to be specified as absolute path
