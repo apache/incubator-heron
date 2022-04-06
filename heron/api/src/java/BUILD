@@ -18,6 +18,7 @@ api_deps_files = \
         ":classification",
         "//heron/common/src/java:basics-java",
         "@maven//:javax_xml_bind_jaxb_api",
+        "@maven//:org_slf4j_jul_to_slf4j",
     ]
 
 # Low Level Api
