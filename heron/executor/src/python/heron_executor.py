@@ -808,7 +808,7 @@ class HeronExecutor:
 
     ckptmgr_main_class = 'org.apache.heron.ckptmgr.CheckpointManager'
 
-    ckptmgr_ram_mb = self.checkpoint_manager_ram / (1024 * 1024)
+    ckptmgr_ram_mb = int(self.checkpoint_manager_ram / (1024 * 1024))
     ckptmgr_id = self.ckptmgr_ids[self.shard]
     ckptmgr_cmd = [os.path.join(self.heron_java_home, "bin/java"),
                    f'-Xms{ckptmgr_ram_mb}M',
