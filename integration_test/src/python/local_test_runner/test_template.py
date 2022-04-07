@@ -246,11 +246,11 @@ class TestTemplate:
   def kill_metricsmgr(self):
     logging.info("Executing kill metrics manager")
     metricsmgr_pid = self.get_pid(
-        '%s-%d' % (HERON_METRICSMGR, NON_TMANAGER_SHARD), self.params['workingDirectory'])
+        f'{HERON_METRICSMGR}-{int(NON_TMANAGER_SHARD)}', self.params['workingDirectory'])
     self.kill_process(metricsmgr_pid)
 
   def _get_tracker_pplan(self):
-    url = 'http://localhost:%s/topologies/physicalplan?' % self.params['trackerPort']\
+    url = f'http://localhost:{self.params['trackerPort']}/topologies/physicalplan?'\
           + 'cluster=local&environ=default&topology=IntegrationTest_LocalReadWriteTopology'
     logging.debug("Fetching physical plan from %s", url)
     response = urlopen(url)

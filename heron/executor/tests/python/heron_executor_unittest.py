@@ -113,7 +113,7 @@ class HeronExecutorTest(unittest.TestCase):
            "-XX:MaxGCPauseMillis=100 -XX:InitiatingHeapOccupancyPercent=30 " \
            "-XX:ParallelGCThreads=4 " \
            "-cp metricsmgr_classpath org.apache.heron.metricsmgr.MetricsManager " \
-           f"--id=metricsmgr-{container_id} --port=metricsmgr_port " \
+           f"--id=metricsmgr-{int(container_id)} --port=metricsmgr_port " \
            "--topology=topname --cluster=cluster --role=role --environment=environ " \
            "--topology-id=topid " \
            f"--system-config-file={INTERNAL_CONF_PATH} --override-config-file={OVERRIDE_PATH} " \
@@ -143,7 +143,7 @@ class HeronExecutorTest(unittest.TestCase):
            "--environment environ --topology_name topname --metricsmgr_port metricsmgr_port"
 
   def get_expected_instance_command(component_name, instance_id, container_id):
-    instance_name = f"container_{container_id}_{component_name}_{instance_id}"
+    instance_name = f"container_{int(container_id)}_{component_name}_{int(instance_id)}"
     return "heron_java_home/bin/java -Xmx320M -Xms320M -XX:MaxMetaspaceSize=128M " \
            "-XX:MetaspaceSize=128M -XX:ReservedCodeCacheSize=64M -XX:+PrintCommandLineFlags " \
            "-Djava.net.preferIPv4Stack=true " \
@@ -153,7 +153,7 @@ class HeronExecutorTest(unittest.TestCase):
            "-cp instance_classpath:classpath -XX:+HeapDumpOnOutOfMemoryError " \
            "org.apache.heron.instance.HeronInstance -topology_name topname -topology_id topid " \
            f"-instance_id {instance_name} -component_name {component_name} " \
-           f"-task_id {instance_id} -component_index 0 -stmgr_id stmgr-{container_id} " \
+           f"-task_id {int(instance_id)} -component_index 0 -stmgr_id stmgr-{int(container_id)} " \
            "-stmgr_port tmanager_controller_port -metricsmgr_port metricsmgr_port " \
            f"-system_config_file {INTERNAL_CONF_PATH} -override_config_file {OVERRIDE_PATH}"
 
@@ -161,12 +161,11 @@ class HeronExecutorTest(unittest.TestCase):
   expected_processes_container_0 = [
       ProcessInfo(MockPOpen(), 'heron-tmanager',
                   'tmanager_binary --topology_name=topname --topology_id=topid '
-                  '--zkhostportlist=zknode --zkroot=zkroot --myhost=%s --server_port=server_port '
+                  f'--zkhostportlist=zknode --zkroot=zkroot --myhost={HOSTNAME} --server_port=server_port '
                   '--controller_port=tmanager_controller_port --stats_port=tmanager_stats_port '
-                  '--config_file=%s --override_config_file=%s '
+                  f'--config_file={INTERNAL_CONF_PATH} --override_config_file={OVERRIDE_PATH} '
                   '--metrics_sinks_yaml=metrics_sinks_config_file '
-                  '--metricsmgr_port=metricsmgr_port '
-                  '--ckptmgr_port=ckptmgr-port' % (HOSTNAME, INTERNAL_CONF_PATH, OVERRIDE_PATH)),
+                  '--metricsmgr_port=metricsmgr_port --ckptmgr_port=ckptmgr-port'),
       ProcessInfo(MockPOpen(), 'heron-metricscache', get_expected_metricscachemgr_command()),
       ProcessInfo(MockPOpen(), 'heron-healthmgr', get_expected_healthmgr_command()),
       ProcessInfo(MockPOpen(), 'metricsmgr-0', get_expected_metricsmgr_command(0)),
@@ -180,12 +179,11 @@ class HeronExecutorTest(unittest.TestCase):
                   '--topologydefn_file=topdefnfile --zkhostportlist=zknode --zkroot=zkroot '
                   '--stmgr_id=stmgr-1 '
                   '--instance_ids=container_1_word_3,container_1_exclaim1_2,container_1_exclaim1_1 '
-                  '--myhost=%s --data_port=server_port '
+                  f'--myhost={HOSTNAME} --data_port=server_port '
                   '--local_data_port=tmanager_controller_port --metricsmgr_port=metricsmgr_port '
-                  '--shell_port=shell-port --config_file=%s --override_config_file=%s '
+                  f'--shell_port=shell-port --config_file={INTERNAL_CONF_PATH} --override_config_file={OVERRIDE_PATH} '
                   '--ckptmgr_port=ckptmgr-port --ckptmgr_id=ckptmgr-1 '
-                  '--metricscachemgr_mode=cluster'
-                  % (HOSTNAME, INTERNAL_CONF_PATH, OVERRIDE_PATH)),
+                  '--metricscachemgr_mode=cluster'),
       ProcessInfo(MockPOpen(), 'metricsmgr-1', get_expected_metricsmgr_command(1)),
       ProcessInfo(MockPOpen(), 'container_1_word_3', get_expected_instance_command('word', 3, 1)),
       ProcessInfo(MockPOpen(), 'container_1_exclaim1_2',

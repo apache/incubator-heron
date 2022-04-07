@@ -116,7 +116,7 @@ class StateManager(metaclass=abc.ABCMeta):
       localport = self.pick_unused_port()
       # pylint: disable=consider-using-with
       self.tunnel.append(subprocess.Popen(
-          ('ssh', self.tunnelhost, f'-NL127.0.0.1:{localport}:{host}:{port}')))
+          ('ssh', self.tunnelhost, f'-NL127.0.0.1:{int(localport)}:{host}:{int(port)}')))
       localportlist.append(('127.0.0.1', localport))
     return localportlist
 

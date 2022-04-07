@@ -549,7 +549,7 @@ def run_topology_tests(conf, test_args):
 
   test_threads = []
   for topology_conf in test_topologies:
-    topology_name = ("%s_%s_%s") % (timestamp, topology_conf["topologyName"], str(uuid.uuid4()))
+    topology_name = f"{timestamp}_{topology_conf['topologyName']}_{str(uuid.uuid4())}"
     classpath = topology_classpath_prefix + topology_conf["classPath"]
 
     update_args = ""

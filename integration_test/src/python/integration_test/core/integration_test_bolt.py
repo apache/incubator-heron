@@ -114,15 +114,15 @@ class IntegrationTestBolt(Bolt):
       super().emit(tup, stream, anchors, direct_task, need_task_ids)
 
   def ack(self, tup):
-    Log.info("Trying to do an ack. tuples processed: %d, received: %d"
-             % (self.tuples_processed, self.tuple_received))
+    Log.info("Trying to do an ack. tuples processed: %d, received: %d",
+            self.tuples_processed, self.tuple_received)
     if self.tuples_processed < self.tuple_received:
       super().ack(tup)
       self.tuples_processed += 1
 
   def fail(self, tup):
-    Log.info("Trying to do a fail. tuples processed: %d, received: %d"
-             % (self.tuples_processed, self.tuple_received))
+    Log.info("Trying to do a fail. tuples processed: %d, received: %d",
+            self.tuples_processed, self.tuple_received)
     if self.tuples_processed < self.tuple_received:
       super().fail(tup)
       self.tuples_processed += 1

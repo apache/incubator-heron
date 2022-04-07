@@ -38,4 +38,4 @@ class HalfAckBolt(Bolt):
 
   def process_tick(self, tup):
     self.log("Got tick tuple!")
-    self.log("Total received: %d", self.total)
+    self.log(f"Total received: {self.total}")

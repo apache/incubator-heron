@@ -49,8 +49,8 @@ class AggregatorBolt(TerminalBolt):
     if response.status == 200:
       Log.info("HTTP POST successful")
     else:
-      Log.severe("HTTP POST failed, response code: %d, response: %s"
-                 % (response.status, response.read()))
+      Log.severe("HTTP POST failed, response code: %d, response: %s",
+                 response.status, response.read())
     return response.status
 
   def write_finished_data(self):

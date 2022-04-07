@@ -195,7 +195,7 @@ class IncomingPacket:
         if len(self.header) == HeronProtocol.HEADER_SIZE:
           self.is_header_read = True
         else:
-          Log.debug(f"Header read incomplete; read {len(self.header)} bytes of header")
+          Log.debug("Header read incomplete; read %d bytes of header", len(self.header))
           return
 
       if self.is_header_read and not self.is_complete:
