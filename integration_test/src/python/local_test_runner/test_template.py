@@ -250,8 +250,8 @@ class TestTemplate:
     self.kill_process(metricsmgr_pid)
 
   def _get_tracker_pplan(self):
-    url = f'http://localhost:{self.params['trackerPort']}/topologies/physicalplan?'\
-          + 'cluster=local&environ=default&topology=IntegrationTest_LocalReadWriteTopology'
+    url = f"http://localhost:{self.params['trackerPort']}/topologies/physicalplan?"\
+          + "cluster=local&environ=default&topology=IntegrationTest_LocalReadWriteTopology"
     logging.debug("Fetching physical plan from %s", url)
     response = urlopen(url)
     physical_plan_json = json.loads(response.read())
