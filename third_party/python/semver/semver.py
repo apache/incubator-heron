@@ -107,7 +107,7 @@ def min_ver(ver1, ver2):
 
 
 def format_version(major, minor, patch, prerelease=None, build=None):
-    version = f"{major}.{minor}.{patch}"
+    version = f"{int(major)}.{int(minor)}.{int(patch)}"
     if prerelease is not None:
         version = version + f"-{prerelease}"
 
