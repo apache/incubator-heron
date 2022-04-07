@@ -23,7 +23,6 @@ import pkgutil
 import re
 import sys
 import time
-from turtle import update
 import uuid
 from http.client import HTTPConnection
 from threading import Lock, Thread
