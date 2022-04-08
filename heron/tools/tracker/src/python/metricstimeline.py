@@ -100,9 +100,9 @@ async def get_metrics_timeline(
     for im in metric.metric:
       metricname = im.name
       if metricname not in timeline:
-        timeline.setdefault(metricname, {})
+        timeline[metricname] = {}
       if instance not in timeline[metricname]:
-        timeline.setdefault(metricname, {})[instance] = {}
+        timeline[metricname][instance] = {}
 
       # We get minutely metrics.
       # Interval-values correspond to the minutely mark for which
