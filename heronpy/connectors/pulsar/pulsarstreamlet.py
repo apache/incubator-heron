@@ -29,9 +29,7 @@ class PulsarStreamlet(Streamlet):
   """Streamlet facade on top of PulsarSpout"""
   def __init__(self, service_url, topic_name, stage_name=None, parallelism=None,
                receive_timeout_ms=None, input_schema=None):
-    super().__init__(parents=[],
-                                          stage_name=stage_name,
-                                          parallelism=parallelism)
+    super().__init__(parents=[], stage_name=stage_name, parallelism=parallelism)
     self._pulsar_service_url = service_url
     self._pulsar_topic_name = topic_name
     self._pulsar_receive_timeout_ms = receive_timeout_ms
