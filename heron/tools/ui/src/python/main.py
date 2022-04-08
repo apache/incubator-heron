@@ -651,7 +651,7 @@ def cli(
     host: str, port: int, base_url_option: str, tracker_url_option: str, verbose: bool
 ) -> None:
   """Start a web UI for heron which renders information from the tracker."""
-  global base_url, Log
+  global base_url
   base_url = base_url_option
   log_level = logging.DEBUG if verbose else logging.INFO
   log.configure(log_level)
