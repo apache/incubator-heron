@@ -92,7 +92,7 @@ class StateManager(metaclass=abc.ABCMeta):
         socket.create_connection(hostport, StateManager.TIMEOUT_SECONDS)
         return True
       except:
-        LOG.info("StateManager %s Unable to connect to host: %s port %i",
+        LOG.info("StateManager %s Unable to connect to host: %d port %d",
           self.name, hostport[0], hostport[1])
         continue
     return False
