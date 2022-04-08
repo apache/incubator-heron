@@ -25,13 +25,15 @@ import httpx
 
 from pydantic import BaseModel, Field
 
+from heron.common.src.python.utils.log import Log
+from heron.proto import common_pb2
 from heron.proto import tmanager_pb2
 
 
 class MetricsTimeline(BaseModel):
   component: str
-  starttime: int = Field(..., alias="starttime")
-  endtime: int = Field(..., alias="endtime")
+  start_time: int = Field(..., alias="starttime")
+  end_time: int = Field(..., alias="endtime")
   timeline: Dict[str, Dict[str, Dict[int, str]]] = Field(
       ...,
       description="map of (metric name, instance, start) to metric value",
@@ -83,9 +85,9 @@ async def get_metrics_timeline(
   response_data = tmanager_pb2.MetricResponse()
   response_data.ParseFromString(result.content)
 
-  # if response_data.status.status == common_pb2.NOTOK:
-  #   if response_data.status.HasField("message"):
-  #     Log.warn("Received response from Tmanager: %s", response_data.status.message)
+  if response_data.status.status == common_pb2.NOTOK:
+    if response_data.status.HasField("message"):
+      Log.warn("Received response from Tmanager: %s", response_data.status.message)
 
   timeline = {}
   # Loop through all the metrics

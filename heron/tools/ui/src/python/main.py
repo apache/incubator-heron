@@ -200,8 +200,8 @@ def timeline(
     topology: str,
     metric: str,
     instance: str,
-    starttime: str,
-    endtime: str,
+    starttime: int,
+    endtime: int,
     component: Optional[str] = None,
     max: bool = False, # pylint: disable=redefined-builtin
 ) -> dict:
@@ -655,10 +655,10 @@ def cli(
   base_url = base_url_option
   log_level = logging.DEBUG if verbose else logging.INFO
   log.configure(log_level)
-  Log = log.Log
+
   tracker.tracker_url = tracker_url_option
 
-  uvicorn.run(app, host=host, port=port, log_config=None)
+  uvicorn.run(app, host=host, port=port, log_level=log_level)
 
 
 if __name__ == "__main__":
