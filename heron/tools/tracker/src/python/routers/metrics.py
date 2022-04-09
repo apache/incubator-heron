@@ -146,7 +146,7 @@ class TimelinePoint(BaseModel): # pylint: disable=too-few-public-methods
       None,
       description="name of the instance the metrics applies to if not an aggregate",
   )
-  data: Dict[int, int] = Field(..., description="map of start times to metric values")
+  data: Dict[int, float] = Field(..., description="map of start times to metric values")
 
 
 class MetricsQueryResponse(BaseModel): # pylint: disable=too-few-public-methods
