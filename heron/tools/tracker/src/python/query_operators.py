@@ -43,7 +43,7 @@ class Metrics:
       instance,
       start: int,
       end: int,
-      timeline: Dict[int, int],
+      timeline: Dict[int, float],
   ):
     """Insantiate class with a floored copy of the timeline within [start, end]."""
     self.component_name = component_name

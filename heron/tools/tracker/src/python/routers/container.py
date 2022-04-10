@@ -196,7 +196,6 @@ async def get_exceptions(  # pylint: disable=too-many-arguments
   exception_response = await _get_exception_log_response(
       cluster, role, environ, component, instances, topology_name, summary=False
   )
-  print(f"NICK: exception response: {exception_response}")
 
   ret = []
   for exception_log in exception_response.exceptions:

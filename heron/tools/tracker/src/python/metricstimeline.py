@@ -32,8 +32,8 @@ from heron.proto import tmanager_pb2
 
 class MetricsTimeline(BaseModel):
   component: str
-  start_time: int = Field(..., alias="starttime")
-  end_time: int = Field(..., alias="endtime")
+  starttime: int
+  endtime: int
   timeline: Dict[str, Dict[str, Dict[int, float]]] = Field(
       ...,
       description="map of (metric name, instance, start) to metric value",
