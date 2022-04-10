@@ -627,7 +627,7 @@ class HeronQueryHandler:
       keys = list(filtered_ts[0]["timeline"][0]["data"].keys())
       timelines = ([res["timeline"][0]["data"][key] for key in keys] for res in filtered_ts)
       values = (max(v) for v in zip(*timelines))
-      data = dict(list(zip(keys, values)))        
+      data = dict(list(zip(keys, values)))
       return data
     return {}
 
