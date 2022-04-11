@@ -246,11 +246,11 @@ class Topology:
   def _render_extra_links(extra_links, topology, execution_state: ExecutionState_pb) -> None:
     """Render links in place."""
     subs = {
-        "cluster": execution_state.cluster,
-        "environ": execution_state.environ,
-        "role": execution_state.role,
-        "jobname": topology.name,
-        "submission_user": execution_state.submission_user,
+        "CLUSTER": execution_state.cluster,
+        "ENVIRON": execution_state.environ,
+        "ROLE": execution_state.role,
+        "TOPOLOGY": topology.name,
+        "USER": execution_state.submission_user,
     }
     for link in extra_links:
       link[EXTRA_LINK_URL_KEY] = string.Template(link[EXTRA_LINK_FORMATTER_KEY]).substitute(subs)
