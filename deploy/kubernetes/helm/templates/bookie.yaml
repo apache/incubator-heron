@@ -45,7 +45,7 @@ data:
   BK_journalMaxBackups: "{{ .Values.bookieJournalMaxBackups }}"
   BK_journalMaxSizeMB: "{{ .Values.bookieJournalMaxSizeMB }}"
   BK_logSizeLimit: "{{ int64 .Values.bookieLogSizeLimit }}"
-  {{- if or (eq .Values.platform "gke") (eq .Values.platform "minikube") }}
+  {{- if .Values.bookkeeper.useHostNameAsBookieID }}
   BK_useHostNameAsBookieID: "true"
   {{- end }}
   # TODO: Issue 458: https://github.com/apache/bookkeeper/issues/458
@@ -60,7 +60,7 @@ data:
 ## cannot be moved across different nodes.
 ## For this reason, we run BK as a daemon set, one for each node in the
 ## cluster, unless restricted by label selectors
-{{- if or (eq .Values.platform "gke") (eq .Values.platform "minikube") }}
+{{- if .Values.bookkeeper.useStatefulSet }}
 apiVersion: apps/v1
 kind: StatefulSet
 {{- else }}
@@ -79,7 +79,7 @@ spec:
       app: {{ .Release.Name }}-bookkeeper
       component: {{ .Release.Name }}-bookie
       cluster: {{ .Release.Name }}-bookkeeper
-{{- if or (eq .Values.platform "gke") (eq .Values.platform "minikube") }}
+{{- if .Values.bookkeeper.createReplicas }}
   serviceName: {{ .Release.Name }}-bookie
   replicas: {{ $bookieReplicas }}
 {{- end }}
@@ -97,7 +97,7 @@ spec:
         prometheus.io/port: "8000"
 
     spec:
-{{- if eq .Values.platform "gke" }}
+{{- if .Values.bookkeeper.affinityPods }}
       # Make sure multiple pods of bookkeeper don't get scheduled on the
       # same node, unless there are no other available nodes
       affinity:
@@ -154,7 +154,7 @@ spec:
             - name: ledgers-disk
               mountPath: /bookkeeper/data/ledgers
 
-{{- if or (eq .Values.platform "aws") (eq .Values.platform "baremetal") }}
+{{- if .Values.bookkeeper.useHostPath }}
       volumes:
           # Mount local disks
         - name: journal-disk
@@ -165,7 +165,7 @@ spec:
             path: /bookkeeper/data/ledgers
 {{- end }}
 
-{{- if or (eq .Values.platform "gke") (eq .Values.platform "minikube") }}
+{{- if .Values.bookkeeper.useVolumeClaimTemplate }}
   volumeClaimTemplates:
     - metadata:
         name: journal-disk
@@ -206,7 +206,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  {{- if or (eq .Values.platform "gke") (eq .Values.platform "minikube") }}
+  {{- if .Values.bookkeeper.tolerateUnreadyEndpoints }}
   annotations:
     service.alpha.kubernetes.io/tolerate-unready-endpoints: "true"
   {{- end }}
