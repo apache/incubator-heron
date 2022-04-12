@@ -119,6 +119,7 @@ async def get_metrics( # pylint: disable=too-many-arguments
   )
 
 
+@router.get("/metricstimeline", response_model=metricstimeline.MetricsTimeline)
 @router.get("/metrics/timeline", response_model=metricstimeline.MetricsTimeline)
 async def get_metrics_timeline( # pylint: disable=too-many-arguments
     cluster: str,
@@ -131,7 +132,11 @@ async def get_metrics_timeline( # pylint: disable=too-many-arguments
     metric_names: Optional[List[str]] = Query(None, alias="metricname"),
     instances: Optional[List[str]] = Query(None, alias="instance"),
 ):
-  """Return metrics over the given interval."""
+  """
+  '/metricstimeline' 0.20.5 below.
+  '/metrics/timeline' 0.20.5 above.
+  Return metrics over the given interval.
+  """
   if start_time > end_time:
     raise BadRequest("start_time > end_time")
   topology = state.tracker.get_toplogy(cluster, role, environ, topology_name)
