@@ -28,21 +28,15 @@ import os
 import sys
 import subprocess
 
-from asyncio import iscoroutinefunction
-from functools import wraps
 from pathlib import Path
-from typing import Any, Generic, Literal, Optional, TypeVar
-
-from heron.common.src.python.utils.log import Log
-from heron.tools.tracker.src.python import constants
-from heron.proto import topology_pb2
+from typing import Any, Optional, TypeVar
 
 import javaobj.v1 as javaobj
 import yaml
+from fastapi import HTTPException
 
-from fastapi import APIRouter, HTTPException
-from pydantic import Field
-from pydantic.generics import GenericModel
+from heron.common.src.python.utils.log import Log
+from heron.proto import topology_pb2
 
 
 # directories for heron tools distribution
@@ -52,58 +46,10 @@ LIB_DIR = "lib"
 
 ResultType = TypeVar("ResultType")
 
-
-class ResponseEnvelope(GenericModel, Generic[ResultType]):
-  execution_time: float = Field(0.0, alias="executiontime")
-  message: str
-  result: Optional[ResultType] = None
-  status: Literal[
-      constants.RESPONSE_STATUS_FAILURE, constants.RESPONSE_STATUS_SUCCESS
-  ]
-  tracker_version: str = constants.API_VERSION
-
 class BadRequest(HTTPException):
   """Raised when bad input is recieved."""
   def __init__(self, detail: str = None) -> None:
     super().__init__(400, detail)
-
-class EnvelopingAPIRouter(APIRouter):
-  """Router which wraps response_models with ResponseEnvelope."""
-
-  def api_route(self, response_model=None, **kwargs):
-    """This provides the decorator used by router.<method>."""
-    if not response_model:
-      return super().api_route(response_model=response_model, **kwargs)
-
-    wrapped_response_model = ResponseEnvelope[response_model]
-    decorator = super().api_route(response_model=wrapped_response_model, **kwargs)
-
-    @wraps(decorator)
-    def new_decorator(f):
-      if iscoroutinefunction(f):
-        @wraps(f)
-        async def envelope(*args, **kwargs):
-          result = await f(*args, **kwargs)
-          return wrapped_response_model(
-              result=result,
-              execution_time=0.0,
-              message="ok",
-              status="success",
-          )
-      else:
-        @wraps(f)
-        def envelope(*args, **kwargs):
-          result = f(*args, **kwargs)
-          return wrapped_response_model(
-              result=result,
-              execution_time=0.0,
-              message="ok",
-              status="success",
-          )
-      return decorator(envelope)
-
-    return new_decorator
-
 
 def make_shell_endpoint(topology_info: dict, instance_id: int) -> str:
   """
@@ -112,10 +58,10 @@ def make_shell_endpoint(topology_info: dict, instance_id: int) -> str:
 
   """
   # Format: container_<id>_<instance_id>
-  pplan = topology_info["physical_plan"]
-  stmgrId = pplan["instances"][instance_id]["stmgrId"]
-  host = pplan["stmgrs"][stmgrId]["host"]
-  shell_port = pplan["stmgrs"][stmgrId]["shell_port"]
+  pplan = topology_info.physical_plan
+  stmgrId = pplan.instances[instance_id].stmgr_id
+  host = pplan.stmgrs[stmgrId].host
+  shell_port = pplan.stmgrs[stmgrId].shell_port
   return f"http://{host}:{shell_port}"
 
 def make_shell_job_url(host: str, shell_port: int, _) -> Optional[str]:
@@ -184,9 +130,9 @@ def cygpath(x: str) -> str:
   :return: the path in windows
   """
   command = ['cygpath', '-wp', x]
-  p = subprocess.Popen(command, stdout=subprocess.PIPE, universal_newlines=True)
-  output, _ = p.communicate()
-  lines = output.split("\n")
+  with subprocess.Popen(command, stdout=subprocess.PIPE, universal_newlines=True) as p:
+    output, _ = p.communicate()
+    lines = output.split("\n")
   return lines[0]
 
 def normalized_class_path(x: str) -> str:
@@ -239,7 +185,7 @@ def parse_config_file(config_file: str) -> Optional[str]:
     return None
 
   # Read the configuration file
-  with open(expanded_config_file_path, 'r') as f:
+  with open(expanded_config_file_path, 'r', encoding='utf8') as f:
     return yaml.safe_load(f)
 
 ################################################################################

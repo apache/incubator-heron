@@ -49,4 +49,4 @@ class Resources:
     return self.set_ram_in_mb(ram * 1024)
 
   def __repr__(self):
-    return 'Resource {cpu: %f, ram: %d}' % (self._cpu, self._ram)
+    return f'Resource {{cpu: {self._cpu}, ram: {self._ram}}}'

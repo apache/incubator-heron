@@ -71,7 +71,7 @@ class MetricsManagerClient(HeronClient):
       while not self.out_queue.is_empty():
         message = self.out_queue.poll()
         assert isinstance(message, metrics_pb2.MetricPublisherPublishMessage)
-        Log.debug("Sending metric message: %s" % str(message))
+        Log.debug(f"Sending metric message: {str(message)}")
         self.send_message(message)
         self.gateway_metrics.update_sent_metrics_size(message.ByteSize())
         self.gateway_metrics.update_sent_metrics(len(message.metrics), len(message.exceptions))
@@ -79,26 +79,26 @@ class MetricsManagerClient(HeronClient):
   def on_connect(self, status):
     Log.debug("In on_connect of MetricsManagerClient")
     if status != StatusCode.OK:
-      Log.error("Error connecting to Metrics Manager with status: %s" % str(status))
+      Log.error(f"Error connecting to Metrics Manager with status: {str(status)}")
       retry_interval = float(self.sys_config[constants.INSTANCE_RECONNECT_METRICSMGR_INTERVAL_SEC])
       self.looper.register_timer_task_in_sec(self.start_connect, retry_interval)
       return
     self._send_register_req()
 
   def on_response(self, status, context, response):
-    Log.debug("In on_response with status: %s, with context: %s" % (str(status), str(context)))
+    Log.debug(f"In on_response with status: {str(status)}, with context: {str(context)}")
     if status != StatusCode.OK:
       raise RuntimeError("Response from Metrics Manager not OK")
     if isinstance(response, metrics_pb2.MetricPublisherRegisterResponse):
       self._handle_register_response(response)
     else:
-      Log.error("Unknown kind of response received: %s" % response.DESCRIPTOR.full_name)
+      Log.error(f"Unknown kind of response received: {response.DESCRIPTOR.full_name}")
       raise RuntimeError("Unknown kind of response received from Metrics Manager")
 
   # pylint: disable=no-self-use
   def on_incoming_message(self, message):
-    raise RuntimeError("Metrics Client got an unknown message from Metrics Manager: %s"
-                       % str(message))
+    raise RuntimeError(f"Metrics Client got an unknown message from "
+                       f"Metrics Manager: {str(message)}")
 
   def on_error(self):
     Log.error("Disconnected from Metrics Manager")
@@ -117,7 +117,7 @@ class MetricsManagerClient(HeronClient):
     request = metrics_pb2.MetricPublisherRegisterRequest()
     request.publisher.CopyFrom(metric_publisher)
 
-    Log.debug("Sending MetricsCli register request: \n%s" % str(request))
+    Log.debug(f"Sending MetricsCli register request: \n{str(request)}")
 
     timeout_sec = float(self.sys_config[constants.INSTANCE_RECONNECT_METRICSMGR_INTERVAL_SEC])
     self.send_request(request, "MetricsClientContext",

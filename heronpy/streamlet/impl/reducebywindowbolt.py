@@ -19,7 +19,7 @@
 #  under the License.
 
 """module for bolt: ReduceByWindowBolt"""
-import collections
+from collections.abc import Iterable
 
 from heronpy.api.bolt.window_bolt import SlidingWindowBolt
 from heronpy.api.custom_grouping import ICustomGrouping
@@ -39,7 +39,7 @@ class ReduceByWindowBolt(SlidingWindowBolt, StreamletBoltBase):
   SLIDEINTERVAL = SlidingWindowBolt.WINDOW_SLIDEINTERVAL_SECS
 
   def initialize(self, config, context):
-    super(ReduceByWindowBolt, self).initialize(config, context)
+    super().initialize(config, context)
     if ReduceByWindowBolt.FUNCTION not in config:
       raise RuntimeError("FUNCTION not specified in reducebywindow operator")
     self.reduce_function = config[ReduceByWindowBolt.FUNCTION]
@@ -59,7 +59,7 @@ class ReduceGrouping(ICustomGrouping):
   def choose_tasks(self, values):
     assert isinstance(values, list) and len(values) == 1
     userdata = values[0]
-    if not isinstance(userdata, collections.Iterable) or len(userdata) != 2:
+    if not isinstance(userdata, Iterable) or len(userdata) != 2:
       raise RuntimeError("Tuples going to reduce must be iterable of length 2")
     # only emits to the first task id
     hashvalue = hash(userdata[0])
@@ -70,7 +70,7 @@ class ReduceGrouping(ICustomGrouping):
 class ReduceByWindowStreamlet(Streamlet):
   """ReduceByWindowStreamlet"""
   def __init__(self, window_config, reduce_function, parent):
-    super(ReduceByWindowStreamlet, self).__init__()
+    super().__init__()
     if not isinstance(window_config, WindowConfig):
       raise RuntimeError("window config has to be of type WindowConfig")
     if not callable(reduce_function):

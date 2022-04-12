@@ -145,13 +145,13 @@ class HeronComponentSpec:
       These values will need to be serialized before adding to a protobuf message.
     """
     if not isinstance(custom_config, dict):
-      raise TypeError("Component-specific configuration must be given as a dict type, given: %s"
-                      % str(type(custom_config)))
+      raise TypeError("Component-specific configuration must be "\
+        f"given as a dict type, given: {str(type(custom_config))}")
     sanitized = {}
     for key, value in list(custom_config.items()):
       if not isinstance(key, str):
-        raise TypeError("Key for component-specific configuration must be string, given: %s:%s"
-                        % (str(type(key)), str(key)))
+        raise TypeError("Key for component-specific configuration "\
+          f"must be string, given: {str(type(key))}:{str(key)}")
 
       if isinstance(value, bool):
         sanitized[key] = "true" if value else "false"
@@ -209,7 +209,7 @@ class HeronComponentSpec:
         elif isinstance(key, GlobalStreamId):
           ret[key] = grouping
         else:
-          raise ValueError("%s is not supported as a key to inputs" % str(key))
+          raise ValueError(f"{str(key)} is not supported as a key to inputs")
     elif isinstance(self.inputs, (list, tuple)):
       # inputs are lists, must be either a list of HeronComponentSpec or GlobalStreamId
       # will use SHUFFLE grouping
@@ -224,9 +224,9 @@ class HeronComponentSpec:
         elif isinstance(input_obj, GlobalStreamId):
           ret[input_obj] = Grouping.SHUFFLE
         else:
-          raise ValueError("%s is not supported as an input" % str(input_obj))
+          raise ValueError(f"{str(input_obj)} is not supported as an input")
     else:
-      raise TypeError("Inputs must be a list, dict, or None, given: %s" % str(self.inputs))
+      raise TypeError(f"Inputs must be a list, dict, or None, given: {str(self.inputs)}")
 
     return ret
 
@@ -250,17 +250,18 @@ class HeronComponentSpec:
       return None
 
     if not isinstance(self.outputs, (list, tuple)):
-      raise TypeError("Argument to outputs must be either list or tuple, given: %s"
-                      % str(type(self.outputs)))
+      raise TypeError("Argument to outputs must be either "\
+        f"list or tuple, given: {str(type(self.outputs))}")
 
     for output in self.outputs:
       if not isinstance(output, (str, Stream)):
-        raise TypeError("Outputs must be a list of strings or Streams, given: %s" % str(output))
+        raise TypeError("Outputs must be a list of strings "\
+          f"or Streams, given: {str(output)}")
 
       if isinstance(output, str):
         # it's a default stream
         if Stream.DEFAULT_STREAM_ID not in ret:
-          ret[Stream.DEFAULT_STREAM_ID] = list()
+          ret[Stream.DEFAULT_STREAM_ID] = []
         ret[Stream.DEFAULT_STREAM_ID].append(output)
       else:
         # output is a Stream object
@@ -277,19 +278,19 @@ class HeronComponentSpec:
       return set()
 
     if not isinstance(self.outputs, (list, tuple)):
-      raise TypeError("Argument to outputs must be either list or tuple, given: %s"
-                      % str(type(self.outputs)))
+      raise TypeError("Argument to outputs must be either "\
+        f"list or tuple, given: {str(type(self.outputs))}")
     ret_lst = []
     for output in self.outputs:
       if not isinstance(output, (str, Stream)):
-        raise TypeError("Outputs must be a list of strings or Streams, given: %s" % str(output))
+        raise TypeError(f"Outputs must be a list of strings or Streams, given: {str(output)}")
       ret_lst.append(Stream.DEFAULT_STREAM_ID if isinstance(output, str) else output.stream_id)
     return set(ret_lst)
 
   def __getitem__(self, stream_id):
     """Get GlobalStreamId for a given stream_id"""
     if stream_id not in self.get_out_streamids():
-      raise ValueError("A given stream id does not exist on this component: %s" % stream_id)
+      raise ValueError(f"A given stream id does not exist on this component: {stream_id}")
 
     component_id = self.name or self
     return GlobalStreamId(componentId=component_id, streamId=stream_id)
@@ -355,12 +356,12 @@ class GlobalStreamId:
         # TopologyType metaclass finally sets it. This statement is to support __eq__(),
         # __hash__() and __str__() methods with safety, as raising Exception is not
         # appropriate this case.
-        return "<No name available for HeronComponentSpec yet, uuid: %s>" % self._component_id.uuid
+        return f"<No name available for HeronComponentSpec yet, uuid: {self._component_id.uuid}>"
       return self._component_id.name
     if isinstance(self._component_id, str):
       return self._component_id
-    raise ValueError("Component Id for this GlobalStreamId is not properly set: <%s:%s>"
-                     % (str(type(self._component_id)), str(self._component_id)))
+    raise ValueError("Component Id for this GlobalStreamId is not "\
+                    f"properly set: <{str(type(self._component_id))}:{str(self._component_id)}>")
 
   def __eq__(self, other):
     return hasattr(other, 'component_id') and self.component_id == other.component_id \
@@ -370,4 +371,4 @@ class GlobalStreamId:
     return hash(self.__str__())
 
   def __str__(self):
-    return "%s:%s" % (self.component_id, self.stream_id)
+    return f"{self.component_id}:{self.stream_id}"

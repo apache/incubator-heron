@@ -20,7 +20,7 @@
 
 '''arraylooper.py: module for defining a simple Generator'''
 
-import collections
+from collections.abc import Iterable
 import itertools
 import time
 
@@ -30,8 +30,8 @@ class ArrayLooper(Generator):
   """A ArrayLooper loops the contents of the a user supplied array forever
   """
   def __init__(self, user_iterable, sleep=None):
-    super(ArrayLooper, self).__init__()
-    if not isinstance(user_iterable, collections.Iterable):
+    super().__init__()
+    if not isinstance(user_iterable, Iterable):
       raise RuntimeError("ArrayLooper must be passed an iterable")
     self._user_iterable = user_iterable
     self._sleep = sleep

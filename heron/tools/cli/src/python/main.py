@@ -29,20 +29,21 @@ import sys
 import time
 import traceback
 
-import heron.common.src.python.utils.log as log
-import heron.tools.common.src.python.utils.config as config
-import heron.tools.cli.src.python.cdefs as cdefs
-import heron.tools.cli.src.python.cliconfig as cliconfig
-import heron.tools.cli.src.python.help as cli_help
-import heron.tools.cli.src.python.activate as activate
-import heron.tools.cli.src.python.deactivate as deactivate
-import heron.tools.cli.src.python.kill as kill
-import heron.tools.cli.src.python.result as result
-import heron.tools.cli.src.python.restart as restart
-import heron.tools.cli.src.python.submit as submit
-import heron.tools.cli.src.python.update as update
-import heron.tools.cli.src.python.version as version
-import heron.tools.cli.src.python.config as hconfig
+from heron.common.src.python.utils import log
+
+from heron.tools.common.src.python.utils import config
+from heron.tools.cli.src.python import cdefs
+from heron.tools.cli.src.python import cliconfig
+from heron.tools.cli.src.python import help as cli_help
+from heron.tools.cli.src.python import activate
+from heron.tools.cli.src.python import deactivate
+from heron.tools.cli.src.python import kill
+from heron.tools.cli.src.python import result
+from heron.tools.cli.src.python import restart
+from heron.tools.cli.src.python import submit
+from heron.tools.cli.src.python import update
+from heron.tools.cli.src.python import version
+from heron.tools.cli.src.python import config as hconfig
 
 from heron.tools.cli.src.python.opts import cleaned_up_files
 
@@ -70,7 +71,7 @@ class _HelpAction(argparse._HelpAction):
     for subparsers_action in subparsers_actions:
       # get all subparsers and print help
       for choice, subparser in list(subparsers_action.choices.items()):
-        print("Subparser '{}'".format(choice))
+        print(f"Subparser '{choice}'")
         print(subparser.format_help())
         return
 
@@ -127,7 +128,7 @@ def run(handlers, command, parser, command_args, unknown_args):
 
   if command in handlers:
     return handlers[command].run(command, parser, command_args, unknown_args)
-  err_context = 'Unknown subcommand: %s' % command
+  err_context = f'Unknown subcommand: {command}'
   return result.SimpleResult(result.Status.InvocationError, err_context)
 
 def cleanup(files):
@@ -165,14 +166,13 @@ def server_deployment_mode(command, parser, cluster, cl_args):
   client_confs = cdefs.read_server_mode_cluster_definition(cluster, cl_args)
 
   if not client_confs[cluster]:
-    return dict()
+    return {}
 
   # tell the user which definition that we are using
   if not cl_args.get('service_url', None):
-    Log.debug("Using cluster definition from file %s" \
-        % cliconfig.get_cluster_config_file(cluster))
+    Log.debug("Using cluster definition from file %s", cliconfig.get_cluster_config_file(cluster))
   else:
-    Log.debug("Using cluster service url %s" % cl_args['service_url'])
+    Log.debug("Using cluster service url %s", cl_args['service_url'])
 
   # if cluster definition exists, but service_url is not set, it is an error
   if not 'service_url' in client_confs[cluster]:
@@ -192,7 +192,7 @@ def server_deployment_mode(command, parser, cluster, cl_args):
     Log.error("Argument cluster/[role]/[env] is not correct: %s", str(ex))
     sys.exit(1)
 
-  new_cl_args = dict()
+  new_cl_args = {}
   new_cl_args['cluster'] = cluster_tuple[0]
   new_cl_args['role'] = cluster_tuple[1]
   new_cl_args['environ'] = cluster_tuple[2]
@@ -223,19 +223,19 @@ def direct_deployment_mode(command, parser, cluster, cl_args):
     # if some of the arguments are not found, print error and exit
     subparser = config.get_subparser(parser, command)
     print(subparser.format_help())
-    return dict()
+    return {}
 
   # check if the cluster config directory exists
   if not cdefs.check_direct_mode_cluster_definition(cluster, config_path):
     Log.error("Cluster config directory \'%s\' does not exist", config_path)
-    return dict()
+    return {}
 
   config_path = config.get_heron_cluster_conf_dir(cluster, config_path)
   if not os.path.isdir(config_path):
     Log.error("Cluster config directory \'%s\' does not exist", config_path)
-    return dict()
+    return {}
 
-  Log.info("Using cluster definition in %s" % config_path)
+  Log.info("Using cluster definition in %s", config_path)
 
   try:
     cluster_role_env = (cl_args['cluster'], cl_args['role'], cl_args['environ'])
@@ -243,9 +243,9 @@ def direct_deployment_mode(command, parser, cluster, cl_args):
     cluster_tuple = config.defaults_cluster_role_env(cluster_role_env)
   except Exception as ex:
     Log.error("Argument cluster/[role]/[env] is not correct: %s", str(ex))
-    return dict()
+    return {}
 
-  new_cl_args = dict()
+  new_cl_args = {}
   new_cl_args['cluster'] = cluster_tuple[0]
   new_cl_args['role'] = cluster_tuple[1]
   new_cl_args['environ'] = cluster_tuple[2]
@@ -268,7 +268,7 @@ def deployment_mode(command, parser, cl_args):
   if len(new_cl_args) > 0:
     return new_cl_args
 
-  return dict()
+  return {}
 
 
 ################################################################################
@@ -289,9 +289,9 @@ def extract_common_args(command, parser, cl_args):
       # if some of the arguments are not found, print error and exit
       subparser = config.get_subparser(parser, command)
       print(subparser.format_help())
-      return dict()
+      return {}
 
-  new_cl_args = dict()
+  new_cl_args = {}
   cluster_tuple = config.get_cluster_role_env(cluster_role_env)
   new_cl_args['cluster'] = cluster_tuple[0]
   new_cl_args['role'] = cluster_tuple[1]

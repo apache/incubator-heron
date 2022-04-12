@@ -23,7 +23,7 @@ import socket
 
 from heron.proto import topology_pb2
 from heron.common.src.python.utils.log import Log
-import heron.common.src.python.pex_loader as pex_loader
+from heron.common.src.python import pex_loader
 from heron.instance.src.python.utils.topology import TopologyContextImpl
 
 from heronpy.api.custom_grouping import ICustomGrouping
@@ -59,7 +59,7 @@ class PhysicalPlanHelper:
         break
 
     if self.my_instance is None:
-      raise RuntimeError("There was no instance that matched my id: %s" % self.my_instance_id)
+      raise RuntimeError(f"There was no instance that matched my id: {self.my_instance_id}")
 
     self.my_component_name = self.my_instance.info.component_name
     self.my_task_id = self.my_instance.info.task_id
@@ -68,7 +68,7 @@ class PhysicalPlanHelper:
     self._my_spbl, self.is_spout = self._get_my_spout_or_bolt(pplan.topology)
 
     # Map <stream id -> number of fields in that stream's schema>
-    self._output_schema = dict()
+    self._output_schema = {}
     outputs = self._my_spbl.outputs
 
     # setup output schema
@@ -119,11 +119,11 @@ class PhysicalPlanHelper:
     # do some checking to make sure that the number of fields match what's expected
     size = self._output_schema.get(stream_id, None)
     if size is None:
-      raise RuntimeError("%s emitting to stream %s but was not declared in output fields"
-                         % (self.my_component_name, stream_id))
+      raise RuntimeError(f"{self.my_component_name} emitting to stream {stream_id}"
+                         f"but was not declared in output fields")
     if size != len(tup):
-      raise RuntimeError("Number of fields emitted in stream %s does not match what's expected. "
-                         "Expected: %s, Observed: %s" % (stream_id, size, len(tup)))
+      raise RuntimeError(f"Number of fields emitted in stream {stream_id} does not match"
+                         f"what's expected. Expected: {size}, Observed: {len(tup)}")
 
   def get_my_spout(self):
     """Returns spout instance, or ``None`` if bolt is assigned"""
@@ -199,8 +199,7 @@ class PhysicalPlanHelper:
         config[kv.key] = default_serializer.deserialize(kv.serialized_value)
       else:
         assert kv.HasField("type")
-        Log.error("Unsupported config <key:value> found: %s, with type: %s"
-                  % (str(kv), str(kv.type)))
+        Log.error(f"Unsupported config <key:value> found: {str(kv)}, with type: {str(kv.type)}")
         continue
 
     return config
@@ -252,7 +251,7 @@ class PhysicalPlanHelper:
             raise NotImplementedError("Java-serialized custom grouping is not yet supported "
                                       "for python topology")
           else:
-            raise ValueError("Unrecognized custom grouping type found: %s" % str(in_stream.type))
+            raise ValueError(f"Unrecognized custom grouping type found: {str(in_stream.type)}")
 
   def _get_taskids_for_component(self, component_name):
     return [instance.info.task_id for instance in self.pplan.instances

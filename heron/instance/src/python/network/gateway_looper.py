@@ -20,6 +20,7 @@
 
 '''gateway_looper.py'''
 
+# pylint: disable=deprecated-module
 import asyncore
 import errno
 import os
@@ -49,7 +50,7 @@ class GatewayLooper(EventLooper):
 
     :param socket_map: socket map used for asyncore.dispatcher
     """
-    super(GatewayLooper, self).__init__()
+    super().__init__()
     self.sock_map = socket_map
 
     # Pipe used for wake up select
@@ -70,7 +71,7 @@ class GatewayLooper(EventLooper):
     Log.debug("Wake up called")
 
   def on_exit(self):
-    super(GatewayLooper, self).on_exit()
+    super().on_exit()
     os.close(self.pipe_r)
     os.close(self.pipe_w)
 

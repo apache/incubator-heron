@@ -30,11 +30,11 @@ from heron.proto import tuple_pb2
 from heron.instance.src.python.utils.misc import SerializerHelper
 from heron.instance.src.python.utils.misc import OutgoingTupleHelper
 from heron.instance.src.python.utils import system_config
-import heron.instance.src.python.utils.system_constants as system_constants
-import heron.common.src.python.pex_loader as pex_loader
+from heron.instance.src.python.utils import system_constants
+from heron.common.src.python import pex_loader
 
-import heronpy.api.global_metrics as global_metrics
-import heronpy.api.api_constants as api_constants
+from heronpy.api import global_metrics
+from heronpy.api import api_constants
 from heronpy.api.state.stateful_component import StatefulComponent
 
 # pylint: disable=too-many-instance-attributes
@@ -92,7 +92,7 @@ class BaseInstance:
       elif level == "error":
         _log_level = logging.ERROR
       else:
-        raise ValueError("%s is not supported as logging level" % str(level))
+        raise ValueError(f"{str(level)} is not supported as logging level")
 
     self.logger.log(_log_level, message)
 
@@ -126,11 +126,11 @@ class BaseInstance:
     except Exception as e:
       spbl = "spout" if is_spout else "bolt"
       self.logger.error(traceback.format_exc())
-      raise RuntimeError("Error when loading a %s from pex: %s" % (spbl, str(e)))
+      raise RuntimeError(f"Error when loading a {spbl} from pex: {str(e)}") from e
     return spbl_class
 
   def handle_initiate_stateful_checkpoint(self, ckptmsg, component):
-    Log.info("Received initiate state checkpoint message for %s" % ckptmsg.checkpoint_id)
+    Log.info(f"Received initiate state checkpoint message for {ckptmsg.checkpoint_id}")
     if not self.is_stateful:
       raise RuntimeError("Received state checkpoint message but we are not stateful topology")
     if isinstance(component, StatefulComponent):

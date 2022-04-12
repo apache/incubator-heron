@@ -40,6 +40,9 @@ import time
 import socket
 import traceback
 import itertools
+import yaml
+
+import click
 
 from heron.common.src.python.utils import log
 from heron.common.src.python.utils import proc
@@ -48,9 +51,6 @@ from heron.proto.packing_plan_pb2 import PackingPlan
 from heron.statemgrs.src.python import statemanagerfactory
 from heron.statemgrs.src.python import configloader
 from heron.statemgrs.src.python.config import Config as StateMgrConfig
-
-import click
-import yaml
 
 Log = log.Log
 
@@ -131,10 +131,10 @@ def cli(
 def id_map(prefix, container_plans, add_zero_id=False):
   ids = {}
   if add_zero_id:
-    ids[0] = "%s-0" % prefix
+    ids[0] = f"{prefix}-0"
 
   for container_plan in container_plans:
-    ids[container_plan.id] = "%s-%d" % (prefix, container_plan.id)
+    ids[container_plan.id] = f"{prefix}-{container_plan.id}"
   return ids
 
 def stmgr_map(container_plans):
@@ -150,13 +150,13 @@ def heron_shell_map(container_plans):
   return id_map("heron-shell", container_plans, True)
 
 def get_heron_executor_process_name(shard_id):
-  return 'heron-executor-%d' % shard_id
+  return f"heron-executor-{shard_id}"
 
 def get_process_pid_filename(process_name):
-  return '%s.pid' % process_name
+  return f"{process_name}.pid"
 
 def get_tmp_filename():
-  return '%s.heron.tmp' % (''.join(random.choice(string.ascii_uppercase) for i in range(12)))
+  return f"{(''.join(random.choice(string.ascii_uppercase) for i in range(12)))}.heron.tmp"
 
 def atomic_write_file(path, content):
   """
@@ -166,7 +166,7 @@ def atomic_write_file(path, content):
   """
   # Write to a randomly tmp file
   tmp_file = get_tmp_filename()
-  with open(tmp_file, 'w') as f:
+  with open(tmp_file, 'w', encoding='utf8') as f:
     f.write(content)
     # make sure that all data is on disk
     f.flush()
@@ -177,7 +177,7 @@ def atomic_write_file(path, content):
 
 def log_pid_for_process(process_name, pid):
   filename = get_process_pid_filename(process_name)
-  Log.info('Logging pid %d to file %s' %(pid, filename))
+  Log.info('Logging pid %d to file %s', pid, filename)
   atomic_write_file(filename, str(pid))
 
 def is_docker_environment():
@@ -247,6 +247,7 @@ class ProcessInfo:
 
   def __repr__(self):
     return (
+        # pylint: disable=consider-using-f-string
         "ProcessInfo(pid=%(pid)r, name=%(name)r, command=%(command)r, attempts=%(attempts)r)"
         % vars(self)
     )
@@ -341,8 +342,8 @@ class HeronExecutor:
     self.metricscache_manager_mode = parsed_args.metricscache_manager_mode \
         if parsed_args.metricscache_manager_mode else "disabled"
     self.health_manager_mode = parsed_args.health_manager_mode
-    self.health_manager_classpath = '%s:%s'\
-        % (self.scheduler_classpath, parsed_args.health_manager_classpath)
+    self.health_manager_classpath = f'{self.scheduler_classpath}:'\
+      f'{parsed_args.health_manager_classpath}'
     self.verbose_gc = parsed_args.verbose_gc
     self.jvm_remote_debugger_ports = \
       parsed_args.jvm_remote_debugger_ports.split(",") \
@@ -375,7 +376,7 @@ class HeronExecutor:
 
   def run_command_or_exit(self, command):
     if self._run_blocking_process(command, True) != 0:
-      Log.error("Failed to run command: %s. Exiting" % command)
+      Log.error(f"Failed to run command: {command}. Exiting")
       sys.exit(1)
 
   def initialize(self):
@@ -385,10 +386,10 @@ class HeronExecutor:
     2. We don't initialize the logger (also something unit tests don't want) until after the
     constructor
     """
-    create_folders = Command('mkdir -p %s' % self.log_dir, self.shell_env)
+    create_folders = Command(f'mkdir -p {self.log_dir}', self.shell_env)
     self.run_command_or_exit(create_folders)
 
-    chmod_logs_dir = Command('chmod a+rx . && chmod a+x %s' % self.log_dir, self.shell_env)
+    chmod_logs_dir = Command(f'chmod a+rx . && chmod a+x {self.log_dir}', self.shell_env)
     self.run_command_or_exit(chmod_logs_dir)
 
     chmod_x_binaries = [self.tmanager_binary, self.stmgr_binary, self.heron_shell_binary]
@@ -396,7 +397,7 @@ class HeronExecutor:
     for binary in chmod_x_binaries:
       stat_result = os.stat(binary)[stat.ST_MODE]
       if not stat_result & stat.S_IXOTH:
-        chmod_binary = Command('chmod +x %s' % binary, self.shell_env)
+        chmod_binary = Command(f'chmod +x {binary}', self.shell_env)
         self.run_command_or_exit(chmod_binary)
 
     # Log itself pid
@@ -411,7 +412,7 @@ class HeronExecutor:
 
   # pylint: disable=no-self-use
   def _load_logging_dir(self, heron_internals_config_file):
-    with open(heron_internals_config_file, 'r') as stream:
+    with open(heron_internals_config_file, 'r', encoding='utf8') as stream:
       heron_internals_config = yaml.safe_load(stream)
     return heron_internals_config['heron.logging.directory']
 
@@ -499,19 +500,19 @@ class HeronExecutor:
     retval = {}
     tmanager_cmd_lst = [
         self.tmanager_binary,
-        '--topology_name=%s' % self.topology_name,
-        '--topology_id=%s' % self.topology_id,
-        '--zkhostportlist=%s' % self.state_manager_connection,
-        '--zkroot=%s' % self.state_manager_root,
-        '--myhost=%s' % self.primary_host,
-        '--server_port=%s' % str(self.server_port),
-        '--controller_port=%s' % str(self.tmanager_controller_port),
-        '--stats_port=%s' % str(self.tmanager_stats_port),
-        '--config_file=%s' % self.heron_internals_config_file,
-        '--override_config_file=%s' % self.override_config_file,
-        '--metrics_sinks_yaml=%s' % self.metrics_sinks_config_file,
-        '--metricsmgr_port=%s' % str(self.metrics_manager_port),
-        '--ckptmgr_port=%s' % str(self.checkpoint_manager_port)]
+        f'--topology_name={self.topology_name}',
+        f'--topology_id={self.topology_id}',
+        f'--zkhostportlist={self.state_manager_connection}',
+        f'--zkroot={self.state_manager_root}',
+        f'--myhost={self.primary_host}',
+        f'--server_port={str(self.server_port)}',
+        f'--controller_port={str(self.tmanager_controller_port)}',
+        f'--stats_port={str(self.tmanager_stats_port)}',
+        f'--config_file={self.heron_internals_config_file}',
+        f'--override_config_file={self.override_config_file}',
+        f'--metrics_sinks_yaml={self.metrics_sinks_config_file}',
+        f'--metricsmgr_port={str(self.metrics_manager_port)}',
+        f'--ckptmgr_port={str(self.checkpoint_manager_port)}']
 
     tmanager_env = self.shell_env.copy() if self.shell_env is not None else {}
     tmanager_cmd = Command(tmanager_cmd_lst, tmanager_env)
@@ -573,7 +574,7 @@ class HeronExecutor:
     return Command(os.path.join(self.heron_java_home, 'bin/java'), self.shell_env)
 
   def _get_java_major_version(self):
-    return int(self._get_jvm_version().split(".")[0])
+    return int(self._get_jvm_version().split('.', maxsplit=1)[0])
 
   def _get_java_gc_instance_cmd(self, cmd, gc_name):
     gc_cmd = [
@@ -598,10 +599,10 @@ class HeronExecutor:
 
     total_jvm_size = int(self.component_ram_map[component_name] / (1024 * 1024))
     heap_size_mb = total_jvm_size - code_cache_size_mb - java_metasize_mb
-    Log.info("component name: %s, RAM request: %d, total JVM size: %dM, "
-             "cache size: %dM, metaspace size: %dM"
-             % (component_name, self.component_ram_map[component_name],
-                total_jvm_size, code_cache_size_mb, java_metasize_mb))
+    Log.info("component name: %s, RAM request: %d, total JVM size: %dM, "\
+             "cache size: %dM, metaspace size: %dM",
+            component_name, self.component_ram_map[component_name],
+            total_jvm_size, code_cache_size_mb, java_metasize_mb)
     xmn_size = int(heap_size_mb / 2)
 
     java_version = self._get_jvm_version()
@@ -610,29 +611,29 @@ class HeronExecutor:
             java_version.startswith("1.6") or \
             java_version.startswith("1.5"):
       java_metasize_param = 'PermSize'
-    xmn_param = '-Xmn%dM' % xmn_size
+    xmn_param = f'-Xmn{xmn_size}M'
     if self._get_java_major_version() >= 11:
       # Remove '-Xmn'
       xmn_param = None
 
     instance_options = [
-        '-Xmx%dM' % heap_size_mb,
-        '-Xms%dM' % heap_size_mb,
+        f'-Xmx{heap_size_mb}M',
+        f'-Xms{heap_size_mb}M',
         xmn_param,
-        '-XX:Max%s=%dM' % (java_metasize_param, java_metasize_mb),
-        '-XX:%s=%dM' % (java_metasize_param, java_metasize_mb),
-        '-XX:ReservedCodeCacheSize=%dM' % code_cache_size_mb,
+        f'-XX:Max{java_metasize_param}={java_metasize_mb}M',
+        f'-XX:{java_metasize_param}={java_metasize_mb}M',
+        f'-XX:ReservedCodeCacheSize={code_cache_size_mb}M',
         '-XX:+PrintCommandLineFlags',
         '-Djava.net.preferIPv4Stack=true',
         '-cp',
-        '%s:%s'% (self.instance_classpath, self.classpath)]
+        f'{self.instance_classpath}:{self.classpath}']
 
     # Insert GC Options
     instance_options = self._get_java_gc_instance_cmd(instance_options, instance_id)
     # Append debugger ports when it is available
     if remote_debugger_port:
-      instance_options.append('-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=%s'
-                              % remote_debugger_port)
+      instance_options.append(f'-agentlib:jdwp=transport=dt_socket,'\
+        f'server=y,suspend=n,address={remote_debugger_port}')
 
     # Append user specified jvm options
     instance_options.extend(self.instance_jvm_opts.split())
@@ -666,16 +667,16 @@ class HeronExecutor:
     if not self.jvm_version:
       cmd = [os.path.join(self.heron_java_home, 'bin/java'),
              '-cp', self.instance_classpath, 'org.apache.heron.instance.util.JvmVersion']
-      process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                                 universal_newlines=True)
-      (process_stdout, process_stderr) = process.communicate()
-      if process.returncode != 0:
-        Log.error("Failed to determine JVM version. Exiting. Output of %s: %s",
-                  ' '.join(cmd), process_stderr)
-        sys.exit(1)
+      with subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                                 universal_newlines=True) as process:
+        (process_stdout, process_stderr) = process.communicate()
+        if process.returncode != 0:
+          Log.error("Failed to determine JVM version. Exiting. Output of %s: %s",
+                    ' '.join(cmd), process_stderr)
+          sys.exit(1)
 
-      self.jvm_version = process_stdout
-      Log.info("Detected JVM version %s" % self.jvm_version)
+        self.jvm_version = process_stdout
+        Log.info(f"Detected JVM version {self.jvm_version}")
     return self.jvm_version
 
   # Returns the processes for each Python Heron Instance
@@ -684,21 +685,21 @@ class HeronExecutor:
     # TODO: currently ignoring ramsize, heap, etc.
     retval = {}
     for (instance_id, component_name, global_task_id, component_index) in instance_info:
-      Log.info("Python instance %s component: %s" %(instance_id, component_name))
+      Log.info(f"Python instance {instance_id} component: {component_name}")
       instance_cmd = [self.python_instance_binary,
-                      '--topology_name=%s' % self.topology_name,
-                      '--topology_id=%s' % self.topology_id,
-                      '--instance_id=%s' % instance_id,
-                      '--component_name=%s' % component_name,
-                      '--task_id=%s' % str(global_task_id),
-                      '--component_index=%s' % str(component_index),
-                      '--stmgr_id=%s' % self.stmgr_ids[self.shard],
-                      '--stmgr_port=%s' % self.tmanager_controller_port,
-                      '--metricsmgr_port=%s' % self.metrics_manager_port,
-                      '--config_file=%s' % self.heron_internals_config_file,
-                      '--override_config_file=%s' % self.override_config_file,
-                      '--topology_pex=%s' % self.topology_binary_file,
-                      '--max_ram=%s' % str(self.component_ram_map[component_name])]
+                      f'--topology_name={self.topology_name}',
+                      f'--topology_id={self.topology_id}',
+                      f'--instance_id={instance_id}',
+                      f'--component_name={component_name}',
+                      f'--task_id={str(global_task_id)}',
+                      f'--component_index={str(component_index)}',
+                      f'--stmgr_id={self.stmgr_ids[self.shard]}',
+                      f'--stmgr_port={self.tmanager_controller_port}',
+                      f'--metricsmgr_port={self.metrics_manager_port}',
+                      f'--config_file={self.heron_internals_config_file}',
+                      f'--override_config_file={self.override_config_file}',
+                      f'--topology_pex={self.topology_binary_file}',
+                      f'--max_ram={str(self.component_ram_map[component_name])}']
 
       retval[instance_id] = Command(instance_cmd, self.shell_env)
 
@@ -710,21 +711,21 @@ class HeronExecutor:
     # TODO: currently ignoring ramsize, heap, etc.
     retval = {}
     for (instance_id, component_name, global_task_id, component_index) in instance_info:
-      Log.info("CPP instance %s component: %s" %(instance_id, component_name))
+      Log.info(f"CPP instance {instance_id} component: {component_name}")
       instance_cmd = [
           self.cpp_instance_binary,
-          '--topology_name=%s' % self.topology_name,
-          '--topology_id=%s' % self.topology_id,
-          '--instance_id=%s' % instance_id,
-          '--component_name=%s' % component_name,
-          '--task_id=%s' % str(global_task_id),
-          '--component_index=%s' % str(component_index),
-          '--stmgr_id=%s' % self.stmgr_ids[self.shard],
-          '--stmgr_port=%s' % str(self.tmanager_controller_port),
-          '--metricsmgr_port=%s' % str(self.metrics_manager_port),
-          '--config_file=%s' % self.heron_internals_config_file,
-          '--override_config_file=%s' % self.override_config_file,
-          '--topology_binary=%s' % os.path.abspath(self.topology_binary_file)
+          f'--topology_name={self.topology_name}',
+          f'--topology_id={self.topology_id}',
+          f'--instance_id={instance_id}',
+          f'--component_name={component_name}',
+          f'--task_id={str(global_task_id)}',
+          f'--component_index={str(component_index)}',
+          f'--stmgr_id={self.stmgr_ids[self.shard]}',
+          f'--stmgr_port={str(self.tmanager_controller_port)}',
+          f'--metricsmgr_port={str(self.metrics_manager_port)}',
+          f'--config_file={self.heron_internals_config_file}',
+          f'--override_config_file={self.override_config_file}',
+          f'--topology_binary={os.path.abspath(self.topology_binary_file)}'
       ]
 
       retval[instance_id] = Command(instance_cmd, self.shell_env)
@@ -745,28 +746,28 @@ class HeronExecutor:
       global_task_id = instance_plan.task_id
       component_index = instance_plan.component_index
       component_name = instance_plan.component_name
-      instance_id = "container_%s_%s_%d" % (str(self.shard), component_name, global_task_id)
+      instance_id = f"container_{str(self.shard)}_{component_name}_{global_task_id}"
       instance_info.append((instance_id, component_name, global_task_id, component_index))
 
     stmgr_cmd_lst = [
         self.stmgr_binary,
-        '--topology_name=%s' % self.topology_name,
-        '--topology_id=%s' % self.topology_id,
-        '--topologydefn_file=%s' % self.topology_defn_file,
-        '--zkhostportlist=%s' % self.state_manager_connection,
-        '--zkroot=%s' % self.state_manager_root,
-        '--stmgr_id=%s' % self.stmgr_ids[self.shard],
-        '--instance_ids=%s' % ','.join([x[0] for x in instance_info]),
-        '--myhost=%s' % self.primary_host,
-        '--data_port=%s' % str(self.server_port),
-        '--local_data_port=%s' % str(self.tmanager_controller_port),
-        '--metricsmgr_port=%s' % str(self.metrics_manager_port),
-        '--shell_port=%s' % str(self.shell_port),
-        '--config_file=%s' % self.heron_internals_config_file,
-        '--override_config_file=%s' % self.override_config_file,
-        '--ckptmgr_port=%s' % str(self.checkpoint_manager_port),
-        '--ckptmgr_id=%s' % self.ckptmgr_ids[self.shard],
-        '--metricscachemgr_mode=%s' % self.metricscache_manager_mode.lower()]
+        f'--topology_name={self.topology_name}',
+        f'--topology_id={self.topology_id}',
+        f'--topologydefn_file={self.topology_defn_file}',
+        f'--zkhostportlist={self.state_manager_connection}',
+        f'--zkroot={self.state_manager_root}',
+        f'--stmgr_id={self.stmgr_ids[self.shard]}',
+        f"--instance_ids={','.join([x[0] for x in instance_info])}",
+        f'--myhost={self.primary_host}',
+        f'--data_port={str(self.server_port)}',
+        f'--local_data_port={str(self.tmanager_controller_port)}',
+        f'--metricsmgr_port={str(self.metrics_manager_port)}',
+        f'--shell_port={str(self.shell_port)}',
+        f'--config_file={self.heron_internals_config_file}',
+        f'--override_config_file={self.override_config_file}',
+        f'--ckptmgr_port={str(self.checkpoint_manager_port)}',
+        f'--ckptmgr_id={self.ckptmgr_ids[self.shard]}',
+        f'--metricscachemgr_mode={self.metricscache_manager_mode.lower()}']
 
     stmgr_env = self.shell_env.copy() if self.shell_env is not None else {}
     stmgr_cmd = Command(stmgr_cmd_lst, stmgr_env)
@@ -789,7 +790,7 @@ class HeronExecutor:
     if self.is_stateful_topology:
       retval.update(self._get_ckptmgr_process())
 
-    if self.pkg_type == 'jar' or self.pkg_type == 'tar':
+    if self.pkg_type in ('jar', 'tar'):
       retval.update(self._get_java_instance_cmd(instance_info))
     elif self.pkg_type == 'pex':
       retval.update(self._get_python_instance_cmd(instance_info))
@@ -798,7 +799,7 @@ class HeronExecutor:
     elif self.pkg_type == 'dylib':
       retval.update(self._get_cpp_instance_cmd(instance_info))
     else:
-      raise ValueError("Unrecognized package type: %s" % self.pkg_type)
+      raise ValueError(f"Unrecognized package type: {self.pkg_type}")
 
     return retval
 
@@ -807,11 +808,11 @@ class HeronExecutor:
 
     ckptmgr_main_class = 'org.apache.heron.ckptmgr.CheckpointManager'
 
-    ckptmgr_ram_mb = self.checkpoint_manager_ram / (1024 * 1024)
+    ckptmgr_ram_mb = int(self.checkpoint_manager_ram / (1024 * 1024))
     ckptmgr_id = self.ckptmgr_ids[self.shard]
     ckptmgr_cmd = [os.path.join(self.heron_java_home, "bin/java"),
-                   '-Xms%dM' % ckptmgr_ram_mb,
-                   '-Xmx%dM' % ckptmgr_ram_mb,
+                   f'-Xms{ckptmgr_ram_mb}M',
+                   f'-Xmx{ckptmgr_ram_mb}M',
                    '-XX:+PrintCommandLineFlags',
                    '-Djava.net.preferIPv4Stack=true',
                    '-cp',
@@ -856,18 +857,18 @@ class HeronExecutor:
     retval = {}
 
     retval[self.heron_shell_ids[self.shard]] = Command([
-        '%s' % self.heron_shell_binary,
-        '--port=%s' % self.shell_port,
-        '--log_file_prefix=%s/heron-shell-%s.log' % (self.log_dir, self.shard),
-        '--secret=%s' % self.topology_id], self.shell_env)
+        f'{self.heron_shell_binary}',
+        f'--port={self.shell_port}',
+        f'--log_file_prefix={self.log_dir}/heron-shell-{self.shard}.log',
+        f'--secret={self.topology_id}'], self.shell_env)
 
     return retval
 
   def _untar_if_needed(self):
     if self.pkg_type == "tar":
-      os.system("tar -xvf %s" % self.topology_binary_file)
+      os.system(f"tar -xvf {self.topology_binary_file}")
     elif self.pkg_type == "pex":
-      os.system("unzip -qq -n %s" % self.topology_binary_file)
+      os.system(f"unzip -qq -n {self.topology_binary_file}")
 
   # pylint: disable=no-self-use
   def _wait_process_std_out_err(self, name, process):
@@ -876,10 +877,11 @@ class HeronExecutor:
     process.wait()
 
   def _run_process(self, name, cmd):
-    Log.info("Running %s process as %s" % (name, cmd))
+    Log.info(f"Running {name} process as {cmd}")
     try:
       # stderr is redirected to stdout so that it can more easily be logged. stderr has a max buffer
       # size and can cause the child process to deadlock if it fills up
+      # pylint: disable=consider-using-with
       process = subprocess.Popen(cmd.cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
                                  env=cmd.env, universal_newlines=True, bufsize=1)
       proc.async_stream_process_stdout(process, stdout_log_fn(name))
@@ -890,17 +892,18 @@ class HeronExecutor:
     return process
 
   def _run_blocking_process(self, cmd, is_shell=False):
-    Log.info("Running blocking process as %s" % cmd)
+    Log.info(f"Running blocking process as {cmd}")
     try:
       # stderr is redirected to stdout so that it can more easily be logged. stderr has a max buffer
       # size and can cause the child process to deadlock if it fills up
+      # pylint: disable=consider-using-with
       process = subprocess.Popen(cmd.cmd, shell=is_shell, stdout=subprocess.PIPE,
                                  stderr=subprocess.STDOUT, universal_newlines=True, env=cmd.env)
 
       # wait for termination
       self._wait_process_std_out_err(cmd.cmd, process)
     except Exception:
-      Log.info("Exception running command %s", cmd)
+      Log.info(f"Exception running command {cmd}")
       traceback.print_exc()
 
     # return the exit code
@@ -913,14 +916,13 @@ class HeronExecutor:
         for process_info in list(self.processes_to_monitor.values()):
           if process_info.name == command_name:
             del self.processes_to_monitor[process_info.pid]
-            Log.info("Killing %s process with pid %d: %s" %
-                     (process_info.name, process_info.pid, command))
+            Log.info(f"Killing {process_info.name} process with pid {process_info.pid}: {command}")
             try:
               process_info.process.terminate()  # sends SIGTERM to process
             except OSError as e:
               if e.errno == 3: # No such process
-                Log.warn("Expected process %s with pid %d was not running, ignoring." %
-                         (process_info.name, process_info.pid))
+                Log.warn(f"Expected process {process_info.name} with "\
+                  f"pid {process_info.pid} was not running, ignoring.")
               else:
                 raise e
 
@@ -954,15 +956,15 @@ class HeronExecutor:
             old_process_info = self.processes_to_monitor[pid]
             name = old_process_info.name
             command = old_process_info.command
-            Log.info("%s (pid=%s) exited with status %d. command=%s" % (name, pid, status, command))
+            Log.info(f"{name} (pid={pid}) exited with status {status}. command={command}")
             # Log the stdout & stderr of the failed process
             self._wait_process_std_out_err(name, old_process_info.process)
 
             # Just make it world readable
-            if os.path.isfile("core.%d" % pid):
-              os.system("chmod a+r core.%d" % pid)
+            if os.path.isfile(f"core.{pid}"):
+              os.system(f"chmod a+r core.{pid}")
             if old_process_info.attempts >= self.max_runs:
-              Log.info("%s exited too many times" % name)
+              Log.info(f"{name} exited too many times")
               sys.exit(1)
             time.sleep(self.interval_between_runs)
             p = self._run_process(name, command)
@@ -985,10 +987,10 @@ class HeronExecutor:
     if self._get_instance_plans(self.packing_plan, self.shard) is None and self.shard != 0:
       retval = {}
       retval['heron-shell'] = Command([
-          '%s' % self.heron_shell_binary,
-          '--port=%s' % self.shell_port,
-          '--log_file_prefix=%s/heron-shell-%s.log' % (self.log_dir, self.shard),
-          '--secret=%s' % self.topology_id], self.shell_env)
+          f'{self.heron_shell_binary}',
+          f'--port={self.shell_port}',
+          f'--log_file_prefix={self.log_dir}/heron-shell-{self.shard}.log',
+          f'--secret={self.topology_id}'], self.shell_env)
       return retval
 
     if self.shard == 0:
@@ -1042,17 +1044,17 @@ class HeronExecutor:
       commands_to_kill, commands_to_keep, commands_to_start = \
           self.get_command_changes(current_commands, updated_commands)
 
-      Log.info("current commands: %s" % sorted(current_commands.keys()))
-      Log.info("new commands    : %s" % sorted(updated_commands.keys()))
-      Log.info("commands_to_kill: %s" % sorted(commands_to_kill.keys()))
-      Log.info("commands_to_keep: %s" % sorted(commands_to_keep.keys()))
-      Log.info("commands_to_start: %s" % sorted(commands_to_start.keys()))
+      Log.info(f"current commands: {sorted(current_commands.keys())}")
+      Log.info(f"new commands    : {sorted(updated_commands.keys())}")
+      Log.info(f"commands_to_kill: {sorted(commands_to_kill.keys())}")
+      Log.info(f"commands_to_keep: {sorted(commands_to_keep.keys())}")
+      Log.info(f"commands_to_start: {sorted(commands_to_start.keys())}")
 
       self._kill_processes(commands_to_kill)
       self._start_processes(commands_to_start)
-      Log.info("Launch complete - processes killed=%s kept=%s started=%s monitored=%s" %
-               (len(commands_to_kill), len(commands_to_keep),
-                len(commands_to_start), len(self.processes_to_monitor)))
+      Log.info(f"Launch complete - processes killed={len(commands_to_kill)}"\
+          f" kept={len(commands_to_keep)} started={len(commands_to_start)}"\
+          f" monitored={len(self.processes_to_monitor)}")
 
   # pylint: disable=global-statement
   def start_state_manager_watches(self):
@@ -1061,7 +1063,7 @@ class HeronExecutor:
     """
     Log.info("Start state manager watches")
 
-    with open(self.override_config_file, 'r') as stream:
+    with open(self.override_config_file, 'r', encoding='utf8') as stream:
       overrides = yaml.safe_load(stream)
       if overrides is None:
         overrides = {}
@@ -1076,18 +1078,18 @@ class HeronExecutor:
       for state_manager in self.state_managers:
         state_manager.start()
     except Exception as ex:
-      Log.error("Found exception while initializing state managers: %s. Bailing out..." % ex)
+      Log.error(f"Found exception while initializing state managers: {ex}. Bailing out...")
       traceback.print_exc()
       sys.exit(1)
 
     # pylint: disable=unused-argument
     def on_packing_plan_watch(state_manager, new_packing_plan):
-      Log.debug("State watch triggered for PackingPlan update on shard %s. Existing: %s, New: %s" %
-                (self.shard, str(self.packing_plan), str(new_packing_plan)))
+      Log.debug(f"State watch triggered for PackingPlan update on shard {self.shard}. "\
+        f"Existing: {str(self.packing_plan)}, New: {str(new_packing_plan)}")
 
       if self.packing_plan != new_packing_plan:
-        Log.info("PackingPlan change detected on shard %s, relaunching effected processes."
-                 % self.shard)
+        Log.info("PackingPlan change detected on shard %s, "\
+          "relaunching effected processes.", self.shard)
         self.update_packing_plan(new_packing_plan)
 
         Log.info("Updating executor processes")
@@ -1101,8 +1103,8 @@ class HeronExecutor:
       # state_manager as first variable.
       onPackingPlanWatch = functools.partial(on_packing_plan_watch, state_manager)
       state_manager.get_packing_plan(self.topology_name, onPackingPlanWatch)
-      Log.info("Registered state watch for packing plan changes with state manager %s." %
-               str(state_manager))
+      Log.info(f"Registered state watch for packing "\
+        f"plan changes with state manager {str(state_manager)}.")
 
   def stop_state_manager_watches(self):
     Log.info("Stopping state managers")
@@ -1115,7 +1117,7 @@ def setup(executor):
   def signal_handler(signal_to_handle, frame):
     # We would do nothing here but just exit
     # Just catch the SIGTERM and then cleanup(), registered with atexit, would invoke
-    Log.info('signal_handler invoked with signal %s', signal_to_handle)
+    Log.info(f'signal_handler invoked with signal {signal_to_handle}')
     executor.stop_state_manager_watches()
     sys.exit(signal_to_handle)
 
@@ -1137,7 +1139,7 @@ def setup(executor):
   # Redirect stdout and stderr to files in append mode
   # The filename format is heron-executor-<container_id>.stdxxx
   shardid = executor.shard
-  log.configure(logfile='heron-executor-%s.stdout' % shardid)
+  log.configure(logfile=f'heron-executor-{shardid}.stdout')
 
   pid = os.getpid()
   sid = os.getsid(pid)

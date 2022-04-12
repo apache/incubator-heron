@@ -43,7 +43,7 @@ class Metrics:
       instance,
       start: int,
       end: int,
-      timeline: Dict[int, int],
+      timeline: Dict[int, float],
   ):
     """Insantiate class with a floored copy of the timeline within [start, end]."""
     self.component_name = component_name
@@ -150,11 +150,11 @@ class TS(Operator):
       raise Exception(metrics["message"])
 
     # Put a blank timeline.
-    if not metrics.get("timeline"):
-      metrics["timeline"] = {
+    if not metrics.timeline:
+      metrics.timeline = {
           self.metric_name: {}
       }
-    timelines = metrics["timeline"][self.metric_name]
+    timelines = metrics.timeline[self.metric_name]
     all_metrics = [
         Metrics(self.component, self.metric_name, instance, start, end, {
             k: float(v)
@@ -460,14 +460,15 @@ class _SimpleArithmaticOperator(Operator):
       for key, metric in metrics2.items():
         # Initialize with first metrics timeline, but second metric's instance
         # because that is multivariate
-        met = Metrics(None, None, metric.instance, start, end, metrics[""].timeline.copy())
-        for timestamp in list(met.timeline.keys()):
-          v = self._f(met.timeline[timestamp], metric.timeline.get(timestamp))
-          if v is None:
-            met.timeline.pop(timestamp, None)
-          else:
-            met.timeline[timestamp] = v
-        all_metrics.append(met)
+        if metrics:
+          met = Metrics(None, None, metric.instance, start, end, metrics[""].timeline.copy())
+          for timestamp in list(met.timeline.keys()):
+            v = self._f(met.timeline[timestamp], metric.timeline.get(timestamp))
+            if v is None:
+              met.timeline.pop(timestamp, None)
+            else:
+              met.timeline[timestamp] = v
+          all_metrics.append(met)
       return all_metrics
 
     # If second is univariate

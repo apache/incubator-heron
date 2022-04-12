@@ -30,4 +30,4 @@ class Window:
     self._end_time = end_time
 
   def __repr__(self):
-    return 'Window {start_time: %s, end_time: %s}' % (self._start_time, self._end_time)
+    return f'Window {{start_time: {self._start_time}, end_time: {self._end_time}}}'

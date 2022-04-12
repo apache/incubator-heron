@@ -31,11 +31,11 @@ from heron.common.src.python.utils.log import Log
 
 from heron.tools.cli.src.python.result import SimpleResult, ProcessResult, Status
 
-import heron.common.src.python.pex_loader as pex_loader
+from heron.common.src.python import pex_loader
 
-import heron.tools.cli.src.python.opts as opts
-import heron.tools.cli.src.python.jars as jars
-import heron.tools.common.src.python.utils.config as config
+from heron.tools.cli.src.python import opts
+from heron.tools.cli.src.python import jars
+from heron.tools.common.src.python.utils import config
 
 ################################################################################
 def heron_class(class_name, lib_jars, extra_jars=None, args=None, java_defines=None):
@@ -83,6 +83,7 @@ def heron_class(class_name, lib_jars, extra_jars=None, args=None, java_defines=N
   Log.debug("Heron options: {%s}", str(heron_env["HERON_OPTIONS"]))
 
   # invoke the command with subprocess and print error message, if any
+  # pylint: disable=consider-using-with
   process = subprocess.Popen(all_args, env=heron_env, stdout=subprocess.PIPE,
                              stderr=subprocess.PIPE, universal_newlines=True, bufsize=1)
   # stdout message has the information Java program sends back
@@ -134,6 +135,7 @@ def heron_pex(topology_pex, topology_class_name, args=None):
     Log.debug("Invoking class using command: ``%s''", ' '.join(cmd))
     Log.debug('Heron options: {%s}', str(heron_env['HERON_OPTIONS']))
     # invoke the command with subprocess and print error message, if any
+    # pylint: disable=consider-using-with
     process = subprocess.Popen(cmd, env=heron_env, stdout=subprocess.PIPE,
                                stderr=subprocess.PIPE, universal_newlines=True, bufsize=1)
     # pylint: disable=fixme
@@ -153,8 +155,7 @@ def heron_pex(topology_pex, topology_class_name, args=None):
     return SimpleResult(Status.Ok)
   except Exception as ex:
     Log.debug(traceback.format_exc())
-    err_context = "Topology %s failed to be loaded from the given pex: %s" %\
-              (topology_class_name, ex)
+    err_context = f"Topology {topology_class_name} failed to be loaded from the given pex: {ex}"
     return SimpleResult(Status.HeronError, err_context)
   return None
 
@@ -168,9 +169,10 @@ def heron_cpp(topology_binary, args=None):
     cmd.extend(args)
   Log.debug("Invoking binary using command: ``%s''", ' '.join(cmd))
   Log.debug('Heron options: {%s}', str(heron_env['HERON_OPTIONS']))
-  print("Invoking class using command: ``%s''" % ' '.join(cmd))
-  print('Heron options: {%s}' % str(heron_env['HERON_OPTIONS']))
+  print(f"""Invoking class using command: ``{' '.join(cmd)}''""")
+  print(f"Heron options: {str(heron_env['HERON_OPTIONS'])}")
   # invoke the command with subprocess and print error message, if any
+  # pylint: disable=consider-using-with
   proc = subprocess.Popen(cmd, env=heron_env, stdout=subprocess.PIPE,
                           stderr=subprocess.PIPE, universal_newlines=True, bufsize=1)
   return ProcessResult(proc)

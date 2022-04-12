@@ -41,7 +41,7 @@ class MapBolt(Bolt, StatefulComponent, StreamletBoltBase):
     pass
 
   def initialize(self, config, context):
-    self.logger.debug("MapBolt's Component-specific config: \n%s" % str(config))
+    self.logger.debug("MapBolt's Component-specific config: \n%s", str(config))
     self.processed = 0
     self.emitted = 0
     if MapBolt.FUNCTION in config:
@@ -60,7 +60,7 @@ class MapBolt(Bolt, StatefulComponent, StreamletBoltBase):
 class MapStreamlet(Streamlet):
   """MapStreamlet"""
   def __init__(self, map_function, parent):
-    super(MapStreamlet, self).__init__()
+    super().__init__()
     if not callable(map_function):
       raise RuntimeError("Map function has to be callable")
     if not isinstance(parent, Streamlet):

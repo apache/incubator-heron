@@ -24,7 +24,7 @@
 # Global variable to store config map and verbosity
 ################################################################################
 # pylint: disable=invalid-name,global-variable-not-assigned,global-statement
-config_opts = dict()
+config_opts = {}
 verbose_flag = False
 
 cleaned_up_files = []
@@ -38,7 +38,7 @@ def get_heron_config():
   '''
   opt_list = []
   for (key, value) in list(config_opts.items()):
-    opt_list.append('%s=%s' % (key, value))
+    opt_list.append(f"{key}={value}")
 
   all_opts = (','.join(opt_list)).replace(' ', '%%%%')
   return all_opts
@@ -76,4 +76,4 @@ def clear_config():
   :return:
   '''
   global config_opts
-  config_opts = dict()
+  config_opts = {}

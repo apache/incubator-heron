@@ -23,19 +23,19 @@ Views on Heron metrics.
 """
 from typing import Dict, List, Optional
 
+import httpx
+
+from fastapi import Query, APIRouter
+from pydantic import BaseModel, Field
+
 from heron.common.src.python.utils.log import Log
 from heron.proto import common_pb2
 from heron.proto import tmanager_pb2
 from heron.tools.tracker.src.python import metricstimeline, state
 from heron.tools.tracker.src.python.query import Query as TManagerQuery
-from heron.tools.tracker.src.python.utils import EnvelopingAPIRouter, BadRequest
+from heron.tools.tracker.src.python.utils import BadRequest
 
-import httpx
-
-from fastapi import Query
-from pydantic import BaseModel, Field
-
-router = EnvelopingAPIRouter()
+router = APIRouter()
 
 class ComponentMetrics(BaseModel):
   interval: int
@@ -100,9 +100,9 @@ async def get_component_metrics(
 @router.get("/metrics", response_model=ComponentMetrics)
 async def get_metrics( # pylint: disable=too-many-arguments
     cluster: str,
-    role: Optional[str],
     environ: str,
     component: str,
+    role: Optional[str] = None,
     topology_name: str = Query(..., alias="topology"),
     metric_names: Optional[List[str]] = Query(None, alias="metricname"),
     instances: Optional[List[str]] = Query(None, alias="instance"),
@@ -119,14 +119,14 @@ async def get_metrics( # pylint: disable=too-many-arguments
   )
 
 
-@router.get("/metricstimeline", response_model=metricstimeline.MetricsTimeline)
+@router.get("/metrics/timeline", response_model=metricstimeline.MetricsTimeline)
 async def get_metrics_timeline( # pylint: disable=too-many-arguments
     cluster: str,
-    role: Optional[str],
     environ: str,
     component: str,
     start_time: int,
     end_time: int,
+    role: Optional[str] = None,
     topology_name: str = Query(..., alias="topology"),
     metric_names: Optional[List[str]] = Query(None, alias="metricname"),
     instances: Optional[List[str]] = Query(None, alias="instance"),
@@ -146,24 +146,24 @@ class TimelinePoint(BaseModel): # pylint: disable=too-few-public-methods
       None,
       description="name of the instance the metrics applies to if not an aggregate",
   )
-  data: Dict[int, int] = Field(..., description="map of start times to metric values")
+  data: Dict[int, float] = Field(..., description="map of start times to metric values")
 
 
 class MetricsQueryResponse(BaseModel): # pylint: disable=too-few-public-methods
   """A metrics timeline over an interval."""
-  start_time: int = Field(..., alias="starttime")
-  end_time: int = Field(..., alias="endtime")
+  starttime: int = Field(..., alias="starttime")
+  endtime: int = Field(..., alias="endtime")
   timeline: List[TimelinePoint] = Field(
       ..., description="list of timeline point objects",
   )
 
 
-@router.get("/metricsquery", response_model=MetricsQueryResponse)
+@router.get("/metrics/query", response_model=MetricsQueryResponse)
 async def get_metrics_query( # pylint: disable=too-many-arguments
     cluster: str,
-    role: Optional[str],
     environ: str,
     query: str,
+    role: Optional[str] = None,
     start_time: int = Query(..., alias="starttime"),
     end_time: int = Query(..., alias="endtime"),
     topology_name: str = Query(..., alias="topology"),
@@ -180,7 +180,7 @@ async def get_metrics_query( # pylint: disable=too-many-arguments
   ]
 
   return MetricsQueryResponse(
-      startime=start_time,
+      starttime=start_time,
       endtime=end_time,
       timeline=timeline,
   )

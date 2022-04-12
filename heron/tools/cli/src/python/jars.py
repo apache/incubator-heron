@@ -22,7 +22,7 @@
 import os
 import fnmatch
 
-import heron.tools.common.src.python.utils.config as config
+from heron.tools.common.src.python.utils import config
 
 
 def pick(dirname, pattern):

@@ -23,17 +23,16 @@ running topologies, and uses data from that to communicate with topology manager
 when prompted to.
 
 """
+import time
 from typing import Dict, List, Optional
 
-from heron.tools.tracker.src.python import constants, state, query
-from heron.tools.tracker.src.python.utils import ResponseEnvelope
-from heron.tools.tracker.src.python.routers import topologies, container, metrics
-
-from fastapi import FastAPI, Query
+from fastapi import FastAPI, Query, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
+from heron.tools.tracker.src.python import constants, state, query
+from heron.tools.tracker.src.python.routers import topologies, container, metrics
 
 openapi_tags = [
     {"name": "metrics", "description": query.__doc__},
@@ -69,6 +68,13 @@ app.include_router(container.router, prefix="/topologies", tags=["container"])
 app.include_router(metrics.router, prefix="/topologies", tags=["metrics"])
 app.include_router(topologies.router, prefix="/topologies", tags=["topologies"])
 
+@app.middleware("http")
+async def wrap_response(request: Request, call_next):
+  start_time = time.time()
+  response = await call_next(request)
+  process_time = time.time() - start_time
+  response.headers["x-process-time"] = str(process_time)
+  return response
 
 @app.on_event("startup")
 async def startup_event():
@@ -80,35 +86,22 @@ async def shutdown_event():
   """Stop recieving topology updates."""
   state.tracker.stop_sync()
 
-
 @app.exception_handler(Exception)
 async def handle_exception(_, exc: Exception):
-  payload = ResponseEnvelope[str](
-      result=None,
-      execution_time=0.0,
-      message=f"request failed: {exc}",
-      status=constants.RESPONSE_STATUS_FAILURE
-  )
+  message = f"request failed: {exc}"
   status_code = 500
   if isinstance(exc, StarletteHTTPException):
     status_code = exc.status_code
   if isinstance(exc, RequestValidationError):
     status_code = 400
-  return JSONResponse(content=payload.dict(), status_code=status_code)
+  return JSONResponse(content=message, status_code=status_code)
 
-
-@app.get("/clusters", response_model=ResponseEnvelope[List[str]])
+@app.get("/clusters")
 async def clusters() -> List[str]:
-  return ResponseEnvelope[List[str]](
-      execution_time=0.0,
-      message="ok",
-      status="success",
-      result=[s.name for s in state.tracker.state_managers],
-  )
-
+  return (s.name for s in state.tracker.state_managers)
 @app.get(
     "/machines",
-    response_model=ResponseEnvelope[Dict[str, Dict[str, Dict[str, List[str]]]]],
+    response_model=Dict[str, Dict[str, Dict[str, List[str]]]],
 )
 async def get_machines(
     cluster_names: Optional[List[str]] = Query(None, alias="cluster"),
@@ -134,9 +127,4 @@ async def get_machines(
         topology.name
     ] = topology.get_machines()
 
-  return ResponseEnvelope[Dict[str, Dict[str, Dict[str, List[str]]]]](
-      execution_time=0.0,
-      result=response,
-      status="success",
-      message="ok",
-  )
+  return response

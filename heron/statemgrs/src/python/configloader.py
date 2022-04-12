@@ -32,7 +32,7 @@ def load_state_manager_locations(cluster, state_manager_config_file='heron-conf/
   """ Reads configs to determine which state manager to use and converts them to state manager
   locations. Handles a subset of config wildcard substitution supported in the substitute method in
   org.apache.heron.spi.common.Misc.java"""
-  with open(state_manager_config_file, 'r') as stream:
+  with open(state_manager_config_file, 'r', encoding='utf8') as stream:
     config = yaml.safe_load(stream)
 
   home_dir = os.path.expanduser("~")
@@ -64,6 +64,7 @@ def load_state_manager_locations(cluster, state_manager_config_file='heron-conf/
       'heron.statemgr.tunnel.host': 'tunnelhost',
       'heron.statemgr.root.path': 'rootpath',
   }
+  # pylint: disable=consider-using-dict-items
   for config_key in key_mappings:
     if config_key in config:
       state_manager_location[key_mappings[config_key]] = config[config_key]
@@ -86,8 +87,8 @@ def __replace(config, wildcards, config_file):
           config_value = config_value.replace(token, wildcards[token])
       found = re.findall(r'\${[A-Z_]+}', config_value)
       if found:
-        raise ValueError("%s=%s in file %s contains unsupported or unset wildcard tokens: %s" %
-                         (config_key, original_value, config_file, ", ".join(found)))
+        raise ValueError(f'{config_key}={original_value} in file "\
+          f"{config_file} contains unsupported or unset wildcard tokens: {", ".join(found)}')
       config[config_key] = config_value
   return config
 
@@ -98,4 +99,4 @@ if __name__ == "__main__":
     locations = load_state_manager_locations('local', sys.argv[1])
   else:
     locations = load_state_manager_locations('local')
-  print("locations: %s" % locations)
+  print(f"locations: {locations}")

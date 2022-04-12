@@ -23,8 +23,11 @@ import dataclasses
 import json
 import string
 
-from copy import deepcopy
 from typing import Any, Dict, List, Optional
+from copy import deepcopy
+import networkx
+
+from pydantic import BaseModel, Field
 
 from heron.proto import topology_pb2
 from heron.proto.execution_state_pb2 import ExecutionState as ExecutionState_pb
@@ -38,11 +41,6 @@ from heron.tools.tracker.src.python.config import (
     EXTRA_LINK_URL_KEY,
 )
 from heron.tools.tracker.src.python import utils
-
-import networkx
-
-from pydantic import BaseModel, Field
-
 
 class TopologyInfoMetadata(BaseModel):
   cluster: str
@@ -248,17 +246,17 @@ class Topology:
   def _render_extra_links(extra_links, topology, execution_state: ExecutionState_pb) -> None:
     """Render links in place."""
     subs = {
-        "cluster": execution_state.cluster,
-        "environ": execution_state.environ,
-        "role": execution_state.role,
-        "jobname": topology.name,
-        "submission_user": execution_state.submission_user,
+        "CLUSTER": execution_state.cluster,
+        "ENVIRON": execution_state.environ,
+        "ROLE": execution_state.role,
+        "TOPOLOGY": topology.name,
+        "USER": execution_state.submission_user,
     }
     for link in extra_links:
       link[EXTRA_LINK_URL_KEY] = string.Template(link[EXTRA_LINK_FORMATTER_KEY]).substitute(subs)
 
   def _rebuild_info(self, t_state: TopologyState) -> Optional[TopologyInfo]:
-    # Execution state is the most basic info. If returnecution state, just return
+    # Execution state is the most basic info. If return execution state, just return
     # as the rest of the things don't matter.
     execution_state = t_state.execution_state
     if not execution_state:

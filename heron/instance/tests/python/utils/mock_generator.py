@@ -95,7 +95,7 @@ def get_a_sample_pplan():
 
   keys = ["instance_id", "task_id", "comp_index", "comp_name"]
   zipped = list(zip(instance_ids, task_ids, comp_indexes, comp_names))
-  return pplan, [dict(list(zip(keys, z))) for z in zipped]
+  return pplan, [dict(zip(keys, z)) for z in zipped]
 
 def make_data_tuple_from_list(lst, serializer=PythonSerializer()):
   """Make HeronDataTuple from a list of objects"""

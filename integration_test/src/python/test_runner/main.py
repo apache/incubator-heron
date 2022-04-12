@@ -50,12 +50,12 @@ class FileBasedExpectedResultsHandler:
     # Read expected result from the expected result file
     try:
       if not os.path.exists(self.file_path):
-        raise status.TestFailure("Expected results file %s does not exist" % self.file_path)
+        raise status.TestFailure(f"Expected results file {self.file_path} does not exist")
       else:
         with open(self.file_path, "r") as expected_result_file:
           return expected_result_file.read().rstrip()
     except Exception as e:
-      raise status.TestFailure("Failed to read expected result file %s" % self.file_path, e)
+      raise status.TestFailure(f"Failed to read expected result file {self.file_path}", e)
 
 class HttpBasedExpectedResultsHandler:
   def __init__(self, server_host_port, topology_name, task_count):
@@ -71,21 +71,21 @@ class HttpBasedExpectedResultsHandler:
       for i in range(0, self.task_count):
         task_result = fetch_from_server(self.server_host_port, self.topology_name,
                                         'expected results',
-                                        '/state/%s_tuples_emitted_%d' % (self.topology_name, i))
+                                        f'/state/{self.topology_name}_tuples_emitted_{i}')
         json_result = decoder.decode(task_result)
         logging.info("Found %d tuples emitted from spout task %d", len(json_result), i)
         result = result + json_result
 
       if len(result) == 0:
         raise status.TestFailure(
-            "Expected result set is empty for topology %s" % self.topology_name)
+            f"Expected result set is empty for topology {self.topology_name}")
 
       # need to convert from a list of json objects to a string of a python list,
       # without the unicode using double quotes, not single quotes.
       return str([str(x) for x in result]).replace("'", '"')
     except Exception as e:
       raise status.TestFailure(
-          "Fetching expected result failed for %s topology" % self.topology_name, e)
+          f"Fetching expected result failed for {self.topology_name} topology", e)
 
 class HttpBasedActualResultsHandler:
   def __init__(self, server_host_port, topology_name):
@@ -95,9 +95,9 @@ class HttpBasedActualResultsHandler:
   def fetch_results(self) -> str:
     try:
       return fetch_from_server(self.server_host_port, self.topology_name,
-                               'results', '/results/%s' % self.topology_name)
+                               'results', f'/results/{self.topology_name}')
     except Exception as e:
-      raise status.TestFailure("Fetching result failed for %s topology" % self.topology_name, e)
+      raise status.TestFailure(f"Fetching result failed for {self.topology_name} topology", e)
 
 # pylint: disable=unnecessary-lambda
 class ExactlyOnceResultsChecker:
@@ -128,8 +128,8 @@ class ExactlyOnceResultsChecker:
     # Compare the actual and expected result
     if actual_results == expected_results:
       return status.TestSuccess(
-          "Topology %s result matches expected result: %s expected tuples found exactly once" %
-          (len(expected_results), self.topology_name))
+          f"Topology {len(expected_results)} result matches expected result: {self.topology_name} expected tuples found exactly once"
+        )
     else:
       failure = status.TestFailure("Actual result did not match expected result")
       # lambda required below to remove the unicode 'u' from the output
@@ -161,9 +161,9 @@ class AtLeastOnceResultsChecker(ExactlyOnceResultsChecker):
       failure = status.TestFailure("Actual result did not match expected result")
       # lambda required below to remove the unicode 'u' from the output
       logging.info("Actual value frequencies ---------- \n" + ', '.join(
-          ["%s(%s)" % (str(k_v[0]), k_v[1]) for k_v in iter(actual_counts.items())]))
+          [f"{str(k_v[0])}({k_v[1]})" for k_v in iter(actual_counts.items())]))
       logging.info("Expected value frequencies ---------- \n" + ', '.join(
-          ["%s(%s)" % (str(k_v1[0]), k_v1[1]) for k_v1 in iter(expected_counts.items())]))
+          [f"{str(k_v1[0])}({k_v1[1]})" for k_v1 in iter(expected_counts.items())]))
       raise failure
 
 def _frequency_dict(values):
@@ -181,13 +181,12 @@ def run_test(topology_name, classpath, results_checker,
 
   #submit topology
   try:
-    args = "-r http://%s/results -t %s %s" %\
-           (http_server_host_port, topology_name, extra_topology_args)
+    args = f"-r http://{http_server_host_port}/results -t {topology_name} {extra_topology_args}"
     submit_topology(params.heron_cli_path, params.cli_config_path, params.cluster, params.role,
                     params.env, params.tests_bin_path, classpath,
                     params.release_package_uri, args)
   except Exception as e:
-    raise status.TestFailure("Failed to submit %s topology" % topology_name, e)
+    raise status.TestFailure(f"Failed to submit {topology_name} topology", e)
 
   logging.info("Successfully submitted %s topology", topology_name)
 
@@ -206,18 +205,18 @@ def run_test(topology_name, classpath, results_checker,
     return results_checker.check_results()
 
   except Exception as e:
-    raise status.TestFailure("Checking result failed for %s topology" % topology_name, e)
+    raise status.TestFailure(f"Checking result failed for {topology_name} topology", e)
   finally:
     kill_topology(params.heron_cli_path, params.cli_config_path, params.cluster,
                   params.role, params.env, topology_name)
 
 def poll_state_server(server_host_port, topology_name, key):
   return fetch_from_server(
-      server_host_port, topology_name, key, '/state/%s_%s' % (topology_name, key))
+      server_host_port, topology_name, key, f'/state/{topology_name}_{key}')
 
 def update_state_server(http_server_host_port, topology_name, key, value):
   connection = HTTPConnection(http_server_host_port)
-  connection.request('POST', '/state/%s_%s' % (topology_name, key), '"%s"' % value)
+  connection.request('POST', f'/state/{topology_name}_{key}', f'"{value}"')
   response = connection.getresponse()
   return response.status == 200
 
@@ -233,7 +232,7 @@ def fetch_from_server(server_host_port, topology_name, data_name, path) -> str:
                    data_name, response.status, response.reason, response.read())
       time.sleep(RETRY_INTERVAL)
 
-  raise status.TestFailure("Failed to fetch %s after %d attempts" % (data_name, RETRY_ATTEMPTS))
+  raise status.TestFailure(f"Failed to fetch {data_name} after {RETRY_ATTEMPTS} attempts")
 
 def get_http_response(server_host_port, path):
   ''' get HTTP response '''
@@ -247,12 +246,12 @@ def get_http_response(server_host_port, path):
       time.sleep(RETRY_INTERVAL)
       continue
 
-  raise status.TestFailure("Failed to get HTTP Response after %d attempts" % RETRY_ATTEMPTS)
+  raise status.TestFailure(f"Failed to get HTTP Response after {RETRY_ATTEMPTS} attempts")
 
 def cluster_token(cluster, role, env):
   if cluster == "local":
     return cluster
-  return "%s/%s/%s" % (cluster, role, env)
+  return f"{cluster}/{role}/{env}"
 
 def submit_topology(heron_cli_path, cli_config_path, cluster, role,
                     env, jar_path, classpath, pkg_uri, args=None):
@@ -260,14 +259,11 @@ def submit_topology(heron_cli_path, cli_config_path, cluster, role,
   # Form the command to submit a topology.
   # Note the single quote around the arg for heron.package.core.uri.
   # This is needed to prevent shell expansion.
-  cmd = "%s submit %s --config-path=%s %s %s %s %s" %\
-        (heron_cli_path, 
-        "--verbose" if VERBOSE else "",
-        cli_config_path, cluster_token(cluster, role, env),
-         jar_path, classpath, args)
+  cmd = f"""{heron_cli_path} submit {"--verbose" if VERBOSE else ""} """\
+    f"--config-path={cli_config_path} {cluster_token(cluster, role, env)} {jar_path} {classpath} {args}"
 
   if pkg_uri is not None:
-    cmd = "%s --config-property heron.package.core.uri='%s'" %(cmd, pkg_uri)
+    cmd = f"{cmd} --config-property heron.package.core.uri='{pkg_uri}'"
 
   logging.info("Submitting topology: %s", cmd)
 
@@ -276,24 +272,21 @@ def submit_topology(heron_cli_path, cli_config_path, cluster, role,
 
 def kill_topology(heron_cli_path, cli_config_path, cluster, role, env, topology_name):
   ''' Kill a topology using heron-cli '''
-  cmd = "%s kill --config-path=%s %s %s" %\
-        (heron_cli_path, cli_config_path, cluster_token(cluster, role, env), topology_name)
+  cmd = f"{heron_cli_path} kill --config-path={cli_config_path} {cluster_token(cluster, role, env)} {topology_name}"
 
   logging.info("Killing topology: %s", cmd)
   if os.system(cmd) != 0:
-    raise status.TestFailure("Failed to kill topology %s" % topology_name)
+    raise status.TestFailure(f"Failed to kill topology {topology_name}")
 
   logging.info("Successfully killed topology %s", topology_name)
 
 def update_topology(heron_cli_path, cli_config_path, cluster,
                     role, env, topology_name, update_args):
-  cmd = "%s update --config-path=%s %s %s %s --verbose" %\
-        (heron_cli_path, cli_config_path,
-         cluster_token(cluster, role, env), update_args, topology_name)
+  cmd = f"{heron_cli_path} update --config-path={cli_config_path} {cluster_token(cluster, role, env)} {update_args} {topology_name} --verbose"
 
   logging.info("Update topology: %s", cmd)
   if os.system(cmd) != 0:
-    raise status.TestFailure("Failed to update topology %s" % topology_name)
+    raise status.TestFailure(f"Failed to update topology {topology_name}")
 
   logging.info("Successfully updated topology %s", topology_name)
 
@@ -314,22 +307,22 @@ def run_tests(conf, test_args):
   lock = Lock()
   timestamp = time.strftime('%Y%m%d%H%M%S')
 
-  http_server_host_port = "%s:%d" % (test_args.http_server_hostname, test_args.http_server_port)
+  http_server_host_port = f"{test_args.http_server_hostname}:{test_args.http_server_port}"
 
   if test_args.tests_bin_path.endswith("scala-integration-tests.jar"):
     test_topologies = filter_test_topologies(conf["scalaTopologies"], test_args.test_topology_pattern)
     topology_classpath_prefix = conf["topologyClasspathPrefix"]
-    extra_topology_args = "-s http://%s/state" % http_server_host_port
+    extra_topology_args = f"-s http://{http_server_host_port}/state"
   elif test_args.tests_bin_path.endswith("integration-tests.jar"):
     test_topologies = filter_test_topologies(conf["javaTopologies"], test_args.test_topology_pattern)
     topology_classpath_prefix = conf["topologyClasspathPrefix"]
-    extra_topology_args = "-s http://%s/state" % http_server_host_port
+    extra_topology_args = f"-s http://{http_server_host_port}/state"
   elif test_args.tests_bin_path.endswith("heron_integ_topology.pex"):
     test_topologies = filter_test_topologies(conf["pythonTopologies"], test_args.test_topology_pattern)
     topology_classpath_prefix = ""
     extra_topology_args = ""
   else:
-    raise ValueError("Unrecognized binary file type: %s" % test_args.tests_bin_path)
+    raise ValueError(f"Unrecognized binary file type: {test_args.tests_bin_path}")
 
   def _run_single_test(topology_name, topology_conf, test_args, http_server_host_port, classpath,
     update_args, topology_args):
@@ -362,7 +355,7 @@ def run_tests(conf, test_args):
 
   test_threads = []
   for topology_conf in test_topologies:
-    topology_name = ("%s_%s_%s") % (timestamp, topology_conf["topologyName"], str(uuid.uuid4()))
+    topology_name = f"{timestamp}_{topology_conf['topologyName']}_{str(uuid.uuid4())}"
     classpath = topology_classpath_prefix + topology_conf["classPath"]
 
     # if the test includes an update we need to pass that info to the topology so it can send
@@ -378,7 +371,7 @@ def run_tests(conf, test_args):
         raise ValueError("Specifying a test with emit_until spout wrapper without updateArgs "
                          + "will cause the spout to emit indefinitely. Not running topology "
                          + topology_name)
-      topology_args = "%s %s" % (topology_args, topology_conf["topologyArgs"])
+      topology_args = f"{topology_args} {topology_conf['topologyArgs']}"
 
     test_threads.append(Thread(target=_run_single_test, args=(topology_name, topology_conf,
       test_args, http_server_host_port, classpath, update_args, topology_args)))
@@ -418,7 +411,7 @@ def load_expected_result_handler(topology_name, topology_conf, args, http_server
         http_server_host_port, topology_name, topology_conf["expectedHttpResultTaskCount"])
   else:
     raise status.TestFailure("Either expectedResultRelativePath or expectedHttpResultTaskCount "
-                             + "must be specified for test %s " % topology_name)
+                             + f"must be specified for test {topology_name}.")
 
 def main():
   ''' main '''
@@ -462,17 +455,17 @@ def main():
   tests_start_time = int(time.time())
   run_tests(conf, args)
   total = len(failures) + len(successes)
-  logging.info("Total integration test time = %ss" % (int(time.time()) - tests_start_time))
+  logging.info("Total integration test time = %ss", (int(time.time()) - tests_start_time))
 
   if not failures:
     logging.info("SUCCESS: %s (all) tests passed:", len(successes))
     for test in successes:
-      logging.info("  - %s: %s", ("[%ss]" % test[1]).ljust(8), test[0])
+      logging.info("  - %s: %s", (f"[{test[1]}s]").ljust(8), test[0])
     sys.exit(0)
   else:
     logging.error("FAILURE: %s/%s tests failed:", len(failures), total)
     for test in failures:
-      logging.error("  - %s: %s", ("[%ss]" % test[1]).ljust(8), test[0])
+      logging.error("  - %s: %s", (f"[{test[1]}s]").ljust(8), test[0])
     sys.exit(1)
 
 if __name__ == '__main__':

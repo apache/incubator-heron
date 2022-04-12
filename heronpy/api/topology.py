@@ -25,7 +25,7 @@ topology.py: module for defining Heron topologies in Python
 import os
 import uuid
 
-import heronpy.api.api_constants as api_constants
+from heronpy.api import api_constants
 from heronpy.api.component.component_spec import HeronComponentSpec
 from heronpy.api.serializer import default_serializer
 from heronpy.proto import topology_pb2
@@ -78,7 +78,7 @@ class TopologyType(type):
         if spec.name is None:
           spec.name = name
         if spec.name in specs:
-          raise ValueError("Duplicate component name: %s" % spec.name)
+          raise ValueError(f"Duplicate component name: {spec.name}")
         specs[spec.name] = spec
     return specs
 
@@ -112,16 +112,18 @@ class TopologyType(type):
   def add_spout_specs(mcs, spec, spout_specs):
     if not spec.outputs:
       raise ValueError(
-          "%s: %s requires at least one output, because it is a spout" %
-          (spec.python_class_path, spec.name))
+          f"{spec.python_class_path}: {spec.name} requires "\
+            "at least one output, because it is a spout"
+        )
     spout_specs[spec.name] = spec.get_protobuf()
 
   @classmethod
   def add_bolt_specs(mcs, spec, bolt_specs):
     if not spec.inputs:
       raise ValueError(
-          "%s: %s requires at least one input, because it is a bolt" %
-          (spec.python_class_path, spec.name))
+          f"{spec.python_class_path}: {spec.name} requires "\
+            "at least one input, because it is a bolt"
+        )
     bolt_specs[spec.name] = spec.get_protobuf()
 
   @classmethod
@@ -210,7 +212,7 @@ class TopologyType(type):
       if sep:
         options[key] = value
       else:
-        raise ValueError("Invalid HERON_OPTIONS part %r" % option_line)
+        raise ValueError(f"Invalid HERON_OPTIONS part {option_line!r}")
     return options
 
   @classmethod
@@ -243,8 +245,8 @@ class TopologyType(type):
     sanitized = {}
     for key, value in list(custom_config.items()):
       if not isinstance(key, str):
-        raise TypeError("Key for topology-wide configuration must be string, given: %s: %s"
-                        % (str(type(key)), str(key)))
+        raise TypeError("Key for topology-wide configuration must "\
+                        f"be string, given: {str(type(key))}: {str(key)}")
 
       if isinstance(value, bool):
         sanitized[key] = "true" if value else "false"
@@ -295,7 +297,7 @@ class Topology(metaclass=TopologyType):
     """
     if cls.__name__ == 'Topology':
       raise ValueError("The base Topology class cannot be writable")
-    filename = "%s.defn" % cls.topology_name
+    filename = f"{cls.topology_name}.defn"
     path = os.path.join(cls.topologydefn_tmpdir, filename)
 
     with open(path, 'wb') as f:
@@ -346,14 +348,13 @@ class TopologyBuilder:
     """
     for spec in specs:
       if not isinstance(spec, HeronComponentSpec):
-        raise TypeError("Argument to add_spec needs to be HeronComponentSpec, given: %s"
-                        % str(spec))
+        raise TypeError(f"Argument to add_spec needs to be HeronComponentSpec, given: {str(spec)}")
       if spec.name is None:
         raise ValueError("TopologyBuilder cannot take a spec without name")
       if spec.name == "config":
         raise ValueError("config is a reserved name")
       if spec.name in self._specs:
-        raise ValueError("Attempting to add duplicate spec name: %r %r" % (spec.name, spec))
+        raise ValueError(f"Attempting to add duplicate spec name: {spec.name!r} {spec!r}")
 
       self._specs[spec.name] = spec
 
@@ -378,7 +379,7 @@ class TopologyBuilder:
     :param config: topology-wide config
     """
     if not isinstance(config, dict):
-      raise TypeError("Argument to set_config needs to be dict, given: %s" % str(config))
+      raise TypeError(f"Argument to set_config needs to be dict, given: {str(config)}")
     self._topology_config = config
 
   def _construct_topo_class_dict(self):

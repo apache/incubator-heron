@@ -63,7 +63,7 @@ class KillExecutorHandler(tornado.web.RequestHandler):
         if instanceId.startswith('heron-executor-'): # kill heron-executor
           kill_parent()
         else: # kill other normal instance
-          fh = open(filepath)
+          fh = open(filepath, encoding='utf8')
           firstLine = int(fh.readline())
           fh.close()
           logger.info("Killing process %s %s", instanceId, firstLine)

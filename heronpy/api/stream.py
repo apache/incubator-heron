@@ -41,9 +41,9 @@ class Stream:
       fields = list(fields)
       for field in fields:
         if not isinstance(field, str):
-          raise TypeError("All field names must be strings, given: %s" % str(field))
+          raise TypeError(f"All field names must be strings, given: {str(field)}")
     else:
-      raise TypeError("Stream fields must be a list, tuple or None, given: %s" % str(fields))
+      raise TypeError(f"Stream fields must be a list, tuple or None, given: {str(fields)}")
 
     # self.fields is always list
     self.fields = fields
@@ -53,14 +53,14 @@ class Stream:
     if isinstance(name, str):
       self.stream_id = name
     else:
-      raise TypeError("Stream name must be a string, given: %s" % str(name))
+      raise TypeError(f"Stream name must be a string, given: {str(name)}")
 
     if isinstance(direct, bool):
       self.direct = direct
       if self.direct:
         raise NotImplementedError("Direct stream is not supported yet.")
     else:
-      raise TypeError("'direct' must be either True or False, given: %s" % str(direct))
+      raise TypeError(f"'direct' must be either True or False, given: {str(direct)}")
 
 class Grouping:
   """Helper class for defining Grouping for Python topology"""
@@ -143,7 +143,7 @@ class Grouping:
     """
     if not isinstance(serialized, bytes):
       raise TypeError("Argument to custom_serialized() must be "
-                      "a serialized Python class as bytes, given: %s" % str(serialized))
+                      f"a serialized Python class as bytes, given: {str(serialized)}")
     if not is_java:
       return cls.CUSTOM(gtype=topology_pb2.Grouping.Value("CUSTOM"),
                         python_serialized=serialized)
