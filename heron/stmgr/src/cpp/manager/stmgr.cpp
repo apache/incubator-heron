@@ -777,7 +777,7 @@ void StMgr::ProcessAcksAndFails(sp_int32 _src_task_id, sp_int32 _task_id,
 void StMgr::HandleInstanceData(const sp_int32 _src_task_id, bool _local_spout,
                                pool_unique_ptr<proto::system::HeronTupleSet> _message) {
   instance_bytes_received_metrics_->scope(std::to_string(_src_task_id))
-      ->incr_by(_message->ByteSize());
+      ->incr_by(_message->ByteSizeLong());
 
   if (stateful_restorer_ && stateful_restorer_->InProgress()) {
     LOG(INFO) << "Dropping data received from instance " << _src_task_id

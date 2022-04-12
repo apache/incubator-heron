@@ -149,18 +149,18 @@ void StMgrClient::HandlePhysicalPlan(
 
 void StMgrClient::HandleTupleMessage(pool_unique_ptr<proto::system::HeronTupleSet2> msg) {
   gatewayMetrics_->updateReceivedPacketsCount(1);
-  gatewayMetrics_->updateReceivedPacketsSize(msg->ByteSize());
+  gatewayMetrics_->updateReceivedPacketsSize(msg->ByteSizeLong());
   tupleWatcher_(std::move(msg));
 }
 
 void StMgrClient::SendTupleMessage(const proto::system::HeronTupleSet& msg) {
   if (IsConnected()) {
     gatewayMetrics_->updateSentPacketsCount(1);
-    gatewayMetrics_->updateSentPacketsSize(msg.ByteSize());
+    gatewayMetrics_->updateSentPacketsSize(msg.ByteSizeLong());
     SendMessage(msg);
   } else {
     gatewayMetrics_->updateDroppedPacketsCount(1);
-    gatewayMetrics_->updateDroppedPacketsSize(msg.ByteSize());
+    gatewayMetrics_->updateDroppedPacketsSize(msg.ByteSizeLong());
     if (++ndropped_messages_ % 100 == 0) {
       LOG(INFO) << "Dropping " << ndropped_messages_ << "th tuple message to stmgr "
                 << instanceProto_.stmgr_id() << " because it is not connected";
