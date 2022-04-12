@@ -47,8 +47,8 @@ void Client::SendRequest(std::unique_ptr<google::protobuf::Message> _request, vo
 }
 
 void Client::SendResponse(REQID _id, const google::protobuf::Message& _response) {
-  sp_int32 byte_size = _response.ByteSize();
-  sp_uint32 data_size = OutgoingPacket::SizeRequiredToPackString(_response.GetTypeName()) +
+  sp_int64 byte_size = _response.ByteSizeLong();
+  sp_uint64 data_size = OutgoingPacket::SizeRequiredToPackString(_response.GetTypeName()) +
                         REQID_size + OutgoingPacket::SizeRequiredToPackProtocolBuffer(byte_size);
   auto opkt = new OutgoingPacket(data_size);
   CHECK_EQ(opkt->PackString(_response.GetTypeName()), 0);
@@ -111,8 +111,8 @@ void Client::InternalSendRequest(std::unique_ptr<google::protobuf::Message> _req
   context_map_[rid] = std::make_pair(_expected_response_type, _ctx);
 
   // Make the outgoing packet
-  sp_int32 byte_size = _request->ByteSize();
-  sp_uint32 sop = OutgoingPacket::SizeRequiredToPackString(_request->GetTypeName()) + REQID_size +
+  sp_int64 byte_size = _request->ByteSizeLong();
+  sp_uint64 sop = OutgoingPacket::SizeRequiredToPackString(_request->GetTypeName()) + REQID_size +
                   OutgoingPacket::SizeRequiredToPackProtocolBuffer(byte_size);
   auto opkt = new OutgoingPacket(sop);
   CHECK_EQ(opkt->PackString(_request->GetTypeName()), 0);
@@ -144,8 +144,8 @@ void Client::InternalSendMessage(const google::protobuf::Message& _message) {
   REQID rid = REQID_Generator::generate_zero_reqid();
 
   // Make the outgoing packet
-  sp_int32 byte_size = _message.ByteSize();
-  sp_uint32 sop = OutgoingPacket::SizeRequiredToPackString(_message.GetTypeName()) + REQID_size +
+  sp_int64 byte_size = _message.ByteSizeLong();
+  sp_uint64 sop = OutgoingPacket::SizeRequiredToPackString(_message.GetTypeName()) + REQID_size +
                   OutgoingPacket::SizeRequiredToPackProtocolBuffer(byte_size);
   auto opkt = new OutgoingPacket(sop);
   CHECK_EQ(opkt->PackString(_message.GetTypeName()), 0);

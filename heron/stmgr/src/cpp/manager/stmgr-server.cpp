@@ -174,7 +174,7 @@ void StMgrServer::HandleTupleStreamMessage(Connection* _conn,
     tuple_set = __global_protobuf_pool_acquire__(tuple_set);
     tuple_set->ParsePartialFromString(_message->set());
 
-    bytes_from_stmgrs_metrics_->incr_by(_message->ByteSize());
+    bytes_from_stmgrs_metrics_->incr_by(_message->ByteSizeLong());
     if (tuple_set->has_data()) {
       tuples_from_stmgrs_metrics_->incr_by(tuple_set->data().tuples_size());
     } else if (tuple_set->has_control()) {
