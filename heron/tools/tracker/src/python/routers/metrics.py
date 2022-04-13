@@ -163,7 +163,8 @@ class MetricsQueryResponse(BaseModel): # pylint: disable=too-few-public-methods
       ..., description="list of timeline point objects",
   )
 
-@router.get("/metricsquery", response_model=MetricsQueryResponse)
+@router.get("/metricsquery", response_model=MetricsQueryResponse,
+    deprecated=True)
 @router.get("/metrics/query", response_model=MetricsQueryResponse)
 async def get_metrics_query( # pylint: disable=too-many-arguments
     cluster: str,
