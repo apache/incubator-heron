@@ -119,7 +119,8 @@ async def get_metrics( # pylint: disable=too-many-arguments
   )
 
 
-@router.get("/metricstimeline", response_model=metricstimeline.MetricsTimeline)
+@router.get("/metricstimeline", response_model=metricstimeline.MetricsTimeline,
+    deprecated=True)
 @router.get("/metrics/timeline", response_model=metricstimeline.MetricsTimeline)
 async def get_metrics_timeline( # pylint: disable=too-many-arguments
     cluster: str,
