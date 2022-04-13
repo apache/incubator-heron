@@ -140,7 +140,7 @@ if __name__ == "__main__":
     # piece together the topology
     word_spout = builder.add_spout("word_spout", WordSpout, par=2)
     count_bolt = builder.add_bolt("count_bolt", CountBolt, par=2, inputs={word_spout: Grouping.fields("word")})
-    # submit the toplogy
+    # submit the topology
     builder.build_and_submit()
 ```
 

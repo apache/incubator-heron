@@ -125,8 +125,8 @@ async def get_metrics_timeline( # pylint: disable=too-many-arguments
     cluster: str,
     environ: str,
     component: str,
-    start_time: int,
-    end_time: int,
+    start_time: int = Query(..., alias="starttime"),
+    end_time: int = Query(..., alias="endtime"),
     role: Optional[str] = None,
     topology_name: str = Query(..., alias="topology"),
     metric_names: Optional[List[str]] = Query(None, alias="metricname"),
@@ -139,7 +139,7 @@ async def get_metrics_timeline( # pylint: disable=too-many-arguments
   """
   if start_time > end_time:
     raise BadRequest("start_time > end_time")
-  topology = state.tracker.get_toplogy(cluster, role, environ, topology_name)
+  topology = state.tracker.get_topology(cluster, role, environ, topology_name)
   return await metricstimeline.get_metrics_timeline(
       topology.tmanager, component, metric_names, instances, start_time, end_time
   )
@@ -162,7 +162,7 @@ class MetricsQueryResponse(BaseModel): # pylint: disable=too-few-public-methods
       ..., description="list of timeline point objects",
   )
 
-
+@router.get("/metricsquery", response_model=MetricsQueryResponse)
 @router.get("/metrics/query", response_model=MetricsQueryResponse)
 async def get_metrics_query( # pylint: disable=too-many-arguments
     cluster: str,
@@ -173,7 +173,11 @@ async def get_metrics_query( # pylint: disable=too-many-arguments
     end_time: int = Query(..., alias="endtime"),
     topology_name: str = Query(..., alias="topology"),
 ) -> MetricsQueryResponse:
-  """Run a metrics query against a particular toplogy."""
+  """
+  '/metricsquery' 0.20.5 below.
+  '/metrics/query' 0.20.5 above.
+  Run a metrics query against a particular topology.
+  """
   topology = state.tracker.get_topology(cluster, role, environ, topology_name)
   metrics = await TManagerQuery(state.tracker).execute_query(
       topology.tmanager, query, start_time, end_time
