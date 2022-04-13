@@ -197,7 +197,7 @@ bool StMgrClient::SendTupleStreamMessage(proto::stmgr::TupleStreamMessage& _msg)
   tuple_set->ParsePartialFromString(_msg.set());
 
   if (!IsConnected() || (droptuples_upon_backpressure_ && HasCausedBackPressure())) {
-    stmgr_client_metrics_->scope(METRIC_BYTES_TO_STMGRS_LOST)->incr_by(_msg.ByteSize());
+    stmgr_client_metrics_->scope(METRIC_BYTES_TO_STMGRS_LOST)->incr_by(_msg.ByteSizeLong());
     if (tuple_set->has_data()) {
       stmgr_client_metrics_->scope(METRIC_DATA_TUPLES_TO_STMGRS_LOST)
           ->incr_by(tuple_set->data().tuples_size());
@@ -220,7 +220,7 @@ bool StMgrClient::SendTupleStreamMessage(proto::stmgr::TupleStreamMessage& _msg)
     }
     retval = false;
   } else {
-    stmgr_client_metrics_->scope(METRIC_BYTES_TO_STMGRS)->incr_by(_msg.ByteSize());
+    stmgr_client_metrics_->scope(METRIC_BYTES_TO_STMGRS)->incr_by(_msg.ByteSizeLong());
     if (tuple_set->has_data()) {
       stmgr_client_metrics_->scope(METRIC_DATA_TUPLES_TO_STMGRS)
           ->incr_by(tuple_set->data().tuples_size());
