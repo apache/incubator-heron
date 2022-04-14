@@ -45,6 +45,7 @@ import org.apache.heron.proto.tmanager.TopologyManager.MetricsCacheLocation;
 import org.apache.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import org.apache.heron.spi.utils.NetworkUtils;
 
+import static org.apache.heron.common.basics.TypeUtils.getDouble;
 import static org.apache.heron.healthmgr.HealthPolicyConfig.CONF_TOPOLOGY_NAME;
 
 public class MetricsCacheMetricsProvider implements MetricsProvider {
@@ -117,7 +118,7 @@ public class MetricsCacheMetricsProvider implements MetricsProvider {
               instanceId,
               metricName,
               Instant.ofEpochSecond(mi.getStart()),
-              Double.parseDouble(value));
+              getDouble(value));
           metricsData.add(measurement);
         }
         // case 2
@@ -127,7 +128,7 @@ public class MetricsCacheMetricsProvider implements MetricsProvider {
               instanceId,
               metricName,
               startTime,
-              Double.parseDouble(im.getValue()));
+              getDouble(im.getValue()));
           metricsData.add(measurement);
         }
       }
