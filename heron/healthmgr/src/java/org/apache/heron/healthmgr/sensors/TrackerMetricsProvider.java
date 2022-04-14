@@ -42,8 +42,8 @@ import com.microsoft.dhalion.api.MetricsProvider;
 import com.microsoft.dhalion.core.Measurement;
 
 import net.minidev.json.JSONArray;
-import org.apache.heron.common.basics.TypeUtils;
 
+import static org.apache.heron.common.basics.TypeUtils.getDouble;
 import static org.apache.heron.healthmgr.HealthPolicyConfig.CONF_METRICS_SOURCE_URL;
 import static org.apache.heron.healthmgr.HealthPolicyConfig.CONF_TOPOLOGY_NAME;
 
@@ -113,7 +113,7 @@ public class TrackerMetricsProvider implements MetricsProvider {
             instanceName,
             metric,
             Instant.ofEpochSecond(Long.parseLong(timeStamp)),
-            TypeUtils.getDouble(tmpValues.get(timeStamp)));
+            getDouble(tmpValues.get(timeStamp)));
         metricsData.add(measurement);
       }
     }
