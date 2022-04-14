@@ -35,6 +35,7 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import com.microsoft.dhalion.api.MetricsProvider;
 import com.microsoft.dhalion.core.Measurement;
 
+import org.apache.heron.common.basics.TypeUtils;
 import org.apache.heron.proto.system.Common.StatusCode;
 import org.apache.heron.proto.tmanager.TopologyManager;
 import org.apache.heron.proto.tmanager.TopologyManager.MetricInterval;
@@ -117,7 +118,7 @@ public class MetricsCacheMetricsProvider implements MetricsProvider {
               instanceId,
               metricName,
               Instant.ofEpochSecond(mi.getStart()),
-              Double.parseDouble(value));
+              TypeUtils.getDouble(value));
           metricsData.add(measurement);
         }
         // case 2
@@ -127,7 +128,7 @@ public class MetricsCacheMetricsProvider implements MetricsProvider {
               instanceId,
               metricName,
               startTime,
-              Double.parseDouble(im.getValue()));
+              TypeUtils.getDouble(im.getValue()));
           metricsData.add(measurement);
         }
       }
