@@ -74,6 +74,7 @@ class Application(tornado.web.Application):
         (r"/topologies/metrics/timeline", handlers.MetricsTimelineHandler, {"tracker":self.tracker}),
         (r"/topologies/metrics", handlers.MetricsHandler, {"tracker":self.tracker}),
         (r"/topologies/metricsquery", handlers.MetricsQueryHandler, {"tracker":self.tracker}),
+        (r"/topologies/metrics/query", handlers.MetricsQueryHandler, {"tracker":self.tracker}),
         (r"/topologies/exceptions", handlers.ExceptionHandler, {"tracker":self.tracker}),
         (r"/topologies/exceptionsummary", handlers.ExceptionSummaryHandler,
          {"tracker":self.tracker}),
