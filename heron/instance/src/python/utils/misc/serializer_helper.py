@@ -20,7 +20,7 @@
 
 '''serializer_helper.py'''
 
-import heron.common.src.python.pex_loader as pex_loader
+from heron.common.src.python import pex_loader
 
 from heronpy.api.serializer import PythonSerializer
 import heronpy.api.api_constants as constants
@@ -41,5 +41,5 @@ class SerializerHelper:
       serializer = serializer_cls()
       return serializer
     except Exception as e:
-      raise RuntimeError("Error with loading custom serializer class: %s, with error message: %s"
-                         % (serializer_clsname, str(e)))
+      raise RuntimeError(f"Error with loading custom serializer class: {serializer_clsname},"
+                         f"with error message: {str(e)}") from e

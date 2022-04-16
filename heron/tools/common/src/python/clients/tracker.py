@@ -36,39 +36,42 @@ import time
 from typing import Any, Iterable, List, Optional, Tuple
 from urllib.parse import urlencode
 
-from heron.common.src.python.utils.log import Log
-
 import requests
+from heron.common.src.python.utils.log import Log
 
 # This requires setting
 tracker_url = "http://127.0.0.1:8888"
 
-# pylint: disable=bad-whitespace
 CLUSTER_URL_FMT             = "%s/clusters"
+
+# Nested under /topologies
 TOPOLOGIES_URL_FMT          = "%s/topologies"
-TOPOLOGIES_STATS_URL_FMT    = "%s/states"             % TOPOLOGIES_URL_FMT
-EXECUTION_STATE_URL_FMT     = "%s/executionstate"     % TOPOLOGIES_URL_FMT
-LOGICALPLAN_URL_FMT         = "%s/logicalplan"        % TOPOLOGIES_URL_FMT
-PHYSICALPLAN_URL_FMT        = "%s/physicalplan"       % TOPOLOGIES_URL_FMT
-PACKINGPLAN_URL_FMT         = "%s/packingplan"        % TOPOLOGIES_URL_FMT
-SCHEDULER_LOCATION_URL_FMT  = "%s/schedulerlocation"  % TOPOLOGIES_URL_FMT
+TOPOLOGIES_STATS_URL_FMT    = f"{TOPOLOGIES_URL_FMT}/states"
+EXECUTION_STATE_URL_FMT     = f"{TOPOLOGIES_URL_FMT}/executionstate"
+LOGICALPLAN_URL_FMT         = f"{TOPOLOGIES_URL_FMT}/logicalplan"
+PHYSICALPLAN_URL_FMT        = f"{TOPOLOGIES_URL_FMT}/physicalplan"
+PACKINGPLAN_URL_FMT         = f"{TOPOLOGIES_URL_FMT}/packingplan"
+SCHEDULER_LOCATION_URL_FMT  = f"{TOPOLOGIES_URL_FMT}/schedulerlocation"
 
-METRICS_URL_FMT             = "%s/metrics"            % TOPOLOGIES_URL_FMT
-METRICS_QUERY_URL_FMT       = "%s/metricsquery"       % TOPOLOGIES_URL_FMT
-METRICS_TIMELINE_URL_FMT    = "%s/metricstimeline"    % TOPOLOGIES_URL_FMT
+EXCEPTIONS_URL_FMT          = f"{TOPOLOGIES_URL_FMT}/exceptions"
+EXCEPTION_SUMMARY_URL_FMT   = f"{TOPOLOGIES_URL_FMT}/exceptionsummary"
 
-EXCEPTIONS_URL_FMT          = "%s/exceptions"         % TOPOLOGIES_URL_FMT
-EXCEPTION_SUMMARY_URL_FMT   = "%s/exceptionsummary"   % TOPOLOGIES_URL_FMT
+INFO_URL_FMT                = f"{TOPOLOGIES_URL_FMT}/info"
+PID_URL_FMT                 = f"{TOPOLOGIES_URL_FMT}/pid"
+JSTACK_URL_FMT              = f"{TOPOLOGIES_URL_FMT}/jstack"
+JMAP_URL_FMT                = f"{TOPOLOGIES_URL_FMT}/jmap"
+HISTOGRAM_URL_FMT           = f"{TOPOLOGIES_URL_FMT}/histo"
 
-INFO_URL_FMT                = "%s/info"               % TOPOLOGIES_URL_FMT
-PID_URL_FMT                 = "%s/pid"                % TOPOLOGIES_URL_FMT
-JSTACK_URL_FMT              = "%s/jstack"             % TOPOLOGIES_URL_FMT
-JMAP_URL_FMT                = "%s/jmap"               % TOPOLOGIES_URL_FMT
-HISTOGRAM_URL_FMT           = "%s/histo"              % TOPOLOGIES_URL_FMT
+# nested under /topologies/metrics/
+METRICS_URL_FMT             = f"{TOPOLOGIES_URL_FMT}/metrics"
+METRICS_QUERY_URL_FMT       = f"{METRICS_URL_FMT}/query"
+METRICS_TIMELINE_URL_FMT    = f"{METRICS_URL_FMT}/timeline"
 
-FILE_DATA_URL_FMT           = "%s/containerfiledata"  % TOPOLOGIES_URL_FMT
-FILE_DOWNLOAD_URL_FMT       = "%s/containerfiledownload"  % TOPOLOGIES_URL_FMT
-FILESTATS_URL_FMT           = "%s/containerfilestats" % TOPOLOGIES_URL_FMT
+# nested under /topologies/container/
+CONTAINER_URL_FMT           = f"{TOPOLOGIES_URL_FMT}/container"
+FILE_DATA_URL_FMT           = f"{CONTAINER_URL_FMT}/filedata"
+FILE_DOWNLOAD_URL_FMT       = f"{CONTAINER_URL_FMT}/filedownload"
+FILESTATS_URL_FMT           = f"{CONTAINER_URL_FMT}/filestats"
 
 
 def strip_whitespace(s):
@@ -122,27 +125,28 @@ queries = dict(
     backpressure=backpressure
 )
 
-def api_get(url: str, params=None) -> dict:
+def api_get(url: str, params=None) -> Any:
   """Make a GET request to a tracker URL and return the result."""
   start = time.time()
   try:
+    Log.debug(f"Requesting URL: {url} with params: {params}")
     response = requests.get(url, params)
     response.raise_for_status()
   except Exception as e:
-    Log.error(f"Unable to get response from {url}: {e}")
+    Log.error(f"Unable to get response from {url} with params {params}: {e}")
     return None
   end = time.time()
   data = response.json()
-  if data["status"] != "success":
-    Log.error("error from tracker: %s", data["message"])
+  if response.status_code != requests.codes.ok:
+    Log.error("error from tracker: %s", response.status_code)
     return None
 
-  execution = data["executiontime"] * 1000
+  execution = float(response.headers.get("x-process-time")) * 1000
   duration = (end - start) * 1000
-  Log.debug(f"URL fetch took {execution:.2}ms server time for {url}")
-  Log.debug(f"URL fetch took {duration:.2}ms round trip time for {url}")
+  Log.debug(f"URL fetch took {execution:.2} ms server time for {url}")
+  Log.debug(f"URL fetch took {duration:.2} ms round trip time for {url}")
 
-  return data["result"]
+  return data
 
 
 def create_url(fmt: str) -> str:
@@ -569,7 +573,7 @@ class HeronQueryHandler:
     comp_metrics = []
     for comp in components:
       query = self.get_query(metric, comp, instance)
-      max_query = "MAX(%s)" % query
+      max_query = f"MAX({query})"
       comp_metrics.append(get_metrics(cluster, environ, topology, timerange, max_query))
 
     data = self.compute_max(comp_metrics)
@@ -623,7 +627,7 @@ class HeronQueryHandler:
       keys = list(filtered_ts[0]["timeline"][0]["data"].keys())
       timelines = ([res["timeline"][0]["data"][key] for key in keys] for res in filtered_ts)
       values = (max(v) for v in zip(*timelines))
-      return dict(list(zip(keys, values)))
+      return dict(zip(keys, values))
     return {}
 
   # pylint: disable=no-self-use

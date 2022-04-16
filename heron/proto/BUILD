@@ -181,7 +181,7 @@ java_library(
 pex_library(
     name = "proto-py",
     reqs = [
-        "protobuf==3.14.0",
+        "protobuf==3.16.0",
         "setuptools==51.0.0",
     ],
     deps = [

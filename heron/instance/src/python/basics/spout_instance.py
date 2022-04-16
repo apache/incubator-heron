@@ -25,7 +25,7 @@ import time
 import collections
 
 from heronpy.api.stream import Stream
-import heronpy.api.api_constants as api_constants
+from heronpy.api import api_constants
 from heronpy.api.state.stateful_component import StatefulComponent
 
 from heron.common.src.python.utils.log import Log
@@ -35,7 +35,7 @@ from heron.instance.src.python.utils.tuple import TupleHelper
 
 from heron.proto import topology_pb2, tuple_pb2, ckptmgr_pb2
 
-import heron.instance.src.python.utils.system_constants as system_constants
+from heron.instance.src.python.utils import system_constants
 
 from .base_instance import BaseInstance
 
@@ -44,7 +44,7 @@ class SpoutInstance(BaseInstance):
   """The base class for all heron spouts in Python"""
 
   def __init__(self, pplan_helper, in_stream, out_stream, looper):
-    super(SpoutInstance, self).__init__(pplan_helper, in_stream, out_stream, looper)
+    super().__init__(pplan_helper, in_stream, out_stream, looper)
     self.topology_state = topology_pb2.TopologyState.Value("PAUSED")
 
     if not self.pplan_helper.is_spout:
@@ -60,8 +60,8 @@ class SpoutInstance(BaseInstance):
     self.enable_message_timeouts = \
       context.get_cluster_config().get(api_constants.TOPOLOGY_ENABLE_MESSAGE_TIMEOUTS)
     self._initialized_metrics_and_tasks = False
-    Log.info("Enable ACK: %s" % str(self.acking_enabled))
-    Log.info("Enable Message Timeouts: %s" % str(self.enable_message_timeouts))
+    Log.info(f"Enable ACK: {str(self.acking_enabled)}")
+    Log.info(f"Enable Message Timeouts: {str(self.enable_message_timeouts)}")
 
     # map <tuple_info.key -> tuple_info>, ordered by insertion time
     self.in_flight_tuples = collections.OrderedDict()
@@ -69,7 +69,7 @@ class SpoutInstance(BaseInstance):
     self.total_tuples_emitted = 0
 
     # load user's spout class
-    spout_impl_class = super(SpoutInstance, self).load_py_instance(is_spout=True)
+    spout_impl_class = super().load_py_instance(is_spout=True)
     self.spout_impl = spout_impl_class(delegate=self)
 
   def start_component(self, stateful_state):
@@ -131,8 +131,8 @@ class SpoutInstance(BaseInstance):
 
     if direct_task is not None:
       if not isinstance(direct_task, int):
-        raise TypeError("direct_task argument needs to be an integer, given: %s"
-                        % str(type(direct_task)))
+        raise TypeError(f"direct_task argument needs to be an integer, "
+                        f"given: {str(type(direct_task))}")
       # performing emit-direct
       data_tuple.dest_task_ids.append(direct_task)
     elif custom_target_task_ids is not None:
@@ -164,7 +164,7 @@ class SpoutInstance(BaseInstance):
     serialize_latency_ns = (time.time() - start_time) * system_constants.SEC_TO_NS
     self.spout_metrics.serialize_data_tuple(stream, serialize_latency_ns)
 
-    super(SpoutInstance, self).admit_data_tuple(stream_id=stream, data_tuple=data_tuple,
+    super().admit_data_tuple(stream_id=stream, data_tuple=data_tuple,
                                                 tuple_size_in_bytes=tuple_size_in_bytes)
     self.total_tuples_emitted += 1
     self.spout_metrics.update_emit_count(stream)
@@ -328,8 +328,8 @@ class SpoutInstance(BaseInstance):
   def _handle_ack_tuple(self, tup, is_success):
     for rt in tup.roots:
       if rt.taskid != self.pplan_helper.my_task_id:
-        raise RuntimeError("Receiving tuple for task: %s in task: %s"
-                           % (str(rt.taskid), str(self.pplan_helper.my_task_id)))
+        raise RuntimeError(f"Receiving tuple for task: {str(rt.taskid)}"
+                           f" in task: {str(self.pplan_helper.my_task_id)}")
       try:
         tuple_info = self.in_flight_tuples.pop(rt.key)
       except KeyError:
@@ -351,13 +351,13 @@ class SpoutInstance(BaseInstance):
       self._invoke_ack(tuple_info.tuple_id, tuple_info.stream_id, 0)
 
   def _invoke_ack(self, tuple_id, stream_id, complete_latency_ns):
-    Log.debug("In invoke_ack(): Acking %s from stream: %s" % (str(tuple_id), stream_id))
+    Log.debug(f"In invoke_ack(): Acking {str(tuple_id)} from stream: {stream_id}")
     self.spout_impl.ack(tuple_id)
     self.pplan_helper.context.invoke_hook_spout_ack(tuple_id, complete_latency_ns)
     self.spout_metrics.acked_tuple(stream_id, complete_latency_ns)
 
   def _invoke_fail(self, tuple_id, stream_id, fail_latency_ns):
-    Log.debug("In invoke_fail(): Failing %s from stream: %s" % (str(tuple_id), stream_id))
+    Log.debug(f"In invoke_fail(): Failing {str(tuple_id)} from stream: {stream_id}")
     self.spout_impl.fail(tuple_id)
     self.pplan_helper.context.invoke_hook_spout_fail(tuple_id, fail_latency_ns)
     self.spout_metrics.failed_tuple(stream_id, fail_latency_ns)

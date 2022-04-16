@@ -20,7 +20,7 @@
 
 ''' deactivate.py '''
 from heron.common.src.python.utils.log import Log
-import heron.tools.cli.src.python.cli_helper as cli_helper
+from heron.tools.cli.src.python import cli_helper
 
 def create_parser(subparsers):
   '''

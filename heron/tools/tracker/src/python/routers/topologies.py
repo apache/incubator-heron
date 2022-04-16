@@ -27,20 +27,20 @@ manager has recieved more information from the state manager.
 """
 from typing import List, Optional, Dict, Union
 
+from fastapi import Query, APIRouter
+
 from heron.tools.tracker.src.python import state
 from heron.tools.tracker.src.python.topology import (
     TopologyInfo,
     TopologyInfoExecutionState,
     TopologyInfoLogicalPlan,
     TopologyInfoMetadata,
+    TopologyInfoPackingPlan,
     TopologyInfoPhysicalPlan,
     TopologyInfoSchedulerLocation,
 )
-from heron.tools.tracker.src.python.utils import EnvelopingAPIRouter
 
-from fastapi import Query
-
-router = EnvelopingAPIRouter()
+router = APIRouter()
 
 
 @router.get("", response_model=Dict[str, Dict[str, Dict[str, List[str]]]])
@@ -111,9 +111,17 @@ async def get_topology_config(
     role: Optional[str] = Query(None, deprecated=True),
 ):
   topology = state.tracker.get_topology(cluster, role, environ, topology)
-  topology_info = topology.info
-  return topology_info.physical_plan.config
+  return topology.info.physical_plan.config
 
+@router.get("/packingplan", response_model=TopologyInfoPackingPlan)
+async def get_topology_packing_plan(
+    cluster: str,
+    environ: str,
+    topology: str,
+    role: Optional[str] = Query(None, deprecated=True),
+):
+  topology = state.tracker.get_topology(cluster, role, environ, topology)
+  return topology.info.packing_plan
 
 @router.get("/physicalplan", response_model=TopologyInfoPhysicalPlan)
 async def get_topology_physical_plan(
@@ -175,5 +183,4 @@ async def get_topology_logical_plan(
 
   """
   topology = state.tracker.get_topology(cluster, role, environ, topology)
-  topology_info = topology.info
-  return topology_info.logical_plan
+  return topology.info.logical_plan

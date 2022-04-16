@@ -52,7 +52,7 @@
       for (var wk in instances) {
         var worker = instances[wk];
         if (worker.name === comp) {
-          containers[worker.stmgrId].children.push(worker);
+          containers[worker.stmgr_id].children.push(worker);
         }
       }
     }

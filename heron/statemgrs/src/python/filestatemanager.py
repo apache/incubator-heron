@@ -117,6 +117,7 @@ class FileStateManager(StateManager):
 
       topologies = []
       if os.path.isdir(topologies_path):
+        # pylint: disable=consider-using-generator
         topologies = list([f for f in os.listdir(topologies_path)
                            if os.path.isfile(os.path.join(topologies_path, f))])
       if set(topologies) != set(self.topologies_directory):

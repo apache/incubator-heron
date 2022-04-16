@@ -31,13 +31,13 @@ from heron.common.src.python.utils.log import Log
 from heron.proto import topology_pb2
 from heron.tools.cli.src.python.result import SimpleResult, Status
 import heron.tools.cli.src.python.args as cli_args
-import heron.tools.cli.src.python.execute as execute
-import heron.tools.cli.src.python.jars as jars
-import heron.tools.cli.src.python.opts as opts
-import heron.tools.cli.src.python.result as result
-import heron.tools.cli.src.python.rest as rest
-import heron.tools.common.src.python.utils.config as config
-import heron.tools.common.src.python.utils.classpath as classpath
+from heron.tools.cli.src.python import execute
+from heron.tools.cli.src.python import jars
+from heron.tools.cli.src.python import opts
+from heron.tools.cli.src.python import result
+from heron.tools.cli.src.python import rest
+from heron.tools.common.src.python.utils import config
+from heron.tools.common.src.python.utils import classpath
 
 # pylint: disable=too-many-return-statements
 
@@ -149,8 +149,8 @@ def launch_a_topology(cl_args, tmp_dir, topology_file, topology_defn_file, topol
       args=args,
       java_defines=[])
 
-  err_ctxt = "Failed to launch topology '%s' %s" % (topology_name, launch_mode_msg(cl_args))
-  succ_ctxt = "Successfully launched topology '%s' %s" % (topology_name, launch_mode_msg(cl_args))
+  err_ctxt = f"Failed to launch topology '{topology_name}' {launch_mode_msg(cl_args)}"
+  succ_ctxt = f"Successfully launched topology '{topology_name}' {launch_mode_msg(cl_args)}"
 
   res.add_context(err_ctxt, succ_ctxt)
   return res
@@ -177,7 +177,7 @@ def launch_topology_server(cl_args, topology_file, topology_defn_file, topology_
   )
 
   Log.info("" + str(cl_args))
-  overrides = dict()
+  overrides = {}
   if 'config_property' in cl_args:
     overrides = config.parse_override_config(cl_args['config_property'])
 
@@ -191,12 +191,13 @@ def launch_topology_server(cl_args, topology_file, topology_defn_file, topology_
     data['verbose_gc'] = True
 
   files = dict(
+      # pylint: disable=consider-using-with
       definition=open(topology_defn_file, 'rb'),
       topology=open(topology_file, 'rb'),
   )
 
-  err_ctxt = "Failed to launch topology '%s' %s" % (topology_name, launch_mode_msg(cl_args))
-  succ_ctxt = "Successfully launched topology '%s' %s" % (topology_name, launch_mode_msg(cl_args))
+  err_ctxt = f"Failed to launch topology '{topology_name}' {launch_mode_msg(cl_args)}"
+  succ_ctxt = f"Successfully launched topology '{topology_name}' {launch_mode_msg(cl_args)}"
 
   try:
     r = service_method(service_apiurl, data=data, files=files)
@@ -204,7 +205,7 @@ def launch_topology_server(cl_args, topology_file, topology_defn_file, topology_
     created = r.status_code is requests.codes.created
     s = Status.Ok if created or ok else Status.HeronError
     if s is Status.HeronError:
-      Log.error(r.json().get('message', "Unknown error from API server %d" % r.status_code))
+      Log.error(r.json().get('message', f"Unknown error from API server {r.status_code}"))
     elif ok:
       # this case happens when we request a dry_run
       print(r.json().get("response"))
@@ -227,18 +228,17 @@ def launch_topologies(cl_args, topology_file, tmp_dir):
   defn_files = glob.glob(tmp_dir + '/*.defn')
 
   if len(defn_files) == 0:
-    return SimpleResult(Status.HeronError, "No topologies found under %s" % tmp_dir)
+    return SimpleResult(Status.HeronError, f"No topologies found under {tmp_dir}")
 
   results = []
   for defn_file in defn_files:
     # load the topology definition from the file
     topology_defn = topology_pb2.Topology()
     try:
-      handle = open(defn_file, "rb")
-      topology_defn.ParseFromString(handle.read())
-      handle.close()
+      with open(defn_file, "rb") as handle:
+        topology_defn.ParseFromString(handle.read())
     except Exception as e:
-      err_context = "Cannot load topology definition '%s': %s" % (defn_file, e)
+      err_context = f"Cannot load topology definition '{defn_file}': {e}"
       return SimpleResult(Status.HeronError, err_context)
 
     # log topology and components configurations
@@ -297,7 +297,7 @@ def submit_fatjar(cl_args, unknown_args, tmp_dir):
 
   if not result.is_successful(res):
     err_context = ("Failed to create topology definition " \
-      "file when executing class '%s' of file '%s'") % (main_class, topology_file)
+      f"file when executing class '{main_class}' of file '{topology_file}'")
     res.add_context(err_context)
     return res
 
@@ -341,7 +341,7 @@ def submit_tar(cl_args, unknown_args, tmp_dir):
 
   if not result.is_successful(res):
     err_context = ("Failed to create topology definition " \
-      "file when executing class '%s' of file '%s'") % (main_class, topology_file)
+      f"file when executing class '{main_class}' of file '{topology_file}'")
     res.add_context(err_context)
     return res
 
@@ -362,7 +362,7 @@ def submit_pex(cl_args, unknown_args, tmp_dir):
   result.render(res)
   if not result.is_successful(res):
     err_context = ("Failed to create topology definition " \
-      "file when executing class '%s' of file '%s'") % (topology_class_name, topology_file)
+      f"file when executing class '{topology_class_name}' of file '{topology_file}'")
     res.add_context(err_context)
     return res
 
@@ -382,7 +382,7 @@ def submit_cpp(cl_args, unknown_args, tmp_dir):
   result.render(res)
   if not result.is_successful(res):
     err_context = ("Failed to create topology definition " \
-      "file when executing cpp binary '%s'") % (topology_binary_name)
+      f"file when executing cpp binary '{topology_binary_name}'")
     res.add_context(err_context)
     return res
 
@@ -433,7 +433,7 @@ def run(command, parser, cl_args, unknown_args):
 
   # check to see if the topology file exists
   if not os.path.isfile(topology_file):
-    err_context = "Topology file '%s' does not exist" % topology_file
+    err_context = f"Topology file '{topology_file}' does not exist"
     return SimpleResult(Status.InvocationError, err_context)
 
   # check if it is a valid file type
@@ -443,17 +443,17 @@ def run(command, parser, cl_args, unknown_args):
   cpp_type = topology_file.endswith(".dylib") or topology_file.endswith(".so")
   if not (jar_type or tar_type or pex_type or cpp_type):
     _, ext_name = os.path.splitext(topology_file)
-    err_context = "Unknown file type '%s'. Please use .tar "\
-                  "or .tar.gz or .jar or .pex or .dylib or .so file"\
-                  % ext_name
+    err_context = f"Unknown file type '{ext_name}'. Please use .tar "\
+                  "or .tar.gz or .jar or .pex or .dylib or .so file"
     return SimpleResult(Status.InvocationError, err_context)
 
   # check if extra launch classpath is provided and if it is validate
   if cl_args['extra_launch_classpath']:
     valid_classpath = classpath.valid_java_classpath(cl_args['extra_launch_classpath'])
     if not valid_classpath:
-      err_context = "One of jar or directory in extra launch classpath does not exist: %s" % \
-        cl_args['extra_launch_classpath']
+      err_context = "One of jar or directory in extra launch classpath"\
+        f"does not exist: {cl_args['extra_launch_classpath']}"
+
       return SimpleResult(Status.InvocationError, err_context)
 
   # create a temporary directory for topology definition file

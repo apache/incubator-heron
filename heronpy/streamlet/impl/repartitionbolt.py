@@ -19,7 +19,7 @@
 #  under the License.
 
 """module for map bolt: RepartitionBolt"""
-import collections
+from collections.abc import Iterable
 import inspect
 
 from heronpy.api.custom_grouping import ICustomGrouping
@@ -50,7 +50,7 @@ class RepartitionCustomGrouping(ICustomGrouping):
     # only emits to the first task id
     targets = self._repartition_function(values, len(self.target_tasks))
     retval = []
-    if isinstance(targets, collections.Iterable):
+    if isinstance(targets, Iterable):
       for target in targets:
         retval.append(self.target_tasks[target % len(self.target_tasks)])
     else:
@@ -70,7 +70,7 @@ class RepartitionBolt(Bolt, StatefulComponent, StreamletBoltBase):
     pass
 
   def initialize(self, config, context):
-    self.logger.debug("RepartitionBolt's Component-specific config: \n%s" % str(config))
+    self.logger.debug("RepartitionBolt's Component-specific config: \n%s", str(config))
     self.processed = 0
     self.emitted = 0
 
@@ -84,7 +84,7 @@ class RepartitionBolt(Bolt, StatefulComponent, StreamletBoltBase):
 class RepartitionStreamlet(Streamlet):
   """RepartitionStreamlet"""
   def __init__(self, num_partitions, repartition_function, parent):
-    super(RepartitionStreamlet, self).__init__()
+    super().__init__()
     if not callable(repartition_function):
       raise RuntimeError("Repartition function has to be callable")
     if len(inspect.getargspec(repartition_function)) != 2:

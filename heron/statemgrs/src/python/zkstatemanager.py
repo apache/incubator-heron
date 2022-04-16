@@ -21,6 +21,12 @@
 ''' zkstatemanager.py '''
 import contextlib
 
+from kazoo.client import KazooClient
+from kazoo.exceptions import NodeExistsError
+from kazoo.exceptions import NoNodeError
+from kazoo.exceptions import NotEmptyError
+from kazoo.exceptions import ZookeeperError
+
 from heron.proto.execution_state_pb2 import ExecutionState
 from heron.proto.packing_plan_pb2 import PackingPlan
 from heron.proto.physical_plan_pb2 import PhysicalPlan
@@ -32,13 +38,9 @@ from heron.statemgrs.src.python.log import Log as LOG
 from heron.statemgrs.src.python.statemanager import StateManager
 from heron.statemgrs.src.python.stateexceptions import StateException
 
-from kazoo.client import KazooClient
-from kazoo.exceptions import NodeExistsError
-from kazoo.exceptions import NoNodeError
-from kazoo.exceptions import NotEmptyError
-from kazoo.exceptions import ZookeeperError
 
 def _makehostportlist(hostportlist):
+  # pylint: disable=consider-using-f-string
   return ','.join(["%s:%i" % hp for hp in hostportlist])
 
 @contextlib.contextmanager
@@ -68,7 +70,7 @@ class ZkStateManager(StateManager):
   """
 
   def __init__(self, name, hostportlist, rootpath, tunnelhost):
-    super(ZkStateManager, self).__init__()
+    super().__init__()
     self.name = name
     self.hostportlist = hostportlist
     self.tunnelhost = tunnelhost
@@ -209,8 +211,7 @@ class ZkStateManager(StateManager):
                            StateException.EX_TYPE_PROTOBUF_ERROR)
 
     path = self.get_topology_path(topologyName)
-    LOG.info("Adding topology: {0} to path: {1}".format(
-        topologyName, path))
+    LOG.info(f"Adding topology: {topologyName} to path: {path}")
     topologyString = topology.SerializeToString()
     with reraise_from_zk_exceptions("creating topology"):
       self.client.create(path, value=topologyString, makepath=True)
@@ -219,8 +220,7 @@ class ZkStateManager(StateManager):
   def delete_topology(self, topologyName):
     """ delete topology """
     path = self.get_topology_path(topologyName)
-    LOG.info("Removing topology: {0} from path: {1}".format(
-        topologyName, path))
+    LOG.info(f"Removing topology: {topologyName} from path: {path}")
     with reraise_from_zk_exceptions("deleting topology"):
       self.client.delete(path)
     return True
@@ -328,8 +328,7 @@ class ZkStateManager(StateManager):
                            StateException.EX_TYPE_PROTOBUF_ERROR)
 
     path = self.get_pplan_path(topologyName)
-    LOG.info("Adding topology: {0} to path: {1}".format(
-        topologyName, path))
+    LOG.info(f"Adding topology: {topologyName} to path: {path}")
     pplanString = pplan.SerializeToString()
     with reraise_from_zk_exceptions("creating pplan"):
       self.client.create(path, value=pplanString, makepath=True)
@@ -338,8 +337,7 @@ class ZkStateManager(StateManager):
   def delete_pplan(self, topologyName):
     """ delete physical plan info """
     path = self.get_pplan_path(topologyName)
-    LOG.info("Removing topology: {0} from path: {1}".format(
-        topologyName, path))
+    LOG.info(f"Removing topology: {topologyName} from path: {path}")
     with reraise_from_zk_exceptions("deleting pplan"):
       self.client.delete(path)
     return True
@@ -400,8 +398,7 @@ class ZkStateManager(StateManager):
                            StateException.EX_TYPE_PROTOBUF_ERROR)
 
     path = self.get_execution_state_path(topologyName)
-    LOG.info("Adding topology: {0} to path: {1}".format(
-        topologyName, path))
+    LOG.info(f"Adding topology: {topologyName} to path: {path}")
     executionStateString = executionState.SerializeToString()
     with reraise_from_zk_exceptions("creating execution state"):
       self.client.create(path, value=executionStateString, makepath=True)
@@ -410,8 +407,7 @@ class ZkStateManager(StateManager):
   def delete_execution_state(self, topologyName):
     """ delete execution state """
     path = self.get_execution_state_path(topologyName)
-    LOG.info("Removing topology: {0} from path: {1}".format(
-        topologyName, path))
+    LOG.info(f"Removing topology: {topologyName} from path: {path}")
     with reraise_from_zk_exceptions("deleting execution state"):
       self.client.delete(path)
     return True

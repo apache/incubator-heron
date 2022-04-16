@@ -40,6 +40,7 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.apache.heron.api.utils.Slf4jUtils;
 import org.apache.heron.apiserver.resources.HeronResource;
 import org.apache.heron.apiserver.utils.ConfigUtils;
 import org.apache.heron.apiserver.utils.Logging;
@@ -245,6 +246,7 @@ public final class Runtime {
 
   @SuppressWarnings({"IllegalCatch", "RegexpSinglelineJava"})
   public static void main(String[] args) throws Exception {
+    Slf4jUtils.installSLF4JBridge();
     final Options options = createOptions();
     final Options helpOptions = constructHelpOptions();
 

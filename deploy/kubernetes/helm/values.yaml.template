@@ -19,14 +19,6 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-# The environment where Heron will be running
-# The following values are valid:
-# "aws" - Amazon Web Services
-# "gke" - Google Kubernetes Engine
-# "minikube" - Kubernetes on a single local node
-# "baremetal" - On-premise cluster
-platform: minikube
-
 # Heron image to use
 image: apache/heron:VERSION
 
@@ -105,6 +97,14 @@ bookkeeper:
   storageClassName: "none"
   prometheus:
     enabled: false
+  # Optional Variables
+  useHostNameAsBookieID: true
+  useStatefulSet: true
+  createReplicas: true
+  affinityPods: false
+  useHostPath: false
+  useVolumeClaimTemplate: true
+  tolerateUnreadyEndpoints: true
 
 zookeeper:
   enabled: true

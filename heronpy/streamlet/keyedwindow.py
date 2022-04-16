@@ -33,4 +33,4 @@ class KeyedWindow:
     self._window = window
 
   def __repr__(self):
-    return 'KeyedWindow {key: %s, window: %s}' % (self._key, self._window)
+    return f'KeyedWindow {{key: {self._key}, window: {self._window}}}'

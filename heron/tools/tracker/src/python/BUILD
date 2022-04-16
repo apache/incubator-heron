@@ -8,11 +8,11 @@ pex_library(
     ),
     reqs = [
         "click==7.1.2",
-        "fastapi==0.62.0",
+        "fastapi==0.75.0",
         "httpx==0.16.1",
         "javaobj-py3==0.4.1",
         "networkx==2.5",
-        "protobuf==3.14.0",
+        "protobuf==3.16.0",
         "uvicorn==0.11.7",
     ],
     deps = [

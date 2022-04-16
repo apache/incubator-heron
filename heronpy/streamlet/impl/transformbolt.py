@@ -43,7 +43,7 @@ class TransformBolt(Bolt, StatefulComponent, StreamletBoltBase):
     pass
 
   def initialize(self, config, context):
-    self.logger.debug("TransformBolt's Component-specific config: \n%s" % str(config))
+    self.logger.debug("TransformBolt's Component-specific config: \n%s", str(config))
     self.processed = 0
     self.emitted = 0
     if TransformBolt.OPERATOR in config:
@@ -65,7 +65,7 @@ class TransformBolt(Bolt, StatefulComponent, StreamletBoltBase):
 class TransformStreamlet(Streamlet):
   """TransformStreamlet"""
   def __init__(self, transform_operator, parent):
-    super(TransformStreamlet, self).__init__()
+    super().__init__()
     if not isinstance(transform_operator, TransformOperator):
       raise RuntimeError("Transform Operator has to be a TransformOperator")
     if not isinstance(parent, Streamlet):

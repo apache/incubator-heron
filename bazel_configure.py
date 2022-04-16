@@ -26,7 +26,7 @@
 #
 #  cd docker
 #  ./build-artifacts.sh ubuntu20.04 0.12.0 .
-#  ./build-artifacts.sh centos8 0.12.0 .
+#  ./build-artifacts.sh rocky8 0.12.0 .
 #
 import os
 import re
@@ -103,10 +103,10 @@ def discover_git_branch():
 # Utility functions for system defines
 ######################################################################
 def define_string(name, value):
-  return '#define %s "%s"\n' % (name, value)
+  return f'#define {name} "{value}"\n'
 
 def define_value(name, value):
-  return '#define %s %s\n' % (name, value)
+  return f'#define {name} {value}\n'
 
 ######################################################################
 # Discover where a program is located using the PATH variable
@@ -144,7 +144,7 @@ def real_program_path(program_name):
   return None
 
 def fail(message):
-  print("\nFAILED:  %s" % message)
+  print(f"\nFAILED:  {message}")
   sys.exit(1)
 
 # Assumes the version is at the end of the first line consisting of digits and dots
@@ -158,7 +158,7 @@ def discover_version(path):
     version_flag = "-V"
   else:
     version_flag = "--version"
-  command = "%s %s" % (path, version_flag)
+  command = f"{path} {version_flag}"
   version_output = subprocess.check_output(command, stderr=subprocess.STDOUT, shell=True)
   first_line = version_output.decode('ascii', 'ignore').split("\n")[0]
   version = get_trailing_version(first_line)
@@ -215,12 +215,12 @@ def discover_version(path):
       return version
 
 
-  fail ("Could not determine the version of %s from the following output\n%s\n%s" % (path, command, version_output))
+  fail (f"Could not determine the version of {path} from the following output\n{command}\n{version_output}")
 
 def to_semver(version):
   # is version too short
   if re.search('^[\d]+\.[\d]+$', version):
-    return "%s.0" % version
+    return f"{version}.0"
 
   # is version too long
   version_search = re.search('^([\d]+\.[\d]+\.[\d]+)\.[\d]+$', version)
@@ -231,8 +231,8 @@ def to_semver(version):
 
 def assert_min_version(path, min_version):
   version = discover_version(path)
-  if not semver.match(to_semver(version), ">=%s" % to_semver(min_version)):
-    fail("%s is version %s which is less than the required version %s" % (path, version, min_version))
+  if not semver.match(to_semver(version), f">={to_semver(min_version)}"):
+    fail(f"{path} is version {version} which is less than the required version {min_version}")
   return version
 
 ######################################################################
@@ -267,17 +267,17 @@ def make_executable(path):
 def discover_tool(program, msg, envvar, min_version = ''):
   VALUE = discover_program(program, envvar)
   if not VALUE:
-    fail("""You need to have %s installed to build Heron.
-Note: Some vendors install %s with a versioned name
-(like /usr/bin/%s-4.8). You can set the %s environment
-variable to specify the full path to yours.'""" % (program, program, program, envvar))
+    fail(f"""You need to have {program} installed to build Heron.
+Note: Some vendors install {program} with a versioned name
+(like /usr/bin/{program}-4.8). You can set the {envvar} environment
+variable to specify the full path to yours.'""")
 
   print_value = VALUE
   if min_version:
     version = assert_min_version(VALUE, min_version)
-    print_value = "%s (%s)" % (VALUE, version)
+    print_value = f"{VALUE} ({version})"
 
-  print('Using %s:\t%s' % (msg.ljust(20), print_value))
+  print(f'Using {msg.ljust(20)}:\t{print_value}')
   return VALUE
 
 def discover_jdk():
@@ -290,7 +290,7 @@ def discover_jdk():
              "You can set the JAVA_HOME environment variavle to specify the full path to yours.")
     jdk_bin_path = os.path.dirname(javac_path)
     jdk_path = os.path.dirname(jdk_bin_path)
-  print('Using %s:\t%s' % ('JDK'.ljust(20), jdk_path))
+  print(f"Using {'JDK'.ljust(20)}:\t{jdk_path}")
   return jdk_path
 
 def test_venv():
@@ -312,14 +312,14 @@ def discover_tool_default(program, msg, envvar, defvalue):
   VALUE = discover_program(program, envvar)
   if not VALUE:
     VALUE = defvalue
-    print('%s:\tnot found, but ok' % (program.ljust(26)))
+    print(f'{program.ljust(26)}:\tnot found, but ok')
   else:
-    print('Using %s:\t%s' % (msg.ljust(20), VALUE))
+    print(f'Using {msg.ljust(20)}:\t{VALUE}')
   return VALUE
 
 def export_env_to_file(out_file, env):
   if env in os.environ:
-    out_file.write('export %s="%s"\n' % (env, os.environ[env]))
+    out_file.write(f'export {env}="{os.environ[env]}"\n')
 
 ######################################################################
 # Generate the shell script that recreates the environment
@@ -348,7 +348,7 @@ def write_env_exec_file(platform, environ):
   out_file.write('$*')
 
   make_executable(env_exec_file)
-  print('Wrote the environment exec file %s' % (env_exec_file))
+  print(f'Wrote the environment exec file {env_exec_file}')
 
 
 ######################################################################
@@ -385,13 +385,13 @@ def write_heron_config_header(config_file):
   out_file.write(define_string('GIT_BRANCH', discover_git_branch()))
   out_file.write(generate_system_defines())
   out_file.close()
-  print('Wrote the heron config header file: \t"%s"' % (config_file))
+  print(f'Wrote the heron config header file: \t"{config_file}"')
 
 ######################################################################
 # MAIN program that sets up your workspace for bazel
 ######################################################################
 def main():
-  env_map = dict()
+  env_map = {}
 
   # Discover the platform
   platform = discover_platform()

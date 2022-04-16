@@ -32,7 +32,7 @@ function die {
 which scalac || die "scalac must be installed to run this script. Exiting."
 
 rm -f heron-storm.jar
-(cd $root && bazel build --config=darwin scripts/packages:tarpkgs)
+(cd $root && bazel build scripts/packages:tarpkgs)
 
 # Verify storm and heron bolts compile with heron-storm.jar
 scalac -cp bazel-bin/./storm-compatibility/v0.10.2/src/java/heron-storm.jar \

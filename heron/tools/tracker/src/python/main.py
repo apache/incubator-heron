@@ -24,6 +24,9 @@ import logging
 import os
 import sys
 
+import click
+import uvicorn
+
 from heron.tools.common.src.python.utils import config as common_config
 from heron.common.src.python.utils import log
 from heron.tools.tracker.src.python import constants
@@ -33,11 +36,8 @@ from heron.tools.tracker.src.python.tracker import Tracker
 from heron.tools.tracker.src.python.app import app
 from heron.tools.tracker.src.python import state
 
-import click
-import uvicorn
-
 Log = log.Log
-
+Log.setLevel(logging.DEBUG)
 
 def create_tracker_config(config_file: str, stmgr_override: dict) -> dict:
   # try to parse the config file if we find one

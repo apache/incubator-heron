@@ -159,7 +159,7 @@ class TestTemplate:
     expected_result = ""
     actual_result = ""
     retries_left = RETRY_COUNT
-    _sleep("before trying to check results for test %s" % self.testname, RETRY_INTERVAL)
+    _sleep(f"before trying to check results for test {self.testname}", RETRY_INTERVAL)
     while retries_left > 0:
       retries_left -= 1
       try:
@@ -169,7 +169,7 @@ class TestTemplate:
           actual_result = g.read()
       except Exception as e:
         message =\
-          "Failed to read expected or actual results from file for test %s: %s" % self.testname
+          f"Failed to read expected or actual results from file for test: {self.testname}"
         if retries_left == 0:
           raise status.TestFailure(message, e)
         logging.error(message, e)
@@ -191,13 +191,13 @@ class TestTemplate:
     # Compare the actual and expected result
     if actual_sorted == expected_sorted:
       success = status.TestSuccess(
-          "Actual result matched expected result for test %s" % self.testname)
+          f"Actual result matched expected result for test {self.testname}")
       logging.info("Actual result ---------- \n%s", actual_sorted)
       logging.info("Expected result ---------- \n%s", expected_sorted)
       return success
     else:
       failure = status.TestFailure(
-          "Actual result did not match expected result for test %s" % self.testname)
+          f"Actual result did not match expected result for test {self.testname}")
       logging.info("Actual result ---------- \n%s", actual_sorted)
       logging.info("Expected result ---------- \n%s", expected_sorted)
       raise failure
@@ -222,7 +222,7 @@ class TestTemplate:
     """ kills process by running unix command kill """
     if process_number < 1:
       raise RuntimeError(
-          "Not attempting to kill process id < 1 passed to kill_process: %d" % process_number)
+          f"Not attempting to kill process id < 1 passed to kill_process: {process_number}")
 
     logging.info("Killing process number %s", process_number)
 
@@ -232,39 +232,39 @@ class TestTemplate:
       if "No such process" in str(ex): # killing a non-existing process condsidered as success
         logging.info(str(ex))
       else:
-        raise RuntimeError("Unable to kill process %s" % process_number)
+        raise RuntimeError(f"Unable to kill process {process_number}")
     except Exception:
-      raise RuntimeError("Unable to kill process %s" % process_number)
+      raise RuntimeError(f"Unable to kill process {process_number}")
 
     logging.info("Killed process number %s", process_number)
 
   def kill_strmgr(self):
     logging.info("Executing kill stream manager")
-    stmgr_pid = self.get_pid('%s-%d' % (STMGR, NON_TMANAGER_SHARD), self.params['workingDirectory'])
+    stmgr_pid = self.get_pid(f'{STMGR}-{NON_TMANAGER_SHARD}', self.params['workingDirectory'])
     self.kill_process(stmgr_pid)
 
   def kill_metricsmgr(self):
     logging.info("Executing kill metrics manager")
     metricsmgr_pid = self.get_pid(
-        '%s-%d' % (HERON_METRICSMGR, NON_TMANAGER_SHARD), self.params['workingDirectory'])
+        f'{HERON_METRICSMGR}-{int(NON_TMANAGER_SHARD)}', self.params['workingDirectory'])
     self.kill_process(metricsmgr_pid)
 
   def _get_tracker_pplan(self):
-    url = 'http://localhost:%s/topologies/physicalplan?' % self.params['trackerPort']\
-          + 'cluster=local&environ=default&topology=IntegrationTest_LocalReadWriteTopology'
+    url = f"http://localhost:{self.params['trackerPort']}/topologies/physicalplan?"\
+          + "cluster=local&environ=default&topology=IntegrationTest_LocalReadWriteTopology"
     logging.debug("Fetching physical plan from %s", url)
     response = urlopen(url)
     physical_plan_json = json.loads(response.read())
 
-    if 'result' not in physical_plan_json:
+    if 'instances' not in physical_plan_json:
       raise status.TestFailure(
-          "Could not find result json in physical plan request to tracker: %s" % url)
+          f"Could not find result json in physical plan request to tracker: {url}")
 
-    return physical_plan_json['result']
+    return physical_plan_json
 
   def _block_until_topology_running(self, min_instances):
     retries_left = RETRY_COUNT
-    _sleep("before trying to fetch pplan for test %s" % self.testname, RETRY_INTERVAL)
+    _sleep(f"before trying to fetch pplan for test {self.testname}", RETRY_INTERVAL)
     while retries_left > 0:
       retries_left -= 1
       packing_plan = self._get_tracker_pplan()
@@ -276,16 +276,15 @@ class TestTemplate:
           return packing_plan
         elif retries_left == 0:
           raise status.TestFailure(
-              "Got pplan from tracker for test %s but the number of " % self.testname +
-              "instances found (%d) was less than min expected (%s)." %
-              (instances_found, min_instances))
+              f"Got pplan from tracker for test {self.testname} but the number of " +
+              f"instances found ({instances_found}) was less than min expected ({min_instances})."
+            )
 
       if retries_left > 0:
-        _sleep("before trying again to fetch pplan for test %s (attempt %s/%s)" %
-               (self.testname, RETRY_COUNT - retries_left, RETRY_COUNT), RETRY_INTERVAL)
+        _sleep("before trying again to fetch pplan for test "\
+          f"{self.testname} (attempt {RETRY_COUNT - retries_left}/{RETRY_COUNT})", RETRY_INTERVAL)
       else:
-        raise status.TestFailure("Failed to get pplan from tracker for test %s after %s attempts."
-                                 % (self.testname, RETRY_COUNT))
+        raise status.TestFailure(f"Failed to get pplan from tracker for test {self.testname} after {RETRY_COUNT} attempts.")
 
 def _block_until_stmgr_running(expected_stmgrs):
   # block until ./heron-stmgr exists
@@ -306,7 +305,7 @@ def _submit_topology(heron_cli_path, test_cluster, test_jar_path, topology_class
   p = subprocess.Popen(splitcmd)
   p.wait()
   if p.returncode != 0:
-    raise status.TestFailure("Failed to submit topology %s" % topology_name)
+    raise status.TestFailure(f"Failed to submit topology {topology_name}")
 
   logging.info("Submitted topology %s", topology_name)
 
@@ -316,7 +315,7 @@ def _kill_topology(heron_cli_path, test_cluster, topology_name):
   logging.info("Killing topology: %s", ' '.join(splitcmd))
   # this call can be blocking, no need for subprocess
   if subprocess.call(splitcmd) != 0:
-    raise RuntimeError("Unable to kill the topology: %s" % topology_name)
+    raise RuntimeError(f"Unable to kill the topology: {topology_name}")
 
 def _get_processes():
   """

@@ -166,7 +166,7 @@ case $# in
     echo "  "
     echo "Script to build heron artifacts for different platforms"
     echo "  "
-    echo "Platforms Supported: darwin, debian10, ubuntu20.04, centos8"
+    echo "Platforms Supported: darwin, debian10, ubuntu20.04, rocky8"
     echo "  "
     echo "Example:"
     echo "  ./build-artifacts.sh ubuntu20.04 0.12.0 ."

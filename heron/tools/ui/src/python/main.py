@@ -32,10 +32,6 @@ from collections import Counter
 from datetime import datetime
 from typing import Callable, List, Optional
 
-from heron.tools.common.src.python.utils import config
-from heron.tools.common.src.python.clients import tracker
-from heron.common.src.python.utils import log
-
 import click
 import pydantic
 import requests
@@ -48,6 +44,10 @@ from fastapi.templating import Jinja2Templates
 from starlette.responses import RedirectResponse, Response
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
+from heron.tools.common.src.python.utils import config
+from heron.tools.common.src.python.clients import tracker
+from heron.common.src.python.utils import log
+
 
 VERSION = config.get_version_number()
 DEFAULT_ADDRESS = "0.0.0.0"
@@ -57,6 +57,9 @@ DEFAULT_BASE_URL = ""
 
 base_url = DEFAULT_BASE_URL
 tracker_url = DEFAULT_TRACKER_URL
+
+Log = log.Log
+Log.setLevel(logging.DEBUG)
 
 app = FastAPI(title="Heron UI", version=VERSION)
 
@@ -105,7 +108,7 @@ def config_page(
   )
 
 
-@topologies_router.get("/{cluster}/{environment}/{topology}/{instance}/{component}/exceptions")
+@topologies_router.get("/{cluster}/{environment}/{topology}/{component}/{instance}/exceptions")
 def exceptions_page(
     cluster: str, environment: str, topology: str, component: str, instance: str,
     request: Request
@@ -197,8 +200,8 @@ def timeline(
     topology: str,
     metric: str,
     instance: str,
-    starttime: str,
-    endtime: str,
+    starttime: int,
+    endtime: int,
     component: Optional[str] = None,
     max: bool = False, # pylint: disable=redefined-builtin
 ) -> dict:
@@ -306,6 +309,33 @@ def file_download(
       headers={"Content-Disposition": f"attachment; filename={filename}"},
   )
 
+# List envelope for Exceptions response
+class ApiListEnvelope(pydantic.BaseModel):
+  """Envelope for heron-ui JSON API."""
+  status: str
+  message: str
+  version: str = VERSION
+  executiontime: int
+  result: list
+
+def api_topology_list_json(method: Callable[[], dict]) -> ApiListEnvelope:
+  """Wrap the output of a method with a response envelope."""
+  started = time.time()
+  result = method()
+  Log.debug(f"Api topology: {result}")
+  if result is None:
+    return ApiEnvelope(
+        status="failure",
+        message="No topology found",
+        executiontime=time.time() - started,
+        result={},
+    )
+  return ApiListEnvelope(
+      status="success",
+      message="",
+      executiontime=time.time() - started,
+      result=result,
+  )
 
 # topology list and plan handlers
 class ApiEnvelope(pydantic.BaseModel):
@@ -316,11 +346,18 @@ class ApiEnvelope(pydantic.BaseModel):
   executiontime: int
   result: dict
 
-
 def api_topology_json(method: Callable[[], dict]) -> ApiEnvelope:
   """Wrap the output of a method with a response envelope."""
   started = time.time()
   result = method()
+  Log.debug(f"Api topology: {result}")
+  if result is None:
+    return ApiEnvelope(
+        status="failure",
+        message="No topology found",
+        executiontime=time.time() - started,
+        result={},
+    )
   return ApiEnvelope(
       status="success",
       message="",
@@ -392,21 +429,21 @@ def execution_state_json(cluster: str, environment: str, topology: str) -> ApiEn
 )
 def scheduler_location_json(cluster: str, environment: str, topology: str) -> ApiEnvelope:
   """Unimplemented method which is currently a duplicate of execution state."""
-  return api_topology_json(lambda: tracker.get_execution_state(
+  return api_topology_json(lambda: tracker.get_scheduler_location(
       cluster, environment, topology,
   ))
 
 
 @topologies_router.get(
     "/{cluster}/{environment}/{topology}/{component}/exceptions.json",
-    response_model=ApiEnvelope,
+    response_model=ApiListEnvelope,
 )
-def exceptions_json(cluster: str, environment: str, topology: str, component: str) -> ApiEnvelope:
+def exceptions_json(cluster: str, environment: str, topology: str,
+                    component: str) -> ApiListEnvelope:
   """Return a list of exceptions for a component."""
-  return api_topology_json(lambda: tracker.get_component_exceptions(
+  return api_topology_list_json(lambda: tracker.get_component_exceptions(
       cluster, environment, topology, component,
   ))
-
 
 @topologies_router.get(
     "/{cluster}/{environment}/{topology}/{component}/exceptionsummary.json",
@@ -462,7 +499,7 @@ def pid_snippet(
 ) -> Response:
   """Render a HTML snippet containing topology output of container."""
   physical_plan = tracker.get_physical_plan(cluster, environment, topology)
-  host = physical_plan["stmgrs"][physical_plan["instances"][instance]["stmgrId"]][
+  host = physical_plan["stmgrs"][physical_plan["instances"][instance]["stmgr_id"]][
       "host"
   ]
   info = tracker.get_instance_pid(cluster, environment, topology, instance)
@@ -492,7 +529,7 @@ def jstack_snippet(
 ) -> HTMLResponse:
   """Render a HTML snippet containing jstack output of container."""
   physical_plan = tracker.get_physical_plan(cluster, environment, topology)
-  host = physical_plan["stmgrs"][physical_plan["instances"][instance]["stmgrId"]][
+  host = physical_plan["stmgrs"][physical_plan["instances"][instance]["stmgr_id"]][
       "host"
   ]
   info = tracker.get_instance_jstack(cluster, environment, topology, instance)
@@ -521,7 +558,7 @@ def jmap_snippet(
 ) -> HTMLResponse:
   """Render a HTML snippet containing jmap output of container."""
   physical_plan = tracker.get_physical_plan(cluster, environment, topology)
-  host = physical_plan["stmgrs"][physical_plan["instances"][instance]["stmgrId"]][
+  host = physical_plan["stmgrs"][physical_plan["instances"][instance]["stmgr_id"]][
       "host"
   ]
   info = tracker.run_instance_jmap(cluster, environment, topology, instance)
@@ -558,7 +595,7 @@ def histogram_snippet(
   """Render a HTML snippet containing jmap histogram output of container."""
   # use a function to DRY up these container API methods
   physical_plan = tracker.get_physical_plan(cluster, environment, topology)
-  host = physical_plan["stmgrs"][physical_plan["instances"][instance]["stmgrId"]][
+  host = physical_plan["stmgrs"][physical_plan["instances"][instance]["stmgr_id"]][
       "host"
   ]
   info = tracker.get_instance_mem_histogram(
@@ -614,12 +651,14 @@ def cli(
     host: str, port: int, base_url_option: str, tracker_url_option: str, verbose: bool
 ) -> None:
   """Start a web UI for heron which renders information from the tracker."""
-  global base_url, tracker_url
+  global base_url
   base_url = base_url_option
-  log.configure(level=logging.DEBUG if verbose else logging.INFO)
+  log_level = logging.DEBUG if verbose else logging.INFO
+  log.configure(log_level)
+
   tracker.tracker_url = tracker_url_option
 
-  uvicorn.run(app, host=host, port=port, log_config=None)
+  uvicorn.run(app, host=host, port=port, log_level=log_level)
 
 
 if __name__ == "__main__":

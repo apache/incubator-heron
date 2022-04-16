@@ -461,7 +461,7 @@ public class V1Controller extends KubernetesController {
    * @param containerResource Passed down to configure the <code>executor</code> resource limits.
    * @param numberOfInstances Used to configure the execution command and ports for the <code>executor</code>.
    * @param isExecutor Flag used to configure components specific to <code>executor</code> and <code>manager</code>.
-   * @return A fully configured <code>StatefulSet</code> for the topology's <code>executors</code>.
+   * @return A fully configured <code>V1StatefulSet</code> for the topology's <code>executors</code>.
    */
   private V1StatefulSet createStatefulSet(Resource containerResource, int numberOfInstances,
                                           boolean isExecutor) {
@@ -1466,7 +1466,7 @@ public class V1Controller extends KubernetesController {
    */
   private String getStatefulSetName(boolean isExecutor) {
     return String.format("%s-%s", getTopologyName(),
-        isExecutor ? KubernetesConstants.EXECUTOR_NAME + "s" : KubernetesConstants.MANAGER_NAME);
+        isExecutor ? KubernetesConstants.EXECUTOR_NAME : KubernetesConstants.MANAGER_NAME);
   }
 
   /**

@@ -61,12 +61,12 @@ class Download extends React.Component {
     const latestDebian10TarUrl =  getTarUrl(latestHeronVersion, "debian10");
     const latestArchiveUrl = distUrl(latestHeronVersion, 'bin');
     const latestSrcArchiveUrl = distUrl(latestHeronVersion, 'src')
-    const centos8InstallUrl = getInstallScriptMirrorUrl(latestHeronVersion, "centos8")
-    const centos8InstallCryptoUrl = getInstallScriptCryptoUrl(latestHeronVersion, "centos8")
+    const rocky8InstallUrl = getInstallScriptMirrorUrl(latestHeronVersion, "rocky8")
+    const rocky8InstallCryptoUrl = getInstallScriptCryptoUrl(latestHeronVersion, "rocky8")
     const debian10InstallUrl = getInstallScriptMirrorUrl(latestHeronVersion, "debian10")
     const debian10InstallCryptoUrl = getInstallScriptCryptoUrl(latestHeronVersion, "debian10")
-    const ubuntu1804InstallUrl = getInstallScriptMirrorUrl(latestHeronVersion, "ubuntu18.04")
-    const ubuntu1804InstallCryptoUrl = getInstallScriptCryptoUrl(latestHeronVersion, "ubuntu18.04")
+    const ubuntu2004InstallUrl = getInstallScriptMirrorUrl(latestHeronVersion, "ubuntu20.04")
+    const ubuntu2004InstallCryptoUrl = getInstallScriptCryptoUrl(latestHeronVersion, "ubuntu20.04")
 
 
 
@@ -148,14 +148,14 @@ class Download extends React.Component {
                 <tbody>
 
 
-                  <tr key={'centos-install'}>
-                    <th>centos8</th>
+                  <tr key={'rocky-install'}>
+                    <th>rocky8</th>
                     <td>
-                      <a href={`${centos8InstallUrl}`}> heron-install-0.20.4-incubating-centos8.sh</a>
+                      <a href={`${rocky8InstallUrl}`}> heron-install-0.20.4-incubating-rocky8.sh</a>
                     </td>
                     <td>
-                      <a href={`${centos8InstallCryptoUrl}.asc`}>asc</a>,&nbsp;
-                      <a href={`${centos8InstallCryptoUrl}.sha512`}>sha512</a>
+                      <a href={`${rocky8InstallCryptoUrl}.asc`}>asc</a>,&nbsp;
+                      <a href={`${rocky8InstallCryptoUrl}.sha512`}>sha512</a>
                     </td>
                   </tr>
                   <tr key={'debian10-install'}>
@@ -168,14 +168,14 @@ class Download extends React.Component {
                       <a href={`${debian10InstallCryptoUrl}.sha512`}>sha512</a>
                     </td>
                   </tr>
-                   <tr key={'ubuntu18.04-install'}>
-                    <th>Ubuntu18.04</th>
+                   <tr key={'ubuntu20.04-install'}>
+                    <th>Ubuntu20.04</th>
                     <td>
-                     <a href={`${ubuntu1804InstallUrl}`}> heron-install-0.20.4-incubating-ubuntu18.04.sh</a>
+                     <a href={`${ubuntu2004InstallUrl}`}> heron-install-0.20.4-incubating-ubuntu20.04.sh</a>
                     </td>
                     <td>
-                      <a href={`${ubuntu1804InstallCryptoUrl}.asc`}>asc</a>,&nbsp;
-                      <a href={`${ubuntu1804InstallCryptoUrl}.sha512`}>sha512</a>
+                      <a href={`${ubuntu2004InstallCryptoUrl}.asc`}>asc</a>,&nbsp;
+                      <a href={`${ubuntu2004InstallCryptoUrl}.sha512`}>sha512</a>
                     </td>
                   </tr>
                   </tbody>

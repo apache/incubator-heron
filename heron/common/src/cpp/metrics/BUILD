@@ -43,7 +43,7 @@ cc_library(
         "@com_github_google_glog//:glog",
         "@com_google_protobuf//:protobuf",
     ] + select({
-        "//tools/platform:darwin": [],
+        "@platforms//os:osx": [],
         "//conditions:default": ["@org_nongnu_libunwind//:libunwind"],
     }),
 )

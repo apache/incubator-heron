@@ -21,7 +21,7 @@
 """module for example bolt: CountBolt"""
 from collections import Counter
 
-import heronpy.api.global_metrics as global_metrics
+from heronpy.api import global_metrics
 from heronpy.api.bolt.bolt import Bolt
 from heronpy.api.state.stateful_component import StatefulComponent
 
@@ -34,19 +34,19 @@ class StatefulCountBolt(Bolt, StatefulComponent):
   # pylint: disable=attribute-defined-outside-init
   def init_state(self, stateful_state):
     self.recovered_state = stateful_state
-    self.logger.info("Checkpoint Snapshot recovered : %s" % str(self.recovered_state))
+    self.logger.info(f"Checkpoint Snapshot recovered : {str(self.recovered_state)}")
 
   def pre_save(self, checkpoint_id):
     for (k, v) in list(self.counter.items()):
       self.recovered_state.put(k, v)
-    self.logger.info("Checkpoint Snapshot %s : %s" % (checkpoint_id, str(self.recovered_state)))
+    self.logger.info(f"Checkpoint Snapshot {checkpoint_id} : {str(self.recovered_state)}")
 
   def initialize(self, config, context):
     self.logger.info("In prepare() of CountBolt")
     self.counter = Counter()
     self.total = 0
 
-    self.logger.info("Component-specific config: \n%s" % str(config))
+    self.logger.info(f"Component-specific config: \n{str(config)}")
 
   def _increment(self, word, inc_by):
     self.counter[word] += inc_by

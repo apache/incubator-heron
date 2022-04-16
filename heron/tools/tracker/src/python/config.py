@@ -75,4 +75,5 @@ class Config:
   @staticmethod
   def config_str(config):
     keys = ("type", "name", "hostport", "rootpath", "tunnelhost")
+    # pylint: disable=consider-using-f-string
     return "".join("\t{}: {}\n".format(k, config[k]) for k in keys if k in config).rstrip()

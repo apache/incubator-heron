@@ -23,12 +23,12 @@ import sys
 
 from typing import Optional
 
-from heron.common.src.python.utils.log import Log
-from heron.tools.common.src.python.clients import tracker
+import requests
 
 from tabulate import tabulate
 
-import requests
+from heron.common.src.python.utils.log import Log
+from heron.tools.common.src.python.clients import tracker
 
 
 def to_table(metrics):
