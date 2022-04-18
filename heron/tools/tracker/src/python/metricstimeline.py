@@ -34,7 +34,7 @@ class MetricsTimeline(BaseModel):
   component: str
   starttime: int
   endtime: int
-  timeline: Dict[str, Dict[str, Dict[int, float]]] = Field(
+  timeline: Dict[str, Dict[str, Dict[int, str]]] = Field(
       ...,
       description="map of (metric name, instance, start) to metric value",
   )
