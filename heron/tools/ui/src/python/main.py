@@ -616,7 +616,7 @@ def histogram_snippet(
 
 @app.get("/health", response_class=PlainTextResponse)
 def healthcheck():
-    return "ok"
+  return "ok"
 
 
 app.include_router(topologies_router, prefix="/topologies")

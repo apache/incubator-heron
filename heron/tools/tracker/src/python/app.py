@@ -131,4 +131,4 @@ async def get_machines(
 
 @app.get("/health", response_class=PlainTextResponse)
 def healthcheck():
-    return "ok"
+  return "ok"
