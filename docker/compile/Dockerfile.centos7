@@ -28,8 +28,8 @@ RUN yum -y install \
       cmake \
       openssl-devel \
       file \
-      gcc \
-      gcc-c++ \
+      devtoolset-8-gcc \
+      devtoolset-8-gcc-c++ \
       git \
       glibc-langpack-en \
       kernel-devel \
@@ -56,13 +56,16 @@ RUN wget -O /tmp/bazel.sh https://github.com/bazelbuild/bazel/releases/download/
       && /tmp/bazel.sh \
       && rm -rf /tmp/bazel.sh
 
-ENV PATH /opt/rh/rh-python38/root/usr/bin:${PATH}
-ENV LD_LIBRARY_PATH /opt/rh/rh-python38/root/usr/lib64:/usr/local/lib:${LD_LIBRARY_PATH}
-ENV MANPATH /opt/rh/rh-python38/root/usr/share/man
+ENV PATH /opt/rh/devtoolset-8/root/bin:/opt/rh/rh-python38/root/usr/bin:${PATH}
+ENV LD_LIBRARY_PATH /opt/rh/devtoolset-8/root/lib64:/opt/rh/rh-python38/root/usr/lib64:/usr/local/lib:${LD_LIBRARY_PATH}
+ENV MANPATH /opt/rh/devtoolset-8/root/usr/share/man:/opt/rh/rh-python38/root/usr/share/man
 ENV PKG_CONFIG_PATH /opt/rh/rh-python38/root/usr/lib64/pkgconfig:${PKG_CONFIG_PATH}
 
 RUN /usr/bin/ln -sfT /opt/rh/rh-python38/root/usr/bin/python3 /usr/bin/python3 \
       && /usr/bin/ln -sfT /opt/rh/rh-python38/root/usr/bin/python3 /usr/bin/python \
-      && /usr/bin/ln -sfT /opt/rh/rh-python38/root/usr/bin/python3.8 /usr/bin/python3.8
+      && /usr/bin/ln -sfT /opt/rh/rh-python38/root/usr/bin/python3.8 /usr/bin/python3.8 \
+      && /usr/bin/ln -sfT /opt/rh/devtoolset-8/root/bin/gcc /usr/bin/gcc \
+      && /usr/bin/ln -sfT /opt/rh/devtoolset-8/root/bin/g++ /usr/bin/g++ \
+      && /usr/bin/ln -sfT /opt/rh/devtoolset-8/root/bin/cpp /usr/bin/cpp
 
 ADD scripts/compile-platform.sh /compile-platform.sh

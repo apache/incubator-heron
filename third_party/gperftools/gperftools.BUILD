@@ -20,7 +20,7 @@ mac_script = "\n".join(common_script + [
 
 linux_script = "\n".join(common_script + [
      './configure --prefix=$$INSTALL_DIR --enable-shared=no CPPFLAGS=-I$$UNWIND_DIR/include LDFLAGS="-L$$UNWIND_DIR/lib -lunwind" --enable-frame-pointers',
-     'make install CPPFLAGS="-I$$UNWIND_DIR/include -std=c++1y" LDFLAGS="-L$$UNWIND_DIR/lib -lunwind"',
+     'make install CPPFLAGS="-I$$UNWIND_DIR/include -std=c++14" LDFLAGS="-L$$UNWIND_DIR/lib -lunwind"',
      'rm -rf $$TMP_DIR',
 ])
 
