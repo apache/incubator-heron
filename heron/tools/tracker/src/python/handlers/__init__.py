@@ -43,3 +43,4 @@ from .stateshandler import StatesHandler
 from .topologieshandler import TopologiesHandler
 from .topologyconfighandler import TopologyConfigHandler
 from .topologyhandler import TopologyHandler
+from .healthhandler import HealthHandler

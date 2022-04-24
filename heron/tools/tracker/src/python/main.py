@@ -83,6 +83,7 @@ class Application(tornado.web.Application):
         (r"/topologies/jstack", handlers.JstackHandler, {"tracker":self.tracker}),
         (r"/topologies/jmap", handlers.JmapHandler, {"tracker":self.tracker}),
         (r"/topologies/histo", handlers.MemoryHistogramHandler, {"tracker":self.tracker}),
+        (r"/health", handlers.HealthHandler),
         (r"(.*)", handlers.DefaultHandler),
     ]
 
