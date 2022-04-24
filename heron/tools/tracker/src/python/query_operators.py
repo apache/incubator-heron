@@ -20,13 +20,17 @@
 
 ''' query_operators.py '''
 import asyncio
+import logging
 import math
 
 from typing import Any, Dict, List, Optional, Union
 
+from heron.common.src.python.utils import log
 from heron.proto.tmanager_pb2 import TManagerLocation
 from heron.tools.tracker.src.python.metricstimeline import get_metrics_timeline
 
+Log = log.Log
+Log.setLevel(logging.DEBUG)
 
 #####################################################################
 # Data Structure for fetched Metrics
@@ -460,7 +464,7 @@ class _SimpleArithmaticOperator(Operator):
       for key, metric in metrics2.items():
         # Initialize with first metrics timeline, but second metric's instance
         # because that is multivariate
-        if metrics:
+        if "" in metrics:
           met = Metrics(None, None, metric.instance, start, end, metrics[""].timeline.copy())
           for timestamp in list(met.timeline.keys()):
             v = self._f(met.timeline[timestamp], metric.timeline.get(timestamp))
@@ -477,7 +481,10 @@ class _SimpleArithmaticOperator(Operator):
       # Initialize with first metrics timeline and its instance
       met = Metrics(None, None, metric.instance, start, end, metric.timeline.copy())
       for timestamp in list(met.timeline.keys()):
-        v = self._f(met.timeline[timestamp], metrics2[""].timeline.get(timestamp))
+        met2_value = None
+        if "" in metrics2:
+          met2_value = metrics2[""].timeline.get(timestamp)
+        v = self._f(met.timeline[timestamp], met2_value)
         if v is None:
           met.timeline.pop(timestamp, None)
         else:

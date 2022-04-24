@@ -79,7 +79,7 @@ async def get_component_metrics(
   if metric_response.status.status == common_pb2.NOTOK:
     if metric_response.status.HasField("message"):
       Log.warn(
-          "Recieved response from Tmanager: %s", metric_response.status.message
+          "Received response from Tmanager: %s", metric_response.status.message
       )
 
   metrics = {}

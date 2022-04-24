@@ -214,10 +214,10 @@ def convert_pb_kvs(kvs, include_non_primitives=True) -> dict:
 def _convert_java_value(kv, include_non_primitives=True):
   try:
     pobj = javaobj.loads(kv.serialized_value)
-    if isinstance(pobj, str):
+    if isinstance(pobj, (str, int, float, bool)):
       return pobj
 
-    if isinstance(pobj, javaobj.transformers.DefaultObjectTransformer.JavaPrimitiveClass):
+    if hasattr(pobj, 'value'):
       return pobj.value
 
     if include_non_primitives:
