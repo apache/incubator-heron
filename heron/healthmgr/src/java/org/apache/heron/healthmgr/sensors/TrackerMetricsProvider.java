@@ -79,6 +79,10 @@ public class TrackerMetricsProvider implements MetricsProvider {
     for (String metric : metricNames) {
       for (String component : components) {
         String response = getMetricsFromTracker(metric, component, startTime, duration);
+        if (Strings.isNullOrEmpty(response)) {
+          LOG.warning(String.format("measurements not found %s/%s", component, metric));
+          continue;
+        }
         Collection<Measurement> measurements = parse(response, component, metric);
         LOG.fine(String.format("%d measurements received for %s/%s",
             measurements.size(), component, metric));
