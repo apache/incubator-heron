@@ -79,7 +79,7 @@ async def get_component_metrics(
   if metric_response.status.status == common_pb2.NOTOK:
     if metric_response.status.HasField("message"):
       Log.warn(
-          "Recieved response from Tmanager: %s", metric_response.status.message
+          "Received response from Tmanager: %s", metric_response.status.message
       )
 
   metrics = {}
@@ -119,8 +119,6 @@ async def get_metrics( # pylint: disable=too-many-arguments
   )
 
 
-@router.get("/metricstimeline", response_model=metricstimeline.MetricsTimeline,
-    deprecated=True)
 @router.get("/metrics/timeline", response_model=metricstimeline.MetricsTimeline)
 async def get_metrics_timeline( # pylint: disable=too-many-arguments
     cluster: str,
@@ -134,8 +132,32 @@ async def get_metrics_timeline( # pylint: disable=too-many-arguments
     instances: Optional[List[str]] = Query(None, alias="instance"),
 ):
   """
-  '/metricstimeline' 0.20.5 below.
   '/metrics/timeline' 0.20.5 above.
+  Return metrics over the given interval.
+  """
+  if start_time > end_time:
+    raise BadRequest("start_time > end_time")
+  topology = state.tracker.get_topology(cluster, role, environ, topology_name)
+  return await metricstimeline.get_metrics_timeline(
+      topology.tmanager, component, metric_names, instances, start_time, end_time
+  )
+
+
+@router.get("/metricstimeline", response_model=metricstimeline.LegacyMetricsTimeline,
+    deprecated=True)
+async def get_legacy_metrics_timeline(  # pylint: disable=too-many-arguments
+    cluster: str,
+    environ: str,
+    component: str,
+    start_time: int = Query(..., alias="starttime"),
+    end_time: int = Query(..., alias="endtime"),
+    role: Optional[str] = None,
+    topology_name: str = Query(..., alias="topology"),
+    metric_names: Optional[List[str]] = Query(None, alias="metricname"),
+    instances: Optional[List[str]] = Query(None, alias="instance"),
+):
+  """
+  '/metricstimeline' 0.20.5 below.
   Return metrics over the given interval.
   """
   if start_time > end_time:
@@ -163,8 +185,6 @@ class MetricsQueryResponse(BaseModel): # pylint: disable=too-few-public-methods
       ..., description="list of timeline point objects",
   )
 
-@router.get("/metricsquery", response_model=MetricsQueryResponse,
-    deprecated=True)
 @router.get("/metrics/query", response_model=MetricsQueryResponse)
 async def get_metrics_query( # pylint: disable=too-many-arguments
     cluster: str,
@@ -176,7 +196,6 @@ async def get_metrics_query( # pylint: disable=too-many-arguments
     topology_name: str = Query(..., alias="topology"),
 ) -> MetricsQueryResponse:
   """
-  '/metricsquery' 0.20.5 below.
   '/metrics/query' 0.20.5 above.
   Run a metrics query against a particular topology.
   """

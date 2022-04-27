@@ -38,7 +38,7 @@ import requests
 import uvicorn
 
 from fastapi import APIRouter, FastAPI, Query, Request
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, PlainTextResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from starlette.responses import RedirectResponse, Response
@@ -612,6 +612,11 @@ def histogram_snippet(
           "output": stdout,
       },
   )
+
+
+@app.get("/health", response_class=PlainTextResponse)
+def healthcheck():
+  return "ok"
 
 
 app.include_router(topologies_router, prefix="/topologies")

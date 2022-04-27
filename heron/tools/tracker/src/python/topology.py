@@ -66,6 +66,7 @@ class TopologyInfoExecutionState(TopologyInfoMetadata):
   has_packing_plan: bool
   has_tmanager_location: bool
   has_scheduler_location: bool
+  status: str
 
 class RuntimeStateStatemanager(BaseModel):
   is_registered: bool
@@ -551,11 +552,8 @@ class Topology:
     return TopologyInfoSchedulerLocation(
         name=scheduler_location.topology_name,
         http_endpoint=scheduler_location.http_endpoint,
-        job_page_link=(
-            scheduler_location.job_page_link[0]
-            if scheduler_location.job_page_link
-            else ""
-        ),
+        job_page_link=scheduler_location.job_page_link \
+            if scheduler_location.job_page_link else "",
     )
 
   @staticmethod

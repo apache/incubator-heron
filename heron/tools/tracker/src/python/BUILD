@@ -10,7 +10,7 @@ pex_library(
         "click==7.1.2",
         "fastapi==0.75.0",
         "httpx==0.16.1",
-        "javaobj-py3==0.4.1",
+        "javaobj-py3==0.4.3",
         "networkx==2.5",
         "protobuf==3.16.0",
         "uvicorn==0.11.7",

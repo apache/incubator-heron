@@ -28,7 +28,7 @@ from typing import Dict, List, Optional
 
 from fastapi import FastAPI, Query, Request
 from fastapi.exceptions import RequestValidationError
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, PlainTextResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from heron.tools.tracker.src.python import constants, state, query
@@ -128,3 +128,7 @@ async def get_machines(
     ] = topology.get_machines()
 
   return response
+
+@app.get("/health", response_class=PlainTextResponse)
+def healthcheck():
+  return "ok"
