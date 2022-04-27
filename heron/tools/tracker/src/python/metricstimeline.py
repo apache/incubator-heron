@@ -34,10 +34,21 @@ class MetricsTimeline(BaseModel):
   component: str
   starttime: int
   endtime: int
+  timeline: Dict[str, Dict[str, Dict[int, float]]] = Field(
+      ...,
+      description="map of (metric name, instance, start) to metric value",
+  )
+
+
+class LegacyMetricsTimeline(BaseModel):
+  component: str
+  starttime: int
+  endtime: int
   timeline: Dict[str, Dict[str, Dict[int, str]]] = Field(
       ...,
       description="map of (metric name, instance, start) to metric value",
   )
+
 
 # pylint: disable=too-many-locals, too-many-branches, unused-argument
 async def get_metrics_timeline(
