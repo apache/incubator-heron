@@ -20,17 +20,13 @@
 
 ''' query_operators.py '''
 import asyncio
-import logging
 import math
 
 from typing import Any, Dict, List, Optional, Union
 
-from heron.common.src.python.utils import log
 from heron.proto.tmanager_pb2 import TManagerLocation
 from heron.tools.tracker.src.python.metricstimeline import get_metrics_timeline
 
-Log = log.Log
-Log.setLevel(logging.DEBUG)
 
 #####################################################################
 # Data Structure for fetched Metrics
