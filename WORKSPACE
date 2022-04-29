@@ -82,7 +82,7 @@ maven_install(
         "org.apache.zookeeper:zookeeper:3.6.3",
         "io.kubernetes:client-java:" + kubernetes_client_version,
         "io.kubernetes:client-java-api-fluent:" + kubernetes_client_version,
-        "com.esotericsoftware:kryo:5.2.1",
+        "com.esotericsoftware:kryo:5.3.0",
         "org.apache.avro:avro:1.7.4",
         "org.apache.mesos:mesos:0.22.0",
         "com.hashicorp.nomad:nomad-sdk:0.7.0",
