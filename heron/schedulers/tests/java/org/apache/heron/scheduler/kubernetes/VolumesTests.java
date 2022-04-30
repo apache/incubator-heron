@@ -65,21 +65,4 @@ public class VolumesTests {
     Assert.assertEquals(volume.getNfs().getPath(), path);
     Assert.assertEquals(volume.getNfs().getServer(), server);
   }
-
-  @Test
-  public void testAwsEbsVolume() {
-    final String volumeId = "aws-ebs-1";
-    final String fsType = "ext4";
-    final Config config = Config.newBuilder()
-        .put(KubernetesContext.KUBERNETES_VOLUME_TYPE, "awsElasticBlockStore")
-        .put(KubernetesContext.KUBERNETES_VOLUME_AWS_EBS_VOLUME_ID, volumeId)
-        .put(KubernetesContext.KUBERNETES_VOLUME_AWS_EBS_FS_TYPE, fsType)
-        .build();
-
-    final V1Volume volume = Volumes.get().create(config);
-    Assert.assertNotNull(volume);
-    Assert.assertNotNull(volume.getAwsElasticBlockStore());
-    Assert.assertEquals(volume.getAwsElasticBlockStore().getVolumeID(), volumeId);
-    Assert.assertEquals(volume.getAwsElasticBlockStore().getFsType(), fsType);
-  }
 }
