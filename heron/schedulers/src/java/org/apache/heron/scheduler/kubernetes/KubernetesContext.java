@@ -74,13 +74,6 @@ public final class KubernetesContext extends Context {
   public static final String KUBERNETES_VOLUME_HOSTPATH_PATH =
       "heron.kubernetes.volume.hostPath.path";
 
-  // nfs volume keys
-  // https://kubernetes.io/docs/concepts/storage/volumes/#nfs
-  public static final String KUBERNETES_VOLUME_NFS_PATH =
-      "heron.kubernetes.volume.nfs.path";
-  public static final String KUBERNETES_VOLUME_NFS_SERVER =
-      "heron.kubernetes.volume.nfs.server";
-
   // Pod Template ConfigMap: heron.kubernetes.[executor | manager].pod.template
   public static final String KUBERNETES_POD_TEMPLATE_LOCATION =
       "heron.kubernetes.%s.pod.template";
@@ -169,14 +162,6 @@ public final class KubernetesContext extends Context {
 
   static String getHostPathVolumePath(Config config) {
     return config.getStringValue(KUBERNETES_VOLUME_HOSTPATH_PATH);
-  }
-
-  static String getNfsVolumePath(Config config) {
-    return config.getStringValue(KUBERNETES_VOLUME_NFS_PATH);
-  }
-
-  static String getNfsServer(Config config) {
-    return config.getStringValue(KUBERNETES_VOLUME_NFS_SERVER);
   }
 
   static boolean hasVolume(Config config) {
