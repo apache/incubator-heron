@@ -69,11 +69,6 @@ public final class KubernetesContext extends Context {
   public static final String KUBERNETES_VOLUME_TYPE = "heron.kubernetes.volume.type";
 
 
-  // HostPath volume keys
-  // https://kubernetes.io/docs/concepts/storage/volumes/#hostpath
-  public static final String KUBERNETES_VOLUME_HOSTPATH_PATH =
-      "heron.kubernetes.volume.hostPath.path";
-
   // Pod Template ConfigMap: heron.kubernetes.[executor | manager].pod.template
   public static final String KUBERNETES_POD_TEMPLATE_LOCATION =
       "heron.kubernetes.%s.pod.template";
@@ -158,10 +153,6 @@ public final class KubernetesContext extends Context {
 
   static String getVolumeName(Config config) {
     return config.getStringValue(KUBERNETES_VOLUME_NAME);
-  }
-
-  static String getHostPathVolumePath(Config config) {
-    return config.getStringValue(KUBERNETES_VOLUME_HOSTPATH_PATH);
   }
 
   static boolean hasVolume(Config config) {
