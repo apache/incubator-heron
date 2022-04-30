@@ -34,18 +34,4 @@ public class VolumesTests {
     final V1Volume volume = Volumes.get().create(config);
     Assert.assertNull(volume);
   }
-
-  @Test
-  public void testHostPathVolume() {
-    final String path = "/test/dir1";
-    final Config config = Config.newBuilder()
-        .put(KubernetesContext.KUBERNETES_VOLUME_TYPE, "hostPath")
-        .put(KubernetesContext.KUBERNETES_VOLUME_HOSTPATH_PATH, path)
-        .build();
-
-    final V1Volume volume = Volumes.get().create(config);
-    Assert.assertNotNull(volume);
-    Assert.assertNotNull(volume.getHostPath());
-    Assert.assertEquals(volume.getHostPath().getPath(), path);
-  }
 }
