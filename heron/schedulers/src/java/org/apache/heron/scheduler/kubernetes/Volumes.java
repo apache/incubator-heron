@@ -39,7 +39,6 @@ final class Volumes {
 
   private Volumes() {
     volumes.put(HOST_PATH, new HostPathVolumeFactory());
-    volumes.put(NFS, new NfsVolumeFactory());
   }
 
   static Volumes get() {
@@ -73,23 +72,6 @@ final class Volumes {
           new V1HostPathVolumeSource()
               .path(path);
       volume.hostPath(hostPathVolume);
-
-      return volume;
-    }
-  }
-
-  static class NfsVolumeFactory implements VolumeFactory {
-    @Override
-    public V1Volume create(Config config) {
-      final V1Volume volume = newVolume(config);
-
-      final String path = KubernetesContext.getNfsVolumePath(config);
-      final String server = KubernetesContext.getNfsServer(config);
-      V1NFSVolumeSource nfsVolumeSource =
-          new V1NFSVolumeSource()
-              .path(path)
-              .server(server);
-      volume.setNfs(nfsVolumeSource);
 
       return volume;
     }
