@@ -38,7 +38,6 @@ final class Volumes {
   private final Map<String, VolumeFactory> volumes = new HashMap<>();
 
   private Volumes() {
-    volumes.put(HOST_PATH, new HostPathVolumeFactory());
   }
 
   static Volumes get() {
@@ -60,20 +59,5 @@ final class Volumes {
   private static V1Volume newVolume(Config config) {
     final String volumeName = KubernetesContext.getVolumeName(config);
     return new V1Volume().name(volumeName);
-  }
-
-  static class HostPathVolumeFactory implements VolumeFactory {
-    @Override
-    public V1Volume create(Config config) {
-      final V1Volume volume = newVolume(config);
-
-      final String path = KubernetesContext.getHostPathVolumePath(config);
-      final V1HostPathVolumeSource hostPathVolume =
-          new V1HostPathVolumeSource()
-              .path(path);
-      volume.hostPath(hostPathVolume);
-
-      return volume;
-    }
   }
 }
