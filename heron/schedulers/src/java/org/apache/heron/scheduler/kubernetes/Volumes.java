@@ -24,16 +24,9 @@ import java.util.Map;
 
 import org.apache.heron.spi.common.Config;
 
-import io.kubernetes.client.openapi.models.V1AWSElasticBlockStoreVolumeSource;
-import io.kubernetes.client.openapi.models.V1HostPathVolumeSource;
-import io.kubernetes.client.openapi.models.V1NFSVolumeSource;
 import io.kubernetes.client.openapi.models.V1Volume;
 
 final class Volumes {
-
-  static final String AWS_EBS = "awsElasticBlockStore";
-  static final String HOST_PATH = "hostPath";
-  static final String NFS = "nfs";
 
   private final Map<String, VolumeFactory> volumes = new HashMap<>();
 
