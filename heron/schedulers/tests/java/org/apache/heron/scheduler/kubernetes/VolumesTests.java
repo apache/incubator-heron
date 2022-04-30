@@ -48,21 +48,4 @@ public class VolumesTests {
     Assert.assertNotNull(volume.getHostPath());
     Assert.assertEquals(volume.getHostPath().getPath(), path);
   }
-
-  @Test
-  public void testNfsVolume() {
-    final String path = "/test/dir1";
-    final String server = "10.10.10.10";
-    final Config config = Config.newBuilder()
-        .put(KubernetesContext.KUBERNETES_VOLUME_TYPE, "nfs")
-        .put(KubernetesContext.KUBERNETES_VOLUME_NFS_PATH, path)
-        .put(KubernetesContext.KUBERNETES_VOLUME_NFS_SERVER, server)
-        .build();
-
-    final V1Volume volume = Volumes.get().create(config);
-    Assert.assertNotNull(volume);
-    Assert.assertNotNull(volume.getNfs());
-    Assert.assertEquals(volume.getNfs().getPath(), path);
-    Assert.assertEquals(volume.getNfs().getServer(), server);
-  }
 }
