@@ -23,8 +23,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 import io.kubernetes.client.custom.Quantity;
+import io.kubernetes.client.openapi.models.V1PersistentVolumeClaim;
 import io.kubernetes.client.openapi.models.V1Volume;
 import io.kubernetes.client.openapi.models.V1VolumeBuilder;
+import io.kubernetes.client.openapi.models.V1VolumeMount;
 
 final class Volumes {
 
@@ -35,7 +37,7 @@ final class Volumes {
     PersistentVolumeClaim,
     VolumeMount
   }
-  private final Map<VolumeType, VolumeFactory> volumes = new HashMap<>();
+  private final Map<VolumeType, IVolumeFactory> volumes = new HashMap<>();
 
   private Volumes() {
     volumes.put(VolumeType.EmptyDir, new EmptyDirVolumeFactory());
@@ -63,11 +65,21 @@ final class Volumes {
     return null;
   }
 
-  interface VolumeFactory {
+  interface IVolumeFactory {
     V1Volume create(String volumeName, Map<KubernetesConstants.VolumeConfigKeys, String> configs);
   }
 
-  static class EmptyDirVolumeFactory implements VolumeFactory {
+  interface IVolumeMountFactory {
+    V1VolumeMount create(String volumeName,
+                         Map<KubernetesConstants.VolumeConfigKeys, String> configs);
+  }
+
+  interface IPersistentVolumeClaimFactory {
+    V1PersistentVolumeClaim create(String volumeName,
+                                   Map<KubernetesConstants.VolumeConfigKeys, String> configs);
+  }
+
+  static class EmptyDirVolumeFactory implements IVolumeFactory {
 
     /**
      * Generates an <code>Empty Directory</code> <code>V1 Volume</code>.
@@ -101,7 +113,7 @@ final class Volumes {
     }
   }
 
-  static class HostPathVolumeFactory implements VolumeFactory {
+  static class HostPathVolumeFactory implements IVolumeFactory {
 
     /**
      * Generates a <code>Host Path</code> <code>V1 Volume</code>.
@@ -134,7 +146,7 @@ final class Volumes {
     }
   }
 
-  static class NetworkFileSystemVolumeFactory implements VolumeFactory {
+  static class NetworkFileSystemVolumeFactory implements IVolumeFactory {
 
     /**
      * Generates a <code>Network File System</code> <code>V1 Volume</code>.
