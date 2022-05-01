@@ -30,7 +30,6 @@ final class Volumes {
 
   public enum VolumeType {
     EmptyDir,
-    Generic,
     HostPath,
     NetworkFileSystem,
     PersistentVolumeClaim,
@@ -105,7 +104,7 @@ final class Volumes {
   static class HostPathVolumeFactory implements VolumeFactory {
 
     /**
-     * Generates an <code>Host Path</code> <code>V1 Volume</code>.
+     * Generates a <code>Host Path</code> <code>V1 Volume</code>.
      * @param volumeName The name of the volume to generate.
      * @param configs    A map of configurations.
      * @return A fully configured <code>Host Path</code> volume.
@@ -138,7 +137,7 @@ final class Volumes {
   static class NetworkFileSystemVolumeFactory implements VolumeFactory {
 
     /**
-     * Generates an <code>Network File System</code> <code>V1 Volume</code>.
+     * Generates a <code>Network File System</code> <code>V1 Volume</code>.
      *
      * @param volumeName The name of the volume to generate.
      * @param configs    A map of configurations.
