@@ -1259,25 +1259,8 @@ public class V1Controller extends KubernetesController {
     for (Map.Entry<String, Map<KubernetesConstants.VolumeConfigKeys, String>> configs
         : mapOfOpts.entrySet()) {
       final String volumeName = configs.getKey();
-      final V1Volume volume = new V1VolumeBuilder()
-          .withName(volumeName)
-          .withNewHostPath()
-          .endHostPath()
-          .build();
-
-      for (Map.Entry<KubernetesConstants.VolumeConfigKeys, String> config
-          : configs.getValue().entrySet()) {
-        switch(config.getKey()) {
-          case type:
-            volume.getHostPath().setType(config.getValue());
-            break;
-          case pathOnHost:
-            volume.getHostPath().setPath(config.getValue());
-            break;
-          default:
-            break;
-        }
-      }
+      final V1Volume volume = Volumes.get()
+          .create(Volumes.VolumeType.HostPath, volumeName, configs.getValue());
       volumes.add(volume);
       volumeMounts.add(createVolumeMountsCLI(volumeName, configs.getValue()));
     }
