@@ -40,6 +40,7 @@ final class Volumes {
 
   private Volumes() {
     volumes.put(VolumeType.EmptyDir, new EmptyDirVolumeFactory());
+    volumes.put(VolumeType.HostPath, new HostPathVolumeFactory());
   }
 
   static Volumes get() {
@@ -96,6 +97,39 @@ final class Volumes {
         }
       }
 
+      return volume;
+    }
+  }
+
+  static class HostPathVolumeFactory implements VolumeFactory {
+
+    /**
+     * Generates an <code>Host Path</code> <code>V1 Volume</code>.
+     * @param volumeName The name of the volume to generate.
+     * @param configs A map of configurations.
+     * @return A fully configured <code>Host Path</code> volume.
+     */
+    @Override
+    public V1Volume create(String volumeName,
+                           Map<KubernetesConstants.VolumeConfigKeys, String> configs) {
+      final V1Volume volume = new V1VolumeBuilder()
+          .withName(volumeName)
+          .withNewHostPath()
+          .endHostPath()
+          .build();
+
+      for (Map.Entry<KubernetesConstants.VolumeConfigKeys, String> config : configs.entrySet()) {
+        switch (config.getKey()) {
+          case type:
+            volume.getHostPath().setType(config.getValue());
+            break;
+          case pathOnHost:
+            volume.getHostPath().setPath(config.getValue());
+            break;
+          default:
+            break;
+        }
+      }
       return volume;
     }
   }

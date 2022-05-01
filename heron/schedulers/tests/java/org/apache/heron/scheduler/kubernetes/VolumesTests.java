@@ -38,7 +38,7 @@ public class VolumesTests {
     final String sizeLimit = "1Gi";
     final String path = "/path/to/mount";
     final String subPath = "/sub/path/to/mount";
-    final Map<KubernetesConstants.VolumeConfigKeys, String> configEmptyDir =
+    final Map<KubernetesConstants.VolumeConfigKeys, String> config =
         ImmutableMap.<KubernetesConstants.VolumeConfigKeys, String>builder()
             .put(KubernetesConstants.VolumeConfigKeys.sizeLimit, sizeLimit)
             .put(KubernetesConstants.VolumeConfigKeys.medium, medium)
@@ -48,14 +48,42 @@ public class VolumesTests {
     final V1Volume expectedVolume = new V1VolumeBuilder()
         .withName(volumeName)
         .withNewEmptyDir()
-        .withMedium(medium)
-        .withNewSizeLimit(sizeLimit)
+          .withMedium(medium)
+          .withNewSizeLimit(sizeLimit)
         .endEmptyDir()
         .build();
 
     final V1Volume actualVolume = Volumes.get()
-        .create(Volumes.VolumeType.EmptyDir, volumeName, configEmptyDir);
+        .create(Volumes.VolumeType.EmptyDir, volumeName, config);
 
     Assert.assertEquals("Volume Factory Empty Directory", expectedVolume, actualVolume);
+  }
+
+  @Test
+  public void testHostPath() {
+    final String volumeName = "volume-name-host-path";
+    final String type = "DirectoryOrCreate";
+    final String pathOnHost = "path.on.host";
+    final String path = "/path/to/mount";
+    final String subPath = "/sub/path/to/mount";
+    final Map<KubernetesConstants.VolumeConfigKeys, String> config =
+        ImmutableMap.<KubernetesConstants.VolumeConfigKeys, String>builder()
+            .put(KubernetesConstants.VolumeConfigKeys.type, type)
+            .put(KubernetesConstants.VolumeConfigKeys.pathOnHost, pathOnHost)
+            .put(KubernetesConstants.VolumeConfigKeys.path, path)
+            .put(KubernetesConstants.VolumeConfigKeys.subPath, subPath)
+            .build();
+    final V1Volume expectedVolume = new V1VolumeBuilder()
+        .withName(volumeName)
+        .withNewHostPath()
+          .withNewType(type)
+          .withNewPath(pathOnHost)
+        .endHostPath()
+        .build();
+
+    final V1Volume actualVolume = Volumes.get()
+        .create(Volumes.VolumeType.HostPath, volumeName, config);
+
+    Assert.assertEquals("Volume Factory Host Path", expectedVolume, actualVolume);
   }
 }
