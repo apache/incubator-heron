@@ -86,4 +86,35 @@ public class VolumesTests {
 
     Assert.assertEquals("Volume Factory Host Path", expectedVolume, actualVolume);
   }
+
+  @Test
+  public void testNetworkFileSystem() {
+    final String volumeName = "volume-name-nfs";
+    final String server = "nfs.server.address";
+    final String pathOnNFS = "path.on.host";
+    final String readOnly = "true";
+    final String path = "/path/to/mount";
+    final String subPath = "/sub/path/to/mount";
+    final Map<KubernetesConstants.VolumeConfigKeys, String> config =
+        ImmutableMap.<KubernetesConstants.VolumeConfigKeys, String>builder()
+            .put(KubernetesConstants.VolumeConfigKeys.server, server)
+            .put(KubernetesConstants.VolumeConfigKeys.readOnly, readOnly)
+            .put(KubernetesConstants.VolumeConfigKeys.pathOnNFS, pathOnNFS)
+            .put(KubernetesConstants.VolumeConfigKeys.path, path)
+            .put(KubernetesConstants.VolumeConfigKeys.subPath, subPath)
+            .build();
+    final V1Volume expectedVolume = new V1VolumeBuilder()
+        .withName(volumeName)
+        .withNewNfs()
+          .withServer(server)
+          .withPath(pathOnNFS)
+          .withReadOnly(Boolean.parseBoolean(readOnly))
+        .endNfs()
+        .build();
+
+    final V1Volume actualVolume = Volumes.get()
+        .create(Volumes.VolumeType.NetworkFileSystem, volumeName, config);
+
+    Assert.assertEquals("Volume Factory Network File System", expectedVolume, actualVolume);
+  }
 }

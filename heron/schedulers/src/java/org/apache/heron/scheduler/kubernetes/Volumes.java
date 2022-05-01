@@ -41,6 +41,7 @@ final class Volumes {
   private Volumes() {
     volumes.put(VolumeType.EmptyDir, new EmptyDirVolumeFactory());
     volumes.put(VolumeType.HostPath, new HostPathVolumeFactory());
+    volumes.put(VolumeType.NetworkFileSystem, new NetworkFileSystemVolumeFactory());
   }
 
   static Volumes get() {
@@ -72,7 +73,7 @@ final class Volumes {
     /**
      * Generates an <code>Empty Directory</code> <code>V1 Volume</code>.
      * @param volumeName The name of the volume to generate.
-     * @param configs A map of configurations.
+     * @param configs    A map of configurations.
      * @return A fully configured <code>Empty Directory</code> volume.
      */
     @Override
@@ -106,7 +107,7 @@ final class Volumes {
     /**
      * Generates an <code>Host Path</code> <code>V1 Volume</code>.
      * @param volumeName The name of the volume to generate.
-     * @param configs A map of configurations.
+     * @param configs    A map of configurations.
      * @return A fully configured <code>Host Path</code> volume.
      */
     @Override
@@ -125,6 +126,43 @@ final class Volumes {
             break;
           case pathOnHost:
             volume.getHostPath().setPath(config.getValue());
+            break;
+          default:
+            break;
+        }
+      }
+      return volume;
+    }
+  }
+
+  static class NetworkFileSystemVolumeFactory implements VolumeFactory {
+
+    /**
+     * Generates an <code>Network File System</code> <code>V1 Volume</code>.
+     *
+     * @param volumeName The name of the volume to generate.
+     * @param configs    A map of configurations.
+     * @return A fully configured <code>Network File System</code> volume.
+     */
+    @Override
+    public V1Volume create(String volumeName,
+                           Map<KubernetesConstants.VolumeConfigKeys, String> configs) {
+      final V1Volume volume = new V1VolumeBuilder()
+          .withName(volumeName)
+          .withNewNfs()
+          .endNfs()
+          .build();
+
+      for (Map.Entry<KubernetesConstants.VolumeConfigKeys, String> config : configs.entrySet()) {
+        switch (config.getKey()) {
+          case server:
+            volume.getNfs().setServer(config.getValue());
+            break;
+          case pathOnNFS:
+            volume.getNfs().setPath(config.getValue());
+            break;
+          case readOnly:
+            volume.getNfs().setReadOnly(Boolean.parseBoolean(config.getValue()));
             break;
           default:
             break;
