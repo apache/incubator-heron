@@ -147,18 +147,6 @@ public final class KubernetesContext extends Context {
             config.getStringValue(KUBERNETES_RESOURCE_REQUEST_MODE));
   }
 
-  static String getVolumeType(Config config) {
-    return config.getStringValue(KUBERNETES_VOLUME_TYPE);
-  }
-
-  static String getVolumeName(Config config) {
-    return config.getStringValue(KUBERNETES_VOLUME_NAME);
-  }
-
-  static boolean hasVolume(Config config) {
-    return isNotEmpty(getVolumeType(config));
-  }
-
   static String getContainerVolumeName(Config config) {
     return config.getStringValue(KUBERNETES_CONTAINER_VOLUME_MOUNT_NAME);
   }
