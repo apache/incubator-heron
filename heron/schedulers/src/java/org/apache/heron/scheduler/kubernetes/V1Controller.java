@@ -656,8 +656,6 @@ public class V1Controller extends KubernetesController {
 
     podSpec.setContainers(containers);
 
-    addVolumesIfPresent(podSpec);
-
     mountSecretsAsVolumes(podSpec);
   }
 
@@ -693,28 +691,6 @@ public class V1Controller extends KubernetesController {
     });
 
     return tolerations;
-  }
-
-  /**
-   * Adds volume to the <code>Pod Spec</code> that Heron requires. Heron's values taking precedence.
-   * @param spec <code>Pod Spec</code> to be configured.
-   */
-  @VisibleForTesting
-  protected void addVolumesIfPresent(final V1PodSpec spec) {
-    final Config config = getConfiguration();
-    if (KubernetesContext.hasVolume(config)) {
-      final V1Volume volumeFromConfig = Volumes.get().create(config);
-      if (volumeFromConfig != null) {
-        // Merge volumes. Deduplicate using volume's name with Heron defaults taking precedence.
-        KubernetesUtils.V1ControllerUtils<V1Volume> utils =
-            new KubernetesUtils.V1ControllerUtils<>();
-        spec.setVolumes(
-            utils.mergeListsDedupe(Collections.singletonList(volumeFromConfig), spec.getVolumes(),
-                Comparator.comparing(V1Volume::getName), "Pod Template Volumes")
-        );
-        LOG.fine("Adding volume: " + volumeFromConfig);
-      }
-    }
   }
 
   /**
