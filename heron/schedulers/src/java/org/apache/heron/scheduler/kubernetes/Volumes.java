@@ -22,35 +22,81 @@ package org.apache.heron.scheduler.kubernetes;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.heron.spi.common.Config;
-
+import io.kubernetes.client.custom.Quantity;
 import io.kubernetes.client.openapi.models.V1Volume;
+import io.kubernetes.client.openapi.models.V1VolumeBuilder;
 
 final class Volumes {
 
-  private final Map<String, VolumeFactory> volumes = new HashMap<>();
+  public enum VolumeType {
+    EmptyDir,
+    Generic,
+    HostPath,
+    NetworkFileSystem,
+    PersistentVolumeClaim,
+    VolumeMount
+  }
+  private final Map<VolumeType, VolumeFactory> volumes = new HashMap<>();
 
   private Volumes() {
+    volumes.put(VolumeType.EmptyDir, new EmptyDirVolumeFactory());
   }
 
   static Volumes get() {
     return new Volumes();
   }
 
-  V1Volume create(Config config) {
-    final String volumeType = KubernetesContext.getVolumeType(config);
+  /**
+   * Creates <code>Generic</code>, <code>Empty Directory</code>, <code>Host Path</code>, and
+   * <code>Network File System</code> volumes.
+   * @param volumeType One of the supported volume types.
+   * @param volumeName The name of the volume to generate.
+   * @param configs A map of configurations.
+   * @return Fully configured <code>V1Volume</code>.
+   */
+  V1Volume create(VolumeType volumeType, String volumeName,
+                  Map<KubernetesConstants.VolumeConfigKeys, String> configs) {
     if (volumes.containsKey(volumeType)) {
-      return volumes.get(volumeType).create(config);
+      return volumes.get(volumeType).create(volumeName, configs);
     }
     return null;
   }
 
   interface VolumeFactory {
-    V1Volume create(Config config);
+    V1Volume create(String volumeName, Map<KubernetesConstants.VolumeConfigKeys, String> configs);
   }
 
-  private static V1Volume newVolume(Config config) {
-    final String volumeName = KubernetesContext.getVolumeName(config);
-    return new V1Volume().name(volumeName);
+  static class EmptyDirVolumeFactory implements VolumeFactory {
+
+    /**
+     * Generates an <code>Empty Directory</code> <code>V1 Volume</code>.
+     * @param volumeName The name of the volume to generate.
+     * @param configs A map of configurations.
+     * @return A fully configured <code>Empty Directory</code> volume.
+     */
+    @Override
+    public V1Volume create(String volumeName,
+                           Map<KubernetesConstants.VolumeConfigKeys, String> configs) {
+      final V1Volume volume = new V1VolumeBuilder()
+          .withName(volumeName)
+          .withNewEmptyDir()
+          .endEmptyDir()
+          .build();
+
+      for (Map.Entry<KubernetesConstants.VolumeConfigKeys, String> config : configs.entrySet()) {
+        switch(config.getKey()) {
+          case medium:
+            volume.getEmptyDir().medium(config.getValue());
+            break;
+          case sizeLimit:
+            volume.getEmptyDir().sizeLimit(new Quantity(config.getValue()));
+            break;
+          default:
+            break;
+        }
+      }
+
+      return volume;
+    }
   }
 }

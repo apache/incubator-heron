@@ -19,19 +19,43 @@
 
 package org.apache.heron.scheduler.kubernetes;
 
+import java.util.Map;
+
+import com.google.common.collect.ImmutableMap;
+
 import org.junit.Assert;
 import org.junit.Test;
 
-import org.apache.heron.spi.common.Config;
-
 import io.kubernetes.client.openapi.models.V1Volume;
+import io.kubernetes.client.openapi.models.V1VolumeBuilder;
 
 public class VolumesTests {
 
   @Test
-  public void testNoVolume() {
-    final Config config = Config.newBuilder().build();
-    final V1Volume volume = Volumes.get().create(config);
-    Assert.assertNull(volume);
+  public void testEmptyDir() {
+    final String volumeName = "volume-name-empty-dir";
+    final String medium = "Memory";
+    final String sizeLimit = "1Gi";
+    final String path = "/path/to/mount";
+    final String subPath = "/sub/path/to/mount";
+    final Map<KubernetesConstants.VolumeConfigKeys, String> configEmptyDir =
+        ImmutableMap.<KubernetesConstants.VolumeConfigKeys, String>builder()
+            .put(KubernetesConstants.VolumeConfigKeys.sizeLimit, sizeLimit)
+            .put(KubernetesConstants.VolumeConfigKeys.medium, medium)
+            .put(KubernetesConstants.VolumeConfigKeys.path, path)
+            .put(KubernetesConstants.VolumeConfigKeys.subPath, subPath)
+            .build();
+    final V1Volume expectedVolume = new V1VolumeBuilder()
+        .withName(volumeName)
+        .withNewEmptyDir()
+        .withMedium(medium)
+        .withNewSizeLimit(sizeLimit)
+        .endEmptyDir()
+        .build();
+
+    final V1Volume actualVolume = Volumes.get()
+        .create(Volumes.VolumeType.EmptyDir, volumeName, configEmptyDir);
+
+    Assert.assertEquals("Volume Factory Empty Directory", expectedVolume, actualVolume);
   }
 }
