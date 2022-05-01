@@ -19,19 +19,102 @@
 
 package org.apache.heron.scheduler.kubernetes;
 
+import java.util.Map;
+
+import com.google.common.collect.ImmutableMap;
+
 import org.junit.Assert;
 import org.junit.Test;
 
-import org.apache.heron.spi.common.Config;
-
 import io.kubernetes.client.openapi.models.V1Volume;
+import io.kubernetes.client.openapi.models.V1VolumeBuilder;
 
 public class VolumesTests {
 
   @Test
-  public void testNoVolume() {
-    final Config config = Config.newBuilder().build();
-    final V1Volume volume = Volumes.get().create(config);
-    Assert.assertNull(volume);
+  public void testEmptyDir() {
+    final String volumeName = "volume-name-empty-dir";
+    final String medium = "Memory";
+    final String sizeLimit = "1Gi";
+    final String path = "/path/to/mount";
+    final String subPath = "/sub/path/to/mount";
+    final Map<KubernetesConstants.VolumeConfigKeys, String> config =
+        ImmutableMap.<KubernetesConstants.VolumeConfigKeys, String>builder()
+            .put(KubernetesConstants.VolumeConfigKeys.sizeLimit, sizeLimit)
+            .put(KubernetesConstants.VolumeConfigKeys.medium, medium)
+            .put(KubernetesConstants.VolumeConfigKeys.path, path)
+            .put(KubernetesConstants.VolumeConfigKeys.subPath, subPath)
+            .build();
+    final V1Volume expectedVolume = new V1VolumeBuilder()
+        .withName(volumeName)
+        .withNewEmptyDir()
+          .withMedium(medium)
+          .withNewSizeLimit(sizeLimit)
+        .endEmptyDir()
+        .build();
+
+    final V1Volume actualVolume = Volumes.get()
+        .create(Volumes.VolumeType.EmptyDir, volumeName, config);
+
+    Assert.assertEquals("Volume Factory Empty Directory", expectedVolume, actualVolume);
+  }
+
+  @Test
+  public void testHostPath() {
+    final String volumeName = "volume-name-host-path";
+    final String type = "DirectoryOrCreate";
+    final String pathOnHost = "path.on.host";
+    final String path = "/path/to/mount";
+    final String subPath = "/sub/path/to/mount";
+    final Map<KubernetesConstants.VolumeConfigKeys, String> config =
+        ImmutableMap.<KubernetesConstants.VolumeConfigKeys, String>builder()
+            .put(KubernetesConstants.VolumeConfigKeys.type, type)
+            .put(KubernetesConstants.VolumeConfigKeys.pathOnHost, pathOnHost)
+            .put(KubernetesConstants.VolumeConfigKeys.path, path)
+            .put(KubernetesConstants.VolumeConfigKeys.subPath, subPath)
+            .build();
+    final V1Volume expectedVolume = new V1VolumeBuilder()
+        .withName(volumeName)
+        .withNewHostPath()
+          .withNewType(type)
+          .withNewPath(pathOnHost)
+        .endHostPath()
+        .build();
+
+    final V1Volume actualVolume = Volumes.get()
+        .create(Volumes.VolumeType.HostPath, volumeName, config);
+
+    Assert.assertEquals("Volume Factory Host Path", expectedVolume, actualVolume);
+  }
+
+  @Test
+  public void testNetworkFileSystem() {
+    final String volumeName = "volume-name-nfs";
+    final String server = "nfs.server.address";
+    final String pathOnNFS = "path.on.host";
+    final String readOnly = "true";
+    final String path = "/path/to/mount";
+    final String subPath = "/sub/path/to/mount";
+    final Map<KubernetesConstants.VolumeConfigKeys, String> config =
+        ImmutableMap.<KubernetesConstants.VolumeConfigKeys, String>builder()
+            .put(KubernetesConstants.VolumeConfigKeys.server, server)
+            .put(KubernetesConstants.VolumeConfigKeys.readOnly, readOnly)
+            .put(KubernetesConstants.VolumeConfigKeys.pathOnNFS, pathOnNFS)
+            .put(KubernetesConstants.VolumeConfigKeys.path, path)
+            .put(KubernetesConstants.VolumeConfigKeys.subPath, subPath)
+            .build();
+    final V1Volume expectedVolume = new V1VolumeBuilder()
+        .withName(volumeName)
+        .withNewNfs()
+          .withServer(server)
+          .withPath(pathOnNFS)
+          .withReadOnly(Boolean.parseBoolean(readOnly))
+        .endNfs()
+        .build();
+
+    final V1Volume actualVolume = Volumes.get()
+        .create(Volumes.VolumeType.NetworkFileSystem, volumeName, config);
+
+    Assert.assertEquals("Volume Factory Network File System", expectedVolume, actualVolume);
   }
 }
