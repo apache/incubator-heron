@@ -1280,28 +1280,8 @@ public class V1Controller extends KubernetesController {
     for (Map.Entry<String, Map<KubernetesConstants.VolumeConfigKeys, String>> configs
         : mapOfOpts.entrySet()) {
       final String volumeName = configs.getKey();
-      final V1Volume volume = new V1VolumeBuilder()
-          .withName(volumeName)
-          .withNewNfs()
-          .endNfs()
-          .build();
-
-      for (Map.Entry<KubernetesConstants.VolumeConfigKeys, String> config
-          : configs.getValue().entrySet()) {
-        switch(config.getKey()) {
-          case server:
-            volume.getNfs().setServer(config.getValue());
-            break;
-          case pathOnNFS:
-            volume.getNfs().setPath(config.getValue());
-            break;
-          case readOnly:
-            volume.getNfs().setReadOnly(Boolean.parseBoolean(config.getValue()));
-            break;
-          default:
-            break;
-        }
-      }
+      final V1Volume volume = Volumes.get()
+          .create(Volumes.VolumeType.NetworkFileSystem, volumeName, configs.getValue());
       volumes.add(volume);
       volumeMounts.add(createVolumeMountsCLI(volumeName, configs.getValue()));
     }
