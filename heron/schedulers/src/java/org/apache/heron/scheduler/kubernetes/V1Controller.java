@@ -80,7 +80,6 @@ import io.kubernetes.client.openapi.models.V1Toleration;
 import io.kubernetes.client.openapi.models.V1Volume;
 import io.kubernetes.client.openapi.models.V1VolumeBuilder;
 import io.kubernetes.client.openapi.models.V1VolumeMount;
-import io.kubernetes.client.openapi.models.V1VolumeMountBuilder;
 import io.kubernetes.client.util.PatchUtils;
 import io.kubernetes.client.util.Yaml;
 import okhttp3.Response;
@@ -1161,38 +1160,6 @@ public class V1Controller extends KubernetesController {
   }
 
   /**
-   * Generates the <code>Volume Mounts</code> to be placed in the <code>Executor</code>
-   * and <code>Manager</code> from options on the CLI.
-   * @param volumeName Name of the <code>Volume</code>.
-   * @param configs Mapping of <code>Volume</code> option <code>key-value</code> configuration pairs.
-   * @return A configured <code>V1VolumeMount</code>.
-   */
-  @VisibleForTesting
-  protected V1VolumeMount createVolumeMountsCLI(final String volumeName,
-      final Map<KubernetesConstants.VolumeConfigKeys, String> configs) {
-    final V1VolumeMount volumeMount = new V1VolumeMountBuilder()
-        .withName(volumeName)
-        .build();
-    for (Map.Entry<KubernetesConstants.VolumeConfigKeys, String> config : configs.entrySet()) {
-      switch (config.getKey()) {
-        case path:
-          volumeMount.mountPath(config.getValue());
-          break;
-        case subPath:
-          volumeMount.subPath(config.getValue());
-          break;
-        case readOnly:
-          volumeMount.readOnly(Boolean.parseBoolean(config.getValue()));
-          break;
-        default:
-          break;
-      }
-    }
-
-    return volumeMount;
-  }
-
-  /**
    * Generates the <code>Volume</code>s and <code>Volume Mounts</code> for <code>Persistent Volume Claims</code>s
    *  to be placed in the <code>Executor</code> and <code>Manager</code> from options on the CLI.
    * @param mapConfig Mapping of <code>Volume</code> option <code>key-value</code> configuration pairs.
@@ -1220,7 +1187,7 @@ public class V1Controller extends KubernetesController {
                 .build()
         );
       }
-      volumeMounts.add(createVolumeMountsCLI(volumeName, configs.getValue()));
+      volumeMounts.add(Volumes.get().createMount(volumeName, configs.getValue()));
     }
   }
 
@@ -1241,7 +1208,7 @@ public class V1Controller extends KubernetesController {
       final V1Volume volume = Volumes.get()
           .createVolume(Volumes.VolumeType.EmptyDir, volumeName, configs.getValue());
       volumes.add(volume);
-      volumeMounts.add(createVolumeMountsCLI(volumeName, configs.getValue()));
+      volumeMounts.add(Volumes.get().createMount(volumeName, configs.getValue()));
     }
   }
 
@@ -1262,7 +1229,7 @@ public class V1Controller extends KubernetesController {
       final V1Volume volume = Volumes.get()
           .createVolume(Volumes.VolumeType.HostPath, volumeName, configs.getValue());
       volumes.add(volume);
-      volumeMounts.add(createVolumeMountsCLI(volumeName, configs.getValue()));
+      volumeMounts.add(Volumes.get().createMount(volumeName, configs.getValue()));
     }
   }
 
@@ -1283,7 +1250,7 @@ public class V1Controller extends KubernetesController {
       final V1Volume volume = Volumes.get()
           .createVolume(Volumes.VolumeType.NetworkFileSystem, volumeName, configs.getValue());
       volumes.add(volume);
-      volumeMounts.add(createVolumeMountsCLI(volumeName, configs.getValue()));
+      volumeMounts.add(Volumes.get().createMount(volumeName, configs.getValue()));
     }
   }
 
