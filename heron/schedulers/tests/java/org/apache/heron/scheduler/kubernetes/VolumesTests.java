@@ -19,6 +19,9 @@
 
 package org.apache.heron.scheduler.kubernetes;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -30,6 +33,9 @@ import org.junit.Test;
 
 import org.apache.heron.common.basics.Pair;
 
+import io.kubernetes.client.custom.Quantity;
+import io.kubernetes.client.openapi.models.V1PersistentVolumeClaim;
+import io.kubernetes.client.openapi.models.V1PersistentVolumeClaimBuilder;
 import io.kubernetes.client.openapi.models.V1Volume;
 import io.kubernetes.client.openapi.models.V1VolumeBuilder;
 import io.kubernetes.client.openapi.models.V1VolumeMount;
@@ -216,9 +222,122 @@ public class VolumesTests {
 
     // Test loop.
     for (KubernetesUtils.TestTuple<Pair<String, Map<KubernetesConstants.VolumeConfigKeys, String>>,
-        V1VolumeMount> testCase : testCases) {
+          V1VolumeMount> testCase : testCases) {
       V1VolumeMount actual = Volumes.get().createMount(testCase.input.first, testCase.input.second);
       Assert.assertEquals(testCase.description, testCase.expected, actual);
     }
+  }
+
+  @Test
+  public void testPersistentVolumeClaim() {
+    final String topologyName = "topology-name";
+    final String volumeNameOne = "volume-name-one";
+    final String volumeNameTwo = "volume-name-two";
+    final String volumeNameStatic = "volume-name-static";
+    final String claimNameOne = "OnDemand";
+    final String claimNameTwo = "claim-name-two";
+    final String claimNameStatic = "OnDEmaND";
+    final String storageClassName = "storage-class-name";
+    final String sizeLimit = "555Gi";
+    final String accessModesList = "ReadWriteOnce,ReadOnlyMany,ReadWriteMany";
+    final String accessModes = "ReadOnlyMany";
+    final String volumeMode = "VolumeMode";
+    final String path = "/path/to/mount/";
+    final String subPath = "/sub/path/to/mount/";
+    final Map<String, String> labels = V1Controller.getPersistentVolumeClaimLabels(topologyName);
+
+    final Map<KubernetesConstants.VolumeConfigKeys, String> volOneConfig =
+        new HashMap<KubernetesConstants.VolumeConfigKeys, String>() {
+        {
+          put(KubernetesConstants.VolumeConfigKeys.claimName, claimNameOne);
+          put(KubernetesConstants.VolumeConfigKeys.storageClassName, storageClassName);
+          put(KubernetesConstants.VolumeConfigKeys.sizeLimit, sizeLimit);
+          put(KubernetesConstants.VolumeConfigKeys.accessModes, accessModesList);
+          put(KubernetesConstants.VolumeConfigKeys.volumeMode, volumeMode);
+          put(KubernetesConstants.VolumeConfigKeys.path, path);
+        }
+      };
+
+    final Map<KubernetesConstants.VolumeConfigKeys, String> volTwoConfig =
+        new HashMap<KubernetesConstants.VolumeConfigKeys, String>() {
+          {
+            put(KubernetesConstants.VolumeConfigKeys.claimName, claimNameTwo);
+            put(KubernetesConstants.VolumeConfigKeys.storageClassName, storageClassName);
+            put(KubernetesConstants.VolumeConfigKeys.sizeLimit, sizeLimit);
+            put(KubernetesConstants.VolumeConfigKeys.accessModes, accessModesList);
+            put(KubernetesConstants.VolumeConfigKeys.volumeMode, volumeMode);
+            put(KubernetesConstants.VolumeConfigKeys.path, path);
+            put(KubernetesConstants.VolumeConfigKeys.subPath, subPath);
+          }
+        };
+
+    final Map<KubernetesConstants.VolumeConfigKeys, String> volStaticConfig =
+        new HashMap<KubernetesConstants.VolumeConfigKeys, String>() {
+          {
+            put(KubernetesConstants.VolumeConfigKeys.claimName, claimNameStatic);
+            put(KubernetesConstants.VolumeConfigKeys.sizeLimit, sizeLimit);
+            put(KubernetesConstants.VolumeConfigKeys.accessModes, accessModes);
+            put(KubernetesConstants.VolumeConfigKeys.volumeMode, volumeMode);
+            put(KubernetesConstants.VolumeConfigKeys.path, path);
+            put(KubernetesConstants.VolumeConfigKeys.subPath, subPath);
+          }
+        };
+
+    final V1PersistentVolumeClaim claimOne = new V1PersistentVolumeClaimBuilder()
+        .withNewMetadata()
+          .withName(volumeNameOne)
+          .withLabels(labels)
+        .endMetadata()
+        .withNewSpec()
+          .withStorageClassName(storageClassName)
+          .withAccessModes(Arrays.asList(accessModesList.split(",")))
+          .withVolumeMode(volumeMode)
+          .withNewResources()
+            .addToRequests("storage", new Quantity(sizeLimit))
+          .endResources()
+        .endSpec()
+        .build();
+
+    final V1PersistentVolumeClaim claimTwo = new V1PersistentVolumeClaimBuilder()
+        .withNewMetadata()
+          .withName(volumeNameTwo)
+          .withLabels(labels)
+        .endMetadata()
+        .withNewSpec()
+          .withStorageClassName(storageClassName)
+          .withAccessModes(Arrays.asList(accessModesList.split(",")))
+          .withVolumeMode(volumeMode)
+          .withNewResources()
+            .addToRequests("storage", new Quantity(sizeLimit))
+          .endResources()
+        .endSpec()
+        .build();
+
+    final V1PersistentVolumeClaim claimStatic = new V1PersistentVolumeClaimBuilder()
+        .withNewMetadata()
+          .withName(volumeNameStatic)
+          .withLabels(labels)
+        .endMetadata()
+        .withNewSpec()
+          .withStorageClassName("")
+          .withAccessModes(Collections.singletonList(accessModes))
+          .withVolumeMode(volumeMode)
+          .withNewResources()
+            .addToRequests("storage", new Quantity(sizeLimit))
+          .endResources()
+        .endSpec()
+        .build();
+
+    final V1PersistentVolumeClaim actualPVCOne = Volumes.get()
+        .createPersistentVolumeClaim(volumeNameOne, labels, volOneConfig);
+    Assert.assertEquals("Volume one PVC", claimOne, actualPVCOne);
+
+    final V1PersistentVolumeClaim actualPVCTwo = Volumes.get()
+        .createPersistentVolumeClaim(volumeNameTwo, labels, volTwoConfig);
+    Assert.assertEquals("Volume two PVC", claimTwo, actualPVCTwo);
+
+    final V1PersistentVolumeClaim actualPVCStatic = Volumes.get()
+        .createPersistentVolumeClaim(volumeNameStatic, labels, volStaticConfig);
+    Assert.assertEquals("Volume static PVC", claimStatic, actualPVCStatic);
   }
 }

@@ -19,11 +19,14 @@
 
 package org.apache.heron.scheduler.kubernetes;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
 import io.kubernetes.client.custom.Quantity;
 import io.kubernetes.client.openapi.models.V1PersistentVolumeClaim;
+import io.kubernetes.client.openapi.models.V1PersistentVolumeClaimBuilder;
+import io.kubernetes.client.openapi.models.V1ResourceRequirements;
 import io.kubernetes.client.openapi.models.V1Volume;
 import io.kubernetes.client.openapi.models.V1VolumeBuilder;
 import io.kubernetes.client.openapi.models.V1VolumeMount;
@@ -34,8 +37,7 @@ final class Volumes {
   public enum VolumeType {
     EmptyDir,
     HostPath,
-    NetworkFileSystem,
-    PersistentVolumeClaim
+    NetworkFileSystem
   }
   private final Map<VolumeType, IVolumeFactory> volumes = new HashMap<>();
 
@@ -92,6 +94,52 @@ final class Volumes {
       }
     }
     return volumeMount;
+  }
+
+  /**
+   * Generates <code>Persistent Volume Claims Templates</code> from a mapping of <code>Volumes</code>
+   * to <code>key-value</code> pairs of configuration options and values.
+   * @param claimName Name to be assigned to <code>Persistent Volume Claims Template</code>.
+   * @param labels Labels to be attached to the <code>Persistent Volume Claims Template</code>.
+   * @param configs <code>Volume</code> to configuration <code>key-value</code> mappings.
+   * @return Fully populated dynamically backed <code>Persistent Volume Claims</code>.
+   */
+  V1PersistentVolumeClaim createPersistentVolumeClaim(String claimName, Map<String, String> labels,
+                                        Map<KubernetesConstants.VolumeConfigKeys, String> configs) {
+    V1PersistentVolumeClaim claim = new V1PersistentVolumeClaimBuilder()
+        .withNewMetadata()
+          .withName(claimName)
+          .withLabels(labels)
+        .endMetadata()
+        .withNewSpec()
+          .withStorageClassName("")
+        .endSpec()
+        .build();
+
+    // Populate PVC options.
+    for (Map.Entry<KubernetesConstants.VolumeConfigKeys, String> option : configs.entrySet()) {
+      String optionValue = option.getValue();
+      switch(option.getKey()) {
+        case storageClassName:
+          claim.getSpec().setStorageClassName(optionValue);
+          break;
+        case sizeLimit:
+          claim.getSpec().setResources(
+              new V1ResourceRequirements()
+                  .putRequestsItem("storage", new Quantity(optionValue)));
+          break;
+        case accessModes:
+          claim.getSpec().setAccessModes(Arrays.asList(optionValue.split(",")));
+          break;
+        case volumeMode:
+          claim.getSpec().setVolumeMode(optionValue);
+          break;
+        // Valid ignored options not used in a PVC.
+        default:
+          break;
+      }
+    }
+    return claim;
   }
 
   interface IVolumeFactory {
