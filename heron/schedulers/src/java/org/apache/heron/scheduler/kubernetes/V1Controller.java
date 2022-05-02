@@ -1239,7 +1239,7 @@ public class V1Controller extends KubernetesController {
         : mapOfOpts.entrySet()) {
       final String volumeName = configs.getKey();
       final V1Volume volume = Volumes.get()
-          .create(Volumes.VolumeType.EmptyDir, volumeName, configs.getValue());
+          .createVolume(Volumes.VolumeType.EmptyDir, volumeName, configs.getValue());
       volumes.add(volume);
       volumeMounts.add(createVolumeMountsCLI(volumeName, configs.getValue()));
     }
@@ -1260,7 +1260,7 @@ public class V1Controller extends KubernetesController {
         : mapOfOpts.entrySet()) {
       final String volumeName = configs.getKey();
       final V1Volume volume = Volumes.get()
-          .create(Volumes.VolumeType.HostPath, volumeName, configs.getValue());
+          .createVolume(Volumes.VolumeType.HostPath, volumeName, configs.getValue());
       volumes.add(volume);
       volumeMounts.add(createVolumeMountsCLI(volumeName, configs.getValue()));
     }
@@ -1281,7 +1281,7 @@ public class V1Controller extends KubernetesController {
         : mapOfOpts.entrySet()) {
       final String volumeName = configs.getKey();
       final V1Volume volume = Volumes.get()
-          .create(Volumes.VolumeType.NetworkFileSystem, volumeName, configs.getValue());
+          .createVolume(Volumes.VolumeType.NetworkFileSystem, volumeName, configs.getValue());
       volumes.add(volume);
       volumeMounts.add(createVolumeMountsCLI(volumeName, configs.getValue()));
     }
