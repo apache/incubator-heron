@@ -27,6 +27,7 @@ import io.kubernetes.client.openapi.models.V1PersistentVolumeClaim;
 import io.kubernetes.client.openapi.models.V1Volume;
 import io.kubernetes.client.openapi.models.V1VolumeBuilder;
 import io.kubernetes.client.openapi.models.V1VolumeMount;
+import io.kubernetes.client.openapi.models.V1VolumeMountBuilder;
 
 final class Volumes {
 
@@ -34,8 +35,7 @@ final class Volumes {
     EmptyDir,
     HostPath,
     NetworkFileSystem,
-    PersistentVolumeClaim,
-    VolumeMount
+    PersistentVolumeClaim
   }
   private final Map<VolumeType, IVolumeFactory> volumes = new HashMap<>();
 
@@ -57,26 +57,45 @@ final class Volumes {
    * @param configs A map of configurations.
    * @return Fully configured <code>V1Volume</code>.
    */
-  V1Volume create(VolumeType volumeType, String volumeName,
-                  Map<KubernetesConstants.VolumeConfigKeys, String> configs) {
+  V1Volume createVolume(VolumeType volumeType, String volumeName,
+                        Map<KubernetesConstants.VolumeConfigKeys, String> configs) {
     if (volumes.containsKey(volumeType)) {
       return volumes.get(volumeType).create(volumeName, configs);
     }
     return null;
   }
 
+  /**
+   * Generates a <code>Volume Mount</code> from specifications.
+   * @param volumeName Name of the <code>Volume</code>.
+   * @param configs Mapping of <code>Volume</code> option <code>key-value</code> configuration pairs.
+   * @return A configured <code>V1VolumeMount</code>.
+   */
+  V1VolumeMount createMount(String volumeName,
+                            Map<KubernetesConstants.VolumeConfigKeys, String> configs) {
+    final V1VolumeMount volumeMount = new V1VolumeMountBuilder()
+        .withName(volumeName)
+        .build();
+    for (Map.Entry<KubernetesConstants.VolumeConfigKeys, String> config : configs.entrySet()) {
+      switch (config.getKey()) {
+        case path:
+          volumeMount.mountPath(config.getValue());
+          break;
+        case subPath:
+          volumeMount.subPath(config.getValue());
+          break;
+        case readOnly:
+          volumeMount.readOnly(Boolean.parseBoolean(config.getValue()));
+          break;
+        default:
+          break;
+      }
+    }
+    return volumeMount;
+  }
+
   interface IVolumeFactory {
     V1Volume create(String volumeName, Map<KubernetesConstants.VolumeConfigKeys, String> configs);
-  }
-
-  interface IVolumeMountFactory {
-    V1VolumeMount create(String volumeName,
-                         Map<KubernetesConstants.VolumeConfigKeys, String> configs);
-  }
-
-  interface IPersistentVolumeClaimFactory {
-    V1PersistentVolumeClaim create(String volumeName,
-                                   Map<KubernetesConstants.VolumeConfigKeys, String> configs);
   }
 
   static class EmptyDirVolumeFactory implements IVolumeFactory {
@@ -182,4 +201,5 @@ final class Volumes {
       return volume;
     }
   }
+
 }

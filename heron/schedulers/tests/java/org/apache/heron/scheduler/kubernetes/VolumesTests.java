@@ -19,6 +19,8 @@
 
 package org.apache.heron.scheduler.kubernetes;
 
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import com.google.common.collect.ImmutableMap;
@@ -26,8 +28,12 @@ import com.google.common.collect.ImmutableMap;
 import org.junit.Assert;
 import org.junit.Test;
 
+import org.apache.heron.common.basics.Pair;
+
 import io.kubernetes.client.openapi.models.V1Volume;
 import io.kubernetes.client.openapi.models.V1VolumeBuilder;
+import io.kubernetes.client.openapi.models.V1VolumeMount;
+import io.kubernetes.client.openapi.models.V1VolumeMountBuilder;
 
 public class VolumesTests {
 
@@ -54,7 +60,7 @@ public class VolumesTests {
         .build();
 
     final V1Volume actualVolume = Volumes.get()
-        .create(Volumes.VolumeType.EmptyDir, volumeName, config);
+        .createVolume(Volumes.VolumeType.EmptyDir, volumeName, config);
 
     Assert.assertEquals("Volume Factory Empty Directory", expectedVolume, actualVolume);
   }
@@ -82,7 +88,7 @@ public class VolumesTests {
         .build();
 
     final V1Volume actualVolume = Volumes.get()
-        .create(Volumes.VolumeType.HostPath, volumeName, config);
+        .createVolume(Volumes.VolumeType.HostPath, volumeName, config);
 
     Assert.assertEquals("Volume Factory Host Path", expectedVolume, actualVolume);
   }
@@ -113,8 +119,106 @@ public class VolumesTests {
         .build();
 
     final V1Volume actualVolume = Volumes.get()
-        .create(Volumes.VolumeType.NetworkFileSystem, volumeName, config);
+        .createVolume(Volumes.VolumeType.NetworkFileSystem, volumeName, config);
 
     Assert.assertEquals("Volume Factory Network File System", expectedVolume, actualVolume);
+  }
+
+  @Test
+  public void testVolumeMount() {
+    final String volumeNamePVC = "volume-name-pvc";
+    final String volumeNameHostPath = "volume-name-host-path";
+    final String volumeNameEmptyDir = "volume-name-empty-dir";
+    final String volumeNameNFS = "volume-name-nfs";
+    final String value = "inserted-value";
+
+    // Test case container.
+    // Input: [0] volume name, [1] volume options
+    // Output: The expected <V1VolumeMount>.
+    final List<KubernetesUtils.TestTuple<
+        Pair<String, Map<KubernetesConstants.VolumeConfigKeys, String>>, V1VolumeMount>> testCases =
+        new LinkedList<>();
+
+    // PVC.
+    final Map<KubernetesConstants.VolumeConfigKeys, String> configPVC =
+        ImmutableMap.<KubernetesConstants.VolumeConfigKeys, String>builder()
+            .put(KubernetesConstants.VolumeConfigKeys.claimName, value)
+            .put(KubernetesConstants.VolumeConfigKeys.storageClassName, value)
+            .put(KubernetesConstants.VolumeConfigKeys.sizeLimit, value)
+            .put(KubernetesConstants.VolumeConfigKeys.accessModes, value)
+            .put(KubernetesConstants.VolumeConfigKeys.volumeMode, value)
+            .put(KubernetesConstants.VolumeConfigKeys.path, value)
+            .put(KubernetesConstants.VolumeConfigKeys.subPath, value)
+            .put(KubernetesConstants.VolumeConfigKeys.readOnly, "true")
+            .build();
+    final V1VolumeMount volumeMountPVC = new V1VolumeMountBuilder()
+        .withName(volumeNamePVC)
+        .withMountPath(value)
+        .withSubPath(value)
+        .withReadOnly(true)
+        .build();
+    testCases.add(new KubernetesUtils.TestTuple<>("PVC volume mount",
+        new Pair<>(volumeNamePVC, configPVC), volumeMountPVC));
+
+    // Host Path.
+    final Map<KubernetesConstants.VolumeConfigKeys, String> configHostPath =
+        ImmutableMap.<KubernetesConstants.VolumeConfigKeys, String>builder()
+            .put(KubernetesConstants.VolumeConfigKeys.type, "DirectoryOrCreate")
+            .put(KubernetesConstants.VolumeConfigKeys.pathOnHost, value)
+            .put(KubernetesConstants.VolumeConfigKeys.path, value)
+            .put(KubernetesConstants.VolumeConfigKeys.subPath, value)
+            .put(KubernetesConstants.VolumeConfigKeys.readOnly, "true")
+            .build();
+    final V1VolumeMount volumeMountHostPath = new V1VolumeMountBuilder()
+        .withName(volumeNameHostPath)
+        .withMountPath(value)
+        .withSubPath(value)
+        .withReadOnly(true)
+        .build();
+    testCases.add(new KubernetesUtils.TestTuple<>("Host Path volume mount",
+        new Pair<>(volumeNameHostPath, configHostPath), volumeMountHostPath));
+
+    // Empty Dir.
+    final Map<KubernetesConstants.VolumeConfigKeys, String> configEmptyDir =
+        ImmutableMap.<KubernetesConstants.VolumeConfigKeys, String>builder()
+            .put(KubernetesConstants.VolumeConfigKeys.sizeLimit, value)
+            .put(KubernetesConstants.VolumeConfigKeys.medium, "Memory")
+            .put(KubernetesConstants.VolumeConfigKeys.path, value)
+            .put(KubernetesConstants.VolumeConfigKeys.subPath, value)
+            .put(KubernetesConstants.VolumeConfigKeys.readOnly, "true")
+            .build();
+    final V1VolumeMount volumeMountEmptyDir = new V1VolumeMountBuilder()
+        .withName(volumeNameEmptyDir)
+        .withMountPath(value)
+        .withSubPath(value)
+        .withReadOnly(true)
+        .build();
+    testCases.add(new KubernetesUtils.TestTuple<>("Empty Dir volume mount",
+        new Pair<>(volumeNameEmptyDir, configEmptyDir), volumeMountEmptyDir));
+
+    // NFS.
+    final Map<KubernetesConstants.VolumeConfigKeys, String> configNFS =
+        ImmutableMap.<KubernetesConstants.VolumeConfigKeys, String>builder()
+            .put(KubernetesConstants.VolumeConfigKeys.server, "nfs.server.address")
+            .put(KubernetesConstants.VolumeConfigKeys.readOnly, "true")
+            .put(KubernetesConstants.VolumeConfigKeys.pathOnNFS, value)
+            .put(KubernetesConstants.VolumeConfigKeys.path, value)
+            .put(KubernetesConstants.VolumeConfigKeys.subPath, value)
+            .build();
+    final V1VolumeMount volumeMountNFS = new V1VolumeMountBuilder()
+        .withName(volumeNameNFS)
+        .withMountPath(value)
+        .withSubPath(value)
+        .withReadOnly(true)
+        .build();
+    testCases.add(new KubernetesUtils.TestTuple<>("NFS volume mount",
+        new Pair<>(volumeNameNFS, configNFS), volumeMountNFS));
+
+    // Test loop.
+    for (KubernetesUtils.TestTuple<Pair<String, Map<KubernetesConstants.VolumeConfigKeys, String>>,
+        V1VolumeMount> testCase : testCases) {
+      V1VolumeMount actual = Volumes.get().createMount(testCase.input.first, testCase.input.second);
+      Assert.assertEquals(testCase.description, testCase.expected, actual);
+    }
   }
 }
