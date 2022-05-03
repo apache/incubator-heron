@@ -871,6 +871,7 @@ public class V1ControllerTest {
     final List<V1PersistentVolumeClaim> actualClaims =
         v1ControllerWithPodTemplate.createPersistentVolumeClaims(mapPVCOpts);
 
+    Assert.assertEquals("Generated claim sizes match", expectedClaims.size(), actualClaims.size());
     Assert.assertTrue(expectedClaims.containsAll(actualClaims));
   }
 

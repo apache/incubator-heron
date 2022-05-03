@@ -142,6 +142,21 @@ final class Volumes {
     return claim;
   }
 
+  /**
+   * Generates a <code>Volume</code> with a <code>Persistent Volume Claim</code> inserted.
+   * @param claimName Name of the <code>Persistent Volume Claim</code>.
+   * @param volumeName Name of the <code>Volume</code> to place the <code>Persistent Volume Claim</code> in.
+   * @return Fully configured <code>Volume</code> with <code>Persistent Volume Claim</code> in it.
+   */
+  V1Volume createPersistentVolumeClaim(String claimName, String volumeName) {
+    return new V1VolumeBuilder()
+        .withName(volumeName)
+        .withNewPersistentVolumeClaim()
+          .withClaimName(claimName)
+        .endPersistentVolumeClaim()
+        .build();
+  }
+
   interface IVolumeFactory {
     V1Volume create(String volumeName, Map<KubernetesConstants.VolumeConfigKeys, String> configs);
   }

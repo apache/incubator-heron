@@ -64,7 +64,6 @@ import io.kubernetes.client.openapi.models.V1LabelSelector;
 import io.kubernetes.client.openapi.models.V1ObjectFieldSelector;
 import io.kubernetes.client.openapi.models.V1ObjectMeta;
 import io.kubernetes.client.openapi.models.V1PersistentVolumeClaim;
-import io.kubernetes.client.openapi.models.V1PersistentVolumeClaimBuilder;
 import io.kubernetes.client.openapi.models.V1PodSpec;
 import io.kubernetes.client.openapi.models.V1PodTemplate;
 import io.kubernetes.client.openapi.models.V1PodTemplateSpec;
@@ -78,7 +77,6 @@ import io.kubernetes.client.openapi.models.V1StatefulSetSpec;
 import io.kubernetes.client.openapi.models.V1Status;
 import io.kubernetes.client.openapi.models.V1Toleration;
 import io.kubernetes.client.openapi.models.V1Volume;
-import io.kubernetes.client.openapi.models.V1VolumeBuilder;
 import io.kubernetes.client.openapi.models.V1VolumeMount;
 import io.kubernetes.client.util.PatchUtils;
 import io.kubernetes.client.util.Yaml;
@@ -1120,41 +1118,9 @@ public class V1Controller extends KubernetesController {
         continue;
       }
 
-      V1PersistentVolumeClaim claim = new V1PersistentVolumeClaimBuilder()
-          .withNewMetadata()
-            .withName(pvc.getKey())
-            .withLabels(getPersistentVolumeClaimLabels(getTopologyName()))
-          .endMetadata()
-          .withNewSpec()
-            .withStorageClassName("")
-          .endSpec()
-          .build();
-
-      // Populate PVC options.
-      for (Map.Entry<KubernetesConstants.VolumeConfigKeys, String> option
-          : pvc.getValue().entrySet()) {
-        String optionValue = option.getValue();
-        switch(option.getKey()) {
-          case storageClassName:
-            claim.getSpec().setStorageClassName(optionValue);
-            break;
-          case sizeLimit:
-            claim.getSpec().setResources(
-                    new V1ResourceRequirements()
-                        .putRequestsItem("storage", new Quantity(optionValue)));
-            break;
-          case accessModes:
-            claim.getSpec().setAccessModes(Arrays.asList(optionValue.split(",")));
-            break;
-          case volumeMode:
-            claim.getSpec().setVolumeMode(optionValue);
-            break;
-          // Valid ignored options not used in a PVC.
-          default:
-            break;
-        }
-      }
-      listOfPVCs.add(claim);
+      listOfPVCs.add(Volumes.get()
+          .createPersistentVolumeClaim(pvc.getKey(),
+              getPersistentVolumeClaimLabels(getTopologyName()), pvc.getValue()));
     }
     return listOfPVCs;
   }
@@ -1178,14 +1144,7 @@ public class V1Controller extends KubernetesController {
       final String claimName = configs.getValue()
           .get(KubernetesConstants.VolumeConfigKeys.claimName);
       if (claimName != null && !KubernetesConstants.LABEL_ON_DEMAND.equalsIgnoreCase(claimName)) {
-        volumes.add(
-            new V1VolumeBuilder()
-                .withName(volumeName)
-                .withNewPersistentVolumeClaim()
-                  .withClaimName(claimName)
-                .endPersistentVolumeClaim()
-                .build()
-        );
+        volumes.add(Volumes.get().createPersistentVolumeClaim(claimName, volumeName));
       }
       volumeMounts.add(Volumes.get().createMount(volumeName, configs.getValue()));
     }

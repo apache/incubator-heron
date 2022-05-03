@@ -340,4 +340,20 @@ public class VolumesTests {
         .createPersistentVolumeClaim(volumeNameStatic, labels, volStaticConfig);
     Assert.assertEquals("Volume static PVC", claimStatic, actualPVCStatic);
   }
+
+  @Test
+  public void testVolumeWithPersistentVolumeClaim() {
+    final String claimName = "claim-name";
+    final String volumeName = "volume-name";
+    final V1Volume expected = new V1VolumeBuilder()
+        .withName(volumeName)
+          .withNewPersistentVolumeClaim()
+        .withClaimName(claimName)
+        .endPersistentVolumeClaim()
+        .build();
+
+    final V1Volume actual = Volumes.get().createPersistentVolumeClaim(claimName, volumeName);
+
+    Assert.assertEquals("Volume with Persistent Volume Claim configured", expected, actual);
+  }
 }
