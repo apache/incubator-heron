@@ -77,7 +77,6 @@ import io.kubernetes.client.openapi.models.V1StatefulSetSpec;
 import io.kubernetes.client.openapi.models.V1Status;
 import io.kubernetes.client.openapi.models.V1Toleration;
 import io.kubernetes.client.openapi.models.V1Volume;
-import io.kubernetes.client.openapi.models.V1VolumeBuilder;
 import io.kubernetes.client.openapi.models.V1VolumeMount;
 import io.kubernetes.client.util.PatchUtils;
 import io.kubernetes.client.util.Yaml;
@@ -1145,14 +1144,7 @@ public class V1Controller extends KubernetesController {
       final String claimName = configs.getValue()
           .get(KubernetesConstants.VolumeConfigKeys.claimName);
       if (claimName != null && !KubernetesConstants.LABEL_ON_DEMAND.equalsIgnoreCase(claimName)) {
-        volumes.add(
-            new V1VolumeBuilder()
-                .withName(volumeName)
-                .withNewPersistentVolumeClaim()
-                  .withClaimName(claimName)
-                .endPersistentVolumeClaim()
-                .build()
-        );
+        volumes.add(Volumes.get().createPersistentVolumeClaim(claimName, volumeName));
       }
       volumeMounts.add(Volumes.get().createMount(volumeName, configs.getValue()));
     }
