@@ -222,7 +222,7 @@ public class VolumesTests {
 
     // Test loop.
     for (KubernetesUtils.TestTuple<Pair<String, Map<KubernetesConstants.VolumeConfigKeys, String>>,
-          V1VolumeMount> testCase : testCases) {
+             V1VolumeMount> testCase : testCases) {
       V1VolumeMount actual = Volumes.get().createMount(testCase.input.first, testCase.input.second);
       Assert.assertEquals(testCase.description, testCase.expected, actual);
     }
