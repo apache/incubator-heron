@@ -25,6 +25,7 @@ kafka_spout_deps = [
 java_library(
     name = "heron-kafka-spout-java",
     srcs = glob(["org/apache/heron/spouts/kafka/**/*.java"]),
+    resources = ["//:disclaimers"],
     javacopts = DOCLINT_HTML_AND_SYNTAX,
     deps = kafka_spout_deps,
 )

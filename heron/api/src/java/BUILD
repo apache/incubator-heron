@@ -50,6 +50,7 @@ java_library(
         "org/apache/heron/streamlet/**/*.java",
     ]),
     javacopts = DOCLINT_HTML_AND_SYNTAX,
+    resources = ["//:disclaimers"],
     deps = api_deps_files + [
         "//third_party/java:kryo-neverlink",
         "@maven//:org_apache_commons_commons_lang3",

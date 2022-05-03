@@ -25,6 +25,7 @@ kafka_bolt_deps = [
 java_library(
     name = "heron-kafka-bolt-java",
     srcs = glob(["org/apache/heron/bolts/kafka/**/*.java"]),
+    resources = ["//:disclaimers"],
     javacopts = DOCLINT_HTML_AND_SYNTAX,
     deps = kafka_bolt_deps,
 )
