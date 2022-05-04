@@ -139,7 +139,7 @@ case $# in
   *)
     echo "Usage: $0 <operation> <platform> <version_string> <tag-prefix> <input-output-directory> "
     echo "  "
-    echo "Platforms Supported: ubuntu20.04, rocky8, debian10"
+    echo "Platforms Supported: ubuntu20.04, rocky8, debian11"
     echo "  "
     echo "Example:"
     echo "  $0 build ubuntu20.04 0.12.0 heron ."

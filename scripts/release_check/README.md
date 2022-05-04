@@ -46,7 +46,7 @@ sh ./scripts/release_check/build.sh
 sh ./scripts/release_check/run_test_topology.sh
 ```
 
-### To compile source into a Heron docker image (host OS: MacOS, target OS: Debian10).
+### To compile source into a Heron docker image (host OS: MacOS, target OS: debian11).
 ```
 sh ./scripts/release_check/build_docker.sh
 ```
