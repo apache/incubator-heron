@@ -24,6 +24,7 @@ java_library(
         "**/spi/metricsmgr/**/*.java",
     ]),
     javacopts = DOCLINT_HTML_AND_SYNTAX,
+    resources = ["//:disclaimers"],
     deps = [
         "//heron/api/src/java:api-java-low-level",
         "//heron/api/src/java:classification",

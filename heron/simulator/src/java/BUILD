@@ -34,6 +34,7 @@ java_library(
 java_binary(
     name = "simulator-unshaded",
     srcs = glob(["org/apache/heron/simulator/**/*.java"]),
+    resources = ["//:disclaimers"],
     deps = simulator_deps_files + [
         "//third_party/java:kryo-neverlink",
         "@maven//:org_apache_commons_commons_lang3",
