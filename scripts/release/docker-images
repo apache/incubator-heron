@@ -28,7 +28,7 @@ List available target distrobutions on separate stdout lines:
   ./docker-images
 
 Build and tag a single distorbution image then print where the archive's path:
-  ./docker-images build 0.1.0-debian10 debian10
+  ./docker-images build 0.1.0-debian11 debian11
 
 Build and tag all distrobution images then print each archive's path:
   ./docker-images build "$(git describe --tags)" --all

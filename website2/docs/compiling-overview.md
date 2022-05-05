@@ -21,7 +21,7 @@ sidebar_label: Compiling Overview
 -->
 
 Heron is currently available for [Mac OS X 12](compiling-osx),
-[Ubuntu 20.04](compiling-linux), and [Debian10](compiling-docker#building-heron).
+[Ubuntu 20.04](compiling-linux), and [debian11](compiling-docker#building-heron).
  This guide describes the basics of the
 Heron build system. For step-by-step build instructions for other platforms,
 the following guides are available:

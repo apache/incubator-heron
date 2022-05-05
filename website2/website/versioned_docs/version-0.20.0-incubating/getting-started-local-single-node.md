@@ -44,7 +44,7 @@ If you already have Bazel and the other required tools installed for your platfo
 $ bazel build --config=[platform] scripts/packages:binpkgs
 ```
 Options for the config flag are:
-* `debian` (Debian10)
+* `debian` (debian11)
 * `ubuntu` (Ubuntu)
 * `darwin` (OSX)
 

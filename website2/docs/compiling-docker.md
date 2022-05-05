@@ -24,7 +24,7 @@ For developing Heron, you will need to compile it for the environment that you
 want to use it in. If you'd like to use Docker to create that build environment,
 Heron provides a convenient script to make that process easier.
 
-Currently Debian10 and Ubuntu 20.04 are actively being supported.  There is also limited support for Ubuntu 18.04, and CentOS 8. If you
+Currently debian11 and Ubuntu 20.04 are actively being supported.  There is also limited support for Ubuntu 18.04, and CentOS 8. If you
 need another platform there are instructions for adding new ones
 [below](#contributing-new-environments).
 
@@ -65,7 +65,7 @@ Script to build heron docker image for different platforms
 Usage: ./docker/scripts/build-docker.sh <platform> <version_string> <artifact-directory> [-s|--squash]
   
 Argument options:
-  <platform>: darwin, debian10, ubuntu20.04, rocky8
+  <platform>: darwin, debian11, ubuntu20.04, rocky8
   <version_string>: Version of Heron build, e.g. v0.17.5.1-rc
   <artifact-directory>: Location of compiled Heron artifact
   [-s|--squash]: Enables using Docker experimental feature --squash
@@ -79,12 +79,12 @@ NOTE: If running on OSX, the output directory will need to
 
 The following arguments are required:
 
-* `platform` --- Currently we are focused on supporting the `debian10` and `ubuntu20.04` platforms.  
+* `platform` --- Currently we are focused on supporting the `debian11` and `ubuntu20.04` platforms.  
 We also support building Heron locally on OSX.  You can specify this as listing `darwin` as the platform.
  All options are:
    - `darwin`
    - `rocky8`
-   - `debian10`
+   - `debian11`
    - `ubuntu18.04`
    - `ubuntu20.04`
     
@@ -99,10 +99,10 @@ We also support building Heron locally on OSX.  You can specify this as listing 
 Here's an example usage:
 
 ```bash
-$ docker/scripts/build-artifacts.sh debian10 0.22.1-incubating ~/heron-release
+$ docker/scripts/build-artifacts.sh debian11 0.22.1-incubating ~/heron-release
 ```
 
-This will build a Docker container specific to Debian10, create a source
+This will build a Docker container specific to debian11, create a source
 tarball of the Heron repository, run a full release build of Heron, and then
 copy the artifacts into the `~/heron-release` directory.
 
@@ -122,12 +122,12 @@ of the generated artifacts:
 
 ```bash
 $ ls ~/heron-release
-heron-0.22.1-incubating-debian10.tar
-heron-0.22.1-incubating-debian10.tar.gz
-heron-core-0.22.1-incubating-debian10.tar.gz
-heron-install-0.22.1-incubating-debian10.sh
-heron-layer-0.22.1-incubating-debian10.tar
-heron-tools-0.22.1-incubating-debian10.tar.gz
+heron-0.22.1-incubating-debian11.tar
+heron-0.22.1-incubating-debian11.tar.gz
+heron-core-0.22.1-incubating-debian11.tar.gz
+heron-install-0.22.1-incubating-debian11.sh
+heron-layer-0.22.1-incubating-debian11.tar
+heron-tools-0.22.1-incubating-debian11.tar.gz
 ```
 
 ## Set Up A Docker Based Development Environment
@@ -172,7 +172,7 @@ platforms.
 
 To add support for a new platform, add a new `Dockerfile` to that directory and
 append the name of the platform to the name of the file. If you'd like to add
-support for Debian 8, for example, add a file named `Dockerfile.debian10`. Once
+support for Debian 8, for example, add a file named `Dockerfile.debian11`. Once
 you've done that, follow the instructions in the [Docker
 documentation](https://docs.docker.com/engine/articles/dockerfile_best-practices/).
 

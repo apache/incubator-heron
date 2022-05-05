@@ -58,13 +58,13 @@ class Download extends React.Component {
     const latestArchiveMirrorUrl = getLatestArchiveMirrorUrl(latestHeronVersion, 'bin');
     const latestSrcArchiveMirrorUrl = getLatestArchiveMirrorUrl(latestHeronVersion, 'src');
     const latestSrcUrl = getTarUrl(latestHeronVersion, "src");
-    const latestDebian10TarUrl =  getTarUrl(latestHeronVersion, "debian10");
+    const latestdebian11TarUrl =  getTarUrl(latestHeronVersion, "debian11");
     const latestArchiveUrl = distUrl(latestHeronVersion, 'bin');
     const latestSrcArchiveUrl = distUrl(latestHeronVersion, 'src')
     const rocky8InstallUrl = getInstallScriptMirrorUrl(latestHeronVersion, "rocky8")
     const rocky8InstallCryptoUrl = getInstallScriptCryptoUrl(latestHeronVersion, "rocky8")
-    const debian10InstallUrl = getInstallScriptMirrorUrl(latestHeronVersion, "debian10")
-    const debian10InstallCryptoUrl = getInstallScriptCryptoUrl(latestHeronVersion, "debian10")
+    const debian11InstallUrl = getInstallScriptMirrorUrl(latestHeronVersion, "debian11")
+    const debian11InstallCryptoUrl = getInstallScriptCryptoUrl(latestHeronVersion, "debian11")
     const ubuntu2004InstallUrl = getInstallScriptMirrorUrl(latestHeronVersion, "ubuntu20.04")
     const ubuntu2004InstallCryptoUrl = getInstallScriptCryptoUrl(latestHeronVersion, "ubuntu20.04")
 
@@ -118,13 +118,13 @@ class Download extends React.Component {
                   </td>
                 </tr>
                 <tr key={'binary'}>
-                  <th>Debian10 Binary</th>
+                  <th>debian11 Binary</th>
                   <td>
-                    <a href={latestSrcArchiveMirrorUrl}>heron-{latestHeronVersion}-debian10.tar.gz</a>
+                    <a href={latestSrcArchiveMirrorUrl}>heron-{latestHeronVersion}-debian11.tar.gz</a>
                   </td>
                   <td>
-                    <a href={`${latestDebian10TarUrl}.asc`}>asc</a>,&nbsp;
-                    <a href={`${latestDebian10TarUrl}.sha512`}>sha512</a>
+                    <a href={`${latestdebian11TarUrl}.asc`}>asc</a>,&nbsp;
+                    <a href={`${latestdebian11TarUrl}.sha512`}>sha512</a>
                   </td>
                 </tr>
                 </tbody>
@@ -158,14 +158,14 @@ class Download extends React.Component {
                       <a href={`${rocky8InstallCryptoUrl}.sha512`}>sha512</a>
                     </td>
                   </tr>
-                  <tr key={'debian10-install'}>
-                    <th>Debian10</th>
+                  <tr key={'debian11-install'}>
+                    <th>debian11</th>
                     <td>
-                      <a href={`${debian10InstallUrl}`}> heron-install-0.20.4-incubating-debian10.sh</a>
+                      <a href={`${debian11InstallUrl}`}> heron-install-0.20.4-incubating-debian11.sh</a>
                     </td>
                     <td>
-                      <a href={`${debian10InstallCryptoUrl}.asc`}>asc</a>,&nbsp;
-                      <a href={`${debian10InstallCryptoUrl}.sha512`}>sha512</a>
+                      <a href={`${debian11InstallCryptoUrl}.asc`}>asc</a>,&nbsp;
+                      <a href={`${debian11InstallCryptoUrl}.sha512`}>sha512</a>
                     </td>
                   </tr>
                    <tr key={'ubuntu20.04-install'}>

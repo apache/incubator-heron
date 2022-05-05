@@ -16,7 +16,7 @@
 #  under the License.
 
 #syntax=docker/dockerfile:1.2
-FROM openjdk:11-jdk-slim-buster
+FROM openjdk:11-jdk-slim-bullseye
 
 ENV LC_ALL C.UTF-8
 ENV LANG C.UTF-8
