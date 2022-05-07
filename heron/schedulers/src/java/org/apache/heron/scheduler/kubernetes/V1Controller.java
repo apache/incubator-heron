@@ -64,7 +64,6 @@ import io.kubernetes.client.openapi.models.V1LabelSelector;
 import io.kubernetes.client.openapi.models.V1ObjectFieldSelector;
 import io.kubernetes.client.openapi.models.V1ObjectMeta;
 import io.kubernetes.client.openapi.models.V1PersistentVolumeClaim;
-import io.kubernetes.client.openapi.models.V1PersistentVolumeClaimBuilder;
 import io.kubernetes.client.openapi.models.V1PodSpec;
 import io.kubernetes.client.openapi.models.V1PodTemplate;
 import io.kubernetes.client.openapi.models.V1PodTemplateSpec;
@@ -78,9 +77,7 @@ import io.kubernetes.client.openapi.models.V1StatefulSetSpec;
 import io.kubernetes.client.openapi.models.V1Status;
 import io.kubernetes.client.openapi.models.V1Toleration;
 import io.kubernetes.client.openapi.models.V1Volume;
-import io.kubernetes.client.openapi.models.V1VolumeBuilder;
 import io.kubernetes.client.openapi.models.V1VolumeMount;
-import io.kubernetes.client.openapi.models.V1VolumeMountBuilder;
 import io.kubernetes.client.util.PatchUtils;
 import io.kubernetes.client.util.Yaml;
 import okhttp3.Response;
@@ -656,8 +653,6 @@ public class V1Controller extends KubernetesController {
 
     podSpec.setContainers(containers);
 
-    addVolumesIfPresent(podSpec);
-
     mountSecretsAsVolumes(podSpec);
   }
 
@@ -693,28 +688,6 @@ public class V1Controller extends KubernetesController {
     });
 
     return tolerations;
-  }
-
-  /**
-   * Adds volume to the <code>Pod Spec</code> that Heron requires. Heron's values taking precedence.
-   * @param spec <code>Pod Spec</code> to be configured.
-   */
-  @VisibleForTesting
-  protected void addVolumesIfPresent(final V1PodSpec spec) {
-    final Config config = getConfiguration();
-    if (KubernetesContext.hasVolume(config)) {
-      final V1Volume volumeFromConfig = Volumes.get().create(config);
-      if (volumeFromConfig != null) {
-        // Merge volumes. Deduplicate using volume's name with Heron defaults taking precedence.
-        KubernetesUtils.V1ControllerUtils<V1Volume> utils =
-            new KubernetesUtils.V1ControllerUtils<>();
-        spec.setVolumes(
-            utils.mergeListsDedupe(Collections.singletonList(volumeFromConfig), spec.getVolumes(),
-                Comparator.comparing(V1Volume::getName), "Pod Template Volumes")
-        );
-        LOG.fine("Adding volume: " + volumeFromConfig);
-      }
-    }
   }
 
   /**
@@ -1145,75 +1118,11 @@ public class V1Controller extends KubernetesController {
         continue;
       }
 
-      V1PersistentVolumeClaim claim = new V1PersistentVolumeClaimBuilder()
-          .withNewMetadata()
-            .withName(pvc.getKey())
-            .withLabels(getPersistentVolumeClaimLabels(getTopologyName()))
-          .endMetadata()
-          .withNewSpec()
-            .withStorageClassName("")
-          .endSpec()
-          .build();
-
-      // Populate PVC options.
-      for (Map.Entry<KubernetesConstants.VolumeConfigKeys, String> option
-          : pvc.getValue().entrySet()) {
-        String optionValue = option.getValue();
-        switch(option.getKey()) {
-          case storageClassName:
-            claim.getSpec().setStorageClassName(optionValue);
-            break;
-          case sizeLimit:
-            claim.getSpec().setResources(
-                    new V1ResourceRequirements()
-                        .putRequestsItem("storage", new Quantity(optionValue)));
-            break;
-          case accessModes:
-            claim.getSpec().setAccessModes(Arrays.asList(optionValue.split(",")));
-            break;
-          case volumeMode:
-            claim.getSpec().setVolumeMode(optionValue);
-            break;
-          // Valid ignored options not used in a PVC.
-          default:
-            break;
-        }
-      }
-      listOfPVCs.add(claim);
+      listOfPVCs.add(Volumes.get()
+          .createPersistentVolumeClaim(pvc.getKey(),
+              getPersistentVolumeClaimLabels(getTopologyName()), pvc.getValue()));
     }
     return listOfPVCs;
-  }
-
-  /**
-   * Generates the <code>Volume Mounts</code> to be placed in the <code>Executor</code>
-   * and <code>Manager</code> from options on the CLI.
-   * @param volumeName Name of the <code>Volume</code>.
-   * @param configs Mapping of <code>Volume</code> option <code>key-value</code> configuration pairs.
-   * @return A configured <code>V1VolumeMount</code>.
-   */
-  @VisibleForTesting
-  protected V1VolumeMount createVolumeMountsCLI(final String volumeName,
-      final Map<KubernetesConstants.VolumeConfigKeys, String> configs) {
-    final V1VolumeMount volumeMount = new V1VolumeMountBuilder()
-        .withName(volumeName)
-        .build();
-    for (Map.Entry<KubernetesConstants.VolumeConfigKeys, String> config : configs.entrySet()) {
-      switch (config.getKey()) {
-        case path:
-          volumeMount.mountPath(config.getValue());
-          break;
-        case subPath:
-          volumeMount.subPath(config.getValue());
-          break;
-        case readOnly:
-          volumeMount.readOnly(Boolean.parseBoolean(config.getValue()));
-          break;
-        default:
-          break;
-      }
-    }
-
-    return volumeMount;
   }
 
   /**
@@ -1235,16 +1144,9 @@ public class V1Controller extends KubernetesController {
       final String claimName = configs.getValue()
           .get(KubernetesConstants.VolumeConfigKeys.claimName);
       if (claimName != null && !KubernetesConstants.LABEL_ON_DEMAND.equalsIgnoreCase(claimName)) {
-        volumes.add(
-            new V1VolumeBuilder()
-                .withName(volumeName)
-                .withNewPersistentVolumeClaim()
-                  .withClaimName(claimName)
-                .endPersistentVolumeClaim()
-                .build()
-        );
+        volumes.add(Volumes.get().createPersistentVolumeClaim(claimName, volumeName));
       }
-      volumeMounts.add(createVolumeMountsCLI(volumeName, configs.getValue()));
+      volumeMounts.add(Volumes.get().createMount(volumeName, configs.getValue()));
     }
   }
 
@@ -1262,27 +1164,10 @@ public class V1Controller extends KubernetesController {
     for (Map.Entry<String, Map<KubernetesConstants.VolumeConfigKeys, String>> configs
         : mapOfOpts.entrySet()) {
       final String volumeName = configs.getKey();
-      final V1Volume volume = new V1VolumeBuilder()
-          .withName(volumeName)
-          .withNewEmptyDir()
-          .endEmptyDir()
-          .build();
-
-      for (Map.Entry<KubernetesConstants.VolumeConfigKeys, String> config
-          : configs.getValue().entrySet()) {
-        switch(config.getKey()) {
-          case medium:
-            volume.getEmptyDir().medium(config.getValue());
-            break;
-          case sizeLimit:
-            volume.getEmptyDir().sizeLimit(new Quantity(config.getValue()));
-            break;
-          default:
-            break;
-        }
-      }
+      final V1Volume volume = Volumes.get()
+          .createVolume(Volumes.VolumeType.EmptyDir, volumeName, configs.getValue());
       volumes.add(volume);
-      volumeMounts.add(createVolumeMountsCLI(volumeName, configs.getValue()));
+      volumeMounts.add(Volumes.get().createMount(volumeName, configs.getValue()));
     }
   }
 
@@ -1300,27 +1185,10 @@ public class V1Controller extends KubernetesController {
     for (Map.Entry<String, Map<KubernetesConstants.VolumeConfigKeys, String>> configs
         : mapOfOpts.entrySet()) {
       final String volumeName = configs.getKey();
-      final V1Volume volume = new V1VolumeBuilder()
-          .withName(volumeName)
-          .withNewHostPath()
-          .endHostPath()
-          .build();
-
-      for (Map.Entry<KubernetesConstants.VolumeConfigKeys, String> config
-          : configs.getValue().entrySet()) {
-        switch(config.getKey()) {
-          case type:
-            volume.getHostPath().setType(config.getValue());
-            break;
-          case pathOnHost:
-            volume.getHostPath().setPath(config.getValue());
-            break;
-          default:
-            break;
-        }
-      }
+      final V1Volume volume = Volumes.get()
+          .createVolume(Volumes.VolumeType.HostPath, volumeName, configs.getValue());
       volumes.add(volume);
-      volumeMounts.add(createVolumeMountsCLI(volumeName, configs.getValue()));
+      volumeMounts.add(Volumes.get().createMount(volumeName, configs.getValue()));
     }
   }
 
@@ -1338,30 +1206,10 @@ public class V1Controller extends KubernetesController {
     for (Map.Entry<String, Map<KubernetesConstants.VolumeConfigKeys, String>> configs
         : mapOfOpts.entrySet()) {
       final String volumeName = configs.getKey();
-      final V1Volume volume = new V1VolumeBuilder()
-          .withName(volumeName)
-          .withNewNfs()
-          .endNfs()
-          .build();
-
-      for (Map.Entry<KubernetesConstants.VolumeConfigKeys, String> config
-          : configs.getValue().entrySet()) {
-        switch(config.getKey()) {
-          case server:
-            volume.getNfs().setServer(config.getValue());
-            break;
-          case pathOnNFS:
-            volume.getNfs().setPath(config.getValue());
-            break;
-          case readOnly:
-            volume.getNfs().setReadOnly(Boolean.parseBoolean(config.getValue()));
-            break;
-          default:
-            break;
-        }
-      }
+      final V1Volume volume = Volumes.get()
+          .createVolume(Volumes.VolumeType.NetworkFileSystem, volumeName, configs.getValue());
       volumes.add(volume);
-      volumeMounts.add(createVolumeMountsCLI(volumeName, configs.getValue()));
+      volumeMounts.add(Volumes.get().createMount(volumeName, configs.getValue()));
     }
   }
 
