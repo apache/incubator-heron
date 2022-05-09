@@ -457,7 +457,6 @@ public final class SchedulerUtils {
    * <br> 1. Convert it into Base64 format
    * <br> 2. Add \" at the start and at the end
    * <br> 3. replace "=" with "(61)" and "&amp;equals;"
-   * '=' can be parsed in a wrong way by some schedulers (aurora) hence it needs to be escaped.
    *
    * @return encoded string
    */
