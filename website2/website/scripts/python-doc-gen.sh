@@ -25,7 +25,7 @@ cd ${HERON_ROOT_DIR}
 ./bazel_configure.py
 
 # Generate python whl packages, packages will be generated in ${HERON_ROOT_DIR}/bazel-bin/scripts/packages/
-bazel build  --config=ubuntu scripts/packages:pypkgs
+bazel build scripts/packages:pypkgs
 
 cd website2/website/
 mkdir -p ./tmp/
@@ -36,14 +36,14 @@ VENV=./venv/
 echo $VENV
 PIP_LOCATION=${HERON_ROOT_DIR}/bazel-bin/scripts/packages
 
-virtualenv "$VENV"
+python3 -m venv "$VENV"
 source "$VENV/bin/activate"
-pip install pdoc==0.3.2
-pip install --ignore-installed six
+pip3 install pdoc==0.3.2
+pip3 install --ignore-installed six
 # Install the heronpy
 echo "list heronpy location"
 ls $PIP_LOCATION
-pip install $PIP_LOCATION/heronpy-*-py2.py3-none-any.whl
+pip3 install $PIP_LOCATION/heronpy-*-py3-none-any.whl
 
 
 mkdir -p static/api && rm -rf static/api/python

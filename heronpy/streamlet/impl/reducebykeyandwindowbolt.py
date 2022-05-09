@@ -19,7 +19,7 @@
 #  under the License.
 
 """module for join bolt: ReduceByKeyAndWindowBolt"""
-import collections
+from collections.abc import Iterable
 
 from heronpy.api.bolt.window_bolt import SlidingWindowBolt
 from heronpy.api.custom_grouping import ICustomGrouping
@@ -40,7 +40,7 @@ class ReduceByKeyAndWindowBolt(SlidingWindowBolt, StreamletBoltBase):
   SLIDEINTERVAL = SlidingWindowBolt.WINDOW_SLIDEINTERVAL_SECS
 
   def initialize(self, config, context):
-    super(ReduceByKeyAndWindowBolt, self).initialize(config, context)
+    super().initialize(config, context)
     if ReduceByKeyAndWindowBolt.FUNCTION not in config:
       raise RuntimeError("FUNCTION not specified in reducebywindow operator")
     self.reduce_function = config[ReduceByKeyAndWindowBolt.FUNCTION]
@@ -59,7 +59,7 @@ class ReduceByKeyAndWindowBolt(SlidingWindowBolt, StreamletBoltBase):
     mymap = {}
     for tup in tuples:
       userdata = tup.values[0]
-      if not isinstance(userdata, collections.Iterable) or len(userdata) != 2:
+      if not isinstance(userdata, Iterable) or len(userdata) != 2:
         raise RuntimeError("ReduceByWindow tuples must be iterable of length 2")
       self._add(userdata[0], userdata[1], mymap)
     for (key, values) in list(mymap.items()):
@@ -77,7 +77,7 @@ class ReduceGrouping(ICustomGrouping):
   def choose_tasks(self, values):
     assert isinstance(values, list) and len(values) == 1
     userdata = values[0]
-    if not isinstance(userdata, collections.Iterable) or len(userdata) != 2:
+    if not isinstance(userdata, Iterable) or len(userdata) != 2:
       raise RuntimeError("Tuples going to reduce must be iterable of length 2")
     # only emits to the first task id
     hashvalue = hash(userdata[0])
@@ -88,7 +88,7 @@ class ReduceGrouping(ICustomGrouping):
 class ReduceByKeyAndWindowStreamlet(Streamlet):
   """ReduceByKeyAndWindowStreamlet"""
   def __init__(self, window_config, reduce_function, parent):
-    super(ReduceByKeyAndWindowStreamlet, self).__init__()
+    super().__init__()
     if not isinstance(window_config, WindowConfig):
       raise RuntimeError("window config has to be a WindowConfig")
     if not callable(reduce_function):

@@ -51,10 +51,10 @@ cc_library(
         "@com_github_google_glog//:glog",
         "@com_github_gflags_gflags//:gflags",
         "@com_github_gperftools_gperftools//:tcmalloc",
-        "//third_party/kashmir:kashmir-cxx",
+        "@com_github_corvusoft_kashmir_cpp//:kashmir-cxx",
         "@com_google_protobuf//:protobuf",
     ] + select({
-        "//tools/platform:darwin": [],
+        "@platforms//os:osx": [],
         "//conditions:default": ["@org_nongnu_libunwind//:libunwind"],
     }),
 )

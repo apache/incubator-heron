@@ -25,9 +25,9 @@ import requests
 from heron.common.src.python.utils.log import Log
 from heron.tools.cli.src.python.result import SimpleResult, Status
 import heron.tools.cli.src.python.args as cli_args
-import heron.tools.common.src.python.utils.config as config
-import heron.tools.cli.src.python.cdefs as cdefs
-import heron.tools.cli.src.python.rest as rest
+from heron.tools.common.src.python.utils import config
+from heron.tools.cli.src.python import cdefs
+from heron.tools.cli.src.python import rest
 
 def add_version_titles(parser):
   '''
@@ -78,7 +78,7 @@ def run(command, parser, cl_args, unknown_args):
   # server mode
   if cluster:
     config_file = config.heron_rc_file()
-    client_confs = dict()
+    client_confs = {}
 
     # Read the cluster definition, if not found
     client_confs = cdefs.read_server_mode_cluster_definition(cluster, cl_args, config_file)
@@ -99,10 +99,10 @@ def run(command, parser, cl_args, unknown_args):
     try:
       r = service_method(service_apiurl)
       if r.status_code != requests.codes.ok:
-        Log.error(r.json().get('message', "Unknown error from API server %d" % r.status_code))
+        Log.error(r.json().get('message', f"Unknown error from API server {r.status_code}"))
       sorted_items = sorted(list(r.json().items()), key=lambda tup: tup[0])
       for key, value in sorted_items:
-        print("%s : %s" % (key, value))
+        print(f"{key} : {value}")
     except (requests.exceptions.ConnectionError, requests.exceptions.HTTPError) as err:
       Log.error(err)
       return SimpleResult(Status.HeronError)

@@ -100,16 +100,16 @@ components.
 The following core components of Heron topologies are discussed in depth in
 the sections below:
 
-* [Topology Master](#topology-master)
+* [Topology Manager](#topology-manager)
 * [Containers](#containers)
 * [Stream Manager](#stream-manager)
 * [Heron Instance](#heron-instance)
 * [Metrics Manager](#metrics-manager)
 * [Heron Tracker](#heron-tracker)
 
-### Topology Master
+### Topology Manager
 
-The **Topology Master** \(TM) manages a topology throughout its entire lifecycle,
+The **Topology Manager** \(TM) manages a topology throughout its entire lifecycle,
 from the time it's submitted until it's ultimately killed. When `heron` deploys
 a topology it starts a single TM and multiple [containers](heron-architecture#container).
 The **TM** creates an ephemeral [ZooKeeper](http://zookeeper.apache.org) node to
@@ -118,12 +118,12 @@ discoverable by any process in the topology. The **TM** also constructs the [phy
 plan](heron-topology-concepts#physical-plan) for a topology which it relays to different
 components.
 
-![Topology Master](assets/tmaster.png)
+![Topology Manager](assets/tmanager.png)
 
-#### Topology Master Configuration
+#### Topology Manager Configuration
 
 TMs have a variety of [configurable
-parameters](cluster-config-tmaster) that you can adjust at each
+parameters](cluster-config-tmanager) that you can adjust at each
 phase of a topology's [lifecycle](heron-topology-concepts#topology-lifecycle).
 
 ### Containers
@@ -134,7 +134,7 @@ Manager](#stream-manager), and a [Metrics Manager](#metrics-manager). Containers
 communicate with the topology's **TM** to ensure that the topology forms a fully
 connected graph.
 
-For an illustration, see the figure in the [Topology Master](#topology-master)
+For an illustration, see the figure in the [Topology Manager](#topology-manager)
 section above.
 
 > In Heron, all topology containerization is handled by the scheduler, be it [Mesos](schedulers-meso-local-mac), [Kubernetes](schedulers-k8s-with-helm), [YARN](schedulers-k8s-by-hand), or something else. Heron schedulers typically use [cgroups](https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/6/html/resource_management_guide/ch01) to manage Heron topology processes.
@@ -197,7 +197,7 @@ each phase of a topology's [lifecycle](heron-topology-concepts##topology-lifecyc
 
 Each topology runs a **Metrics Manager** (MM) that collects and exports metrics from
 all components in a [container]({{< ref "#container" >}}). It then routes those metrics to
-both the [Topology Master]({{< ref "#topology-master" >}}) and to external collectors, such as
+both the [Topology Manager]({{< ref "#topology-manager" >}}) and to external collectors, such as
 [Scribe](https://github.com/facebookarchive/scribe),
 [Graphite](http://graphite.wikidot.com/), or analogous systems.
 
@@ -288,25 +288,25 @@ Storage | When the topology is deployed to containers by the scheduler, the code
 * Topologies
 
     `heron-executor` process is started for each container and is responsible for
-    executing the **Topology Master** or **Heron Instances** (Bolt/Spout) that are
-    assigned to the container. Note that the **Topology Master** is always executed
+    executing the **Topology Manager** or **Heron Instances** (Bolt/Spout) that are
+    assigned to the container. Note that the **Topology Manager** is always executed
     on container 0. When `heron-executor` executes normal **Heron Instances**
     (i.e. except for container 0), it first prepares
     the **Stream Manager** and the **Metrics Manager** before starting
     `org.apache.heron.instance.HeronInstance` for each instance that is
     assigned to the container.
     
-    **Heron Instance** has two threads: the gateway thread and the slave thread.
+    **Heron Instance** has two threads: the gateway thread and the executor thread.
     The gateway thread is mainly responsible for communicating with the **Stream Manager**
     and the **Metrics Manager** using `StreamManagerClient` and `MetricsManagerClient`
-    respectively, as well as sending/receiving tuples to/from the slave
-    thread. On the other hand, the slave thread runs either Spout or Bolt
+    respectively, as well as sending/receiving tuples to/from the executor
+    thread. On the other hand, the executor thread runs either Spout or Bolt
     of the topology based on the physical plan.
     
     When a new **Heron Instance** is started, its `StreamManagerClient` establishes
     a connection and registers itself with the **Stream Manager**.
     After the successful registration, the gateway thread sends its physical plan to
-    the slave thread, which then executes the assigned instance accordingly.
+    the executor thread, which then executes the assigned instance accordingly.
     
 
 ## Codebase

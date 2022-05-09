@@ -41,6 +41,8 @@ default_handlers = [
     (r"^/filestats/(.*)", handlers.FileStatsHandler),
     (r"^/download/(.*)", handlers.DownloadHandler),
     (r"^/killexecutor", handlers.KillExecutorHandler),
+    (r"^/quitquitquit", handlers.KillExecutorHandler),
+    (r"^/abortabortabort", handlers.KillExecutorHandler),
     (r"^/health", handlers.HealthHandler),
 ]
 
@@ -57,7 +59,7 @@ def run(url_to_handlers=default_handlers):
   AsyncHTTPClient.configure(None, defaults=dict(request_timeout=120.0))
   app = tornado.web.Application(url_to_handlers)
   app.listen(options.port)
-  tornado.ioloop.IOLoop.instance().start()
+  tornado.ioloop.IOLoop.current().start()
 
 if __name__ == '__main__':
   run()

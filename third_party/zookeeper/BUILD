@@ -20,7 +20,7 @@ genrule(
         "lib/libzookeeper_st.a",
     ],
     cmd = select({
-        ":darwin": "\n".join([
+        "@platforms//os:osx": "\n".join([
             "export INSTALL_DIR=$$(pwd)/$(@D)",
             "export TMP_DIR=$$(mktemp -d -t zookeeper.XXXXX)",
             "export CXXFLAGS=-Wno-error",
@@ -28,7 +28,8 @@ genrule(
             "mkdir -p $$TMP_DIR",
             "cp -R $$(pwd)/external/org_apache_zookeeper/* $$TMP_DIR",
             "cd $$TMP_DIR/zookeeper-client/zookeeper-client-c",
-            "./configure --prefix=$$INSTALL_DIR --enable-shared=no",
+            "autoreconf -if",
+            "./configure --prefix=$$INSTALL_DIR --disable-shared --without-cppunit --without-openssl",
             "make install",
             "rm -rf $$TMP_DIR",
         ]),
@@ -41,7 +42,7 @@ genrule(
             "cp -R $$(pwd)/external/org_apache_zookeeper/* $$TMP_DIR",
             "cd $$TMP_DIR/zookeeper-client/zookeeper-client-c",
             "autoreconf -if",
-            "./configure --prefix=$$INSTALL_DIR --enable-shared=no",
+            "./configure --prefix=$$INSTALL_DIR --disable-shared --without-cppunit --without-openssl",
             "make install",
             "rm -rf $$TMP_DIR",
         ]),
@@ -84,12 +85,4 @@ cc_library(
         "include",
     ],
     linkstatic = 1,
-)
-
-config_setting(
-    name = "darwin",
-    values = {
-        "cpu": "darwin",
-    },
-    visibility = ["//visibility:public"],
 )

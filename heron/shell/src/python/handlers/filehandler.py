@@ -30,20 +30,17 @@ class FileHandler(tornado.web.RequestHandler):
   Responsible for creating the web page for files. The html
   will in turn call the /filedata/ endpoint to get the file data.
   """
-  @tornado.web.asynchronous
-  def get(self, path):
+  async def get(self, path):
     """ get method """
     t = Template(utils.get_asset("file.html"))
     if path is None:
       self.set_status(404)
-      self.write("No such file")
-      self.finish()
+      await self.finish("No such file")
       return
 
     if not utils.check_path(path):
-      self.write("Only relative paths are allowed")
       self.set_status(403)
-      self.finish()
+      await self.finish("Only relative paths are allowed")
       return
 
     args = dict(
@@ -52,6 +49,5 @@ class FileHandler(tornado.web.RequestHandler):
         pailer=utils.get_asset("jquery.pailer.js"),
         css=utils.get_asset("bootstrap.css"),
     )
-    self.write(t.generate(**args))
-    self.finish()
+    await self.finish(t.generate(**args))
     return

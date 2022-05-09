@@ -18,7 +18,7 @@
 
 set -o errexit
 
-BUILD_OS=debian9
+BUILD_OS=debian11
 VERSION_TAG=test_build
 TEMP_RELEASE_DIR=artifacts
 

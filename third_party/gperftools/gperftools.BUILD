@@ -2,22 +2,6 @@ licenses(["notice"])
 
 package(default_visibility = ["//visibility:public"])
 
-config_setting(
-    name = "darwin",
-    values = {
-        "cpu": "darwin",
-    },
-    visibility = ["//visibility:public"],
-)
-
-config_setting(
-    name = "k8",
-    values = {
-        "cpu": "k8",
-    },
-    visibility = ["//visibility:public"],
-)
-
 common_script = [
     "export UNWIND_DIR=$$(pwd)/$(GENDIR)/external/org_nongnu_libunwind",
     "echo $$UNWIND_DIR",
@@ -36,14 +20,14 @@ mac_script = "\n".join(common_script + [
 
 linux_script = "\n".join(common_script + [
      './configure --prefix=$$INSTALL_DIR --enable-shared=no CPPFLAGS=-I$$UNWIND_DIR/include LDFLAGS="-L$$UNWIND_DIR/lib -lunwind" --enable-frame-pointers',
-     'make install CPPFLAGS=-I$$UNWIND_DIR/include LDFLAGS="-L$$UNWIND_DIR/lib -lunwind"',
+     'make install CPPFLAGS="-I$$UNWIND_DIR/include -std=c++14" LDFLAGS="-L$$UNWIND_DIR/lib -lunwind"',
      'rm -rf $$TMP_DIR',
 ])
 
 genrule(
     name = "gperftools-srcs",
     srcs = select({
-        ":darwin": [],
+        "@platforms//os:osx": [],
         "//conditions:default": ["@org_apache_heron//third_party/libunwind:libunwind-files"]
     }),
     outs = [
@@ -77,7 +61,7 @@ genrule(
         "lib/libtcmalloc_minimal_debug.a",
     ],
     cmd = select({
-        ":darwin": mac_script,
+        "@platforms//os:osx": mac_script,
         "//conditions:default": linux_script,
     }),
 )

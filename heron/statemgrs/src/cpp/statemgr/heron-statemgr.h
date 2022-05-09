@@ -25,20 +25,20 @@
 // This file defines the HeronStateMgr interface.
 // Services accross Heron use HeronStateMgr to get/set state information.
 // Currently the primary things kept by state are
-// 1. Where is the the topology master running.
-//    The topology master is responsible for writing this information out
+// 1. Where is the the topology manager running.
+//    The topology manager is responsible for writing this information out
 //    upon startup. The streammgrs query this upon startup to find out
-//    who is their topology master. In case they loose connection with
-//    the topology master, the streammgrs query this again to see
-//    if the topology master has changed.
+//    who is their topology manager. In case they loose connection with
+//    the topology manager, the streammgrs query this again to see
+//    if the topology manager has changed.
 // 2. Topology and the current running state of the topology
 //    This information is seeded by the topology submitter.
-//    The topology master updates this when the state of the topology
+//    The topology manager updates this when the state of the topology
 //    changes.
 // 3. Current assignment.
-//    This information is solely used by topology master. When it
+//    This information is solely used by topology manager. When it
 //    creates a new assignment or when the assignment changes, it writes
-//    out this information. This is required for topology master failover.
+//    out this information. This is required for topology manager failover.
 //
 // Clients call the methods of the state passing a callback. The callback
 // is called with result code upon the completion of the operation.
@@ -76,25 +76,25 @@ class HeronStateMgr {
   // Sets up the basic tree for zk or filesystem
   virtual void InitTree() = 0;
 
-  // Sets up a watch on tmaster location change
-  // Everytime there is a change in tmaster location, _watcher
+  // Sets up a watch on tmanager location change
+  // Everytime there is a change in tmanager location, _watcher
   // will be called. Users dont need to be bothered about
   // registering the watcher again as that will be done by us.
-  virtual void SetTMasterLocationWatch(const std::string& _topology_name, VCallback<> _watcher) = 0;
+  virtual void SetTManagerLocationWatch(const std::string& _topology_name, VCallback<> _watcher) = 0;
   virtual void SetMetricsCacheLocationWatch(
                const std::string& _topology_name, VCallback<> _watcher) = 0;
   virtual void SetPackingPlanWatch(const std::string& _topology_name, VCallback<> _watcher) = 0;
 
-  // Sets/Gets the Tmaster
-  virtual void GetTMasterLocation(const std::string& _topology_name,
-                                  shared_ptr<proto::tmaster::TMasterLocation> _return,
+  // Sets/Gets the Tmanager
+  virtual void GetTManagerLocation(const std::string& _topology_name,
+                                  shared_ptr<proto::tmanager::TManagerLocation> _return,
                                   VCallback<proto::system::StatusCode> _cb) = 0;
-  virtual void SetTMasterLocation(const proto::tmaster::TMasterLocation& _location,
+  virtual void SetTManagerLocation(const proto::tmanager::TManagerLocation& _location,
                                   VCallback<proto::system::StatusCode> _cb) = 0;
   virtual void GetMetricsCacheLocation(const std::string& _topology_name,
-                                  shared_ptr<proto::tmaster::MetricsCacheLocation> _return,
+                                  shared_ptr<proto::tmanager::MetricsCacheLocation> _return,
                                   VCallback<proto::system::StatusCode> _cb) = 0;
-  virtual void SetMetricsCacheLocation(const proto::tmaster::MetricsCacheLocation& _location,
+  virtual void SetMetricsCacheLocation(const proto::tmanager::MetricsCacheLocation& _location,
                                   VCallback<proto::system::StatusCode> _cb) = 0;
 
   // Gets/Sets the Topology
@@ -164,7 +164,7 @@ class HeronStateMgr {
   //
   // We define methods of where the records have to be placed
   //
-  std::string GetTMasterLocationPath(const std::string& _topology_name);
+  std::string GetTManagerLocationPath(const std::string& _topology_name);
   std::string GetMetricsCacheLocationPath(const std::string& _topology_name);
   std::string GetTopologyPath(const std::string& _topology_name);
   std::string GetPhysicalPlanPath(const std::string& _topology_name);
@@ -172,7 +172,7 @@ class HeronStateMgr {
   std::string GetExecutionStatePath(const std::string& _topology_name);
   std::string GetStatefulCheckpointsPath(const std::string& _topology_name);
 
-  std::string GetTMasterLocationDir();
+  std::string GetTManagerLocationDir();
   std::string GetMetricsCacheLocationDir();
   std::string GetTopologyDir();
   std::string GetPhysicalPlanDir();

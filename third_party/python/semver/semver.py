@@ -74,7 +74,7 @@ def match(version, match_expr):
     else:
         raise ValueError("match_expr parameter should be in format <op><ver>, "
                          "where <op> is one of ['<', '>', '==', '<=', '>=']. "
-                         "You provided: %r" % match_expr)
+                         f"You provided: {match_expr!r}")
 
     possibilities_dict = {
         '>': (1,),
@@ -107,12 +107,12 @@ def min_ver(ver1, ver2):
 
 
 def format_version(major, minor, patch, prerelease=None, build=None):
-    version = "%d.%d.%d" % (major, minor, patch)
+    version = f"{int(major)}.{int(minor)}.{int(patch)}"
     if prerelease is not None:
-        version = version + "-%s" % prerelease
+        version = version + f"-{prerelease}"
 
     if build is not None:
-        version = version + "+%s" % build
+        version = version + f"+{build}"
 
     return version
 

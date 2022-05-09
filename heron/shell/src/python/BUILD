@@ -6,9 +6,9 @@ pex_library(
         ["**/*.py"],
     ),
     reqs = [
-        "requests==2.12.3",
-        "tornado==4.0.2",
-        "future==0.18.2",
+        "logging-formatter-anticrlf==1.2",
+        "requests==2.27.1",
+        "tornado==6.1",
     ],
     deps = [
         "//heron/common/src/python:common-py",

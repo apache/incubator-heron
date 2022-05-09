@@ -35,6 +35,7 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.heron.api.generated.TopologyAPI;
+import org.apache.heron.api.utils.Slf4jUtils;
 import org.apache.heron.api.utils.TopologyUtils;
 import org.apache.heron.common.basics.DryRunFormatType;
 import org.apache.heron.common.basics.SysUtils;
@@ -73,6 +74,7 @@ public class SubmitterMain {
    * @param dryRun run as dry run
    * @param dryRunFormat the dry run format
    * @param verbose enable verbose logging
+   * @param verboseGC enable verbose JVM GC logging
    * @return config the command line config
    */
   protected static Config commandLineConfigs(String cluster,
@@ -81,7 +83,8 @@ public class SubmitterMain {
                                              String submitUser,
                                              Boolean dryRun,
                                              DryRunFormatType dryRunFormat,
-                                             Boolean verbose) {
+                                             Boolean verbose,
+                                             Boolean verboseGC) {
     return Config.newBuilder()
         .put(Key.CLUSTER, cluster)
         .put(Key.ROLE, role)
@@ -90,6 +93,7 @@ public class SubmitterMain {
         .put(Key.DRY_RUN, dryRun)
         .put(Key.DRY_RUN_FORMAT_TYPE, dryRunFormat)
         .put(Key.VERBOSE, verbose)
+        .put(Key.VERBOSE_GC, verboseGC)
         .build();
   }
 
@@ -207,6 +211,11 @@ public class SubmitterMain {
         .longOpt("verbose")
         .build();
 
+    Option verboseGC = Option.builder("vgc")
+            .desc("Enable verbose JVM GC logs")
+            .longOpt("verbose_gc")
+            .build();
+
     options.addOption(cluster);
     options.addOption(role);
     options.addOption(environment);
@@ -221,6 +230,7 @@ public class SubmitterMain {
     options.addOption(dryRun);
     options.addOption(dryRunFormat);
     options.addOption(verbose);
+    options.addOption(verboseGC);
 
     return options;
   }
@@ -239,6 +249,10 @@ public class SubmitterMain {
 
   private static boolean isVerbose(CommandLine cmd) {
     return cmd.hasOption("v");
+  }
+
+  private static boolean isVerboseGC(CommandLine cmd) {
+    return cmd.hasOption("vgc");
   }
 
   @SuppressWarnings("JavadocMethod")
@@ -277,13 +291,14 @@ public class SubmitterMain {
     return Config.toLocalMode(Config.newBuilder()
         .putAll(ConfigLoader.loadConfig(heronHome, configPath, releaseFile, overrideConfigFile))
         .putAll(commandLineConfigs(cluster, role, environ, submitUser, dryRun,
-            dryRunFormat, isVerbose(cmd)))
+            dryRunFormat, isVerbose(cmd), isVerboseGC(cmd)))
         .putAll(SubmitterUtils.topologyConfigs(topologyPackage, topologyBinaryFile,
             topologyDefnFile, topology))
         .build());
   }
 
   public static void main(String[] args) throws Exception {
+    Slf4jUtils.installSLF4JBridge();
     Options options = constructOptions();
     Options helpOptions = constructHelpOptions();
     CommandLineParser parser = new DefaultParser();

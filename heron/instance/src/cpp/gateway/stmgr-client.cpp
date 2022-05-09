@@ -125,8 +125,7 @@ void StMgrClient::HandleRegisterResponse(
 
   if (response->has_pplan()) {
     LOG(INFO) << "Registration response had a pplan";
-    using std::move;
-    pplanWatcher_(move(pool_unique_ptr<proto::system::PhysicalPlan>(response->release_pplan())));
+    pplanWatcher_(pool_unique_ptr<proto::system::PhysicalPlan>(response->release_pplan()));
   }
 }
 
@@ -145,23 +144,23 @@ void StMgrClient::HandlePhysicalPlan(
         pool_unique_ptr<proto::stmgr::NewInstanceAssignmentMessage> msg) {
   LOG(INFO) << "Got a Physical Plan from our stmgr " << instanceProto_.stmgr_id() << " running at "
             << get_clientoptions().get_host() << ":" << get_clientoptions().get_port();
-  pplanWatcher_(std::move(pool_unique_ptr<proto::system::PhysicalPlan>(msg->release_pplan())));
+  pplanWatcher_(pool_unique_ptr<proto::system::PhysicalPlan>(msg->release_pplan()));
 }
 
 void StMgrClient::HandleTupleMessage(pool_unique_ptr<proto::system::HeronTupleSet2> msg) {
   gatewayMetrics_->updateReceivedPacketsCount(1);
-  gatewayMetrics_->updateReceivedPacketsSize(msg->ByteSize());
+  gatewayMetrics_->updateReceivedPacketsSize(msg->ByteSizeLong());
   tupleWatcher_(std::move(msg));
 }
 
 void StMgrClient::SendTupleMessage(const proto::system::HeronTupleSet& msg) {
   if (IsConnected()) {
     gatewayMetrics_->updateSentPacketsCount(1);
-    gatewayMetrics_->updateSentPacketsSize(msg.ByteSize());
+    gatewayMetrics_->updateSentPacketsSize(msg.ByteSizeLong());
     SendMessage(msg);
   } else {
     gatewayMetrics_->updateDroppedPacketsCount(1);
-    gatewayMetrics_->updateDroppedPacketsSize(msg.ByteSize());
+    gatewayMetrics_->updateDroppedPacketsSize(msg.ByteSizeLong());
     if (++ndropped_messages_ % 100 == 0) {
       LOG(INFO) << "Dropping " << ndropped_messages_ << "th tuple message to stmgr "
                 << instanceProto_.stmgr_id() << " because it is not connected";
@@ -172,7 +171,7 @@ void StMgrClient::SendTupleMessage(const proto::system::HeronTupleSet& msg) {
 void StMgrClient::putBackPressure() {
   auto conn = static_cast<Connection*>(conn_);
   if (!conn->isUnderBackPressure()) {
-    LOG(INFO) << "Buffer to Slave Thread at maximum capacity. Clamping down on reads from Stmgr";
+    LOG(INFO) << "Buffer to Executor Thread at maximum capacity. Clamping down on reads from Stmgr";
     conn->putBackPressure();
   }
 }
@@ -180,7 +179,7 @@ void StMgrClient::putBackPressure() {
 void StMgrClient::removeBackPressure() {
   auto conn = static_cast<Connection*>(conn_);
   if (conn->isUnderBackPressure()) {
-    LOG(INFO) << "Buffer to Slave Thread less than capacity. Resuming reads from stmgr";
+    LOG(INFO) << "Buffer to Executor Thread less than capacity. Resuming reads from stmgr";
     conn->removeBackPressure();
   }
 }

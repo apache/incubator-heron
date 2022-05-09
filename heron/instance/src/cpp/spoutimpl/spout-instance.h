@@ -22,7 +22,7 @@
 
 #include <string>
 
-#include "slave/instance-base.h"
+#include "executor/instance-base.h"
 
 #include "proto/messages.h"
 #include "network/network.h"
@@ -41,7 +41,7 @@ namespace instance {
 class SpoutInstance : public InstanceBase {
  public:
   SpoutInstance(std::shared_ptr<EventLoop> eventLoop, std::shared_ptr<TaskContextImpl> taskContext,
-                NotifyingCommunicator<google::protobuf::Message*>* dataFromSlave,
+                NotifyingCommunicator<google::protobuf::Message*>* dataFromExecutor,
                 void* dllHandle);
   virtual ~SpoutInstance();
 
@@ -62,7 +62,7 @@ class SpoutInstance : public InstanceBase {
   void handleAckTuple(const proto::system::AckTuple& ackTuple, bool isAck);
 
   std::shared_ptr<TaskContextImpl> taskContext_;
-  NotifyingCommunicator<google::protobuf::Message*>* dataFromSlave_;
+  NotifyingCommunicator<google::protobuf::Message*>* dataFromExecutor_;
   std::shared_ptr<EventLoop> eventLoop_;
   api::spout::ISpout* spout_;
   std::shared_ptr<api::serializer::IPluggableSerializer> serializer_;

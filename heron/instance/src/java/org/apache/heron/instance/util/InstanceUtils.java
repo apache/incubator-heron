@@ -24,7 +24,7 @@ import java.util.Map;
 
 import org.apache.heron.api.Config;
 import org.apache.heron.api.Pair;
-import org.apache.heron.common.basics.SlaveLooper;
+import org.apache.heron.common.basics.ExecutorLooper;
 import org.apache.heron.common.utils.misc.PhysicalPlanHelper;
 
 public final class InstanceUtils {
@@ -32,7 +32,7 @@ public final class InstanceUtils {
   }
 
   @SuppressWarnings("unchecked")
-  public static void prepareTimerEvents(SlaveLooper looper, PhysicalPlanHelper helper) {
+  public static void prepareTimerEvents(ExecutorLooper looper, PhysicalPlanHelper helper) {
     Map<String, Pair<Duration, Runnable>> timerEvents =
         (Map<String, Pair<Duration, Runnable>>) helper.getTopologyContext()
             .getTopologyConfig().get(Config.TOPOLOGY_TIMER_EVENTS);

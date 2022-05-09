@@ -28,7 +28,7 @@ class TextFileGenerator(Generator):
   """TextFileGenerator: reads from a list of files"""
 
   def __init__(self, filepattern):
-    super(TextFileGenerator, self).__init__()
+    super().__init__()
     self._files = glob.glob(filepattern)
 
   # pylint: disable=attribute-defined-outside-init
@@ -36,7 +36,7 @@ class TextFileGenerator(Generator):
     """Implements TextFile Generator's setup method"""
     myindex = context.get_partition_index()
     self._files_to_consume = self._files[myindex::context.get_num_partitions()]
-    self.logger.info("TextFileSpout files to consume %s" % self._files_to_consume)
+    self.logger.info("TextFileSpout files to consume %s", self._files_to_consume)
     self._lines_to_consume = self._get_next_lines()
     self._emit_count = 0
 
@@ -62,12 +62,12 @@ class TextFileGenerator(Generator):
     if file_to_consume is None:
       self.logger.info("All files consumed")
       return None
-    self.logger.info("Now reading file %s" % file_to_consume)
+    self.logger.info("Now reading file %s", file_to_consume)
     try:
-      filep = open(file_to_consume, 'r')
-      return filep.readlines()
+      with open(file_to_consume, 'r', encoding='utf8') as filep:
+        return filep.readlines()
     except IOError as e:
-      self.logger.info("Could not open the file %s" % file_to_consume)
+      self.logger.info("Could not open the file %s", file_to_consume)
       raise e
 
   def _get_next_file_to_consume(self):

@@ -20,7 +20,7 @@
 
 '''Unittest for EventLooper'''
 import time
-import unittest2 as unittest
+import unittest
 
 from heron.instance.src.python.network import EventLooper
 

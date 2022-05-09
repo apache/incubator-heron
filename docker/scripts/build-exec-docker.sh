@@ -68,14 +68,14 @@ build_exec_image() {
 
   # build the image
   echo "Building docker image with tag:$DOCKER_TAG"
-  docker build --build-arg heronVersion=$HERON_VERSION -t "$DOCKER_TAG" -f "$DOCKER_FILE" "$SCRATCH_DIR"
+  docker buildx build --build-arg heronVersion=$HERON_VERSION -t "$DOCKER_TAG" -f "$DOCKER_FILE" "$SCRATCH_DIR"
 
   # save the image as a tar file
   DOCKER_IMAGE_FILE="$OUTPUT_DIRECTORY/heron-docker-$HERON_VERSION-$TARGET_PLATFORM.tar"
   
   echo "Saving docker image to $DOCKER_IMAGE_FILE"
   docker save -o $DOCKER_IMAGE_FILE $DOCKER_TAG
-  gzip $DOCKER_IMAGE_FILE
+  pigz $DOCKER_IMAGE_FILE
 }
 
 case $# in
@@ -86,10 +86,10 @@ case $# in
   *)
     echo "Usage: $0 <platform> <version_string> <output-directory> "
     echo "  "
-    echo "Platforms Supported: darwin, debian9, ubuntu14.04, ubuntu16.04, ubuntu18.04, centos7"
+    echo "Platforms Supported: darwin, debian11, ubuntu20.04, rocky8"
     echo "  "
     echo "Example:"
-    echo "  ./build-exec-docker.sh ubuntu14.04 0.12.0 ."
+    echo "  ./build-exec-docker.sh ubuntu20.04 0.12.0 ."
     echo "  "
     exit 1
     ;;

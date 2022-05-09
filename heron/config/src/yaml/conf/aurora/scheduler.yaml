@@ -42,7 +42,7 @@ heron.scheduler.job.kill.retry.interval.ms:  2000
 ####################################################################
 # Following are config for tunneling
 ####################################################################
-# Whether we should attempt to tunnel if there is no direct access to a remote host (e.g. TMaster)
+# Whether we should attempt to tunnel if there is no direct access to a remote host (e.g. TManager)
 heron.scheduler.is.tunnel.needed:                          False
 
 # The connection timeout in ms when testing if we can connect to remote host

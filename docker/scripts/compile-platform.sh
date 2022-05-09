@@ -36,35 +36,14 @@ cd $SCRATCH_DIR
 echo "Extracting source"
 tar -C . -xzf $SOURCE_TARBALL
 
-if [[ "$TARGET_PLATFORM" =~ "ubuntu" ]]; then
-  CONFIG_PLATFORM=ubuntu_nostyle
-elif [[ "$TARGET_PLATFORM" =~ "centos" ]]; then
-  CONFIG_PLATFORM=centos_nostyle
-elif [[ "$TARGET_PLATFORM" =~ "darwin" ]]; then
-  CONFIG_PLATFORM=darwin_nostyle
-elif [[ "$TARGET_PLATFORM" =~ "debian" ]]; then
-  CONFIG_PLATFORM=debian_nostyle
-elif [[ "$TARGET_PLATFORM" =~ "ubuntu_nostyle" ]]; then
-  CONFIG_PLATFORM=ubuntu_nostyle
-elif [[ "$TARGET_PLATFORM" =~ "centos_nostyle" ]]; then
-  CONFIG_PLATFORM=centos_nostyle
-elif [[ "$TARGET_PLATFORM" =~ "darwin_nostyle" ]]; then
-  CONFIG_PLATFORM=darwin_nostyle
-elif [[ "$TARGET_PLATFORM" =~ "debian_nostyle" ]]; then
-  CONFIG_PLATFORM=debian_nostyle
-else
-  echo "Unknown platform: $TARGET_PLATFORM"
-  exit 1
-fi
-
 bazel version
 ./bazel_configure.py
 bazel clean
 
 echo "Creating packages"
-bazel build -c opt --jobs 25 --config=$CONFIG_PLATFORM scripts/packages:tarpkgs
-bazel build -c opt --jobs 25 --config=$CONFIG_PLATFORM scripts/packages:binpkgs
-bazel build -c opt --jobs 25 --config=$CONFIG_PLATFORM scripts/images:heron.tar
+bazel build -c opt --copt=-O3 scripts/packages:tarpkgs
+bazel build -c opt --copt=-O3 scripts/packages:binpkgs
+bazel build -c opt --copt=-O3 scripts/images:heron.tar
 
 echo "Moving packages to /$OUTPUT_DIRECTORY"
 for file in ./bazel-bin/scripts/packages/*.tar.gz; do

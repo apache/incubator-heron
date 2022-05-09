@@ -149,7 +149,7 @@ amongst other things.
 1. The jar or tar file associated with this topology
 2. Logs for heron-executor <!-- TODO: Link heron-executor -->
 3. `log-files` folder which has instance logs, as well as `stream manager` or
-   `tmaster` logs.
+   `tmanager` logs.
 
 ![Jobpage](assets/jobpage1.png)
 

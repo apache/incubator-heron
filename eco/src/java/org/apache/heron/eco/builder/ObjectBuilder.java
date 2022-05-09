@@ -24,6 +24,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -220,7 +221,7 @@ public class ObjectBuilder {
     }
     if (eligibleCount > 1) {
       LOG.warn("Found multiple invokable methods for class, method, given arguments {} "
-          + new Object[]{target, methodName, args});
+          + Arrays.toString(new Object[]{target, methodName, args}));
     }
     return retval;
   }

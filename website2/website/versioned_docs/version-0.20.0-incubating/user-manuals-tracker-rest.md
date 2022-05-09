@@ -46,10 +46,10 @@ All Heron Tracker endpoints return a JSON object with the following information:
 * [`/topologies/executionstate`](#topologies_executionstate)
 * [`/topologies/schedulerlocation`](#topologies_schedulerlocation)
 * [`/topologies/metrics`](#topologies_metrics)
-* [`/topologies/metricstimeline`](#topologies_metricstimeline)
-* [`/topologies/metricsquery`](#topologies_metricsquery)
-* [`/topologies/containerfiledata`](#topologies_containerfiledata)
-* [`/topologies/containerfilestats`](#topologies_containerfilestats)
+* [`/topologies/metrics/timeline`](#topologies_metricstimeline)
+* [`/topologies/metrics/query`](#topologies_metricsquery)
+* [`/topologies/container/filedata`](#topologies_containerfiledata)
+* [`/topologies/container/filestats`](#topologies_containerfilestats)
 * [`/topologies/exceptions`](#topologies_exceptions)
 * [`/topologies/exceptionsummary`](#topologies_exceptionsummary)
 * [`/topologies/pid`](#topologies_pid)
@@ -199,7 +199,7 @@ Each execution state object lists the following:
   topology
 * `release_version` --- Release version
 * `has_physical_plan` --- Whether the topology has a physical plan
-* `has_tmaster_location` --- Whether the topology has a Topology Master Location
+* `has_tmanager_location` --- Whether the topology has a Topology Manager Location
 * `has_scheduler_location` --- Whether the topology has a Scheduler Location
 * `viz` --- Metric visualization UI URL for the topology if it was [configured](user-manuals-heron-tracker-runbook)
 
@@ -225,8 +225,8 @@ $ curl "http://heron-tracker-url/topologies/states?cluster=cluster1&environ=deve
 ### <a name="topologies_info">/topologies/info</a>
 
 Returns a JSON representation of a dictionary containing logical plan, physical plan,
-execution state, scheduler location and TMaster location for a topology, as described above.
-`TMasterLocation` is the location of the TMaster, including its host,
+execution state, scheduler location and TManager location for a topology, as described above.
+`TManagerLocation` is the location of the TManager, including its host,
 port, and the heron-shell port that it exposes.
 
 #### Parameters
@@ -237,7 +237,7 @@ port, and the heron-shell port that it exposes.
 
 ---
 
-### <a name="topologies_containerfilestats">/topologies/containerfilestats</a>
+### <a name="topologies_containerfilestats">/topologies/container/filestats</a>
 
 Returns the file stats for a container. This is the output of the command `ls -lh` when run
 in the directory where the heron-controller launched all the processes.
@@ -255,7 +255,7 @@ This endpoint is mainly used by ui for exploring files in a container.
 
 ---
 
-### <a name="topologies_containerfiledata">/topologies/containerfiledata</a>
+### <a name="topologies_containerfiledata">/topologies/container/filedata</a>
 
 Returns the file data for a file of a container.
 
@@ -280,7 +280,7 @@ Returns a JSON map of instances of the topology to their respective metrics.
 To filter instances returned use the `instance` parameter discussed below.
 
 
-Note that these metrics come from TMaster, which only holds metrics
+Note that these metrics come from TManager, which only holds metrics
 for last 3 hours minutely data, as well as cumulative values. If the `interval`
 is greater than `10800` seconds, the values will be for all-time metrics.
 
@@ -296,16 +296,16 @@ is greater than `10800` seconds, the values will be for all-time metrics.
 
 ---
 
-### <a name="topologies_metricstimeline">/topologies/metricstimeline</a>
+### <a name="topologies_metricstimeline">/topologies/metrics/timeline</a>
 
 Returns a JSON map of instances of the topology to their respective metrics timeline.
 To filter instances returned use the `instance` parameter discussed below.
 
 The difference between this and `/metrics` endpoint above, is that `/metrics` will report
-cumulative value over the period of `interval` provided. On the other hand, `/metricstimeline`
+cumulative value over the period of `interval` provided. On the other hand, `/metrics/timeline`
 endpoint will report minutely values for each metricname for each instance.
 
-Note that these metrics come from TMaster, which only holds metrics
+Note that these metrics come from TManager, which only holds metrics
 for last 3 hours minutely data, as well as cumulative all-time values. If the starttime
 is older than 3 hours ago, those minutes would not be part of the response.
 
@@ -321,12 +321,12 @@ is older than 3 hours ago, those minutes would not be part of the response.
    and greater than `starttime`)
 * `instance` (optional) --- IDs of the instances. If not present, return for all the instances.
 
-### <a name="topologies_metricsquery">/topologies/metricsquery</a>
+### <a name="topologies_metricsquery">/topologies/metrics/query</a>
 
 Executes the metrics query for the topology and returns the result in form of minutely timeseries.
 A detailed description of query language is given [below](#metricsquery).
 
-Note that these metrics come from TMaster, which only holds metrics
+Note that these metrics come from TManager, which only holds metrics
 for last 3 hours minutely data, as well as cumulative all-time values. If the starttime
 is older than 3 hours ago, those minutes would not be part of the response.
 
@@ -472,7 +472,7 @@ Example:
 TS(component1, *, __emit-count/stream1)
 ```
 
-Time Series Operator. This is the basic operator that is responsible for getting metrics from TMaster.
+Time Series Operator. This is the basic operator that is responsible for getting metrics from TManager.
 Accepts a list of 3 elements:
 
 1. componentName

@@ -78,7 +78,7 @@ pkg_tar(
         "//heron/instance/src/python:heron-python-instance",
         "//heron/shell/src/python:heron-shell",
         "//heron/stmgr/src/cpp:heron-stmgr",
-        "//heron/tmaster/src/cpp:heron-tmaster",
+        "//heron/tmanager/src/cpp:heron-tmanager",
     ],
     package_dir = "heron-core/bin",
 )
@@ -207,7 +207,7 @@ pkg_tar(
     srcs = [
         "@com_google_protobuf//:protobuf_java",
         "@maven//:org_slf4j_slf4j_api",
-        "@maven//:org_slf4j_slf4j_jdk14",
+        "@maven//:org_slf4j_jul_to_slf4j",
     ],
     package_dir = "heron-tools/lib/third_party",
 )
@@ -266,13 +266,11 @@ pkg_tar(
     srcs = [
         "//heron/downloaders/src/shell:heron-downloader",
         "//heron/downloaders/src/shell:heron-downloader-config",
-        "//heron/tools/admin/src/python:heron-admin",
         "//heron/tools/apiserver/src/shell:heron-apiserver",
         "//heron/tools/cli/src/python:heron",
         "//heron/tools/explorer/src/python:heron-explorer",
         "//heron/tools/tracker/src/python:heron-tracker",
         "//heron/tools/ui/src/python:heron-ui",
-        "//third_party/nomad:heron-nomad",
     ],
     package_dir = "bin",
 )
@@ -411,7 +409,7 @@ pkg_tar(
     srcs = [
         "@com_google_protobuf//:protobuf_java",
         "@maven//:org_slf4j_slf4j_api",
-        "@maven//:org_slf4j_slf4j_jdk14",
+        "@maven//:org_slf4j_jul_to_slf4j",
     ],
     package_dir = "lib/third_party",
 )
@@ -474,6 +472,11 @@ pkg_tar(
 )
 
 pkg_tar(
+    name = "disclaimers",
+    srcs = ["//:disclaimers"],
+)
+
+pkg_tar(
     name = "heron",
     srcs = generated_release_files,
     extension = "tar.gz",
@@ -501,6 +504,7 @@ pkg_tar(
         ":heron-lib-third_party",
         ":heron-lib-uploader",
         ":heron-simulator",
+        ":disclaimers",
     ],
 )
 
@@ -594,6 +598,7 @@ pkg_tar(
 genrule(
     name = "generate-heronpy-package",
     srcs = [
+        "//:disclaimers",
         "heronpy/requirements.txt",
         "heronpy/setup.py.template",
         "heronpy/README.txt",
@@ -604,8 +609,9 @@ genrule(
         "export RELEASE_FILE_DIR=$$(pwd)",
         "export TMP_DIR=$$(mktemp -d -t heronpy.XXXXX)",
         "echo $$TMP_DIR",
-        "$(location @virtualenv//:virtualenv) --no-download --quiet --clear $$TMP_DIR/venv",
-        "PS1= source $$TMP_DIR/venv/bin/activate",
+        # Create the virtual environment
+        'python3 -m venv $$TMP_DIR/venv --clear',
+        "VIRTUAL_ENV_DISABLE_PROMPT=1 source $$TMP_DIR/venv/bin/activate",
         "export HERONPY_DIR=$$TMP_DIR/heronpy",
         "export HERONPYAPI_UNZIP=$$TMP_DIR/heronapiunzip",
         "export HERONPYSTREAMLET_UNZIP=$$TMP_DIR/heronstreamletunzip",
@@ -646,6 +652,7 @@ genrule(
         "rm setup.py.template",
         "tree $$HERONPY_DIR",
         "/usr/bin/env python3 setup.py sdist",
+        "pip3 install wheel",
         "/usr/bin/env python3 setup.py bdist_wheel",
         "cd -",
         "ls -l $$HERONPY_DIR/dist",
@@ -661,7 +668,6 @@ genrule(
         "//heronpy/connectors:heron-pythonconnectors-package",
         "//heronpy/proto:proto-py-package",
         "//heronpy/streamlet:heron-python-streamlet-api-package",
-        "@virtualenv",
     ],
 )
 

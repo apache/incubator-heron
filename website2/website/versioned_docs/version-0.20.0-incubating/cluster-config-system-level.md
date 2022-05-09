@@ -28,7 +28,7 @@ apply to any specific component.
 
 Config | Meaning | Default
 :----- |:------- |:-------
-`heron.check.tmaster.location.interval.sec` | The interval, in seconds, after which to check if the topology master location has been fetched or not | 120
+`heron.check.tmanager.location.interval.sec` | The interval, in seconds, after which to check if the topology manager location has been fetched or not | 120
 `heron.metrics.export.interval` | The interval, in seconds, at which components export metrics to the topology's Metrics Manager
 
 ## Logging

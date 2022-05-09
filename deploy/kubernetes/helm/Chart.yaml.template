@@ -14,16 +14,30 @@
 #  KIND, either express or implied.  See the License for the
 #  specific language governing permissions and limitations
 #  under the License.
-
-apiVersion: v1
-description: Heron is a fast distributed streaming engine for processing large data volumes with velocity
+---
+apiVersion: v2
 name: heron
 version: VERSION
+kubeVersion: ">=1.16"
 appVersion: VERSION
-icon: https://apache.github.io/incubator-heron/img/HeronTextLogo-small.png
-home: http://heron.io
+description: Heron is a fast distributed streaming engine for processing large data volumes with velocity
+type: application
+keywords:
+  - apache
+  - streaming
+  - analytics
+  - heron
+  - heronpy
+  - apache-heron
+  - heron-helm
+home: https://heron.apache.org/
+icon: https://heron.apache.org/img/HeronTextLogo-small.png
 sources:
-  - https://github.com/apache/incubator-heron.git
+  - https://github.com/apache/incubator-heron/
+  - https://github.com/apache/incubator-heron/tree/master/deploy/kubernetes/helm/
+dependencies:
 maintainers:
-  - name: Karthik Ramasamy
-    email: kramasamy@gmail.com
+  - name: Apache Heron Developers
+    email: dev@heron.apache.org
+    url: https://heron.apache.org/
+annotations:

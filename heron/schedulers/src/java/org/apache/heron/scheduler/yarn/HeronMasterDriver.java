@@ -105,7 +105,7 @@ import org.apache.reef.wake.time.event.StartTime;
 @Unit
 public class HeronMasterDriver {
   static final int TM_MEM_SIZE_MB = 1024;
-  static final int TMASTER_CONTAINER_ID = 0;
+  static final int TMANAGER_CONTAINER_ID = 0;
   static final int MB = 1024 * 1024;
   private static final Logger LOG = Logger.getLogger(HeronMasterDriver.class.getName());
   private final String topologyPackageName;
@@ -128,7 +128,7 @@ public class HeronMasterDriver {
   // looked up by heron's executor id or REEF's container id.
   private MultiKeyWorkerMap multiKeyWorkerMap;
 
-  private TMaster tMaster;
+  private TManager tManager;
 
   // TODO: https://github.com/apache/incubator-heron/issues/949: implement Driver HA
 
@@ -185,11 +185,11 @@ public class HeronMasterDriver {
   }
 
   /*
-   * Must be invoked after workers are scheduled. TMaster needs component RAM map.
+   * Must be invoked after workers are scheduled. TManager needs component RAM map.
    */
-  void launchTMaster() {
-    tMaster = buildTMaster(Executors.newSingleThreadExecutor());
-    tMaster.launch();
+  void launchTManager() {
+    tManager = buildTManager(Executors.newSingleThreadExecutor());
+    tManager.launch();
   }
 
   /**
@@ -266,7 +266,7 @@ public class HeronMasterDriver {
     LOG.log(Level.INFO, "Kill topology: {0}", topologyName);
     isTopologyKilled.set(true);
 
-    tMaster.killTMaster();
+    tManager.killTManager();
 
     for (HeronWorker worker : multiKeyWorkerMap.getHeronWorkers()) {
       AllocatedEvaluator evaluator = multiKeyWorkerMap.detachEvaluatorAndRemove(worker);
@@ -397,10 +397,10 @@ public class HeronMasterDriver {
   }
 
   @VisibleForTesting
-  TMaster buildTMaster(ExecutorService executor) {
-    TMaster tMasterManager = new TMaster();
-    tMasterManager.executor = executor;
-    return tMasterManager;
+  TManager buildTManager(ExecutorService executor) {
+    TManager tManagerManager = new TManager();
+    tManagerManager.executor = executor;
+    return tManagerManager;
   }
 
   /**
@@ -501,29 +501,29 @@ public class HeronMasterDriver {
   }
 
   /**
-   * This class manages the TMaster executor process, including launching the TMaster, monitoring it
+   * This class manages the TManager executor process, including launching the TManager, monitoring it
    * and killing it when needed.
    */
   @VisibleForTesting
-  class TMaster implements Runnable {
+  class TManager implements Runnable {
     private ExecutorService executor;
-    private Future<?> tMasterFuture;
-    private CountDownLatch tMasterErrorCounter = new CountDownLatch(3);
+    private Future<?> tManagerFuture;
+    private CountDownLatch tManagerErrorCounter = new CountDownLatch(3);
 
     void launch() {
       LOG.log(Level.INFO, "Launching executor for TM: {0}", topologyName);
 
-      tMasterFuture = executor.submit(this);
+      tManagerFuture = executor.submit(this);
 
-      // the following task will restart the tMaster if it fails
+      // the following task will restart the tManager if it fails
       executor.submit(new Runnable() {
         @Override
         public void run() {
           try {
-            tMasterFuture.get();
-            LOG.log(Level.INFO, "TMaster executor terminated, {0}", topologyName);
+            tManagerFuture.get();
+            LOG.log(Level.INFO, "TManager executor terminated, {0}", topologyName);
           } catch (InterruptedException | ExecutionException e) {
-            LOG.log(Level.WARNING, "Error while waiting for TMaster executor", e);
+            LOG.log(Level.WARNING, "Error while waiting for TManager executor", e);
           }
 
           if (isTopologyKilled.get()) {
@@ -531,35 +531,35 @@ public class HeronMasterDriver {
             return;
           }
 
-          tMasterErrorCounter.countDown();
-          long counter = tMasterErrorCounter.getCount();
+          tManagerErrorCounter.countDown();
+          long counter = tManagerErrorCounter.getCount();
           if (counter > 0) {
-            LOG.log(Level.WARNING, "Restarting TMaster, attempts left: {0}", counter);
+            LOG.log(Level.WARNING, "Restarting TManager, attempts left: {0}", counter);
             launch();
           }
         }
       });
     }
 
-    void killTMaster() {
-      LOG.log(Level.INFO, "Killing TMaster process: {0}", topologyName);
-      if (!tMasterFuture.isDone()) {
-        tMasterFuture.cancel(true);
+    void killTManager() {
+      LOG.log(Level.INFO, "Killing TManager process: {0}", topologyName);
+      if (!tManagerFuture.isDone()) {
+        tManagerFuture.cancel(true);
       }
       executor.shutdownNow();
     }
 
-    HeronExecutorTask getTMasterExecutorTask() {
-      return new HeronExecutorTask(reefFileNames, TMASTER_CONTAINER_ID,
+    HeronExecutorTask getTManagerExecutorTask() {
+      return new HeronExecutorTask(reefFileNames, TMANAGER_CONTAINER_ID,
           cluster, role, topologyName, env, topologyPackageName, heronCorePackageName, topologyJar,
           getComponentRamMap(), verboseMode);
     }
 
     @Override
     public void run() {
-      HeronExecutorTask tMasterTask = getTMasterExecutorTask();
+      HeronExecutorTask tManagerTask = getTManagerExecutorTask();
       try {
-        tMasterTask.startExecutor();
+        tManagerTask.startExecutor();
       } catch (InvalidTopologyException e) {
         throw new RuntimeException(e);
       }

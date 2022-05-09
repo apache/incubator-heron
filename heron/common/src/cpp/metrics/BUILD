@@ -25,8 +25,8 @@ cc_library(
         "multi-mean-metric.h",
         "time-spent-metric.cpp",
         "time-spent-metric.h",
-        "tmaster-metrics.cpp",
-        "tmaster-metrics.h",
+        "tmanager-metrics.cpp",
+        "tmanager-metrics.h",
     ],
     copts = [
         "-Iheron",
@@ -43,7 +43,7 @@ cc_library(
         "@com_github_google_glog//:glog",
         "@com_google_protobuf//:protobuf",
     ] + select({
-        "//tools/platform:darwin": [],
+        "@platforms//os:osx": [],
         "//conditions:default": ["@org_nongnu_libunwind//:libunwind"],
     }),
 )

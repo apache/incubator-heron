@@ -23,7 +23,7 @@ import argparse
 import os
 import sys
 
-import heron.tools.common.src.python.utils.config as config
+from heron.tools.common.src.python.utils import config
 
 
 def add_titles(parser):
@@ -48,6 +48,17 @@ def add_verbose(parser):
       help='Verbose mode. Increases logging level to show debug messages')
   return parser
 
+def add_verbose_gc(parser):
+  '''
+  :param parser:
+  :return:
+  '''
+  parser.add_argument(
+      '--verbose_gc',
+      default=False,
+      action='store_true',
+      help='Produce JVM GC logging')
+  return parser
 
 def add_topology(parser):
   '''
@@ -184,13 +195,13 @@ def add_dry_run(parser):
   '''
   default_format = 'table'
   resp_formats = ['raw', 'table', 'colored_table', 'json']
+  # pylint: disable=consider-using-f-string
   available_options = ', '.join(['%s' % opt for opt in resp_formats])
 
   def dry_run_resp_format(value):
     if value not in resp_formats:
       raise argparse.ArgumentTypeError(
-          'Invalid dry-run response format: %s. Available formats: %s'
-          % (value, available_options))
+          f'Invalid dry-run response format: {value}. Available formats: {available_options}')
     return value
 
   parser.add_argument(
@@ -205,7 +216,8 @@ def add_dry_run(parser):
       metavar='DRY_RUN_FORMAT',
       default='colored_table' if sys.stdout.isatty() else 'table',
       type=dry_run_resp_format,
-      help='The format of the dry-run output ([%s], default=%s). '
-           'Ignored when dry-run mode is not enabled' % ('|'.join(resp_formats), default_format))
+      help="The format of the dry-run output "\
+           f"([{'|'.join(resp_formats)}], default={default_format}). "
+           "Ignored when dry-run mode is not enabled")
 
   return parser

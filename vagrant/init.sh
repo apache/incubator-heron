@@ -16,31 +16,7 @@ set -o errexit -o nounset -o pipefail
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-bazelVersion=3.0.0
-
-install_docker() {
-    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
-    add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
-    apt-get update
-    apt-get install -qy docker-ce docker-ce-cli containerd.io
-    usermod -aG docker vagrant
-}
-
-install_k8s_stack() {
-    install_docker
-    # install kubectl
-    curl -Lo /usr/local/bin/kubectl https://storage.googleapis.com/kubernetes-release/release/v1.18.3/bin/linux/amd64/kubectl
-    chmod +x /usr/local/bin/kubectl
-    # install kind
-    curl -Lo /usr/local/bin/kind "https://kind.sigs.k8s.io/dl/v0.8.1/kind-$(uname)-amd64"
-    chmod +x /usr/local/bin/kind
-    # helm
-    curl --location https://get.helm.sh/helm-v3.2.1-linux-amd64.tar.gz \
-        | tar --extract --gzip linux-amd64/helm --to-stdout \
-        > /usr/local/bin/helm
-    chmod +x /usr/local/bin/helm
-}
-
+bazelVersion=4.2.2
 bazel_install() {
     apt-get install -y automake cmake gcc g++ zlib1g-dev zip pkg-config wget libssl-dev libunwind-dev
     mkdir -p /opt/bazel
@@ -51,13 +27,11 @@ bazel_install() {
     popd
 }
 
-build_heron() {
-    pushd /vagrant
-        bazel clean
-        ./bazel_configure.py
-        bazel --bazelrc=tools/travis/bazel.rc build --config=ubuntu heron/...
-    popd
-}
+if [[ "$1" != "master" && $1 != "slave" ]]; then
+    echo "Usage: $0 master|slave"
+    exit 1
+fi
+mode="$1"
 
 cd /vagrant/vagrant
 
@@ -68,27 +42,23 @@ cp .vagrant/hosts /etc/hosts
 echo -e "\nnet.ipv6.conf.all.disable_ipv6 = 1\n" >> /etc/sysctl.conf
 sysctl -p
 
-# use apt-proxy if present
-if [ -f ".vagrant/apt-proxy" ]; then
-    apt_proxy=$(cat ".vagrant/apt-proxy")
-    echo "Using apt-proxy: $apt_proxy";
-    echo "Acquire::http::Proxy \"$apt_proxy\";" > /etc/apt/apt.conf.d/90-apt-proxy.conf
-fi
+# install docker repo
+apt-get install -qy ca-certificates curl gnupg lsb-release
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+echo \
+  "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu \
+  $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
 
+# update installed packages
 apt-get -qy update
 
 # install deps
-apt-get install -qy vim zip mc curl wget openjdk-11-jdk scala git python3-setuptools python3-dev libtool-bin libcppunit-dev python-is-python3 tree
+apt-get install -qy ant vim zip mc curl wget openjdk-11-jdk scala git python3-setuptools python3-venv python3-dev libtool-bin python-is-python3
 
-install_k8s_stack
-bazel_install
+# install docker 
+apt-get install -qy docker-ce docker-ce-cli containerd.io
+usermod -aG docker vagrant
 
-# configure environment variables required
-{
-    ## the install script with the --user flag will install binaries here
-    #echo 'export PATH=$HOME/bin:$PATH' >> ~vagrant/.bashrc
-    # the discover_platform helper uses this as `python -mplatform` does not put out expected info in this image
-    echo 'export PLATFORM=Ubuntu' >> ~vagrant/.bashrc
-    # set JAVA_HOME as plenty of places in heron use it to find java
-    echo 'export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64/' >> ~vagrant/.bashrc
-}
+if [ $mode == "master" ]; then 
+    bazel_install
+fi

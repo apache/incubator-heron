@@ -7,9 +7,13 @@ pex_library(
         exclude = ["main.py"],
     ),
     reqs = [
-        "protobuf==3.8.0",
-        "tornado==4.0.2",
-        "future==0.18.2",
+        "click==7.1.2",
+        "fastapi==0.75.0",
+        "httpx==0.16.1",
+        "javaobj-py3==0.4.3",
+        "networkx==2.5",
+        "protobuf==3.16.0",
+        "uvicorn==0.11.7",
     ],
     deps = [
         "//heron/common/src/python:common-py",

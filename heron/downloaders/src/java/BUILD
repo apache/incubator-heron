@@ -11,10 +11,11 @@ files = glob(
 
 downloader_deps = [
     "//heron/io/dlog/src/java:dlog-lib",
+    "//heron/api/src/java:api-java-low-level",
     "//heron/spi/src/java:common-spi-java",
     "//third_party/java:commons-compress",
     "@maven//:commons_cli_commons_cli",
-    "@maven//:org_apache_distributedlog_distributedlog_core_shaded",
+    "//third_party/java:dlog-java",
     "@maven//:io_netty_netty_all",
 ]
 

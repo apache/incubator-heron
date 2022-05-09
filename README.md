@@ -16,23 +16,24 @@
     specific language governing permissions and limitations
     under the License.
 -->
-[![Build Status](https://travis-ci.org/apache/incubator-heron.svg?&branch=master)](https://travis-ci.org/apache/incubator-heron)
+[![Build Status](https://travis-ci.com/apache/incubator-heron.svg?&branch=master)](https://travis-ci.com/apache/incubator-heron)
 
 ![logo](website2/docs/assets/HeronTextLogo.png)
 
-Heron is realtime analytics platform developed by Twitter.  It has a wide array of architectural improvements over it's predecessor.
+Heron is a realtime analytics platform developed by Twitter.  It has a wide array of architectural improvements over it's predecessor.
 
 [Heron in Apache Incubation](http://incubator.apache.org/projects/heron.html)
 
 ### Documentation
 
-[https://heron.incubator.apache.org/](https://heron.incubator.apache.org/)
+[https://heron.incubator.apache.org/](https://heron.apache.org/)
+</br>
 Confluence: https://cwiki.apache.org/confluence/display/HERON
 
 #### Heron Requirements:
  * Java 11
  * Python 3.6
- * Bazel 3.0.0
+ * Bazel 4.2.2
 
 ## Contact
 
@@ -53,8 +54,8 @@ Confluence: https://cwiki.apache.org/confluence/display/HERON
 
 ## For more information:
 
-* Official Heron documentation located at [https://heron.incubator.apache.org/](https://heron.incubator.apache.org/)
-* Official Heron resources, including Conference & Journal Papers, Videos, Blog Posts and selected Press located at [Heron Resources](https://apache.github.io/incubator-heron/docs/resources/)
+* Official Heron documentation located at [https://heron.apache.org/](https://heron.apache.org/)
+* Official Heron resources, including Conference & Journal Papers, Videos, Blog Posts and selected Press located at [Heron Resources](https://heron.apache.org/resources)
 * [Twitter Heron: Stream Processing at Scale](http://dl.acm.org/citation.cfm?id=2742788) (academic paper)
 * [Twitter Heron: Stream Processing at Scale](https://www.youtube.com/watch?v=pUaFOuGgmco) (YouTube video)
 * [Flying Faster with Twitter Heron](https://blog.twitter.com/2015/flying-faster-with-twitter-heron) (blog post)

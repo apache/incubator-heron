@@ -30,8 +30,9 @@ platform: gke
 # Number of replicas for the job binary in bookkeeper
 jobReplicas: 2
 
-# amount of memory to provide for API server
-apiServerMemory: 512M
+apiServer:
+  # amount of memory to provide for API server
+  memory: 512M
 
 # Number of replicas for storage bookies, memory and storage requirements 
 bookieReplicas: 5

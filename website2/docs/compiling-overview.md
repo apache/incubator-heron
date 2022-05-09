@@ -20,8 +20,8 @@ sidebar_label: Compiling Overview
     under the License.
 -->
 
-Heron is currently available for [Mac OS X 10.14](compiling-osx),
-[Ubuntu 18.04](compiling-linux), and [Debian10](compiling-docker#building-heron).
+Heron is currently available for [Mac OS X 12](compiling-osx),
+[Ubuntu 20.04](compiling-linux), and [debian11](compiling-docker#building-heron).
  This guide describes the basics of the
 Heron build system. For step-by-step build instructions for other platforms,
 the following guides are available:
@@ -50,8 +50,10 @@ You must have the following installed to compile Heron:
 * [GNU Libtool](http://www.gnu.org/software/libtool/) >= 2.4.6
 * [gcc/g++](https://gcc.gnu.org/) >= 4.8.1 (Linux platforms)
 * [CMake](https://cmake.org/) >= 2.6.4
-* [Python](https://www.python.org/) >= 2.7 (not including Python 3.x)
+* [Python](https://www.python.org/) >= 3.8
 * [Perl](https://www.perl.org/) >= 5.8.8
+* [Ant] (https://ant.apache.org/) >= 1.10.0
+* [Pkg-Config] (https://www.freedesktop.org/wiki/Software/pkg-config/) >= 0.29.2
 
 Export the `CC` and `CXX` environment variables with a path specific to your
 machine:
@@ -84,30 +86,21 @@ $ ./bazel_configure.py
 
 ## Building
 
-### Bazel OS Environments
-
-Bazel builds are specific to a given OS. When building you must specify an
-OS-specific configuration using the `--config` flag. The following OS values
-are supported:
-
-* `darwin` (Mac OS X)
-* `ubuntu` (Ubuntu 18.04)
-* `debian` (Debian10)
-* `centos5` (CentOS 7)
-
-For example, on Mac OS X (`darwin`), the following command will build all
-packages:
-
 ```bash
-$ bazel build --config=darwin heron/...
+$ bazel build heron/...
 ```
 
-Production release packages include additional performance optimizations
-not enabled by default. Enabling these optimizations increases build time.
-To enable production optimizations, include the `opt` flag:
+This will build in the Bazel default `fastbuild` mode. Production release packages include additional performance optimizations not enabled by default. To enable production optimizations, include the `opt` flag. This defaults to optimization level `-O2`. The second option overrides the setting to bump it to `-CO3`.
+
 ```bash
-$ bazel build -c opt --config=PLATFORM heron/...
+$ bazel build -c opt heron/...
 ```
+
+```bash
+$ bazel build -c opt --copt=-O3 heron/...
+```
+
+If you wish to add the code syntax style check, add `--config=stylecheck`.
 
 ### Building All Components
 
@@ -116,8 +109,8 @@ bundled tars. To build executables or tars for all Heron components at once,
 use the following `bazel build` commands, respectively:
 
 ```bash
-$ bazel build --config=PLATFORM scripts/packages:binpkgs
-$ bazel build --config=PLATFORM scripts/packages:tarpkgs
+$ bazel build scripts/packages:binpkgs
+$ bazel build scripts/packages:tarpkgs
 ```
 
 Resulting artifacts can be found in subdirectories below the `bazel-bin`
@@ -132,7 +125,7 @@ Tracker](user-manuals-heron-tracker-runbook)) by passing a target to the `bazel
 build` command. For example, the following command would build the Heron Tracker:
 
 ```bash
-$ bazel build --config=darwin heron/tools/tracker/src/python:heron-tracker
+$ bazel build heron/tools/tracker/src/python:heron-tracker
 ```
 
 ## Testing Heron

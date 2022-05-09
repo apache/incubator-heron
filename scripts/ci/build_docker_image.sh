@@ -19,7 +19,7 @@
 # Build docker image to be released
 # parameters:
 # 1. version tag, e.g. v0.20.1-incubating
-# 2. build os, e.g. debian9, centos7
+# 2. build os, e.g. debian11, rocky8
 # 3. output dir
 
 # Related environment variables

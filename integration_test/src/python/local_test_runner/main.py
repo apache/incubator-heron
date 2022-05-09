@@ -37,22 +37,24 @@ from heron.common.src.python.utils import log
 from . import test_kill_metricsmgr
 from . import test_kill_stmgr
 from . import test_kill_stmgr_metricsmgr
-from . import test_kill_tmaster
+from . import test_kill_tmanager
 from . import test_scale_up
 from . import test_template
+from . import test_explorer
 
 TEST_CLASSES = [
     test_template.TestTemplate,
-    test_kill_tmaster.TestKillTMaster,
+    test_kill_tmanager.TestKillTManager,
     test_kill_stmgr.TestKillStmgr,
     test_kill_metricsmgr.TestKillMetricsMgr,
     test_kill_stmgr_metricsmgr.TestKillStmgrMetricsMgr,
     test_scale_up.TestScaleUp,
     # test_kill_bolt.TestKillBolt,
+    test_explorer.TestExplorer,
 ]
 
 # The location of default configure file
-DEFAULT_TEST_CONF_FILE = "integration_test/src/python/local_test_runner/resources/test.conf"
+DEFAULT_TEST_CONF_FILE = "resources/test.conf"
 
 ProcessTuple = namedtuple('ProcessTuple', 'pid cmd')
 
@@ -116,7 +118,7 @@ def main():
   # Convert the conf file to a json format
   conf = decoder.decode(conf_string)
 
-  args = dict()
+  args = {}
   home_directory = os.path.expanduser("~")
   args['cluster'] = conf['cluster']
   args['topologyName'] = conf['topology']['topologyName']

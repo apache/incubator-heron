@@ -139,7 +139,7 @@ sink by name. You should add the sink you want to use to that list. Here's an ex
 sinks:
   - file-sink
   - scribe-sink
-  - tmaster-sink
+  - tmanager-sink
   - print-sink
   - prometheus-sink
 ```

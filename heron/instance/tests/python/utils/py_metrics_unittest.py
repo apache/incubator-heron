@@ -21,7 +21,7 @@
 
 # pylint: disable=missing-docstring
 from collections import namedtuple
-from mock import Mock, patch
+from unittest.mock import Mock, patch
 import unittest
 import threading
 

@@ -107,6 +107,10 @@ public class KeysTest {
         Key.VERBOSE
     );
     assertEquals(
+         "heron.config.verbose_gc",
+         Key.VERBOSE_GC
+    );
+    assertEquals(
         "heron.config.property",
         Key.CONFIG_PROPERTY
     );
@@ -147,8 +151,8 @@ public class KeysTest {
         Key.STMGR_BINARY
     );
     assertEquals(
-        "heron.binaries.tmaster",
-        Key.TMASTER_BINARY
+        "heron.binaries.tmanager",
+        Key.TMANAGER_BINARY
     );
     assertEquals(
         "heron.binaries.shell",

@@ -1,4 +1,20 @@
 #!/usr/bin/env bash
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+# 
+#   http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
 :<<'DOC'
 set NO_CACHE=1 to always rebuild images.
 set DEBUG=1 to not clean up
@@ -71,7 +87,7 @@ function get_image {
         out="$expected"
     else
         action "Creating heron image"
-        local gz="$(scripts/release/docker-images build test "$distro")"
+        local gz="$(scripts/release/docker-images build test debian11)"
         # XXX: must un .gz https://github.com/kubernetes-sigs/kind/issues/1636
         gzip --decompress "$gz"
         out="${gz%%.gz}"
@@ -102,15 +118,16 @@ function url_wait {
 trap clean EXIT
 create_cluster
 
-#get_image debian10
-get_image ubuntu20.04
+get_image debian11
 heron_archive="$archive"
 action "Loading heron docker image"
 kind load image-archive "$heron_archive"
-image_heron="heron/heron:$TAG"
+#image_heron="docker.io/bazel/scripts/images:heron"
+#image_heron="$heron_image"
+image_heron="apache/heron:$TAG"
 
 action "Loading bookkeeper image"
-image_bookkeeper="docker.io/apache/bookkeeper:4.7.3"
+image_bookkeeper="docker.io/apache/bookkeeper:4.13.0"
 docker pull "$image_bookkeeper"
 kind load docker-image "$image_bookkeeper"
 

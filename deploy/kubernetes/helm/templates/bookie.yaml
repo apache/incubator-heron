@@ -36,12 +36,16 @@ metadata:
 data:
   BK_BOOKIE_EXTRA_OPTS: "\"-Xms{{ $bookieHeapMemory }} -Xmx{{ $bookieHeapMemory }} -XX:MaxDirectMemorySize={{ $bookieDirectMemory }} -XX:+UseG1GC  -XX:MaxGCPauseMillis=10 -XX:+ParallelRefProcEnabled -XX:+UnlockExperimentalVMOptions -XX:+AggressiveOpts -XX:+DoEscapeAnalysis -XX:ParallelGCThreads=32 -XX:ConcGCThreads=32 -XX:G1NewSizePercent=50 -XX:+DisableExplicitGC -XX:-ResizePLAB\""
   BK_bookiePort: "3181"
+  BK_httpServerPort: "8080"
   BK_journalDirectory: "/bookkeeper/data/journal"
   BK_ledgerDirectories: "/bookkeeper/data/ledgers"
   BK_indexDirectories: "/bookkeeper/data/ledgers" 
   BK_zkServers: {{ .Release.Name }}-zookeeper:{{ .Values.zookeeper.clientPort }}
   BK_autoRecoveryDaemonEnabled: "true"
-  {{- if or (eq .Values.platform "gke") (eq .Values.platform "minikube") }}
+  BK_journalMaxBackups: "{{ .Values.bookieJournalMaxBackups }}"
+  BK_journalMaxSizeMB: "{{ .Values.bookieJournalMaxSizeMB }}"
+  BK_logSizeLimit: "{{ int64 .Values.bookieLogSizeLimit }}"
+  {{- if .Values.bookkeeper.useHostNameAsBookieID }}
   BK_useHostNameAsBookieID: "true"
   {{- end }}
   # TODO: Issue 458: https://github.com/apache/bookkeeper/issues/458
@@ -56,7 +60,7 @@ data:
 ## cannot be moved across different nodes.
 ## For this reason, we run BK as a daemon set, one for each node in the
 ## cluster, unless restricted by label selectors
-{{- if or (eq .Values.platform "gke") (eq .Values.platform "minikube") }}
+{{- if .Values.bookkeeper.useStatefulSet }}
 apiVersion: apps/v1
 kind: StatefulSet
 {{- else }}
@@ -75,7 +79,7 @@ spec:
       app: {{ .Release.Name }}-bookkeeper
       component: {{ .Release.Name }}-bookie
       cluster: {{ .Release.Name }}-bookkeeper
-{{- if or (eq .Values.platform "gke") (eq .Values.platform "minikube") }}
+{{- if .Values.bookkeeper.createReplicas }}
   serviceName: {{ .Release.Name }}-bookie
   replicas: {{ $bookieReplicas }}
 {{- end }}
@@ -93,7 +97,7 @@ spec:
         prometheus.io/port: "8000"
 
     spec:
-{{- if eq .Values.platform "gke" }}
+{{- if .Values.bookkeeper.affinityPods }}
       # Make sure multiple pods of bookkeeper don't get scheduled on the
       # same node, unless there are no other available nodes
       affinity:
@@ -108,8 +112,8 @@ spec:
                       values:
                         - {{ .Release.Name }}-bookkeeper
                 topologyKey: "kubernetes.io/hostname"
-{{- end }}
       terminationGracePeriodSeconds: 0
+{{- end }}
       initContainers:
         # Wait until the zookeeper pods are up and running
         - name: bookie-init-container
@@ -141,9 +145,6 @@ spec:
           ports:
             - name: client
               containerPort: 3181
-              # we are using `status.hostIP` for the bookie's advertised address. export 3181 as the hostPort,
-              # so that the containers are able to access the host port
-              hostPort: 3181
           envFrom:
             - configMapRef:
                 name: {{ .Release.Name }}-bookie-config
@@ -153,7 +154,7 @@ spec:
             - name: ledgers-disk
               mountPath: /bookkeeper/data/ledgers
 
-{{- if or (eq .Values.platform "aws") (eq .Values.platform "baremetal") }}
+{{- if .Values.bookkeeper.useHostPath }}
       volumes:
           # Mount local disks
         - name: journal-disk
@@ -164,7 +165,7 @@ spec:
             path: /bookkeeper/data/ledgers
 {{- end }}
 
-{{- if or (eq .Values.platform "gke") (eq .Values.platform "minikube") }}
+{{- if .Values.bookkeeper.useVolumeClaimTemplate }}
   volumeClaimTemplates:
     - metadata:
         name: journal-disk
@@ -205,7 +206,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  {{- if or (eq .Values.platform "gke") (eq .Values.platform "minikube") }}
+  {{- if .Values.bookkeeper.tolerateUnreadyEndpoints }}
   annotations:
     service.alpha.kubernetes.io/tolerate-unready-endpoints: "true"
   {{- end }}

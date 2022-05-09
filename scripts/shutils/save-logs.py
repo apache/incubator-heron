@@ -44,7 +44,7 @@ def shell_cmd(cmd):
     return " ".join(shlex.quote(c) for c in cmd)
 
 def main(file, cmd):
-  print("%s > %s" % (shell_cmd(cmd),file))
+  print(f"{shell_cmd(cmd)} > {file}")
   with open(file, "w") as out:
    count = 0
    process = subprocess.Popen(cmd,
@@ -59,7 +59,7 @@ def main(file, cmd):
        count = count + 1
        if datetime.now() > nextPrint:
           diff = datetime.now() - start
-          sys.stdout.write("\r%d seconds %d log lines"%(diff.seconds, count))
+          sys.stdout.write(f"\r{diff.seconds} seconds {count} log lines")
           sys.stdout.flush()
           nextPrint = datetime.now() + timedelta(seconds=10)
        out.write(line.decode())
@@ -67,8 +67,8 @@ def main(file, cmd):
    out.close()
    errcode = process.wait()
    diff = datetime.now() - start
-   sys.stdout.write("\r%d seconds %d log lines"%(diff.seconds, count))
-  print("\n `%s` finished with errcode: %d" % (shell_cmd(cmd), errcode))
+   sys.stdout.write(f"\r{diff.seconds} seconds {count} log lines")
+  print(f"\n `{shell_cmd(cmd)}` finished with errcode: {errcode}")
   if errcode != 0:
      lines = tail(file, 1000)
      print('\n'.join(lines))
@@ -79,7 +79,7 @@ if __name__ == "__main__":
   try:
     _, file, *cmd = sys.argv
   except ValueError:
-    print("Usage: %s [file info]" % sys.argv[0])
+    print(f"Usage: {sys.argv[0]} [file info]")
     sys.exit(1)
 
   main(file, cmd)

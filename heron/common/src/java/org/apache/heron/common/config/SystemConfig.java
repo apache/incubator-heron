@@ -230,20 +230,20 @@ public final class SystemConfig {
     return getInteger(SystemConfigKey.HERON_METRICS_MAX_EXCEPTIONS_PER_MESSAGE_COUNT);
   }
 
-  public long getTmasterMetricsCollectorMaximumException() {
+  public long getTmanagerMetricsCollectorMaximumException() {
     try {
-      return getLong(SystemConfigKey.TMASTER_METRICS_COLLECTOR_MAXIMUM_EXCEPTION);
+      return getLong(SystemConfigKey.TMANAGER_METRICS_COLLECTOR_MAXIMUM_EXCEPTION);
     } catch (IllegalArgumentException e) {
       return 256; // default value if not found in config
     }
   }
 
-  public Duration getTmasterMetricsCollectorMaximumInterval() {
-    return getDuration(SystemConfigKey.TMASTER_METRICS_COLLECTOR_MAXIMUM_INTERVAL);
+  public Duration getTmanagerMetricsCollectorMaximumInterval() {
+    return getDuration(SystemConfigKey.TMANAGER_METRICS_COLLECTOR_MAXIMUM_INTERVAL);
   }
 
-  public Duration getTmasterMetricsCollectorPurgeInterval() {
-    return getDuration(SystemConfigKey.TMASTER_METRICS_COLLECTOR_PURGE_INTERVAL);
+  public Duration getTmanagerMetricsCollectorPurgeInterval() {
+    return getDuration(SystemConfigKey.TMANAGER_METRICS_COLLECTOR_PURGE_INTERVAL);
   }
 
   private String getString(SystemConfigKey key) {

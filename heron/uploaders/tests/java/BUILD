@@ -23,7 +23,7 @@ localfs_deps_files = \
 dlog_deps_files = \
     common_deps_files + \
     spi_deps_files + [
-        "@maven//:org_apache_distributedlog_distributedlog_core_shaded",
+        "//third_party/java:dlog-java",
         "@maven//:io_netty_netty_all",
         "//heron/uploaders/src/java:dlog-uploader-java",
     ]
@@ -104,7 +104,7 @@ java_test(
     srcs = glob(["**/http/HttpUploaderTest.java"]),
     deps = common_deps_files + spi_deps_files + [
         "//heron/uploaders/src/java:http-uploader-java",
-        "@maven//:commons_logging_commons_logging",
+        "@maven//:org_slf4j_jcl_over_slf4j",
         "@maven//:org_apache_httpcomponents_httpcore",
         "@maven//:org_apache_httpcomponents_httpclient",
         "@maven//:org_apache_httpcomponents_httpclient_tests",

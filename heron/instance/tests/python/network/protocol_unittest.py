@@ -20,7 +20,7 @@
 
 
 # pylint: disable=missing-docstring
-import unittest2 as unittest
+import unittest
 from heron.instance.src.python.network import REQID, HeronProtocol, IncomingPacket
 import heron.instance.tests.python.network.mock_generator_client as mock_generator
 

@@ -22,7 +22,7 @@
 # pylint: disable=missing-docstring
 # pylint: disable=protected-access
 
-import unittest2 as unittest
+import unittest
 from heron.instance.src.python.network import StatusCode
 import heron.instance.tests.python.network.mock_generator_client as mock_generator
 import heron.instance.tests.python.mock_protobuf as mock_protobuf

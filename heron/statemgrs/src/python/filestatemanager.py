@@ -30,7 +30,7 @@ from heron.proto.execution_state_pb2 import ExecutionState
 from heron.proto.packing_plan_pb2 import PackingPlan
 from heron.proto.physical_plan_pb2 import PhysicalPlan
 from heron.proto.scheduler_pb2 import SchedulerLocation
-from heron.proto.tmaster_pb2 import TMasterLocation
+from heron.proto.tmanager_pb2 import TManagerLocation
 from heron.proto.topology_pb2 import Topology
 
 # pylint: disable=too-many-instance-attributes
@@ -50,7 +50,7 @@ class FileStateManager(StateManager):
     self.execution_state_directory = {}
     self.packing_plan_directory = {}
     self.pplan_directory = {}
-    self.tmaster_directory = {}
+    self.tmanager_directory = {}
     self.scheduler_location_directory = {}
 
     # The watches are triggered when there
@@ -65,7 +65,7 @@ class FileStateManager(StateManager):
     self.execution_state_watchers = defaultdict(lambda: [])
     self.packing_plan_watchers = defaultdict(lambda: [])
     self.pplan_watchers = defaultdict(lambda: [])
-    self.tmaster_watchers = defaultdict(lambda: [])
+    self.tmanager_watchers = defaultdict(lambda: [])
     self.scheduler_location_watchers = defaultdict(lambda: [])
 
     # Instantiate the monitoring thread.
@@ -117,6 +117,7 @@ class FileStateManager(StateManager):
 
       topologies = []
       if os.path.isdir(topologies_path):
+        # pylint: disable=consider-using-generator
         topologies = list([f for f in os.listdir(topologies_path)
                            if os.path.isfile(os.path.join(topologies_path, f))])
       if set(topologies) != set(self.topologies_directory):
@@ -144,11 +145,11 @@ class FileStateManager(StateManager):
           self.pplan_watchers, pplan_path,
           self.pplan_directory, PhysicalPlan)
 
-      # Get the directory name for tmaster
-      tmaster_path = os.path.dirname(self.get_tmaster_path(""))
+      # Get the directory name for tmanager
+      tmanager_path = os.path.dirname(self.get_tmanager_path(""))
       trigger_watches_based_on_files(
-          self.tmaster_watchers, tmaster_path,
-          self.tmaster_directory, TMasterLocation)
+          self.tmanager_watchers, tmanager_path,
+          self.tmanager_directory, TManagerLocation)
 
       # Get the directory name for scheduler location
       scheduler_location_path = os.path.dirname(self.get_scheduler_location_path(""))
@@ -253,19 +254,19 @@ class FileStateManager(StateManager):
     Delete path is currently not supported in file based state manager.
     """
 
-  def get_tmaster(self, topologyName, callback=None):
+  def get_tmanager(self, topologyName, callback=None):
     """
-    Get tmaster
+    Get tmanager
     """
     if callback:
-      self.tmaster_watchers[topologyName].append(callback)
+      self.tmanager_watchers[topologyName].append(callback)
     else:
-      tmaster_path = self.get_tmaster_path(topologyName)
-      with open(tmaster_path, "rb") as f:
+      tmanager_path = self.get_tmanager_path(topologyName)
+      with open(tmanager_path, "rb") as f:
         data = f.read()
-        tmaster = TMasterLocation()
-        tmaster.ParseFromString(data)
-        return tmaster
+        tmanager = TManagerLocation()
+        tmanager.ParseFromString(data)
+        return tmanager
     return None
 
   def get_scheduler_location(self, topologyName, callback=None):

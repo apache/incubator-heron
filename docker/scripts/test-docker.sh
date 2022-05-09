@@ -36,16 +36,11 @@ dockerfile_path_for_platform() {
   echo "$SCRATCH_DIR/test/Dockerfile.$1"
 }
 
-copy_bazel_rc_to() {
-  cp $PROJECT_DIR/tools/docker/bazel.rc $1
-}
-
 DOCKER_FILE=$(dockerfile_path_for_platform $TARGET_PLATFORM)
 verify_dockerfile_exists $DOCKER_FILE
-copy_bazel_rc_to  $SCRATCH_DIR/bazelrc
 
 echo "Building heron-compiler container"
-docker build -t heron-compiler:$TARGET_PLATFORM -f $DOCKER_FILE $SCRATCH_DIR
+docker buildx build -t heron-compiler:$TARGET_PLATFORM -f $DOCKER_FILE $SCRATCH_DIR
 
 echo "Running build in container"
 docker run \

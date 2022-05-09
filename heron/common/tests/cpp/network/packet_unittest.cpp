@@ -76,9 +76,9 @@ TEST(OutgoingPacketTest, test_protobuf) {
 
   TestMessage tm;
   tm.add_message("abcdefghijklmnopqrstuvwxyz");
-  op.PackProtocolBuffer(tm, tm.ByteSize());
+  op.PackProtocolBuffer(tm, tm.ByteSizeLong());
 
-  sp_uint32 explen = PacketHeader::header_size() + sizeof(sp_uint32) + tm.ByteSize();
+  sp_uint64 explen = PacketHeader::header_size() + sizeof(sp_uint32) + tm.ByteSizeLong();
   EXPECT_EQ(explen, op.GetBytesFilled());
 }
 

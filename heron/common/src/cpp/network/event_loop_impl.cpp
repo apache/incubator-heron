@@ -18,6 +18,7 @@
  */
 
 #include "network/event_loop_impl.h"
+#include <signal.h>
 #include <errno.h>
 #include <iostream>
 #include "glog/logging.h"

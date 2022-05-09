@@ -19,7 +19,7 @@
 #  under the License.
 
 """module for join bolt: JoinBolt"""
-import collections
+from collections.abc import Iterable
 
 from heronpy.api.bolt.window_bolt import SlidingWindowBolt
 from heronpy.api.component.component_spec import GlobalStreamId
@@ -61,15 +61,15 @@ class JoinBolt(SlidingWindowBolt, StreamletBoltBase):
       mymap[key][0].append(value)
 
   def initialize(self, config, context):
-    super(JoinBolt, self).initialize(config, context)
+    super().initialize(config, context)
     if not JoinBolt.JOINEDCOMPONENT in config:
-      raise RuntimeError("%s must be specified in the JoinBolt" % JoinBolt.JOINEDCOMPONENT)
+      raise RuntimeError(f"{JoinBolt.JOINEDCOMPONENT} must be specified in the JoinBolt")
     self._joined_component = config[JoinBolt.JOINEDCOMPONENT]
     if not JoinBolt.JOINFUNCTION in config:
-      raise RuntimeError("%s must be specified in the JoinBolt" % JoinBolt.JOINFUNCTION)
+      raise RuntimeError(f"{JoinBolt.JOINFUNCTION} must be specified in the JoinBolt")
     self._join_function = config[JoinBolt.JOINFUNCTION]
     if not JoinBolt.JOINTYPE in config:
-      raise RuntimeError("%s must be specified in the JoinBolt" % JoinBolt.JOINTYPE)
+      raise RuntimeError(f"{JoinBolt.JOINTYPE} must be specified in the JoinBolt")
     self._join_type = config[JoinBolt.JOINTYPE]
 
   def processWindow(self, window_config, tuples):
@@ -78,7 +78,7 @@ class JoinBolt(SlidingWindowBolt, StreamletBoltBase):
     mymap = {}
     for tup in tuples:
       userdata = tup.values[0]
-      if not isinstance(userdata, collections.Iterable) or len(userdata) != 2:
+      if not isinstance(userdata, Iterable) or len(userdata) != 2:
         raise RuntimeError("Join tuples must be iterable of length 2")
       self._add(userdata[0], userdata[1], tup.component, mymap)
     for (key, values) in list(mymap.items()):
@@ -136,7 +136,7 @@ class JoinGrouping(ICustomGrouping):
   def choose_tasks(self, values):
     assert isinstance(values, list) and len(values) == 1
     userdata = values[0]
-    if not isinstance(userdata, collections.Iterable) or len(userdata) != 2:
+    if not isinstance(userdata, Iterable) or len(userdata) != 2:
       raise RuntimeError("Tuples going to join must be iterable of length 2")
     # only emits to the first task id
     hashvalue = hash(userdata[0])
@@ -147,7 +147,7 @@ class JoinGrouping(ICustomGrouping):
 class JoinStreamlet(Streamlet):
   """JoinStreamlet"""
   def __init__(self, join_type, window_config, join_function, left, right):
-    super(JoinStreamlet, self).__init__()
+    super().__init__()
     if not join_type in [JoinBolt.INNER, JoinBolt.OUTER_RIGHT, JoinBolt.OUTER_LEFT]:
       raise RuntimeError("join type has to be of one of inner, outer, left")
     if not isinstance(window_config, WindowConfig):
@@ -173,8 +173,8 @@ class JoinStreamlet(Streamlet):
 
   # pylint: disable=superfluous-parens
   def _build_this(self, builder, stage_names):
-    print("join_build_this left: %s right: %s" % (self._left._built, self._right._built))
-    print("left: %s right: %s" % (self._left.get_name(), self._right.get_name()))
+    print(f"join_build_this left: {self._left._built} right: {self._right._built}")
+    print(f"left: {self._left.get_name()} right: {self._right.get_name()}")
     if not self._left._built or not self._right._built:
       return False
     if not self.get_name():

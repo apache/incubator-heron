@@ -72,7 +72,7 @@ check_docker_install
 
 case $1 in
   start)
-    DOCKER_IMAGE=${2:-heron/heron:latest}
+    DOCKER_IMAGE=${2:-apache/heron:latest}
     sandbox_start $DOCKER_IMAGE
     ;;
   ps)

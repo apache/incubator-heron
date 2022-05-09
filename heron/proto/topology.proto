@@ -24,14 +24,14 @@ option java_outer_classname = "TopologyAPI";
 // This file defines the logic plan of a topology, including
 // components definition, stream schema and others.
 // 1. Heron usbmitter pushes the message Topology to state manager at node: topologies/{topology_name}
-// 2. When TMaster first time starts, it reads Topology from state manager at node topologies/{topology_name},
-// 3. TMaster constructs and distribute PhysicalPlan basing on Topology and StrMgrHelloRequest.
+// 2. When TManager first time starts, it reads Topology from state manager at node topologies/{topology_name},
+// 3. TManager constructs and distribute PhysicalPlan basing on Topology and StrMgrHelloRequest.
 //    It also pushes the PhysicalPlan to state manager at node: pplans/{topology_name}
 //
 // Note:
 // 1. message PhysicalPlan also contains a copy of message Topolgoy. We distinguish them:
 //    - topologies/{topology_name} consist of the topology logic plan first submitted by user,
-//      it shall only be used to construct the PhysicalPlan when TMaster first time starts
+//      it shall only be used to construct the PhysicalPlan when TManager first time starts
 //    - pplans/{topology_name} reflects the dynamic state of the topology. Initially, it shall be the same
 //      as what user has submitted.
 //    Any runtime changes on Topology in are made to Topology inside the node pplans/{topology_name}.

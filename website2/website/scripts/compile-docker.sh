@@ -38,14 +38,9 @@ dockerfile_path_for_platform() {
   echo "$PROJECT_DIR/website/scripts/Dockerfile.$1"
 }
 
-copy_bazel_rc_to() {
-  cp $PROJECT_DIR/../tools/docker/bazel.rc $1
-}
-
 TARGET_PLATFORM="ubuntu18.04"
 DOCKER_FILE=$(dockerfile_path_for_platform $TARGET_PLATFORM)
 verify_dockerfile_exists $DOCKER_FILE
-copy_bazel_rc_to  $PROJECT_DIR/website/scripts/bazelrc
 
 echo "docker file"
 echo $DOCKER_FILE

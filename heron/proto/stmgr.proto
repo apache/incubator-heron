@@ -24,7 +24,7 @@ import "common.proto";
 import "physical_plan.proto";
 
 //
-// Messages sent by topologymaster
+// Messages sent by topologymanager
 //
 
 message NewPhysicalPlanMessage {

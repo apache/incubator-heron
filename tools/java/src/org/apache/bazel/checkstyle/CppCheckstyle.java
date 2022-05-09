@@ -43,7 +43,7 @@ import org.apache.commons.cli.ParseException;
  * Usage: java org.apache.bazel.checkstyle.CppCheckstyle -f &lt;extra_action_file&gt; -c &lt;cpplint_file&gt;
  * <p>
  * To test:
- * $ bazel build --config=darwin --experimental_action_listener=tools/cpp:compile_cpp heron/stmgr/src/cpp:grouping-cxx
+ * $ bazel build --experimental_action_listener=tools/cpp:compile_cpp heron/stmgr/src/cpp:grouping-cxx
  */
 public final class CppCheckstyle {
   public static final Logger LOG = Logger.getLogger(CppCheckstyle.class.getName());
@@ -91,7 +91,7 @@ public final class CppCheckstyle {
       // Remove "runtime/references" when we fix all non-const references in our codebase.
       // TODO: https://github.com/apache/incubator-heron/issues/467,
       // Remove "runtime/threadsafe_fn" when we fix all non-threadsafe libc functions
-      commandBuilder.add("--filter=-build/header_guard,-runtime/references,-runtime/threadsafe_fn");
+      commandBuilder.add("--filter=-build/header_guard,-runtime/references,-runtime/threadsafe_fn,-whitespace,-readability,-build/include_what_you_use,-build/c++11,-runtime/string");
       commandBuilder.addAll(sourceFiles);
       runLinter(commandBuilder);
 
@@ -137,12 +137,14 @@ public final class CppCheckstyle {
     return Collections2.filter(
             cppInfo.getSourcesAndHeadersList(),
             Predicates.and(
-                    Predicates.not(Predicates.containsPattern("external/")),
-                    Predicates.not(Predicates.containsPattern("third_party/")),
-                    Predicates.not(Predicates.containsPattern("config/heron-config.h")),
-                    Predicates.not(Predicates.containsPattern(".*pb.h$")),
-                    Predicates.not(Predicates.containsPattern(".*cc_wrapper.sh$")),
-                    Predicates.not(Predicates.containsPattern(".*pb.cc$"))
+              Predicates.not(Predicates.containsPattern("external/")),
+              Predicates.not(Predicates.containsPattern("third_party/")),
+              Predicates.not(Predicates.containsPattern("config/heron-config.h")),
+              Predicates.not(Predicates.containsPattern(".*cppmap")),
+              Predicates.not(Predicates.containsPattern(".*srcjar")),
+              Predicates.not(Predicates.containsPattern(".*pb.h$")),
+              Predicates.not(Predicates.containsPattern(".*cc_wrapper.sh$")),
+              Predicates.not(Predicates.containsPattern(".*pb.cc$"))
             )
     );
   }

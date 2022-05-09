@@ -20,10 +20,6 @@
 
 
 ''' killexecutorhandler.py '''
-# pylint: disable=wrong-import-order
-from future.standard_library import install_aliases
-install_aliases()
-
 import logging
 import os
 import signal
@@ -36,8 +32,7 @@ class KillExecutorHandler(tornado.web.RequestHandler):
   """
   Responsible for killing heron-executor process.
   """
-  @tornado.web.asynchronous
-  def post(self):
+  async def post(self):
     """ post method """
     def status_finish(ret):
       self.set_status(ret)
@@ -48,13 +43,16 @@ class KillExecutorHandler(tornado.web.RequestHandler):
       logger.info("Killing parent executor")
       os.killpg(os.getppid(), signal.SIGTERM)
 
+    def is_local():
+      return self.request.remote_ip in ('localhost', '127.0.0.1', '::1')
+
     logger = logging.getLogger(__file__)
     logger.info("Received 'Killing process' request")
     data = dict(parse_qsl(self.request.body))
 
     # check shared secret
     sharedSecret = data.get('secret')
-    if sharedSecret != options.secret:
+    if not is_local() and sharedSecret != options.secret:
       status_finish(403)
       return
 
@@ -65,12 +63,12 @@ class KillExecutorHandler(tornado.web.RequestHandler):
         if instanceId.startswith('heron-executor-'): # kill heron-executor
           kill_parent()
         else: # kill other normal instance
-          fh = open(filepath)
+          fh = open(filepath, encoding='utf8')
           firstLine = int(fh.readline())
           fh.close()
           logger.info("Killing process %s %s", instanceId, firstLine)
           os.kill(firstLine, signal.SIGTERM)
-          status_finish(200)
+          await status_finish(200)
       else: # instance_id not found
         logger.info("%s not found", filepath)
         status_finish(422)

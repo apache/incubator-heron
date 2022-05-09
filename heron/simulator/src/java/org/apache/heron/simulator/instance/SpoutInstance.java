@@ -27,8 +27,8 @@ import com.google.protobuf.Message;
 import org.apache.heron.api.Config;
 import org.apache.heron.common.basics.ByteAmount;
 import org.apache.heron.common.basics.Communicator;
+import org.apache.heron.common.basics.ExecutorLooper;
 import org.apache.heron.common.basics.SingletonRegistry;
-import org.apache.heron.common.basics.SlaveLooper;
 import org.apache.heron.common.basics.TypeUtils;
 import org.apache.heron.common.config.SystemConfig;
 import org.apache.heron.common.utils.misc.PhysicalPlanHelper;
@@ -48,7 +48,7 @@ public class SpoutInstance
   @SuppressWarnings("deprecation")
   public SpoutInstance(PhysicalPlanHelper helper,
                        Communicator<Message> streamInQueue,
-                       Communicator<Message> streamOutQueue, SlaveLooper looper) {
+                       Communicator<Message> streamOutQueue, ExecutorLooper looper) {
     super(helper, streamInQueue, streamOutQueue, looper);
     Map<String, Object> config = helper.getTopologyContext().getTopologyConfig();
     SystemConfig systemConfig =

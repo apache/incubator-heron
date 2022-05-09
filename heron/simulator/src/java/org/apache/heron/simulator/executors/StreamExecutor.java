@@ -30,7 +30,7 @@ import java.util.logging.Logger;
 import com.google.protobuf.Message;
 
 import org.apache.heron.api.generated.TopologyAPI;
-import org.apache.heron.common.basics.SlaveLooper;
+import org.apache.heron.common.basics.ExecutorLooper;
 import org.apache.heron.common.basics.WakeableLooper;
 import org.apache.heron.proto.system.HeronTuples;
 import org.apache.heron.proto.system.PhysicalPlans;
@@ -334,7 +334,7 @@ public class StreamExecutor implements Runnable {
   }
 
   protected WakeableLooper createWakeableLooper() {
-    return new SlaveLooper();
+    return new ExecutorLooper();
   }
 
   protected Set<String> createSpoutsSet(PhysicalPlans.PhysicalPlan physicalPlan) {

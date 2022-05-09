@@ -32,7 +32,7 @@ import org.apache.heron.proto.scheduler.Scheduler;
 import org.apache.heron.proto.system.ExecutionEnvironment;
 import org.apache.heron.proto.system.PackingPlans;
 import org.apache.heron.proto.system.PhysicalPlans;
-import org.apache.heron.proto.tmaster.TopologyMaster;
+import org.apache.heron.proto.tmanager.TopologyManager;
 import org.apache.heron.spi.common.Config;
 import org.apache.heron.spi.statemgr.IStateManager;
 import org.apache.heron.spi.statemgr.Lock;
@@ -72,15 +72,15 @@ public class NullStateManager implements IStateManager {
   }
 
   @Override
-  public ListenableFuture<Boolean> setTMasterLocation(
-      TopologyMaster.TMasterLocation location,
+  public ListenableFuture<Boolean> setTManagerLocation(
+      TopologyManager.TManagerLocation location,
       String topologyName) {
     return nullFuture;
   }
 
   @Override
   public ListenableFuture<Boolean> setMetricsCacheLocation(
-      TopologyMaster.MetricsCacheLocation location,
+      TopologyManager.MetricsCacheLocation location,
       String topologyName) {
     return nullFuture;
   }
@@ -121,7 +121,7 @@ public class NullStateManager implements IStateManager {
   }
 
   @Override
-  public ListenableFuture<Boolean> deleteTMasterLocation(String topologyName) {
+  public ListenableFuture<Boolean> deleteTManagerLocation(String topologyName) {
     return nullFuture;
   }
 
@@ -156,14 +156,14 @@ public class NullStateManager implements IStateManager {
   }
 
   @Override
-  public ListenableFuture<TopologyMaster.TMasterLocation> getTMasterLocation(
+  public ListenableFuture<TopologyManager.TManagerLocation> getTManagerLocation(
       WatchCallback watcher,
       String topologyName) {
     return SettableFuture.create();
   }
 
   @Override
-  public ListenableFuture<TopologyMaster.MetricsCacheLocation> getMetricsCacheLocation(
+  public ListenableFuture<TopologyManager.MetricsCacheLocation> getMetricsCacheLocation(
       WatchCallback watcher,
       String topologyName) {
     return SettableFuture.create();

@@ -17,15 +17,12 @@
 
 set -eu
 
-function query() {
-  ./output/bazel query "$@"
-}
 
 set +e
 # Build everything
 DIR=`dirname $0`
-source ${DIR}/detect_os_type.sh
-bazel build --config=`platform` {heron,integration_test,tools/java,examples,heronpy,storm-compatibility,storm-compatibility-examples,eco,eco-storm-examples,eco-heron-examples}/...
+
+bazel build {heron,integration_test,tools/java,examples,heronpy,storm-compatibility/v0.10.2,storm-compatibility-examples,eco,eco-storm-examples,eco-heron-examples}/...
 result=$?
 if [ "${result}" -eq "0" ] ; then
   echo "Bazel build successful!!"
@@ -44,7 +41,7 @@ function get_heron_thirdparty_dependencies() {
   # bazel-bin/external for third_party deps
   # bazel-heron/bazel-bin/host/bin/third_party for extra_action proto jars in third_party
   # bazel-heron/bazel-bin/host/genfiles/external more third_party deps
-  echo "$(find {bazel-bin/heron/proto,bazel-bin/external,bazel-incubator-heron/bazel-bin/host/bin/third_party,bazel-incubator-heron/bazel-bin/host/genfiles/external}/. -name "*jar" -type f | sort -u)";
+  echo "$(find {bazel-bin/heron/proto,bazel-bin/external,bazel-incubator-heron/bazel-out/host/bin/third_party,bazel-incubator-heron/bazel-out/host/bin/external}/. -name "*jar" -type f | sort -u)";
 }
 
 function get_heron_bazel_deps(){
@@ -67,7 +64,7 @@ function get_package_of() {
 }
 
 function get_heron_java_paths() {
-  local java_paths=$(find {heron,heron/tools,tools,integration_test,examples,storm-compatibility,eco,eco-storm-examples,eco-heron-examples,contrib} -name "*.java" | sed "s|/src/java/.*$|/src/java|"| sed "s|/java/src/.*$|/java/src|" |  sed "s|/tests/java/.*$|/tests/java|" | sort -u | fgrep -v "heron/scheduler/" | fgrep -v "heron/scheduler/" )
+  local java_paths=$(find {heron,heron/tools,tools,integration_test,examples,storm-compatibility/v0.10.2,eco,eco-storm-examples,eco-heron-examples,contrib} -name "*.java" | sed "s|/src/java/.*$|/src/java|"| sed "s|/java/src/.*$|/java/src|" |  sed "s|/tests/java/.*$|/tests/java|" | sort -u | fgrep -v "heron/scheduler/" | fgrep -v "heron/scheduler/" )
   if [ "$(uname -s | tr 'A-Z' 'a-z')" != "darwin" ]; then
     java_paths=$(echo "${java_paths}" | fgrep -v "/objc_tools/")
   fi
@@ -92,9 +89,9 @@ function get_consuming_target() {
   # Here to the god of bazel, I should probably offer one or two memory chips for that
   local target=$(get_target_of $1)
   # Get the rule that generated this file.
-  local generating_target=$(query "kind(rule, deps(${target}, 1)) - ${target}")
+  local generating_target=$(bazel query "kind(rule, deps(${target}, 1)) - ${target}")
   [[ -n $generating_target ]] || echo "Couldn't get generating target for ${target}" 1>&2
-  local java_library=$(query "rdeps(//heron/..., ${generating_target}, 1) - ${generating_target}")
+  local java_library=$(bazel query "rdeps(//heron/..., ${generating_target}, 1) - ${generating_target}")
   echo "${java_library}"
 }
 
@@ -118,4 +115,5 @@ function collect_generated_paths() {
 
 # GENERATED_PATHS stores pairs of jar:source_path as a list of strings, with
 # each pair internally delimited by a colon. Use ${string//:/ } to split one.
-GENERATED_PATHS="$(collect_generated_paths)"
+#GENERATED_PATHS="$(collect_generated_paths)" # bypass java_doc issue
+GENERATED_PATHS=""

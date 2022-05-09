@@ -19,7 +19,7 @@
 
 #include <iostream>
 
-#include "core/network/misc/samplehttpserver.h"
+#include "heron/common/src/cpp/network/misc/samplehttpserver.h"
 #include "core/common/public/common.h"
 #include "core/errors/public/errors.h"
 #include "core/threads/public/threads.h"

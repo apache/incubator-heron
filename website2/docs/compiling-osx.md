@@ -32,11 +32,12 @@ install it using this one-liner:
 $ /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 ```
 
-### Step 2 -- Install Bazel
+### Step 2 -- Install Bazelisk
+
+Bazelisk helps automate the management of Bazel versions
+
 ```bash
-wget -O /tmp/bazel.sh https://github.com/bazelbuild/bazel/releases/download/3.0.0/bazel-3.0.0-installer-darwin-x86_64.sh
-chmod +x /tmp/bazel.sh
-/tmp/bazel.sh --user
+brew install bazelisk
 ```
 
 ### Step 2 --- Install other required libraries
@@ -45,6 +46,8 @@ chmod +x /tmp/bazel.sh
 brew install automake
 brew install cmake
 brew install libtool
+brew install ant
+brew install pkg-config
 ```
 
 ### Step 3 --- Set the following environment variables
@@ -73,14 +76,26 @@ to install those dependencies.
 ### Step 6 --- Build the project
 
 ```bash
-$ bazel build --config=darwin heron/...
+$ bazel build heron/...
 ```
+
+This will build in the Bazel default `fastbuild` mode. Production release packages include additional performance optimizations not enabled by default. To enable production optimizations, include the `opt` flag. This defaults to optimization level `-O2`. The second option overrides the setting to bump it to `-CO3`.
+
+```bash
+$ bazel build -c opt heron/...
+```
+
+```bash
+$ bazel build -c opt --copt=-O3 heron/...
+```
+
+If you wish to add the code syntax style check, add `--config=stylecheck`.
 
 ### Step 7 --- Build the packages
 
 ```bash
-$ bazel build --config=darwin scripts/packages:binpkgs
-$ bazel build --config=darwin scripts/packages:tarpkgs
+$ bazel build scripts/packages:binpkgs
+$ bazel build scripts/packages:tarpkgs
 ```
 
 This will install Heron packages in the `bazel-bin/scripts/packages/` directory.

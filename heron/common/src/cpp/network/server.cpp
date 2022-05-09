@@ -41,8 +41,8 @@ sp_int32 Server::Stop() { return Stop_Base(); }
 
 void Server::SendResponse(REQID _id, Connection* _connection,
                           const google::protobuf::Message& _response) {
-  sp_int32 byte_size = _response.ByteSize();
-  sp_uint32 data_size = OutgoingPacket::SizeRequiredToPackString(_response.GetTypeName()) +
+  sp_int64 byte_size = _response.ByteSizeLong();
+  sp_uint64 data_size = OutgoingPacket::SizeRequiredToPackString(_response.GetTypeName()) +
                         REQID_size + OutgoingPacket::SizeRequiredToPackProtocolBuffer(byte_size);
   auto opkt = new OutgoingPacket(data_size);
   CHECK_EQ(opkt->PackString(_response.GetTypeName()), 0);
@@ -208,8 +208,8 @@ void Server::InternalSendRequest(Connection* _conn, google::protobuf::Message* _
   context_map_[rid] = std::make_pair(_response_placeholder, _ctx);
 
   // Make the outgoing packet
-  sp_int32 byte_size = _request->ByteSize();
-  sp_uint32 sop = OutgoingPacket::SizeRequiredToPackString(_request->GetTypeName()) + REQID_size +
+  sp_int64 byte_size = _request->ByteSizeLong();
+  sp_uint64 sop = OutgoingPacket::SizeRequiredToPackString(_request->GetTypeName()) + REQID_size +
                   OutgoingPacket::SizeRequiredToPackProtocolBuffer(byte_size);
   auto opkt = new OutgoingPacket(sop);
   CHECK_EQ(opkt->PackString(_request->GetTypeName()), 0);

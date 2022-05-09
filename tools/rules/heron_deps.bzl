@@ -27,7 +27,7 @@ def heron_java_proto_files():
         "//heron/proto:proto_physical_plan_java",
         "//heron/proto:proto_scheduler_java",
         "//heron/proto:proto_ckptmgr_java",
-        "//heron/proto:proto_tmaster_java",
+        "//heron/proto:proto_tmanager_java",
         "//heron/proto:proto_topology_java",
         "//heron/proto:proto_tuple_java",
         "//heron/proto:proto_stmgr_java",

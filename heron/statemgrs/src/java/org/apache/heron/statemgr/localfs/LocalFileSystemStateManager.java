@@ -30,13 +30,14 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
 
 import org.apache.heron.api.generated.TopologyAPI;
+import org.apache.heron.api.utils.Slf4jUtils;
 import org.apache.heron.common.basics.FileUtils;
 import org.apache.heron.proto.ckptmgr.CheckpointManager;
 import org.apache.heron.proto.scheduler.Scheduler;
 import org.apache.heron.proto.system.ExecutionEnvironment;
 import org.apache.heron.proto.system.PackingPlans;
 import org.apache.heron.proto.system.PhysicalPlans;
-import org.apache.heron.proto.tmaster.TopologyMaster;
+import org.apache.heron.proto.tmanager.TopologyManager;
 import org.apache.heron.spi.common.Config;
 import org.apache.heron.spi.common.Key;
 import org.apache.heron.spi.statemgr.Lock;
@@ -184,19 +185,19 @@ public class LocalFileSystemStateManager extends FileSystemStateManager {
   }
 
   @Override
-  public ListenableFuture<Boolean> setTMasterLocation(
-      TopologyMaster.TMasterLocation location, String topologyName) {
+  public ListenableFuture<Boolean> setTManagerLocation(
+      TopologyManager.TManagerLocation location, String topologyName) {
     // Note: Unlike Zk statemgr, we overwrite the location even if there is already one.
-    // This is because when running in simulator we control when a tmaster dies and
+    // This is because when running in simulator we control when a tmanager dies and
     // comes up deterministically.
-    return setData(StateLocation.TMASTER_LOCATION, topologyName, location.toByteArray(), true);
+    return setData(StateLocation.TMANAGER_LOCATION, topologyName, location.toByteArray(), true);
   }
 
   @Override
   public ListenableFuture<Boolean> setMetricsCacheLocation(
-      TopologyMaster.MetricsCacheLocation location, String topologyName) {
+      TopologyManager.MetricsCacheLocation location, String topologyName) {
     // Note: Unlike Zk statemgr, we overwrite the location even if there is already one.
-    // This is because when running in simulator we control when a tmaster dies and
+    // This is because when running in simulator we control when a tmanager dies and
     // comes up deterministically.
     LOG.info("setMetricsCacheLocation: ");
     return setData(StateLocation.METRICSCACHE_LOCATION, topologyName, location.toByteArray(), true);
@@ -247,6 +248,7 @@ public class LocalFileSystemStateManager extends FileSystemStateManager {
 
   public static void main(String[] args) throws ExecutionException, InterruptedException,
       IllegalAccessException, ClassNotFoundException, InstantiationException {
+    Slf4jUtils.installSLF4JBridge();
     Config config = Config.newBuilder()
         .put(Key.STATEMGR_ROOT_PATH,
             System.getProperty("user.home") + "/.herondata/repository/state/local")

@@ -95,7 +95,7 @@ trap cleanup EXIT
 
 generate_source() {
   echo "Generating source tarball"
-  tar --exclude-from=$DOCKER_DIR/.tarignore -C $PROJECT_DIR -czf $SRC_TAR .
+  tar --use-compress-program=pigz --exclude-from=$DOCKER_DIR/.tarignore -C $PROJECT_DIR -cf $SRC_TAR .
 }
 
 verify_source_exists() {
@@ -166,10 +166,10 @@ case $# in
     echo "  "
     echo "Script to build heron artifacts for different platforms"
     echo "  "
-    echo "Platforms Supported: darwin, debian9, ubuntu14.04, ubuntu16.04, ubuntu18.04, centos7"
+    echo "Platforms Supported: darwin, debian11, ubuntu20.04, rocky8"
     echo "  "
     echo "Example:"
-    echo "  ./build-artifacts.sh ubuntu14.04 0.12.0 ."
+    echo "  ./build-artifacts.sh ubuntu20.04 0.12.0 ."
     echo "  "
     echo "NOTE: If running on OSX, the output directory will need to "
     echo "      be under /Users so virtualbox has access to."

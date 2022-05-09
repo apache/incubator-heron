@@ -27,12 +27,7 @@ GEN_PROTO_DIR=$HERON_ROOT_DIR/bazel-bin/heron/proto/_javac
 # The path of the customized landing page for the Javadocs
 OVERVIEW_HTML_FILE=$HERON_ROOT_DIR/website2/website/scripts/javadocs-overview.html
 
-# Check if this script is run with Travis flag
-if [ $# -eq 1 ] && [ $1 == "--travis" ]; then
-    BAZEL_CMD="bazel --bazelrc=$HERON_ROOT_DIR/tools/travis/bazel.rc build"
-else
-    BAZEL_CMD="bazel build"
-fi
+BAZEL_CMD="bazel build"
 
 (cd $HERON_ROOT_DIR && $BAZEL_CMD \
   `bazel query 'kind("java_library", "heron/...")'` \
@@ -51,7 +46,7 @@ mkdir -p $JAVADOC_OUTPUT_DIR
 GEN_JARS=`find $HERON_ROOT_DIR/bazel-bin/external/. -name "*\.jar" | tr '\n' ':'`
 SCRIBE_JARS=`find $HERON_ROOT_DIR/bazel-bin/. -name "libthrift_scribe_java.jar" | tr '\n' ':'`
 PROTO_JARS=`find $HERON_ROOT_DIR/bazel-bin/heron/proto/. -name "*\.jar" | tr '\n' ':'`
-CLOSURE_CLASSES="$HERON_ROOT_DIR/bazel-bin/storm-compatibility/src/java/_javac/storm-compatibility-java/libstorm-compatibility-java_classes/."
+CLOSURE_CLASSES="$HERON_ROOT_DIR/bazel-bin/storm-compatibility/v0.10.2/src/java/_javac/storm-compatibility-java/libstorm-compatibility-java_classes/."
 CONTRIB_JARS=`find $HERON_ROOT_DIR/bazel-bin/contrib/. -name "*\.jar" | tr '\n' ':'`
 
 export CLASSPATH=$GEN_JARS:$SCRIBE_JARS:$PROTO_JARS:$CLOSURE_CLASSES:$CONTRIB_JARS

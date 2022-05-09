@@ -19,7 +19,7 @@
 # Build packages to be released
 # parameters:
 # 1. version tag, e.g. v0.20.1-incubating
-# 2. build os, e.g. darwin, centos7
+# 2. build os, e.g. darwin, rocky8
 # 3. output dir
 
 # Related environment variables

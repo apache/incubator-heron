@@ -25,16 +25,15 @@ LINUX_EXECUTE = [
 POST_EXECUTE = [
     'ln -sf "$$OUTDIR" "$$TMPF"',
     'VENV="$${TMPF}/venv"',
-    '$(location @virtualenv//:virtualenv) --no-download --quiet --clear "$$VENV"',
-    '# this is just to keep the activate script happy',
-    'PS1=',
-    'source "$$VENV/bin/activate"',
-
+    # Create the virtual environment
+    'python3 -m venv $$VENV --clear',
+    'VIRTUAL_ENV_DISABLE_PROMPT=1 source "$$VENV/bin/activate"',
+    'TEMP="$(@D)/pexbuild"',
     'pip install pex \
-            --quiet --no-cache-dir --no-index --build $(@D)/pexbuild \
-            --find-links $$(dirname $(location @pex_src//file)) \
-            --find-links $$(dirname $(location @wheel_src//file)) \
-            --find-links $$(dirname $(location @setuptools_wheel//file))',
+            --quiet --no-cache-dir --no-index \
+            --find-links $$(dirname $(location @pex_pkg//file)) \
+            --find-links $$(dirname $(location @wheel_pkg//file)) \
+            --find-links $$(dirname $(location @setuptools_pkg//file))',
 
     '# Work around setuptools insistance on writing to the source directory,',
     '# which is discouraged by Bazel (and annoying)',
@@ -45,10 +44,14 @@ POST_EXECUTE = [
             --disable-cache --no-index \
             --entry-point=pex_wrapper \
             --output-file=$@ \
-            --find-links $$(dirname $(location @pex_src//file)) \
-            --find-links $$(dirname $(location @setuptools_wheel//file)) \
-            --find-links $$(dirname $(location @requests_src//file)) \
-            --find-links $$(dirname $(location @wheel_src//file))',
+            --find-links $$(dirname $(location @pex_pkg//file)) \
+            --find-links $$(dirname $(location @setuptools_pkg//file)) \
+            --find-links $$(dirname $(location @requests_pkg//file)) \
+            --find-links $$(dirname $(location @charset_pkg//file)) \
+            --find-links $$(dirname $(location @idna_pkg//file)) \
+            --find-links $$(dirname $(location @urllib3_pkg//file)) \
+            --find-links $$(dirname $(location @certifi_pkg//file)) \
+            --find-links $$(dirname $(location @wheel_pkg//file))',
    ]
 
 genrule(
@@ -57,19 +60,22 @@ genrule(
         "wrapper/setup.py",
         "wrapper/pex_wrapper.py",
         "wrapper/README",
-        "@setuptools_wheel//file",
-        "@wheel_src//file",
-        "@pex_src//file",
-        "@requests_src//file",
+        "@setuptools_pkg//file",
+        "@wheel_pkg//file",
+        "@pex_pkg//file",
+        "@requests_pkg//file",
+        "@charset_pkg//file",
+        "@idna_pkg//file",
+        "@urllib3_pkg//file",
+        "@certifi_pkg//file",
     ],
     outs = ["pex_wrapper.pex"],
     cmd = select({
-        "//tools/platform:darwin": "\n".join(PRE_EXECUTE + DARWIN_EXECUTE + POST_EXECUTE),
+        "@platforms//os:osx": "\n".join(PRE_EXECUTE + DARWIN_EXECUTE + POST_EXECUTE),
         "//conditions:default": "\n".join(PRE_EXECUTE + LINUX_EXECUTE + POST_EXECUTE),
     }),
     executable = True,
     message = "Bootstrapping pex",
     output_to_bindir = True,
-    tools = ["@virtualenv"],
     visibility = ["//visibility:public"],
 )

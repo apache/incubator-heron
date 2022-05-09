@@ -44,7 +44,7 @@ If you already have Bazel and the other required tools installed for your platfo
 $ bazel build --config=[platform] scripts/packages:binpkgs
 ```
 Options for the config flag are:
-* `debian` (Debian10)
+* `debian` (debian11)
 * `ubuntu` (Ubuntu)
 * `darwin` (OSX)
 
@@ -215,7 +215,7 @@ Available commands:
     submit             Submit a topology
     version            Print version of heron-cli
 
-For detailed documentation, go to https://heron.incubator.apache.org
+For detailed documentation, go to https://heron.apache.org
 ```
 
 To invoke help output for a command, run `heron help COMMAND`. Here's an

@@ -28,8 +28,8 @@
 # After the container is started, you can build Heron with bazel
 # (ubuntu config is used in the example):
 #   ./bazel_configure.py
-#   bazel build --config=ubuntu heron/...
-#   bazel build --config=ubuntu scripts/packages:binpkgs
+#   bazel build heron/...
+#   bazel build scripts/packages:binpkgs
 
 set -o nounset
 set -o errexit
@@ -43,7 +43,7 @@ case $# in
 esac
 
 # Default platform is ubuntu18.04. Other available platforms
-# include centos7, debian9, debian10, ubuntu18.04
+# include rocky8, debian11, ubuntu18.04
 TARGET_PLATFORM=${2:-"ubuntu18.04"}
 SCRATCH_DIR="$HOME/.heron-docker"
 REPOSITORY="heron-dev"
@@ -69,7 +69,6 @@ dockerfile_path_for_platform() {
 
 copy_extra_files() {
   mkdir -p $SCRATCH_DIR/scripts
-  cp $PROJECT_DIR/tools/docker/bazel.rc $SCRATCH_DIR/bazelrc
   cp $DOCKER_DIR/scripts/compile-docker.sh $SCRATCH_DIR/scripts/compile-platform.sh
 }
 
@@ -78,7 +77,7 @@ verify_dockerfile_exists $DOCKER_FILE
 copy_extra_files
 
 echo "Building docker image for Heron development environment on $TARGET_PLATFORM"
-docker build -t $REPOSITORY:$TARGET_PLATFORM -f $DOCKER_FILE $SCRATCH_DIR
+docker buildx build -t $REPOSITORY:$TARGET_PLATFORM -f $DOCKER_FILE $SCRATCH_DIR
 
 echo "Creating and starting container and mapping the current dir to /heron"
 docker container run -it \

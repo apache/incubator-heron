@@ -9,6 +9,9 @@ pex_library(
     deps = [
         "//heronpy/proto:proto-py",
     ],
+    reqs = [
+        "cloudpickle~=1.5.0",
+    ],
 )
 
 # for egg production

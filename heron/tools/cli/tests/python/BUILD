@@ -5,9 +5,7 @@ pex_pytest(
     size = "small",
     srcs = ["opts_unittest.py"],
     reqs = [
-        "py==1.4.34",
-        "pytest==3.2.2",
-        "unittest2==1.1.0",
+        "pytest==6.1.2",
     ],
     deps = [
         "//heron/tools/cli/src/python:cli-py",
@@ -19,10 +17,7 @@ pex_pytest(
     size = "small",
     srcs = ["client_command_unittest.py"],
     reqs = [
-        "py==1.4.34",
-        "pytest==3.2.2",
-        "unittest2==1.1.0",
-        "mock==1.0.1",
+        "pytest==6.1.2",
     ],
     deps = [
         "//heron/tools/cli/src/python:cli-py",

@@ -40,13 +40,14 @@ import org.apache.curator.framework.state.ConnectionState;
 import org.apache.curator.framework.state.ConnectionStateListener;
 import org.apache.curator.retry.ExponentialBackoffRetry;
 import org.apache.heron.api.generated.TopologyAPI;
+import org.apache.heron.api.utils.Slf4jUtils;
 import org.apache.heron.common.basics.Pair;
 import org.apache.heron.proto.ckptmgr.CheckpointManager;
 import org.apache.heron.proto.scheduler.Scheduler;
 import org.apache.heron.proto.system.ExecutionEnvironment;
 import org.apache.heron.proto.system.PackingPlans;
 import org.apache.heron.proto.system.PhysicalPlans;
-import org.apache.heron.proto.tmaster.TopologyMaster;
+import org.apache.heron.proto.tmanager.TopologyManager;
 import org.apache.heron.spi.common.Config;
 import org.apache.heron.spi.common.Context;
 import org.apache.heron.spi.common.Key;
@@ -348,15 +349,15 @@ public class CuratorStateManager extends FileSystemStateManager {
   }
 
   @Override
-  public ListenableFuture<Boolean> setTMasterLocation(
-      TopologyMaster.TMasterLocation location,
+  public ListenableFuture<Boolean> setTManagerLocation(
+      TopologyManager.TManagerLocation location,
       String topologyName) {
-    return createNode(StateLocation.TMASTER_LOCATION, topologyName, location.toByteArray(), true);
+    return createNode(StateLocation.TMANAGER_LOCATION, topologyName, location.toByteArray(), true);
   }
 
   @Override
   public ListenableFuture<Boolean> setMetricsCacheLocation(
-      TopologyMaster.MetricsCacheLocation location,
+      TopologyManager.MetricsCacheLocation location,
       String topologyName) {
     client.getConnectionStateListenable().addListener(new ConnectionStateListener() {
       @Override
@@ -419,7 +420,7 @@ public class CuratorStateManager extends FileSystemStateManager {
   }
 
   @Override
-  public ListenableFuture<Boolean> deleteTMasterLocation(String topologyName) {
+  public ListenableFuture<Boolean> deleteTManagerLocation(String topologyName) {
     // It is a EPHEMERAL node and would be removed automatically
     final SettableFuture<Boolean> result = SettableFuture.create();
     safeSetFuture(result, true);
@@ -451,7 +452,7 @@ public class CuratorStateManager extends FileSystemStateManager {
     if (args.length < 2) {
       throw new RuntimeException("Expects 2 arguments: <topology_name> <zookeeper_hostname>");
     }
-
+    Slf4jUtils.installSLF4JBridge();
     String zookeeperHostname = args[1];
     Config config = Config.newBuilder()
         .put(Key.STATEMGR_ROOT_PATH, "/storm/heron/states")

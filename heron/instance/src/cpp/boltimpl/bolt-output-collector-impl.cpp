@@ -45,10 +45,10 @@ namespace instance {
 BoltOutputCollectorImpl::BoltOutputCollectorImpl(
                           std::shared_ptr<api::serializer::IPluggableSerializer> serializer,
                           std::shared_ptr<TaskContextImpl> taskContext,
-                          NotifyingCommunicator<google::protobuf::Message*>* dataFromSlave,
+                          NotifyingCommunicator<google::protobuf::Message*>* dataFromExecutor,
                           std::shared_ptr<BoltMetrics> metrics)
   : api::bolt::IBoltOutputCollector(serializer), metrics_(metrics) {
-  collector_ = new OutgoingTupleCollection(taskContext->getThisComponentName(), dataFromSlave);
+  collector_ = new OutgoingTupleCollection(taskContext->getThisComponentName(), dataFromExecutor);
   ackingEnabled_ = taskContext->isAckingEnabled();
   taskId_ = taskContext->getThisTaskId();
 }
@@ -97,7 +97,7 @@ void BoltOutputCollectorImpl::ack(std::shared_ptr<api::tuple::Tuple> tup) {
       int64_t tupSize = 0;
       for (int i = 0; i < actualRepr->roots_size(); ++i) {
         ack->add_roots()->CopyFrom(actualRepr->roots(i));
-        tupSize += actualRepr->roots(i).ByteSize();
+        tupSize += actualRepr->roots(i).ByteSizeLong();
       }
       collector_->addAckTuple(ack, tupSize);
       int64_t currentTime = std::chrono::duration_cast<std::chrono::nanoseconds>(
@@ -118,7 +118,7 @@ void BoltOutputCollectorImpl::fail(std::shared_ptr<api::tuple::Tuple> tup) {
       int64_t tupSize = 0;
       for (int i = 0; i < actualRepr->roots_size(); ++i) {
         fl->add_roots()->CopyFrom(actualRepr->roots(i));
-        tupSize += actualRepr->roots(i).ByteSize();
+        tupSize += actualRepr->roots(i).ByteSizeLong();
       }
       collector_->addFailTuple(fl, tupSize);
       int64_t currentTime = std::chrono::duration_cast<std::chrono::nanoseconds>(

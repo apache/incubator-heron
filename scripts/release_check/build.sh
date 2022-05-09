@@ -18,5 +18,5 @@
 
 set -o errexit
 
-bazel build --compilation_mode=dbg --config=darwin heron/... --verbose_failures
-bazel build --compilation_mode=dbg --config=darwin scripts/packages:binpkgs --verbose_failures
+bazel build -c dbg heron/... --verbose_failures
+bazel build -c dbg scripts/packages:binpkgs --verbose_failures

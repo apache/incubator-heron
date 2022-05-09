@@ -33,7 +33,7 @@ java_tests(
 hdfs_deps_files = [
     "//heron/statefulstorages/src/java:hdfs-statefulstorage-java",
     "@maven//:org_apache_hadoop_hadoop_core",
-    "@maven//:commons_logging_commons_logging",
+    "@maven//:org_slf4j_jcl_over_slf4j",
 ]
 
 java_library(
@@ -57,7 +57,7 @@ dlog_deps_files = [
     "//heron/statefulstorages/src/java:dlog-statefulstorage-java",
     "//heron/io/dlog/src/java:dlog-lib",
     "@maven//:com_google_guava_guava",
-    "@maven//:org_apache_distributedlog_distributedlog_core_shaded",
+    "//third_party/java:dlog-java",
     "@maven//:io_netty_netty_all",
 ]
 

@@ -20,7 +20,7 @@
 
 '''config.py: module for defining config'''
 
-import heronpy.api.api_constants as api_constants
+from heronpy.api import api_constants
 from heronpy.streamlet.resources import Resources
 
 class Config:
@@ -51,7 +51,7 @@ class Config:
       self._api_config[api_constants.TOPOLOGY_RELIABILITY_MODE] =\
                api_constants.TopologyReliabilityMode.EFFECTIVELY_ONCE
     else:
-      raise RuntimeError("Unknown Topology delivery semantics %s" % str(semantics))
+      raise RuntimeError(f"Unknown Topology delivery semantics {str(semantics)}")
 
   def set_num_containers(self, ncontainers):
     self._api_config[api_constants.TOPOLOGY_STMGRS] = int(ncontainers)

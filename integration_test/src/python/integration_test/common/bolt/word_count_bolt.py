@@ -38,8 +38,8 @@ class WordCountBolt(BatchBolt):
     else:
       self.cache[word] = 1
 
-    self.logger.info("Counter: %s" % str(self.cache))
+    self.logger.info("Counter: %s", str(self.cache))
 
   def finish_batch(self):
-    self.logger.info("In finish batch, emitting: %d" % len(self.cache))
+    self.logger.info("In finish batch, emitting: %d", len(self.cache))
     self.emit([len(self.cache)])

@@ -33,6 +33,7 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.heron.api.exception.InvalidTopologyException;
 import org.apache.heron.api.generated.TopologyAPI;
+import org.apache.heron.api.utils.Slf4jUtils;
 import org.apache.heron.api.utils.TopologyUtils;
 import org.apache.heron.common.basics.FileUtils;
 import org.apache.heron.common.basics.SysUtils;
@@ -177,7 +178,7 @@ public class SchedulerMain {
   }
 
   public static void main(String[] args) throws Exception {
-
+    Slf4jUtils.installSLF4JBridge();
     // construct the options and help options first.
     Options options = constructOptions();
     Options helpOptions = constructHelpOptions();

@@ -18,18 +18,18 @@
  */
 
 #include <iostream>
+#include <string>
 
 #include "common/common.h"
 #include "errors/errors.h"
 #include "threads/threads.h"
 #include "network/network.h"
 #include "statemgr/heron-zkstatemgr.h"
-#include <string>
 
 using heron::common::HeronStateMgr;
 
-void TMasterLocationWatchHandler() {
-  std::cout << "TMasterLocationWatchHandler triggered " << std::endl;
+void TManagerLocationWatchHandler() {
+  std::cout << "TManagerLocationWatchHandler triggered " << std::endl;
 }
 
 int main(int argc, char* argv[]) {
@@ -55,7 +55,7 @@ int main(int argc, char* argv[]) {
   const std::string topology_name = "test_topology";
 
   HeronStateMgr* state_mgr = HeronStateMgr::MakeStateMgr(host_port, top_level_dir, &ss);
-  state_mgr->SetTMasterLocationWatch(topology_name, []() { TMasterLocationWatchHandler(); });
+  state_mgr->SetTManagerLocationWatch(topology_name, []() { TManagerLocationWatchHandler(); });
   state_mgr->SetPackingPlanWatch(topology_name, []() { PackingPlanWatchHandler(); });
   ss.loop();
   return 0;

@@ -17,28 +17,23 @@
 
 FROM centos:centos7
 
-# This is passed to the heron build command via the --config flag
-ENV TARGET_PLATFORM centos
-ENV bazelVersion 3.0.0
-
-RUN yum -y upgrade
+RUN yum -y upgrade && yum -y install centos-release-scl-rh
 RUN yum -y install \
       automake \
       curl \
       cmake \
       openssl-devel \
       file \
-      gcc \
-      gcc-c++ \
+      devtoolset-8-gcc \
+      devtoolset-8-gcc-c++ \
       git \
+      glibc-langpack-en \
       kernel-devel \
       libtool \
-      cppunit-devel \
       make \
       patch \
-      python3-devel \
-      python3-devel \
-      python3-setuptools \
+      ant \
+      rh-python38-python-devel \
       zip \
       unzip \
       wget \
@@ -46,11 +41,20 @@ RUN yum -y install \
       tree \
       java-11-openjdk-devel
 
+RUN /usr/bin/ln -sfT /opt/rh/rh-python38/root/usr/bin/python3 /usr/bin/python3 \
+      && /usr/bin/ln -sfT /opt/rh/rh-python38/root/usr/bin/python3 /usr/bin/python \
+      && /usr/bin/ln -sfT /opt/rh/rh-python38/root/usr/bin/python3.8 /usr/bin/python3.8 \
+      && /usr/bin/ln -sfT /opt/rh/devtoolset-8/root/bin/gcc /usr/bin/gcc \
+      && /usr/bin/ln -sfT /opt/rh/devtoolset-8/root/bin/g++ /usr/bin/g++ \
+      && /usr/bin/ln -sfT /opt/rh/devtoolset-8/root/bin/cpp /usr/bin/cpp
+
+ENV LC_ALL en_US.utf8
 ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk
+
+ENV bazelVersion 4.2.2
 
 RUN wget -O /tmp/bazel.sh https://github.com/bazelbuild/bazel/releases/download/$bazelVersion/bazel-$bazelVersion-installer-linux-x86_64.sh \
       && chmod +x /tmp/bazel.sh \
       && /tmp/bazel.sh
 
-ADD bazelrc /root/.bazelrc
 ADD scripts/test-platform.sh /test-platform.sh

@@ -22,12 +22,12 @@ sidebar_label: Compiling on Linux
 
 Heron can currently be built on the following Linux platforms:
 
-* [Ubuntu 18.04](#building-on-ubuntu-18.04)
-* [CentOS 7](#building-on-centos-7)
+* [Ubuntu 20.04](#building-on-ubuntu-20.04)
+* [Rocky 8](#building-on-rocky-8)
 
-## Building on Ubuntu 18.04
+## Building on Ubuntu 20.04
 
-To build Heron on a fresh Ubuntu 18.04 installation:
+To build Heron on a fresh Ubuntu 20.04 installation:
 
 ### Step 1 --- Update Ubuntu
 
@@ -39,8 +39,8 @@ $ sudo apt-get upgrade -y
 ### Step 2 --- Install required libraries
 
 ```bash
-$ sudo apt-get install git build-essential automake cmake libtool-bin zip \
-  libunwind-setjmp0-dev zlib1g-dev unzip pkg-config python-setuptools -y
+$ sudo apt-get install git build-essential automake cmake libtool-bin zip ant \
+  libunwind-setjmp0-dev zlib1g-dev unzip pkg-config python3-setuptools -y
 ```
 
 #### Step 3 --- Set the following environment variables
@@ -72,7 +72,7 @@ bazelVersion %}}).
 
 ### Step 6 --- Install python development tools
 ```bash
-$ sudo apt-get install  python-dev python-pip
+$ sudo apt-get install  python3-dev python3-pip
 ```
 
 ### Step 7 --- Make sure the Bazel executable is in your `PATH`
@@ -96,14 +96,14 @@ $ ./bazel_configure.py
 ### Step 10 --- Build the project
 
 ```bash
-$ bazel build --config=ubuntu heron/...
+$ bazel build heron/...
 ```
 
 ### Step 11 --- Build the packages
 
 ```bash
-$ bazel build --config=ubuntu scripts/packages:binpkgs
-$ bazel build --config=ubuntu scripts/packages:tarpkgs
+$ bazel build scripts/packages:binpkgs
+$ bazel build scripts/packages:tarpkgs
 ```
 
 This will install Heron packages in the `bazel-bin/scripts/packages/` directory.
@@ -147,14 +147,14 @@ $ make
 $ sudo make install
 ```
 
-## Building on CentOS 7
+## Building on Rocky 8
 
-To build Heron on a fresh CentOS 7 installation:
+To build Heron on a fresh Rocky 8 installation:
 
 ### Step 1 --- Install the required dependencies
 
 ```bash
-$ sudo yum install gcc gcc-c++ kernel-devel wget unzip zlib-devel zip git automake cmake patch libtool -y
+$ sudo yum install gcc gcc-c++ kernel-devel wget unzip zlib-devel zip git automake cmake patch libtool ant pkg-config -y
 ```
 
 ### Step 2 --- Install libunwind from source
@@ -182,30 +182,52 @@ $ sudo yum install java-11-openjdk java-11-openjdk-devel
 $ export JAVA_HOME=/usr/lib/jvm/java-11-openjdk
 ```
 
-#### Step 5 - Install Bazel {{% bazelVersion %}}
+#### Step 5 - Install Bazelisk
+
+Bazelisk helps automate the management of Bazel versions
 
 ```bash
-wget -O /tmp/bazel.sh https://github.com/bazelbuild/bazel/releases/download/0.26.0/bazel-0.26.0-installer-linux-x86_64.sh
-chmod +x /tmp/bazel.sh
-/tmp/bazel.sh --user
+wget -O /tmp/bazelisk https://github.com/bazelbuild/bazelisk/releases/download/v1.11.0/bazelisk-darwin-amd64
+chmod +x /tmp/bazelisk
+sudo mv /tmp/bazelisk /usr/local/bin/bazel
 ```
 
-Make sure to download the appropriate version of Bazel (currently {{%
-bazelVersion %}}).
-
-### Step 6 --- Download Heron and compile it
+### Step 6 --- Fetch the latest version of Heron's source code
 
 ```bash
-$ git clone https://github.com/apache/incubator-heron.git && cd heron
+$ git clone https://github.com/apache/incubator-heron.git && cd incubator-heron
+```
+
+
+### Step 7 --- Configure Heron for building with Bazel
+
+```bash
 $ ./bazel_configure.py
-$ bazel build --config=centos heron/...
 ```
 
-### Step 7 --- Build the binary packages
+### Step 8 --- Build the project
 
 ```bash
-$ bazel build --config=centos scripts/packages:binpkgs
-$ bazel build --config=centos scripts/packages:tarpkgs
+$ bazel build heron/...
+```
+
+This will build in the Bazel default `fastbuild` mode. Production release packages include additional performance optimizations not enabled by default. To enable production optimizations, include the `opt` flag. This defaults to optimization level `-O2`. The second option overrides the setting to bump it to `-CO3`.
+
+```bash
+$ bazel build -c opt heron/...
+```
+
+```bash
+$ bazel build -c opt --copt=-O3 heron/...
+```
+
+If you wish to add the code syntax style check, add `--config=stylecheck`.
+
+### Step 9 --- Build the binary packages
+
+```bash
+$ bazel build scripts/packages:binpkgs
+$ bazel build scripts/packages:tarpkgs
 ```
 
 This will install Heron packages in the `bazel-bin/scripts/packages/` directory.

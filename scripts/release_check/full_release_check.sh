@@ -39,5 +39,5 @@ sh ./scripts/release_check/build.sh
 echo "Run a test topology locally..."
 sh ./scripts/release_check/run_test_topology.sh
 
-echo "Build debian9 docker image..."
+echo "Build debian11 docker image..."
 sh ./scripts/release_check/build_docker.sh

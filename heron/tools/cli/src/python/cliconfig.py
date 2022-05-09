@@ -39,7 +39,7 @@ def cluster_config(cluster):
   config = _cluster_config(cluster)
   if _config_has_property(config, PROP_SERVICE_URL):
     return {PROP_SERVICE_URL: config[PROP_SERVICE_URL]}
-  return dict()
+  return {}
 
 
 def is_valid_property(prop):
@@ -79,7 +79,7 @@ def _save_or_remove(config, cluster):
     config_directory = get_config_directory(cluster)
     if not os.path.isdir(config_directory):
       os.makedirs(config_directory)
-    with open(cluster_config_file, 'w') as cf:
+    with open(cluster_config_file, 'w', encoding='utf8') as cf:
       yaml.dump(config, cf, default_flow_style=False)
   else:
     if os.path.isfile(cluster_config_file):
@@ -90,10 +90,10 @@ def _save_or_remove(config, cluster):
 
 
 def _cluster_config(cluster):
-  config = dict()
+  config = {}
   cluster_config_file = get_cluster_config_file(cluster)
   if os.path.isfile(cluster_config_file):
-    with open(cluster_config_file, 'r') as cf:
-      config = yaml.load(cf)
+    with open(cluster_config_file, 'r', encoding='utf8') as cf:
+      config = yaml.safe_load(cf)
 
   return config

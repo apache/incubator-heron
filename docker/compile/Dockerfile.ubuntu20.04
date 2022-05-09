@@ -17,26 +17,25 @@
 
 FROM ubuntu:20.04
 
-# This is passed to the heron build command via the --config flag
-ENV TARGET_PLATFORM ubuntu
-ENV bazelVersion 3.0.0
-
 ARG DEBIAN_FRONTEND=noninteractive
 
+ENV LC_ALL C.UTF-8
+ENV LANG C.UTF-8
+
 RUN apt-get update && apt-get -y install \
+      ant \
       g++ \
       cmake \
       automake \
       libtool-bin \
       libunwind8 \
-      libcppunit-dev \
       patch \
+      python-is-python3 \
       python3-dev \
-      python \
+      python3-venv \
       pkg-config \
       wget \
       zip \
-      virtualenv \
       unzip \
       git \
       curl \
@@ -45,9 +44,11 @@ RUN apt-get update && apt-get -y install \
 
 ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk-amd64
 
+ENV bazelVersion 4.2.2
+
 RUN wget -O /tmp/bazel.sh https://github.com/bazelbuild/bazel/releases/download/$bazelVersion/bazel-$bazelVersion-installer-linux-x86_64.sh \
       && chmod +x /tmp/bazel.sh \
-      && /tmp/bazel.sh
+      && /tmp/bazel.sh \
+      && rm -rf /tmp/bazel.sh
 
-ADD bazelrc /root/.bazelrc
 ADD scripts/compile-platform.sh /compile-platform.sh

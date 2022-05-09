@@ -38,7 +38,7 @@ class IntegrationTestSpout(Spout):
 
   @classmethod
   def spec(cls, name, par, config, user_spout_classpath, user_output_fields=None):
-    python_class_path = "%s.%s" % (cls.__module__, cls.__name__)
+    python_class_path = f"{cls.__module__}.{cls.__name__}"
 
     config[integ_const.USER_SPOUT_CLASSPATH] = user_spout_classpath
     # avoid modification to cls.outputs
@@ -57,7 +57,7 @@ class IntegrationTestSpout(Spout):
 
     self.max_executions = config.get(integ_const.USER_MAX_EXECUTIONS, integ_const.MAX_EXECUTIONS)
     assert isinstance(self.max_executions, int) and self.max_executions > 0
-    Log.info("Max executions: %d" % self.max_executions)
+    Log.info("Max executions: %d", self.max_executions)
     self.tuples_to_complete = 0
 
     self.user_spout.initialize(config, context)
@@ -77,7 +77,7 @@ class IntegrationTestSpout(Spout):
       return
 
     self.max_executions -= 1
-    Log.info("max executions: %d" % self.max_executions)
+    Log.info("max executions: %d", self.max_executions)
 
     self.user_spout.next_tuple()
 
@@ -86,14 +86,14 @@ class IntegrationTestSpout(Spout):
       Log.info("This topology is finished.")
 
   def ack(self, tup_id):
-    Log.info("Received an ack with tuple id: %s" % str(tup_id))
+    Log.info("Received an ack with tuple id: %s", str(tup_id))
     self.tuples_to_complete -= 1
     if tup_id != integ_const.INTEGRATION_TEST_MOCK_MESSAGE_ID:
       self.user_spout.ack(tup_id)
     self._emit_terminal_if_needed()
 
   def fail(self, tup_id):
-    Log.info("Received a fail message with tuple id: %s" % str(tup_id))
+    Log.info("Received a fail message with tuple id: %s", str(tup_id))
     self.tuples_to_complete -= 1
     if tup_id != integ_const.INTEGRATION_TEST_MOCK_MESSAGE_ID:
       self.user_spout.fail(tup_id)
@@ -109,16 +109,16 @@ class IntegrationTestSpout(Spout):
     self.tuples_to_complete += 1
 
     if tup_id is None:
-      Log.info("Add tup_id for tuple: %s" % str(tup))
+      Log.info("Add tup_id for tuple: %s", str(tup))
       _tup_id = integ_const.INTEGRATION_TEST_MOCK_MESSAGE_ID
     else:
       _tup_id = tup_id
 
-    super(IntegrationTestSpout, self).emit(tup, _tup_id, stream, direct_task, need_task_ids)
+    super().emit(tup, _tup_id, stream, direct_task, need_task_ids)
 
   def _emit_terminal_if_needed(self):
-    Log.info("is_done: %s, tuples_to_complete: %s" % (self.is_done, self.tuples_to_complete))
+    Log.info("is_done: %s, tuples_to_complete: %s", self.is_done, self.tuples_to_complete)
     if self.is_done and self.tuples_to_complete == 0:
       Log.info("Emitting terminals to downstream")
-      super(IntegrationTestSpout, self).emit([integ_const.INTEGRATION_TEST_TERMINAL],
+      super().emit([integ_const.INTEGRATION_TEST_TERMINAL],
                                              stream=integ_const.INTEGRATION_TEST_CONTROL_STREAM_ID)

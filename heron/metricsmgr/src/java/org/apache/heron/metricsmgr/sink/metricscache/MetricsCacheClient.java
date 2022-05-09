@@ -29,15 +29,15 @@ import org.apache.heron.common.basics.NIOLooper;
 import org.apache.heron.common.network.HeronClient;
 import org.apache.heron.common.network.HeronSocketOptions;
 import org.apache.heron.common.network.StatusCode;
-import org.apache.heron.proto.tmaster.TopologyMaster;
+import org.apache.heron.proto.tmanager.TopologyManager;
 
 /**
- * MetricsCacheClient connects to MetricsCache and then send TopologyMaster.PublishMetrics continuously.
+ * MetricsCacheClient connects to MetricsCache and then send TopologyManager.PublishMetrics continuously.
  * Note that MetricsCache will not send registerRequest or wait for registerResponse.
  */
 public class MetricsCacheClient extends HeronClient implements Runnable {
   private static final Logger LOG = Logger.getLogger(MetricsCacheClient.class.getName());
-  private final Communicator<TopologyMaster.PublishMetrics> publishMetricsCommunicator;
+  private final Communicator<TopologyManager.PublishMetrics> publishMetricsCommunicator;
   private final String host;
   private final int port;
   private final Duration reconnectInterval;
@@ -52,7 +52,7 @@ public class MetricsCacheClient extends HeronClient implements Runnable {
    */
   public MetricsCacheClient(
       NIOLooper s, String host, int port, HeronSocketOptions options,
-      Communicator<TopologyMaster.PublishMetrics> publishMetricsCommunicator,
+      Communicator<TopologyManager.PublishMetrics> publishMetricsCommunicator,
       Duration reconnectInterval) {
     super(s, host, port, options);
     this.host = host;
@@ -93,7 +93,7 @@ public class MetricsCacheClient extends HeronClient implements Runnable {
     Runnable task = new Runnable() {
       @Override
       public void run() {
-        TopologyMaster.PublishMetrics publishMetrics;
+        TopologyManager.PublishMetrics publishMetrics;
         while (true) {
           synchronized (publishMetricsCommunicator) {
             publishMetrics = publishMetricsCommunicator.poll();

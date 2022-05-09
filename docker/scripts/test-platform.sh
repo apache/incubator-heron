@@ -36,40 +36,18 @@ cd $SCRATCH_DIR
 echo "Extracting source"
 tar -C . -xzf $SOURCE_TARBALL
 
-if [[ "$TARGET_PLATFORM" =~ "ubuntu" ]]; then
-  CONFIG_PLATFORM=ubuntu
-elif [[ "$TARGET_PLATFORM" =~ "centos" ]]; then
-  CONFIG_PLATFORM=centos
-elif [[ "$TARGET_PLATFORM" =~ "darwin" ]]; then
-  CONFIG_PLATFORM=darwin
-elif [[ "$TARGET_PLATFORM" =~ "debian" ]]; then
-  CONFIG_PLATFORM=debian
-elif [[ "$TARGET_PLATFORM" =~ "ubuntu_nostyle" ]]; then
-  CONFIG_PLATFORM=ubuntu
-elif [[ "$TARGET_PLATFORM" =~ "centos_nostyle" ]]; then
-  CONFIG_PLATFORM=centos
-elif [[ "$TARGET_PLATFORM" =~ "darwin_nostyle" ]]; then
-  CONFIG_PLATFORM=darwin
-elif [[ "$TARGET_PLATFORM" =~ "debian_nostyle" ]]; then
-  CONFIG_PLATFORM=debian
-else
-  echo "Unknown platform: $TARGET_PLATFORM"
-  exit 1
-fi
-
 bazel version
 ./bazel_configure.py
 bazel clean
 
 echo "UnitTest"
-bazel test -c opt --jobs 25 \
-    --config=$CONFIG_PLATFORM \
+bazel test -c opt \
     --test_output=all \
     --test_summary=detailed \
     heron/... \
     heronpy/... \
     examples/... \
-    storm-compatibility-examples/... \
+    storm-compatibility-examples/v0.10.2/... \
     eco-storm-examples/... \
     eco-heron-examples/... \
     contrib/...

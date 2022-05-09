@@ -20,7 +20,7 @@ sidebar_label:  Nomad
     under the License.
 -->
 
-Heron supports [Hashicorp](https://hashicorp.com)'s [Nomad](https://nomadproject.io) as a scheduler. You can use Nomad for either small- or large-scale Heron deployments or to run Heron locally in [standalone mode](schedulers-standalone).
+Heron supports [Hashicorp](https://hashicorp.com)'s [Nomad](https://nomadproject.io) as a scheduler.
 
 > Update: Heron now supports running on Nomad via [raw exec driver](https://www.nomadproject.io/docs/drivers/raw_exec.html) and [docker driver](https://www.nomadproject.io/docs/drivers/docker.html)
 
@@ -301,7 +301,7 @@ heron.nomad.driver: "docker"
 You can also adjust which docker image to use for running Heron via the `heron.executor.docker.image` in `~/.heron/conf/nomad/scheduler.yaml` e.g.
 
 ```yaml
-heron.executor.docker.image: 'heron/heron:latest'
+heron.executor.docker.image: 'apache/heron:latest'
 ```
 
 You'll need to use a topology uploader to deploy topology packages to nodes in your cluster. You can use one of the following uploaders:

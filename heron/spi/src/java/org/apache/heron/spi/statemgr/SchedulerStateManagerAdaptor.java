@@ -32,7 +32,7 @@ import org.apache.heron.proto.scheduler.Scheduler;
 import org.apache.heron.proto.system.ExecutionEnvironment;
 import org.apache.heron.proto.system.PackingPlans;
 import org.apache.heron.proto.system.PhysicalPlans;
-import org.apache.heron.proto.tmaster.TopologyMaster;
+import org.apache.heron.proto.tmanager.TopologyManager;
 
 /**
  * This file provides a Adaptor for Scheduler.
@@ -169,12 +169,12 @@ public class SchedulerStateManagerAdaptor {
   }
 
   /**
-   * Delete the tmaster location for the given topology
+   * Delete the tmanager location for the given topology
    *
    * @return Boolean - Success or Failure
    */
-  public Boolean deleteTMasterLocation(String topologyName) {
-    return awaitResult(delegate.deleteTMasterLocation(topologyName));
+  public Boolean deleteTManagerLocation(String topologyName) {
+    return awaitResult(delegate.deleteTManagerLocation(topologyName));
   }
 
   /**
@@ -240,12 +240,12 @@ public class SchedulerStateManagerAdaptor {
   }
 
   /**
-   * Get the tmaster location for the given topology
+   * Get the tmanager location for the given topology
    *
-   * @return TMasterLocation
+   * @return TManagerLocation
    */
-  public TopologyMaster.TMasterLocation getTMasterLocation(String topologyName) {
-    return awaitResult(delegate.getTMasterLocation(null, topologyName));
+  public TopologyManager.TManagerLocation getTManagerLocation(String topologyName) {
+    return awaitResult(delegate.getTManagerLocation(null, topologyName));
   }
 
   /**
@@ -262,7 +262,7 @@ public class SchedulerStateManagerAdaptor {
    *
    * @return MetricsCacheLocation
    */
-  public TopologyMaster.MetricsCacheLocation getMetricsCacheLocation(String topologyName) {
+  public TopologyManager.MetricsCacheLocation getMetricsCacheLocation(String topologyName) {
     return awaitResult(delegate.getMetricsCacheLocation(null, topologyName));
   }
 

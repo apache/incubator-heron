@@ -19,131 +19,112 @@
 #  under the License.
 
 """ metricstimeline.py """
-import tornado.gen
+from typing import Dict, List
+
+import httpx
+
+from pydantic import BaseModel, Field
 
 from heron.common.src.python.utils.log import Log
 from heron.proto import common_pb2
-from heron.proto import tmaster_pb2
+from heron.proto import tmanager_pb2
+
+
+class MetricsTimeline(BaseModel):
+  component: str
+  starttime: int
+  endtime: int
+  timeline: Dict[str, Dict[str, Dict[int, float]]] = Field(
+      ...,
+      description="map of (metric name, instance, start) to metric value",
+  )
+
+
+class LegacyMetricsTimeline(BaseModel):
+  component: str
+  starttime: int
+  endtime: int
+  timeline: Dict[str, Dict[str, Dict[int, str]]] = Field(
+      ...,
+      description="map of (metric name, instance, start) to metric value",
+  )
+
 
 # pylint: disable=too-many-locals, too-many-branches, unused-argument
-@tornado.gen.coroutine
-def getMetricsTimeline(tmaster,
-                       component_name,
-                       metric_names,
-                       instances,
-                       start_time,
-                       end_time,
-                       callback=None):
+async def get_metrics_timeline(
+    tmanager: tmanager_pb2.TManagerLocation,
+    component_name: str,
+    metric_names: List[str],
+    instances: List[str],
+    start_time: int,
+    end_time: int,
+    callback=None,
+) -> MetricsTimeline:
   """
   Get the specified metrics for the given component name of this topology.
-  Returns the following dict on success:
-  {
-    "timeline": {
-      <metricname>: {
-        <instance>: {
-          <start_time> : <numeric value>,
-          <start_time> : <numeric value>,
-          ...
-        }
-        ...
-      }, ...
-    },
-    "starttime": <numeric value>,
-    "endtime": <numeric value>,
-    "component": "..."
-  }
 
-  Returns the following dict on failure:
-  {
-    "message": "..."
-  }
   """
-  # Tmaster is the proto object and must have host and port for stats.
-  if not tmaster or not tmaster.host or not tmaster.stats_port:
-    raise Exception("No Tmaster found")
 
-  host = tmaster.host
-  port = tmaster.stats_port
+  # Tmanager is the proto object and must have host and port for stats.
+  if not tmanager or not tmanager.host or not tmanager.stats_port:
+    raise Exception("No Tmanager found")
 
   # Create the proto request object to get metrics.
+  request_parameters = tmanager_pb2.MetricRequest()
+  request_parameters.component_name = component_name
 
-  metricRequest = tmaster_pb2.MetricRequest()
-  metricRequest.component_name = component_name
-
-  # If no instances are give, metrics for all instances
+  # If no instances are given, metrics for all instances
   # are fetched by default.
-  if len(instances) > 0:
-    for instance in instances:
-      metricRequest.instance_id.append(instance)
+  request_parameters.instance_id.extend(instances)
+  request_parameters.metric.extend(metric_names)
 
-  for metricName in metric_names:
-    metricRequest.metric.append(metricName)
-
-  metricRequest.explicit_interval.start = start_time
-  metricRequest.explicit_interval.end = end_time
-  metricRequest.minutely = True
-
-  # Serialize the metricRequest to send as a payload
-  # with the HTTP request.
-  metricRequestString = metricRequest.SerializeToString()
+  request_parameters.explicit_interval.start = start_time
+  request_parameters.explicit_interval.end = end_time
+  request_parameters.minutely = True
 
   # Form and send the http request.
-  url = "http://{0}:{1}/stats".format(host, port)
-  request = tornado.httpclient.HTTPRequest(url,
-                                           body=metricRequestString,
-                                           method='POST',
-                                           request_timeout=5)
-
-  Log.debug("Making HTTP call to fetch metrics")
-  Log.debug("url: " + url)
-  try:
-    client = tornado.httpclient.AsyncHTTPClient()
-    result = yield client.fetch(request)
-    Log.debug("HTTP call complete.")
-  except tornado.httpclient.HTTPError as e:
-    raise Exception(str(e))
-
+  url = f"http://{tmanager.host}:{tmanager.stats_port}/stats"
+  Log.debug(f"Making HTTP call to fetch metrics: {url}")
+  async with httpx.AsyncClient() as client:
+    result = await client.post(url, data=request_parameters.SerializeToString())
 
   # Check the response code - error if it is in 400s or 500s
-  responseCode = result.code
-  if responseCode >= 400:
-    message = "Error in getting metrics from Tmaster, code: " + responseCode
-    Log.error(message)
+  if result.status_code >= 400:
+    message = f"Error in getting metrics from Tmanager, code: {result.code}"
     raise Exception(message)
 
-  # Parse the response from tmaster.
-  metricResponse = tmaster_pb2.MetricResponse()
-  metricResponse.ParseFromString(result.body)
+  # Parse the response from tmanager.
+  response_data = tmanager_pb2.MetricResponse()
+  response_data.ParseFromString(result.content)
 
-  if metricResponse.status.status == common_pb2.NOTOK:
-    if metricResponse.status.HasField("message"):
-      Log.warn("Received response from Tmaster: %s", metricResponse.status.message)
+  if response_data.status.status == common_pb2.NOTOK:
+    if response_data.status.HasField("message"):
+      Log.warn("Received response from Tmanager: %s", response_data.status.message)
 
-  # Form the response.
-  ret = {}
-  ret["starttime"] = start_time
-  ret["endtime"] = end_time
-  ret["component"] = component_name
-  ret["timeline"] = {}
-
+  timeline = {}
   # Loop through all the metrics
   # One instance corresponds to one metric, which can have
   # multiple IndividualMetrics for each metricname requested.
-  for metric in metricResponse.metric:
+  for metric in response_data.metric:
     instance = metric.instance_id
 
     # Loop through all individual metrics.
     for im in metric.metric:
       metricname = im.name
-      if metricname not in ret["timeline"]:
-        ret["timeline"][metricname] = {}
-      if instance not in ret["timeline"][metricname]:
-        ret["timeline"][metricname][instance] = {}
+      if metricname not in timeline:
+        timeline[metricname] = {}
+      if instance not in timeline[metricname]:
+        timeline[metricname][instance] = {}
 
       # We get minutely metrics.
       # Interval-values correspond to the minutely mark for which
       # this metric value corresponds to.
       for interval_value in im.interval_values:
-        ret["timeline"][metricname][instance][interval_value.interval.start] = interval_value.value
+        timeline[metricname][instance][interval_value.interval.start] = interval_value.value
 
-  raise tornado.gen.Return(ret)
+  return MetricsTimeline(
+      starttime=start_time,
+      endtime=end_time,
+      component=component_name,
+      timeline=timeline,
+  )

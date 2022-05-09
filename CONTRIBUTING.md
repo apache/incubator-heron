@@ -44,6 +44,18 @@ To bootstrap an IDEA project run the following from the root folder of the repo:
 ```bash
 $ ./scripts/setup-intellij.sh
 ```
+
+Alternatively, you may install the Bazel plugin from the Intellij Marketplace and utilize it to
+ automatically configure the IDE.
+
+1. File -> Import Bazel Project...
+2. Workspace: Select the root folder for the Heron codebase.
+3. Generate from BUILD file: select the BUILD file in the Heron source root directory.
+4. Finish.
+
+This will open up the Heron project and initiate a Bazel build. Once completed the IDE should be
+ fully configured.
+
 To bootstrap an Eclipse project fun the following from the root folder of the repo:
 
 ```bash

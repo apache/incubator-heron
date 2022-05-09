@@ -5,10 +5,7 @@ pex_pytest(
     size = "small",
     srcs = ["explorer_unittest.py"],
     reqs = [
-        "mock==1.0.1",
-        "py==1.4.34",
-        "pytest==3.2.2",
-        "unittest2==1.1.0",
+        "pytest==6.1.2",
     ],
     deps = [
         "//heron/common/src/python:common-py",

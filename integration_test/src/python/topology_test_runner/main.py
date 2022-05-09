@@ -34,7 +34,7 @@ from heron.statemgrs.src.python.zkstatemanager import ZkStateManager
 from heron.statemgrs.src.python.filestatemanager import FileStateManager
 
 # The location of default configure file
-DEFAULT_TEST_CONF_FILE = "integration_test/src/python/topology_test_runner/resources/test.json"
+DEFAULT_TEST_CONF_FILE = "resources/test.json"
 
 #seconds
 RETRY_ATTEMPTS = 50
@@ -111,7 +111,7 @@ class TopologyStructureResultChecker:
 
     if correct_topology:
       return status.TestSuccess(
-        "Topology %s result matches expected result" % self.topology_name)
+        f"Topology {self.topology_name} result matches expected result")
     else:
       raise status.TestFailure("Actual result did not match expected result")
 
@@ -119,8 +119,8 @@ class TopologyStructureResultChecker:
     """
     Parse JSON file and generate expected_nodes and expected_links
     """
-    expected_nodes = dict()
-    expected_links = dict()
+    expected_nodes = {}
+    expected_links = {}
     for bolt in expected_results["topology"]["bolts"]:
       name = bolt["comp"]["name"]
       if name not in expected_links:
@@ -140,8 +140,8 @@ class TopologyStructureResultChecker:
     """
     Parse protobuf messege and generate actual_nodes and actual_links
     """
-    actual_nodes = dict()
-    actual_links = dict()
+    actual_nodes = {}
+    actual_links = {}
     for bolt in actual_results.topology.bolts:
       name = bolt.comp.name
       if name not in actual_links:
@@ -178,7 +178,7 @@ class InstanceStateResultChecker(TopologyStructureResultChecker):
     topology_structure_check_result = TopologyStructureResultChecker.check_results(self)
     if isinstance(topology_structure_check_result, status.TestFailure):
       raise status.TestFailure("The actual topology graph structure does not match the expected one"
-                               + " for topology: %s" % self.topology_name)
+                               + f" for topology: {self.topology_name}")
     # check instance states, get the instance_state_check_result
     # if both above are isinstance(status.TestSuccess), return success, else return fail
     expected_result = self.instance_state_expected_result_handler.fetch_results()
@@ -237,12 +237,12 @@ class FileBasedExpectedResultsHandler:
     """
     try:
       if not os.path.exists(self.file_path):
-        raise status.TestFailure("Expected results file %s does not exist" % self.file_path)
+        raise status.TestFailure(f"Expected results file {self.file_path} does not exist")
       else:
         with open(self.file_path, "r") as expected_result_file:
           return expected_result_file.read().rstrip()
     except Exception as e:
-      raise status.TestFailure("Failed to read expected result file %s" % self.file_path, e)
+      raise status.TestFailure(f"Failed to read expected result file {self.file_path}", e)
 
 
 class ZkFileBasedActualResultsHandler:
@@ -270,8 +270,7 @@ class ZkFileBasedActualResultsHandler:
         state_mgr_config[0]["rootpath"],
         state_mgr_config[0]["tunnelhost"])
     else:
-      raise status.TestFailure("Unrecognized state manager type: %s"
-                               % state_mgr_config["type"])
+      raise status.TestFailure(f"Unrecognized state manager type: {state_mgr_config['type']}")
 
   def fetch_cur_pplan(self):
     try:
@@ -285,12 +284,10 @@ class ZkFileBasedActualResultsHandler:
           break
         time.sleep(RETRY_INTERVAL)
       else:
-        raise status.TestFailure("Fetching physical plan failed for %s topology"
-                                 % self.topology_name)
+        raise status.TestFailure(f"Fetching physical plan failed for {self.topology_name} topology")
       return pplan_string
     except Exception as e:
-      raise status.TestFailure("Fetching physical plan failed for %s topology"
-                               % self.topology_name, e)
+      raise status.TestFailure(f"Fetching physical plan failed for {self.topology_name} topology", e)
 
   def stop_state_mgr(self):
     self.state_mgr.stop()
@@ -308,9 +305,9 @@ class HttpBasedActualResultsHandler:
   def fetch_results(self) -> str:
     try:
       return self.fetch_from_server(self.server_host_port, self.topology_name,
-        'instance_state', '/stateResults/%s' % self.topology_name)
+        'instance_state', f'/stateResults/{self.topology_name}')
     except Exception as e:
-      raise status.TestFailure("Fetching instance state failed for %s topology" % self.topology_name, e)
+      raise status.TestFailure(f"Fetching instance state failed for {self.topology_name} topology", e)
 
   def fetch_from_server(self, server_host_port, topology_name, data_name, path) -> str:
     ''' Make a http get request to fetch actual results from http server '''
@@ -324,7 +321,7 @@ class HttpBasedActualResultsHandler:
           data_name, response.status, response.reason, response.read().decode())
         time.sleep(RETRY_INTERVAL)
 
-    raise status.TestFailure("Failed to fetch %s after %d attempts" % (data_name, RETRY_ATTEMPTS))
+    raise status.TestFailure(f"Failed to fetch {data_name} after {RETRY_ATTEMPTS} attempts")
 
   def get_http_response(self, server_host_port, path):
     ''' get HTTP response '''
@@ -338,7 +335,7 @@ class HttpBasedActualResultsHandler:
         time.sleep(RETRY_INTERVAL)
         continue
 
-    raise status.TestFailure("Failed to get HTTP Response after %d attempts" % RETRY_ATTEMPTS)
+    raise status.TestFailure(f"Failed to get HTTP Response after {RETRY_ATTEMPTS} attempts")
 
 #  Result handlers end
 
@@ -361,15 +358,14 @@ def run_topology_test(topology_name, classpath, results_checker,
   check_type):
   try:
     if check_type == 'checkpoint_state':
-      args = "-r http://%s/stateResults -t %s %s" % \
-             (http_server_host_port, topology_name, extra_topology_args)
+      args = f"-r http://{http_server_host_port}/stateResults -t {topology_name} {extra_topology_args}"
     else:
-      args = "-t %s %s" % (topology_name, extra_topology_args)
+      args = f"-t {topology_name} {extra_topology_args}"
     submit_topology(params.heron_cli_path, params.cli_config_path, params.cluster, params.role,
       params.env, params.tests_bin_path, classpath,
       params.release_package_uri, args)
   except Exception as e:
-    raise status.TestFailure("Failed to submit %s topology" % topology_name, e)
+    raise status.TestFailure(f"Failed to submit {topology_name} topology", e)
 
   logging.info("Successfully submitted %s topology", topology_name)
 
@@ -398,7 +394,7 @@ def run_topology_test(topology_name, classpath, results_checker,
     return results_checker.check_results()
 
   except Exception as e:
-    raise status.TestFailure("Checking result failed for %s topology" % topology_name, e)
+    raise status.TestFailure(f"Checking result failed for {topology_name} topology", e)
   finally:
     kill_topology(params.heron_cli_path, params.cli_config_path, params.cluster,
       params.role, params.env, topology_name)
@@ -412,12 +408,10 @@ def submit_topology(heron_cli_path, cli_config_path, cluster, role,
   """
   Submit topology using heron-cli
   """
-  cmd = "%s submit --config-path=%s %s %s %s %s" % \
-        (heron_cli_path, cli_config_path, cluster_token(cluster, role, env),
-        jar_path, classpath, args)
+  cmd = f"{heron_cli_path} submit --config-path={cli_config_path} {cluster_token(cluster, role, env)} {jar_path} {classpath} {args}"
 
   if pkg_uri is not None:
-    cmd = "%s --config-property heron.package.core.uri='%s'" %(cmd, pkg_uri)
+    cmd = f"{cmd} --config-property heron.package.core.uri='{pkg_uri}'"
 
   logging.info("Submitting topology: %s", cmd)
 
@@ -427,13 +421,11 @@ def submit_topology(heron_cli_path, cli_config_path, cluster, role,
 
 def update_topology(heron_cli_path, cli_config_path, cluster,
   role, env, topology_name, update_args):
-  cmd = "%s update --config-path=%s %s %s %s --verbose" % \
-        (heron_cli_path, cli_config_path,
-        cluster_token(cluster, role, env), update_args, topology_name)
+  cmd = f"{heron_cli_path} update --config-path={cli_config_path} {cluster_token(cluster, role, env)} {update_args} {topology_name} --verbose"
 
   logging.info("Update topology: %s", cmd)
   if os.system(cmd) != 0:
-    raise status.TestFailure("Failed to update topology %s" % topology_name)
+    raise status.TestFailure(f"Failed to update topology {topology_name}")
 
   logging.info("Successfully updated topology %s", topology_name)
 
@@ -441,32 +433,26 @@ def update_topology(heron_cli_path, cli_config_path, cluster,
 def deactivate_topology(heron_cli_path, cli_config_path, cluster,
     role, env, topology_name, deactivate):
   if deactivate:
-    cmd = "%s deactivate --config-path=%s %s %s" % \
-          (heron_cli_path, cli_config_path,
-          cluster_token(cluster, role, env), topology_name)
+    cmd = f"{heron_cli_path} deactivate --config-path={cli_config_path} {cluster_token(cluster, role, env)} {topology_name}"
     logging.info("deactivate topology: %s", cmd)
     if os.system(cmd) != 0:
-      raise status.TestFailure("Failed to deactivate topology %s" % topology_name)
+      raise status.TestFailure(f"Failed to deactivate topology {topology_name}")
     logging.info("Successfully deactivate topology %s", topology_name)
   else:
-    cmd = "%s activate --config-path=%s %s %s" % \
-          (heron_cli_path, cli_config_path,
-          cluster_token(cluster, role, env), topology_name)
+    cmd = f"{heron_cli_path} activate --config-path={cli_config_path} {cluster_token(cluster, role, env)} {topology_name}"
     logging.info("activate topology: %s", cmd)
     if os.system(cmd) != 0:
-      raise status.TestFailure("Failed to activate topology %s" % topology_name)
+      raise status.TestFailure(f"Failed to activate topology {topology_name}")
     logging.info("Successfully activate topology %s", topology_name)
 
 
 def restart_topology(heron_cli_path, cli_config_path, cluster,
     role, env, topology_name, container_id):
-  cmd = "%s restart --config-path=%s %s %s %s" % \
-        (heron_cli_path, cli_config_path,
-        cluster_token(cluster, role, env), topology_name, str(container_id))
+  cmd = f"{heron_cli_path} restart --config-path={cli_config_path} {cluster_token(cluster, role, env)} {topology_name} {str(container_id)}"
 
   logging.info("Kill container %s", cmd)
   if os.system(cmd) != 0:
-    raise status.TestFailure("Failed to kill container %s" % str(container_id))
+    raise status.TestFailure(f"Failed to kill container {str(container_id)}")
 
   logging.info("Successfully kill container %s", str(container_id))
 
@@ -475,12 +461,11 @@ def kill_topology(heron_cli_path, cli_config_path, cluster, role, env, topology_
   """
   Kill a topology using heron-cli
   """
-  cmd = "%s kill --config-path=%s %s %s" % \
-        (heron_cli_path, cli_config_path, cluster_token(cluster, role, env), topology_name)
+  cmd = f"{heron_cli_path} kill --config-path={cli_config_path} {cluster_token(cluster, role, env)} {topology_name}"
 
   logging.info("Killing topology: %s", cmd)
   if os.system(cmd) != 0:
-    raise status.TestFailure("Failed to kill topology %s" % topology_name)
+    raise status.TestFailure(f"Failed to kill topology {topology_name}")
 
   logging.info("Successfully killed topology %s", topology_name)
 
@@ -488,7 +473,7 @@ def kill_topology(heron_cli_path, cli_config_path, cluster, role, env, topology_
 def cluster_token(cluster, role, env):
   if cluster == "local" or cluster == "localzk":
     return cluster
-  return "%s/%s/%s" % (cluster, role, env)
+  return f"{cluster}/{role}/{env}"
 
 #  Topology manipulations end
 
@@ -500,7 +485,7 @@ def run_topology_tests(conf, test_args):
   timestamp = time.strftime('%Y%m%d%H%M%S')
   run_fingerprint = f"{timestamp}-{random.randint(0, 2**16):04x}"
 
-  http_server_host_port = "%s:%d" % (test_args.http_hostname, test_args.http_port)
+  http_server_host_port = f"{test_args.http_hostname}:{test_args.http_port}"
 
   if test_args.tests_bin_path.endswith("scala-integration-tests.jar"):
     test_topologies = filter_test_topologies(conf["scalaTopologies"], test_args.test_topology_pattern)
@@ -512,7 +497,7 @@ def run_topology_tests(conf, test_args):
     test_topologies = filter_test_topologies(conf["pythonTopologies"], test_args.test_topology_pattern)
     topology_classpath_prefix = ""
   else:
-    raise ValueError("Unrecognized binary file type: %s" % test_args.tests_bin_path)
+    raise ValueError(f"Unrecognized binary file type: {test_args.tests_bin_path}")
 
   processing_type = conf["processingType"]
 
@@ -565,11 +550,8 @@ def run_topology_tests(conf, test_args):
       lock.release()
 
   test_threads = []
-  for i, topology_conf in enumerate(test_topologies, 1):
-    # this name has to be valid for all tested schedullers, state managers, etc.
-    topology_name = f"run-{run_fingerprint}-test-{i:03}"
-    # TODO: make sure logs describe the test/topology that fails, as now topology_name is opaque
-    # topology_conf["topologyName"]
+  for topology_conf in test_topologies:
+    topology_name = f"{timestamp}_{topology_conf['topologyName']}_{str(uuid.uuid4())}"
     classpath = topology_classpath_prefix + topology_conf["classPath"]
 
     update_args = ""
@@ -584,7 +566,7 @@ def run_topology_tests(conf, test_args):
       restart_args = True
 
     if "topologyArgs" in topology_conf:
-      topology_args = "%s %s" % (topology_args, topology_conf["topologyArgs"])
+      topology_args = f"{topology_args} {topology_conf['topologyArgs']}"
 
     expected_topo_result_file_path = \
       test_args.topologies_path + "/" + topology_conf["expectedTopoResultRelativePath"]
@@ -628,7 +610,7 @@ def load_result_checker(check_type, topology_name,
       expected_instance_state_result_handler,
       actual_instance_state_result_handler)
   else:
-    status.TestFailure("Unrecognized check type : %s", check_type)
+    status.TestFailure(f"Unrecognized check type : {check_type}")
 
 
 def main():
@@ -670,17 +652,17 @@ def main():
   tests_start_time = int(time.time())
   run_topology_tests(conf, args)
   total = len(failures) + len(successes)
-  logging.info("Total integration topology test time = %ss" % (int(time.time()) - tests_start_time))
+  logging.info("Total integration topology test time = %s s", int(time.time()) - tests_start_time)
 
   if not failures:
     logging.info("SUCCESS: %s (all) tests passed:", len(successes))
     for test in successes:
-      logging.info("  - %s: %s", ("[%ss]" % test[1]).ljust(8), test[0])
+      logging.info("  - %s: %s", (f"[{test[1]}s]").ljust(8), test[0])
     sys.exit(0)
   else:
     logging.error("FAILURE: %s/%s tests failed:", len(failures), total)
     for test in failures:
-      logging.error("  - %s: %s", ("[%ss]" % test[1]).ljust(8), test[0])
+      logging.error("  - %s: %s", (f"[{test[1]}s]").ljust(8), test[0])
     sys.exit(1)
 
 if __name__ == '__main__':

@@ -76,7 +76,7 @@ nomad_sdk_deps = [
     "@maven//:com_fasterxml_jackson_core_jackson_databind",
     "@maven//:com_google_code_findbugs_jsr305",
     "@maven//:commons_codec_commons_codec",
-    "@maven//:commons_logging_commons_logging",
+    "@maven//:org_slf4j_jcl_over_slf4j",
     "@maven//:org_apache_httpcomponents_httpclient",
     "@maven//:org_apache_httpcomponents_httpcore",
     "@maven//:org_bouncycastle_bcpkix_jdk15on",
@@ -192,7 +192,9 @@ java_tests(
 java_library(
     name = "kubernetes-tests",
     srcs = glob(["**/kubernetes/*.java"]),
-    deps = scheduler_deps_files + kubernetes_deps_files,
+    deps = scheduler_deps_files + kubernetes_deps_files + [
+        "@maven//:org_apache_commons_commons_collections4",
+    ],
 )
 
 java_tests(
@@ -202,6 +204,9 @@ java_tests(
         "org.apache.heron.scheduler.kubernetes.KubernetesControllerTest",
         "org.apache.heron.scheduler.kubernetes.KubernetesLauncherTest",
         "org.apache.heron.scheduler.kubernetes.VolumesTests",
+        "org.apache.heron.scheduler.kubernetes.KubernetesContextTest",
+        "org.apache.heron.scheduler.kubernetes.V1ControllerTest",
+        "org.apache.heron.scheduler.kubernetes.KubernetesUtilsTest",
     ],
     runtime_deps = [":kubernetes-tests"],
 )

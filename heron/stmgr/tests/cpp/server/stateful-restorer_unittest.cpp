@@ -346,7 +346,7 @@ TEST(StatefulRestorer, deadinstances) {
   // Send notification that some tasks have recovered
   EXPECT_GT(local_tasks.size(), 1);
   bool first = true;
-  int32_t troublesome_task;
+  int32_t troublesome_task = 0;
   for (auto task : local_tasks) {
     if (first) {
       first = false;
@@ -426,7 +426,7 @@ TEST(StatefulRestorer, deadckptmgr) {
   // Send notification that some tasks have recovered
   EXPECT_GT(local_tasks.size(), 1);
   bool first = true;
-  int32_t troublesome_task;
+  int32_t troublesome_task = 0;
   // ckpt delivers some checkpoints
   for (auto task : local_tasks) {
     if (first) {

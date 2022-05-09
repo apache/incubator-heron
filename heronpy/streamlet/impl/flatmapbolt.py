@@ -19,7 +19,7 @@
 #  under the License.
 
 """module for flat_map bolt: FlatMapBolt"""
-import collections
+from collections.abc import Iterable
 from heronpy.api.bolt.bolt import Bolt
 from heronpy.api.state.stateful_component import StatefulComponent
 from heronpy.api.component.component_spec import GlobalStreamId
@@ -42,7 +42,7 @@ class FlatMapBolt(Bolt, StatefulComponent, StreamletBoltBase):
     pass
 
   def initialize(self, config, context):
-    self.logger.debug("FlatMapBolt's Component-specific config: \n%s" % str(config))
+    self.logger.debug("FlatMapBolt's Component-specific config: \n%s", str(config))
     self.processed = 0
     self.emitted = 0
     if FlatMapBolt.FUNCTION in config:
@@ -52,7 +52,7 @@ class FlatMapBolt(Bolt, StatefulComponent, StreamletBoltBase):
 
   def process(self, tup):
     retval = self.flatmap_function(tup.values[0])
-    if isinstance(retval, collections.Iterable):
+    if isinstance(retval, Iterable):
       for value in retval:
         self.emit([value], stream='output')
         self.emitted += 1
@@ -66,7 +66,7 @@ class FlatMapBolt(Bolt, StatefulComponent, StreamletBoltBase):
 class FlatMapStreamlet(Streamlet):
   """FlatMapStreamlet"""
   def __init__(self, flatmap_function, parent):
-    super(FlatMapStreamlet, self).__init__()
+    super().__init__()
     if not callable(flatmap_function):
       raise RuntimeError("FlatMap function has to be callable")
     if not isinstance(parent, Streamlet):

@@ -58,11 +58,10 @@ run_build() {
       break
     fi
   done
-  echo $DOCKER_SQUASH
 
   DOCKER_FILE="$SCRATCH_DIR/dist/Dockerfile.dist.$TARGET_PLATFORM"
-  DOCKER_TAG="heron/heron:$HERON_VERSION"
-  DOCKER_LATEST_TAG="heron/heron:latest"
+  DOCKER_TAG="apache/heron:$HERON_VERSION"
+  DOCKER_LATEST_TAG="apache/heron:latest"
 
   setup_scratch_dir $SCRATCH_DIR
 
@@ -74,16 +73,16 @@ run_build() {
 
   echo "Building docker image with tag:$DOCKER_TAG"
   if [ $DOCKER_SQUASH = true ]; then
-    docker build --squash -t "$DOCKER_TAG" -t "$DOCKER_LATEST_TAG" -f "$DOCKER_FILE" "$SCRATCH_DIR"
+    docker buildx build --squash -t "$DOCKER_TAG" -t "$DOCKER_LATEST_TAG" -f "$DOCKER_FILE" "$SCRATCH_DIR"
   else
-    docker build -t "$DOCKER_TAG" -t "$DOCKER_LATEST_TAG" -f "$DOCKER_FILE" "$SCRATCH_DIR"
+    docker buildx build -t "$DOCKER_TAG" -t "$DOCKER_LATEST_TAG" -f "$DOCKER_FILE" "$SCRATCH_DIR"
   fi
   # save the image as a tar file
   DOCKER_IMAGE_FILE="$OUTPUT_DIRECTORY/heron-docker-$HERON_VERSION-$TARGET_PLATFORM.tar"
 
   echo "Saving docker image to $DOCKER_IMAGE_FILE"
   docker save -o $DOCKER_IMAGE_FILE $DOCKER_TAG
-  gzip $DOCKER_IMAGE_FILE
+  pigz $DOCKER_IMAGE_FILE
 } 
 
 case $# in
@@ -96,13 +95,13 @@ case $# in
     echo "Usage: $0 <platform> <version_string> <artifact-directory> [-s|--squash]"
     echo "  "
     echo "Argument options:"
-    echo "  <platform>: darwin, debian9, debian10, ubuntu14.04, ubuntu18.04, centos7"
+    echo "  <platform>: darwin, debian11, ubuntu20.04, rocky8"
     echo "  <version_string>: Version of Heron build, e.g. v0.17.5.1-rc"
     echo "  <artifact-directory>: Location of compiled Heron artifact"
     echo "  [-s|--squash]: Enables using Docker experimental feature --squash"
     echo "  "
     echo "Example:"
-    echo "  ./build-docker.sh ubuntu18.04 0.12.0 ~/ubuntu"
+    echo "  ./build-docker.sh ubuntu20.04 0.12.0 ~/ubuntu"
     echo "  "
     exit 1
     ;;

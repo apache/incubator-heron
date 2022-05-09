@@ -45,8 +45,8 @@ import org.apache.heron.spi.packing.PackingPlanProtoSerializer;
 import org.apache.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import org.apache.heron.spi.utils.NetworkUtils;
 import org.apache.heron.spi.utils.ReflectionUtils;
-import org.apache.heron.spi.utils.TMasterException;
-import org.apache.heron.spi.utils.TMasterUtils;
+import org.apache.heron.spi.utils.TManagerException;
+import org.apache.heron.spi.utils.TManagerUtils;
 
 public class RuntimeManagerRunner {
   // Internal config keys. They are used internally only to pass command line arguments
@@ -80,7 +80,7 @@ public class RuntimeManagerRunner {
   }
 
   public void call()
-      throws TMasterException, TopologyRuntimeManagementException,
+      throws TManagerException, TopologyRuntimeManagementException,
       PackingException, UpdateDryRunResponse {
     // execute the appropriate command
     String topologyName = Context.topologyName(config);
@@ -108,24 +108,24 @@ public class RuntimeManagerRunner {
   /**
    * Handler to activate a topology
    */
-  private void activateTopologyHandler(String topologyName) throws TMasterException {
+  private void activateTopologyHandler(String topologyName) throws TManagerException {
     assert !potentialStaleExecutionData;
     NetworkUtils.TunnelConfig tunnelConfig =
         NetworkUtils.TunnelConfig.build(config, NetworkUtils.HeronSystem.SCHEDULER);
-    TMasterUtils.transitionTopologyState(topologyName,
-        TMasterUtils.TMasterCommand.ACTIVATE, Runtime.schedulerStateManagerAdaptor(runtime),
+    TManagerUtils.transitionTopologyState(topologyName,
+        TManagerUtils.TManagerCommand.ACTIVATE, Runtime.schedulerStateManagerAdaptor(runtime),
         TopologyAPI.TopologyState.PAUSED, TopologyAPI.TopologyState.RUNNING, tunnelConfig);
   }
 
   /**
    * Handler to deactivate a topology
    */
-  private void deactivateTopologyHandler(String topologyName) throws TMasterException {
+  private void deactivateTopologyHandler(String topologyName) throws TManagerException {
     assert !potentialStaleExecutionData;
     NetworkUtils.TunnelConfig tunnelConfig =
         NetworkUtils.TunnelConfig.build(config, NetworkUtils.HeronSystem.SCHEDULER);
-    TMasterUtils.transitionTopologyState(topologyName,
-        TMasterUtils.TMasterCommand.DEACTIVATE, Runtime.schedulerStateManagerAdaptor(runtime),
+    TManagerUtils.transitionTopologyState(topologyName,
+        TManagerUtils.TManagerCommand.DEACTIVATE, Runtime.schedulerStateManagerAdaptor(runtime),
         TopologyAPI.TopologyState.RUNNING, TopologyAPI.TopologyState.PAUSED, tunnelConfig);
   }
 
@@ -141,16 +141,16 @@ public class RuntimeManagerRunner {
             .setTopologyName(topologyName)
             .setContainerIndex(containerId)
             .build();
-    // If we restart the container including TMaster, wee need to clean TMasterLocation,
-    // since when starting up, TMaster expects no other existing TMaster,
-    // i.e. TMasterLocation does not exist
+    // If we restart the container including TManager, wee need to clean TManagerLocation,
+    // since when starting up, TManager expects no other existing TManager,
+    // i.e. TManagerLocation does not exist
     if (containerId == -1 || containerId == 0) {
       // get the instance of state manager to clean state
       SchedulerStateManagerAdaptor stateManager = Runtime.schedulerStateManagerAdaptor(runtime);
-      Boolean result = stateManager.deleteTMasterLocation(topologyName);
+      Boolean result = stateManager.deleteTManagerLocation(topologyName);
       if (result == null || !result) {
         throw new TopologyRuntimeManagementException(
-            "Failed to clear TMaster location. Check whether TMaster set it correctly.");
+            "Failed to clear TManager location. Check whether TManager set it correctly.");
       }
     }
 
@@ -314,17 +314,17 @@ public class RuntimeManagerRunner {
 
   @VisibleForTesting
   void updateTopologyUserRuntimeConfig(String topologyName, String userRuntimeConfig)
-      throws TopologyRuntimeManagementException, TMasterException {
+      throws TopologyRuntimeManagementException, TManagerException {
     String[] runtimeConfigs = parseUserRuntimeConfigParam(userRuntimeConfig);
     if (runtimeConfigs.length == 0) {
       throw new TopologyRuntimeManagementException("No user config is found");
     }
 
-    // Send user runtime config to TMaster
+    // Send user runtime config to TManager
     NetworkUtils.TunnelConfig tunnelConfig =
         NetworkUtils.TunnelConfig.build(config, NetworkUtils.HeronSystem.SCHEDULER);
-    TMasterUtils.sendRuntimeConfig(topologyName,
-                                   TMasterUtils.TMasterCommand.RUNTIME_CONFIG_UPDATE,
+    TManagerUtils.sendRuntimeConfig(topologyName,
+                                   TManagerUtils.TManagerCommand.RUNTIME_CONFIG_UPDATE,
                                    Runtime.schedulerStateManagerAdaptor(runtime),
                                    runtimeConfigs,
                                    tunnelConfig);
@@ -333,7 +333,7 @@ public class RuntimeManagerRunner {
   /**
    * Clean all states of a heron topology
    * 1. Topology def and ExecutionState are required to exist to delete
-   * 2. TMasterLocation, SchedulerLocation and PhysicalPlan may not exist to delete
+   * 2. TManagerLocation, SchedulerLocation and PhysicalPlan may not exist to delete
    */
   protected void cleanState(
       String topologyName,
@@ -342,10 +342,10 @@ public class RuntimeManagerRunner {
 
     Boolean result;
 
-    result = statemgr.deleteTMasterLocation(topologyName);
+    result = statemgr.deleteTManagerLocation(topologyName);
     if (result == null || !result) {
       throw new TopologyRuntimeManagementException(
-          "Failed to clear TMaster location. Check whether TMaster set it correctly.");
+          "Failed to clear TManager location. Check whether TManager set it correctly.");
     }
 
     result = statemgr.deleteMetricsCacheLocation(topologyName);
@@ -363,7 +363,7 @@ public class RuntimeManagerRunner {
     result = statemgr.deletePhysicalPlan(topologyName);
     if (result == null || !result) {
       throw new TopologyRuntimeManagementException(
-          "Failed to clear physical plan. Check whether TMaster set it correctly.");
+          "Failed to clear physical plan. Check whether TManager set it correctly.");
     }
 
     result = statemgr.deleteSchedulerLocation(topologyName);

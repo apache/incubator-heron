@@ -41,9 +41,9 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.heron.common.basics.Communicator;
+import org.apache.heron.common.basics.ExecutorLooper;
 import org.apache.heron.common.basics.NIOLooper;
 import org.apache.heron.common.basics.SingletonRegistry;
-import org.apache.heron.common.basics.SlaveLooper;
 import org.apache.heron.common.basics.SysUtils;
 import org.apache.heron.common.config.SystemConfig;
 import org.apache.heron.common.utils.logging.ErrorReportLoggingHandler;
@@ -62,7 +62,7 @@ public class HeronInstance {
   private static final int NUM_THREADS = 2;
 
   private final NIOLooper gatewayLooper;
-  private final SlaveLooper slaveLooper;
+  private final ExecutorLooper executorLooper;
 
   // Only one outStreamQueue, which is responsible for both control tuples and data tuples
   private final Communicator<Message> outStreamQueue;
@@ -71,7 +71,7 @@ public class HeronInstance {
   // For spout, it will buffer Control tuple, while for bolt, it will buffer data tuple.
   private final Communicator<Message> inStreamQueue;
 
-  // This queue is used to pass Control Message from Gateway to Slave
+  // This queue is used to pass Control Message from Gateway to Executor
   // TODO:- currently it would just pass the PhysicalPlanHelper
   // TODO:- we might handle more types of ControlMessage in future
   private final Communicator<InstanceControlMsg> inControlQueue;
@@ -82,7 +82,7 @@ public class HeronInstance {
   private final List<Communicator<Metrics.MetricPublisherPublishMessage>> outMetricsQueues;
 
   private final Gateway gateway;
-  private final Slave slave;
+  private final Executor executor;
 
   private final ExecutorService threadsPool;
 
@@ -114,16 +114,16 @@ public class HeronInstance {
 
     // Two WakeableLooper
     gatewayLooper = new NIOLooper();
-    slaveLooper = new SlaveLooper();
+    executorLooper = new ExecutorLooper();
 
     // Add the task on exit
     gatewayLooper.addTasksOnExit(new GatewayExitTask());
-    slaveLooper.addTasksOnExit(new SlaveExitTask());
+    executorLooper.addTasksOnExit(new ExecutorExitTask());
 
     // For stream
-    inStreamQueue = new Communicator<Message>(gatewayLooper, slaveLooper);
-    outStreamQueue = new Communicator<Message>(slaveLooper, gatewayLooper);
-    inControlQueue = new Communicator<InstanceControlMsg>(gatewayLooper, slaveLooper);
+    inStreamQueue = new Communicator<Message>(gatewayLooper, executorLooper);
+    outStreamQueue = new Communicator<Message>(executorLooper, gatewayLooper);
+    inControlQueue = new Communicator<InstanceControlMsg>(gatewayLooper, executorLooper);
 
     // Now for metrics
     // No need in queues for metrics
@@ -135,21 +135,21 @@ public class HeronInstance {
         systemConfig.getInstanceTuningExpectedMetricsWriteQueueSize(),
         systemConfig.getInstanceTuningCurrentSampleWeight());
 
-    Communicator<Metrics.MetricPublisherPublishMessage> slaveMetricsOut =
-        new Communicator<Metrics.MetricPublisherPublishMessage>(slaveLooper, gatewayLooper);
-    slaveMetricsOut.init(systemConfig.getInstanceInternalMetricsWriteQueueCapacity(),
+    Communicator<Metrics.MetricPublisherPublishMessage> executorMetricsOut =
+        new Communicator<Metrics.MetricPublisherPublishMessage>(executorLooper, gatewayLooper);
+    executorMetricsOut.init(systemConfig.getInstanceInternalMetricsWriteQueueCapacity(),
         systemConfig.getInstanceTuningExpectedMetricsWriteQueueSize(),
         systemConfig.getInstanceTuningCurrentSampleWeight());
 
     outMetricsQueues.add(gatewayMetricsOut);
-    outMetricsQueues.add(slaveMetricsOut);
+    outMetricsQueues.add(executorMetricsOut);
 
     // We will new these two Runnable
     this.gateway =
         new Gateway(topologyName, topologyId, instance, streamPort, metricsPort,
             gatewayLooper, inStreamQueue, outStreamQueue, inControlQueue, outMetricsQueues);
-    this.slave = new Slave(slaveLooper, inStreamQueue, outStreamQueue,
-        inControlQueue, slaveMetricsOut);
+    this.executor = new Executor(executorLooper, inStreamQueue, outStreamQueue,
+        inControlQueue, executorMetricsOut);
 
     // New the ThreadPool and register it inside the SingletonRegistry
     threadsPool = Executors.newFixedThreadPool(NUM_THREADS);
@@ -295,7 +295,7 @@ public class HeronInstance {
     Level loggingLevel = Level.INFO;
     String loggingDir = systemConfig.getHeronLoggingDirectory();
 
-    // Log to file and TMaster
+    // Log to file and TManager
     LoggingHelper.loggerInit(loggingLevel, true);
     LoggingHelper.addLoggingHandler(
         LoggingHelper.getFileHandler(instanceId, loggingDir, true,
@@ -328,7 +328,7 @@ public class HeronInstance {
 
     // Get the Thread Pool and run it
     threadsPool.execute(gateway);
-    threadsPool.execute(slave);
+    threadsPool.execute(executor);
   }
 
   public void stop() {
@@ -394,10 +394,10 @@ public class HeronInstance {
       exitExecutor.execute(new ForceExitTask(exited, systemConfig.getInstanceForceExitTimeout()));
 
       // Clean up
-      if (thread.getName().equals(ThreadNames.THREAD_SLAVE_NAME)) {
-        // Run the SlaveExitTask here since the thread throw exceptions
+      if (thread.getName().equals(ThreadNames.THREAD_EXECUTOR_NAME)) {
+        // Run the ExecutorExitTask here since the thread throw exceptions
         // and this Task would never be invoked on exit in future
-        new SlaveExitTask().run();
+        new ExecutorExitTask().run();
 
         // And exit the GatewayLooper
         gatewayLooper.exitLoop();
@@ -424,12 +424,12 @@ public class HeronInstance {
     }
   }
 
-  // The Task to execute on Slave thread's exit
-  public class SlaveExitTask implements Runnable {
+  // The Task to execute on Executor thread's exit
+  public class ExecutorExitTask implements Runnable {
 
     @Override
     public void run() {
-      SysUtils.closeIgnoringExceptions(slave);
+      SysUtils.closeIgnoringExceptions(executor);
     }
   }
 

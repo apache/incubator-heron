@@ -4,6 +4,7 @@
     "Getting Started": [
       "getting-started-local-single-node",
       "getting-started-migrate-storm-topologies",
+      "getting-started-docker",
       "getting-started-troubleshooting-guide"
     ],
     "Deployment": [
@@ -23,7 +24,6 @@
     ],
     "Guides": [
       "guides-effectively-once-java-topologies",
-      "guides-python-topologies",
       "guides-data-model",
       "guides-tuple-serialization",
       "guides-ui-guide",
@@ -53,10 +53,10 @@
     "Schedulers": [
       "schedulers-k8s-by-hand",
       "schedulers-k8s-with-helm",
+      "schedulers-k8s-execution-environment",
       "schedulers-aurora-cluster",
       "schedulers-aurora-local",
       "schedulers-local",
-      "schedulers-standalone",
       "schedulers-nomad",
       "schedulers-mesos-local-mac",
       "schedulers-slurm",
@@ -68,7 +68,7 @@
       "cluster-config-instance",
       "cluster-config-metrics",
       "cluster-config-stream",
-      "cluster-config-tmaster"
+      "cluster-config-tmanager"
     ],
     "Observability": [
       "observability-prometheus",

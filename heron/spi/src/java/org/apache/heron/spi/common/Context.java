@@ -58,6 +58,10 @@ public class Context {
     return cfg.getBooleanValue(Key.VERBOSE);
   }
 
+  public static Boolean verboseGC(Config cfg) {
+    return cfg.getBooleanValue(Key.VERBOSE_GC);
+  }
+
   public static String buildVersion(Config cfg) {
     return cfg.getStringValue(Key.BUILD_VERSION);
   }
@@ -326,8 +330,8 @@ public class Context {
     return cfg.getStringValue(Key.STMGR_BINARY);
   }
 
-  public static String tmasterBinary(Config cfg) {
-    return cfg.getStringValue(Key.TMASTER_BINARY);
+  public static String tmanagerBinary(Config cfg) {
+    return cfg.getStringValue(Key.TMANAGER_BINARY);
   }
 
   public static String shellBinary(Config cfg) {

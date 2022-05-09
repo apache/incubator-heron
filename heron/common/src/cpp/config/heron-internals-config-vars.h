@@ -51,9 +51,9 @@ class HeronInternalsConfigVars {
   // The maximum number of log files
   static const sp_string HERON_LOGGING_MAXIMUM_FILES;
 
-  // The interval in seconds after which to check if the tmaster location
+  // The interval in seconds after which to check if the tmanager location
   // has been fetched or not
-  static const sp_string HERON_CHECK_TMASTER_LOCATION_INTERVAL_SEC;
+  static const sp_string HERON_CHECK_TMANAGER_LOCATION_INTERVAL_SEC;
 
   // The interval in seconds to prune logging files in C+++
   static const sp_string HERON_LOGGING_PRUNE_INTERVAL_SEC;
@@ -92,45 +92,45 @@ class HeronInternalsConfigVars {
   // The interval in seconds to flush cached metircs to scribe
   static const sp_string HERON_METRICSMGR_SCRIBE_PERIODIC_FLUSH_INTERVAL_SEC;
 
-  // The interval in seconds to reconnect to tmaster if a connection failure happens
-  static const sp_string HERON_METRICSMGR_RECONNECT_TMASTER_INTERVAL_SEC;
+  // The interval in seconds to reconnect to tmanager if a connection failure happens
+  static const sp_string HERON_METRICSMGR_RECONNECT_TMANAGER_INTERVAL_SEC;
 
   // The maximum packet size in MB of metrics manager's network options
   static const sp_string HERON_METRICSMGR_NETWORK_OPTIONS_MAXIMUM_PACKET_MB;
 
   /**
-  * HERON_TMASTER_* configs are for the metrics manager
+  * HERON_TMANAGER_* configs are for the metrics manager
   **/
 
-  // The maximum interval in minutes of metrics to be kept in tmaster
-  static const sp_string HERON_TMASTER_METRICS_COLLECTOR_MAXIMUM_INTERVAL_MIN;
+  // The maximum interval in minutes of metrics to be kept in tmanager
+  static const sp_string HERON_TMANAGER_METRICS_COLLECTOR_MAXIMUM_INTERVAL_MIN;
 
-  // The maximum time to retry to establish the tmaster
-  static const sp_string HERON_TMASTER_ESTABLISH_RETRY_TIMES;
+  // The maximum time to retry to establish the tmanager
+  static const sp_string HERON_TMANAGER_ESTABLISH_RETRY_TIMES;
 
-  // The interval to retry to establish the tmaster
-  static const sp_string HERON_TMASTER_ESTABLISH_RETRY_INTERVAL_SEC;
+  // The interval to retry to establish the tmanager
+  static const sp_string HERON_TMANAGER_ESTABLISH_RETRY_INTERVAL_SEC;
 
-  // The maximum packet size in MB of tmaster's network options for stmgrs to connect to
-  static const sp_string HERON_TMASTER_NETWORK_MASTER_OPTIONS_MAXIMUM_PACKET_MB;
+  // The maximum packet size in MB of tmanager's network options for stmgrs to connect to
+  static const sp_string HERON_TMANAGER_NETWORK_SERVER_OPTIONS_MAXIMUM_PACKET_MB;
 
-  // The maximum packet size in MB of tmaster's network options for scheduler to connect to
-  static const sp_string HERON_TMASTER_NETWORK_CONTROLLER_OPTIONS_MAXIMUM_PACKET_MB;
+  // The maximum packet size in MB of tmanager's network options for scheduler to connect to
+  static const sp_string HERON_TMANAGER_NETWORK_CONTROLLER_OPTIONS_MAXIMUM_PACKET_MB;
 
-  // The maximum packet size in MB of tmaster's network options for stat queries
-  static const sp_string HERON_TMASTER_NETWORK_STATS_OPTIONS_MAXIMUM_PACKET_MB;
+  // The maximum packet size in MB of tmanager's network options for stat queries
+  static const sp_string HERON_TMANAGER_NETWORK_STATS_OPTIONS_MAXIMUM_PACKET_MB;
 
-  // The inteval for tmaster to purge metrics from socket
-  static const sp_string HERON_TMASTER_METRICS_COLLECTOR_PURGE_INTERVAL_SEC;
+  // The inteval for tmanager to purge metrics from socket
+  static const sp_string HERON_TMANAGER_METRICS_COLLECTOR_PURGE_INTERVAL_SEC;
 
   // The maximum # of exception to be stored in tmetrics collector, to prevent potential OOM
-  static const sp_string HERON_TMASTER_METRICS_COLLECTOR_MAXIMUM_EXCEPTION;
+  static const sp_string HERON_TMANAGER_METRICS_COLLECTOR_MAXIMUM_EXCEPTION;
 
-  // Whether tmaster's metrics server should bind on all interfaces
-  static const sp_string HERON_TMASTER_METRICS_NETWORK_BINDALLINTERFACES;
+  // Whether tmanager's metrics server should bind on all interfaces
+  static const sp_string HERON_TMANAGER_METRICS_NETWORK_BINDALLINTERFACES;
 
   // The timeout in seconds for stream mgr, compared with (current time - last heartbeat time)
-  static const sp_string HERON_TMASTER_STMGR_STATE_TIMEOUT_SEC;
+  static const sp_string HERON_TMANAGER_STMGR_STATE_TIMEOUT_SEC;
 
   /**
   * HERON_STREAMMGR_* configs are for the stream manager
@@ -153,16 +153,16 @@ class HeronInternalsConfigVars {
   static const sp_string HERON_STREAMMGR_CLIENT_RECONNECT_INTERVAL_SEC;
 
   // The reconnect interval to tamster in second for stream manager client
-  static const sp_string HERON_STREAMMGR_CLIENT_RECONNECT_TMASTER_INTERVAL_SEC;
+  static const sp_string HERON_STREAMMGR_CLIENT_RECONNECT_TMANAGER_INTERVAL_SEC;
 
-  // The max reconnect attempts to tmaster for stream manager client
-  static const sp_string HERON_STREAMMGR_CLIENT_RECONNECT_TMASTER_MAX_ATTEMPTS;
+  // The max reconnect attempts to tmanager for stream manager client
+  static const sp_string HERON_STREAMMGR_CLIENT_RECONNECT_TMANAGER_MAX_ATTEMPTS;
 
   // The maximum packet size in MB of stream manager's network options
   static const sp_string HERON_STREAMMGR_NETWORK_OPTIONS_MAXIMUM_PACKET_MB;
 
   // The interval in seconds to send heartbeat
-  static const sp_string HERON_STREAMMGR_TMASTER_HEARTBEAT_INTERVAL_SEC;
+  static const sp_string HERON_STREAMMGR_TMANAGER_HEARTBEAT_INTERVAL_SEC;
 
   // Maximum batch size in MB to read by stream manager from socket
   static const sp_string HERON_STREAMMGR_CONNECTION_READ_BATCH_SIZE_MB;

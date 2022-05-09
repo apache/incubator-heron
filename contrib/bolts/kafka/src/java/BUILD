@@ -14,7 +14,7 @@ java_doc(
 )
 
 kafka_bolt_deps = [
-    "//storm-compatibility/src/java:storm-compatibility-java-neverlink",
+    "//storm-compatibility/v0.10.2/src/java:storm-compatibility-java-neverlink",
     "//heron/api/src/java:api-java-low-level",
     "//heron/common/src/java:basics-java",
     "//heron/common/src/java:config-java",
@@ -25,6 +25,7 @@ kafka_bolt_deps = [
 java_library(
     name = "heron-kafka-bolt-java",
     srcs = glob(["org/apache/heron/bolts/kafka/**/*.java"]),
+    resources = ["//:disclaimers"],
     javacopts = DOCLINT_HTML_AND_SYNTAX,
     deps = kafka_bolt_deps,
 )

@@ -400,7 +400,7 @@ TEST(CheckpointGateway, overflow) {
         // Now send another tuple from the upstreamer.
         auto tup = new heron::proto::system::HeronTupleSet2();
         tup->set_src_task_id(upstreamer);
-        sp_uint32 cached_size = tup->ByteSize();
+        sp_uint64 cached_size = tup->ByteSizeLong();
         gateway->SendToInstance(local_bolt, tup);
         if (upstream_map[local_bolt].empty()) {
           // They only have one upstreamer, so the tuple is passed thru
@@ -420,14 +420,14 @@ TEST(CheckpointGateway, overflow) {
             EXPECT_EQ(0, drainer3_markers.size());
             tup = new heron::proto::system::HeronTupleSet2();
             tup->set_src_task_id(upstreamer);
-            cached_size += tup->ByteSize();
+            cached_size += tup->ByteSizeLong();
             total_sent++;
             gateway->SendToInstance(local_bolt, tup);
           }
           // Send one more to tip over
           tup = new heron::proto::system::HeronTupleSet2();
           tup->set_src_task_id(upstreamer);
-          cached_size += tup->ByteSize();
+          cached_size += tup->ByteSizeLong();
           total_sent++;
           gateway->SendToInstance(local_bolt, tup);
           EXPECT_EQ(total_sent, drainer1_tuples.size());

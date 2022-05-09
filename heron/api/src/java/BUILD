@@ -18,6 +18,7 @@ api_deps_files = \
         ":classification",
         "//heron/common/src/java:basics-java",
         "@maven//:javax_xml_bind_jaxb_api",
+        "@maven//:org_slf4j_jul_to_slf4j",
     ]
 
 # Low Level Api
@@ -49,6 +50,7 @@ java_library(
         "org/apache/heron/streamlet/**/*.java",
     ]),
     javacopts = DOCLINT_HTML_AND_SYNTAX,
+    resources = ["//:disclaimers"],
     deps = api_deps_files + [
         "//third_party/java:kryo-neverlink",
         "@maven//:org_apache_commons_commons_lang3",
@@ -67,11 +69,10 @@ java_binary(
     ],
 )
 
-jarjar_binary(
+jar_jar(
     name = "api-shaded",
-    src = ":api-unshaded_deploy.jar",
-    shade = "shade.conf",
-    deps = ["@maven//:org_sonatype_plugins_jarjar_maven_plugin"],
+    input_jar = ":api-unshaded_deploy.jar",
+    rules = "shade.conf",
 )
 
 genrule(

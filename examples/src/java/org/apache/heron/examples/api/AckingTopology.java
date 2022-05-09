@@ -20,6 +20,7 @@
 
 package org.apache.heron.examples.api;
 
+import java.time.Duration;
 import java.util.Map;
 import java.util.Random;
 
@@ -36,6 +37,7 @@ import org.apache.heron.api.topology.TopologyContext;
 import org.apache.heron.api.tuple.Fields;
 import org.apache.heron.api.tuple.Tuple;
 import org.apache.heron.api.tuple.Values;
+import org.apache.heron.common.basics.SysUtils;
 
 /**
  * This is a basic example of a Heron topology with acking enable.
@@ -53,12 +55,14 @@ public final class AckingTopology {
 
     int spouts = 2;
     int bolts = 2;
-    builder.setSpout("word", new AckingTestWordSpout(), spouts);
+    builder.setSpout("word", new AckingTestWordSpout(Duration.ofMillis(200)), spouts);
     builder.setBolt("exclaim1", new ExclamationBolt(), bolts)
         .shuffleGrouping("word");
 
     Config conf = new Config();
     conf.setDebug(true);
+
+    conf.setSerializationClassName(Config.HERON_KRYO_SERIALIZER_CLASS_NAME);
 
     // Specifies that all tuples will be automatically failed if not acked within 10 seconds
     conf.setMessageTimeoutSecs(10);
@@ -95,8 +99,10 @@ public final class AckingTopology {
     private SpoutOutputCollector collector;
     private String[] words;
     private Random rand;
+    private final Duration throttleDuration;
 
-    public AckingTestWordSpout() {
+    public AckingTestWordSpout(Duration throttleDuration) {
+      this.throttleDuration = throttleDuration;
     }
 
     @SuppressWarnings("rawtypes")
@@ -114,7 +120,9 @@ public final class AckingTopology {
 
     public void nextTuple() {
       final String word = words[rand.nextInt(words.length)];
-
+      if (!throttleDuration.isZero()) {
+        SysUtils.sleep(throttleDuration); // sleep to throttle back CPU usage
+      }
       // To enable acking, we need to emit each tuple with a MessageId, which is an Object.
       // Each new message emitted needs to be annotated with a unique ID, which allows
       // the spout to keep track of which messages should be acked back to the producer or

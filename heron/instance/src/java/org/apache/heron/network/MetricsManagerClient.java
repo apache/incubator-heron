@@ -138,7 +138,7 @@ public class MetricsManagerClient extends HeronClient {
   @Override
   public void onConnect(StatusCode status) {
     // We will not send registerRequest when we are onConnect
-    // We will send when we receive the PhysicalPlan sent by slave
+    // We will send when we receive the PhysicalPlan sent by executor
     if (status != StatusCode.OK) {
       LOG.log(Level.WARNING,
           "Cannot connect to the metrics port with status: {0}, Will Retry..", status);

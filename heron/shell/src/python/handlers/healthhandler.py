@@ -27,9 +27,7 @@ class HealthHandler(tornado.web.RequestHandler):
   """
 
   # pylint: disable=attribute-defined-outside-init
-  @tornado.web.asynchronous
   def get(self):
     """ get method """
     self.content_type = 'plain/text'
-    self.write('ok')
-    self.finish()
+    self.finish('ok')

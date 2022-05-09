@@ -53,8 +53,8 @@ import org.apache.heron.spi.statemgr.IStateManager;
 import org.apache.heron.spi.statemgr.Lock;
 import org.apache.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import org.apache.heron.spi.utils.NetworkUtils;
-import org.apache.heron.spi.utils.TMasterException;
-import org.apache.heron.spi.utils.TMasterUtils;
+import org.apache.heron.spi.utils.TManagerException;
+import org.apache.heron.spi.utils.TManagerUtils;
 
 import static org.apache.heron.api.Config.TOPOLOGY_UPDATE_DEACTIVATE_WAIT_SECS;
 import static org.apache.heron.api.Config.TOPOLOGY_UPDATE_REACTIVATE_WAIT_SECS;
@@ -155,7 +155,7 @@ public class UpdateTopologyManager implements Closeable {
     // deactivate and sleep
     if (initiallyRunning) {
       // Update the topology since the state should have changed from RUNNING to PAUSED
-      // Will throw exceptions internally if tmaster fails to deactivate
+      // Will throw exceptions internally if tmanager fails to deactivate
       deactivateTopology(stateManager, topology, proposedPackingPlan);
     }
 
@@ -192,11 +192,11 @@ public class UpdateTopologyManager implements Closeable {
 
     // reactivate topology
     if (initiallyRunning) {
-      // wait before reactivating to give the tmaster a chance to receive the packing update and
-      // delete the packing plan. Instead we could message tmaster to invalidate the physical plan
+      // wait before reactivating to give the tmanager a chance to receive the packing update and
+      // delete the packing plan. Instead we could message tmanager to invalidate the physical plan
       // and/or possibly even update the packing plan directly
       SysUtils.sleep(Duration.ofSeconds(10));
-      // Will throw exceptions internally if tmaster fails to deactivate
+      // Will throw exceptions internally if tmanager fails to deactivate
       reactivateTopology(stateManager, topology, removableContainerCount);
     }
 
@@ -209,7 +209,7 @@ public class UpdateTopologyManager implements Closeable {
   void deactivateTopology(SchedulerStateManagerAdaptor stateManager,
                           final TopologyAPI.Topology topology,
                           PackingPlan proposedPackingPlan)
-      throws InterruptedException, TMasterException {
+      throws InterruptedException, TManagerException {
 
     List<TopologyAPI.Config.KeyValue> topologyConfig = topology.getTopologyConfig().getKvsList();
     long deactivateSleepSeconds = TopologyUtils.getConfigWithDefault(
@@ -218,8 +218,8 @@ public class UpdateTopologyManager implements Closeable {
     logInfo("Deactivating topology %s before handling update request", topology.getName());
     NetworkUtils.TunnelConfig tunnelConfig =
         NetworkUtils.TunnelConfig.build(config, NetworkUtils.HeronSystem.SCHEDULER);
-    TMasterUtils.transitionTopologyState(
-            topology.getName(), TMasterUtils.TMasterCommand.DEACTIVATE, stateManager,
+    TManagerUtils.transitionTopologyState(
+            topology.getName(), TManagerUtils.TManagerCommand.DEACTIVATE, stateManager,
             TopologyAPI.TopologyState.RUNNING, TopologyAPI.TopologyState.PAUSED, tunnelConfig);
     if (deactivateSleepSeconds > 0) {
       logInfo("Deactivated topology %s. Sleeping for %d seconds before handling update request",
@@ -301,10 +301,10 @@ public class UpdateTopologyManager implements Closeable {
         NetworkUtils.TunnelConfig tunnelConfig =
             NetworkUtils.TunnelConfig.build(config, NetworkUtils.HeronSystem.SCHEDULER);
         try {
-          TMasterUtils.transitionTopologyState(
-              topologyName, TMasterUtils.TMasterCommand.ACTIVATE, stateManager,
+          TManagerUtils.transitionTopologyState(
+              topologyName, TManagerUtils.TManagerCommand.ACTIVATE, stateManager,
               TopologyAPI.TopologyState.PAUSED, TopologyAPI.TopologyState.RUNNING, tunnelConfig);
-        } catch (TMasterException e) {
+        } catch (TManagerException e) {
           if (removableContainerCount < 1) {
             throw new TopologyRuntimeManagementException(String.format(
                 "Topology reactivation failed for topology %s after topology update",
@@ -326,7 +326,7 @@ public class UpdateTopologyManager implements Closeable {
         cancel();
       } else {
         logInfo("Couldn't fetch physical plan for topology %s. This is probably because stream "
-            + "managers are still registering with TMaster. Will sleep and try again",
+            + "managers are still registering with TManager. Will sleep and try again",
             topologyName);
       }
     }

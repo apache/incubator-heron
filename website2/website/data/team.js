@@ -77,6 +77,10 @@ module.exports = {
         apacheId: 'ptgoetz',
       },
       {
+        name: 'Saad Ur Rahman',
+        apacheId: 'saadurrahman'
+      },
+      {
         name: 'Simon Weng',
         apacheId: 'simingweng',
       },
