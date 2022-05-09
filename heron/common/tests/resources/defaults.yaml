@@ -17,4 +17,4 @@
 
 role: role
 environ: environ
-heron.launcher.class: org.apache.heron.scheduler.aurora.AuroraLauncher
+heron.launcher.class: org.apache.heron.scheduler.kubernetes.KubernetesLauncher

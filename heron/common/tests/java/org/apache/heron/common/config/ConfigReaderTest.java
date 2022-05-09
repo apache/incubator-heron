@@ -43,7 +43,7 @@ public class ConfigReaderTest {
   private void testProperty(Map<String, Object> props) {
     Assert.assertEquals("role", props.get(ROLE_KEY));
     Assert.assertEquals("environ", props.get(ENVIRON_KEY));
-    Assert.assertEquals("org.apache.heron.scheduler.aurora.AuroraLauncher",
+    Assert.assertEquals("org.apache.heron.scheduler.kubernetes.KubernetesLauncher",
         props.get(LAUNCHER_CLASS_KEY));
     Assert.assertNull(props.get(USER_KEY));
   }
