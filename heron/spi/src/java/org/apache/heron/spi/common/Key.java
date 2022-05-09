@@ -81,7 +81,6 @@ public enum Key {
   PACKING_CLASS            ("heron.class.packing.algorithm",               Type.STRING),
   REPACKING_CLASS          ("heron.class.repacking.algorithm",             Type.STRING),
   STATE_MANAGER_CLASS      ("heron.class.state.manager",                   Type.STRING),
-  AURORA_CONTROLLER_CLASS  ("heron.class.scheduler.aurora.controller.cli", Boolean.TRUE),
 
   //keys for scheduler config
   SCHEDULER_IS_SERVICE     ("heron.scheduler.is.service", Boolean.TRUE),
