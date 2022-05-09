@@ -227,7 +227,7 @@ public class PrometheusSinkTests {
     );
 
     records = Arrays.asList(
-        newRecord("shared-aurora-036:31/spout-release-1/container_1_spout-release-1_31",
+        newRecord("shared-kubernetes-036:31/spout-release-1/container_1_spout-release-1_31",
             infos, Collections.emptyList())
     );
     PrometheusTestSink sink = new PrometheusTestSink();
