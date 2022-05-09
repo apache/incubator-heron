@@ -320,7 +320,7 @@ def submit_tar(cl_args, unknown_args, tmp_dir):
   The submitter inside will write out the topology defn file to a location
   that we specify. Then we write the topology defn file to a well known
   packer location. We then write to appropriate places in zookeeper
-  and launch the aurora jobs
+  and launch the jobs.
   :param cl_args:
   :param unknown_args:
   :param tmp_dir:
