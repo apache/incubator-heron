@@ -39,15 +39,6 @@ class ConfigLoaderTest(unittest.TestCase):
                              'heron/config/src/yaml/conf/%s/statemgr.yaml' % cluster)
     return configloader.load_state_manager_locations(cluster, yaml_path)
 
-  def test_load_state_manager_locations_aurora(self):
-    self.assertEqual([{
-      'hostport': 'LOCALMODE',
-      'name': 'local',
-      'rootpath': '/vagrant/.herondata/repository/state/aurora',
-      'tunnelhost': 'my.tunnel.host',
-      'type': 'file'
-    }], self.load_locations('aurora'))
-
   def test_load_state_manager_locations_local(self):
     self.assertEqual([{
       'hostport': 'LOCALMODE',
