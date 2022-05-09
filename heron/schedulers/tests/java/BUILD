@@ -25,9 +25,6 @@ scheduler_deps_files = \
     common_deps_files + \
     spi_deps_files
 
-aurora_deps_files = [
-    "//heron/schedulers/src/java:aurora-scheduler-java",
-]
 
 yarn_deps_files = [
     "//heron/packing/src/java:roundrobin-packing",
@@ -89,22 +86,6 @@ nomad_deps_files = \
         "//heron/schedulers/src/java:scheduler-utils-java",
     ]
 
-java_library(
-    name = "aurora-tests",
-    srcs = glob(["**/aurora/*.java"]),
-    deps = scheduler_deps_files + aurora_deps_files + ["@maven//:commons_cli_commons_cli"],
-)
-
-java_tests(
-    size = "small",
-    test_classes = [
-        "org.apache.heron.scheduler.aurora.AuroraSchedulerTest",
-        "org.apache.heron.scheduler.aurora.AuroraLauncherTest",
-        "org.apache.heron.scheduler.aurora.AuroraCLIControllerTest",
-        "org.apache.heron.scheduler.aurora.AuroraContextTest",
-    ],
-    runtime_deps = [":aurora-tests"],
-)
 
 java_library(
     name = "yarn-tests",

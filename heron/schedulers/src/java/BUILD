@@ -94,27 +94,6 @@ genrule(
 )
 
 java_library(
-    name = "aurora-scheduler-java",
-    srcs = glob(["**/aurora/*.java"]),
-    resources = glob(["**/aurora/*.aurora"]),
-    deps = scheduler_deps_files,
-)
-
-java_binary(
-    name = "aurora-scheduler-unshaded",
-    srcs = glob(["**/aurora/*.java"]),
-    resources = glob(["**/aurora/*.aurora"]),
-    deps = scheduler_deps_files,
-)
-
-genrule(
-    name = "heron-aurora-scheduler",
-    srcs = [":aurora-scheduler-unshaded_deploy.jar"],
-    outs = ["heron-aurora-scheduler.jar"],
-    cmd = "cp $< $@",
-)
-
-java_library(
     name = "null-scheduler-java",
     srcs = glob(
         ["**/NullLauncher.java"] + [
