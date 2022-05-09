@@ -21,9 +21,6 @@ for different components.
 
 The files are
 
- * aurora_scheduler.yaml
-   - this contains the configuration for aurora scheduler
-
  * heron_internals.yaml
    - this file contains several configuration elements that govern heron behavior
 
