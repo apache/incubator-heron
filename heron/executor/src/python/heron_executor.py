@@ -270,7 +270,7 @@ class HeronExecutor:
     self.stmgr_binary = parsed_args.stmgr_binary
     self.metrics_manager_classpath = parsed_args.metrics_manager_classpath
     self.metricscache_manager_classpath = parsed_args.metricscache_manager_classpath
-    # '=' can be parsed in a wrong way by some schedulers (aurora) hence it needs to be escaped.
+    # '=' can be parsed in a wrong way and hence it needs to be escaped.
     # It is escaped in two different ways. '(61)' is the new escaping. '&equals;' was
     # the original replacement but it is not friendly to bash and is causing issues. The original
     # escaping is still left there for reference and backward compatibility purposes (to be
@@ -299,11 +299,11 @@ class HeronExecutor:
                                               self.component_ram_map)
 
     # component_jvm_opts_in_base64 itself is a base64-encoding-json-map, which is appended with
-    # " at the start and end. It also escapes "=" to "&equals" due to aurora limitation
+    # " at the start and end. It also escapes "=" to "&equals" due to parsing limitations
     # And the json is a map from base64-encoding-component-name to base64-encoding-jvm-options
     self.component_jvm_opts = {}
     # First we need to decode the base64 string back to a json map string.
-    # '=' can be parsed in a wrong way by some schedulers (aurora) hence it needs to be escaped.
+    # '=' can be parsed in a wrong way and hence it needs to be escaped.
     # It is escaped in two different ways. '(61)' is the new escaping. '&equals;' was
     # the original replacement but it is not friendly to bash and is causing issues. The original
     # escaping is still left there for reference and backward compatibility purposes (to be
