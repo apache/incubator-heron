@@ -335,7 +335,6 @@ pkg_tar(
         "//heron/packing/src/java:heron-binpacking-packing",
         "//heron/packing/src/java:heron-roundrobin-packing",
         "//heron/scheduler-core/src/java:heron-scheduler",
-        "//heron/schedulers/src/java:heron-aurora-scheduler",
         "//heron/schedulers/src/java:heron-kubernetes-scheduler",
         "//heron/schedulers/src/java:heron-local-scheduler",
         "//heron/schedulers/src/java:heron-marathon-scheduler",
