@@ -21,20 +21,19 @@
 """ defaulthandler.py """
 import tornado.gen
 
-from heron.tools.tracker.src.python.handlers import BaseHandler
 
-class HealthHandler(BaseHandler):
+class HealthHandler(tornado.web.RequestHandler):
   """
   URL - anything that is not supported
 
   This is the default case in the regular expression
-  matching for the URLs. If nothin matched before this,
+  matching for the URLs. If nothing matched before this,
   then this is the URL that is not supported by the API.
 
   Sends back a "failure" response to the client.
   """
 
   @tornado.gen.coroutine
-  def get(self, url):
+  def get(self):
     """ get method """
     self.write("ok")
