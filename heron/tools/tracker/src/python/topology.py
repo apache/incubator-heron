@@ -52,6 +52,7 @@ class TopologyInfoMetadata(BaseModel):
   release_username: str
   release_tag: str
   release_version: str
+  instances: int = 0
   extra_links: List[Dict[str, str]]
 
 class TopologyInfoExecutionState(TopologyInfoMetadata):
@@ -274,7 +275,7 @@ class Topology:
     return TopologyInfo(
         id=topology.id,
         logical_plan=self._build_logical_plan(topology, execution_state, physical_plan),
-        metadata=self._build_metadata(topology, execution_state, tracker_config),
+        metadata=self._build_metadata(topology, physical_plan, execution_state, tracker_config),
         name=topology.name, # was self.name
         packing_plan=self._build_packing_plan(packing_plan),
         physical_plan=self._build_physical_plan(physical_plan),
@@ -313,7 +314,7 @@ class Topology:
         topology_pb2.PAUSED: "Paused",
         topology_pb2.KILLED: "Killed",
     }.get(physical_plan.topology.state if physical_plan else None, "Unknown")
-    metadata = Topology._build_metadata(topology, execution_state, tracker_config)
+    metadata = Topology._build_metadata(topology, physical_plan, execution_state, tracker_config)
     return TopologyInfoExecutionState(
         has_physical_plan=bool(physical_plan),
         has_packing_plan=bool(packing_plan),
@@ -378,7 +379,8 @@ class Topology:
     return info
 
   @staticmethod
-  def _build_metadata(topology, execution_state, tracker_config) -> TopologyInfoMetadata:
+  def _build_metadata(topology, physical_plan, execution_state, tracker_config) \
+          -> TopologyInfoMetadata:
     if not execution_state:
       return  TopologyInfoMetadata()
     metadata = {
@@ -392,6 +394,8 @@ class Topology:
         "release_tag": execution_state.release_state.release_tag,
         "release_version": execution_state.release_state.release_version,
     }
+    if physical_plan is not None and hasattr(physical_plan, "instances"):
+      metadata["instances"] = len(physical_plan.instances)
     extra_links = deepcopy(tracker_config.extra_links)
     Topology._render_extra_links(extra_links, topology, execution_state)
     return TopologyInfoMetadata(
