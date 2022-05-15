@@ -39,7 +39,7 @@ class SupplierSpout(Spout, StatefulComponent, StreamletSpoutBase):
     pass
 
   def initialize(self, config, context):
-    self.logger.debug("SupplierSpout's Component-specific config: \n%s" % str(config))
+    self.logger.debug("SupplierSpout's Component-specific config: \n%s", str(config))
     self.emitted = 0
     if SupplierSpout.FUNCTION in config:
       self._supplier_function = config[SupplierSpout.FUNCTION]
@@ -55,7 +55,7 @@ class SupplierSpout(Spout, StatefulComponent, StreamletSpoutBase):
 class SupplierStreamlet(Streamlet):
   """SupplierStreamlet"""
   def __init__(self, supplier_function):
-    super(SupplierStreamlet, self).__init__()
+    super().__init__()
     if not callable(supplier_function):
       raise RuntimeError("Supplier function has to be callable")
     self._supplier_function = supplier_function

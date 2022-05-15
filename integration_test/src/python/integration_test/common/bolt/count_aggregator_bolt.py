@@ -34,5 +34,5 @@ class CountAggregatorBolt(BatchBolt):
     self.sum += int(tup.values[0])
 
   def finish_batch(self):
-    self.logger.info("In finish batch, emitting: %d" % self.sum)
+    self.logger.info("In finish batch, emitting: %d", self.sum)
     self.emit([self.sum])

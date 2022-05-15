@@ -31,13 +31,11 @@ class JmapHandler(tornado.web.RequestHandler):
   """
 
   # pylint: disable=attribute-defined-outside-init
-  @tornado.web.asynchronous
-  def get(self, pid):
+  async def get(self, pid):
     ''' get method '''
     utils.str_cmd(['rm', '-rf', '/tmp/heap.bin'], None, None)
     body = utils.str_cmd(['jmap', '-dump:format=b,file=/tmp/heap.bin',
                           str(pid)], None, None)
     utils.str_cmd(['chmod', '+r', '/tmp/heap.bin'], None, None)
     self.content_type = 'application/json'
-    self.write(json.dumps(body))
-    self.finish()
+    await self.finish(json.dumps(body))

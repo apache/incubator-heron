@@ -40,6 +40,7 @@ import org.apache.curator.framework.state.ConnectionState;
 import org.apache.curator.framework.state.ConnectionStateListener;
 import org.apache.curator.retry.ExponentialBackoffRetry;
 import org.apache.heron.api.generated.TopologyAPI;
+import org.apache.heron.api.utils.Slf4jUtils;
 import org.apache.heron.common.basics.Pair;
 import org.apache.heron.proto.ckptmgr.CheckpointManager;
 import org.apache.heron.proto.scheduler.Scheduler;
@@ -451,7 +452,7 @@ public class CuratorStateManager extends FileSystemStateManager {
     if (args.length < 2) {
       throw new RuntimeException("Expects 2 arguments: <topology_name> <zookeeper_hostname>");
     }
-
+    Slf4jUtils.installSLF4JBridge();
     String zookeeperHostname = args[1];
     Config config = Config.newBuilder()
         .put(Key.STATEMGR_ROOT_PATH, "/storm/heron/states")

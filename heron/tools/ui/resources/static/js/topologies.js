@@ -994,7 +994,7 @@ var BoltRunningInfo = React.createClass({
               var latencyMetrics = metrics[boltName][time][executeLatencyMetricName][stream].metrics;
               // For each intance
               for (var m in countMetrics) {
-                if (countMetrics.hasOwnProperty(m) && latencyMetrics.hasOwnProperty(m)) {
+                if (countMetrics.hasOwnProperty(m) && latencyMetrics && latencyMetrics.hasOwnProperty(m)) {
                   var count = Number(countMetrics[m]) / (metrics[boltName][time][executeCountMetricName][stream].scaleDevisor || 1);
                   var latency = Number(latencyMetrics[m]) / (metrics[boltName][time][executeLatencyMetricName][stream].scaleDevisor || 1);
                   var utilization = count * latency;
@@ -1480,8 +1480,8 @@ var InstanceCounters = React.createClass({
           }
         }
         if (instanceInfo) {
-          var stmgrId = instanceInfo.stmgrId;
-          var container = stmgrId.split("-")[1]
+          var stmgr_id = instanceInfo.stmgr_id;
+          var container = stmgr_id.split("-")[1]
           var topologyParams = this.props.info.cluster + '/' + this.props.info.environ
               + '/' + this.props.info.topology
           var instanceParams = topologyParams + '/' + instanceInfo.id

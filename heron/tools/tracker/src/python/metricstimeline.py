@@ -21,23 +21,34 @@
 """ metricstimeline.py """
 from typing import Dict, List
 
-from heron.common.src.python.utils.log import Log
-from heron.proto import common_pb2
-from heron.proto import tmanager_pb2
-
 import httpx
 
 from pydantic import BaseModel, Field
 
+from heron.common.src.python.utils.log import Log
+from heron.proto import common_pb2
+from heron.proto import tmanager_pb2
+
 
 class MetricsTimeline(BaseModel):
   component: str
-  start_time: int = Field(..., alias="starttime")
-  end_time: int = Field(..., alias="enddtime")
-  timeline: Dict[str, Dict[str, Dict[int, int]]] = Field(
+  starttime: int
+  endtime: int
+  timeline: Dict[str, Dict[str, Dict[int, float]]] = Field(
       ...,
       description="map of (metric name, instance, start) to metric value",
   )
+
+
+class LegacyMetricsTimeline(BaseModel):
+  component: str
+  starttime: int
+  endtime: int
+  timeline: Dict[str, Dict[str, Dict[int, str]]] = Field(
+      ...,
+      description="map of (metric name, instance, start) to metric value",
+  )
+
 
 # pylint: disable=too-many-locals, too-many-branches, unused-argument
 async def get_metrics_timeline(
@@ -73,11 +84,12 @@ async def get_metrics_timeline(
 
   # Form and send the http request.
   url = f"http://{tmanager.host}:{tmanager.stats_port}/stats"
-  with httpx.AsyncClient() as client:
+  Log.debug(f"Making HTTP call to fetch metrics: {url}")
+  async with httpx.AsyncClient() as client:
     result = await client.post(url, data=request_parameters.SerializeToString())
 
   # Check the response code - error if it is in 400s or 500s
-  if result.code >= 400:
+  if result.status_code >= 400:
     message = f"Error in getting metrics from Tmanager, code: {result.code}"
     raise Exception(message)
 
@@ -99,8 +111,10 @@ async def get_metrics_timeline(
     # Loop through all individual metrics.
     for im in metric.metric:
       metricname = im.name
+      if metricname not in timeline:
+        timeline[metricname] = {}
       if instance not in timeline[metricname]:
-        timeline.setdefault(metricname, {})[instance] = {}
+        timeline[metricname][instance] = {}
 
       # We get minutely metrics.
       # Interval-values correspond to the minutely mark for which

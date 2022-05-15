@@ -86,7 +86,7 @@ case $# in
   *)
     echo "Usage: $0 <platform> <version_string> <output-directory> "
     echo "  "
-    echo "Platforms Supported: darwin, debian10, ubuntu20.04, centos8"
+    echo "Platforms Supported: darwin, debian11, ubuntu20.04, rocky8"
     echo "  "
     echo "Example:"
     echo "  ./build-exec-docker.sh ubuntu20.04 0.12.0 ."

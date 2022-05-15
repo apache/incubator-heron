@@ -46,9 +46,9 @@ To run integration tests on your mac first run the following to build the test p
 the heron client:
 
 ```Bash
-  bazel build --config=darwin integration_test/src/...
-  bazel run --config=darwin -- scripts/packages:heron-client-install.sh --user
-  bazel run --config=darwin -- scripts/packages:heron-tools-install.sh --user
+  bazel build integration_test/src/...
+  bazel run -- scripts/packages:heron-client-install.sh --user
+  bazel run -- scripts/packages:heron-tools-install.sh --user
 ```
 
 To run the local integration tests on your mac run the following from the heron repo's top dir:

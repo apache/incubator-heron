@@ -19,7 +19,6 @@
 #  under the License.
 
 ''' utils.py '''
-import functools
 import grp
 import os
 import pkgutil
@@ -52,6 +51,7 @@ def format_mode(sres):
 
   def triple(md):
     ''' triple '''
+    # pylint: disable=consider-using-f-string
     return '%c%c%c' % (
         'r' if md & 0b100 else '-',
         'w' if md & 0b010 else '-',
@@ -65,6 +65,7 @@ def format_mtime(mtime):
   """
   now = datetime.now()
   dt = datetime.fromtimestamp(mtime)
+  # pylint: disable=consider-using-f-string
   return '%s %2d %5s' % (
       dt.strftime('%b'), dt.day,
       dt.year if dt.year != now.year else dt.strftime('%H:%M'))
@@ -87,6 +88,7 @@ def format_prefix(filename, sres):
   except KeyError:
     group = sres.st_gid
 
+  # pylint: disable=consider-using-f-string
   return '%s %3d %10s %10s %10d %s' % (
       format_mode(sres),
       sres.st_nlink,
@@ -157,6 +159,7 @@ def pipe(prev_proc, to_cmd):
   Pipes output of prev_proc into to_cmd.
   Returns piped process
   """
+  # pylint: disable=consider-using-with
   stdin = None if prev_proc is None else prev_proc.stdout
   process = subprocess.Popen(to_cmd,
                              stdout=subprocess.PIPE,
@@ -169,28 +172,13 @@ def str_cmd(cmd, cwd, env):
   """
   Runs the command and returns its stdout and stderr.
   """
-  process = subprocess.Popen(cmd, stdout=subprocess.PIPE,
+  with subprocess.Popen(cmd, stdout=subprocess.PIPE,
                              stderr=subprocess.PIPE, cwd=cwd,
-                             env=env, universal_newlines=True)
-  stdout_builder, stderr_builder = proc.async_stdout_stderr_builder(process)
-  process.wait()
-  stdout, stderr = stdout_builder.result(), stderr_builder.result()
+                             env=env, universal_newlines=True) as process:
+    stdout_builder, stderr_builder = proc.async_stdout_stderr_builder(process)
+    process.wait()
+    stdout, stderr = stdout_builder.result(), stderr_builder.result()
   return {'command': ' '.join(cmd), 'stderr': stderr, 'stdout': stdout}
-
-# pylint: disable=unnecessary-lambda
-def chain(cmd_list):
-  """
-  Feed output of one command to the next and return final output
-  Returns string output of chained application of commands.
-  """
-  command = ' | '.join([' '.join(x) for x in cmd_list])
-  chained_proc = functools.reduce(pipe, [None] + cmd_list)
-  stdout_builder = proc.async_stdout_builder(chained_proc)
-  chained_proc.wait()
-  return {
-      'command': command,
-      'stdout': stdout_builder.result()
-  }
 
 def get_container_id(instance_id):
   ''' get container id '''

@@ -34,4 +34,4 @@ class StreamAggregateBolt(Bolt):
 
   def process_tick(self, tup):
     self.log("Got tick tuple!")
-    self.log("Current stream counter: %s" % str(self.stream_counter))
+    self.log(f"Current stream counter: {str(self.stream_counter)}")

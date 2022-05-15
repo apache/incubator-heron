@@ -41,7 +41,7 @@ class IntegrationTestBolt(Bolt):
 
   @classmethod
   def spec(cls, name, par, inputs, config, user_bolt_classpath, user_output_fields=None):
-    python_class_path = "%s.%s" % (cls.__module__, cls.__name__)
+    python_class_path = f"{cls.__module__}.{cls.__name__}"
     config[integ_const.USER_BOLT_CLASSPATH] = user_bolt_classpath
     # avoid modification to cls.outputs
     _outputs = copy.copy(cls.outputs)
@@ -69,7 +69,7 @@ class IntegrationTestBolt(Bolt):
     self.tuples_processed = 0
     self.current_tuple_processing = None
 
-    Log.info("Terminals to receive: %d" % self.terminal_to_receive)
+    Log.info("Terminals to receive: %d", self.terminal_to_receive)
     self.user_bolt.initialize(config, context)
 
   @staticmethod
@@ -86,7 +86,7 @@ class IntegrationTestBolt(Bolt):
     self.tuple_received += 1
     stream_id = tup.stream
 
-    Log.info("Received a tuple: %s from %s" % (tup, stream_id))
+    Log.info("Received a tuple: %s from %s", (tup, stream_id))
     if stream_id == integ_const.INTEGRATION_TEST_CONTROL_STREAM_ID:
       self.terminal_to_receive -= 1
       if self.is_done:
@@ -95,7 +95,7 @@ class IntegrationTestBolt(Bolt):
           self.user_bolt.finish_batch()
 
         Log.info("Populating the terminals to downstream")
-        super(IntegrationTestBolt, self).emit(
+        super().emit(
             [integ_const.INTEGRATION_TEST_TERMINAL],
             stream=integ_const.INTEGRATION_TEST_CONTROL_STREAM_ID)
     else:
@@ -107,24 +107,24 @@ class IntegrationTestBolt(Bolt):
            direct_task=None, need_task_ids=False):
     Log.info("emitting tuple: %s", tup)
     if tup is None:
-      super(IntegrationTestBolt, self).emit(list(self.current_tuple_processing),
+      super().emit(list(self.current_tuple_processing),
                                             stream=stream, anchors=anchors,
                                             direct_task=direct_task, need_task_ids=need_task_ids)
     else:
-      super(IntegrationTestBolt, self).emit(tup, stream, anchors, direct_task, need_task_ids)
+      super().emit(tup, stream, anchors, direct_task, need_task_ids)
 
   def ack(self, tup):
-    Log.info("Trying to do an ack. tuples processed: %d, received: %d"
-             % (self.tuples_processed, self.tuple_received))
+    Log.info("Trying to do an ack. tuples processed: %d, received: %d",
+            self.tuples_processed, self.tuple_received)
     if self.tuples_processed < self.tuple_received:
-      super(IntegrationTestBolt, self).ack(tup)
+      super().ack(tup)
       self.tuples_processed += 1
 
   def fail(self, tup):
-    Log.info("Trying to do a fail. tuples processed: %d, received: %d"
-             % (self.tuples_processed, self.tuple_received))
+    Log.info("Trying to do a fail. tuples processed: %d, received: %d",
+            self.tuples_processed, self.tuple_received)
     if self.tuples_processed < self.tuple_received:
-      super(IntegrationTestBolt, self).fail(tup)
+      super().fail(tup)
       self.tuples_processed += 1
 
   def process_tick(self, tup):

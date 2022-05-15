@@ -22,11 +22,8 @@ set -e
 
 DIR=`dirname $0`
 UTILS=${DIR}/../shutils
+export log_level=WARN
 source ${UTILS}/common.sh
-
-# Autodiscover the platform
-PLATFORM=$(discover_platform)
-echo "Using $PLATFORM platform"
 
 # integration test binaries have to be specified as absolute path
 JAVA_INTEGRATION_TESTS_BIN="${HOME}/.herontests/lib/integration-tests.jar"
@@ -37,19 +34,19 @@ SCALA_INTEGRATION_TESTS_BIN="${HOME}/.herontests/lib/scala-integration-tests.jar
 # build test related jar
 T="heron build integration_test"
 start_timer "$T"
-${UTILS}/save-logs.py "heron_build_integration_test.txt" bazel --bazelrc=tools/travis/bazel.rc build --config=$PLATFORM integration_test/src/...
+${UTILS}/save-logs.py "heron_build_integration_test.txt" bazel build integration_test/src/...
 end_timer "$T"
 
 # install heron 
 T="heron install"
 start_timer "$T"
-${UTILS}/save-logs.py "heron_install.txt" bazel --bazelrc=tools/travis/bazel.rc run --config=$PLATFORM -- scripts/packages:heron-install.sh --user
+${UTILS}/save-logs.py "heron_install.txt" bazel run -- scripts/packages:heron-install.sh --user
 end_timer "$T"
 
 # install tests
 T="heron tests install"
 start_timer "$T"
-${UTILS}/save-logs.py "heron_tests_install.txt" bazel --bazelrc=tools/travis/bazel.rc run --config=$PLATFORM -- scripts/packages:heron-tests-install.sh --user
+${UTILS}/save-logs.py "heron_tests_install.txt" bazel run -- scripts/packages:heron-tests-install.sh --user
 end_timer "$T"
 
 pathadd ${HOME}/bin/

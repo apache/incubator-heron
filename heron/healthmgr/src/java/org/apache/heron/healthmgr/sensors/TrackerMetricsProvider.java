@@ -43,6 +43,7 @@ import com.microsoft.dhalion.core.Measurement;
 
 import net.minidev.json.JSONArray;
 
+import static org.apache.heron.common.basics.TypeUtils.getDouble;
 import static org.apache.heron.healthmgr.HealthPolicyConfig.CONF_METRICS_SOURCE_URL;
 import static org.apache.heron.healthmgr.HealthPolicyConfig.CONF_TOPOLOGY_NAME;
 
@@ -63,7 +64,7 @@ public class TrackerMetricsProvider implements MetricsProvider {
     Client client = ClientBuilder.newClient();
 
     this.baseTarget = client.target(trackerURL)
-        .path("topologies/metricstimeline")
+        .path("topologies/metrics/timeline")
         .queryParam("cluster", cluster)
         .queryParam("environ", environ)
         .queryParam("topology", topologyName);
@@ -105,14 +106,14 @@ public class TrackerMetricsProvider implements MetricsProvider {
     }
 
     for (String instanceName : metricsMap.keySet()) {
-      Map<String, String> tmpValues = (Map<String, String>) metricsMap.get(instanceName);
+      Map<String, Object> tmpValues = (Map<String, Object>) metricsMap.get(instanceName);
       for (String timeStamp : tmpValues.keySet()) {
         Measurement measurement = new Measurement(
             component,
             instanceName,
             metric,
             Instant.ofEpochSecond(Long.parseLong(timeStamp)),
-            Double.parseDouble(tmpValues.get(timeStamp)));
+            getDouble(tmpValues.get(timeStamp)));
         metricsData.add(measurement);
       }
     }

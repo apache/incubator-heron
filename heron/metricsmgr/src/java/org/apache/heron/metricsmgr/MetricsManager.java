@@ -39,6 +39,7 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.heron.api.metric.MultiCountMetric;
+import org.apache.heron.api.utils.Slf4jUtils;
 import org.apache.heron.common.basics.Communicator;
 import org.apache.heron.common.basics.ExecutorLooper;
 import org.apache.heron.common.basics.NIOLooper;
@@ -329,6 +330,7 @@ public class MetricsManager {
   }
 
   public static void main(String[] args) throws Exception {
+    Slf4jUtils.installSLF4JBridge();
     final Options options = constructOptions();
     final Options helpOptions = constructHelpOptions();
 

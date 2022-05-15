@@ -16,25 +16,27 @@
 #  under the License.
 
 #syntax=docker/dockerfile:1.2
-FROM centos:centos8
+FROM ubuntu:22.04
 
-ENV LC_ALL en_US.utf8
+ARG DEBIAN_FRONTEND=noninteractive
 
-RUN yum -y install epel-release \
-    && yum -y install \
+ENV LC_ALL C.UTF-8
+ENV LANG C.UTF-8
+
+# Docker 20.10.10 or older will not work
+RUN apt-get -y update \
+    && apt-get -y install \
     curl \
-    java-11-openjdk-headless \
+    openjdk-11-jdk-headless \
+    netcat-openbsd \
+    python3 \
+    python3-distutils \
     supervisor \
-    nmap-ncat \
-    python39 \
-    python39-setuptools \
     unzip \
-    which \
-    && yum clean all
+    && apt-get clean
 
-ENV JAVA_HOME /usr/
-
-RUN update-alternatives --set python /usr/bin/python3.9
+ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk-amd64
+RUN update-ca-certificates -f
 
 # run Heron installer
 RUN --mount=type=bind,source=artifacts,target=/tmp/heron /tmp/heron/heron-install.sh \

@@ -21,12 +21,12 @@
 ''' cli_helper.py '''
 import logging
 import requests
-import heron.tools.common.src.python.utils.config as config
+from heron.tools.common.src.python.utils import config
 from heron.tools.cli.src.python.result import SimpleResult, Status
-import heron.tools.cli.src.python.args as args
-import heron.tools.cli.src.python.execute as execute
-import heron.tools.cli.src.python.jars as jars
-import heron.tools.cli.src.python.rest as rest
+from heron.tools.cli.src.python import args
+from heron.tools.cli.src.python import execute
+from heron.tools.cli.src.python import jars
+from heron.tools.cli.src.python import rest
 
 from heron.common.src.python.utils.log import Log
 
@@ -67,7 +67,7 @@ def flatten_args(fargs):
 
 ################################################################################
 # pylint: disable=dangerous-default-value
-def run_server(command, cl_args, action, extra_args=dict()):
+def run_server(command, cl_args, action, extra_args={}):
   '''
   helper function to take action on topologies using REST API
   :param command:
@@ -90,14 +90,14 @@ def run_server(command, cl_args, action, extra_args=dict()):
   # convert the dictionary to a list of tuples
   data = flatten_args(extra_args)
 
-  err_msg = "Failed to %s: %s" % (action, topology_name)
-  succ_msg = "Successfully %s: %s" % (action, topology_name)
+  err_msg = f"Failed to {action}: {topology_name}"
+  succ_msg = f"Successfully {action}: {topology_name}"
 
   try:
     r = service_method(service_apiurl, data=data)
     s = Status.Ok if r.status_code == requests.codes.ok else Status.HeronError
     if r.status_code != requests.codes.ok:
-      Log.error(r.json().get('message', "Unknown error from API server %d" % r.status_code))
+      Log.error(r.json().get('message', f"Unknown error from API server {r.status_code}"))
   except (requests.exceptions.ConnectionError, requests.exceptions.HTTPError) as err:
     Log.error(err)
     return SimpleResult(Status.HeronError, err_msg, succ_msg)
@@ -143,13 +143,13 @@ def run_direct(command, cl_args, action, extra_args=[], extra_lib_jars=[]):
       args=new_args
   )
 
-  err_msg = "Failed to %s: %s" % (action, topology_name)
-  succ_msg = "Successfully %s: %s" % (action, topology_name)
+  err_msg = f"Failed to {action}: {topology_name}"
+  succ_msg = f"Successfully {action}: {topology_name}"
   result.add_context(err_msg, succ_msg)
   return result
 
 ################################################################################
 def run(command, cl_args, action, extra_lib_jars=[]):
   if cl_args['deploy_mode'] == config.SERVER_MODE:
-    return run_server(command, cl_args, action, extra_args=dict())
+    return run_server(command, cl_args, action, extra_args={})
   return run_direct(command, cl_args, action, extra_args=[], extra_lib_jars=extra_lib_jars)

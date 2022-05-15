@@ -53,7 +53,7 @@ class BaseSpout(BaseComponent):
                              This is an optional argument, and exists only for supporting dynamic
                              output field declaration.
     """
-    python_class_path = "%s.%s" % (cls.__module__, cls.__name__)
+    python_class_path = f"{cls.__module__}.{cls.__name__}"
 
     if hasattr(cls, 'outputs'):
       # avoid modification to cls.outputs

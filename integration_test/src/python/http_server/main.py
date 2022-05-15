@@ -38,9 +38,9 @@ class FileHandler(tornado.web.RequestHandler):
     if not os.path.exists(jsonFilePath):
       self.clear()
       self.set_status(404)
-      self.finish("%s does not exist" % (fileName + ".json"))
+      self.finish(f"{fileName}.json does not exist")
     else:
-      with open(jsonFilePath, "r") as jsonFile:
+      with open(jsonFilePath, "r", encoding="utf8") as jsonFile:
         data = jsonFile.read()
 
       self.set_header("Content-Type", 'application/json; charset="utf-8"')
@@ -50,7 +50,7 @@ class FileHandler(tornado.web.RequestHandler):
     jsonFilePath = RESULTS_DIRECTORY + "/" + secure_filename(fileName) + ".json"
 
     #Overwrites the existing file
-    with open(jsonFilePath, "w") as jsonFile:
+    with open(jsonFilePath, "w", encoding="utf8") as jsonFile:
       try:
         data = tornado.escape.json_decode(self.request.body)
         jsonFile.write(tornado.escape.json_encode(data))
@@ -79,7 +79,7 @@ class MemoryMapHandler(tornado.web.RequestHandler):
       if key in self.state_map:
         self.write(self.state_map[key])
       else:
-        raise tornado.web.HTTPError(status_code=404, log_message="Key %s not found" % key)
+        raise tornado.web.HTTPError(status_code=404, log_message=f"Key {key} not found")
     else:
       self.write(str(self.state_map))
 
@@ -99,7 +99,7 @@ class StateResultHandler(tornado.web.RequestHandler):
       if key in self.result_map:
         self.write(tornado.escape.json_encode(self.result_map[key]))
       else:
-        raise tornado.web.HTTPError(status_code=404, log_message="Key %s not found" % key)
+        raise tornado.web.HTTPError(status_code=404, log_message=f"Key {key} not found")
     else:
       self.write(tornado.escape.json_encode(self.result_map))
 
@@ -117,7 +117,7 @@ class StateResultHandler(tornado.web.RequestHandler):
         self.result_map[key] = [data]
       self.write("Results written successfully: topology " + key + ' instance ' + list(data.keys())[0])
     else:
-      raise tornado.web.HTTPError(status_code=404, log_message="Invalid key %s" % key)
+      raise tornado.web.HTTPError(status_code=404, log_message=f"Invalid key {key}")
 
 def main():
   '''
@@ -153,7 +153,7 @@ def main():
 
   logging.info("Starting server at port " + str(port))
   application.listen(port)
-  tornado.ioloop.IOLoop.instance().start()
+  tornado.ioloop.IOLoop.current().start()
 
 if __name__ == '__main__':
   main()

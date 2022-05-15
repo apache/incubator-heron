@@ -58,15 +58,15 @@ class Download extends React.Component {
     const latestArchiveMirrorUrl = getLatestArchiveMirrorUrl(latestHeronVersion, 'bin');
     const latestSrcArchiveMirrorUrl = getLatestArchiveMirrorUrl(latestHeronVersion, 'src');
     const latestSrcUrl = getTarUrl(latestHeronVersion, "src");
-    const latestDebian10TarUrl =  getTarUrl(latestHeronVersion, "debian10");
+    const latestdebian11TarUrl =  getTarUrl(latestHeronVersion, "debian11");
     const latestArchiveUrl = distUrl(latestHeronVersion, 'bin');
     const latestSrcArchiveUrl = distUrl(latestHeronVersion, 'src')
-    const centos8InstallUrl = getInstallScriptMirrorUrl(latestHeronVersion, "centos8")
-    const centos8InstallCryptoUrl = getInstallScriptCryptoUrl(latestHeronVersion, "centos8")
-    const debian10InstallUrl = getInstallScriptMirrorUrl(latestHeronVersion, "debian10")
-    const debian10InstallCryptoUrl = getInstallScriptCryptoUrl(latestHeronVersion, "debian10")
-    const ubuntu1804InstallUrl = getInstallScriptMirrorUrl(latestHeronVersion, "ubuntu18.04")
-    const ubuntu1804InstallCryptoUrl = getInstallScriptCryptoUrl(latestHeronVersion, "ubuntu18.04")
+    const rocky8InstallUrl = getInstallScriptMirrorUrl(latestHeronVersion, "rocky8")
+    const rocky8InstallCryptoUrl = getInstallScriptCryptoUrl(latestHeronVersion, "rocky8")
+    const debian11InstallUrl = getInstallScriptMirrorUrl(latestHeronVersion, "debian11")
+    const debian11InstallCryptoUrl = getInstallScriptCryptoUrl(latestHeronVersion, "debian11")
+    const ubuntu2004InstallUrl = getInstallScriptMirrorUrl(latestHeronVersion, "ubuntu20.04")
+    const ubuntu2004InstallCryptoUrl = getInstallScriptCryptoUrl(latestHeronVersion, "ubuntu20.04")
 
 
 
@@ -118,13 +118,13 @@ class Download extends React.Component {
                   </td>
                 </tr>
                 <tr key={'binary'}>
-                  <th>Debian10 Binary</th>
+                  <th>debian11 Binary</th>
                   <td>
-                    <a href={latestSrcArchiveMirrorUrl}>heron-{latestHeronVersion}-debian10.tar.gz</a>
+                    <a href={latestSrcArchiveMirrorUrl}>heron-{latestHeronVersion}-debian11.tar.gz</a>
                   </td>
                   <td>
-                    <a href={`${latestDebian10TarUrl}.asc`}>asc</a>,&nbsp;
-                    <a href={`${latestDebian10TarUrl}.sha512`}>sha512</a>
+                    <a href={`${latestdebian11TarUrl}.asc`}>asc</a>,&nbsp;
+                    <a href={`${latestdebian11TarUrl}.sha512`}>sha512</a>
                   </td>
                 </tr>
                 </tbody>
@@ -148,34 +148,34 @@ class Download extends React.Component {
                 <tbody>
 
 
-                  <tr key={'centos-install'}>
-                    <th>centos8</th>
+                  <tr key={'rocky-install'}>
+                    <th>rocky8</th>
                     <td>
-                      <a href={`${centos8InstallUrl}`}> heron-install-0.20.4-incubating-centos8.sh</a>
+                      <a href={`${rocky8InstallUrl}`}> heron-install-0.20.4-incubating-rocky8.sh</a>
                     </td>
                     <td>
-                      <a href={`${centos8InstallCryptoUrl}.asc`}>asc</a>,&nbsp;
-                      <a href={`${centos8InstallCryptoUrl}.sha512`}>sha512</a>
-                    </td>
-                  </tr>
-                  <tr key={'debian10-install'}>
-                    <th>Debian10</th>
-                    <td>
-                      <a href={`${debian10InstallUrl}`}> heron-install-0.20.4-incubating-debian10.sh</a>
-                    </td>
-                    <td>
-                      <a href={`${debian10InstallCryptoUrl}.asc`}>asc</a>,&nbsp;
-                      <a href={`${debian10InstallCryptoUrl}.sha512`}>sha512</a>
+                      <a href={`${rocky8InstallCryptoUrl}.asc`}>asc</a>,&nbsp;
+                      <a href={`${rocky8InstallCryptoUrl}.sha512`}>sha512</a>
                     </td>
                   </tr>
-                   <tr key={'ubuntu18.04-install'}>
-                    <th>Ubuntu18.04</th>
+                  <tr key={'debian11-install'}>
+                    <th>debian11</th>
                     <td>
-                     <a href={`${ubuntu1804InstallUrl}`}> heron-install-0.20.4-incubating-ubuntu18.04.sh</a>
+                      <a href={`${debian11InstallUrl}`}> heron-install-0.20.4-incubating-debian11.sh</a>
                     </td>
                     <td>
-                      <a href={`${ubuntu1804InstallCryptoUrl}.asc`}>asc</a>,&nbsp;
-                      <a href={`${ubuntu1804InstallCryptoUrl}.sha512`}>sha512</a>
+                      <a href={`${debian11InstallCryptoUrl}.asc`}>asc</a>,&nbsp;
+                      <a href={`${debian11InstallCryptoUrl}.sha512`}>sha512</a>
+                    </td>
+                  </tr>
+                   <tr key={'ubuntu20.04-install'}>
+                    <th>Ubuntu20.04</th>
+                    <td>
+                     <a href={`${ubuntu2004InstallUrl}`}> heron-install-0.20.4-incubating-ubuntu20.04.sh</a>
+                    </td>
+                    <td>
+                      <a href={`${ubuntu2004InstallCryptoUrl}.asc`}>asc</a>,&nbsp;
+                      <a href={`${ubuntu2004InstallCryptoUrl}.sha512`}>sha512</a>
                     </td>
                   </tr>
                   </tbody>

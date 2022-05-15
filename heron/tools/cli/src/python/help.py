@@ -21,7 +21,7 @@
 ''' help.py '''
 from heron.common.src.python.utils.log import Log
 from heron.tools.cli.src.python.result import SimpleResult, Status
-import heron.tools.common.src.python.utils.config as config
+from heron.tools.common.src.python.utils import config
 
 def create_parser(subparsers):
   '''

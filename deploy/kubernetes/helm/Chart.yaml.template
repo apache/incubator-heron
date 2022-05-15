@@ -18,7 +18,7 @@
 apiVersion: v2
 name: heron
 version: VERSION
-kubeVersion: 1.16
+kubeVersion: ">=1.16"
 appVersion: VERSION
 description: Heron is a fast distributed streaming engine for processing large data volumes with velocity
 type: application

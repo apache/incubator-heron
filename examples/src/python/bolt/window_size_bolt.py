@@ -27,11 +27,11 @@ class WindowSizeBolt(SlidingWindowBolt):
      A bolt that calculates the average batch size of window"""
 
   def initialize(self, config, context):
-    super(WindowSizeBolt, self).initialize(config, context)
+    super().initialize(config, context)
     self.numerator = 0.0
     self.denominator = 0.0
 
   def processWindow(self, window_info, tuples):
     self.numerator += len(tuples)
     self.denominator += 1
-    self.logger.info("The current average is %f" % (self.numerator / self.denominator))
+    self.logger.info(f"The current average is {(self.numerator / self.denominator)}")

@@ -27,12 +27,7 @@ GEN_PROTO_DIR=$HERON_ROOT_DIR/bazel-bin/heron/proto/_javac
 # The path of the customized landing page for the Javadocs
 OVERVIEW_HTML_FILE=$HERON_ROOT_DIR/website2/website/scripts/javadocs-overview.html
 
-# Check if this script is run with Travis flag
-if [ $# -eq 1 ] && [ $1 == "--travis" ]; then
-    BAZEL_CMD="bazel --bazelrc=$HERON_ROOT_DIR/tools/travis/bazel.rc build"
-else
-    BAZEL_CMD="bazel build"
-fi
+BAZEL_CMD="bazel build"
 
 (cd $HERON_ROOT_DIR && $BAZEL_CMD \
   `bazel query 'kind("java_library", "heron/...")'` \

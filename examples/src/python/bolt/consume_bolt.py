@@ -33,4 +33,4 @@ class ConsumeBolt(Bolt):
 
   def process_tick(self, tup):
     self.log("Got tick tuple!")
-    self.log("Total received data tuple: %d" % self.total)
+    self.log(f"Total received data tuple: {self.total}")

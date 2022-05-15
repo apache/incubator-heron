@@ -39,7 +39,7 @@ class LogBolt(Bolt, StatefulComponent, StreamletBoltBase):
     pass
 
   def initialize(self, config, context):
-    self.logger.debug("LogBolt's Component-specific config: \n%s" % str(config))
+    self.logger.debug("LogBolt's Component-specific config: \n%s", str(config))
     self.processed = 0
 
   def process(self, tup):
@@ -51,7 +51,7 @@ class LogBolt(Bolt, StatefulComponent, StreamletBoltBase):
 class LogStreamlet(Streamlet):
   """LogStreamlet"""
   def __init__(self, parent):
-    super(LogStreamlet, self).__init__()
+    super().__init__()
     if not isinstance(parent, Streamlet):
       raise RuntimeError("Parent of Log Streamlet has to be a Streamlet")
     self._parent = parent

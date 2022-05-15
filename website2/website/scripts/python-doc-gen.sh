@@ -25,7 +25,7 @@ cd ${HERON_ROOT_DIR}
 ./bazel_configure.py
 
 # Generate python whl packages, packages will be generated in ${HERON_ROOT_DIR}/bazel-bin/scripts/packages/
-bazel build  --config=linux_nostyle scripts/packages:pypkgs
+bazel build scripts/packages:pypkgs
 
 cd website2/website/
 mkdir -p ./tmp/

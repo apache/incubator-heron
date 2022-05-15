@@ -20,7 +20,7 @@ genrule(
         "lib/libzookeeper_st.a",
     ],
     cmd = select({
-        ":darwin": "\n".join([
+        "@platforms//os:osx": "\n".join([
             "export INSTALL_DIR=$$(pwd)/$(@D)",
             "export TMP_DIR=$$(mktemp -d -t zookeeper.XXXXX)",
             "export CXXFLAGS=-Wno-error",
@@ -85,12 +85,4 @@ cc_library(
         "include",
     ],
     linkstatic = 1,
-)
-
-config_setting(
-    name = "darwin",
-    values = {
-        "cpu": "darwin",
-    },
-    visibility = ["//visibility:public"],
 )

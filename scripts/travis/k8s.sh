@@ -75,7 +75,7 @@ function get_image {
         out="$expected"
     else
         action "Creating heron image"
-        local gz="$(scripts/release/docker-images build test debian10)"
+        local gz="$(scripts/release/docker-images build test debian11)"
         # XXX: must un .gz https://github.com/kubernetes-sigs/kind/issues/1636
         gzip --decompress "$gz"
         out="${gz%%.gz}"
@@ -85,7 +85,7 @@ function get_image {
 
 create_cluster
 
-get_image debian10
+get_image debian11
 heron_archive="$archive"
 action "Loading heron docker image"
 kind load image-archive "$heron_archive"

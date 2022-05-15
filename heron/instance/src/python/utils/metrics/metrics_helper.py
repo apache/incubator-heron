@@ -122,7 +122,7 @@ class GatewayMetrics(BaseMetricsHelper):
 
   def __init__(self, metrics_collector):
     sys_config = system_config.get_sys_config()
-    super(GatewayMetrics, self).__init__(self.metrics)
+    super().__init__(self.metrics)
     interval = float(sys_config[constants.HERON_METRICS_EXPORT_INTERVAL_SEC])
     self.register_metrics(metrics_collector, interval)
 
@@ -168,7 +168,7 @@ class ComponentMetrics(BaseMetricsHelper):
   def __init__(self, additional_metrics):
     metrics = self.component_metrics
     metrics.update(additional_metrics)
-    super(ComponentMetrics, self).__init__(metrics)
+    super().__init__(metrics)
 
   # pylint: disable=arguments-differ
   def register_metrics(self, context):
@@ -179,7 +179,7 @@ class ComponentMetrics(BaseMetricsHelper):
     sys_config = system_config.get_sys_config()
     interval = float(sys_config[constants.HERON_METRICS_EXPORT_INTERVAL_SEC])
     collector = context.get_metrics_collector()
-    super(ComponentMetrics, self).register_metrics(collector, interval)
+    super().register_metrics(collector, interval)
 
   def update_out_queue_full_count(self):
     """Apply update to the out-queue full count"""
@@ -213,7 +213,7 @@ class SpoutMetrics(ComponentMetrics):
                    TIMEOUT_COUNT, ComponentMetrics.EMIT_COUNT]
 
   def __init__(self, pplan_helper):
-    super(SpoutMetrics, self).__init__(self.spout_metrics)
+    super().__init__(self.spout_metrics)
     self._init_multi_count_metrics(pplan_helper)
 
   def _init_multi_count_metrics(self, pplan_helper):
@@ -269,7 +269,7 @@ class BoltMetrics(ComponentMetrics):
   outputs_init = [ComponentMetrics.EMIT_COUNT]
 
   def __init__(self, pplan_helper):
-    super(BoltMetrics, self).__init__(self.bolt_metrics)
+    super().__init__(self.bolt_metrics)
     self._init_multi_count_metrics(pplan_helper)
 
   def _init_multi_count_metrics(self, pplan_helper):
@@ -330,9 +330,9 @@ class MetricsCollector:
   def __init__(self, looper, out_metrics):
     self.looper = looper
     # map <metrics name -> IMetric object>
-    self.metrics_map = dict()
+    self.metrics_map = {}
     # map <time_bucket_sec -> metrics name>
-    self.time_bucket_in_sec_to_metrics_name = dict()
+    self.time_bucket_in_sec_to_metrics_name = {}
     # out metrics queue
     self.out_metrics = out_metrics
 
@@ -344,7 +344,7 @@ class MetricsCollector:
     :param time_bucket_in_sec: time interval for update to the metrics manager
     """
     if name in self.metrics_map:
-      raise RuntimeError("Another metric has already been registered with name: %s" % name)
+      raise RuntimeError(f"Another metric has already been registered with name: {name}")
 
     Log.debug("Register metric: %s, with interval: %s", name, str(time_bucket_in_sec))
     self.metrics_map[name] = metric
@@ -382,7 +382,7 @@ class MetricsCollector:
       for key, value in list(metric_value.items()):
         if key is not None and value is not None:
           self._add_data_to_message(message, name + "/" + str(key), value)
-          self._add_data_to_message(message, "%s/%s" % (name, str(key)), value)
+          self._add_data_to_message(message, f"{name}/{str(key)}", value)
         else:
           Log.info("When gathering metric: %s, <%s:%s> is not a valid key-value to output "
                    "as metric. Skipping...", name, str(key), str(value))

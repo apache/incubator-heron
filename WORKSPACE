@@ -20,6 +20,7 @@ workspace(name = "org_apache_heron")
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive", "http_file")
 
 RULES_JVM_EXTERNAL_TAG = "4.2"
+
 RULES_JVM_EXTERNAL_SHA = "cd1a77b7b02e8e008439ca76fd34f5b07aecb8c752961f9640dea15e9e5ba1ca"
 
 http_archive(
@@ -54,7 +55,9 @@ powermock_version = "1.6.2"
 
 reef_version = "0.14.0"
 
-slf4j_version = "1.7.30"
+slf4j_version = "1.7.36"
+
+logback_verison = "1.2.11"
 
 distributedlog_version = "4.13.0"
 
@@ -70,11 +73,16 @@ kubernetes_client_version = "14.0.0"
 maven_install(
     name = "maven",
     artifacts = [
+        "org.slf4j:slf4j-api:%s" % slf4j_version,
+        "org.slf4j:log4j-over-slf4j:%s" % slf4j_version,
+        "org.slf4j:jul-to-slf4j:%s" % slf4j_version,
+        "org.slf4j:jcl-over-slf4j:%s" % slf4j_version,
+        "ch.qos.logback:logback-classic:%s" % logback_verison,
         "antlr:antlr:2.7.7",
         "org.apache.zookeeper:zookeeper:3.6.3",
         "io.kubernetes:client-java:" + kubernetes_client_version,
         "io.kubernetes:client-java-api-fluent:" + kubernetes_client_version,
-        "com.esotericsoftware:kryo:5.2.0",
+        "com.esotericsoftware:kryo:5.3.0",
         "org.apache.avro:avro:1.7.4",
         "org.apache.mesos:mesos:0.22.0",
         "com.hashicorp.nomad:nomad-sdk:0.7.0",
@@ -102,17 +110,17 @@ maven_install(
         "org.glassfish.jersey.media:jersey-media-multipart:" + jersey_version,
         "org.glassfish.jersey.containers:jersey-container-servlet:" + jersey_version,
         "org.apache.distributedlog:distributedlog-core:" + distributedlog_version,
-        "io.netty:netty-all:4.1.72.Final",
+        "io.netty:netty-all:4.1.76.Final",
         "aopalliance:aopalliance:1.0",
         "org.roaringbitmap:RoaringBitmap:0.6.51",
+        "com.google.inject:guice:5.1.0",
+        "com.google.inject.extensions:guice-assistedinject:5.1.0",
         "com.google.guava:guava:23.6-jre",
+        "com.google.protobuf:protobuf-java:3.16.1",
         "io.gsonfire:gson-fire:1.8.3",
         "org.apache.curator:curator-framework:" + curator_version,
         "org.apache.curator:curator-recipes:" + curator_version,
         "org.apache.curator:curator-client:" + curator_version,
-        "org.slf4j:slf4j-api:" + slf4j_version,
-        "org.slf4j:slf4j-jdk14:" + slf4j_version,
-        "log4j:log4j:1.2.17",
         "tech.tablesaw:tablesaw-core:0.11.4",
         "org.glassfish.hk2.external:aopalliance-repackaged:2.5.0-b32",
         "org.apache.commons:commons-compress:1.14",
@@ -121,11 +129,11 @@ maven_install(
         "commons-cli:commons-cli:1.3.1",
         "org.apache.commons:commons-compress:1.14",
         "com.jayway.jsonpath:json-path:2.1.0",
-        "com.fasterxml.jackson.core:jackson-core:" + jackson_version,
-        "com.fasterxml.jackson.core:jackson-annotations:" + jackson_version,
-        "com.fasterxml.jackson.core:jackson-databind:" + jackson_version,
-        "com.fasterxml.jackson.jaxrs:jackson-jaxrs-base:2.8.8",
-        "com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider:2.8.8",
+        "com.fasterxml.jackson.core:jackson-core:%s" % jackson_version,
+        "com.fasterxml.jackson.core:jackson-annotations:%s" % jackson_version,
+        "com.fasterxml.jackson.core:jackson-databind:%s" % jackson_version,
+        "com.fasterxml.jackson.jaxrs:jackson-jaxrs-base:%s" % jackson_version,
+        "com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider:%s" % jackson_version,
         "javax.xml.bind:jaxb-api:2.3.0",
         "javax.activation:activation:1.1.1",
         "org.mockito:mockito-all:1.10.19",
@@ -134,12 +142,18 @@ maven_install(
         "com.puppycrawl.tools:checkstyle:6.17",
         "com.googlecode.json-simple:json-simple:1.1",
         maven.artifact(
-            group = "org.apache.httpcomponents",
             artifact = "httpclient",
-            version = http_client_version,
             classifier = "tests",
+            group = "org.apache.httpcomponents",
             packaging = "test-jar",
+            version = http_client_version,
         ),
+    ],
+    excluded_artifacts = [
+        "org.slf4j:slf4j-jdk14",
+        "org.slf4j:slf4j-log4j12",
+        "log4j:log4j",
+        "commons-logging:commons-logging",
     ],
     fail_if_repin_required = True,
     fetch_sources = True,
@@ -156,6 +170,7 @@ maven_install(
 # To update `maven_install.json` run the following command:
 # `REPIN=1 bazel run @unpinned_maven//:pin`
 load("@maven//:defs.bzl", "pinned_maven_install")
+
 pinned_maven_install()
 
 load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
@@ -163,7 +178,7 @@ load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
 git_repository(
     name = "com_github_johnynek_bazel_jar_jar",
     commit = "171f268569384c57c19474b04aebe574d85fde0d", # Latest commit SHA as at 2019/02/13
-    remote = "git://github.com/johnynek/bazel_jar_jar.git",
+    remote = "https://github.com/johnynek/bazel_jar_jar.git",
     shallow_since = "1594234634 -1000",
 )
 
@@ -171,7 +186,18 @@ load(
     "@com_github_johnynek_bazel_jar_jar//:jar_jar.bzl",
     "jar_jar_repositories",
 )
+
 jar_jar_repositories()
+
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+http_archive(
+    name = "platforms",
+    urls = [
+        "https://mirror.bazel.build/github.com/bazelbuild/platforms/releases/download/0.0.5/platforms-0.0.5.tar.gz",
+        "https://github.com/bazelbuild/platforms/releases/download/0.0.5/platforms-0.0.5.tar.gz",
+    ],
+    sha256 = "379113459b0feaf6bfbb584a91874c065078aa673222846ac765f86661c27407",
+)
 
 http_archive(
     name = "rules_python",
@@ -276,9 +302,9 @@ http_file(
 # protobuf dependencies for C++ and Java
 http_archive(
     name = "com_google_protobuf",
-    sha256 = "03d2e5ef101aee4c2f6ddcf145d2a04926b9c19e7086944df3842b1b8502b783",
-    strip_prefix = "protobuf-3.8.0",
-    urls = ["https://github.com/protocolbuffers/protobuf/archive/v3.8.0.tar.gz"],
+    sha256 = "fb9158b00b2df4949f66da0bb8a9eaf662b842c7987d096b260759d629805d7f",
+    strip_prefix = "protobuf-3.16.1",
+    urls = ["https://github.com/protocolbuffers/protobuf/archive/v3.16.1.tar.gz"],
 )
 # end protobuf dependencies for C++ and Java
 
@@ -367,11 +393,9 @@ http_archive(
 http_archive(
     name = "com_github_danmar_cppcheck",
     build_file = "@//:third_party/cppcheck/cppcheck.BUILD",
-    patch_args = ["-p2"],
-    patches = ["//third_party/cppcheck:cppcheck-readdir-fix.patch"],
-    sha256 = "cb0e66cbe2d6b655fce430cfaaa74b83ad11c91f221e3926f1ca3211bb7c906b",
-    strip_prefix = "cppcheck-1.90",
-    urls = ["https://github.com/danmar/cppcheck/archive/1.90.zip"],
+    sha256 = "9285bf64af22a07fb24a7431510cc34fba118cf6950190abc2a08c9f7a7084c8",
+    strip_prefix = "cppcheck-2.7",
+    urls = ["https://github.com/danmar/cppcheck/archive/refs/tags/2.7.zip"],
 )
 
 http_archive(
@@ -414,6 +438,7 @@ load(
     "@io_bazel_rules_docker//repositories:repositories.bzl",
     container_repositories = "repositories",
 )
+
 container_repositories()
 
 load("@io_bazel_rules_docker//repositories:deps.bzl", container_deps = "deps")
@@ -441,39 +466,58 @@ container_pull(
 http_archive(
     name = "rules_pkg",
     urls = [
-        "https://github.com/bazelbuild/rules_pkg/releases/download/0.2.6/rules_pkg-0.2.6.tar.gz",
-        "https://mirror.bazel.build/github.com/bazelbuild/rules_pkg/releases/download/0.2.6/rules_pkg-0.2.6.tar.gz",
+        "https://mirror.bazel.build/github.com/bazelbuild/rules_pkg/releases/download/0.6.0/rules_pkg-0.6.0.tar.gz",
+        "https://github.com/bazelbuild/rules_pkg/releases/download/0.6.0/rules_pkg-0.6.0.tar.gz",
     ],
-    sha256 = "aeca78988341a2ee1ba097641056d168320ecc51372ef7ff8e64b139516a4937",
+    sha256 = "62eeb544ff1ef41d786e329e1536c1d541bb9bcad27ae984d57f18f314018e66",
 )
+
 load("@rules_pkg//:deps.bzl", "rules_pkg_dependencies")
+
 rules_pkg_dependencies()
 
 # scala integration
-rules_scala_version = "358ab829626c6c2d34ec27f856485d3121e299c7"  # Jan 15 2020 - update this as needed
-
 http_archive(
     name = "io_bazel_rules_scala",
-    strip_prefix = "rules_scala-%s" % rules_scala_version,
-    sha256 = "5abd638278de10ccccb0b4d614158f394278b828708ba990461334ecc01529a6",
+    sha256 = "77a3b9308a8780fff3f10cdbbe36d55164b85a48123033f5e970fdae262e8eb2",
+    strip_prefix = "rules_scala-20220201",
     type = "zip",
-    url = "https://github.com/bazelbuild/rules_scala/archive/%s.zip" % rules_scala_version,
+    url = "https://github.com/bazelbuild/rules_scala/releases/download/20220201/rules_scala-20220201.zip",
 )
+
+skylib_version = "1.0.3"
+
+http_archive(
+    name = "bazel_skylib",
+    sha256 = "1c531376ac7e5a180e0237938a2536de0c54d93f5c278634818e0efc952dd56c",
+    type = "tar.gz",
+    url = "https://mirror.bazel.build/github.com/bazelbuild/bazel-skylib/releases/download/{}/bazel-skylib-{}.tar.gz".format(skylib_version, skylib_version),
+)
+
+load("@io_bazel_rules_scala//:scala_config.bzl", "scala_config")
+
+scala_config(scala_version = "2.12.15")
 
 load("@io_bazel_rules_scala//scala:scala.bzl", "scala_repositories")
 
-scala_repositories((
-    "2.12.8",
-    {
-        "scala_compiler": "f34e9119f45abd41e85b9e121ba19dd9288b3b4af7f7047e86dc70236708d170",
-        "scala_library": "321fb55685635c931eba4bc0d7668349da3f2c09aee2de93a70566066ff25c28",
-        "scala_reflect": "4d6405395c4599ce04cea08ba082339e3e42135de9aae2923c9f5367e957315a",
-    },
-))
+scala_repositories()
+
+load("@rules_proto//proto:repositories.bzl", "rules_proto_dependencies", "rules_proto_toolchains")
+
+rules_proto_dependencies()
+
+rules_proto_toolchains()
 
 load("@io_bazel_rules_scala//scala:toolchains.bzl", "scala_register_toolchains")
 
 scala_register_toolchains()
+
+# optional: setup ScalaTest toolchain and dependencies
+load("@io_bazel_rules_scala//testing:scalatest.bzl", "scalatest_repositories", "scalatest_toolchain")
+
+scalatest_repositories()
+
+scalatest_toolchain()
 
 # Protocol buffers in Java and CC.
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")

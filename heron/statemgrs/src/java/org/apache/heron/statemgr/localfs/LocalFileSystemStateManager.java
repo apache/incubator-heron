@@ -30,6 +30,7 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
 
 import org.apache.heron.api.generated.TopologyAPI;
+import org.apache.heron.api.utils.Slf4jUtils;
 import org.apache.heron.common.basics.FileUtils;
 import org.apache.heron.proto.ckptmgr.CheckpointManager;
 import org.apache.heron.proto.scheduler.Scheduler;
@@ -247,6 +248,7 @@ public class LocalFileSystemStateManager extends FileSystemStateManager {
 
   public static void main(String[] args) throws ExecutionException, InterruptedException,
       IllegalAccessException, ClassNotFoundException, InstantiationException {
+    Slf4jUtils.installSLF4JBridge();
     Config config = Config.newBuilder()
         .put(Key.STATEMGR_ROOT_PATH,
             System.getProperty("user.home") + "/.herondata/repository/state/local")

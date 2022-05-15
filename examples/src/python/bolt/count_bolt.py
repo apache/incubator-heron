@@ -20,7 +20,7 @@
 
 """module for example bolt: CountBolt"""
 from collections import Counter
-import heronpy.api.global_metrics as global_metrics
+from heronpy.api import global_metrics
 from heronpy.api.bolt.bolt import Bolt
 
 # pylint: disable=unused-argument
@@ -34,8 +34,8 @@ class CountBolt(Bolt):
     self.counter = Counter()
     self.total = 0
 
-    self.logger.info("Component-specific config: \n%s" % str(config))
-    self.logger.info("Context: \n%s" % str(context))
+    self.logger.info(f"Component-specific config: \n{str(config)}")
+    self.logger.info(f"Context: \n{str(context)}")
 
   def _increment(self, word, inc_by):
     self.counter[word] += inc_by
@@ -49,4 +49,4 @@ class CountBolt(Bolt):
 
   def process_tick(self, tup):
     self.log("Got tick tuple!")
-    self.log("Current map: %s" % str(self.counter))
+    self.log(f"Current map: {str(self.counter)}")

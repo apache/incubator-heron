@@ -19,97 +19,250 @@
 
 package org.apache.heron.scheduler.kubernetes;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.heron.spi.common.Config;
-
-import io.kubernetes.client.openapi.models.V1AWSElasticBlockStoreVolumeSource;
-import io.kubernetes.client.openapi.models.V1HostPathVolumeSource;
-import io.kubernetes.client.openapi.models.V1NFSVolumeSource;
+import io.kubernetes.client.custom.Quantity;
+import io.kubernetes.client.openapi.models.V1PersistentVolumeClaim;
+import io.kubernetes.client.openapi.models.V1PersistentVolumeClaimBuilder;
+import io.kubernetes.client.openapi.models.V1ResourceRequirements;
 import io.kubernetes.client.openapi.models.V1Volume;
+import io.kubernetes.client.openapi.models.V1VolumeBuilder;
+import io.kubernetes.client.openapi.models.V1VolumeMount;
+import io.kubernetes.client.openapi.models.V1VolumeMountBuilder;
 
 final class Volumes {
 
-  static final String AWS_EBS = "awsElasticBlockStore";
-  static final String HOST_PATH = "hostPath";
-  static final String NFS = "nfs";
-
-  private final Map<String, VolumeFactory> volumes = new HashMap<>();
+  public enum VolumeType {
+    EmptyDir,
+    HostPath,
+    NetworkFileSystem
+  }
+  private final Map<VolumeType, IVolumeFactory> volumes = new HashMap<>();
 
   private Volumes() {
-    volumes.put(HOST_PATH, new HostPathVolumeFactory());
-    volumes.put(NFS, new NfsVolumeFactory());
-    volumes.put(AWS_EBS, new AwsEbsVolumeFactory());
+    volumes.put(VolumeType.EmptyDir, new EmptyDirVolumeFactory());
+    volumes.put(VolumeType.HostPath, new HostPathVolumeFactory());
+    volumes.put(VolumeType.NetworkFileSystem, new NetworkFileSystemVolumeFactory());
   }
 
   static Volumes get() {
     return new Volumes();
   }
 
-  V1Volume create(Config config) {
-    final String volumeType = KubernetesContext.getVolumeType(config);
+  /**
+   * Creates <code>Generic</code>, <code>Empty Directory</code>, <code>Host Path</code>, and
+   * <code>Network File System</code> volumes.
+   * @param volumeType One of the supported volume types.
+   * @param volumeName The name of the volume to generate.
+   * @param configs A map of configurations.
+   * @return Fully configured <code>V1Volume</code>.
+   */
+  V1Volume createVolume(VolumeType volumeType, String volumeName,
+                        Map<KubernetesConstants.VolumeConfigKeys, String> configs) {
     if (volumes.containsKey(volumeType)) {
-      return volumes.get(volumeType).create(config);
+      return volumes.get(volumeType).create(volumeName, configs);
     }
     return null;
   }
 
-  interface VolumeFactory {
-    V1Volume create(Config config);
+  /**
+   * Generates a <code>Volume Mount</code> from specifications.
+   * @param volumeName Name of the <code>Volume</code>.
+   * @param configs Mapping of <code>Volume</code> option <code>key-value</code> configuration pairs.
+   * @return A configured <code>V1VolumeMount</code>.
+   */
+  V1VolumeMount createMount(String volumeName,
+                            Map<KubernetesConstants.VolumeConfigKeys, String> configs) {
+    final V1VolumeMount volumeMount = new V1VolumeMountBuilder()
+        .withName(volumeName)
+        .build();
+    for (Map.Entry<KubernetesConstants.VolumeConfigKeys, String> config : configs.entrySet()) {
+      switch (config.getKey()) {
+        case path:
+          volumeMount.mountPath(config.getValue());
+          break;
+        case subPath:
+          volumeMount.subPath(config.getValue());
+          break;
+        case readOnly:
+          volumeMount.readOnly(Boolean.parseBoolean(config.getValue()));
+          break;
+        default:
+          break;
+      }
+    }
+    return volumeMount;
   }
 
-  private static V1Volume newVolume(Config config) {
-    final String volumeName = KubernetesContext.getVolumeName(config);
-    return new V1Volume().name(volumeName);
+  /**
+   * Generates <code>Persistent Volume Claims Templates</code> from a mapping of <code>Volumes</code>
+   * to <code>key-value</code> pairs of configuration options and values.
+   * @param claimName Name to be assigned to <code>Persistent Volume Claims Template</code>.
+   * @param labels Labels to be attached to the <code>Persistent Volume Claims Template</code>.
+   * @param configs <code>Volume</code> to configuration <code>key-value</code> mappings.
+   * @return Fully populated dynamically backed <code>Persistent Volume Claims</code>.
+   */
+  V1PersistentVolumeClaim createPersistentVolumeClaim(String claimName, Map<String, String> labels,
+                                        Map<KubernetesConstants.VolumeConfigKeys, String> configs) {
+    V1PersistentVolumeClaim claim = new V1PersistentVolumeClaimBuilder()
+        .withNewMetadata()
+          .withName(claimName)
+          .withLabels(labels)
+        .endMetadata()
+        .withNewSpec()
+          .withStorageClassName("")
+        .endSpec()
+        .build();
+
+    // Populate PVC options.
+    for (Map.Entry<KubernetesConstants.VolumeConfigKeys, String> option : configs.entrySet()) {
+      String optionValue = option.getValue();
+      switch(option.getKey()) {
+        case storageClassName:
+          claim.getSpec().setStorageClassName(optionValue);
+          break;
+        case sizeLimit:
+          claim.getSpec().setResources(
+              new V1ResourceRequirements()
+                  .putRequestsItem("storage", new Quantity(optionValue)));
+          break;
+        case accessModes:
+          claim.getSpec().setAccessModes(Arrays.asList(optionValue.split(",")));
+          break;
+        case volumeMode:
+          claim.getSpec().setVolumeMode(optionValue);
+          break;
+        // Valid ignored options not used in a PVC.
+        default:
+          break;
+      }
+    }
+    return claim;
   }
 
-  static class HostPathVolumeFactory implements VolumeFactory {
+  /**
+   * Generates a <code>Volume</code> with a <code>Persistent Volume Claim</code> inserted.
+   * @param claimName Name of the <code>Persistent Volume Claim</code>.
+   * @param volumeName Name of the <code>Volume</code> to place the <code>Persistent Volume Claim</code> in.
+   * @return Fully configured <code>Volume</code> with <code>Persistent Volume Claim</code> in it.
+   */
+  V1Volume createPersistentVolumeClaim(String claimName, String volumeName) {
+    return new V1VolumeBuilder()
+        .withName(volumeName)
+        .withNewPersistentVolumeClaim()
+          .withClaimName(claimName)
+        .endPersistentVolumeClaim()
+        .build();
+  }
+
+  interface IVolumeFactory {
+    V1Volume create(String volumeName, Map<KubernetesConstants.VolumeConfigKeys, String> configs);
+  }
+
+  static class EmptyDirVolumeFactory implements IVolumeFactory {
+
+    /**
+     * Generates an <code>Empty Directory</code> <code>V1 Volume</code>.
+     * @param volumeName The name of the volume to generate.
+     * @param configs    A map of configurations.
+     * @return A fully configured <code>Empty Directory</code> volume.
+     */
     @Override
-    public V1Volume create(Config config) {
-      final V1Volume volume = newVolume(config);
+    public V1Volume create(String volumeName,
+                           Map<KubernetesConstants.VolumeConfigKeys, String> configs) {
+      final V1Volume volume = new V1VolumeBuilder()
+          .withName(volumeName)
+          .withNewEmptyDir()
+          .endEmptyDir()
+          .build();
 
-      final String path = KubernetesContext.getHostPathVolumePath(config);
-      final V1HostPathVolumeSource hostPathVolume =
-          new V1HostPathVolumeSource()
-              .path(path);
-      volume.hostPath(hostPathVolume);
+      for (Map.Entry<KubernetesConstants.VolumeConfigKeys, String> config : configs.entrySet()) {
+        switch(config.getKey()) {
+          case medium:
+            volume.getEmptyDir().medium(config.getValue());
+            break;
+          case sizeLimit:
+            volume.getEmptyDir().sizeLimit(new Quantity(config.getValue()));
+            break;
+          default:
+            break;
+        }
+      }
 
       return volume;
     }
   }
 
-  static class NfsVolumeFactory implements VolumeFactory {
+  static class HostPathVolumeFactory implements IVolumeFactory {
+
+    /**
+     * Generates a <code>Host Path</code> <code>V1 Volume</code>.
+     * @param volumeName The name of the volume to generate.
+     * @param configs    A map of configurations.
+     * @return A fully configured <code>Host Path</code> volume.
+     */
     @Override
-    public V1Volume create(Config config) {
-      final V1Volume volume = newVolume(config);
+    public V1Volume create(String volumeName,
+                           Map<KubernetesConstants.VolumeConfigKeys, String> configs) {
+      final V1Volume volume = new V1VolumeBuilder()
+          .withName(volumeName)
+          .withNewHostPath()
+          .endHostPath()
+          .build();
 
-      final String path = KubernetesContext.getNfsVolumePath(config);
-      final String server = KubernetesContext.getNfsServer(config);
-      V1NFSVolumeSource nfsVolumeSource =
-          new V1NFSVolumeSource()
-              .path(path)
-              .server(server);
-      volume.setNfs(nfsVolumeSource);
-
+      for (Map.Entry<KubernetesConstants.VolumeConfigKeys, String> config : configs.entrySet()) {
+        switch (config.getKey()) {
+          case type:
+            volume.getHostPath().setType(config.getValue());
+            break;
+          case pathOnHost:
+            volume.getHostPath().setPath(config.getValue());
+            break;
+          default:
+            break;
+        }
+      }
       return volume;
     }
   }
 
-  static class AwsEbsVolumeFactory implements VolumeFactory {
+  static class NetworkFileSystemVolumeFactory implements IVolumeFactory {
+
+    /**
+     * Generates a <code>Network File System</code> <code>V1 Volume</code>.
+     *
+     * @param volumeName The name of the volume to generate.
+     * @param configs    A map of configurations.
+     * @return A fully configured <code>Network File System</code> volume.
+     */
     @Override
-    public V1Volume create(Config config) {
-      final V1Volume volume = newVolume(config);
+    public V1Volume create(String volumeName,
+                           Map<KubernetesConstants.VolumeConfigKeys, String> configs) {
+      final V1Volume volume = new V1VolumeBuilder()
+          .withName(volumeName)
+          .withNewNfs()
+          .endNfs()
+          .build();
 
-      final String volumeId = KubernetesContext.getAwsEbsVolumeId(config);
-      final String fsType = KubernetesContext.getAwsEbsFsType(config);
-      V1AWSElasticBlockStoreVolumeSource awsElasticBlockStoreVolumeSource =
-          new V1AWSElasticBlockStoreVolumeSource()
-              .volumeID(volumeId)
-              .fsType(fsType);
-      volume.setAwsElasticBlockStore(awsElasticBlockStoreVolumeSource);
-
+      for (Map.Entry<KubernetesConstants.VolumeConfigKeys, String> config : configs.entrySet()) {
+        switch (config.getKey()) {
+          case server:
+            volume.getNfs().setServer(config.getValue());
+            break;
+          case pathOnNFS:
+            volume.getNfs().setPath(config.getValue());
+            break;
+          case readOnly:
+            volume.getNfs().setReadOnly(Boolean.parseBoolean(config.getValue()));
+            break;
+          default:
+            break;
+        }
+      }
       return volume;
     }
   }
+
 }

@@ -9,6 +9,7 @@ common_deps = [
     "@maven//:com_google_guava_guava",
     "//third_party/java/bazel:extra_actions_proto_java",
     "//third_party/java/bazel:proto_java",
+    "//third_party/java:logging",
 ]
 
 java_binary(

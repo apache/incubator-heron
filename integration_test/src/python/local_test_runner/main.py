@@ -118,7 +118,7 @@ def main():
   # Convert the conf file to a json format
   conf = decoder.decode(conf_string)
 
-  args = dict()
+  args = {}
   home_directory = os.path.expanduser("~")
   args['cluster'] = conf['cluster']
   args['topologyName'] = conf['topology']['topologyName']

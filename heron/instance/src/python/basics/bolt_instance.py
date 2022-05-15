@@ -27,9 +27,9 @@ from heron.common.src.python.utils.log import Log
 from heron.proto import topology_pb2, tuple_pb2, ckptmgr_pb2
 from heron.instance.src.python.utils.metrics import BoltMetrics
 from heron.instance.src.python.utils.tuple import TupleHelper, HeronTuple
-import heron.instance.src.python.utils.system_constants as system_constants
+from heron.instance.src.python.utils import system_constants
 
-import heronpy.api.api_constants as api_constants
+from heronpy.api import api_constants
 from heronpy.api.state.stateful_component import StatefulComponent
 from heronpy.api.stream import Stream
 
@@ -39,7 +39,7 @@ class BoltInstance(BaseInstance):
   """The base class for all heron bolts in Python"""
 
   def __init__(self, pplan_helper, in_stream, out_stream, looper):
-    super(BoltInstance, self).__init__(pplan_helper, in_stream, out_stream, looper)
+    super().__init__(pplan_helper, in_stream, out_stream, looper)
     self.topology_state = topology_pb2.TopologyState.Value("PAUSED")
 
     if self.pplan_helper.is_spout:
@@ -54,10 +54,10 @@ class BoltInstance(BaseInstance):
                                             api_constants.TopologyReliabilityMode.ATMOST_ONCE)
     self.acking_enabled = bool(mode == api_constants.TopologyReliabilityMode.ATLEAST_ONCE)
     self._initialized_metrics_and_tasks = False
-    Log.info("Enable ACK: %s" % str(self.acking_enabled))
+    Log.info(f"Enable ACK: {str(self.acking_enabled)}")
 
     # load user's bolt class
-    bolt_impl_class = super(BoltInstance, self).load_py_instance(is_spout=False)
+    bolt_impl_class = super().load_py_instance(is_spout=False)
     self.bolt_impl = bolt_impl_class(delegate=self)
 
   def start_component(self, stateful_state):
@@ -116,8 +116,8 @@ class BoltInstance(BaseInstance):
 
     if direct_task is not None:
       if not isinstance(direct_task, int):
-        raise TypeError("direct_task argument needs to be an integer, given: %s"
-                        % str(type(direct_task)))
+        raise TypeError(f"direct_task argument needs to be an integer, "
+                        f"given: {str(type(direct_task))}")
       # performing emit-direct
       data_tuple.dest_task_ids.append(direct_task)
     elif custom_target_task_ids is not None:
@@ -145,7 +145,7 @@ class BoltInstance(BaseInstance):
     serialize_latency_ns = (time.time() - start_time) * system_constants.SEC_TO_NS
     self.bolt_metrics.serialize_data_tuple(stream, serialize_latency_ns)
 
-    super(BoltInstance, self).admit_data_tuple(stream_id=stream, data_tuple=data_tuple,
+    super().admit_data_tuple(stream_id=stream, data_tuple=data_tuple,
                                                tuple_size_in_bytes=tuple_size_in_bytes)
 
     self.bolt_metrics.update_emit_count(stream)
@@ -228,7 +228,7 @@ class BoltInstance(BaseInstance):
     cluster_config = self.pplan_helper.context.get_cluster_config()
     if api_constants.TOPOLOGY_TICK_TUPLE_FREQ_SECS in cluster_config:
       tick_freq_sec = cluster_config[api_constants.TOPOLOGY_TICK_TUPLE_FREQ_SECS]
-      Log.debug("Tick Tuple Frequency: %s sec." % str(tick_freq_sec))
+      Log.debug(f"Tick Tuple Frequency: {str(tick_freq_sec)} sec.")
 
       def send_tick():
         tick = TupleHelper.make_tick_tuple()
@@ -260,7 +260,7 @@ class BoltInstance(BaseInstance):
         to_add = ack_tuple.roots.add()
         to_add.CopyFrom(rt)
         tuple_size_in_bytes += rt.ByteSize()
-      super(BoltInstance, self).admit_control_tuple(ack_tuple, tuple_size_in_bytes, True)
+      super().admit_control_tuple(ack_tuple, tuple_size_in_bytes, True)
 
     process_latency_ns = (time.time() - tup.creation_time) * system_constants.SEC_TO_NS
     self.pplan_helper.context.invoke_hook_bolt_ack(tup, process_latency_ns)
@@ -284,7 +284,7 @@ class BoltInstance(BaseInstance):
         to_add = fail_tuple.roots.add()
         to_add.CopyFrom(rt)
         tuple_size_in_bytes += rt.ByteSize()
-      super(BoltInstance, self).admit_control_tuple(fail_tuple, tuple_size_in_bytes, False)
+      super().admit_control_tuple(fail_tuple, tuple_size_in_bytes, False)
 
     fail_latency_ns = (time.time() - tup.creation_time) * system_constants.SEC_TO_NS
     self.pplan_helper.context.invoke_hook_bolt_fail(tup, fail_latency_ns)

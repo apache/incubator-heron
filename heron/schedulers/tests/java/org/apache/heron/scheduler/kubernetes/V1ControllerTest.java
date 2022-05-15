@@ -679,71 +679,6 @@ public class V1ControllerTest {
   }
 
   @Test
-  public void testAddVolumesIfPresent() {
-    final String pathDefault = "config-host-volume-path";
-    final String pathNameDefault = "config-host-volume-name";
-    final Config configWithVolumes = Config.newBuilder()
-        .put(KubernetesContext.KUBERNETES_VOLUME_NAME, pathNameDefault)
-        .put(KubernetesContext.KUBERNETES_VOLUME_TYPE, Volumes.HOST_PATH)
-        .put(KubernetesContext.KUBERNETES_VOLUME_HOSTPATH_PATH, pathDefault)
-        .build();
-    final V1Controller controllerWithVol = new V1Controller(configWithVolumes, RUNTIME);
-
-    final V1Volume volumeDefault = new V1VolumeBuilder()
-        .withName(pathNameDefault)
-        .withNewHostPath()
-          .withNewPath(pathDefault)
-        .endHostPath()
-        .build();
-    final V1Volume volumeToBeKept = new V1VolumeBuilder()
-        .withName("volume-to-be-kept-name")
-        .withNewHostPath()
-          .withNewPath("volume-to-be-kept-path")
-        .endHostPath()
-        .build();
-
-    final List<V1Volume> customVolumeList = Arrays.asList(
-        new V1VolumeBuilder()
-            .withName(pathNameDefault)
-            .withNewHostPath()
-              .withNewPath("this-path-must-be-replaced")
-            .endHostPath()
-            .build(),
-        volumeToBeKept
-    );
-    final List<V1Volume> expectedDefault = Collections.singletonList(volumeDefault);
-    final List<V1Volume> expectedCustom = Arrays.asList(volumeDefault, volumeToBeKept);
-
-    // No Volumes set.
-    V1Controller controllerDoNotSetVolumes = new V1Controller(Config.newBuilder().build(), RUNTIME);
-    V1PodSpec podSpecNoSetVolumes = new V1PodSpec();
-    controllerDoNotSetVolumes.addVolumesIfPresent(podSpecNoSetVolumes);
-    Assert.assertNull(podSpecNoSetVolumes.getVolumes());
-
-    // Default. Null Volumes.
-    V1PodSpec podSpecNull = new V1PodSpecBuilder().build();
-    controllerWithVol.addVolumesIfPresent(podSpecNull);
-    Assert.assertTrue("Default VOLUMES should be set in container with null VOLUMES",
-        CollectionUtils.containsAll(expectedDefault, podSpecNull.getVolumes()));
-
-    // Empty Volumes list
-    V1PodSpec podSpecEmpty = new V1PodSpecBuilder()
-        .withVolumes(new LinkedList<>())
-        .build();
-    controllerWithVol.addVolumesIfPresent(podSpecEmpty);
-    Assert.assertTrue("Default VOLUMES should be set in container with empty VOLUMES",
-        CollectionUtils.containsAll(expectedDefault, podSpecEmpty.getVolumes()));
-
-    // Custom Volumes list
-    V1PodSpec podSpecCustom = new V1PodSpecBuilder()
-        .withVolumes(customVolumeList)
-        .build();
-    controllerWithVol.addVolumesIfPresent(podSpecCustom);
-    Assert.assertTrue("Default VOLUMES should be set in container with custom VOLUMES",
-        CollectionUtils.containsAll(expectedCustom, podSpecCustom.getVolumes()));
-  }
-
-  @Test
   public void testMountVolumeIfPresent() {
     final String pathDefault = "config-host-volume-path";
     final String pathNameDefault = "config-host-volume-name";
@@ -936,6 +871,7 @@ public class V1ControllerTest {
     final List<V1PersistentVolumeClaim> actualClaims =
         v1ControllerWithPodTemplate.createPersistentVolumeClaims(mapPVCOpts);
 
+    Assert.assertEquals("Generated claim sizes match", expectedClaims.size(), actualClaims.size());
     Assert.assertTrue(expectedClaims.containsAll(actualClaims));
   }
 
@@ -1214,103 +1150,6 @@ public class V1ControllerTest {
           v1ControllerPodTemplate.createResourcesRequirement(testCase.input);
       Assert.assertEquals(testCase.description, testCase.expected, actual);
     }
-  }
-
-  @Test
-  public void testCreateVolumeMountsCLI() {
-    final String volumeNamePVC = "volume-name-pvc";
-    final String volumeNameHostPath = "volume-name-host-path";
-    final String volumeNameEmptyDir = "volume-name-empty-dir";
-    final String volumeNameNFS = "volume-name-nfs";
-    final String value = "inserted-value";
-
-    // Test case container.
-    // Input: [0] volume name, [1] volume options
-    // Output: The expected <V1VolumeMount>.
-    final List<TestTuple<Pair<String, Map<VolumeConfigKeys, String>>, V1VolumeMount>> testCases =
-        new LinkedList<>();
-
-    // PVC.
-    final Map<VolumeConfigKeys, String> configPVC = ImmutableMap.<VolumeConfigKeys, String>builder()
-        .put(VolumeConfigKeys.claimName, value)
-        .put(VolumeConfigKeys.storageClassName, value)
-        .put(VolumeConfigKeys.sizeLimit, value)
-        .put(VolumeConfigKeys.accessModes, value)
-        .put(VolumeConfigKeys.volumeMode, value)
-        .put(VolumeConfigKeys.path, value)
-        .put(VolumeConfigKeys.subPath, value)
-        .put(VolumeConfigKeys.readOnly, "true")
-        .build();
-    final V1VolumeMount volumeMountPVC = new V1VolumeMountBuilder()
-        .withName(volumeNamePVC)
-        .withMountPath(value)
-        .withSubPath(value)
-        .withReadOnly(true)
-        .build();
-    testCases.add(new TestTuple<>("PVC volume mount",
-        new Pair<>(volumeNamePVC, configPVC), volumeMountPVC));
-
-    // Host Path.
-    final Map<VolumeConfigKeys, String> configHostPath =
-        ImmutableMap.<VolumeConfigKeys, String>builder()
-            .put(VolumeConfigKeys.type, "DirectoryOrCreate")
-            .put(VolumeConfigKeys.pathOnHost, value)
-            .put(VolumeConfigKeys.path, value)
-            .put(VolumeConfigKeys.subPath, value)
-            .put(VolumeConfigKeys.readOnly, "true")
-            .build();
-    final V1VolumeMount volumeMountHostPath = new V1VolumeMountBuilder()
-        .withName(volumeNameHostPath)
-        .withMountPath(value)
-        .withSubPath(value)
-        .withReadOnly(true)
-        .build();
-    testCases.add(new TestTuple<>("Host Path volume mount",
-        new Pair<>(volumeNameHostPath, configHostPath), volumeMountHostPath));
-
-    // Empty Dir.
-    final Map<VolumeConfigKeys, String> configEmptyDir =
-        ImmutableMap.<VolumeConfigKeys, String>builder()
-            .put(VolumeConfigKeys.sizeLimit, value)
-            .put(VolumeConfigKeys.medium, "Memory")
-            .put(VolumeConfigKeys.path, value)
-            .put(VolumeConfigKeys.subPath, value)
-            .put(VolumeConfigKeys.readOnly, "true")
-            .build();
-    final V1VolumeMount volumeMountEmptyDir = new V1VolumeMountBuilder()
-        .withName(volumeNameEmptyDir)
-        .withMountPath(value)
-        .withSubPath(value)
-        .withReadOnly(true)
-        .build();
-    testCases.add(new TestTuple<>("Empty Dir volume mount",
-        new Pair<>(volumeNameEmptyDir, configEmptyDir), volumeMountEmptyDir));
-
-    // NFS.
-    final Map<VolumeConfigKeys, String> configNFS = ImmutableMap.<VolumeConfigKeys, String>builder()
-        .put(VolumeConfigKeys.server, "nfs.server.address")
-        .put(VolumeConfigKeys.readOnly, "true")
-        .put(VolumeConfigKeys.pathOnNFS, value)
-        .put(VolumeConfigKeys.path, value)
-        .put(VolumeConfigKeys.subPath, value)
-        .build();
-    final V1VolumeMount volumeMountNFS = new V1VolumeMountBuilder()
-        .withName(volumeNameNFS)
-        .withMountPath(value)
-        .withSubPath(value)
-        .withReadOnly(true)
-        .build();
-    testCases.add(new TestTuple<>("NFS volume mount",
-        new Pair<>(volumeNameNFS, configNFS), volumeMountNFS));
-
-    // Test loop.
-    for (TestTuple<Pair<String, Map<VolumeConfigKeys, String>>, V1VolumeMount> testCase
-        : testCases) {
-      V1VolumeMount actual = v1ControllerPodTemplate.createVolumeMountsCLI(
-          testCase.input.first, testCase.input.second);
-      Assert.assertEquals(testCase.description, testCase.expected, actual);
-    }
-
   }
 
   @Test
