@@ -30,8 +30,9 @@ var TopologyItem = React.createClass({
     };
 
     var topology = this.props.topology;
-    var displaycluster = topology.cluster.toUpperCase();
-    var displayenv = topology.environ.toUpperCase();
+    var display_cluster = topology.cluster.toUpperCase();
+    var display_env = topology.environ.toUpperCase();
+    var display_instances = topology.instances;
     var display_time = "-";
     if (topology.submission_time !== "-") {
       display_time = moment(topology.submission_time * 1000).fromNow();
@@ -53,14 +54,15 @@ var TopologyItem = React.createClass({
     return (
        <tr className={state_class}>
          <td className="col-md-1 index no-break">{index}</td>
-         <td className="col-md-3 break-all"><a className="toponame" href={'./topologies/' + topology.cluster + '/' + topology.environ + '/' + topology.name}>{topology.name}</a></td>
-         <td className="col-md-1 topostatus">{topology.status}</td>
-         <td className="col-md-1 topocluster">{displaycluster}</td>
-         <td className="col-md-1 toporunrole break-all">{topology.role}</td>
-         <td className="col-md-1 topoenviron">{displayenv}</td>
-         <td className="col-md-2 toporeleaseversion break-all">{topology.release_version}</td>
-         <td className="col-md-1 toposubmittedby break-all">{topology.submission_user}</td>
-         <td className="col-md-2 toposubmittedat no-break">{display_time}</td>
+         <td className="col-md-3 break-all"><a className="topo_name" href={'./topologies/' + topology.cluster + '/' + topology.environ + '/' + topology.name}>{topology.name}</a></td>
+         <td className="col-md-1 topo_status">{topology.status}</td>
+         <td className="col-md-1 topo_cluster">{display_cluster}</td>
+         <td className="col-md-1 topo_runrole break-all">{topology.role}</td>
+         <td className="col-md-1 topo_environ">{display_env}</td>
+         <td className="col-md-1 topo_instances">{display_instances}</td>
+         <td className="col-md-2 topo_releaseversion break-all">{topology.release_version}</td>
+         <td className="col-md-1 topo_submittedby break-all">{topology.submission_user}</td>
+         <td className="col-md-2 topo_submittedat no-break">{display_time}</td>
        </tr>
     );
   }
@@ -94,6 +96,7 @@ var TopologyTable = React.createClass({
                 role: estate.role,
                 has_physical_plan: estate.has_physical_plan,
                 has_tmanager_location: estate.has_tmanager_location,
+                instances: estate.instances,
                 release_version: estate.release_version,
                 submission_time: estate.submission_time,
                 submission_user: estate.submission_user,
@@ -192,6 +195,9 @@ var TopologyTable = React.createClass({
               </th>
               <th onClick={sortBy("environ")} className={sortClass("environ")}>
                 Environ
+              </th>
+              <th onClick={sortBy("instances")} className={sortClass("instances")}>
+                Instances
               </th>
               <th onClick={sortBy("release_version")} className={sortClass("release_version")}>
                 Version

@@ -116,3 +116,20 @@ def test_bolts(topology):
   assert 3 == len(bolts)
   assert ["mock_bolt1", "mock_bolt2", "mock_bolt3"] == \
                    topology.bolt_names()
+
+
+def test_containers(topology):
+  # Set pplan now
+  pplan = MockProto().create_mock_simple_physical_plan()
+  topology.set_physical_plan(pplan)
+
+  assert 1 == len(pplan.instances)
+
+  estate = MockProto().create_mock_execution_state()
+  topology.set_execution_state(estate)
+
+  tracker = MagicMock(Tracker)
+  tracker.config.extra_links = []
+
+  top_info_meta = topology._build_metadata(topology, pplan, estate, tracker.config)
+  assert 1 == top_info_meta.instances
