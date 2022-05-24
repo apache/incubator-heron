@@ -72,43 +72,54 @@ disablePodTemplates: false
 # Support for Voume specification from CLI input
 disableVolumesFromCLI: false
 
-# Number of replicas for storage bookies, memory and storage requirements
-bookieReplicas: 3
-bookieCpuMin: 100m
-bookieCpuMax: 250m
-bookieHeapMemory: 512M
-bookieDirectMemory: 256M
-bookieReadCacheSize: 32
-bookieWriteCacheSize: 32
-bookieJournalCapacity: 5G
-bookieStorageCapacity: 15G
-bookieJournalMaxBackups: 3
-bookieJournalMaxSizeMB: 300
-bookieLogSizeLimit: 10000000
 
 # Number of replicas for zookeeper
 zkReplicas: 3
 
+
 bookkeeper:
   image: apache/bookkeeper:4.13.0
   imagePullPolicy: IfNotPresent
-  
+
   # set storageClassName to "none" to not use storageClassName
   storageClassName: "none"
+
+  replicas: 3
+  createReplicas: true
+  useStatefulSet: true
+  affinityPods: false
+  useVolumeClaimTemplate: true
+
+  logSizeLimit: 10000000
+  useHostNameAsBookieID: true
+  tolerateUnreadyEndpoints: true
+
   prometheus:
     enabled: false
-  # Optional Variables
-  useHostNameAsBookieID: true
-  useStatefulSet: true
-  createReplicas: true
-  affinityPods: false
+
+  resources:
+    cpuMin: 100m
+    cpuMax: 250m
+    heapMemory: 512M
+    directMemory: 256M
+    readCacheSize: 32
+    writeCacheSize: 32
+
   useHostPath: false
-  useVolumeClaimTemplate: true
-  tolerateUnreadyEndpoints: true
+  journal:
+    capacity: 5G
+    maxBackups: 3
+    maxSizeMB: 300
+    hostPath: '/opt/bookkeeper/joural-disk'
+  ledgers:
+    capacity: 15G
+    hostPath: '/opt/bookkeeper/ledgers-disk'
+
 
 zookeeper:
   enabled: true
   minAvailable: 1
+  replicas: 3
   resources:
     requests:
       cpu: 500m

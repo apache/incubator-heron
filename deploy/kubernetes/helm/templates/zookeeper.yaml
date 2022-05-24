@@ -16,7 +16,7 @@
 #  under the License.
 
 {{- $platform := .Values.platform }}
-{{- $zkReplicas := .Values.zkReplicas }}
+{{- $zkReplicas := .Values.zookeeper.replicas }}
 
 apiVersion: policy/v1
 kind: PodDisruptionBudget
