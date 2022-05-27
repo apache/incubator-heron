@@ -27,6 +27,9 @@ import colorlog
 # pylint: disable=invalid-name
 logging.basicConfig()
 Log = logging.getLogger()
+logging.getLogger('javaobj').setLevel(logging.INFO)
+logging.getLogger('httpx').setLevel(logging.INFO)
+logging.getLogger('kazoo').setLevel(logging.INFO)
 
 # time formatter - date - time - UTC offset
 # e.g. "08/16/1988 21:30:00 +1030"
