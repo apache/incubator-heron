@@ -65,8 +65,8 @@ public final class UploaderUtils {
       String tag,
       int version,
       String extension) {
-    return String.format("%s-%s-%s-%d-%d%s",
-        topologyName, role, tag, version, new Random().nextLong(), extension);
+    return String.format("%s-%s-%s-%d%s",
+        topologyName, role, tag, version, extension);
   }
 
   public static void copyToOutputStream(String inFile,
