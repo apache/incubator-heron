@@ -176,14 +176,43 @@ class MockProto:
 
     return topology
 
+  def create_mock_stream_manager(self):
+    stmgr = protoPPlan.StMgr()
+    stmgr.id = "mock_stream1"
+    stmgr.host_name = "local"
+    stmgr.local_endpoint = ":1000"
+    stmgr.local_data_port = 1001
+    stmgr.shell_port = 1002
+    stmgr.data_port = 1003
+    stmgr.cwd = ""
+    stmgr.pid = 1
+    return stmgr
+
+  def create_mock_instance(self, i):
+    instance = protoPPlan.Instance()
+    instance.instance_id = f"mock_instance{i}"
+    instance.stmgr_id = f"mock_stream{i}"
+    instance_info = protoPPlan.InstanceInfo()
+    instance_info.task_id = i
+    instance_info.component_index = i
+    instance_info.component_name = f"mock_spout"
+    instance.info.CopyFrom(instance_info)
+    return instance
+
   def create_mock_simple_physical_plan(
       self,
       spout_parallelism=1,
-      bolt_parallelism=1):
+      bolt_parallelism=1,
+      instances_num=1):
     pplan = protoPPlan.PhysicalPlan()
     pplan.topology.CopyFrom(self.create_mock_simple_topology(
         spout_parallelism,
         bolt_parallelism))
+    pplan.stmgrs.extend([self.create_mock_stream_manager()])
+    instances = []
+    for i in range(instances_num):
+      instances.append(self.create_mock_instance(i+1))
+    pplan.instances.extend(instances)
     return pplan
 
   def create_mock_simple_packing_plan(

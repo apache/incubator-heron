@@ -20,14 +20,15 @@
 ## A reference of https://github.com/apache/incubator-pulsar/blob/master/kubernetes/google-container-engine/bookie.yaml
 
 {{- $platform := .Values.platform }}
-{{- $bookieReplicas := .Values.bookieReplicas }}
-{{- $bookieCpuMin := .Values.bookieCpuMin }}
-{{- $bookieCpuMax := .Values.bookieCpuMax }}
-{{- $bookieHeapMemory := .Values.bookieHeapMemory }}
-{{- $bookieDirectMemory := .Values.bookieDirectMemory }}
-{{- $bookieJournalCapacity := .Values.bookieJournalCapacity }}
-{{- $bookieStorageCapacity := .Values.bookieStorageCapacity }}
-{{- $bookieStorageHostPath := .Values.bookieStorageHostPath }}
+{{- $bookieReplicas := .Values.bookkeeper.replicas }}
+{{- $bookieCpuMin := .Values.bookkeeper.resources.cpuMin }}
+{{- $bookieCpuMax := .Values.bookkeeper.resources.cpuMax }}
+{{- $bookieHeapMemory := .Values.bookkeeper.resources.heapMemory }}
+{{- $bookieDirectMemory := .Values.bookkeeper.resources.directMemory }}
+{{- $bookieJournalCapacity := .Values.bookkeeper.journal.capacity }}
+{{- $bookieJournalHostPath := .Values.bookkeeper.journal.hostPath }}
+{{- $bookieLedgersCapacity := .Values.bookkeeper.ledgers.capacity }}
+{{- $bookieLedgersHostPath := .Values.bookkeeper.ledgers.hostPath }}
 
 apiVersion: v1
 kind: ConfigMap
@@ -42,9 +43,9 @@ data:
   BK_indexDirectories: "/bookkeeper/data/ledgers" 
   BK_zkServers: {{ .Release.Name }}-zookeeper:{{ .Values.zookeeper.clientPort }}
   BK_autoRecoveryDaemonEnabled: "true"
-  BK_journalMaxBackups: "{{ .Values.bookieJournalMaxBackups }}"
-  BK_journalMaxSizeMB: "{{ .Values.bookieJournalMaxSizeMB }}"
-  BK_logSizeLimit: "{{ int64 .Values.bookieLogSizeLimit }}"
+  BK_journalMaxBackups: "{{ .Values.bookkeeper.journal.maxBackups }}"
+  BK_journalMaxSizeMB: "{{ .Values.bookkeeper.journal.maxSizeMB }}"
+  BK_logSizeLimit: "{{ int64 .Values.bookkeeper.logSizeLimit }}"
   {{- if .Values.bookkeeper.useHostNameAsBookieID }}
   BK_useHostNameAsBookieID: "true"
   {{- end }}
@@ -159,10 +160,10 @@ spec:
           # Mount local disks
         - name: journal-disk
           hostPath:
-            path: /bookkeeper/data/journal
+            path: {{ $bookieJournalHostPath }}
         - name: ledgers-disk
           hostPath:
-            path: /bookkeeper/data/ledgers
+            path: {{ $bookieLedgersHostPath }}
 {{- end }}
 
 {{- if .Values.bookkeeper.useVolumeClaimTemplate }}
@@ -194,7 +195,7 @@ spec:
         {{- end }}
         resources:
           requests:
-            storage: {{ $bookieStorageCapacity }}
+            storage: {{ $bookieLedgersCapacity }}
 {{- end }}
 
 ---
