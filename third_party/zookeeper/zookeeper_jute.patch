@@ -1,6 +1,6 @@
-diff -urN apache-zookeeper-3.6.3.orig/zookeeper-client/zookeeper-client-c/generated/zookeeper.jute.c apache-zookeeper-3.6.3.desired/zookeeper-client/zookeeper-client-c/generated/zookeeper.jute.c
---- apache-zookeeper-3.6.3.orig/zookeeper-client/zookeeper-client-c/generated/zookeeper.jute.c	1970-01-01 00:00:00.000000000 +0000
-+++ apache-zookeeper-3.6.3.desired/zookeeper-client/zookeeper-client-c/generated/zookeeper.jute.c	2021-04-18 05:41:30.643935033 +0000
+diff -urN apache-zookeeper-3.8.0.orig/zookeeper-client/zookeeper-client-c/generated/zookeeper.jute.c apache-zookeeper-3.8.0.desired/zookeeper-client/zookeeper-client-c/generated/zookeeper.jute.c
+--- apache-zookeeper-3.8.0.orig/zookeeper-client/zookeeper-client-c/generated/zookeeper.jute.c	1970-01-01 00:00:00.000000000 +0000
++++ apache-zookeeper-3.8.0.desired/zookeeper-client/zookeeper-client-c/generated/zookeeper.jute.c	2021-04-18 05:41:30.643935033 +0000
 @@ -0,0 +1,1622 @@
 +/**
 +* Licensed to the Apache Software Foundation (ASF) under one
@@ -1624,9 +1624,9 @@ diff -urN apache-zookeeper-3.6.3.orig/zookeeper-client/zookeeper-client-c/genera
 +void deallocate_MultiTxn(struct MultiTxn*v){
 +    deallocate_Txn_vector(&v->txns);
 +}
-diff -urN apache-zookeeper-3.6.3.orig/zookeeper-client/zookeeper-client-c/generated/zookeeper.jute.h apache-zookeeper-3.6.3.desired/zookeeper-client/zookeeper-client-c/generated/zookeeper.jute.h
---- apache-zookeeper-3.6.3.orig/zookeeper-client/zookeeper-client-c/generated/zookeeper.jute.h	1970-01-01 00:00:00.000000000 +0000
-+++ apache-zookeeper-3.6.3.desired/zookeeper-client/zookeeper-client-c/generated/zookeeper.jute.h	2021-04-18 05:41:30.647076266 +0000
+diff -urN apache-zookeeper-3.8.0.orig/zookeeper-client/zookeeper-client-c/generated/zookeeper.jute.h apache-zookeeper-3.8.0.desired/zookeeper-client/zookeeper-client-c/generated/zookeeper.jute.h
+--- apache-zookeeper-3.8.0.orig/zookeeper-client/zookeeper-client-c/generated/zookeeper.jute.h	1970-01-01 00:00:00.000000000 +0000
++++ apache-zookeeper-3.8.0.desired/zookeeper-client/zookeeper-client-c/generated/zookeeper.jute.h	2021-04-18 05:41:30.647076266 +0000
 @@ -0,0 +1,595 @@
 +/**
 +* Licensed to the Apache Software Foundation (ASF) under one
