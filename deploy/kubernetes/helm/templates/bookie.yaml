@@ -43,9 +43,6 @@ data:
   BK_indexDirectories: "/bookkeeper/data/ledgers" 
   BK_zkServers: {{ .Release.Name }}-zookeeper:{{ .Values.zookeeper.clientPort }}
   BK_autoRecoveryDaemonEnabled: "true"
-  BK_journalMaxBackups: "{{ .Values.bookkeeper.journal.maxBackups }}"
-  BK_journalMaxSizeMB: "{{ .Values.bookkeeper.journal.maxSizeMB }}"
-  BK_logSizeLimit: "{{ int64 .Values.bookkeeper.logSizeLimit }}"
   {{- if .Values.bookkeeper.useHostNameAsBookieID }}
   BK_useHostNameAsBookieID: "true"
   {{- end }}

@@ -89,8 +89,6 @@ bookkeeper:
   useStatefulSet: true
   affinityPods: false
   useVolumeClaimTemplate: true
-
-  logSizeLimit: 10000000
   useHostNameAsBookieID: true
   tolerateUnreadyEndpoints: true
 
@@ -108,8 +106,6 @@ bookkeeper:
   useHostPath: false
   journal:
     capacity: 5G
-    maxBackups: 3
-    maxSizeMB: 300
     hostPath: '/opt/bookkeeper/joural-disk'
   ledgers:
     capacity: 15G
