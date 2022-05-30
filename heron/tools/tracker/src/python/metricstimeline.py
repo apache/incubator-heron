@@ -84,7 +84,6 @@ async def get_metrics_timeline(
 
   # Form and send the http request.
   url = f"http://{tmanager.host}:{tmanager.stats_port}/stats"
-  Log.debug(f"Making HTTP call to fetch metrics: {url}")
   async with httpx.AsyncClient() as client:
     result = await client.post(url, data=request_parameters.SerializeToString())
 
