@@ -1,7 +1,7 @@
-diff -urN apache-zookeeper-3.8.0.orig/zookeeper-client/zookeeper-client-c/generated/zookeeper.jute.c apache-zookeeper-3.8.0.desired/zookeeper-client/zookeeper-client-c/generated/zookeeper.jute.c
---- apache-zookeeper-3.8.0.orig/zookeeper-client/zookeeper-client-c/generated/zookeeper.jute.c	1970-01-01 00:00:00.000000000 +0000
-+++ apache-zookeeper-3.8.0.desired/zookeeper-client/zookeeper-client-c/generated/zookeeper.jute.c	2021-04-18 05:41:30.643935033 +0000
-@@ -0,0 +1,1622 @@
+diff -ruN apache-zookeeper-3.8.0/zookeeper-client/zookeeper-client-c/generated/zookeeper.jute.c apache-zookeeper-3.8.0.generated/zookeeper-client/zookeeper-client-c/generated/zookeeper.jute.c
+--- apache-zookeeper-3.8.0/zookeeper-client/zookeeper-client-c/generated/zookeeper.jute.c	1969-12-31 19:00:00.000000000 -0500
++++ apache-zookeeper-3.8.0.generated/zookeeper-client/zookeeper-client-c/generated/zookeeper.jute.c	2022-05-31 23:55:06.000000000 -0400
+@@ -0,0 +1,1704 @@
 +/**
 +* Licensed to the Apache Software Foundation (ASF) under one
 +* or more contributor license agreements.  See the NOTICE file
@@ -129,6 +129,26 @@ diff -urN apache-zookeeper-3.8.0.orig/zookeeper-client/zookeeper-client-c/genera
 +    return rc;
 +}
 +void deallocate_StatPersisted(struct StatPersisted*v){
++}
++int serialize_ClientInfo(struct oarchive *out, const char *tag, struct ClientInfo *v){
++    int rc;
++    rc = out->start_record(out, tag);
++    rc = rc ? rc : out->serialize_String(out, "authScheme", &v->authScheme);
++    rc = rc ? rc : out->serialize_String(out, "user", &v->user);
++    rc = rc ? rc : out->end_record(out, tag);
++    return rc;
++}
++int deserialize_ClientInfo(struct iarchive *in, const char *tag, struct ClientInfo*v){
++    int rc;
++    rc = in->start_record(in, tag);
++    rc = rc ? rc : in->deserialize_String(in, "authScheme", &v->authScheme);
++    rc = rc ? rc : in->deserialize_String(in, "user", &v->user);
++    rc = rc ? rc : in->end_record(in, tag);
++    return rc;
++}
++void deallocate_ClientInfo(struct ClientInfo*v){
++    deallocate_String(&v->authScheme);
++    deallocate_String(&v->user);
 +}
 +int serialize_ConnectRequest(struct oarchive *out, const char *tag, struct ConnectRequest *v){
 +    int rc;
@@ -1119,6 +1139,68 @@ diff -urN apache-zookeeper-3.8.0.orig/zookeeper-client/zookeeper-client-c/genera
 +void deallocate_GetEphemeralsResponse(struct GetEphemeralsResponse*v){
 +    deallocate_String_vector(&v->ephemerals);
 +}
++int allocate_ClientInfo_vector(struct ClientInfo_vector *v, int32_t len) {
++    if (!len) {
++        v->count = 0;
++        v->data = 0;
++    } else {
++        v->count = len;
++        v->data = calloc(sizeof(*v->data), len);
++    }
++    return 0;
++}
++int deallocate_ClientInfo_vector(struct ClientInfo_vector *v) {
++    if (v->data) {
++        int32_t i;
++        for(i=0;i<v->count; i++) {
++            deallocate_ClientInfo(&v->data[i]);
++        }
++        free(v->data);
++        v->data = 0;
++    }
++    return 0;
++}
++int serialize_ClientInfo_vector(struct oarchive *out, const char *tag, struct ClientInfo_vector *v)
++{
++    int32_t count = v->count;
++    int rc = 0;
++    int32_t i;
++    rc = out->start_vector(out, tag, &count);
++    for(i=0;i<v->count;i++) {
++    rc = rc ? rc : serialize_ClientInfo(out, "data", &v->data[i]);
++    }
++    rc = rc ? rc : out->end_vector(out, tag);
++    return rc;
++}
++int deserialize_ClientInfo_vector(struct iarchive *in, const char *tag, struct ClientInfo_vector *v)
++{
++    int rc = 0;
++    int32_t i;
++    rc = in->start_vector(in, tag, &v->count);
++    v->data = calloc(v->count, sizeof(*v->data));
++    for(i=0;i<v->count;i++) {
++    rc = rc ? rc : deserialize_ClientInfo(in, "value", &v->data[i]);
++    }
++    rc = in->end_vector(in, tag);
++    return rc;
++}
++int serialize_WhoAmIResponse(struct oarchive *out, const char *tag, struct WhoAmIResponse *v){
++    int rc;
++    rc = out->start_record(out, tag);
++    rc = rc ? rc : serialize_ClientInfo_vector(out, "clientInfo", &v->clientInfo);
++    rc = rc ? rc : out->end_record(out, tag);
++    return rc;
++}
++int deserialize_WhoAmIResponse(struct iarchive *in, const char *tag, struct WhoAmIResponse*v){
++    int rc;
++    rc = in->start_record(in, tag);
++    rc = rc ? rc : deserialize_ClientInfo_vector(in, "clientInfo", &v->clientInfo);
++    rc = rc ? rc : in->end_record(in, tag);
++    return rc;
++}
++void deallocate_WhoAmIResponse(struct WhoAmIResponse*v){
++    deallocate_ClientInfo_vector(&v->clientInfo);
++}
 +int serialize_LearnerInfo(struct oarchive *out, const char *tag, struct LearnerInfo *v){
 +    int rc;
 +    rc = out->start_record(out, tag);
@@ -1624,10 +1706,10 @@ diff -urN apache-zookeeper-3.8.0.orig/zookeeper-client/zookeeper-client-c/genera
 +void deallocate_MultiTxn(struct MultiTxn*v){
 +    deallocate_Txn_vector(&v->txns);
 +}
-diff -urN apache-zookeeper-3.8.0.orig/zookeeper-client/zookeeper-client-c/generated/zookeeper.jute.h apache-zookeeper-3.8.0.desired/zookeeper-client/zookeeper-client-c/generated/zookeeper.jute.h
---- apache-zookeeper-3.8.0.orig/zookeeper-client/zookeeper-client-c/generated/zookeeper.jute.h	1970-01-01 00:00:00.000000000 +0000
-+++ apache-zookeeper-3.8.0.desired/zookeeper-client/zookeeper-client-c/generated/zookeeper.jute.h	2021-04-18 05:41:30.647076266 +0000
-@@ -0,0 +1,595 @@
+diff -ruN apache-zookeeper-3.8.0/zookeeper-client/zookeeper-client-c/generated/zookeeper.jute.h apache-zookeeper-3.8.0.generated/zookeeper-client/zookeeper-client-c/generated/zookeeper.jute.h
+--- apache-zookeeper-3.8.0/zookeeper-client/zookeeper-client-c/generated/zookeeper.jute.h	1969-12-31 19:00:00.000000000 -0500
++++ apache-zookeeper-3.8.0.generated/zookeeper-client/zookeeper-client-c/generated/zookeeper.jute.h	2022-05-31 23:55:06.000000000 -0400
+@@ -0,0 +1,617 @@
 +/**
 +* Licensed to the Apache Software Foundation (ASF) under one
 +* or more contributor license agreements.  See the NOTICE file
@@ -1698,6 +1780,13 @@ diff -urN apache-zookeeper-3.8.0.orig/zookeeper-client/zookeeper-client-c/genera
 +int serialize_StatPersisted(struct oarchive *out, const char *tag, struct StatPersisted *v);
 +int deserialize_StatPersisted(struct iarchive *in, const char *tag, struct StatPersisted*v);
 +void deallocate_StatPersisted(struct StatPersisted*);
++struct ClientInfo {
++    char * authScheme;
++    char * user;
++};
++int serialize_ClientInfo(struct oarchive *out, const char *tag, struct ClientInfo *v);
++int deserialize_ClientInfo(struct iarchive *in, const char *tag, struct ClientInfo*v);
++void deallocate_ClientInfo(struct ClientInfo*);
 +struct ConnectRequest {
 +    int32_t protocolVersion;
 +    int64_t lastZxidSeen;
@@ -2044,6 +2133,21 @@ diff -urN apache-zookeeper-3.8.0.orig/zookeeper-client/zookeeper-client-c/genera
 +int serialize_GetEphemeralsResponse(struct oarchive *out, const char *tag, struct GetEphemeralsResponse *v);
 +int deserialize_GetEphemeralsResponse(struct iarchive *in, const char *tag, struct GetEphemeralsResponse*v);
 +void deallocate_GetEphemeralsResponse(struct GetEphemeralsResponse*);
++struct ClientInfo_vector {
++    int32_t count;
++    struct ClientInfo *data;
++
++};
++int serialize_ClientInfo_vector(struct oarchive *out, const char *tag, struct ClientInfo_vector *v);
++int deserialize_ClientInfo_vector(struct iarchive *in, const char *tag, struct ClientInfo_vector *v);
++int allocate_ClientInfo_vector(struct ClientInfo_vector *v, int32_t len);
++int deallocate_ClientInfo_vector(struct ClientInfo_vector *v);
++struct WhoAmIResponse {
++    struct ClientInfo_vector clientInfo;
++};
++int serialize_WhoAmIResponse(struct oarchive *out, const char *tag, struct WhoAmIResponse *v);
++int deserialize_WhoAmIResponse(struct iarchive *in, const char *tag, struct WhoAmIResponse*v);
++void deallocate_WhoAmIResponse(struct WhoAmIResponse*);
 +struct LearnerInfo {
 +    int64_t serverid;
 +    int32_t protocolVersion;
