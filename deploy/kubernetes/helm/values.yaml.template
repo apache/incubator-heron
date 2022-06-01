@@ -78,7 +78,7 @@ zkReplicas: 3
 
 
 bookkeeper:
-  image: apache/bookkeeper:4.13.0
+  image: apache/bookkeeper:4.14.5
   imagePullPolicy: IfNotPresent
 
   # set storageClassName to "none" to not use storageClassName
