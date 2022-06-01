@@ -61,7 +61,7 @@ spec:
       initContainers:
         # The first time, initialize BK to wipe data for minikube
         - name: bookie-format
-          image: apache/bookkeeper:4.13.0
+          image: apache/bookkeeper:4.14.5
           args: ["/opt/bookkeeper/bin/bookkeeper", "shell", "bookieformat", "-nonInteractive", "-force"]
           command: [ "/bin/bash", "/opt/bookkeeper/scripts/entrypoint.sh" ]
           envFrom:
@@ -74,7 +74,7 @@ spec:
               mountPath: /bookkeeper/data/ledgers
       containers:
         - name: bookie
-          image: apache/bookkeeper:4.13.0
+          image: apache/bookkeeper:4.14.5
           resources:
             requests:
               memory: "1Gi"

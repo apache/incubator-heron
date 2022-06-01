@@ -23,7 +23,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Random;
 
 /**
  * Utility used by Uploader
@@ -65,8 +64,8 @@ public final class UploaderUtils {
       String tag,
       int version,
       String extension) {
-    return String.format("%s-%s-%s-%d-%d%s",
-        topologyName, role, tag, version, new Random().nextLong(), extension);
+    return String.format("%s-%s-%s-%d%s",
+        topologyName, role, tag, version, extension);
   }
 
   public static void copyToOutputStream(String inFile,

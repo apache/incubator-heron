@@ -37,19 +37,26 @@ public class UploaderUtilsTest {
 
   @Test
   public void testGenerateFilename() throws Exception {
-    int expectedUniqueFilename = 10000;
+    int requestsForFilename = 2;
     String topologyName = "topologyName";
     String role = "role";
     String tag = "";
     int version = -1;
     Set<String> filenames = new HashSet<>();
-    for (int i = 0; i < expectedUniqueFilename; i++) {
+    for (int i = 0; i < requestsForFilename; i++) {
       filenames.add(UploaderUtils.generateFilename(
           topologyName, role, tag, version, ""));
     }
 
-    // All filenames should be unique
-    Assert.assertEquals(expectedUniqueFilename, filenames.size());
+    // There should not be multiple entries
+    Assert.assertEquals(1, filenames.size());
+
+    int newVersion = 1;
+    filenames.add(UploaderUtils.generateFilename(
+        topologyName, role, tag, newVersion, ""));
+
+    // Each version should provide a unique filename
+    Assert.assertEquals(2, filenames.size());
   }
 
   @Test
