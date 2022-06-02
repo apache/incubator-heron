@@ -66,10 +66,10 @@ class Tracker:
     def on_topologies_watch(state_manager: StateManager, topologies: List[str]) -> None:
       """watch topologies"""
       topologies = set(topologies)
-      Log.info(f"State watch triggered for topologies of {state_manager.name}.")
-      Log.debug(f"Received topologies: {state_manager.name}, {topologies}")
-      cached_names = [t.name for t in self.get_stmgr_topologies(state_manager.name)]
-      Log.debug(f"Existing topologies: {state_manager.name}, {cached_names}")
+      Log.info("State watch triggered for topologies of %s." % state_manager.name)
+      Log.debug("Received topologies: %s, %s" % (state_manager.name, topologies))
+      cached_names = {t.name for t in self.get_stmgr_topologies(state_manager.name)}
+      Log.debug("Existing topologies: %s, %s" % (state_manager.name, cached_names))
       for name in cached_names:
         if name not in topologies:
           Log.info(f"Removing topology: {name} in rootpath: {state_manager.rootpath}")
@@ -132,12 +132,12 @@ class Tracker:
         Log.info(f"Adding new topology: {topology_name}, state_manager: {state_manager.name}")
         self.topologies.append(topology)
 
-      # Set watches on the pplan, execution_state, tmanager and scheduler_location.
-      state_manager.get_pplan(topology_name, topology.set_physical_plan)
-      state_manager.get_packing_plan(topology_name, topology.set_packing_plan)
-      state_manager.get_execution_state(topology_name, topology.set_execution_state)
-      state_manager.get_tmanager(topology_name, topology.set_tmanager)
-      state_manager.get_scheduler_location(topology_name, topology.set_scheduler_location)
+    # Set watches on the pplan, execution_state, tmanager and scheduler_location.
+    state_manager.get_pplan(topology_name, topology.set_physical_plan)
+    state_manager.get_packing_plan(topology_name, topology.set_packing_plan)
+    state_manager.get_execution_state(topology_name, topology.set_execution_state)
+    state_manager.get_tmanager(topology_name, topology.set_tmanager)
+    state_manager.get_scheduler_location(topology_name, topology.set_scheduler_location)
 
   def remove_topology(self, topology_name: str, state_manager_name: str) -> None:
     """
