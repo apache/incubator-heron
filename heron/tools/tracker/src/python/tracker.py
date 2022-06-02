@@ -66,10 +66,10 @@ class Tracker:
     def on_topologies_watch(state_manager: StateManager, topologies: List[str]) -> None:
       """watch topologies"""
       topologies = set(topologies)
-      Log.info("State watch triggered for topologies of %s.", state_manager.name)
-      Log.debug("Received topologies: %s, %s", state_manager.name, topologies)
+      Log.info(f"State watch triggered for topologies of {state_manager.name}.")
+      Log.debug(f"Received topologies: {state_manager.name}, {topologies}")
       cached_names = {t.name for t in self.get_stmgr_topologies(state_manager.name)}
-      Log.debug("Existing topologies: %s, %s", state_manager.name, cached_names)
+      Log.debug(f"Existing topologies: {state_manager.name}, {cached_names}")
       for name in cached_names:
         if name not in topologies:
           Log.info(f"Removing topology: {name} in rootpath: {state_manager.rootpath}")
