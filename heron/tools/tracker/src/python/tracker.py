@@ -121,15 +121,13 @@ class Tracker:
     """
     return [t for t in self.topologies if t.state_manager_name == name]
 
-  # pylint: disable=R1732
   def add_new_topology(self, state_manager: StateManager, topology_name: str) -> None:
     """
     Adds a topology in the local cache, and sets a watch
     on any changes on the topology.
     """
     topology = Topology(topology_name, state_manager.name, self.config)
-    try:
-      self.lock.acquire()
+    with self.lock:
       if topology not in self.topologies:
         Log.info(f"Adding new topology: {topology_name}, state_manager: {state_manager.name}")
         self.topologies.append(topology)
@@ -140,16 +138,12 @@ class Tracker:
       state_manager.get_execution_state(topology_name, topology.set_execution_state)
       state_manager.get_tmanager(topology_name, topology.set_tmanager)
       state_manager.get_scheduler_location(topology_name, topology.set_scheduler_location)
-    finally:
-      self.lock.release()
 
-  # pylint: disable=R1732
   def remove_topology(self, topology_name: str, state_manager_name: str) -> None:
     """
     Removes the topology from the local cache.
     """
-    try:
-      self.lock.acquire()
+    with self.lock:
       self.topologies = [
           topology
           for topology in self.topologies
@@ -158,8 +152,6 @@ class Tracker:
               and topology.state_manager_name == state_manager_name
           )
       ]
-    finally:
-      self.lock.release()
 
   def filtered_topologies(
       self,

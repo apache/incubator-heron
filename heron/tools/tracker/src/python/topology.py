@@ -601,8 +601,7 @@ class Topology:
       scheduler_location=...,
     ) -> None:
     """Atomically update this instance to avoid inconsistent reads/writes from other threads."""
-    try:
-      self.lock.acquire()
+    with self.lock:
       t_state = TopologyState(
           physical_plan=self.physical_plan if physical_plan is ... else physical_plan,
           packing_plan=self.packing_plan if packing_plan is ... else packing_plan,
@@ -627,8 +626,6 @@ class Topology:
         update["environ"] = t_state.execution_state.environ
       # atomic update using python GIL
       self.__dict__.update(update)
-    finally:
-      self.lock.release()
 
   def set_physical_plan(self, physical_plan: PhysicalPlan_pb) -> None:
     """ set physical plan """
