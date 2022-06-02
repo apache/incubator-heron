@@ -103,14 +103,10 @@ class Tracker:
                   and t.cluster == cluster
                   and (not role or t.execution_state.role == role)
                   and t.environ == environ]
-    if len(topologies) == 0:
+    if len(topologies) != 1:
       if role is not None:
         raise KeyError(f"Topology not found for {cluster}, {role}, {environ}, {topology_name}")
       raise KeyError(f"Topology not found for {cluster}, {environ}, {topology_name}")
-
-    if len(topologies) > 1:
-      Log.warn(f"Topology {len(topologies)} found for {cluster}, {role}, {environ}, "
-               f"{topology_name}")
 
     # There is only one topology which is returned.
     return topologies[0]
