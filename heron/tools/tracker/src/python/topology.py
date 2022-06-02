@@ -591,7 +591,6 @@ class Topology:
         status_port=tmanager.stats_port,
     )
 
-  # pylint: disable=R1732
   def _update(
       self,
       physical_plan=...,
