@@ -19,7 +19,7 @@
 if [ "$#" -ne 1 ]; then
   echo "Usage: $0 zookeeper-<version-number>"
   echo "Example:"
-  echo "$ $0 zookeeper-3.5.8"
+  echo "$ $0 zookeeper-3.8.0"
   exit 1
 fi
 
