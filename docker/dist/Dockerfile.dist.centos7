@@ -21,8 +21,9 @@ FROM centos:centos7
 ENV TARGET_PLATFORM linux
 ENV LC_ALL en_US.utf8
 
-RUN yum -y upgrade && yum -y install centos-release-scl-rh
-RUN yum -y install epel-release \
+RUN yum -y upgrade \
+    && yum -y install centos-release-scl-rh \
+    && yum -y install epel-release \
     && yum -y install \
     curl \
     java-11-openjdk-headless \
