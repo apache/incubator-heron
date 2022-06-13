@@ -19,6 +19,7 @@
 #  under the License.
 
 ''' tracker.py '''
+import threading
 import sys
 
 from functools import partial
@@ -42,12 +43,13 @@ class Tracker:
   by handlers.
   """
 
-  __slots__ = ["topologies", "config", "state_managers"]
+  __slots__ = ["topologies", "config", "state_managers", "lock"]
 
   def __init__(self, config: Config):
     self.config = config
     self.topologies: List[Topology] = []
     self.state_managers = []
+    self.lock = threading.RLock()
 
   def sync_topologies(self) -> None:
     """
@@ -64,17 +66,17 @@ class Tracker:
     def on_topologies_watch(state_manager: StateManager, topologies: List[str]) -> None:
       """watch topologies"""
       topologies = set(topologies)
-      Log.info("State watch triggered for topologies.")
-      Log.debug("Topologies: %s", topologies)
+      Log.debug("Received topologies: %s, %s", state_manager.name, topologies)
       cached_names = {t.name for t in self.get_stmgr_topologies(state_manager.name)}
-      Log.debug("Existing topologies: %s", cached_names)
-      for name in cached_names - topologies:
-        Log.info("Removing topology: %s in rootpath: %s",
-                 name, state_manager.rootpath)
-        self.remove_topology(name, state_manager.name)
+      Log.debug(f"Existing topologies: {state_manager.name}, {cached_names}")
+      for name in cached_names:
+        if name not in topologies:
+          Log.info(f"Removing topology: {name} in rootpath: {state_manager.rootpath}")
+          self.remove_topology(name, state_manager.name)
 
-      for name in topologies - cached_names:
-        self.add_new_topology(state_manager, name)
+      for name in topologies:
+        if name not in cached_names:
+          self.add_new_topology(state_manager, name)
 
     for state_manager in self.state_managers:
       # The callback function with the bound state_manager as first variable
@@ -114,17 +116,16 @@ class Tracker:
     """
     return [t for t in self.topologies if t.state_manager_name == name]
 
-  def add_new_topology(self, state_manager, topology_name: str) -> None:
+  def add_new_topology(self, state_manager: StateManager, topology_name: str) -> None:
     """
     Adds a topology in the local cache, and sets a watch
     on any changes on the topology.
     """
     topology = Topology(topology_name, state_manager.name, self.config)
-    Log.info("Adding new topology: %s, state_manager: %s",
-             topology_name, state_manager.name)
-    # populate the cache before making it addressable in the topologies to
-    # avoid races due to concurrent execution
-    self.topologies.append(topology)
+    with self.lock:
+      if topology not in self.topologies:
+        Log.info(f"Adding new topology: {topology_name}, state_manager: {state_manager.name}")
+        self.topologies.append(topology)
 
     # Set watches on the pplan, execution_state, tmanager and scheduler_location.
     state_manager.get_pplan(topology_name, topology.set_physical_plan)
@@ -137,14 +138,15 @@ class Tracker:
     """
     Removes the topology from the local cache.
     """
-    self.topologies = [
-        topology
-        for topology in self.topologies
-        if not (
-            topology.name == topology_name
-            and topology.state_manager_name == state_manager_name
-        )
-    ]
+    with self.lock:
+      self.topologies = [
+          topology
+          for topology in self.topologies
+          if not (
+              topology.name == topology_name
+              and topology.state_manager_name == state_manager_name
+          )
+      ]
 
   def filtered_topologies(
       self,

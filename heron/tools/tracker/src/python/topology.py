@@ -22,7 +22,9 @@
 import dataclasses
 import json
 import string
+import threading
 
+from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
 from copy import deepcopy
 import networkx
@@ -220,6 +222,7 @@ class TopologyState:
   execution_state: Optional[ExecutionState_pb]
 
 # pylint: disable=too-many-instance-attributes
+@dataclass(init=False)
 class Topology:
   """
   Class Topology
@@ -241,8 +244,16 @@ class Topology:
     self.id: Optional[int] = None
     self.tracker_config: Config = tracker_config
     # this maps pb2 structs to structures returned via API endpoints
-    # it is repopulated every time one of the pb2 roperties is updated
+    # it is repopulated every time one of the pb2 properties is updated
     self.info: Optional[TopologyInfo] = None
+    self.lock = threading.RLock()
+
+  def __eq__(self, o):
+    return isinstance(o, Topology) \
+           and o.name == self.name \
+           and o.state_manager_name == self.state_manager_name \
+           and o.cluster == self.cluster \
+           and o.environ == self.environ
 
   @staticmethod
   def _render_extra_links(extra_links, topology, execution_state: ExecutionState_pb) -> None:
@@ -589,30 +600,31 @@ class Topology:
       scheduler_location=...,
     ) -> None:
     """Atomically update this instance to avoid inconsistent reads/writes from other threads."""
-    t_state = TopologyState(
-        physical_plan=self.physical_plan if physical_plan is ... else physical_plan,
-        packing_plan=self.packing_plan if packing_plan is ... else packing_plan,
-        execution_state=self.execution_state if execution_state is ... else execution_state,
-        tmanager=self.tmanager if tmanager is ... else tmanager,
-        scheduler_location=(
-            self.scheduler_location
-            if scheduler_location is ... else
-            scheduler_location
-        ),
-    )
-    if t_state.physical_plan:
-      id_ = t_state.physical_plan.topology.id
-    elif t_state.packing_plan:
-      id_ = t_state.packing_plan.id
-    else:
-      id_ = None
+    with self.lock:
+      t_state = TopologyState(
+          physical_plan=self.physical_plan if physical_plan is ... else physical_plan,
+          packing_plan=self.packing_plan if packing_plan is ... else packing_plan,
+          execution_state=self.execution_state if execution_state is ... else execution_state,
+          tmanager=self.tmanager if tmanager is ... else tmanager,
+          scheduler_location=self.scheduler_location \
+              if scheduler_location is ... else scheduler_location,
+      )
+      if t_state.physical_plan:
+        id_ = t_state.physical_plan.topology.id
+      elif t_state.packing_plan:
+        id_ = t_state.packing_plan.id
+      else:
+        id_ = None
 
-    info = self._rebuild_info(t_state)
-    update = dataclasses.asdict(t_state)
-    update["info"] = info
-    update["id"] = id_
-    # atomic update using python GIL
-    self.__dict__.update(update)
+      info = self._rebuild_info(t_state)
+      update = dataclasses.asdict(t_state)
+      update["info"] = info
+      update["id"] = id_
+      if t_state.execution_state:
+        update["cluster"] = t_state.execution_state.cluster
+        update["environ"] = t_state.execution_state.environ
+      # atomic update using python GIL
+      self.__dict__.update(update)
 
   def set_physical_plan(self, physical_plan: PhysicalPlan_pb) -> None:
     """ set physical plan """
