@@ -69,7 +69,7 @@ mkdir -p $OUTPUT_DIR/$VERSION_TAG/heron-kafka-bolt
 
 echo "Copy heron-api artifacts ... "
 cp -p -f ./release/heron-api-$VERSION_TAG.pom $OUTPUT_DIR/$VERSION_TAG/heron-api/
-cp -p -f ./bazel-bin/heron/api/src/java/api-java-low-level-functional.jar $OUTPUT_DIR/$VERSION_TAG/heron-api/heron-api-$VERSION_TAG.jar
+cp -p -f ./bazel-bin/heron/api/src/java/api-shaded.jar $OUTPUT_DIR/$VERSION_TAG/heron-api/heron-api-$VERSION_TAG.jar
 cp -p -f ./bazel-bin/heron/api/src/java/heron-api-javadoc.zip $OUTPUT_DIR/$VERSION_TAG/heron-api/heron-api-$VERSION_TAG-javadoc.jar
 cp -p -f ./bazel-bin/heron/api/src/java/libapi-java-low-level-functional-src.jar $OUTPUT_DIR/$VERSION_TAG/heron-api/heron-api-$VERSION_TAG-sources.jar
 
