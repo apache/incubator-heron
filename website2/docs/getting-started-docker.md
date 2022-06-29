@@ -30,16 +30,16 @@ The official Apache Heron Docker image is located at the link below
 In one terminal execute to start Heron in a container
 
 ```bash
-$ docker run -it  --rm \ 
-   -p 8889:8889 \ 
-   -p 8888:8888 \ 
-   --name local-heron \ 
+$ docker run -it  --rm \
+   -p 8889:8889 \
+   -p 8888:8888 \
+   --name local-heron \
    apache/heron:0.20.4-incubating supervisord --nodaemon
 ```
 In another terminal execute the following to deploy a job:
 ```bash
-$ docker exec -it \ 
-   local-heron \ 
+$ docker exec -it \
+   local-heron \
    bash -c "heron submit sandbox  /heron/examples/heron-eco-examples.jar org.apache.heron.eco.Eco --eco-config-file /heron/examples/heron_wordcount.yaml"
 ```
 
