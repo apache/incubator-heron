@@ -34,9 +34,19 @@ cat ./maven/heron-no-kryo.template.pom | \
                             <version>3.12.0</version>\
                         </dependency>\
                         <dependency>\
-                            <groupId>org.glassfish.jersey.media</groupId>\
-                             <artifactId>jersey-media-jaxb</artifactId>\
-                              <version>2.25.1</version>\
+                          <groupId>com.google.protobuf</groupId>\
+                            <artifactId>protobuf-java</artifactId>\
+                            <version>3.16.1</version>\
+                        </dependency>\
+                        <dependency>\
+                          <groupId>javax.xml.bind</groupId>\
+                            <artifactId>jaxb-api</artifactId>\
+                            <version>2.3.0</version>\
+                        </dependency>\
+                        <dependency>\
+                          <groupId>org.slf4j</groupId>\
+                            <artifactId>jul-to-slf4j</artifactId>\
+                            <version>1.7.36</version>\
                         </dependency>", $0); print}' | \
     xmllint --format - \
     >> ./heron-api-$1.pom
