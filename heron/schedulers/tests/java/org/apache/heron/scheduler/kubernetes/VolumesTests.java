@@ -244,7 +244,7 @@ public class VolumesTests {
     final String volumeMode = "VolumeMode";
     final String path = "/path/to/mount/";
     final String subPath = "/sub/path/to/mount/";
-    final Map<String, String> labels = V1Controller.getPersistentVolumeClaimLabels(topologyName);
+    final Map<String, String> labels = KubernetesShim.getPersistentVolumeClaimLabels(topologyName);
 
     final Map<KubernetesConstants.VolumeConfigKeys, String> volOneConfig =
         new HashMap<KubernetesConstants.VolumeConfigKeys, String>() {

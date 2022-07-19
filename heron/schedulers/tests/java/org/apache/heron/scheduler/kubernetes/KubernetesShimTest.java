@@ -71,7 +71,7 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doReturn;
 
 @RunWith(MockitoJUnitRunner.class)
-public class V1ControllerTest {
+public class KubernetesShimTest {
 
   private static final String TOPOLOGY_NAME = "topology-name";
   private static final String CONFIGMAP_NAME = "CONFIG-MAP-NAME";
@@ -124,19 +124,19 @@ public class V1ControllerTest {
       .build();
 
   @Spy
-  private final V1Controller v1ControllerWithPodTemplate =
-      new V1Controller(CONFIG_WITH_POD_TEMPLATE, RUNTIME);
+  private final KubernetesShim v1ControllerWithPodTemplate =
+      new KubernetesShim(CONFIG_WITH_POD_TEMPLATE, RUNTIME);
 
   @Spy
-  private final V1Controller v1ControllerPodTemplate =
-      new V1Controller(configDisabledPodTemplate, RUNTIME);
+  private final KubernetesShim v1ControllerPodTemplate =
+      new KubernetesShim(configDisabledPodTemplate, RUNTIME);
 
   @Rule
   public final ExpectedException expectedException = ExpectedException.none();
 
   @Test
   public void testLoadPodFromTemplateDefault() {
-    final V1Controller v1ControllerNoPodTemplate = new V1Controller(CONFIG, RUNTIME);
+    final KubernetesShim v1ControllerNoPodTemplate = new KubernetesShim(CONFIG, RUNTIME);
     final V1PodTemplateSpec defaultPodSpec = new V1PodTemplateSpec();
 
     final V1PodTemplateSpec podSpecExecutor = v1ControllerNoPodTemplate.loadPodFromTemplate(true);
@@ -237,7 +237,7 @@ public class V1ControllerTest {
         .build();
 
     // Test case container.
-    // Input: ConfigMap to setup mock V1Controller, Boolean flag for executor/manager switch.
+    // Input: ConfigMap to setup mock KubernetesShim, Boolean flag for executor/manager switch.
     // Output: The expected error message.
     final List<TestTuple<Pair<V1ConfigMap, Boolean>, String>> testCases = new LinkedList<>();
     testCases.add(new TestTuple<>("Executor invalid Pod Template",
@@ -314,7 +314,7 @@ public class V1ControllerTest {
         .build();
 
     // Test case container.
-    // Input: ConfigMap to setup mock V1Controller, Boolean flag for executor/manager switch.
+    // Input: ConfigMap to setup mock KubernetesShim, Boolean flag for executor/manager switch.
     // Output: The expected Pod template as a string.
     final List<TestTuple<Pair<V1ConfigMap, Boolean>, String>> testCases = new LinkedList<>();
     testCases.add(new TestTuple<>("Executor valid Pod Template",
@@ -357,7 +357,7 @@ public class V1ControllerTest {
 
 
     // Test case container.
-    // Input: ConfigMap to setup mock V1Controller, Boolean flag for executor/manager switch.
+    // Input: ConfigMap to setup mock KubernetesShim, Boolean flag for executor/manager switch.
     // Output: The expected Pod template as a string.
     final List<TestTuple<Pair<V1ConfigMap, Boolean>, String>> testCases = new LinkedList<>();
     testCases.add(new TestTuple<>("Executor invalid Pod Template",
@@ -409,7 +409,7 @@ public class V1ControllerTest {
     final Config testConfig = Config.newBuilder()
         .put(POD_TEMPLATE_LOCATION_EXECUTOR, CONFIGMAP_POD_TEMPLATE_NAME)
         .build();
-    final V1Controller v1Controller = new V1Controller(testConfig, RUNTIME);
+    final KubernetesShim v1Controller = new KubernetesShim(testConfig, RUNTIME);
     final Pair<String, String> expected = new Pair<>(CONFIGMAP_NAME, POD_TEMPLATE_NAME);
 
     // Correct parsing
@@ -422,7 +422,7 @@ public class V1ControllerTest {
     expectedException.expect(TopologySubmissionException.class);
     final Config testConfig = Config.newBuilder()
         .put(POD_TEMPLATE_LOCATION_EXECUTOR, ".POD-TEMPLATE-NAME").build();
-    V1Controller v1Controller = new V1Controller(testConfig, RUNTIME);
+    KubernetesShim v1Controller = new KubernetesShim(testConfig, RUNTIME);
     v1Controller.getPodTemplateLocation(true);
   }
 
@@ -431,7 +431,7 @@ public class V1ControllerTest {
     expectedException.expect(TopologySubmissionException.class);
     final Config testConfig = Config.newBuilder()
         .put(POD_TEMPLATE_LOCATION_EXECUTOR, "CONFIGMAP-NAME.").build();
-    V1Controller v1Controller = new V1Controller(testConfig, RUNTIME);
+    KubernetesShim v1Controller = new KubernetesShim(testConfig, RUNTIME);
     v1Controller.getPodTemplateLocation(true);
   }
 
@@ -440,7 +440,7 @@ public class V1ControllerTest {
     expectedException.expect(TopologySubmissionException.class);
     final Config testConfig = Config.newBuilder()
         .put(POD_TEMPLATE_LOCATION_EXECUTOR, "CONFIGMAP-NAMEPOD-TEMPLATE-NAME").build();
-    V1Controller v1Controller = new V1Controller(testConfig, RUNTIME);
+    KubernetesShim v1Controller = new KubernetesShim(testConfig, RUNTIME);
     v1Controller.getPodTemplateLocation(true);
   }
 
@@ -450,9 +450,9 @@ public class V1ControllerTest {
     final int portNumberkept = 1111;
     final int numInstances = 3;
     final List<V1ContainerPort> expectedPortsBase =
-        Collections.unmodifiableList(V1Controller.getExecutorPorts());
+        Collections.unmodifiableList(KubernetesShim.getExecutorPorts());
     final List<V1ContainerPort> debugPorts =
-        Collections.unmodifiableList(V1Controller.getDebuggingPorts(numInstances));
+        Collections.unmodifiableList(KubernetesShim.getDebuggingPorts(numInstances));
     final List<V1ContainerPort> inputPortsBase = Collections.unmodifiableList(
         Arrays.asList(
             new V1ContainerPort()
@@ -509,7 +509,7 @@ public class V1ControllerTest {
   @Test
   public void testConfigureContainerEnvVars() {
     final List<V1EnvVar> heronEnvVars =
-        Collections.unmodifiableList(V1Controller.getExecutorEnvVars());
+        Collections.unmodifiableList(KubernetesShim.getExecutorEnvVars());
     final V1EnvVar additionEnvVar = new V1EnvVar()
         .name("env-variable-to-be-kept")
         .valueFrom(new V1EnvVarSource()
@@ -686,7 +686,7 @@ public class V1ControllerTest {
         .put(KubernetesContext.KUBERNETES_CONTAINER_VOLUME_MOUNT_NAME, pathNameDefault)
         .put(KubernetesContext.KUBERNETES_CONTAINER_VOLUME_MOUNT_PATH, pathDefault)
         .build();
-    final V1Controller controllerWithMounts = new V1Controller(configWithVolumes, RUNTIME);
+    final KubernetesShim controllerWithMounts = new KubernetesShim(configWithVolumes, RUNTIME);
     final V1VolumeMount volumeDefault = new V1VolumeMountBuilder()
         .withName(pathNameDefault)
         .withMountPath(pathDefault)
@@ -707,7 +707,8 @@ public class V1ControllerTest {
     );
 
     // No Volume Mounts set.
-    V1Controller controllerDoNotSetMounts = new V1Controller(Config.newBuilder().build(), RUNTIME);
+    KubernetesShim controllerDoNotSetMounts =
+        new KubernetesShim(Config.newBuilder().build(), RUNTIME);
     V1Container containerNoSetMounts = new V1Container();
     controllerDoNotSetMounts.mountVolumeIfPresent(containerNoSetMounts);
     Assert.assertNull(containerNoSetMounts.getVolumeMounts());
@@ -743,7 +744,7 @@ public class V1ControllerTest {
         .effect("Some Effect")
         .tolerationSeconds(5L);
     final List<V1Toleration> expectedTolerationBase =
-        Collections.unmodifiableList(V1Controller.getTolerations());
+        Collections.unmodifiableList(KubernetesShim.getTolerations());
     final List<V1Toleration> inputTolerationsBase = Collections.unmodifiableList(
         Arrays.asList(
             new V1Toleration()
@@ -838,7 +839,7 @@ public class V1ControllerTest {
     final V1PersistentVolumeClaim claimOne = new V1PersistentVolumeClaimBuilder()
         .withNewMetadata()
           .withName(volumeNameOne)
-          .withLabels(V1Controller.getPersistentVolumeClaimLabels(topologyName))
+          .withLabels(KubernetesShim.getPersistentVolumeClaimLabels(topologyName))
         .endMetadata()
         .withNewSpec()
           .withStorageClassName(storageClassName)
@@ -853,7 +854,7 @@ public class V1ControllerTest {
     final V1PersistentVolumeClaim claimStatic = new V1PersistentVolumeClaimBuilder()
         .withNewMetadata()
           .withName(volumeNameStatic)
-          .withLabels(V1Controller.getPersistentVolumeClaimLabels(topologyName))
+          .withLabels(KubernetesShim.getPersistentVolumeClaimLabels(topologyName))
         .endMetadata()
         .withNewSpec()
           .withStorageClassName("")

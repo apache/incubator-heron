@@ -219,7 +219,7 @@ public final class KubernetesContext extends Context {
   @VisibleForTesting
   protected static Map<String, Map<KubernetesConstants.VolumeConfigKeys, String>>
       getVolumeConfigs(final Config config, final String prefix, final boolean isExecutor) {
-    final Logger LOG = Logger.getLogger(V1Controller.class.getName());
+    final Logger LOG = Logger.getLogger(KubernetesShim.class.getName());
 
     final String prefixKey = String.format(prefix,
         isExecutor ? KubernetesConstants.EXECUTOR_NAME : KubernetesConstants.MANAGER_NAME);

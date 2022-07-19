@@ -84,10 +84,10 @@ import okhttp3.Response;
 
 import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
 
-public class V1Controller extends KubernetesController {
+public class KubernetesShim extends KubernetesController {
 
   private static final Logger LOG =
-      Logger.getLogger(V1Controller.class.getName());
+      Logger.getLogger(KubernetesShim.class.getName());
 
   private static final String ENV_SHARD_ID = "SHARD_ID";
 
@@ -101,7 +101,7 @@ public class V1Controller extends KubernetesController {
    * @param configuration <code>topology</code> configurations.
    * @param runtimeConfiguration Kubernetes runtime configurations.
    */
-  V1Controller(Config configuration, Config runtimeConfiguration) {
+  KubernetesShim(Config configuration, Config runtimeConfiguration) {
     super(configuration, runtimeConfiguration);
 
     isPodTemplateDisabled = KubernetesContext.getPodTemplateDisabled(configuration);
