@@ -19,5 +19,12 @@
 
 package org.apache.heron.scheduler.kubernetes;
 
+import org.junit.Assert;
+import org.junit.Test;
+
 public class StatefulSetTest {
+  @Test
+  public void testEmpty() {
+    Assert.assertTrue(true);
+  }
 }
