@@ -27,14 +27,49 @@ import org.apache.heron.spi.packing.Resource;
 import io.kubernetes.client.openapi.models.V1StatefulSet;
 
 final class StatefulSet {
-  private final Map<String, StatefulSetFactory> statefulsets = new HashMap<>();
+  private final Map<Type, IStatefulSetFactory> statefulsets = new HashMap<>();
 
   public enum Type {
     Executor,
     Manager
   }
 
-  interface StatefulSetFactory {
-    V1StatefulSet create(Type type, Resource containerResources, int numberOfInstances);
+  private StatefulSet() {
+    statefulsets.put(Type.Executor, new ExecutorFactory());
+    statefulsets.put(Type.Manager, new ManagerFactory());
+  }
+
+  interface IStatefulSetFactory {
+    V1StatefulSet create(Resource containerResources, int numberOfInstances);
+  }
+
+  /**
+   * Creates configured <code>Executor</code> or <code>Manager</code> <code>Stateful Set</code>.
+   * @param type One of <code>Executor</code> or <code>Manager</code>
+   * @param containerResources The container system resource configurations.
+   * @param numberOfInstances The container count.
+   * @return Fully configured <code>Stateful Set</code> or <code>null</code> on invalid <code>type</code>.
+   */
+  V1StatefulSet create(Type type, Resource containerResources, int numberOfInstances) {
+    if (statefulsets.containsKey(type)) {
+      return statefulsets.get(type).create(containerResources, numberOfInstances);
+    }
+    return null;
+  }
+
+  static class ExecutorFactory implements IStatefulSetFactory {
+
+    @Override
+    public V1StatefulSet create(Resource containerResources, int numberOfInstances) {
+      return null;
+    }
+  }
+
+  static class ManagerFactory implements IStatefulSetFactory {
+
+    @Override
+    public V1StatefulSet create(Resource containerResources, int numberOfInstances) {
+      return null;
+    }
   }
 }
