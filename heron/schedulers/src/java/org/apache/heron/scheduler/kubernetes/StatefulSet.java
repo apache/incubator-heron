@@ -118,10 +118,19 @@ final class StatefulSet {
     }
   }
 
+  @VisibleForTesting
+  protected void setClusterConfigs(Configs configs) {
+    this.clusterConfigs = configs;
+  }
 
-  private StatefulSet() {
+  @VisibleForTesting
+  protected StatefulSet() {
     statefulsets.put(Type.Executor, new ExecutorFactory());
     statefulsets.put(Type.Manager, new ManagerFactory());
+  }
+
+  static StatefulSet get() {
+    return new StatefulSet();
   }
 
   interface IStatefulSetFactory {
@@ -149,7 +158,7 @@ final class StatefulSet {
     @Override
     public V1StatefulSet create(Configs configs, Resource containerResources,
                                 int numberOfInstances) {
-      clusterConfigs = configs;
+      setClusterConfigs(configs);
       return createStatefulSet(containerResources, numberOfInstances, true);
     }
   }
@@ -159,7 +168,7 @@ final class StatefulSet {
     @Override
     public V1StatefulSet create(Configs configs, Resource containerResources,
                                 int numberOfInstances) {
-      clusterConfigs = configs;
+      setClusterConfigs(configs);
       return createStatefulSet(containerResources, numberOfInstances, false);
     }
   }
