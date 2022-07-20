@@ -409,11 +409,11 @@ public class KubernetesShimTest {
     final Config testConfig = Config.newBuilder()
         .put(POD_TEMPLATE_LOCATION_EXECUTOR, CONFIGMAP_POD_TEMPLATE_NAME)
         .build();
-    final KubernetesShim v1Controller = new KubernetesShim(testConfig, RUNTIME);
+    final KubernetesShim kubernetesShim = new KubernetesShim(testConfig, RUNTIME);
     final Pair<String, String> expected = new Pair<>(CONFIGMAP_NAME, POD_TEMPLATE_NAME);
 
     // Correct parsing
-    final Pair<String, String> actual = v1Controller.getPodTemplateLocation(true);
+    final Pair<String, String> actual = kubernetesShim.getPodTemplateLocation(true);
     Assert.assertEquals(expected, actual);
   }
 
@@ -422,8 +422,8 @@ public class KubernetesShimTest {
     expectedException.expect(TopologySubmissionException.class);
     final Config testConfig = Config.newBuilder()
         .put(POD_TEMPLATE_LOCATION_EXECUTOR, ".POD-TEMPLATE-NAME").build();
-    KubernetesShim v1Controller = new KubernetesShim(testConfig, RUNTIME);
-    v1Controller.getPodTemplateLocation(true);
+    KubernetesShim kubernetesShim = new KubernetesShim(testConfig, RUNTIME);
+    kubernetesShim.getPodTemplateLocation(true);
   }
 
   @Test
@@ -431,8 +431,8 @@ public class KubernetesShimTest {
     expectedException.expect(TopologySubmissionException.class);
     final Config testConfig = Config.newBuilder()
         .put(POD_TEMPLATE_LOCATION_EXECUTOR, "CONFIGMAP-NAME.").build();
-    KubernetesShim v1Controller = new KubernetesShim(testConfig, RUNTIME);
-    v1Controller.getPodTemplateLocation(true);
+    KubernetesShim kubernetesShim = new KubernetesShim(testConfig, RUNTIME);
+    kubernetesShim.getPodTemplateLocation(true);
   }
 
   @Test
@@ -440,8 +440,8 @@ public class KubernetesShimTest {
     expectedException.expect(TopologySubmissionException.class);
     final Config testConfig = Config.newBuilder()
         .put(POD_TEMPLATE_LOCATION_EXECUTOR, "CONFIGMAP-NAMEPOD-TEMPLATE-NAME").build();
-    KubernetesShim v1Controller = new KubernetesShim(testConfig, RUNTIME);
-    v1Controller.getPodTemplateLocation(true);
+    KubernetesShim kubernetesShim = new KubernetesShim(testConfig, RUNTIME);
+    kubernetesShim.getPodTemplateLocation(true);
   }
 
   @Test
