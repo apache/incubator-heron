@@ -88,6 +88,14 @@ final class StatefulSet {
     private final V1PodTemplateSpec managerPodTemplateSpec;
     private final V1PodTemplateSpec executorPodTemplateSpec;
 
+    /**
+     * <code>Configs</code> contains the Kubernetes cluster configurations as well as the
+     * <code>Pod Templates</code> for the <code>Executor</code>s and <code>Manager</code>.
+     * @param configuration The cluster configurations contains items relating/stored in the Kubernetes cluster.
+     * @param runtimeConfiguration The runtime configurations contain items such as the topology name.
+     * @param managerPodTemplateSpec The <code>Pod Template Spec</code> configurations for a <code>Manager</code>.
+     * @param executorPodTemplateSpec The <code>Pod Template Spec</code> configurations for the <code>Executor</code>s.
+     */
     Configs(Config configuration, Config runtimeConfiguration,
             V1PodTemplateSpec managerPodTemplateSpec, V1PodTemplateSpec executorPodTemplateSpec) {
       this.topologyName = Runtime.topologyName(runtimeConfiguration);
