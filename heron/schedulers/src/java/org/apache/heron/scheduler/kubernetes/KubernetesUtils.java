@@ -95,7 +95,7 @@ final class KubernetesUtils {
     return Math.round(value * scale) / scale;
   }
 
-  static class V1ControllerUtils<T> {
+  static class CommonUtils<T> {
     private static final Logger LOG = Logger.getLogger(KubernetesShim.class.getName());
 
     /**

@@ -67,48 +67,48 @@ public class KubernetesUtilsTest {
         additionEnvVar
     );
 
-    KubernetesUtils.V1ControllerUtils<V1EnvVar> v1ControllerUtils =
-        new KubernetesUtils.V1ControllerUtils<>();
+    KubernetesUtils.CommonUtils<V1EnvVar> commonUtils =
+        new KubernetesUtils.CommonUtils<>();
 
     // Both input lists are null.
     Assert.assertNull("Both input lists are <null>",
-         v1ControllerUtils.mergeListsDedupe(null, null,
+         commonUtils.mergeListsDedupe(null, null,
              Comparator.comparing(V1EnvVar::getName), description));
 
     // <primaryList> is <null>.
     Assert.assertEquals("<primaryList> is null and <secondaryList> should be returned",
         inputEnvVars,
-        v1ControllerUtils.mergeListsDedupe(null, inputEnvVars,
+        commonUtils.mergeListsDedupe(null, inputEnvVars,
             Comparator.comparing(V1EnvVar::getName), description));
 
     // <primaryList> is empty.
     Assert.assertEquals("<primaryList> is empty and <secondaryList> should be returned",
         inputEnvVars,
-        v1ControllerUtils.mergeListsDedupe(new LinkedList<>(), inputEnvVars,
+        commonUtils.mergeListsDedupe(new LinkedList<>(), inputEnvVars,
             Comparator.comparing(V1EnvVar::getName), description));
 
     // <secondaryList> is <null>.
     Assert.assertEquals("<secondaryList> is null and <primaryList> should be returned",
         heronEnvVars,
-        v1ControllerUtils.mergeListsDedupe(heronEnvVars, null,
+        commonUtils.mergeListsDedupe(heronEnvVars, null,
             Comparator.comparing(V1EnvVar::getName), description));
 
     // <secondaryList> is empty.
     Assert.assertEquals("<secondaryList> is empty and <primaryList> should be returned",
         heronEnvVars,
-        v1ControllerUtils.mergeListsDedupe(heronEnvVars, new LinkedList<>(),
+        commonUtils.mergeListsDedupe(heronEnvVars, new LinkedList<>(),
             Comparator.comparing(V1EnvVar::getName), description));
 
     // Merge both lists.
     Assert.assertTrue("<primaryList> and <secondaryList> merged and deduplicated",
         expectedEnvVars.containsAll(
-            v1ControllerUtils.mergeListsDedupe(heronEnvVars, inputEnvVars,
+            commonUtils.mergeListsDedupe(heronEnvVars, inputEnvVars,
                 Comparator.comparing(V1EnvVar::getName), description)));
 
     // Expect thrown error.
     String errorMessage = "";
     try {
-      v1ControllerUtils.mergeListsDedupe(heronEnvVars, Collections.singletonList(new V1EnvVar()),
+      commonUtils.mergeListsDedupe(heronEnvVars, Collections.singletonList(new V1EnvVar()),
           Comparator.comparing(V1EnvVar::getName), description);
     } catch (TopologySubmissionException e) {
       errorMessage = e.getMessage();

@@ -434,8 +434,7 @@ final class StatefulSet {
    */
   @VisibleForTesting
   protected void configureTolerations(final V1PodSpec spec) {
-    KubernetesUtils.V1ControllerUtils<V1Toleration> utils =
-        new KubernetesUtils.V1ControllerUtils<>();
+    KubernetesUtils.CommonUtils<V1Toleration> utils = new KubernetesUtils.CommonUtils<>();
     spec.setTolerations(
         utils.mergeListsDedupe(getTolerations(), spec.getTolerations(),
             Comparator.comparing(V1Toleration::getKey), "Pod Specification Tolerations")
@@ -624,7 +623,7 @@ final class StatefulSet {
   @VisibleForTesting
   protected void configureContainerEnvVars(final V1Container container) {
     // Deduplicate on var name with Heron defaults take precedence.
-    KubernetesUtils.V1ControllerUtils<V1EnvVar> utils = new KubernetesUtils.V1ControllerUtils<>();
+    KubernetesUtils.CommonUtils<V1EnvVar> utils = new KubernetesUtils.CommonUtils<>();
     container.setEnv(
         utils.mergeListsDedupe(getExecutorEnvVars(), container.getEnv(),
           Comparator.comparing(V1EnvVar::getName), "Pod Template Environment Variables")
@@ -668,8 +667,7 @@ final class StatefulSet {
     }
 
     // Set container ports. Deduplicate using port number with Heron defaults taking precedence.
-    KubernetesUtils.V1ControllerUtils<V1ContainerPort> utils =
-        new KubernetesUtils.V1ControllerUtils<>();
+    KubernetesUtils.CommonUtils<V1ContainerPort> utils = new KubernetesUtils.CommonUtils<>();
     container.setPorts(
         utils.mergeListsDedupe(getExecutorPorts(), container.getPorts(),
             Comparator.comparing(V1ContainerPort::getContainerPort), "Pod Template Ports")
@@ -725,8 +723,7 @@ final class StatefulSet {
               .mountPath(KubernetesContext.getContainerVolumeMountPath(config));
 
       // Merge volume mounts. Deduplicate using mount's name with Heron defaults taking precedence.
-      KubernetesUtils.V1ControllerUtils<V1VolumeMount> utils =
-          new KubernetesUtils.V1ControllerUtils<>();
+      KubernetesUtils.CommonUtils<V1VolumeMount> utils = new KubernetesUtils.CommonUtils<>();
       container.setVolumeMounts(
           utils.mergeListsDedupe(Collections.singletonList(mount), container.getVolumeMounts(),
               Comparator.comparing(V1VolumeMount::getName), "Pod Template Volume Mounts")
@@ -891,15 +888,13 @@ final class StatefulSet {
 
     // Deduplicate on Names with Persistent Volume Claims taking precedence.
 
-    KubernetesUtils.V1ControllerUtils<V1Volume> utilsVolumes =
-        new KubernetesUtils.V1ControllerUtils<>();
+    KubernetesUtils.CommonUtils<V1Volume> utilsVolumes = new KubernetesUtils.CommonUtils<>();
     podSpec.setVolumes(
         utilsVolumes.mergeListsDedupe(volumes, podSpec.getVolumes(),
             Comparator.comparing(V1Volume::getName),
             "Pod with Volumes"));
 
-    KubernetesUtils.V1ControllerUtils<V1VolumeMount> utilsMounts =
-        new KubernetesUtils.V1ControllerUtils<>();
+    KubernetesUtils.CommonUtils<V1VolumeMount> utilsMounts = new KubernetesUtils.CommonUtils<>();
     executor.setVolumeMounts(
         utilsMounts.mergeListsDedupe(volumeMounts, executor.getVolumeMounts(),
             Comparator.comparing(V1VolumeMount::getName),
