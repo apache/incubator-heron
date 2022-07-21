@@ -150,8 +150,18 @@ public class KubernetesShim extends KubernetesController {
     for (PackingPlan.ContainerPlan containerPlan : packingPlan.getContainers()) {
       numberOfInstances = Math.max(numberOfInstances, containerPlan.getInstances().size());
     }
-    final V1StatefulSet executors = createStatefulSet(containerResource, numberOfInstances, true);
-    final V1StatefulSet manager = createStatefulSet(containerResource, numberOfInstances, false);
+
+    final StatefulSet.Configs clusterConfigs = new StatefulSet.Configs(
+        getConfiguration(),
+        getRuntimeConfiguration(),
+        loadPodFromTemplate(false),
+        loadPodFromTemplate(true)
+        );
+
+    final V1StatefulSet executors = StatefulSet.get()
+        .create(StatefulSet.Type.Executor, clusterConfigs, containerResource, numberOfInstances);
+    final V1StatefulSet manager = StatefulSet.get()
+        .create(StatefulSet.Type.Manager, clusterConfigs, containerResource, numberOfInstances);
 
     try {
       appsClient.createNamespacedStatefulSet(getNamespace(), executors, null,
