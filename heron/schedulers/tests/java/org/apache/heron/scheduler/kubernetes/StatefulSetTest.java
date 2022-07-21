@@ -63,6 +63,7 @@ import io.kubernetes.client.openapi.models.V1VolumeMountBuilder;
 
 import static org.apache.heron.scheduler.kubernetes.KubernetesConstants.VolumeConfigKeys;
 import static org.apache.heron.scheduler.kubernetes.KubernetesUtils.TestTuple;
+import static org.apache.heron.scheduler.kubernetes.StatefulSet.getTolerations;
 
 @RunWith(MockitoJUnitRunner.class)
 public class StatefulSetTest {
@@ -428,7 +429,7 @@ public class StatefulSetTest {
         .effect("Some Effect")
         .tolerationSeconds(5L);
     final List<V1Toleration> expectedTolerationBase =
-        Collections.unmodifiableList(KubernetesShim.getTolerations());
+        Collections.unmodifiableList(getTolerations());
     final List<V1Toleration> inputTolerationsBase = Collections.unmodifiableList(
         Arrays.asList(
             new V1Toleration()
@@ -526,7 +527,7 @@ public class StatefulSetTest {
     final V1PersistentVolumeClaim claimOne = new V1PersistentVolumeClaimBuilder()
         .withNewMetadata()
           .withName(volumeNameOne)
-          .withLabels(KubernetesShim.getPersistentVolumeClaimLabels(topologyName))
+          .withLabels(StatefulSet.getPersistentVolumeClaimLabels(topologyName))
         .endMetadata()
         .withNewSpec()
           .withStorageClassName(storageClassName)
@@ -541,7 +542,7 @@ public class StatefulSetTest {
     final V1PersistentVolumeClaim claimStatic = new V1PersistentVolumeClaimBuilder()
         .withNewMetadata()
           .withName(volumeNameStatic)
-          .withLabels(KubernetesShim.getPersistentVolumeClaimLabels(topologyName))
+          .withLabels(StatefulSet.getPersistentVolumeClaimLabels(topologyName))
         .endMetadata()
         .withNewSpec()
           .withStorageClassName("")
