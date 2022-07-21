@@ -43,14 +43,14 @@ public class KubernetesUtilsTest {
   public void testMergeListsDedupe() {
     final String description = "Pod Template Environment Variables";
     final List<V1EnvVar> heronEnvVars =
-        Collections.unmodifiableList(KubernetesShim.getExecutorEnvVars());
+        Collections.unmodifiableList(StatefulSet.getExecutorEnvVars());
     final V1EnvVar additionEnvVar = new V1EnvVar()
         .name("env-variable-to-be-kept")
         .valueFrom(new V1EnvVarSource()
             .fieldRef(new V1ObjectFieldSelector()
                 .fieldPath("env-variable-was-kept")));
     final List<V1EnvVar> expectedEnvVars = Collections.unmodifiableList(
-        new LinkedList<V1EnvVar>(KubernetesShim.getExecutorEnvVars()) {{
+        new LinkedList<V1EnvVar>(StatefulSet.getExecutorEnvVars()) {{
           add(additionEnvVar);
         }});
     final List<V1EnvVar> inputEnvVars = Arrays.asList(
