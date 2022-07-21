@@ -95,8 +95,8 @@ final class KubernetesUtils {
     return Math.round(value * scale) / scale;
   }
 
-  static class V1ControllerUtils<T> {
-    private static final Logger LOG = Logger.getLogger(V1Controller.class.getName());
+  static class CommonUtils<T> {
+    private static final Logger LOG = Logger.getLogger(KubernetesShim.class.getName());
 
     /**
      * Merge two lists by keeping all values in the <code>primaryList</code> and de-duplicating values in

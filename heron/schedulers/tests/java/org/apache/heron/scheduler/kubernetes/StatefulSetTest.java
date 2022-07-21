@@ -29,28 +29,22 @@ import java.util.Map;
 import com.google.common.collect.ImmutableMap;
 
 import org.junit.Assert;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
-import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.heron.common.basics.ByteAmount;
 import org.apache.heron.common.basics.Pair;
-import org.apache.heron.scheduler.TopologySubmissionException;
-import org.apache.heron.scheduler.kubernetes.KubernetesUtils.TestTuple;
 import org.apache.heron.spi.common.Config;
 import org.apache.heron.spi.common.Key;
 import org.apache.heron.spi.packing.Resource;
 
 import io.kubernetes.client.custom.Quantity;
-import io.kubernetes.client.openapi.models.V1ConfigMap;
-import io.kubernetes.client.openapi.models.V1ConfigMapBuilder;
 import io.kubernetes.client.openapi.models.V1Container;
 import io.kubernetes.client.openapi.models.V1ContainerBuilder;
 import io.kubernetes.client.openapi.models.V1ContainerPort;
+import io.kubernetes.client.openapi.models.V1ContainerPortBuilder;
 import io.kubernetes.client.openapi.models.V1EnvVar;
 import io.kubernetes.client.openapi.models.V1EnvVarSource;
 import io.kubernetes.client.openapi.models.V1ObjectFieldSelector;
@@ -59,6 +53,7 @@ import io.kubernetes.client.openapi.models.V1PersistentVolumeClaimBuilder;
 import io.kubernetes.client.openapi.models.V1PodSpec;
 import io.kubernetes.client.openapi.models.V1PodSpecBuilder;
 import io.kubernetes.client.openapi.models.V1PodTemplateSpec;
+import io.kubernetes.client.openapi.models.V1PodTemplateSpecBuilder;
 import io.kubernetes.client.openapi.models.V1ResourceRequirements;
 import io.kubernetes.client.openapi.models.V1Toleration;
 import io.kubernetes.client.openapi.models.V1Volume;
@@ -67,49 +62,22 @@ import io.kubernetes.client.openapi.models.V1VolumeMount;
 import io.kubernetes.client.openapi.models.V1VolumeMountBuilder;
 
 import static org.apache.heron.scheduler.kubernetes.KubernetesConstants.VolumeConfigKeys;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.doReturn;
+import static org.apache.heron.scheduler.kubernetes.KubernetesUtils.TestTuple;
+import static org.apache.heron.scheduler.kubernetes.StatefulSet.getTolerations;
 
 @RunWith(MockitoJUnitRunner.class)
-public class V1ControllerTest {
-
+public class StatefulSetTest {
   private static final String TOPOLOGY_NAME = "topology-name";
   private static final String CONFIGMAP_NAME = "CONFIG-MAP-NAME";
   private static final String POD_TEMPLATE_NAME = "POD-TEMPLATE-NAME";
   private static final String CONFIGMAP_POD_TEMPLATE_NAME =
       String.format("%s.%s", CONFIGMAP_NAME, POD_TEMPLATE_NAME);
-  private static final String POD_TEMPLATE_VALID =
-      "apiVersion: apps/v1\n"
-          + "kind: PodTemplate\n"
-          + "metadata:\n"
-          + "  name: heron-tracker\n"
-          + "  namespace: default\n"
-          + "template:\n"
-          + "  metadata:\n"
-          + "    labels:\n"
-          + "      app: heron-tracker\n"
-          + "  spec:\n"
-          + "    containers:\n"
-          + "      - name: heron-tracker\n"
-          + "        image: apache/heron:latest\n"
-          + "        ports:\n"
-          + "          - containerPort: 8888\n"
-          + "            name: api-port\n"
-          + "        resources:\n"
-          + "          requests:\n"
-          + "            cpu: \"100m\"\n"
-          + "            memory: \"200M\"\n"
-          + "          limits:\n"
-          + "            cpu: \"400m\"\n"
-          + "            memory: \"512M\"";
   private static final String POD_TEMPLATE_LOCATION_EXECUTOR =
       String.format(KubernetesContext.KUBERNETES_POD_TEMPLATE_LOCATION,
           KubernetesConstants.EXECUTOR_NAME);
   private static final String POD_TEMPLATE_LOCATION_MANAGER =
       String.format(KubernetesContext.KUBERNETES_POD_TEMPLATE_LOCATION,
           KubernetesConstants.MANAGER_NAME);
-
-  private static final Config CONFIG = Config.newBuilder().build();
   private static final Config CONFIG_WITH_POD_TEMPLATE = Config.newBuilder()
       .put(POD_TEMPLATE_LOCATION_EXECUTOR, CONFIGMAP_POD_TEMPLATE_NAME)
       .put(POD_TEMPLATE_LOCATION_MANAGER, CONFIGMAP_POD_TEMPLATE_NAME)
@@ -117,332 +85,30 @@ public class V1ControllerTest {
   private static final Config RUNTIME = Config.newBuilder()
       .put(Key.TOPOLOGY_NAME, TOPOLOGY_NAME)
       .build();
-  private final Config configDisabledPodTemplate = Config.newBuilder()
-      .put(POD_TEMPLATE_LOCATION_EXECUTOR, CONFIGMAP_POD_TEMPLATE_NAME)
-      .put(POD_TEMPLATE_LOCATION_MANAGER, CONFIGMAP_POD_TEMPLATE_NAME)
-      .put(KubernetesContext.KUBERNETES_POD_TEMPLATE_DISABLED, "true")
+  private static final StatefulSet STATEFUL_SET = new StatefulSet();
+  private static final V1PodTemplateSpec POD_TEMPLATE_SPEC = new V1PodTemplateSpecBuilder()
+      .withNewMetadata()
+        .withLabels(Collections.singletonMap("app", "heron-tracker"))
+      .endMetadata()
+      .withNewSpec()
+      .withContainers(new V1ContainerBuilder()
+          .withName("heron-tracker")
+          .withImage("apache/heron:latest")
+          .withPorts(new V1ContainerPortBuilder()
+              .withName("api-port")
+              .withContainerPort(8888)
+            .build())
+          .withNewResources()
+          .withRequests(Collections.singletonMap("100m", new Quantity("200M")))
+          .withLimits(Collections.singletonMap("400m", new Quantity("512M")))
+          .endResources()
+          .build())
+      .endSpec()
       .build();
+  private static final StatefulSet.Configs CLUSTER_CONFIGS =
+      new StatefulSet.Configs(CONFIG_WITH_POD_TEMPLATE, RUNTIME,
+        POD_TEMPLATE_SPEC, POD_TEMPLATE_SPEC);
 
-  @Spy
-  private final V1Controller v1ControllerWithPodTemplate =
-      new V1Controller(CONFIG_WITH_POD_TEMPLATE, RUNTIME);
-
-  @Spy
-  private final V1Controller v1ControllerPodTemplate =
-      new V1Controller(configDisabledPodTemplate, RUNTIME);
-
-  @Rule
-  public final ExpectedException expectedException = ExpectedException.none();
-
-  @Test
-  public void testLoadPodFromTemplateDefault() {
-    final V1Controller v1ControllerNoPodTemplate = new V1Controller(CONFIG, RUNTIME);
-    final V1PodTemplateSpec defaultPodSpec = new V1PodTemplateSpec();
-
-    final V1PodTemplateSpec podSpecExecutor = v1ControllerNoPodTemplate.loadPodFromTemplate(true);
-    Assert.assertEquals("Default Pod Spec for Executor", defaultPodSpec, podSpecExecutor);
-
-    final V1PodTemplateSpec podSpecManager = v1ControllerNoPodTemplate.loadPodFromTemplate(false);
-    Assert.assertEquals("Default Pod Spec for Manager", defaultPodSpec, podSpecManager);
-  }
-
-  @Test
-  public void testLoadPodFromTemplateNullConfigMap() {
-    final List<TestTuple<Boolean, String>> testCases = new LinkedList<>();
-    testCases.add(new TestTuple<>("Executor not found", true, "unable to locate"));
-    testCases.add(new TestTuple<>("Manager not found", false, "unable to locate"));
-
-    for (TestTuple<Boolean, String> testCase : testCases) {
-      doReturn(null)
-          .when(v1ControllerWithPodTemplate)
-          .getConfigMap(anyString());
-
-      String message = "";
-      try {
-        v1ControllerWithPodTemplate.loadPodFromTemplate(testCase.input);
-      } catch (TopologySubmissionException e) {
-        message = e.getMessage();
-      }
-      Assert.assertTrue(testCase.description, message.contains(testCase.expected));
-    }
-  }
-
-  @Test
-  public void testLoadPodFromTemplateNoConfigMap() {
-    final List<TestTuple<Boolean, String>> testCases = new LinkedList<>();
-    testCases.add(new TestTuple<>("Executor no ConfigMap", true, "Failed to locate Pod Template"));
-    testCases.add(new TestTuple<>("Manager no ConfigMap", false, "Failed to locate Pod Template"));
-
-    for (TestTuple<Boolean, String> testCase : testCases) {
-      doReturn(new V1ConfigMap())
-          .when(v1ControllerWithPodTemplate)
-          .getConfigMap(anyString());
-
-      String message = "";
-      try {
-        v1ControllerWithPodTemplate.loadPodFromTemplate(testCase.input);
-      } catch (TopologySubmissionException e) {
-        message = e.getMessage();
-      }
-      Assert.assertTrue(testCase.description, message.contains(testCase.expected));
-    }
-  }
-
-  @Test
-  public void testLoadPodFromTemplateNoTargetConfigMap() {
-    final List<TestTuple<Boolean, String>> testCases = new LinkedList<>();
-    testCases.add(new TestTuple<>("Executor no target ConfigMap",
-        true, "Failed to locate Pod Template"));
-    testCases.add(new TestTuple<>("Manager no target ConfigMap",
-        false, "Failed to locate Pod Template"));
-
-    final V1ConfigMap configMapNoTargetData = new V1ConfigMapBuilder()
-        .withNewMetadata()
-          .withName(CONFIGMAP_NAME)
-        .endMetadata()
-        .addToData("Dummy Key", "Dummy Value")
-        .build();
-
-    for (TestTuple<Boolean, String> testCase : testCases) {
-      doReturn(configMapNoTargetData)
-          .when(v1ControllerWithPodTemplate)
-          .getConfigMap(anyString());
-
-      String message = "";
-      try {
-        v1ControllerWithPodTemplate.loadPodFromTemplate(testCase.input);
-      } catch (TopologySubmissionException e) {
-        message = e.getMessage();
-      }
-      Assert.assertTrue(testCase.description, message.contains(testCase.expected));
-    }
-  }
-
-  @Test
-  public void testLoadPodFromTemplateBadTargetConfigMap() {
-    // ConfigMap with target ConfigMap and an invalid Pod Template.
-    final V1ConfigMap configMapInvalidPod = new V1ConfigMapBuilder()
-        .withNewMetadata()
-          .withName(CONFIGMAP_NAME)
-        .endMetadata()
-        .addToData(POD_TEMPLATE_NAME, "Dummy Value")
-        .build();
-
-    // ConfigMap with target ConfigMaps and an empty Pod Template.
-    final V1ConfigMap configMapEmptyPod = new V1ConfigMapBuilder()
-        .withNewMetadata()
-        .withName(CONFIGMAP_NAME)
-        .endMetadata()
-        .addToData(POD_TEMPLATE_NAME, "")
-        .build();
-
-    // Test case container.
-    // Input: ConfigMap to setup mock V1Controller, Boolean flag for executor/manager switch.
-    // Output: The expected error message.
-    final List<TestTuple<Pair<V1ConfigMap, Boolean>, String>> testCases = new LinkedList<>();
-    testCases.add(new TestTuple<>("Executor invalid Pod Template",
-        new Pair<>(configMapInvalidPod, true), "Error parsing"));
-    testCases.add(new TestTuple<>("Manager invalid Pod Template",
-        new Pair<>(configMapInvalidPod, false), "Error parsing"));
-    testCases.add(new TestTuple<>("Executor empty Pod Template",
-        new Pair<>(configMapEmptyPod, true), "Error parsing"));
-    testCases.add(new TestTuple<>("Manager empty Pod Template",
-        new Pair<>(configMapEmptyPod, false), "Error parsing"));
-
-    // Test loop.
-    for (TestTuple<Pair<V1ConfigMap, Boolean>, String> testCase : testCases) {
-      doReturn(testCase.input.first)
-          .when(v1ControllerWithPodTemplate)
-          .getConfigMap(anyString());
-
-      String message = "";
-      try {
-        v1ControllerWithPodTemplate.loadPodFromTemplate(testCase.input.second);
-      } catch (TopologySubmissionException e) {
-        message = e.getMessage();
-      }
-      Assert.assertTrue(testCase.description, message.contains(testCase.expected));
-    }
-  }
-
-  @Test
-  public void testLoadPodFromTemplateValidConfigMap() {
-    final String expected =
-        "        containers: [class V1Container {\n"
-        + "            args: null\n"
-        + "            command: null\n"
-        + "            env: null\n"
-        + "            envFrom: null\n"
-        + "            image: apache/heron:latest\n"
-        + "            imagePullPolicy: null\n"
-        + "            lifecycle: null\n"
-        + "            livenessProbe: null\n"
-        + "            name: heron-tracker\n"
-        + "            ports: [class V1ContainerPort {\n"
-        + "                containerPort: 8888\n"
-        + "                hostIP: null\n"
-        + "                hostPort: null\n"
-        + "                name: api-port\n"
-        + "                protocol: null\n"
-        + "            }]\n"
-        + "            readinessProbe: null\n"
-        + "            resources: class V1ResourceRequirements {\n"
-        + "                limits: {cpu=Quantity{number=0.400, format=DECIMAL_SI}, "
-        + "memory=Quantity{number=512000000, format=DECIMAL_SI}}\n"
-        + "                requests: {cpu=Quantity{number=0.100, format=DECIMAL_SI}, "
-        + "memory=Quantity{number=200000000, format=DECIMAL_SI}}\n"
-        + "            }\n"
-        + "            securityContext: null\n"
-        + "            startupProbe: null\n"
-        + "            stdin: null\n"
-        + "            stdinOnce: null\n"
-        + "            terminationMessagePath: null\n"
-        + "            terminationMessagePolicy: null\n"
-        + "            tty: null\n"
-        + "            volumeDevices: null\n"
-        + "            volumeMounts: null\n"
-        + "            workingDir: null\n"
-        + "        }]";
-
-
-    // ConfigMap with valid Pod Template.
-    final V1ConfigMap configMapValidPod = new V1ConfigMapBuilder()
-        .withNewMetadata()
-          .withName(CONFIGMAP_NAME)
-        .endMetadata()
-        .addToData(POD_TEMPLATE_NAME, POD_TEMPLATE_VALID)
-        .build();
-
-    // Test case container.
-    // Input: ConfigMap to setup mock V1Controller, Boolean flag for executor/manager switch.
-    // Output: The expected Pod template as a string.
-    final List<TestTuple<Pair<V1ConfigMap, Boolean>, String>> testCases = new LinkedList<>();
-    testCases.add(new TestTuple<>("Executor valid Pod Template",
-        new Pair<>(configMapValidPod, true), expected));
-    testCases.add(new TestTuple<>("Manager valid Pod Template",
-        new Pair<>(configMapValidPod, false), expected));
-
-    // Test loop.
-    for (TestTuple<Pair<V1ConfigMap, Boolean>, String> testCase : testCases) {
-      doReturn(testCase.input.first)
-          .when(v1ControllerWithPodTemplate)
-          .getConfigMap(anyString());
-
-      V1PodTemplateSpec podTemplateSpec = v1ControllerWithPodTemplate.loadPodFromTemplate(true);
-
-      Assert.assertTrue(podTemplateSpec.toString().contains(testCase.expected));
-    }
-  }
-
-  @Test
-  public void testLoadPodFromTemplateInvalidConfigMap() {
-    // ConfigMap with an invalid Pod Template.
-    final String invalidPodTemplate =
-        "apiVersion: apps/v1\n"
-            + "kind: InvalidTemplate\n"
-            + "metadata:\n"
-            + "  name: heron-tracker\n"
-            + "  namespace: default\n"
-            + "template:\n"
-            + "  metadata:\n"
-            + "    labels:\n"
-            + "      app: heron-tracker\n"
-            + "  spec:\n";
-    final V1ConfigMap configMap = new V1ConfigMapBuilder()
-        .withNewMetadata()
-          .withName(CONFIGMAP_NAME)
-        .endMetadata()
-        .addToData(POD_TEMPLATE_NAME, invalidPodTemplate)
-        .build();
-
-
-    // Test case container.
-    // Input: ConfigMap to setup mock V1Controller, Boolean flag for executor/manager switch.
-    // Output: The expected Pod template as a string.
-    final List<TestTuple<Pair<V1ConfigMap, Boolean>, String>> testCases = new LinkedList<>();
-    testCases.add(new TestTuple<>("Executor invalid Pod Template",
-        new Pair<>(configMap, true), "Error parsing"));
-    testCases.add(new TestTuple<>("Manager invalid Pod Template",
-        new Pair<>(configMap, false), "Error parsing"));
-
-    // Test loop.
-    for (TestTuple<Pair<V1ConfigMap, Boolean>, String> testCase : testCases) {
-      doReturn(testCase.input.first)
-          .when(v1ControllerWithPodTemplate)
-          .getConfigMap(anyString());
-
-      String message = "";
-      try {
-        v1ControllerWithPodTemplate.loadPodFromTemplate(testCase.input.second);
-      } catch (TopologySubmissionException e) {
-        message = e.getMessage();
-      }
-      Assert.assertTrue(message.contains(testCase.expected));
-    }
-  }
-
-  @Test
-  public void testDisablePodTemplates() {
-    // ConfigMap with valid Pod Template.
-    V1ConfigMap configMapValidPod = new V1ConfigMapBuilder()
-        .withNewMetadata()
-          .withName(CONFIGMAP_NAME)
-        .endMetadata()
-        .addToData(POD_TEMPLATE_NAME, POD_TEMPLATE_VALID)
-        .build();
-    final String expected = "Pod Templates are disabled";
-    String message = "";
-    doReturn(configMapValidPod)
-        .when(v1ControllerPodTemplate)
-        .getConfigMap(anyString());
-
-    try {
-      v1ControllerPodTemplate.loadPodFromTemplate(true);
-    } catch (TopologySubmissionException e) {
-      message = e.getMessage();
-    }
-    Assert.assertTrue(message.contains(expected));
-  }
-
-  @Test
-  public void testGetPodTemplateLocationPassing() {
-    final Config testConfig = Config.newBuilder()
-        .put(POD_TEMPLATE_LOCATION_EXECUTOR, CONFIGMAP_POD_TEMPLATE_NAME)
-        .build();
-    final V1Controller v1Controller = new V1Controller(testConfig, RUNTIME);
-    final Pair<String, String> expected = new Pair<>(CONFIGMAP_NAME, POD_TEMPLATE_NAME);
-
-    // Correct parsing
-    final Pair<String, String> actual = v1Controller.getPodTemplateLocation(true);
-    Assert.assertEquals(expected, actual);
-  }
-
-  @Test
-  public void testGetPodTemplateLocationNoConfigMap() {
-    expectedException.expect(TopologySubmissionException.class);
-    final Config testConfig = Config.newBuilder()
-        .put(POD_TEMPLATE_LOCATION_EXECUTOR, ".POD-TEMPLATE-NAME").build();
-    V1Controller v1Controller = new V1Controller(testConfig, RUNTIME);
-    v1Controller.getPodTemplateLocation(true);
-  }
-
-  @Test
-  public void testGetPodTemplateLocationNoPodTemplate() {
-    expectedException.expect(TopologySubmissionException.class);
-    final Config testConfig = Config.newBuilder()
-        .put(POD_TEMPLATE_LOCATION_EXECUTOR, "CONFIGMAP-NAME.").build();
-    V1Controller v1Controller = new V1Controller(testConfig, RUNTIME);
-    v1Controller.getPodTemplateLocation(true);
-  }
-
-  @Test
-  public void testGetPodTemplateLocationNoDelimiter() {
-    expectedException.expect(TopologySubmissionException.class);
-    final Config testConfig = Config.newBuilder()
-        .put(POD_TEMPLATE_LOCATION_EXECUTOR, "CONFIGMAP-NAMEPOD-TEMPLATE-NAME").build();
-    V1Controller v1Controller = new V1Controller(testConfig, RUNTIME);
-    v1Controller.getPodTemplateLocation(true);
-  }
 
   @Test
   public void testConfigureContainerPorts() {
@@ -450,9 +116,9 @@ public class V1ControllerTest {
     final int portNumberkept = 1111;
     final int numInstances = 3;
     final List<V1ContainerPort> expectedPortsBase =
-        Collections.unmodifiableList(V1Controller.getExecutorPorts());
+        Collections.unmodifiableList(StatefulSet.getExecutorPorts());
     final List<V1ContainerPort> debugPorts =
-        Collections.unmodifiableList(V1Controller.getDebuggingPorts(numInstances));
+        Collections.unmodifiableList(StatefulSet.getDebuggingPorts(numInstances));
     final List<V1ContainerPort> inputPortsBase = Collections.unmodifiableList(
         Arrays.asList(
             new V1ContainerPort()
@@ -463,9 +129,12 @@ public class V1ControllerTest {
         )
     );
 
+    // Load configurations into test class.
+    STATEFUL_SET.setClusterConfigs(CLUSTER_CONFIGS);
+
     // Null ports. This is the default case.
     final V1Container inputContainerWithNullPorts = new V1ContainerBuilder().build();
-    v1ControllerWithPodTemplate.configureContainerPorts(false, 0, inputContainerWithNullPorts);
+    STATEFUL_SET.configureContainerPorts(false, 0, inputContainerWithNullPorts);
     Assert.assertTrue("Server and/or shell PORTS for container with null ports list",
         CollectionUtils.containsAll(inputContainerWithNullPorts.getPorts(), expectedPortsBase));
 
@@ -473,7 +142,7 @@ public class V1ControllerTest {
     final V1Container inputContainerWithEmptyPorts = new V1ContainerBuilder()
         .withPorts(new LinkedList<>())
         .build();
-    v1ControllerWithPodTemplate.configureContainerPorts(false, 0, inputContainerWithEmptyPorts);
+    STATEFUL_SET.configureContainerPorts(false, 0, inputContainerWithEmptyPorts);
     Assert.assertTrue("Server and/or shell PORTS for container with empty ports list",
         CollectionUtils.containsAll(inputContainerWithEmptyPorts.getPorts(), expectedPortsBase));
 
@@ -486,7 +155,7 @@ public class V1ControllerTest {
     expectedPortsOverriding
         .add(new V1ContainerPort().name(portNamekept).containerPort(portNumberkept));
 
-    v1ControllerWithPodTemplate.configureContainerPorts(false, 0, inputContainerWithPorts);
+    STATEFUL_SET.configureContainerPorts(false, 0, inputContainerWithPorts);
     Assert.assertTrue("Server and/or shell PORTS for container should be overwritten.",
         CollectionUtils.containsAll(inputContainerWithPorts.getPorts(), expectedPortsOverriding));
 
@@ -500,8 +169,7 @@ public class V1ControllerTest {
     expectedPortsDebug.add(new V1ContainerPort().name(portNamekept).containerPort(portNumberkept));
     expectedPortsDebug.addAll(debugPorts);
 
-    v1ControllerWithPodTemplate.configureContainerPorts(
-        true, numInstances, inputContainerWithDebug);
+    STATEFUL_SET.configureContainerPorts(true, numInstances, inputContainerWithDebug);
     Assert.assertTrue("Server and/or shell with debug PORTS for container should be overwritten.",
         CollectionUtils.containsAll(inputContainerWithDebug.getPorts(), expectedPortsDebug));
   }
@@ -509,7 +177,7 @@ public class V1ControllerTest {
   @Test
   public void testConfigureContainerEnvVars() {
     final List<V1EnvVar> heronEnvVars =
-        Collections.unmodifiableList(V1Controller.getExecutorEnvVars());
+        Collections.unmodifiableList(STATEFUL_SET.getExecutorEnvVars());
     final V1EnvVar additionEnvVar = new V1EnvVar()
         .name("env-variable-to-be-kept")
         .valueFrom(new V1EnvVarSource()
@@ -529,9 +197,12 @@ public class V1ControllerTest {
         additionEnvVar
     );
 
+    // Load configurations into test class.
+    STATEFUL_SET.setClusterConfigs(CLUSTER_CONFIGS);
+
     // Null env vars. This is the default case.
     V1Container containerWithNullEnvVars = new V1ContainerBuilder().build();
-    v1ControllerWithPodTemplate.configureContainerEnvVars(containerWithNullEnvVars);
+    STATEFUL_SET.configureContainerEnvVars(containerWithNullEnvVars);
     Assert.assertTrue("ENV_HOST & ENV_POD_NAME in container with null Env Vars should match",
         CollectionUtils.containsAll(containerWithNullEnvVars.getEnv(), heronEnvVars));
 
@@ -539,7 +210,7 @@ public class V1ControllerTest {
     V1Container containerWithEmptyEnvVars = new V1ContainerBuilder()
         .withEnv(new LinkedList<>())
         .build();
-    v1ControllerWithPodTemplate.configureContainerEnvVars(containerWithEmptyEnvVars);
+    STATEFUL_SET.configureContainerEnvVars(containerWithEmptyEnvVars);
     Assert.assertTrue("ENV_HOST & ENV_POD_NAME in container with empty Env Vars should match",
         CollectionUtils.containsAll(containerWithEmptyEnvVars.getEnv(), heronEnvVars));
 
@@ -549,13 +220,16 @@ public class V1ControllerTest {
     V1Container containerWithEnvVars = new V1ContainerBuilder()
         .withEnv(inputEnvVars)
         .build();
-    v1ControllerWithPodTemplate.configureContainerEnvVars(containerWithEnvVars);
+    STATEFUL_SET.configureContainerEnvVars(containerWithEnvVars);
     Assert.assertTrue("ENV_HOST & ENV_POD_NAME in container with Env Vars should be overridden",
         CollectionUtils.containsAll(containerWithEnvVars.getEnv(), expectedOverriding));
   }
 
   @Test
   public void testConfigureContainerResources() {
+    // Load configurations into test class.
+    STATEFUL_SET.setClusterConfigs(CLUSTER_CONFIGS);
+
     final boolean isExecutor = true;
 
     final Resource resourceDefault = new Resource(
@@ -597,16 +271,16 @@ public class V1ControllerTest {
 
     // Default. Null resources.
     V1Container containerNull = new V1ContainerBuilder().build();
-    v1ControllerWithPodTemplate.configureContainerResources(
-        containerNull, configNoLimit, resourceDefault, isExecutor);
+    STATEFUL_SET.configureContainerResources(containerNull, configNoLimit, resourceDefault,
+        isExecutor);
     Assert.assertTrue("Default LIMITS should be set in container with null LIMITS",
         containerNull.getResources().getLimits().entrySet()
             .containsAll(expectDefaultRequirements.getLimits().entrySet()));
 
     // Empty resources.
     V1Container containerEmpty = new V1ContainerBuilder().withNewResources().endResources().build();
-    v1ControllerWithPodTemplate.configureContainerResources(
-        containerEmpty, configNoLimit, resourceDefault, isExecutor);
+    STATEFUL_SET.configureContainerResources(containerEmpty, configNoLimit, resourceDefault,
+        isExecutor);
     Assert.assertTrue("Default LIMITS should be set in container with empty LIMITS",
         containerNull.getResources().getLimits().entrySet()
             .containsAll(expectDefaultRequirements.getLimits().entrySet()));
@@ -615,8 +289,8 @@ public class V1ControllerTest {
     V1Container containerCustom = new V1ContainerBuilder()
         .withResources(customRequirements)
         .build();
-    v1ControllerWithPodTemplate.configureContainerResources(
-        containerCustom, configNoLimit, resourceDefault, isExecutor);
+    STATEFUL_SET.configureContainerResources(containerCustom, configNoLimit, resourceDefault,
+        isExecutor);
     Assert.assertTrue("Custom LIMITS should be set in container with custom LIMITS",
         containerCustom.getResources().getLimits().entrySet()
             .containsAll(expectCustomRequirements.getLimits().entrySet()));
@@ -625,8 +299,8 @@ public class V1ControllerTest {
     V1Container containerRequests = new V1ContainerBuilder()
         .withResources(customRequirements)
         .build();
-    v1ControllerWithPodTemplate.configureContainerResources(
-        containerRequests, configWithLimit, resourceDefault, isExecutor);
+    STATEFUL_SET.configureContainerResources(containerRequests, configWithLimit, resourceDefault,
+        isExecutor);
     Assert.assertTrue("Custom LIMITS should be set in container with custom LIMITS and REQUEST",
         containerRequests.getResources().getLimits().entrySet()
             .containsAll(expectCustomRequirements.getLimits().entrySet()));
@@ -637,6 +311,9 @@ public class V1ControllerTest {
 
   @Test
   public void testConfigureContainerResourcesCLI() {
+    // Load configurations into test class.
+    STATEFUL_SET.setClusterConfigs(CLUSTER_CONFIGS);
+
     final boolean isExecutor = true;
     final String customLimitMEMStr = "120Gi";
     final String customLimitCPUStr = "5";
@@ -674,7 +351,7 @@ public class V1ControllerTest {
         .build();
 
     final V1Container actual = new V1Container();
-    v1ControllerWithPodTemplate.configureContainerResources(actual, config, resources, isExecutor);
+    STATEFUL_SET.configureContainerResources(actual, config, resources, isExecutor);
     Assert.assertEquals("Container Resources are set from CLI.", expected, actual);
   }
 
@@ -686,7 +363,10 @@ public class V1ControllerTest {
         .put(KubernetesContext.KUBERNETES_CONTAINER_VOLUME_MOUNT_NAME, pathNameDefault)
         .put(KubernetesContext.KUBERNETES_CONTAINER_VOLUME_MOUNT_PATH, pathDefault)
         .build();
-    final V1Controller controllerWithMounts = new V1Controller(configWithVolumes, RUNTIME);
+    final StatefulSet.Configs configsWithVolumes = new StatefulSet.Configs(configWithVolumes,
+        RUNTIME, POD_TEMPLATE_SPEC, POD_TEMPLATE_SPEC);
+    final StatefulSet.Configs configsWithNoVolumes = new StatefulSet.Configs(
+        Config.newBuilder().build(), RUNTIME, POD_TEMPLATE_SPEC, POD_TEMPLATE_SPEC);
     final V1VolumeMount volumeDefault = new V1VolumeMountBuilder()
         .withName(pathNameDefault)
         .withMountPath(pathDefault)
@@ -707,14 +387,17 @@ public class V1ControllerTest {
     );
 
     // No Volume Mounts set.
-    V1Controller controllerDoNotSetMounts = new V1Controller(Config.newBuilder().build(), RUNTIME);
+    STATEFUL_SET.setClusterConfigs(configsWithNoVolumes);
     V1Container containerNoSetMounts = new V1Container();
-    controllerDoNotSetMounts.mountVolumeIfPresent(containerNoSetMounts);
+    STATEFUL_SET.mountVolumeIfPresent(containerNoSetMounts);
     Assert.assertNull(containerNoSetMounts.getVolumeMounts());
+
+    // Configure factory for volume mounts.
+    STATEFUL_SET.setClusterConfigs(configsWithVolumes);
 
     // Default. Null Volume Mounts.
     V1Container containerNull = new V1ContainerBuilder().build();
-    controllerWithMounts.mountVolumeIfPresent(containerNull);
+    STATEFUL_SET.mountVolumeIfPresent(containerNull);
     Assert.assertTrue("Default VOLUME MOUNTS should be set in container with null VOLUME MOUNTS",
         CollectionUtils.containsAll(expectedMountsDefault, containerNull.getVolumeMounts()));
 
@@ -722,7 +405,7 @@ public class V1ControllerTest {
     V1Container containerEmpty = new V1ContainerBuilder()
         .withVolumeMounts(new LinkedList<>())
         .build();
-    controllerWithMounts.mountVolumeIfPresent(containerEmpty);
+    STATEFUL_SET.mountVolumeIfPresent(containerEmpty);
     Assert.assertTrue("Default VOLUME MOUNTS should be set in container with empty VOLUME MOUNTS",
         CollectionUtils.containsAll(expectedMountsDefault, containerEmpty.getVolumeMounts()));
 
@@ -730,20 +413,23 @@ public class V1ControllerTest {
     V1Container containerCustom = new V1ContainerBuilder()
         .withVolumeMounts(volumeMountsCustomList)
         .build();
-    controllerWithMounts.mountVolumeIfPresent(containerCustom);
+    STATEFUL_SET.mountVolumeIfPresent(containerCustom);
     Assert.assertTrue("Default VOLUME MOUNTS should be set in container with custom VOLUME MOUNTS",
         CollectionUtils.containsAll(expectedMountsCustom, containerCustom.getVolumeMounts()));
   }
 
   @Test
   public void testConfigureTolerations() {
+    // Load configurations into test class.
+    STATEFUL_SET.setClusterConfigs(CLUSTER_CONFIGS);
+
     final V1Toleration keptToleration = new V1Toleration()
         .key("kept toleration")
         .operator("Some Operator")
         .effect("Some Effect")
         .tolerationSeconds(5L);
     final List<V1Toleration> expectedTolerationBase =
-        Collections.unmodifiableList(V1Controller.getTolerations());
+        Collections.unmodifiableList(getTolerations());
     final List<V1Toleration> inputTolerationsBase = Collections.unmodifiableList(
         Arrays.asList(
             new V1Toleration()
@@ -756,7 +442,7 @@ public class V1ControllerTest {
 
     // Null Tolerations. This is the default case.
     final V1PodSpec podSpecNullTolerations = new V1PodSpecBuilder().build();
-    v1ControllerWithPodTemplate.configureTolerations(podSpecNullTolerations);
+    STATEFUL_SET.configureTolerations(podSpecNullTolerations);
     Assert.assertTrue("Pod Spec has null TOLERATIONS and should be set to Heron's defaults",
         CollectionUtils.containsAll(podSpecNullTolerations.getTolerations(),
             expectedTolerationBase));
@@ -765,7 +451,7 @@ public class V1ControllerTest {
     final V1PodSpec podSpecWithEmptyTolerations = new V1PodSpecBuilder()
         .withTolerations(new LinkedList<>())
         .build();
-    v1ControllerWithPodTemplate.configureTolerations(podSpecWithEmptyTolerations);
+    STATEFUL_SET.configureTolerations(podSpecWithEmptyTolerations);
     Assert.assertTrue("Pod Spec has empty TOLERATIONS and should be set to Heron's defaults",
         CollectionUtils.containsAll(podSpecWithEmptyTolerations.getTolerations(),
             expectedTolerationBase));
@@ -778,7 +464,7 @@ public class V1ControllerTest {
         new LinkedList<>(expectedTolerationBase);
     expectedTolerationsOverriding.add(keptToleration);
 
-    v1ControllerWithPodTemplate.configureTolerations(podSpecWithTolerations);
+    STATEFUL_SET.configureTolerations(podSpecWithTolerations);
     Assert.assertTrue("Pod Spec has TOLERATIONS and should be overridden with Heron's defaults",
         CollectionUtils.containsAll(podSpecWithTolerations.getTolerations(),
             expectedTolerationsOverriding));
@@ -786,6 +472,9 @@ public class V1ControllerTest {
 
   @Test
   public void testCreatePersistentVolumeClaims() {
+    // Load configurations into test class.
+    STATEFUL_SET.setClusterConfigs(CLUSTER_CONFIGS);
+
     final String topologyName = "topology-name";
     final String volumeNameOne = "volume-name-one";
     final String volumeNameTwo = "volume-name-two";
@@ -838,7 +527,7 @@ public class V1ControllerTest {
     final V1PersistentVolumeClaim claimOne = new V1PersistentVolumeClaimBuilder()
         .withNewMetadata()
           .withName(volumeNameOne)
-          .withLabels(V1Controller.getPersistentVolumeClaimLabels(topologyName))
+          .withLabels(StatefulSet.getPersistentVolumeClaimLabels(topologyName))
         .endMetadata()
         .withNewSpec()
           .withStorageClassName(storageClassName)
@@ -853,7 +542,7 @@ public class V1ControllerTest {
     final V1PersistentVolumeClaim claimStatic = new V1PersistentVolumeClaimBuilder()
         .withNewMetadata()
           .withName(volumeNameStatic)
-          .withLabels(V1Controller.getPersistentVolumeClaimLabels(topologyName))
+          .withLabels(StatefulSet.getPersistentVolumeClaimLabels(topologyName))
         .endMetadata()
         .withNewSpec()
           .withStorageClassName("")
@@ -869,7 +558,7 @@ public class V1ControllerTest {
         new LinkedList<>(Arrays.asList(claimOne, claimStatic));
 
     final List<V1PersistentVolumeClaim> actualClaims =
-        v1ControllerWithPodTemplate.createPersistentVolumeClaims(mapPVCOpts);
+        STATEFUL_SET.createPersistentVolumeClaims(mapPVCOpts);
 
     Assert.assertEquals("Generated claim sizes match", expectedClaims.size(), actualClaims.size());
     Assert.assertTrue(expectedClaims.containsAll(actualClaims));
@@ -877,6 +566,9 @@ public class V1ControllerTest {
 
   @Test
   public void testCreatePersistentVolumeClaimVolumesAndMounts() {
+    // Load configurations into test class.
+    STATEFUL_SET.setClusterConfigs(CLUSTER_CONFIGS);
+
     final String volumeNameOne = "VolumeNameONE";
     final String volumeNameTwo = "VolumeNameTWO";
     final String claimNameOne = "claim-name-one";
@@ -919,8 +611,8 @@ public class V1ControllerTest {
     // Test case container.
     // Input: Map of Volume configurations.
     // Output: The expected lists of Volumes and Volume Mounts.
-    final List<TestTuple<Map<String, Map<VolumeConfigKeys, String>>,
-        Pair<List<V1Volume>, List<V1VolumeMount>>>> testCases = new LinkedList<>();
+    final List<KubernetesUtils.TestTuple<Map<String, Map<VolumeConfigKeys, String>>,
+          Pair<List<V1Volume>, List<V1VolumeMount>>>> testCases = new LinkedList<>();
 
     // Default case: No PVC provided.
     testCases.add(new TestTuple<>("Generated an empty list of Volumes", new HashMap<>(),
@@ -939,7 +631,7 @@ public class V1ControllerTest {
              Pair<List<V1Volume>, List<V1VolumeMount>>> testCase : testCases) {
       List<V1Volume> actualVolume = new LinkedList<>();
       List<V1VolumeMount> actualVolumeMount = new LinkedList<>();
-      v1ControllerPodTemplate.createVolumeAndMountsPersistentVolumeClaimCLI(testCase.input,
+      STATEFUL_SET.createVolumeAndMountsPersistentVolumeClaimCLI(testCase.input,
           actualVolume, actualVolumeMount);
 
       Assert.assertTrue(testCase.description,
@@ -951,6 +643,9 @@ public class V1ControllerTest {
 
   @Test
   public void testConfigurePodWithVolumesAndMountsFromCLI() {
+    // Load configurations into test class.
+    STATEFUL_SET.setClusterConfigs(CLUSTER_CONFIGS);
+
     final String volumeNameClashing = "clashing-volume";
     final String volumeMountNameClashing = "original-volume-mount";
     V1Volume baseVolume = new V1VolumeBuilder()
@@ -1048,7 +743,7 @@ public class V1ControllerTest {
 
     // Testing loop.
     for (TestTuple<Object[], Pair<V1PodSpec, V1Container>> testCase : testCases) {
-      v1ControllerWithPodTemplate
+      STATEFUL_SET
           .configurePodWithVolumesAndMountsFromCLI((V1PodSpec) testCase.input[0],
               (V1Container) testCase.input[1], (List<V1Volume>) testCase.input[2],
               (List<V1VolumeMount>) testCase.input[3]);
@@ -1062,6 +757,8 @@ public class V1ControllerTest {
 
   @Test
   public void testSetShardIdEnvironmentVariableCommand() {
+    // Load configurations into test class.
+    STATEFUL_SET.setClusterConfigs(CLUSTER_CONFIGS);
 
     List<TestTuple<Boolean, String>> testCases = new LinkedList<>();
 
@@ -1072,12 +769,15 @@ public class V1ControllerTest {
 
     for (TestTuple<Boolean, String> testCase : testCases) {
       Assert.assertEquals(testCase.description, testCase.expected,
-          v1ControllerWithPodTemplate.setShardIdEnvironmentVariableCommand(testCase.input));
+          STATEFUL_SET.setShardIdEnvironmentVariableCommand(testCase.input));
     }
   }
 
   @Test
   public void testCreateResourcesRequirement() {
+    // Load configurations into test class.
+    STATEFUL_SET.setClusterConfigs(CLUSTER_CONFIGS);
+
     final String managerCpuLimit = "3000m";
     final String managerMemLimit = "256Gi";
     final Quantity memory = Quantity.fromString(managerMemLimit);
@@ -1147,13 +847,16 @@ public class V1ControllerTest {
     // Test loop.
     for (TestTuple<Map<String, String>, Map<String, Quantity>> testCase : testCases) {
       Map<String, Quantity> actual =
-          v1ControllerPodTemplate.createResourcesRequirement(testCase.input);
+          STATEFUL_SET.createResourcesRequirement(testCase.input);
       Assert.assertEquals(testCase.description, testCase.expected, actual);
     }
   }
 
   @Test
   public void testCreateVolumeAndMountsEmptyDirCLI() {
+    // Load configurations into test class.
+    STATEFUL_SET.setClusterConfigs(CLUSTER_CONFIGS);
+
     final String volumeName = "volume-name-empty-dir";
     final String medium = "Memory";
     final String sizeLimit = "1Gi";
@@ -1189,13 +892,16 @@ public class V1ControllerTest {
 
     List<V1Volume> actualVolumes = new LinkedList<>();
     List<V1VolumeMount> actualMounts = new LinkedList<>();
-    v1ControllerPodTemplate.createVolumeAndMountsEmptyDirCLI(config, actualVolumes, actualMounts);
+    STATEFUL_SET.createVolumeAndMountsEmptyDirCLI(config, actualVolumes, actualMounts);
     Assert.assertEquals("Empty Dir Volume populated", expectedVolumes, actualVolumes);
     Assert.assertEquals("Empty Dir Volume Mount populated", expectedMounts, actualMounts);
   }
 
   @Test
   public void testCreateVolumeAndMountsHostPathCLI() {
+    // Load configurations into test class.
+    STATEFUL_SET.setClusterConfigs(CLUSTER_CONFIGS);
+
     final String volumeName = "volume-name-host-path";
     final String type = "DirectoryOrCreate";
     final String pathOnHost = "path.on.host";
@@ -1231,13 +937,16 @@ public class V1ControllerTest {
 
     List<V1Volume> actualVolumes = new LinkedList<>();
     List<V1VolumeMount> actualMounts = new LinkedList<>();
-    v1ControllerPodTemplate.createVolumeAndMountsHostPathCLI(config, actualVolumes, actualMounts);
+    STATEFUL_SET.createVolumeAndMountsHostPathCLI(config, actualVolumes, actualMounts);
     Assert.assertEquals("Host Path Volume populated", expectedVolumes, actualVolumes);
     Assert.assertEquals("Host Path Volume Mount populated", expectedMounts, actualMounts);
   }
 
   @Test
   public void testCreateVolumeAndMountsNFSCLI() {
+    // Load configurations into test class.
+    STATEFUL_SET.setClusterConfigs(CLUSTER_CONFIGS);
+
     final String volumeName = "volume-name-nfs";
     final String server = "nfs.server.address";
     final String pathOnNFS = "path.on.host";
@@ -1277,7 +986,7 @@ public class V1ControllerTest {
 
     List<V1Volume> actualVolumes = new LinkedList<>();
     List<V1VolumeMount> actualMounts = new LinkedList<>();
-    v1ControllerPodTemplate.createVolumeAndMountsNFSCLI(config, actualVolumes, actualMounts);
+    STATEFUL_SET.createVolumeAndMountsNFSCLI(config, actualVolumes, actualMounts);
     Assert.assertEquals("NFS Volume populated", expectedVolumes, actualVolumes);
     Assert.assertEquals("NFS Volume Mount populated", expectedMounts, actualMounts);
   }
