@@ -20,28 +20,18 @@
 package org.apache.heron.scheduler.kubernetes;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import com.google.common.annotations.VisibleForTesting;
 
-import org.apache.heron.api.utils.TopologyUtils;
 import org.apache.heron.common.basics.Pair;
 import org.apache.heron.scheduler.TopologyRuntimeManagementException;
 import org.apache.heron.scheduler.TopologySubmissionException;
-import org.apache.heron.scheduler.utils.Runtime;
-import org.apache.heron.scheduler.utils.SchedulerUtils;
-import org.apache.heron.scheduler.utils.SchedulerUtils.ExecutorPort;
 import org.apache.heron.spi.common.Config;
 import org.apache.heron.spi.packing.PackingPlan;
 import org.apache.heron.spi.packing.Resource;
@@ -53,9 +43,6 @@ import io.kubernetes.client.openapi.Configuration;
 import io.kubernetes.client.openapi.apis.AppsV1Api;
 import io.kubernetes.client.openapi.apis.CoreV1Api;
 import io.kubernetes.client.openapi.models.V1ConfigMap;
-import io.kubernetes.client.openapi.models.V1EnvVar;
-import io.kubernetes.client.openapi.models.V1EnvVarSource;
-import io.kubernetes.client.openapi.models.V1ObjectFieldSelector;
 import io.kubernetes.client.openapi.models.V1ObjectMeta;
 import io.kubernetes.client.openapi.models.V1PodTemplate;
 import io.kubernetes.client.openapi.models.V1PodTemplateSpec;
@@ -64,7 +51,6 @@ import io.kubernetes.client.openapi.models.V1ServiceSpec;
 import io.kubernetes.client.openapi.models.V1StatefulSet;
 import io.kubernetes.client.openapi.models.V1StatefulSetSpec;
 import io.kubernetes.client.openapi.models.V1Status;
-import io.kubernetes.client.openapi.models.V1Toleration;
 import io.kubernetes.client.util.PatchUtils;
 import io.kubernetes.client.util.Yaml;
 import okhttp3.Response;
@@ -75,8 +61,6 @@ public class KubernetesShim extends KubernetesController {
 
   private static final Logger LOG =
       Logger.getLogger(KubernetesShim.class.getName());
-
-  private static final String ENV_SHARD_ID = "SHARD_ID";
 
   private final boolean isPodTemplateDisabled;
 
@@ -306,8 +290,9 @@ public class KubernetesShim extends KubernetesController {
                   + getTopologyName());
           return;
         }
-        LOG.log(Level.SEVERE, "Error when deleting the Service of the job ["
-                + getTopologyName() + "] in namespace [" + getNamespace() + "]");
+        LOG.log(Level.SEVERE,
+            String.format("Error when deleting the Service of the job [%s] in namespace [%s]",
+            getTopologyName(), getNamespace()));
         LOG.log(Level.SEVERE, "Error killing topology message:" + response.message());
         KubernetesUtils.logResponseBodyIfPresent(LOG, response);
 
@@ -320,14 +305,15 @@ public class KubernetesShim extends KubernetesController {
                 + getTopologyName());
         return;
       }
-      throw new TopologyRuntimeManagementException("Error deleting topology ["
-              + getTopologyName() + "] Kubernetes service", e);
+      throw new TopologyRuntimeManagementException(
+        String.format("Error deleting topology [%s] Kubernetes service", getTopologyName()), e);
     } catch (IOException e) {
-      throw new TopologyRuntimeManagementException("Error deleting topology ["
-              + getTopologyName() + "] Kubernetes service", e);
+      throw new TopologyRuntimeManagementException(
+        String.format("Error deleting topology [%s] Kubernetes service", getTopologyName()), e);
     }
-    LOG.log(Level.INFO, "Headless Service for the Job [" + getTopologyName()
-            + "] in namespace [" + getNamespace() + "] is deleted.");
+    LOG.log(Level.INFO,
+        String.format("Headless Service for the Job [%s] in namespace [%s] is deleted.",
+        getTopologyName(), getNamespace()));
   }
 
   /**
@@ -346,8 +332,9 @@ public class KubernetesShim extends KubernetesController {
                   + getTopologyName());
           return;
         }
-        LOG.log(Level.SEVERE, "Error when deleting the StatefulSets of the job ["
-                + getTopologyName() + "] in namespace [" + getNamespace() + "]");
+        LOG.log(Level.SEVERE,
+            String.format("Error when deleting the StatefulSets of the job [%s] in namespace [%s]",
+            getTopologyName(), getNamespace()));
         LOG.log(Level.SEVERE, "Error killing topology message: " + response.message());
         KubernetesUtils.logResponseBodyIfPresent(LOG, response);
 
@@ -360,14 +347,17 @@ public class KubernetesShim extends KubernetesController {
                 + getTopologyName());
         return;
       }
-      throw new TopologyRuntimeManagementException("Error deleting topology ["
-              + getTopologyName() + "] Kubernetes StatefulSets", e);
+      throw new TopologyRuntimeManagementException(
+        String.format("Error deleting topology [%s] Kubernetes StatefulSets", getTopologyName()),
+        e);
     } catch (IOException e) {
-      throw new TopologyRuntimeManagementException("Error deleting topology ["
-              + getTopologyName() + "] Kubernetes StatefulSets", e);
+      throw new TopologyRuntimeManagementException(
+        String.format("Error deleting topology [%s] Kubernetes StatefulSets", getTopologyName()),
+        e);
     }
-    LOG.log(Level.INFO, "StatefulSet for the Job [" + getTopologyName()
-            + "] in namespace [" + getNamespace() + "] is deleted.");
+    LOG.log(Level.INFO,
+        String.format("StatefulSet for the Job [%s] in namespace [%s] is deleted.",
+          getTopologyName(), getNamespace()));
   }
 
   /**
