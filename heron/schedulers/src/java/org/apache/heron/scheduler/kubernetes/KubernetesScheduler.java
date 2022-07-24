@@ -50,7 +50,7 @@ public class KubernetesScheduler implements IScheduler, IScalable {
   private UpdateTopologyManager updateTopologyManager;
 
   protected KubernetesController getController() {
-    return new V1Controller(configuration, runtimeConfiguration);
+    return new KubernetesShim(configuration, runtimeConfiguration);
   }
 
   @Override
