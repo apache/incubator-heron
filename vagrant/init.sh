@@ -100,10 +100,22 @@ CODENAME=$(lsb_release -cs)
 echo "deb http://repos.mesosphere.io/${DISTRO} cosmic main" | tee /etc/apt/sources.list.d/mesosphere.list
 REMOVED
 
+# install docker repo
+apt-get install -qy ca-certificates curl gnupg lsb-release
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+echo \
+  "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu \
+  $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+# update installed packages
 apt-get -qy update
 
 # install deps
 apt-get install -qy ant vim zip mc curl wget openjdk-11-jdk scala git python3-setuptools python3-venv python3-dev libtool-bin python-is-python3
+
+# install docker 
+apt-get install -qy docker-ce docker-ce-cli containerd.io
+usermod -aG docker vagrant
 
 # install_mesos $mode
 if [ $mode == "master" ]; then 
