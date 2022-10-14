@@ -116,7 +116,7 @@ maven_install(
         "com.google.inject:guice:5.1.0",
         "com.google.inject.extensions:guice-assistedinject:5.1.0",
         "com.google.guava:guava:23.6-jre",
-        "com.google.protobuf:protobuf-java:3.16.1",
+        "com.google.protobuf:protobuf-java:3.18.3",
         "io.gsonfire:gson-fire:1.8.3",
         "org.apache.curator:curator-framework:" + curator_version,
         "org.apache.curator:curator-recipes:" + curator_version,
@@ -178,7 +178,7 @@ load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
 
 git_repository(
     name = "com_github_johnynek_bazel_jar_jar",
-    commit = "171f268569384c57c19474b04aebe574d85fde0d", # Latest commit SHA as at 2019/02/13
+    commit = "171f268569384c57c19474b04aebe574d85fde0d",  # Latest commit SHA as at 2019/02/13
     remote = "https://github.com/johnynek/bazel_jar_jar.git",
     shallow_since = "1594234634 -1000",
 )
@@ -301,9 +301,9 @@ http_file(
 # protobuf dependencies for C++ and Java
 http_archive(
     name = "com_google_protobuf",
-    sha256 = "fb9158b00b2df4949f66da0bb8a9eaf662b842c7987d096b260759d629805d7f",
-    strip_prefix = "protobuf-3.16.1",
-    urls = ["https://github.com/protocolbuffers/protobuf/archive/v3.16.1.tar.gz"],
+    sha256 = "663b3a6d56605e6ab7888d32a1525c34f34639b25b8996337821591e60c37041",
+    strip_prefix = "protobuf-3.18.3",
+    urls = ["https://github.com/protocolbuffers/protobuf/archive/v3.18.3.tar.gz"],
 )
 # end protobuf dependencies for C++ and Java
 
