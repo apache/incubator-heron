@@ -567,7 +567,7 @@ class Topology:
     return TopologyInfoSchedulerLocation(
         name=scheduler_location.topology_name,
         http_endpoint=scheduler_location.http_endpoint,
-        job_page_link=scheduler_location.job_page_link \
+        job_page_link=scheduler_location.job_page_link[0] \
             if scheduler_location.job_page_link else "",
     )
 
