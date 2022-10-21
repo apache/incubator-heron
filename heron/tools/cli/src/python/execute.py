@@ -108,7 +108,7 @@ def heron_tar(class_name, topology_tar, arguments, tmpdir_root, java_defines):
     for name in tar.getnames():
       untarpath_abs = os.path.abspath(os.path.join(tmpdir, name))
       if not untarpath_abs.startswith(tmpdir_abs):
-        raise Exception(f"tar extract outside directory file: {name}")
+        raise Exception(f"tar attempted to extract a file outside the destination directory: {name}")
 
     tar.extractall(path=tmpdir)
 
