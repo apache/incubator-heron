@@ -38,7 +38,7 @@ dockerfile_path_for_platform() {
   echo "$PROJECT_DIR/website/scripts/Dockerfile.$1"
 }
 
-TARGET_PLATFORM="ubuntu18.04"
+TARGET_PLATFORM="ubuntu22.04"
 DOCKER_FILE=$(dockerfile_path_for_platform $TARGET_PLATFORM)
 verify_dockerfile_exists $DOCKER_FILE
 
