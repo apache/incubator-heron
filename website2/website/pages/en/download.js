@@ -19,7 +19,7 @@ function getTarUrl(version, type) {
 }
 
 function getInstallScriptCryptoUrl(version, osType) {
-   return `https://downloads.apache.org/incubator/heron/heron-${version}/heron-install-${version}-${osType}.sh`
+   return `https://downloads.apache.org/incubator/heron/heron-${version}/heron-install-${version}-${osType}.sh.tar.gz`
 }
 
 function distUrl(version, type) {
@@ -27,7 +27,7 @@ function distUrl(version, type) {
 }
 
 function getInstallScriptMirrorUrl(version, type) {
-    return `http://www.apache.org/dyn/closer.lua/incubator/heron/heron-${version}/heron-install-${version}-${type}.sh`
+    return `http://www.apache.org/dyn/closer.lua/incubator/heron/heron-${version}/heron-install-${version}-${type}.sh.tar.gz`
 }
 
 function archiveUrl(version, type) {
@@ -55,18 +55,16 @@ function getProperEndpoint(version, type) {
 class Download extends React.Component {
   render() {
     const latestHeronVersion = heronReleases[0];
-    const latestArchiveMirrorUrl = getLatestArchiveMirrorUrl(latestHeronVersion, 'bin');
     const latestSrcArchiveMirrorUrl = getLatestArchiveMirrorUrl(latestHeronVersion, 'src');
     const latestSrcUrl = getTarUrl(latestHeronVersion, "src");
-    const latestdebian11TarUrl =  getTarUrl(latestHeronVersion, "debian11");
-    const latestArchiveUrl = distUrl(latestHeronVersion, 'bin');
-    const latestSrcArchiveUrl = distUrl(latestHeronVersion, 'src')
-    const rocky8InstallUrl = getInstallScriptMirrorUrl(latestHeronVersion, "rocky8")
-    const rocky8InstallCryptoUrl = getInstallScriptCryptoUrl(latestHeronVersion, "rocky8")
+    const centOS7InstallUrl = getInstallScriptMirrorUrl(latestHeronVersion, "centos7")
+    const centOS7InstallCryptoUrl = getInstallScriptCryptoUrl(latestHeronVersion, "centos7")
+    const darwinInstallUrl = getInstallScriptMirrorUrl(latestHeronVersion, "darwin")
+    const darwinInstallCryptoUrl = getInstallScriptCryptoUrl(latestHeronVersion, "darwin")
     const debian11InstallUrl = getInstallScriptMirrorUrl(latestHeronVersion, "debian11")
     const debian11InstallCryptoUrl = getInstallScriptCryptoUrl(latestHeronVersion, "debian11")
-    const ubuntu2004InstallUrl = getInstallScriptMirrorUrl(latestHeronVersion, "ubuntu20.04")
-    const ubuntu2004InstallCryptoUrl = getInstallScriptCryptoUrl(latestHeronVersion, "ubuntu20.04")
+    const ubuntu2204InstallUrl = getInstallScriptMirrorUrl(latestHeronVersion, "ubuntu22.04")
+    const ubuntu2204InstallCryptoUrl = getInstallScriptCryptoUrl(latestHeronVersion, "ubuntu22.04")
 
 
 
@@ -117,26 +115,12 @@ class Download extends React.Component {
                     <a href={`${latestSrcUrl}.sha512`}>sha512</a>
                   </td>
                 </tr>
-                <tr key={'binary'}>
-                  <th>debian11 Binary</th>
-                  <td>
-                    <a href={latestSrcArchiveMirrorUrl}>heron-{latestHeronVersion}-debian11.tar.gz</a>
-                  </td>
-                  <td>
-                    <a href={`${latestdebian11TarUrl}.asc`}>asc</a>,&nbsp;
-                    <a href={`${latestdebian11TarUrl}.sha512`}>sha512</a>
-                  </td>
-                </tr>
+
                 </tbody>
               </table>
 
               <h2 id="latest">Heron Install Scripts</h2>
-              <h3 style={{color:"red"}}> READ BEFORE DOWNLOADING </h3>
-              <p>
-                To download the Heron self-extracting install scripts: click a link below for the Operating System of your choice that will show the closest mirror for you to download from.
-                 Once you are on the page with the closest mirror right click on the link and select “save as” to download the install script.
-                  If you do not right click the link will only bring you to view the script in the browser and will not start a download.
-              </p>
+
               <table className="versions" style={{width:'100%'}}>
                 <thead>
                   <tr>
@@ -148,34 +132,44 @@ class Download extends React.Component {
                 <tbody>
 
 
-                  <tr key={'rocky-install'}>
-                    <th>rocky8</th>
+                  <tr key={'centos7-install'}>
+                    <th>CentOS 7</th>
                     <td>
-                      <a href={`${rocky8InstallUrl}`}> heron-install-0.20.4-incubating-rocky8.sh</a>
+                      <a href={`${centOS7InstallUrl}`}> heron-install-{latestHeronVersion}-centos7.sh.tar.gz</a>
                     </td>
                     <td>
-                      <a href={`${rocky8InstallCryptoUrl}.asc`}>asc</a>,&nbsp;
-                      <a href={`${rocky8InstallCryptoUrl}.sha512`}>sha512</a>
+                      <a href={`${centOS7InstallCryptoUrl}.asc`}>asc</a>,&nbsp;
+                      <a href={`${centOS7InstallCryptoUrl}.sha512`}>sha512</a>
+                    </td>
+                  </tr>
+                  <tr key={'darwin-install'}>
+                    <th>Darwin</th>
+                    <td>
+                      <a href={`${darwinInstallUrl}`}> heron-install-{latestHeronVersion}-darwin.sh.tar.gz</a>
+                    </td>
+                    <td>
+                      <a href={`${darwinInstallCryptoUrl}.asc`}>asc</a>,&nbsp;
+                      <a href={`${darwinInstallCryptoUrl}.sha512`}>sha512</a>
                     </td>
                   </tr>
                   <tr key={'debian11-install'}>
                     <th>debian11</th>
                     <td>
-                      <a href={`${debian11InstallUrl}`}> heron-install-0.20.4-incubating-debian11.sh</a>
+                      <a href={`${debian11InstallUrl}`}> heron-install-{latestHeronVersion}-debian11.sh</a>
                     </td>
                     <td>
                       <a href={`${debian11InstallCryptoUrl}.asc`}>asc</a>,&nbsp;
                       <a href={`${debian11InstallCryptoUrl}.sha512`}>sha512</a>
                     </td>
                   </tr>
-                   <tr key={'ubuntu20.04-install'}>
-                    <th>Ubuntu20.04</th>
+                   <tr key={'ubuntu22.04-install'}>
+                    <th>Ubuntu22.04</th>
                     <td>
-                     <a href={`${ubuntu2004InstallUrl}`}> heron-install-0.20.4-incubating-ubuntu20.04.sh</a>
+                     <a href={`${ubuntu2204InstallUrl}`}> heron-install-{latestHeronVersion}-ubuntu22.04.sh</a>
                     </td>
                     <td>
-                      <a href={`${ubuntu2004InstallCryptoUrl}.asc`}>asc</a>,&nbsp;
-                      <a href={`${ubuntu2004InstallCryptoUrl}.sha512`}>sha512</a>
+                      <a href={`${ubuntu2204InstallCryptoUrl}.asc`}>asc</a>,&nbsp;
+                      <a href={`${ubuntu2204InstallCryptoUrl}.sha512`}>sha512</a>
                     </td>
                   </tr>
                   </tbody>
