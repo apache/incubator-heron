@@ -9,7 +9,7 @@ javadocs:
 python-docs:
 	@scripts/python-doc-gen.sh 0.0.0
 
-buildsite: javadocs python-docs
+buildsite: javadocs
 	@scripts/build-site.sh
 
 publish:
