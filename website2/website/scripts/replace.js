@@ -40,6 +40,7 @@ const bazelVersions = {
     '0.20.2-incubating': '0.26.0',
     '0.20.3-incubating': '3.7.0',
     '0.20.4-incubating': '3.7.2',
+    '0.20.5-incubating': '4.2.2',
     'latest': '4.2.2',
 }
 
@@ -52,9 +53,9 @@ function replaceBazel(version) {
         }
     } catch (error) {
 
-        console.error('no versions found defaulting to 0.26')
+        console.error('no versions found defaulting to 0.20.5-incubating')
     }
-    return '0.26'
+    return '0.20.5-incubating'
 }
 
 console.log(latestVersion)
