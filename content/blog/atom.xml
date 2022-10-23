@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+    <id>https://heron.apache.org/blog</id>
+    <title>Apache Heron Blog</title>
+    <updated>2022-10-22T06:00:00Z</updated>
+    <generator>Feed for Node.js</generator>
+    <link rel="alternate" href="https://heron.apache.org/blog"/>
+    <subtitle>The best place to stay up-to-date with the latest Apache Heron news and events.</subtitle>
+    <logo>https://heron.apache.org/img/HeronTextLogo-small.png</logo>
+    <rights>Copyright © 2022 the Apache Software Foundation, Apache Heron, Heron, 
+  Apache, the Apache feather Logo, and the Apache Heron project logo are either registered 
+  trademarks or trademarks of the Apache Software Foundation.</rights>
+    <entry>
+        <title type="html"><![CDATA[0.20.5-incubating Release]]></title>
+        <id>https://heron.apache.org/blog/2022/10/22/0.20.5-incubating-release.html</id>
+        <link href="https://heron.apache.org/blog/2022/10/22/0.20.5-incubating-release.html">
+        </link>
+        <updated>2022-10-22T06:00:00Z</updated>
+        <summary type="html"><![CDATA[<p>The Heron community is pleased to announce the release of version 0.20.5-incubating! We are excited as this is moment in time when we start to work on graduating out of the incubator. Heron has had several cloud native specific improvements and we th...</p>]]></summary>
+        <author>
+            <name>Josh Fischer</name>
+            <uri>https://www.linkedin.com/in/joshfischer1108/</uri>
+        </author>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[0.20.4-incubating Release]]></title>
+        <id>https://heron.apache.org/blog/2021/05/27/0.20.4-incubating-release.html</id>
+        <link href="https://heron.apache.org/blog/2021/05/27/0.20.4-incubating-release.html">
+        </link>
+        <updated>2021-05-27T06:00:00Z</updated>
+        <summary type="html"><![CDATA[<p>The Heron community is pleased to announce the release of version 0.20.4-incubating. We are excited as this is the first release the Heron community has distributed a full set of convenience binaries from the released source code while under the Apac...</p>]]></summary>
+        <author>
+            <name>Josh Fischer</name>
+            <uri>https://www.linkedin.com/in/joshfischer1108/</uri>
+        </author>
+    </entry>
+</feed>

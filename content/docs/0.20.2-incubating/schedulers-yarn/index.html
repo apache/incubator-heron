@@ -1,0 +1,202 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Apache Hadoop YARN Cluster (Experimental) · Apache Heron</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="&lt;!--"/><meta name="docsearch:version" content="0.20.2-incubating"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Apache Hadoop YARN Cluster (Experimental) · Apache Heron"/><meta property="og:type" content="website"/><meta property="og:url" content="https://heron.apache.org/"/><meta property="og:description" content="&lt;!--"/><meta property="og:image" content="https://heron.apache.org/img/undraw_online.svg"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://heron.apache.org/img/undraw_tweetstorm.svg"/><link rel="shortcut icon" href="/img/favicon-32x32.png"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><link rel="alternate" type="application/atom+xml" href="https://heron.apache.org/blog/atom.xml" title="Apache Heron Blog ATOM Feed"/><link rel="alternate" type="application/rss+xml" href="https://heron.apache.org/blog/feed.xml" title="Apache Heron Blog RSS Feed"/><script>
+              (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+              (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+              m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+              })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+              ga('create', 'UA-198017384-1', 'auto');
+              ga('send', 'pageview');
+            </script><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script type="text/javascript" src="/js/custom.js"></script><script type="text/javascript" src="/js/fix-location.js"></script><link rel="stylesheet" href="/css/main.css"/><script src="/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/"><img class="logo" src="/img/HeronTextLogo-small.png" alt="Apache Heron"/><h2 class="headerTitleWithLogo">Apache Heron</h2></a><a href="/versions"><h3>0.20.2-incubating</h3></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class=""><a href="/api/java" target="_self">Javadocs</a></li><li class=""><a href="/api/python" target="_self">Pydocs</a></li><li class="siteNavGroupActive"><a href="/docs/0.20.2-incubating/getting-started-local-single-node" target="_self">Docs</a></li><li class=""><a href="/download" target="_self">Downloads</a></li><li class=""><a href="#community" target="_self">Community</a></li><li class=""><a href="/blog/" target="_self">Blog</a></li><li class=""><a href="#apache" target="_self">Apache</a></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="container docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><div class="hamburger-menu"><div class="line1"></div><div class="line2"></div><div class="line3"></div></div></div><h2><i>›</i><span>Schedulers</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle">Getting Started</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/0.20.2-incubating/getting-started-local-single-node">Local (Single Node)</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.2-incubating/getting-started-migrate-storm-topologies">Migrate Storm Topologies</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.2-incubating/getting-started-troubleshooting-guide">Troubleshooting Guide</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Deployment</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/0.20.2-incubating/deployment-overview">Deployment Overiew</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.2-incubating/deployment-configuration">Configuration</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.2-incubating/deployment-api-server">The Heron API Server</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Topology Development APIs</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/0.20.2-incubating/topology-development-streamlet-api">The Heron Streamlet API for Java</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.2-incubating/topology-development-eco-api">The ECO API for Java</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.2-incubating/topology-development-topology-api-java">The Heron Topology API for Java</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.2-incubating/topology-development-topology-api-python">The Heron Topology API for Python</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.2-incubating/topology-development-streamlet-scala">The Heron Streamlet API for Scala</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Client API Docs</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/0.20.2-incubating/client-api-docs-overview">Client API Docs</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Guides</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/0.20.2-incubating/guides-effectively-once-java-topologies">Effectively Once Java Topologies</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.2-incubating/guides-data-model">Heron Data Model</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.2-incubating/guides-tuple-serialization">Tuple Serialization</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.2-incubating/guides-ui-guide">Heron UI Guide</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.2-incubating/guides-topology-tuning">Topology Tuning Guide</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.2-incubating/guides-packing-algorithms">Packing Algorithms</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.2-incubating/guides-simulator-mode">Simulator Mode</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.2-incubating/guides-troubeshooting-guide">Topology Troubleshooting Guide</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Heron Concepts</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/0.20.2-incubating/heron-design-goals">Heron Design Goals</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.2-incubating/heron-topology-concepts">Heron Topologies</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.2-incubating/heron-streamlet-concepts">Heron Streamlets</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.2-incubating/heron-architecture">Heron Architecture</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.2-incubating/heron-delivery-semantics">Heron Delivery Semantics</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">State Managers</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/0.20.2-incubating/state-managers-zookeeper">Zookeeper</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.2-incubating/state-managers-local-fs">Local File System</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Uploaders</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/0.20.2-incubating/uploaders-local-fs">Local File System</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.2-incubating/uploaders-hdfs">HDFS</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.2-incubating/uploaders-http">HTTP</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.2-incubating/uploaders-amazon-s3">Amazon S3</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.2-incubating/uploaders-scp">Secure Copy (SCP)</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Schedulers</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/0.20.2-incubating/schedulers-k8s-by-hand">Kubernetes by hand</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.2-incubating/schedulers-k8s-with-helm">Kubernetes with Helm</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.2-incubating/schedulers-aurora-cluster">Aurora Cluster</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.2-incubating/schedulers-aurora-local">Aurora Locally</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.2-incubating/schedulers-local">Local Cluster</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.2-incubating/schedulers-nomad">Nomad</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.2-incubating/schedulers-mesos-local-mac">Mesos Cluster Locally</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.2-incubating/schedulers-slurm">Slurm Cluster</a></li><li class="navListItem navListItemActive"><a class="navItem" href="/docs/0.20.2-incubating/schedulers-yarn">YARN Cluster</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Cluster Configuration</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/0.20.2-incubating/cluster-config-overview">Cluster Config Overview</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.2-incubating/cluster-config-system-level">System Level Configuration</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.2-incubating/cluster-config-instance">Heron Instance</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.2-incubating/cluster-config-metrics">Metrics Manager</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.2-incubating/cluster-config-stream">Stream Manager</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.2-incubating/cluster-config-tmanager">Topology Manager</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Observability</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/0.20.2-incubating/observability-prometheus">Prometheus</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.2-incubating/observability-graphite">Graphite</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.2-incubating/observability-scribe">Scribe</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">User Manuals</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/0.20.2-incubating/user-manuals-heron-cli">Heron Client</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.2-incubating/user-manuals-heron-explorer">Heron Explorer</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.2-incubating/user-manuals-tracker-rest">Heron Tracker REST API</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.2-incubating/user-manuals-heron-tracker-runbook">Heron Tracker Runbook</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.2-incubating/user-manuals-heron-ui-runbook">Heron UI Runbook</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.2-incubating/user-manuals-heron-shell">Heron Shell</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Compiling</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/0.20.2-incubating/compiling-overview">Compiling Overview</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.2-incubating/compiling-linux">Compiling on Linux</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.2-incubating/compiling-osx">Compiling on OS X</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.2-incubating/compiling-docker">Compiling With Docker</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.2-incubating/compiling-running-tests">Running Tests</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.2-incubating/compiling-code-organization">Code Organization</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Extending Heron</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/0.20.2-incubating/extending-heron-scheduler">Custom Scheduler</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.2-incubating/extending-heron-metric-sink">Custom Metrics Sink</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Heron Resources</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/0.20.2-incubating/heron-resources-resources">Heron Resources</a></li></ul></div></div></section></div><script>
+            var coll = document.getElementsByClassName('collapsible');
+            var checkActiveCategory = true;
+            for (var i = 0; i < coll.length; i++) {
+              var links = coll[i].nextElementSibling.getElementsByTagName('*');
+              if (checkActiveCategory){
+                for (var j = 0; j < links.length; j++) {
+                  if (links[j].classList.contains('navListItemActive')){
+                    coll[i].nextElementSibling.classList.toggle('hide');
+                    coll[i].childNodes[1].classList.toggle('rotate');
+                    checkActiveCategory = false;
+                    break;
+                  }
+                }
+              }
+
+              coll[i].addEventListener('click', function() {
+                var arrow = this.childNodes[1];
+                arrow.classList.toggle('rotate');
+                var content = this.nextElementSibling;
+                content.classList.toggle('hide');
+              });
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+              createToggler('#navToggler', '#docsNav', 'docsSliderActive');
+              createToggler('#tocToggler', 'body', 'tocActive');
+
+              var headings = document.querySelector('.toc-headings');
+              headings && headings.addEventListener('click', function(event) {
+                var el = event.target;
+                while(el !== headings){
+                  if (el.tagName === 'A') {
+                    document.body.classList.remove('tocActive');
+                    break;
+                  } else{
+                    el = el.parentNode;
+                  }
+                }
+              }, false);
+
+              function createToggler(togglerSelector, targetSelector, className) {
+                var toggler = document.querySelector(togglerSelector);
+                var target = document.querySelector(targetSelector);
+
+                if (!toggler) {
+                  return;
+                }
+
+                toggler.onclick = function(event) {
+                  event.preventDefault();
+
+                  target.classList.toggle(className);
+                };
+              }
+            });
+        </script></nav></div><div class="container mainContainer"><div class="wrapper"><div class="post"><header class="postHeader"><h1 class="postHeaderTitle">Apache Hadoop YARN Cluster (Experimental)</h1></header><article><div><span><!--
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements.  See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership.  The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License.  You may obtain a copy of the License at
+      http://www.apache.org/licenses/LICENSE-2.0
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied.  See the License for the
+    specific language governing permissions and limitations
+    under the License.
+-->
+<p>In addition to out-of-the-box schedulers for <a href="schedulers-aurora-cluster">Aurora</a>, Heron can also be deployed on a
+YARN cluster with the YARN scheduler. The YARN scheduler is implemented using the
+<a href="https://reef.apache.org/">Apache REEF</a> framework.</p>
+<p><strong>Key features</strong> of the YARN scheduler:</p>
+<ul>
+<li><p><strong>Heterogeneous container allocation:</strong> The YARN scheduler will request heterogeneous containers
+from the YARN ResourceManager <a href="http://hadoop.apache.org/docs/current/hadoop-yarn/hadoop-yarn-site/YARN.html">RM</a>. In other words the topology will not request more resources than what is really needed.</p></li>
+<li><p><strong>Container reuse:</strong> The REEF framework allows the YARN scheduler to retain containers
+across events like topology restarts.</p></li>
+</ul>
+<h2><a class="anchor" aria-hidden="true" id="topology-deployment-on-a-yarn-cluster"></a><a href="#topology-deployment-on-a-yarn-cluster" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Topology deployment on a YARN Cluster</h2>
+<p>Using the YARN scheduler is similar to deploying Heron on other clusters, i.e. using the
+<a href="user-manuals-heron-cli">Heron CLI</a>.
+This document assumes that the Hadoop yarn client is installed and configured.</p>
+<p>Following steps are executed when a Heron topology is submitted:</p>
+<ol>
+<li>The REEF client copies the <code>Heron Core package</code> and the <code>topology package</code> on the distributed file system.</li>
+<li>It then starts the YARN Application Master (AM) for the topology.</li>
+<li>The AM subsequently invokes the <code>Heron Scheduler</code> in the same process.</li>
+<li>This is followed by container allocation for the topology's manager and workers. As a result <code>N+2</code>
+containers are allocated for each topology.</li>
+</ol>
+<h3><a class="anchor" aria-hidden="true" id="configuring-the-heron-client-classpath"></a><a href="#configuring-the-heron-client-classpath" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Configuring the Heron client classpath</h3>
+<p><strong>Under 0.14.2 version (including 0.14.2)</strong></p>
+<ol>
+<li>Command <code>hadoop classpath</code> provides a list of jars needed to submit a hadoop job. Copy all jars to <code>HERON_INSTALL_DIR/lib/scheduler</code>.
+<ul>
+<li>Do not copy commons-cli jar if it is older than version 1.3.1.</li>
+</ul></li>
+<li>Create a jar containing core-site.xml and yarn-site.xml. Add this jar to <code>HERON_INSTALL_DIR/lib/scheduler</code> too.</li>
+</ol>
+<p><strong>After 0.14.3 version released</strong></p>
+<p>It is unnecessary to copy hadoop-classpath-jars to <code>HERON_INSTALL_DIR/lib/scheduler</code> like what 0.14.2 version requested. <a href="https://github.com/apache/incubator-heron/issues/1245">#1245</a> added <code>extra-launch-classpath</code> arguments, which makes it easier and more convenient to submit a topology to YARN.</p>
+<blockquote>
+<p><strong>Tips</strong></p>
+<p><strong><em>No matter which version of Heron you are using, there is something user should pay attention to</em></strong> if you want to submit a topology to YARN.</p>
+<p>For <code>localfs-state-manager</code></p>
+<ul>
+<li>The version of common-cli jar should be greater than or equal to 1.3.1.</li>
+</ul>
+<p>For <code>zookeeper-state-manager</code></p>
+<ul>
+<li>The version of common-cli jar should be greater than or equal to 1.3.1.</li>
+<li>The version of curator-framework jar should be greater than or equal to 2.10.0</li>
+<li>The version of curator-client jar should be greater than or equal to 2.10.0</li>
+</ul>
+</blockquote>
+<h3><a class="anchor" aria-hidden="true" id="configure-the-yarn-scheduler"></a><a href="#configure-the-yarn-scheduler" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Configure the YARN scheduler</h3>
+<p>A set of default configuration files are provided with Heron in the <a href="https://github.com/apache/incubator-heron/tree/master/heron/config/src/yaml/conf/yarn">conf/yarn</a> directory.
+The default configuration uses the local state manager. This will work with single-node local
+YARN installation only. A Zookeeper based state management will be needed for topology
+deployment on a multi-node YARN cluster.</p>
+<ol>
+<li>Custom Heron Launcher for YARN: <code>YarnLauncher</code></li>
+<li>Custom Heron Scheduler for YARN: <code>YarnScheduler</code></li>
+<li>State manager for multi-node deployment:
+<code>org.apache.heron.statemgr.zookeeper.curator.CuratorStateManager</code></li>
+<li><code>YarnLauncher</code> performs the job of uploader also. So <code>NullUploader</code> is used.</li>
+</ol>
+<h2><a class="anchor" aria-hidden="true" id="topology-management"></a><a href="#topology-management" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Topology management</h2>
+<h3><a class="anchor" aria-hidden="true" id="topology-submission"></a><a href="#topology-submission" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Topology Submission</h3>
+<p><strong>Command</strong></p>
+<p><strong>Under 0.14.2 version (including 0.14.2)</strong></p>
+<p><code>$ heron submit yarn heron-api-examples.jar org.apache.heron.examples.api.AckingTopology AckingTopology</code></p>
+<p><strong>After 0.14.3 version released</strong></p>
+<p><code>$ heron submit yarn heron-api-examples.jar org.apache.heron.examples.api.AckingTopology AckingTopology --extra-launch-classpath &lt;extra-classpath-value&gt;</code></p>
+<blockquote>
+<p><strong>Tips</strong></p>
+<ol>
+<li>More details for using the <code>--extra-launch-classpath</code> argument in 0.14.3 version. It supports both a single directory which including all <code>hadoop-lib-jars</code> and multiple directories separated by colon such as what <code>hadoop classpath</code> gives. <strong><em>The submit operation will fail if any path is invalid or if any file is missing.</em></strong></li>
+<li>if you want to submit a topology to a specific YARN queue, you can set the <code>heron.scheduler.yarn.queue</code> argument in <code>--config-property</code>. For instance, <code>--config-property heron.scheduler.yarn.queue=test</code>. This configuration could be found in the <a href="https://github.com/apache/incubator-heron/blob/master/heron/config/src/yaml/conf/yarn/scheduler.yaml">conf/yarn/scheduler</a> file too. <code>default</code> would be the YARN default queue as YARN provided.</li>
+</ol>
+</blockquote>
+<p><strong>Sample Output</strong></p>
+<pre><code class="hljs css language-bash">INFO: Launching topology <span class="hljs-string">'AckingTopology'</span>
+...
+...
+Powered by
+     ___________  ______  ______  _______
+    /  ______  / /  ___/ /  ___/ /  ____/
+   /     _____/ /  /__  /  /__  /  /___
+  /  /\  \     /  ___/ /  ___/ /  ____/
+ /  /  \  \   /  /__  /  /__  /  /
+/__/    \__\ /_____/ /_____/ /__/
+
+...
+...
+org.apache.heron.scheduler.yarn.ReefClientSideHandlers INFO:  Topology AckingTopology is running, jobId AckingTopology.
+</code></pre>
+<p><strong>Verification</strong></p>
+<p>Visit the YARN http console or execute command <code>yarn application -list</code> on a yarn client host.</p>
+<pre><code class="hljs css language-bash">Total number of applications (application-types: [] and states: [SUBMITTED, ACCEPTED, RUNNING]):1
+                Application-Id      Application-Name        Application-Type          User       Queue               State         Final-State         Progress                        Tracking-URL
+application_1466548964728_0004        AckingTopology                    YARN         heron     default             RUNNING           UNDEFINED               0%                                 N/A
+</code></pre>
+<h3><a class="anchor" aria-hidden="true" id="topology-termination"></a><a href="#topology-termination" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Topology termination</h3>
+<p><strong>Command</strong></p>
+<p><code>$ heron kill yarn AckingTopology</code></p>
+<h3><a class="anchor" aria-hidden="true" id="log-file-location"></a><a href="#log-file-location" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Log File location</h3>
+<p>Assuming HDFS as the file system, Heron logs and REEF logs can be found in the following locations:</p>
+<ol>
+<li><p>Logs generated when the topologies AM starts:
+<code>&lt;LOG_DIR&gt;/userlogs/application_1466548964728_0004/container_1466548964728_0004_01_000001/driver.stderr</code></p></li>
+<li><p>Ths scheduler's logs are created on the first/AM container:
+<code>&lt;NM_LOCAL_DIR&gt;/usercache/heron/appcache/application_1466548964728_0004/container_1466548964728_0004_01_000001/log-files</code></p></li>
+<li><p>Logs generated when the TManager starts in its container:
+<code>&lt;LOG_DIR&gt;/userlogs/application_1466548964728_0004/container_1466548964728_0004_01_000002/evaluator.stderr</code></p></li>
+<li><p>The TManager's logs are created on the second container owned by the topology app:
+<code>&lt;NM_LOCAL_DIR&gt;/usercache/heron/appcache/application_1466548964728_0004/container_1466548964728_0004_01_000002/log-files</code></p></li>
+<li><p>Worker logs are created on the remaining containers in the YARN NodeManager's local directory.</p></li>
+</ol>
+<h2><a class="anchor" aria-hidden="true" id="work-in-progress"></a><a href="#work-in-progress" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Work in Progress</h2>
+<ol>
+<li>The YARN Scheduler will restart any failed workers and TManager containers. However <a href="https://hadoop.apache.org/docs/r2.7.1/hadoop-yarn/hadoop-yarn-site/ResourceManagerHA.html">AM HA</a>  is not
+supported yet. As a result AM failure will result in topology failure.
+Issue: <a href="https://github.com/apache/incubator-heron/issues/949">#949</a></li>
+<li>TManager and Scheduler are started in separate containers. Increased network latency can result
+in warnings or failures. Issue: <a href="https://github.com/apache/incubator-heron/issues/951">#951</a></li>
+</ol>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/0.20.2-incubating/schedulers-slurm"><span class="arrow-prev">← </span><span>Slurm Cluster</span></a><a class="docs-next button" href="/docs/0.20.2-incubating/cluster-config-overview"><span>Cluster Config Overview</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#topology-deployment-on-a-yarn-cluster">Topology deployment on a YARN Cluster</a><ul class="toc-headings"><li><a href="#configuring-the-heron-client-classpath">Configuring the Heron client classpath</a></li><li><a href="#configure-the-yarn-scheduler">Configure the YARN scheduler</a></li></ul></li><li><a href="#topology-management">Topology management</a><ul class="toc-headings"><li><a href="#topology-submission">Topology Submission</a></li><li><a href="#topology-termination">Topology termination</a></li><li><a href="#log-file-location">Log File location</a></li></ul></li><li><a href="#work-in-progress">Work in Progress</a></li></ul></nav></div><footer class="nav-footer" id="footer"><div class="apache-disclaimer">Apache Heron is an effort undergoing incubation at <a target="_blank" href="https://apache.org/">The Apache Software Foundation (ASF)</a> sponsored by the Apache Incubator PMC. Incubation is required of all newly accepted projects until a further review indicates that the infrastructure, communications, and decision making process have stabilized in a manner consistent with other successful ASF projects. While incubation status is not necessarily a reflection of the completeness or stability of the code, it does indicate that the project has yet to be fully endorsed by the ASF.<br/><br/>Apache®, the names of Apache projects, and the feather logo are either <a rel="external" href="https://www.apache.org/foundation/marks/list/">registered trademarks or trademarks</a> of the Apache Software Foundation in the United States and/or other countries.<br/><br/><div class="copyright-box">Copyright © 2022 the Apache Software Foundation, Apache Heron, Heron, 
+  Apache, the Apache feather Logo, and the Apache Heron project logo are either registered 
+  trademarks or trademarks of the Apache Software Foundation.</div></div><div class="apache-links"><a class="item" rel="external" href="https://incubator.apache.org/">Apache Incubator</a><div><a class="item" rel="external" href="https://www.apache.org/">About the ASF</a></div><div><a class="item" rel="external" href="https://www.apache.org/events/current-event">Events</a></div><div><a class="item" rel="external" href="https://www.apache.org/foundation/thanks.html">Thanks</a></div><div><a class="item" rel="external" href="https://www.apache.org/foundation/sponsorship.html">Become a Sponsor</a></div><div><a class="item" rel="external" href="https://www.apache.org/security/">Security</a></div><div><a class="item" rel="external" href="https://www.apache.org/licenses/">License</a></div></div></footer></div><script>window.twttr=(function(d,s, id){var js,fjs=d.getElementsByTagName(s)[0],t=window.twttr||{};if(d.getElementById(id))return t;js=d.createElement(s);js.id=id;js.src='https://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js, fjs);t._e = [];t.ready = function(f) {t._e.push(f);};return t;}(document, 'script', 'twitter-wjs'));</script></body></html>

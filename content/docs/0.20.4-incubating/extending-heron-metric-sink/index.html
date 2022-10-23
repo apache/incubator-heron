@@ -1,0 +1,221 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Implementing a Custom Metrics Sink · Apache Heron</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="&lt;!--"/><meta name="docsearch:version" content="0.20.4-incubating"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Implementing a Custom Metrics Sink · Apache Heron"/><meta property="og:type" content="website"/><meta property="og:url" content="https://heron.apache.org/"/><meta property="og:description" content="&lt;!--"/><meta property="og:image" content="https://heron.apache.org/img/undraw_online.svg"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://heron.apache.org/img/undraw_tweetstorm.svg"/><link rel="shortcut icon" href="/img/favicon-32x32.png"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><link rel="alternate" type="application/atom+xml" href="https://heron.apache.org/blog/atom.xml" title="Apache Heron Blog ATOM Feed"/><link rel="alternate" type="application/rss+xml" href="https://heron.apache.org/blog/feed.xml" title="Apache Heron Blog RSS Feed"/><script>
+              (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+              (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+              m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+              })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+              ga('create', 'UA-198017384-1', 'auto');
+              ga('send', 'pageview');
+            </script><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script type="text/javascript" src="/js/custom.js"></script><script type="text/javascript" src="/js/fix-location.js"></script><link rel="stylesheet" href="/css/main.css"/><script src="/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/"><img class="logo" src="/img/HeronTextLogo-small.png" alt="Apache Heron"/><h2 class="headerTitleWithLogo">Apache Heron</h2></a><a href="/versions"><h3>0.20.4-incubating</h3></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class=""><a href="/api/java" target="_self">Javadocs</a></li><li class=""><a href="/api/python" target="_self">Pydocs</a></li><li class="siteNavGroupActive"><a href="/docs/0.20.4-incubating/getting-started-local-single-node" target="_self">Docs</a></li><li class=""><a href="/download" target="_self">Downloads</a></li><li class=""><a href="#community" target="_self">Community</a></li><li class=""><a href="/blog/" target="_self">Blog</a></li><li class=""><a href="#apache" target="_self">Apache</a></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="container docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><div class="hamburger-menu"><div class="line1"></div><div class="line2"></div><div class="line3"></div></div></div><h2><i>›</i><span>Extending Heron</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle">Getting Started</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/0.20.4-incubating/getting-started-local-single-node">Local (Single Node)</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.4-incubating/getting-started-migrate-storm-topologies">Migrate Storm Topologies</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.4-incubating/getting-started-docker">Heron &amp; Docker</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.4-incubating/getting-started-troubleshooting-guide">Troubleshooting Guide</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Deployment</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/0.20.4-incubating/deployment-overview">Deployment Overiew</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.4-incubating/deployment-configuration">Configuration</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.4-incubating/deployment-api-server">The Heron API Server</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Topology Development APIs</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/0.20.4-incubating/topology-development-streamlet-api">The Heron Streamlet API for Java</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.4-incubating/topology-development-eco-api">The ECO API for Java</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.4-incubating/topology-development-topology-api-java">The Heron Topology API for Java</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.4-incubating/topology-development-topology-api-python">The Heron Topology API for Python</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.4-incubating/topology-development-streamlet-scala">The Heron Streamlet API for Scala</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Client API Docs</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/0.20.4-incubating/client-api-docs-overview">Client API Docs</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Guides</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/0.20.4-incubating/guides-effectively-once-java-topologies">Effectively Once Java Topologies</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.4-incubating/guides-data-model">Heron Data Model</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.4-incubating/guides-tuple-serialization">Tuple Serialization</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.4-incubating/guides-ui-guide">Heron UI Guide</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.4-incubating/guides-topology-tuning">Topology Tuning Guide</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.4-incubating/guides-packing-algorithms">Packing Algorithms</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.4-incubating/guides-simulator-mode">Simulator Mode</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.4-incubating/guides-troubeshooting-guide">Topology Troubleshooting Guide</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Heron Concepts</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/0.20.4-incubating/heron-design-goals">Heron Design Goals</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.4-incubating/heron-topology-concepts">Heron Topologies</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.4-incubating/heron-streamlet-concepts">Heron Streamlets</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.4-incubating/heron-architecture">Heron Architecture</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.4-incubating/heron-delivery-semantics">Heron Delivery Semantics</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">State Managers</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/0.20.4-incubating/state-managers-zookeeper">Zookeeper</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.4-incubating/state-managers-local-fs">Local File System</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Uploaders</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/0.20.4-incubating/uploaders-local-fs">Local File System</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.4-incubating/uploaders-hdfs">HDFS</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.4-incubating/uploaders-http">HTTP</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.4-incubating/uploaders-amazon-s3">Amazon S3</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.4-incubating/uploaders-scp">Secure Copy (SCP)</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Schedulers</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/0.20.4-incubating/schedulers-k8s-by-hand">Kubernetes by hand</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.4-incubating/schedulers-k8s-with-helm">Kubernetes with Helm</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.4-incubating/schedulers-aurora-cluster">Aurora Cluster</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.4-incubating/schedulers-aurora-local">Aurora Locally</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.4-incubating/schedulers-local">Local Cluster</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.4-incubating/schedulers-nomad">Nomad</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.4-incubating/schedulers-mesos-local-mac">Mesos Cluster Locally</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.4-incubating/schedulers-slurm">Slurm Cluster</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.4-incubating/schedulers-yarn">YARN Cluster</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Cluster Configuration</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/0.20.4-incubating/cluster-config-overview">Cluster Config Overview</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.4-incubating/cluster-config-system-level">System Level Configuration</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.4-incubating/cluster-config-instance">Heron Instance</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.4-incubating/cluster-config-metrics">Metrics Manager</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.4-incubating/cluster-config-stream">Stream Manager</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.4-incubating/cluster-config-tmanager">Topology Manager</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Observability</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/0.20.4-incubating/observability-prometheus">Prometheus</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.4-incubating/observability-graphite">Graphite</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.4-incubating/observability-scribe">Scribe</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">User Manuals</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/0.20.4-incubating/user-manuals-heron-cli">Heron Client</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.4-incubating/user-manuals-heron-explorer">Heron Explorer</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.4-incubating/user-manuals-tracker-rest">Heron Tracker REST API</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.4-incubating/user-manuals-heron-tracker-runbook">Heron Tracker Runbook</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.4-incubating/user-manuals-heron-ui-runbook">Heron UI Runbook</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.4-incubating/user-manuals-heron-shell">Heron Shell</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Compiling</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/0.20.4-incubating/compiling-overview">Compiling Overview</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.4-incubating/compiling-linux">Compiling on Linux</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.4-incubating/compiling-osx">Compiling on OS X</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.4-incubating/compiling-docker">Compiling With Docker</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.4-incubating/compiling-running-tests">Running Tests</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.4-incubating/compiling-code-organization">Code Organization</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Extending Heron</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/0.20.4-incubating/extending-heron-scheduler">Custom Scheduler</a></li><li class="navListItem navListItemActive"><a class="navItem" href="/docs/0.20.4-incubating/extending-heron-metric-sink">Custom Metrics Sink</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Heron Resources</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/0.20.4-incubating/heron-resources-resources">Heron Resources</a></li></ul></div></div></section></div><script>
+            var coll = document.getElementsByClassName('collapsible');
+            var checkActiveCategory = true;
+            for (var i = 0; i < coll.length; i++) {
+              var links = coll[i].nextElementSibling.getElementsByTagName('*');
+              if (checkActiveCategory){
+                for (var j = 0; j < links.length; j++) {
+                  if (links[j].classList.contains('navListItemActive')){
+                    coll[i].nextElementSibling.classList.toggle('hide');
+                    coll[i].childNodes[1].classList.toggle('rotate');
+                    checkActiveCategory = false;
+                    break;
+                  }
+                }
+              }
+
+              coll[i].addEventListener('click', function() {
+                var arrow = this.childNodes[1];
+                arrow.classList.toggle('rotate');
+                var content = this.nextElementSibling;
+                content.classList.toggle('hide');
+              });
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+              createToggler('#navToggler', '#docsNav', 'docsSliderActive');
+              createToggler('#tocToggler', 'body', 'tocActive');
+
+              var headings = document.querySelector('.toc-headings');
+              headings && headings.addEventListener('click', function(event) {
+                var el = event.target;
+                while(el !== headings){
+                  if (el.tagName === 'A') {
+                    document.body.classList.remove('tocActive');
+                    break;
+                  } else{
+                    el = el.parentNode;
+                  }
+                }
+              }, false);
+
+              function createToggler(togglerSelector, targetSelector, className) {
+                var toggler = document.querySelector(togglerSelector);
+                var target = document.querySelector(targetSelector);
+
+                if (!toggler) {
+                  return;
+                }
+
+                toggler.onclick = function(event) {
+                  event.preventDefault();
+
+                  target.classList.toggle(className);
+                };
+              }
+            });
+        </script></nav></div><div class="container mainContainer"><div class="wrapper"><div class="post"><header class="postHeader"><h1 class="postHeaderTitle">Implementing a Custom Metrics Sink</h1></header><article><div><span><!--
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements.  See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership.  The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License.  You may obtain a copy of the License at
+      http://www.apache.org/licenses/LICENSE-2.0
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied.  See the License for the
+    specific language governing permissions and limitations
+    under the License.
+-->
+<p>Each Heron container has its own centralized <a href="heron-architecture#metrics-manager">Metrics
+Manager</a> (MM), which collects
+metrics from all <a href="heron-architecture#heron-instance">Heron Instances</a> in
+the container. You can define how the MM processes metrics by implementing a
+<strong>metrics sink</strong>, which specifies how the MM handles incoming
+<a href="/api/org/apache/heron/spi/metricsmgr/metrics/MetricsRecord.html"><code>MetricsRecord</code></a>
+objects.</p>
+<blockquote>
+<p>Java is currently the only supported language for custom metrics sinks. This may change in the future.</p>
+</blockquote>
+<h2><a class="anchor" aria-hidden="true" id="currently-supported-sinks"></a><a href="#currently-supported-sinks" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Currently supported Sinks</h2>
+<p>Heron comes equipped out of the box with three metrics sinks that you can apply
+for a specific topology. The code for these sinks may prove helpful for
+implementing your own.</p>
+<table>
+<thead>
+<tr><th style="text-align:left">Sink</th><th style="text-align:left">How it works</th></tr>
+</thead>
+<tbody>
+<tr><td style="text-align:left"><a href="observability-prometheus">Prometheus</a></td><td style="text-align:left"><a href="/api/org/apache/heron/metricsmgr/sink/PrometheusSink.html"><code>PrometheusSink</code></a> sends each <code>MetricsRecord</code> object to a specified path in the <a href="https://prometheus.io">Prometheus</a> instance.</td></tr>
+<tr><td style="text-align:left"><a href="observability-graphite">Graphite</a></td><td style="text-align:left"><a href="/api/org/apache/heron/metricsmgr/sink/GraphiteSink.html"><code>GraphiteSink</code></a> sends each <code>MetricsRecord</code> object to a <a href="http://graphite.wikidot.com/">Graphite</a> instance according to a Graphite prefix.</td></tr>
+<tr><td style="text-align:left"><a href="observability-scribe">Scribe</a></td><td style="text-align:left"><a href="/api/org/apache/heron/metricsmgr/sink/ScribeSink.html"><code>ScribeSink</code></a> sends each <code>MetricsRecord</code> object to a <a href="https://github.com/facebookarchive/scribe">Scribe</a> instance according to a Scribe category and namespace.</td></tr>
+<tr><td style="text-align:left">Local filesystem</td><td style="text-align:left"><a href="/api/org/apache/heron/metricsmgr/sink/FileSink.html"><code>FileSink</code></a> writes each <code>MetricsRecord</code> object to a JSON file at a specified path.</td></tr>
+</tbody>
+</table>
+<h2><a class="anchor" aria-hidden="true" id="java-setup"></a><a href="#java-setup" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Java Setup</h2>
+<p>In order to create a custom metrics sink, you need to import the <code>heron-spi</code>
+library into your project.</p>
+<h4><a class="anchor" aria-hidden="true" id="maven"></a><a href="#maven" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Maven</h4>
+<pre><code class="hljs css language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">dependency</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>org.apache.heron<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>heron-spi<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">version</span>&gt;</span>0.20.4-incubating<span class="hljs-tag">&lt;/<span class="hljs-name">version</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">dependency</span>&gt;</span>
+</code></pre>
+<h4><a class="anchor" aria-hidden="true" id="gradle"></a><a href="#gradle" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Gradle</h4>
+<pre><code class="hljs css language-groovy">dependencies {
+  compile <span class="hljs-string">group:</span> <span class="hljs-string">"org.apache.heron"</span>, <span class="hljs-string">name:</span> <span class="hljs-string">"heron-spi"</span>, <span class="hljs-string">version:</span> <span class="hljs-string">"0.20.4-incubating"</span>
+}
+</code></pre>
+<h2><a class="anchor" aria-hidden="true" id="the-imetricssink-interface"></a><a href="#the-imetricssink-interface" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>The <code>IMetricsSink</code> Interface</h2>
+<p>Each metrics sink must implement the
+<a href="/api/org/apache/heron/spi/metricsmgr/sink/IMetricsSink.html"><code>IMetricsSink</code></a>
+interface, which requires you to implement the following methods:</p>
+<table>
+<thead>
+<tr><th style="text-align:left">Method</th><th style="text-align:left">Description</th></tr>
+</thead>
+<tbody>
+<tr><td style="text-align:left"><a href="/api/org/apache/heron/spi/metricsmgr/sink/IMetricsSink.html#init-java.util.Map-org.apache.heron.spi.metricsmgr.sink.SinkContext-"><code>init</code></a></td><td style="text-align:left">Defines the initialization behavior of the sink. The <code>conf</code> map is the configuration that is passed to the sink by the <code>.yaml</code> configuration file at <code>heron/config/metrics_sink.yaml</code>; the <a href="/api/org/apache/heron/spi/metricsmgr/sink/SinkContext.html"><code>SinkContext</code></a> object enables you to access values from the sink's runtime context (the ID of the metrics manager, the ID of the sink, and the name of the topology).</td></tr>
+<tr><td style="text-align:left"><a href="/api/org/apache/heron/spi/metricsmgr/sink/IMetricsSink.html#processRecord-org.apache.heron.spi.metricsmgr.metrics.MetricsRecord-"><code>processRecord</code></a></td><td style="text-align:left">Defines how each <a href="/api/org/apache/heron/spi/metricsmgr/metrics/MetricsRecord.html"><code>MetricsRecord</code></a> that passes through the sink is processed.</td></tr>
+<tr><td style="text-align:left"><a href="/api/org/apache/heron/spi/metricsmgr/sink/IMetricsSink.html#flush--"><code>flush</code></a></td><td style="text-align:left">Flush any buffered metrics; this function is called at the interval specified by the <code>flush-frequency-ms</code> parameter. More info can be found in the <a href="../../concepts/architecture#stream-manager">Stream Manager</a> documentation.</td></tr>
+<tr><td style="text-align:left"><a href="/api/org/apache/heron/spi/metricsmgr/sink/IMetricsSink.html#close--"><code>close</code></a></td><td style="text-align:left">Closes the stream and releases any system resources associated with it; if the stream is already closed, invoking <code>close()</code> has no effect.</td></tr>
+</tbody>
+</table>
+<p>Your implementation of those interfaces will need to be packaged into a JAR file
+and distributed to the <code>heron-core/lib/metricsmgr</code> folder of your <a href="compiling-overview">Heron
+release</a>.</p>
+<h2><a class="anchor" aria-hidden="true" id="example-implementation"></a><a href="#example-implementation" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Example Implementation</h2>
+<p>Below is an example implementation that simply prints the contents of each
+metrics record as it passes through:</p>
+<pre><code class="hljs css language-java"><span class="hljs-keyword">import</span> org.apache.heron.metricsmgr.api.metrics.MetricsInfo;
+<span class="hljs-keyword">import</span> org.apache.heron.metricsmgr.api.metrics.MetricsRecord;
+<span class="hljs-keyword">import</span> org.apache.heron.metricsmgr.api.sink.IMetricsSink;
+<span class="hljs-keyword">import</span> org.apache.heron.metricsmgr.api.sink.SinkContext;
+
+<span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">PrintSink</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">IMetricsSink</span> </span>{
+    <span class="hljs-meta">@Override</span>
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">init</span><span class="hljs-params">(Map&lt;String, Object&gt; conf, SinkContext context)</span> </span>{
+        System.out.println(<span class="hljs-string">"Sink configuration:"</span>);
+        <span class="hljs-comment">// This will print out each config in the supplied configuration</span>
+        <span class="hljs-keyword">for</span> (Map.Entry&lt;String, Object&gt; config : conf.entrySet()) {
+            System.out.println(String.format(<span class="hljs-string">"%s: %s"</span>, config.getKey(), config.getValue());
+        }
+        System.out.println(String.format(<span class="hljs-string">"Topology name: %s"</span>, context.getTopologyName());
+        System.out.println(String.format(<span class="hljs-string">"Sink ID: %s"</span>, context.getSinkId()));
+    }
+
+    <span class="hljs-meta">@Override</span>
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">processRecord</span><span class="hljs-params">(MetricsRecord record)</span> </span>{
+        String recordString = String.format(<span class="hljs-string">"Record received: %s"</span>, record.toString());
+        System.out.println(recordString);
+    }
+
+    <span class="hljs-meta">@Override</span>
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">flush</span><span class="hljs-params">()</span> </span>{
+        <span class="hljs-comment">// Since we're just printing to stdout in this sink, we don't need to</span>
+        <span class="hljs-comment">// specify any flush() behavior</span>
+    }
+
+    <span class="hljs-meta">@Override</span>
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">close</span><span class="hljs-params">()</span> </span>{
+        <span class="hljs-comment">// Since we're just printing to stdout in this sink, we don't need to</span>
+        <span class="hljs-comment">// specify any close() behavior</span>
+    }
+}
+</code></pre>
+<h2><a class="anchor" aria-hidden="true" id="configuring-your-custom-sink"></a><a href="#configuring-your-custom-sink" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Configuring Your Custom Sink</h2>
+<p>The configuration for your sink needs to be provided in the
+<code>metrics_sinks.yaml</code> configuration file in your scheduler's base configuration template.</p>
+<p>At the top of that file there's a <code>sinks</code> parameter that lists each available
+sink by name. You should add the sink you want to use to that list. Here's an example:</p>
+<pre><code class="hljs css language-yaml"><span class="hljs-attr">sinks:</span>
+  <span class="hljs-bullet">-</span> <span class="hljs-string">file-sink</span>
+  <span class="hljs-bullet">-</span> <span class="hljs-string">scribe-sink</span>
+  <span class="hljs-bullet">-</span> <span class="hljs-string">tmanager-sink</span>
+  <span class="hljs-bullet">-</span> <span class="hljs-string">print-sink</span>
+  <span class="hljs-bullet">-</span> <span class="hljs-string">prometheus-sink</span>
+</code></pre>
+<p>For each sink you are required to specify the following:</p>
+<table>
+<thead>
+<tr><th style="text-align:left">Parameter</th><th style="text-align:left">Description</th></tr>
+</thead>
+<tbody>
+<tr><td style="text-align:left"><code>class</code></td><td style="text-align:left">The Java class name of your custom implementation of the <code>IMetricsSink</code> interface, e.g. <code>biz.acme.heron.metrics.PrintSink</code>.</td></tr>
+<tr><td style="text-align:left"><code>flush-frequency-ms</code></td><td style="text-align:left">The frequency (in milliseconds) at which the <code>flush()</code> method is called in your implementation of <code>IMetricsSink</code>.</td></tr>
+<tr><td style="text-align:left"><code>sink-restart-attempts</code></td><td style="text-align:left">The number of times that a sink will attempt to restart if it throws exceptions and dies. If you do not set this, the default is 0; if you set it to -1, the sink will attempt to restart forever.</td></tr>
+</tbody>
+</table>
+<p>Here is an example <code>metrics_sinks.yaml</code> configuration:</p>
+<pre><code class="hljs css language-yaml"><span class="hljs-attr">sinks:</span>
+  <span class="hljs-bullet">-</span> <span class="hljs-string">custom-sink</span>
+
+<span class="hljs-attr">print-sink:</span>
+  <span class="hljs-attr">class:</span> <span class="hljs-string">"biz.acme.heron.metrics.CustomSink"</span>
+  <span class="hljs-attr">flush-frequency-ms:</span> <span class="hljs-number">60000</span> <span class="hljs-comment"># One minute</span>
+  <span class="hljs-attr">sink-restart-attempts:</span> <span class="hljs-number">-1</span> <span class="hljs-comment"># Attempt to restart forever</span>
+  <span class="hljs-attr">some-other-config:</span> <span class="hljs-literal">false</span>
+</code></pre>
+<p>It is optional to add other configurations for the sink. All configurations will be constructed
+as an unmodifiable map <code>Map&lt;String, Object&gt; conf</code> and passed to the sink via the <code>init</code> function.</p>
+<h2><a class="anchor" aria-hidden="true" id="using-your-custom-sink"></a><a href="#using-your-custom-sink" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Using Your Custom Sink</h2>
+<p>Once you've made a JAR for your custom Java sink, distributed that JAR to
+<code>heron-core/lib/metricsmgr</code> folder, and changed the configuration in
+<code>metrics_sinks.yaml</code> file in the base configuration template, any topology submitted using that configuration will include the custom sink.</p>
+<p>You must <a href="compiling-overview">re-compile
+Heron</a> if you want to include the configuration in a new distribution of <a href="user-manuals-heron-cli">Heron CLI</a>.</p>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/0.20.4-incubating/extending-heron-scheduler"><span class="arrow-prev">← </span><span>Custom Scheduler</span></a><a class="docs-next button" href="/docs/0.20.4-incubating/heron-resources-resources"><span>Heron Resources</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#currently-supported-sinks">Currently supported Sinks</a></li><li><a href="#java-setup">Java Setup</a></li><li><a href="#the-imetricssink-interface">The <code>IMetricsSink</code> Interface</a></li><li><a href="#example-implementation">Example Implementation</a></li><li><a href="#configuring-your-custom-sink">Configuring Your Custom Sink</a></li><li><a href="#using-your-custom-sink">Using Your Custom Sink</a></li></ul></nav></div><footer class="nav-footer" id="footer"><div class="apache-disclaimer">Apache Heron is an effort undergoing incubation at <a target="_blank" href="https://apache.org/">The Apache Software Foundation (ASF)</a> sponsored by the Apache Incubator PMC. Incubation is required of all newly accepted projects until a further review indicates that the infrastructure, communications, and decision making process have stabilized in a manner consistent with other successful ASF projects. While incubation status is not necessarily a reflection of the completeness or stability of the code, it does indicate that the project has yet to be fully endorsed by the ASF.<br/><br/>Apache®, the names of Apache projects, and the feather logo are either <a rel="external" href="https://www.apache.org/foundation/marks/list/">registered trademarks or trademarks</a> of the Apache Software Foundation in the United States and/or other countries.<br/><br/><div class="copyright-box">Copyright © 2022 the Apache Software Foundation, Apache Heron, Heron, 
+  Apache, the Apache feather Logo, and the Apache Heron project logo are either registered 
+  trademarks or trademarks of the Apache Software Foundation.</div></div><div class="apache-links"><a class="item" rel="external" href="https://incubator.apache.org/">Apache Incubator</a><div><a class="item" rel="external" href="https://www.apache.org/">About the ASF</a></div><div><a class="item" rel="external" href="https://www.apache.org/events/current-event">Events</a></div><div><a class="item" rel="external" href="https://www.apache.org/foundation/thanks.html">Thanks</a></div><div><a class="item" rel="external" href="https://www.apache.org/foundation/sponsorship.html">Become a Sponsor</a></div><div><a class="item" rel="external" href="https://www.apache.org/security/">Security</a></div><div><a class="item" rel="external" href="https://www.apache.org/licenses/">License</a></div></div></footer></div><script>window.twttr=(function(d,s, id){var js,fjs=d.getElementsByTagName(s)[0],t=window.twttr||{};if(d.getElementById(id))return t;js=d.createElement(s);js.id=id;js.src='https://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js, fjs);t._e = [];t.ready = function(f) {t._e.push(f);};return t;}(document, 'script', 'twitter-wjs'));</script></body></html>

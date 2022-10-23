@@ -1,0 +1,269 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Local (Single Node) · Apache Heron</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="&lt;!--"/><meta name="docsearch:version" content="next"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Local (Single Node) · Apache Heron"/><meta property="og:type" content="website"/><meta property="og:url" content="https://heron.apache.org/"/><meta property="og:description" content="&lt;!--"/><meta property="og:image" content="https://heron.apache.org/img/undraw_online.svg"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://heron.apache.org/img/undraw_tweetstorm.svg"/><link rel="shortcut icon" href="/img/favicon-32x32.png"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><link rel="alternate" type="application/atom+xml" href="https://heron.apache.org/blog/atom.xml" title="Apache Heron Blog ATOM Feed"/><link rel="alternate" type="application/rss+xml" href="https://heron.apache.org/blog/feed.xml" title="Apache Heron Blog RSS Feed"/><script>
+              (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+              (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+              m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+              })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+              ga('create', 'UA-198017384-1', 'auto');
+              ga('send', 'pageview');
+            </script><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script type="text/javascript" src="/js/custom.js"></script><script type="text/javascript" src="/js/fix-location.js"></script><link rel="stylesheet" href="/css/main.css"/><script src="/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/"><img class="logo" src="/img/HeronTextLogo-small.png" alt="Apache Heron"/><h2 class="headerTitleWithLogo">Apache Heron</h2></a><a href="/versions"><h3>next</h3></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class=""><a href="/api/java" target="_self">Javadocs</a></li><li class=""><a href="/api/python" target="_self">Pydocs</a></li><li class="siteNavGroupActive siteNavItemActive"><a href="/docs/next/getting-started-local-single-node" target="_self">Docs</a></li><li class=""><a href="/download" target="_self">Downloads</a></li><li class=""><a href="#community" target="_self">Community</a></li><li class=""><a href="/blog/" target="_self">Blog</a></li><li class=""><a href="#apache" target="_self">Apache</a></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="container docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><div class="hamburger-menu"><div class="line1"></div><div class="line2"></div><div class="line3"></div></div></div><h2><i>›</i><span>Getting Started</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle">Getting Started</h3><ul class=""><li class="navListItem navListItemActive"><a class="navItem" href="/docs/next/getting-started-local-single-node">Local (Single Node)</a></li><li class="navListItem"><a class="navItem" href="/docs/next/getting-started-migrate-storm-topologies">Migrate Storm Topologies</a></li><li class="navListItem"><a class="navItem" href="/docs/next/getting-started-docker">Heron &amp; Docker</a></li><li class="navListItem"><a class="navItem" href="/docs/next/getting-started-troubleshooting-guide">Troubleshooting Guide</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Deployment</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/next/deployment-overview">Deployment Overiew</a></li><li class="navListItem"><a class="navItem" href="/docs/next/deployment-configuration">Configuration</a></li><li class="navListItem"><a class="navItem" href="/docs/next/deployment-api-server">The Heron API Server</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Topology Development APIs</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/next/topology-development-streamlet-api">The Heron Streamlet API for Java</a></li><li class="navListItem"><a class="navItem" href="/docs/next/topology-development-eco-api">The ECO API for Java</a></li><li class="navListItem"><a class="navItem" href="/docs/next/topology-development-topology-api-java">The Heron Topology API for Java</a></li><li class="navListItem"><a class="navItem" href="/docs/next/topology-development-topology-api-python">The Heron Topology API for Python</a></li><li class="navListItem"><a class="navItem" href="/docs/next/topology-development-streamlet-scala">The Heron Streamlet API for Scala</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Client API Docs</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/next/client-api-docs-overview">Client API Docs</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Guides</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/next/guides-effectively-once-java-topologies">Effectively Once Java Topologies</a></li><li class="navListItem"><a class="navItem" href="/docs/next/guides-data-model">Heron Data Model</a></li><li class="navListItem"><a class="navItem" href="/docs/next/guides-tuple-serialization">Tuple Serialization</a></li><li class="navListItem"><a class="navItem" href="/docs/next/guides-ui-guide">Heron UI Guide</a></li><li class="navListItem"><a class="navItem" href="/docs/next/guides-topology-tuning">Topology Tuning Guide</a></li><li class="navListItem"><a class="navItem" href="/docs/next/guides-packing-algorithms">Packing Algorithms</a></li><li class="navListItem"><a class="navItem" href="/docs/next/guides-simulator-mode">Simulator Mode</a></li><li class="navListItem"><a class="navItem" href="/docs/next/guides-troubeshooting-guide">Topology Troubleshooting Guide</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Heron Concepts</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/next/heron-design-goals">Heron Design Goals</a></li><li class="navListItem"><a class="navItem" href="/docs/next/heron-topology-concepts">Heron Topologies</a></li><li class="navListItem"><a class="navItem" href="/docs/next/heron-streamlet-concepts">Heron Streamlets</a></li><li class="navListItem"><a class="navItem" href="/docs/next/heron-architecture">Heron Architecture</a></li><li class="navListItem"><a class="navItem" href="/docs/next/heron-delivery-semantics">Heron Delivery Semantics</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">State Managers</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/next/state-managers-zookeeper">Zookeeper</a></li><li class="navListItem"><a class="navItem" href="/docs/next/state-managers-local-fs">Local File System</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Uploaders</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/next/uploaders-local-fs">Local File System</a></li><li class="navListItem"><a class="navItem" href="/docs/next/uploaders-hdfs">HDFS</a></li><li class="navListItem"><a class="navItem" href="/docs/next/uploaders-http">HTTP</a></li><li class="navListItem"><a class="navItem" href="/docs/next/uploaders-amazon-s3">Amazon S3</a></li><li class="navListItem"><a class="navItem" href="/docs/next/uploaders-scp">Secure Copy (SCP)</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Schedulers</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/next/schedulers-k8s-by-hand">Kubernetes by hand</a></li><li class="navListItem"><a class="navItem" href="/docs/next/schedulers-k8s-with-helm">Kubernetes with Helm</a></li><li class="navListItem"><a class="navItem" href="/docs/next/schedulers-k8s-execution-environment">Kubernetes Environment Customization</a></li><li class="navListItem"><a class="navItem" href="/docs/next/schedulers-aurora-cluster">Aurora Cluster</a></li><li class="navListItem"><a class="navItem" href="/docs/next/schedulers-aurora-local">Aurora Locally</a></li><li class="navListItem"><a class="navItem" href="/docs/next/schedulers-local">Local Cluster</a></li><li class="navListItem"><a class="navItem" href="/docs/next/schedulers-nomad">Nomad</a></li><li class="navListItem"><a class="navItem" href="/docs/next/schedulers-mesos-local-mac">Mesos Cluster Locally</a></li><li class="navListItem"><a class="navItem" href="/docs/next/schedulers-slurm">Slurm Cluster</a></li><li class="navListItem"><a class="navItem" href="/docs/next/schedulers-yarn">YARN Cluster</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Cluster Configuration</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/next/cluster-config-overview">Cluster Config Overview</a></li><li class="navListItem"><a class="navItem" href="/docs/next/cluster-config-system-level">System Level Configuration</a></li><li class="navListItem"><a class="navItem" href="/docs/next/cluster-config-instance">Heron Instance</a></li><li class="navListItem"><a class="navItem" href="/docs/next/cluster-config-metrics">Metrics Manager</a></li><li class="navListItem"><a class="navItem" href="/docs/next/cluster-config-stream">Stream Manager</a></li><li class="navListItem"><a class="navItem" href="/docs/next/cluster-config-tmanager">Topology Manager</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Observability</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/next/observability-prometheus">Prometheus</a></li><li class="navListItem"><a class="navItem" href="/docs/next/observability-graphite">Graphite</a></li><li class="navListItem"><a class="navItem" href="/docs/next/observability-scribe">Scribe</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">User Manuals</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/next/user-manuals-heron-cli">Heron Client</a></li><li class="navListItem"><a class="navItem" href="/docs/next/user-manuals-heron-explorer">Heron Explorer</a></li><li class="navListItem"><a class="navItem" href="/docs/next/user-manuals-tracker-rest">Heron Tracker REST API</a></li><li class="navListItem"><a class="navItem" href="/docs/next/user-manuals-heron-tracker-runbook">Heron Tracker Runbook</a></li><li class="navListItem"><a class="navItem" href="/docs/next/user-manuals-heron-ui-runbook">Heron UI Runbook</a></li><li class="navListItem"><a class="navItem" href="/docs/next/user-manuals-heron-shell">Heron Shell</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Compiling</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/next/compiling-overview">Compiling Overview</a></li><li class="navListItem"><a class="navItem" href="/docs/next/compiling-linux">Compiling on Linux</a></li><li class="navListItem"><a class="navItem" href="/docs/next/compiling-osx">Compiling on OS X</a></li><li class="navListItem"><a class="navItem" href="/docs/next/compiling-docker">Compiling With Docker</a></li><li class="navListItem"><a class="navItem" href="/docs/next/compiling-running-tests">Running Tests</a></li><li class="navListItem"><a class="navItem" href="/docs/next/compiling-code-organization">Code Organization</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Extending Heron</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/next/extending-heron-scheduler">Custom Scheduler</a></li><li class="navListItem"><a class="navItem" href="/docs/next/extending-heron-metric-sink">Custom Metrics Sink</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Heron Resources</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/next/heron-resources-resources">Heron Resources</a></li></ul></div></div></section></div><script>
+            var coll = document.getElementsByClassName('collapsible');
+            var checkActiveCategory = true;
+            for (var i = 0; i < coll.length; i++) {
+              var links = coll[i].nextElementSibling.getElementsByTagName('*');
+              if (checkActiveCategory){
+                for (var j = 0; j < links.length; j++) {
+                  if (links[j].classList.contains('navListItemActive')){
+                    coll[i].nextElementSibling.classList.toggle('hide');
+                    coll[i].childNodes[1].classList.toggle('rotate');
+                    checkActiveCategory = false;
+                    break;
+                  }
+                }
+              }
+
+              coll[i].addEventListener('click', function() {
+                var arrow = this.childNodes[1];
+                arrow.classList.toggle('rotate');
+                var content = this.nextElementSibling;
+                content.classList.toggle('hide');
+              });
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+              createToggler('#navToggler', '#docsNav', 'docsSliderActive');
+              createToggler('#tocToggler', 'body', 'tocActive');
+
+              var headings = document.querySelector('.toc-headings');
+              headings && headings.addEventListener('click', function(event) {
+                var el = event.target;
+                while(el !== headings){
+                  if (el.tagName === 'A') {
+                    document.body.classList.remove('tocActive');
+                    break;
+                  } else{
+                    el = el.parentNode;
+                  }
+                }
+              }, false);
+
+              function createToggler(togglerSelector, targetSelector, className) {
+                var toggler = document.querySelector(togglerSelector);
+                var target = document.querySelector(targetSelector);
+
+                if (!toggler) {
+                  return;
+                }
+
+                toggler.onclick = function(event) {
+                  event.preventDefault();
+
+                  target.classList.toggle(className);
+                };
+              }
+            });
+        </script></nav></div><div class="container mainContainer"><div class="wrapper"><div class="post"><header class="postHeader"><h1 class="postHeaderTitle">Local (Single Node)</h1></header><article><div><span><!--
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements.  See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership.  The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License.  You may obtain a copy of the License at
+      http://www.apache.org/licenses/LICENSE-2.0
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied.  See the License for the
+    specific language governing permissions and limitations
+    under the License.
+-->
+<blockquote>
+<p>The current version of Heron is 0.20.5-incubating
+For other platforms, you need to build from source. Please refer to the <a href="compiling-overview">guide to compiling Heron</a>.</p>
+</blockquote>
+<h2><a class="anchor" aria-hidden="true" id="step-1-download-the-heron-tools"></a><a href="#step-1-download-the-heron-tools" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Step 1 --- Download the Heron tools</h2>
+<p>Heron tools can be installed using <a href="#using-installation-scripts">installation scripts</a>.</p>
+<blockquote>
+<p>Note: As of version  0.20.4-incubating, there is a python compatibility on OSX.
+The supported platforms are rocky8, debian11, and Ubuntu18.04.</p>
+</blockquote>
+<h2><a class="anchor" aria-hidden="true" id="using-installation-scripts"></a><a href="#using-installation-scripts" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Using installation scripts</h2>
+<p>To install Heron binaries directly, using installation scripts, go to Heron's <a href="https://heron.apache.org/download">download page</a>
+and see a full listing of Heron releases for each available platform. The installation script for macOS (<code>debian11</code>), for example, is named
+<code>heron-install-0.20.5-incubating-debian11.sh</code>.</p>
+<p>Once you've downloaded the script, make it executable using <a href="https://en.wikipedia.org/wiki/Chmod">chmod</a>:</p>
+<pre><code class="hljs css language-bash">$ chmod +x heron-*.sh
+</code></pre>
+<p>Now run the <a href="user-manuals-heron-cli">Heron client</a> installation script with the <code>--user</code> flag set. Here's an example:</p>
+<blockquote>
+<p>The script will install executables in the <code>~/bin</code> folder. You should add that folder to your <code>PATH</code> using <code>export PATH=~/bin:$PATH</code>.</p>
+</blockquote>
+<pre><code class="hljs css language-bash">$ ./heron-install-0.20.5-incubating-ubuntu.sh --user
+Heron installer
+---------------
+
+Uncompressing...done
+...
+Heron is now installed!
+</code></pre>
+<p>To check that Heron is successfully installed, run <code>heron version</code>:</p>
+<pre><code class="hljs css language-bash">$ heron version
+heron.build.git.revision : b580f689d8cbcb3026966bde2aacf6da74d5bcf5
+heron.build.git.status : Modified
+heron.build.host : MBP
+heron.build.time : Sun Mar 22 06:42:05 CDT 2020
+heron.build.timestamp : 1584877325000
+heron.build.user : ...
+heron.build.version : update-docs-compiling
+</code></pre>
+<h2><a class="anchor" aria-hidden="true" id="step-2-launch-an-example-topology"></a><a href="#step-2-launch-an-example-topology" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Step 2 --- Launch an example topology</h2>
+<blockquote>
+<h4><a class="anchor" aria-hidden="true" id="note-for-macos-users"></a><a href="#note-for-macos-users" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Note for macOS users</h4>
+</blockquote>
+<blockquote>
+<p>If you want to run topologies locally on macOS, you may need to add your
+hostname to your <code>/etc/hosts</code> file under <code>localhost</code>. Here's an example line:
+<code>127.0.0.1 localhost My-Mac-Laptop.local</code>. You can fetch your hostname by simply
+running <code>hostname</code> in your shell.</p>
+</blockquote>
+<p>If you set the <code>--user</code> flag when running the installation scripts, some example
+topologies will be installed in your <code>~/.heron/examples</code> directory. You can
+launch an example <a href="heron-topology-concepts">topology</a> locally (on your machine)
+using the <a href="user-manuals-heron-cli">Heron CLI tool</a>:</p>
+<pre><code class="hljs css language-bash">$ heron submit <span class="hljs-built_in">local</span> \
+  ~/.heron/examples/heron-streamlet-examples.jar \
+  org.apache.heron.examples.streamlet.WindowedWordCountTopology \
+  WindowedWordCountTopology \
+  --deploy-deactivated
+</code></pre>
+<p>The output should look something like this:</p>
+<pre><code class="hljs css language-bash">INFO: Launching topology <span class="hljs-string">'WindowedWordCountTopology'</span>
+
+...
+
+INFO: Topology <span class="hljs-string">'WindowedWordCountTopology'</span> launched successfully
+INFO: Elapsed time: 3.409s.
+</code></pre>
+<p>This will <em>submit</em> the topology to your locally running Heron cluster but it
+won't <em>activate</em> the topology because the <code>--deploy-deactivated</code> flag was set.
+Activating the topology will be explored in <a href="#step-5-explore-topology-management-commands">step
+5</a> below.</p>
+<p>Note that the output shows whether the topology has been launched successfully as well
+the working directory for the topology.</p>
+<p>To check what's under the working directory, run:</p>
+<pre><code class="hljs css language-bash">$ ls -al ~/.herondata/topologies/<span class="hljs-built_in">local</span>/<span class="hljs-variable">${ROLE}</span>/WindowedWordCountTopology
+-rw-r--r--   1 username  staff     6141 Oct 12 09:58 WindowedWordCountTopology.defn
+-rw-r--r--   1 username  staff        5 Oct 12 09:58 container_1_flatmap1_4.pid
+-rw-r--r--   1 username  staff        5 Oct 12 09:58 container_1_logger1_3.pid
+<span class="hljs-comment"># etc.</span>
+</code></pre>
+<p>All instances' log files can be found in <code>log-files</code> under the working directory:</p>
+<pre><code class="hljs css language-bash">$ ls -al ~/.herondata/topologies/<span class="hljs-built_in">local</span>/<span class="hljs-variable">${ROLE}</span>/WindowedWordCountTopology/<span class="hljs-built_in">log</span>-files
+total 408
+-rw-r--r--   1 username  staff   5055 Oct 12 09:58 container_1_flatmap1_4.log.0
+-rw-r--r--   1 username  staff      0 Oct 12 09:58 container_1_flatmap1_4.log.0.lck
+-rw-r--r--   1 username  staff   5052 Oct 12 09:58 container_1_logger1_3.log.0
+<span class="hljs-comment"># etc.</span>
+</code></pre>
+<h2><a class="anchor" aria-hidden="true" id="step-3-start-heron-tracker"></a><a href="#step-3-start-heron-tracker" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Step 3 --- Start Heron Tracker</h2>
+<p>The <a href="user-manuals-heron-tracker-runbook">Heron Tracker</a> is a web service that
+continuously gathers information about your Heron cluster. You can launch the
+tracker by running the <code>heron-tracker</code> command (which is already installed):</p>
+<pre><code class="hljs css language-bash">$ heron-tracker
+... Running on port: 8888
+... Using config file: <span class="hljs-variable">$HOME</span>/.herontools/conf/heron_tracker.yaml
+</code></pre>
+<p>You can reach Heron Tracker in your browser at <a href="http://localhost:8888">http://localhost:8888</a>
+and see something like the following upon successful submission of the topology:
+<img src="/docs/assets/heron-tracker.png" alt="Heron Tracker"></p>
+<p>To explore Heron Tracker, please refer to <a href="user-manuals-tracker-rest">Heron Tracker Rest API</a></p>
+<h2><a class="anchor" aria-hidden="true" id="step-4-start-heron-ui"></a><a href="#step-4-start-heron-ui" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Step 4 --- Start Heron UI</h2>
+<p><a href="user-manuals-heron-ui-runbook">Heron UI</a> is a user interface that uses Heron Tracker to
+provide detailed visual representations of your Heron topologies. To launch
+Heron UI:</p>
+<pre><code class="hljs css language-bash">$ heron-ui
+... Running on port: 8889
+... Using tracker url: http://localhost:8888
+</code></pre>
+<p>You can open Heron UI in your browser at <a href="http://localhost:8889">http://localhost:8889</a>
+and see something like this upon successful submission of the topology:
+<img src="/docs/assets/heron-ui.png" alt="Heron UI"></p>
+<p>To play with Heron UI, please refer to <a href="guides-ui-guide">Heron UI Usage Guide</a></p>
+<h2><a class="anchor" aria-hidden="true" id="step-5-explore-topology-management-commands"></a><a href="#step-5-explore-topology-management-commands" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Step 5 --- Explore topology management commands</h2>
+<p>In step 2 you submitted a topology to your local cluster. The <code>heron</code> CLI tool
+also enables you to activate, deactivate, and kill topologies and more.</p>
+<pre><code class="hljs css language-bash">$ heron activate <span class="hljs-built_in">local</span> WindowedWordCountTopology
+$ heron deactivate <span class="hljs-built_in">local</span> WindowedWordCountTopology
+$ heron <span class="hljs-built_in">kill</span> <span class="hljs-built_in">local</span> WindowedWordCountTopology
+</code></pre>
+<p>Upon successful actions, a message similar to the following will appear:</p>
+<pre><code class="hljs css language-bash">INFO: Successfully activated topology <span class="hljs-string">'WindowedWordCountTopology'</span>
+INFO: Elapsed time: 1.980s.
+</code></pre>
+<p>For more info on these commands, read about <a href="heron-topology-concepts#topology-lifecycle">topology
+lifecycles</a>.</p>
+<p>To list the available CLI commands, run <code>heron</code> by itself:</p>
+<pre><code class="hljs css language-bash">usage: heron &lt;<span class="hljs-built_in">command</span>&gt; &lt;options&gt; ...
+
+Available commands:
+    activate           Activate a topology
+    deactivate         Deactivate a topology
+    <span class="hljs-built_in">help</span>               Prints <span class="hljs-built_in">help</span> <span class="hljs-keyword">for</span> commands
+    <span class="hljs-built_in">kill</span>               Kill a topology
+    restart            Restart a topology
+    submit             Submit a topology
+    version            Print version of heron-cli
+
+For detailed documentation, go to https://heron.apache.org
+</code></pre>
+<p>To invoke help output for a command, run <code>heron help COMMAND</code>. Here's an
+example:</p>
+<pre><code class="hljs css language-bash">$ heron <span class="hljs-built_in">help</span> submit
+usage: heron submit [options] cluster/[role]/[environ] topology-file-name topology-class-name [topology-args]
+
+Required arguments:
+  cluster/[role]/[env]  Cluster, role, and environ to run topology
+  topology-file-name    Topology jar/tar/zip file
+  topology-class-name   Topology class name
+
+Optional arguments:
+  --config-path (a string; path to cluster config; default: <span class="hljs-string">"<span class="hljs-variable">$HOME</span>/.heron/conf"</span>)
+  --config-property (key=value; a config key and its value; default: [])
+  --deploy-deactivated (a boolean; default: <span class="hljs-string">"false"</span>)
+  -D DEFINE             Define a system property to pass to java -D when
+                        running main.
+  --verbose (a boolean; default: <span class="hljs-string">"false"</span>)
+</code></pre>
+<h2><a class="anchor" aria-hidden="true" id="step-6-explore-other-example-topologies"></a><a href="#step-6-explore-other-example-topologies" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Step 6 --- Explore other example topologies</h2>
+<p>The source code for the example topologies can be found
+<a href="https://github.com/apache/incubator-heron/tree/master/examples/src/java/org/apache/heron/examples">on
+GitHub</a>.
+The included example topologies:</p>
+<ul>
+<li><code>AckingTopology.java</code> --- A topology with acking enabled.</li>
+<li><code>ComponentJVMOptionsTopology.java</code> --- A topology that supplies JVM options
+for each component.</li>
+<li><code>CustomGroupingTopology.java</code> --- A topology that implements custom grouping.</li>
+<li><code>ExclamationTopology.java</code> --- A spout that emits random words to a bolt that
+then adds an exclamation mark.</li>
+<li><code>MultiSpoutExclamationTopology.java</code> --- a topology with multiple spouts.</li>
+<li><code>MultiStageAckingTopology.java</code> --- A three-stage topology. A spout emits to a
+bolt that then feeds to another bolt.</li>
+<li><code>TaskHookTopology.java</code> --- A topology that uses a task hook to subscribe to
+event notifications.</li>
+</ul>
+<h2><a class="anchor" aria-hidden="true" id="troubleshooting"></a><a href="#troubleshooting" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Troubleshooting</h2>
+<p>In case of any issues, please refer to <a href="getting-started-troubleshooting-guide">Quick Start Troubleshooting</a>.</p>
+<h3><a class="anchor" aria-hidden="true" id="next-steps"></a><a href="#next-steps" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Next Steps</h3>
+<ul>
+<li><a href="getting-started-migrate-storm-topologies">Migrate Storm topologies</a> to Heron with simple <code>pom.xml</code>
+changes</li>
+<li><a href="deployment-overview">Deploy topologies</a> in clustered, scheduler-driven
+environments (such as on <a href="schedulers-aurora-cluster">Aurora</a>
+and <a href="schedulers-local">locally</a>)</li>
+<li><a href="heron-architecture">Develop topologies</a> for Heron</li>
+</ul>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-next button" href="/docs/next/getting-started-migrate-storm-topologies"><span>Migrate Storm Topologies</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#step-1-download-the-heron-tools">Step 1 --- Download the Heron tools</a></li><li><a href="#using-installation-scripts">Using installation scripts</a></li><li><a href="#step-2-launch-an-example-topology">Step 2 --- Launch an example topology</a></li><li><a href="#step-3-start-heron-tracker">Step 3 --- Start Heron Tracker</a></li><li><a href="#step-4-start-heron-ui">Step 4 --- Start Heron UI</a></li><li><a href="#step-5-explore-topology-management-commands">Step 5 --- Explore topology management commands</a></li><li><a href="#step-6-explore-other-example-topologies">Step 6 --- Explore other example topologies</a></li><li><a href="#troubleshooting">Troubleshooting</a><ul class="toc-headings"><li><a href="#next-steps">Next Steps</a></li></ul></li></ul></nav></div><footer class="nav-footer" id="footer"><div class="apache-disclaimer">Apache Heron is an effort undergoing incubation at <a target="_blank" href="https://apache.org/">The Apache Software Foundation (ASF)</a> sponsored by the Apache Incubator PMC. Incubation is required of all newly accepted projects until a further review indicates that the infrastructure, communications, and decision making process have stabilized in a manner consistent with other successful ASF projects. While incubation status is not necessarily a reflection of the completeness or stability of the code, it does indicate that the project has yet to be fully endorsed by the ASF.<br/><br/>Apache®, the names of Apache projects, and the feather logo are either <a rel="external" href="https://www.apache.org/foundation/marks/list/">registered trademarks or trademarks</a> of the Apache Software Foundation in the United States and/or other countries.<br/><br/><div class="copyright-box">Copyright © 2022 the Apache Software Foundation, Apache Heron, Heron, 
+  Apache, the Apache feather Logo, and the Apache Heron project logo are either registered 
+  trademarks or trademarks of the Apache Software Foundation.</div></div><div class="apache-links"><a class="item" rel="external" href="https://incubator.apache.org/">Apache Incubator</a><div><a class="item" rel="external" href="https://www.apache.org/">About the ASF</a></div><div><a class="item" rel="external" href="https://www.apache.org/events/current-event">Events</a></div><div><a class="item" rel="external" href="https://www.apache.org/foundation/thanks.html">Thanks</a></div><div><a class="item" rel="external" href="https://www.apache.org/foundation/sponsorship.html">Become a Sponsor</a></div><div><a class="item" rel="external" href="https://www.apache.org/security/">Security</a></div><div><a class="item" rel="external" href="https://www.apache.org/licenses/">License</a></div></div></footer></div><script>window.twttr=(function(d,s, id){var js,fjs=d.getElementsByTagName(s)[0],t=window.twttr||{};if(d.getElementById(id))return t;js=d.createElement(s);js.id=id;js.src='https://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js, fjs);t._e = [];t.ready = function(f) {t._e.push(f);};return t;}(document, 'script', 'twitter-wjs'));</script></body></html>

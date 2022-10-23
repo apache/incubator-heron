@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0">
+    <channel>
+        <title>Apache Heron Blog</title>
+        <link>https://heron.apache.org/blog</link>
+        <description>The best place to stay up-to-date with the latest Apache Heron news and events.</description>
+        <lastBuildDate>Sat, 22 Oct 2022 06:00:00 GMT</lastBuildDate>
+        <docs>http://blogs.law.harvard.edu/tech/rss</docs>
+        <generator>Feed for Node.js</generator>
+        <image>
+            <title>Apache Heron Blog</title>
+            <url>https://heron.apache.org/img/HeronTextLogo-small.png</url>
+            <link>https://heron.apache.org/blog</link>
+        </image>
+        <copyright>Copyright © 2022 the Apache Software Foundation, Apache Heron, Heron, 
+  Apache, the Apache feather Logo, and the Apache Heron project logo are either registered 
+  trademarks or trademarks of the Apache Software Foundation.</copyright>
+        <item>
+            <title><![CDATA[0.20.5-incubating Release]]></title>
+            <link>https://heron.apache.org/blog/2022/10/22/0.20.5-incubating-release.html</link>
+            <guid>https://heron.apache.org/blog/2022/10/22/0.20.5-incubating-release.html</guid>
+            <pubDate>Sat, 22 Oct 2022 06:00:00 GMT</pubDate>
+            <description><![CDATA[<p>The Heron community is pleased to announce the release of version 0.20.5-incubating! We are excited as this is moment in time when we start to work on graduating out of the incubator. Heron has had several cloud native specific improvements and we th...</p>]]></description>
+        </item>
+        <item>
+            <title><![CDATA[0.20.4-incubating Release]]></title>
+            <link>https://heron.apache.org/blog/2021/05/27/0.20.4-incubating-release.html</link>
+            <guid>https://heron.apache.org/blog/2021/05/27/0.20.4-incubating-release.html</guid>
+            <pubDate>Thu, 27 May 2021 06:00:00 GMT</pubDate>
+            <description><![CDATA[<p>The Heron community is pleased to announce the release of version 0.20.4-incubating. We are excited as this is the first release the Heron community has distributed a full set of convenience binaries from the released source code while under the Apac...</p>]]></description>
+        </item>
+    </channel>
+</rss>

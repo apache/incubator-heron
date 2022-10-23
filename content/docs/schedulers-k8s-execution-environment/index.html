@@ -1,0 +1,657 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Kubernetes Execution Environment Customization · Apache Heron</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="&lt;!--"/><meta name="docsearch:version" content="0.20.5-incubating"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Kubernetes Execution Environment Customization · Apache Heron"/><meta property="og:type" content="website"/><meta property="og:url" content="https://heron.apache.org/"/><meta property="og:description" content="&lt;!--"/><meta property="og:image" content="https://heron.apache.org/img/undraw_online.svg"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://heron.apache.org/img/undraw_tweetstorm.svg"/><link rel="shortcut icon" href="/img/favicon-32x32.png"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><link rel="alternate" type="application/atom+xml" href="https://heron.apache.org/blog/atom.xml" title="Apache Heron Blog ATOM Feed"/><link rel="alternate" type="application/rss+xml" href="https://heron.apache.org/blog/feed.xml" title="Apache Heron Blog RSS Feed"/><script>
+              (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+              (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+              m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+              })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+              ga('create', 'UA-198017384-1', 'auto');
+              ga('send', 'pageview');
+            </script><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script type="text/javascript" src="/js/custom.js"></script><script type="text/javascript" src="/js/fix-location.js"></script><link rel="stylesheet" href="/css/main.css"/><script src="/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/"><img class="logo" src="/img/HeronTextLogo-small.png" alt="Apache Heron"/><h2 class="headerTitleWithLogo">Apache Heron</h2></a><a href="/versions"><h3>0.20.5-incubating</h3></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class=""><a href="/api/java" target="_self">Javadocs</a></li><li class=""><a href="/api/python" target="_self">Pydocs</a></li><li class="siteNavGroupActive"><a href="/docs/getting-started-local-single-node" target="_self">Docs</a></li><li class=""><a href="/download" target="_self">Downloads</a></li><li class=""><a href="#community" target="_self">Community</a></li><li class=""><a href="/blog/" target="_self">Blog</a></li><li class=""><a href="#apache" target="_self">Apache</a></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="container docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><div class="hamburger-menu"><div class="line1"></div><div class="line2"></div><div class="line3"></div></div></div><h2><i>›</i><span>Schedulers</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle">Getting Started</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/getting-started-local-single-node">Local (Single Node)</a></li><li class="navListItem"><a class="navItem" href="/docs/getting-started-migrate-storm-topologies">Migrate Storm Topologies</a></li><li class="navListItem"><a class="navItem" href="/docs/getting-started-docker">Heron &amp; Docker</a></li><li class="navListItem"><a class="navItem" href="/docs/getting-started-troubleshooting-guide">Troubleshooting Guide</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Deployment</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/deployment-overview">Deployment Overiew</a></li><li class="navListItem"><a class="navItem" href="/docs/deployment-configuration">Configuration</a></li><li class="navListItem"><a class="navItem" href="/docs/deployment-api-server">The Heron API Server</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Topology Development APIs</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/topology-development-streamlet-api">The Heron Streamlet API for Java</a></li><li class="navListItem"><a class="navItem" href="/docs/topology-development-eco-api">The ECO API for Java</a></li><li class="navListItem"><a class="navItem" href="/docs/topology-development-topology-api-java">The Heron Topology API for Java</a></li><li class="navListItem"><a class="navItem" href="/docs/topology-development-topology-api-python">The Heron Topology API for Python</a></li><li class="navListItem"><a class="navItem" href="/docs/topology-development-streamlet-scala">The Heron Streamlet API for Scala</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Client API Docs</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/client-api-docs-overview">Client API Docs</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Guides</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/guides-effectively-once-java-topologies">Effectively Once Java Topologies</a></li><li class="navListItem"><a class="navItem" href="/docs/guides-data-model">Heron Data Model</a></li><li class="navListItem"><a class="navItem" href="/docs/guides-tuple-serialization">Tuple Serialization</a></li><li class="navListItem"><a class="navItem" href="/docs/guides-ui-guide">Heron UI Guide</a></li><li class="navListItem"><a class="navItem" href="/docs/guides-topology-tuning">Topology Tuning Guide</a></li><li class="navListItem"><a class="navItem" href="/docs/guides-packing-algorithms">Packing Algorithms</a></li><li class="navListItem"><a class="navItem" href="/docs/guides-simulator-mode">Simulator Mode</a></li><li class="navListItem"><a class="navItem" href="/docs/guides-troubeshooting-guide">Topology Troubleshooting Guide</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Heron Concepts</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/heron-design-goals">Heron Design Goals</a></li><li class="navListItem"><a class="navItem" href="/docs/heron-topology-concepts">Heron Topologies</a></li><li class="navListItem"><a class="navItem" href="/docs/heron-streamlet-concepts">Heron Streamlets</a></li><li class="navListItem"><a class="navItem" href="/docs/heron-architecture">Heron Architecture</a></li><li class="navListItem"><a class="navItem" href="/docs/heron-delivery-semantics">Heron Delivery Semantics</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">State Managers</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/state-managers-zookeeper">Zookeeper</a></li><li class="navListItem"><a class="navItem" href="/docs/state-managers-local-fs">Local File System</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Uploaders</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/uploaders-local-fs">Local File System</a></li><li class="navListItem"><a class="navItem" href="/docs/uploaders-hdfs">HDFS</a></li><li class="navListItem"><a class="navItem" href="/docs/uploaders-http">HTTP</a></li><li class="navListItem"><a class="navItem" href="/docs/uploaders-amazon-s3">Amazon S3</a></li><li class="navListItem"><a class="navItem" href="/docs/uploaders-scp">Secure Copy (SCP)</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Schedulers</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/schedulers-k8s-by-hand">Kubernetes by hand</a></li><li class="navListItem"><a class="navItem" href="/docs/schedulers-k8s-with-helm">Kubernetes with Helm</a></li><li class="navListItem navListItemActive"><a class="navItem" href="/docs/schedulers-k8s-execution-environment">Kubernetes Environment Customization</a></li><li class="navListItem"><a class="navItem" href="/docs/schedulers-aurora-cluster">Aurora Cluster</a></li><li class="navListItem"><a class="navItem" href="/docs/schedulers-aurora-local">Aurora Locally</a></li><li class="navListItem"><a class="navItem" href="/docs/schedulers-local">Local Cluster</a></li><li class="navListItem"><a class="navItem" href="/docs/schedulers-nomad">Nomad</a></li><li class="navListItem"><a class="navItem" href="/docs/schedulers-mesos-local-mac">Mesos Cluster Locally</a></li><li class="navListItem"><a class="navItem" href="/docs/schedulers-slurm">Slurm Cluster</a></li><li class="navListItem"><a class="navItem" href="/docs/schedulers-yarn">YARN Cluster</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Cluster Configuration</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/cluster-config-overview">Cluster Config Overview</a></li><li class="navListItem"><a class="navItem" href="/docs/cluster-config-system-level">System Level Configuration</a></li><li class="navListItem"><a class="navItem" href="/docs/cluster-config-instance">Heron Instance</a></li><li class="navListItem"><a class="navItem" href="/docs/cluster-config-metrics">Metrics Manager</a></li><li class="navListItem"><a class="navItem" href="/docs/cluster-config-stream">Stream Manager</a></li><li class="navListItem"><a class="navItem" href="/docs/cluster-config-tmanager">Topology Manager</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Observability</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/observability-prometheus">Prometheus</a></li><li class="navListItem"><a class="navItem" href="/docs/observability-graphite">Graphite</a></li><li class="navListItem"><a class="navItem" href="/docs/observability-scribe">Scribe</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">User Manuals</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/user-manuals-heron-cli">Heron Client</a></li><li class="navListItem"><a class="navItem" href="/docs/user-manuals-heron-explorer">Heron Explorer</a></li><li class="navListItem"><a class="navItem" href="/docs/user-manuals-tracker-rest">Heron Tracker REST API</a></li><li class="navListItem"><a class="navItem" href="/docs/user-manuals-heron-tracker-runbook">Heron Tracker Runbook</a></li><li class="navListItem"><a class="navItem" href="/docs/user-manuals-heron-ui-runbook">Heron UI Runbook</a></li><li class="navListItem"><a class="navItem" href="/docs/user-manuals-heron-shell">Heron Shell</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Compiling</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/compiling-overview">Compiling Overview</a></li><li class="navListItem"><a class="navItem" href="/docs/compiling-linux">Compiling on Linux</a></li><li class="navListItem"><a class="navItem" href="/docs/compiling-osx">Compiling on OS X</a></li><li class="navListItem"><a class="navItem" href="/docs/compiling-docker">Compiling With Docker</a></li><li class="navListItem"><a class="navItem" href="/docs/compiling-running-tests">Running Tests</a></li><li class="navListItem"><a class="navItem" href="/docs/compiling-code-organization">Code Organization</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Extending Heron</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/extending-heron-scheduler">Custom Scheduler</a></li><li class="navListItem"><a class="navItem" href="/docs/extending-heron-metric-sink">Custom Metrics Sink</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Heron Resources</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/heron-resources-resources">Heron Resources</a></li></ul></div></div></section></div><script>
+            var coll = document.getElementsByClassName('collapsible');
+            var checkActiveCategory = true;
+            for (var i = 0; i < coll.length; i++) {
+              var links = coll[i].nextElementSibling.getElementsByTagName('*');
+              if (checkActiveCategory){
+                for (var j = 0; j < links.length; j++) {
+                  if (links[j].classList.contains('navListItemActive')){
+                    coll[i].nextElementSibling.classList.toggle('hide');
+                    coll[i].childNodes[1].classList.toggle('rotate');
+                    checkActiveCategory = false;
+                    break;
+                  }
+                }
+              }
+
+              coll[i].addEventListener('click', function() {
+                var arrow = this.childNodes[1];
+                arrow.classList.toggle('rotate');
+                var content = this.nextElementSibling;
+                content.classList.toggle('hide');
+              });
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+              createToggler('#navToggler', '#docsNav', 'docsSliderActive');
+              createToggler('#tocToggler', 'body', 'tocActive');
+
+              var headings = document.querySelector('.toc-headings');
+              headings && headings.addEventListener('click', function(event) {
+                var el = event.target;
+                while(el !== headings){
+                  if (el.tagName === 'A') {
+                    document.body.classList.remove('tocActive');
+                    break;
+                  } else{
+                    el = el.parentNode;
+                  }
+                }
+              }, false);
+
+              function createToggler(togglerSelector, targetSelector, className) {
+                var toggler = document.querySelector(togglerSelector);
+                var target = document.querySelector(targetSelector);
+
+                if (!toggler) {
+                  return;
+                }
+
+                toggler.onclick = function(event) {
+                  event.preventDefault();
+
+                  target.classList.toggle(className);
+                };
+              }
+            });
+        </script></nav></div><div class="container mainContainer"><div class="wrapper"><div class="post"><header class="postHeader"></header><article><div><span><!--
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements.  See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership.  The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License.  You may obtain a copy of the License at
+      http://www.apache.org/licenses/LICENSE-2.0
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied.  See the License for the
+    specific language governing permissions and limitations
+    under the License.
+-->
+<h1><a class="anchor" aria-hidden="true" id="customizing-the-heron-execution-environment-in-kubernetes"></a><a href="#customizing-the-heron-execution-environment-in-kubernetes" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Customizing the Heron Execution Environment in Kubernetes</h1>
+<p>This document demonstrates how you can customize various aspects of the Heron execution environment when using the Kubernetes Scheduler.</p>
+<p><br></p>
+<hr>
+<p><br></p>
+<h2><a class="anchor" aria-hidden="true" id="customizing-a-topology-s-execution-environment-using-pod-templates"></a><a href="#customizing-a-topology-s-execution-environment-using-pod-templates" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Customizing a Topology's Execution Environment Using Pod Templates</h2>
+<p><br></p>
+<blockquote>
+<p>This section demonstrates how you can utilize custom <a href="https://kubernetes.io/docs/concepts/workloads/pods/#pod-templates">Pod Templates</a> embedded in <a href="https://kubernetes.io/docs/concepts/configuration/configmap/">Configuration Maps</a> for your Topology's <code>Executor</code>s and <code>Manager</code> (hereinafter referred to as <code>Heron containers</code>). You may specify different Pod Templates for different topologies.</p>
+</blockquote>
+<p><br/></p>
+<p>When you deploy a topology to Heron on Kubernetes, you may specify individual Pod Templates to be used in your topology's <code>Executor</code>s and <code>Manager</code>. This can be achieved by providing valid Pod Templates, and embedding the Pod Templates in Configuration Maps. By default, Heron will use a minimally configured Pod Template which is adequate to deploy a topology.</p>
+<p>Pod Templates will allow you to configure most aspects of your topology's execution environment, with some exceptions. There are some aspects of Pods for which Heron will have the final say, and which will not be user-customizable. Please view the <a href="#heron-configured-items-in-pod-templates">tables</a> at the end of this section to identify what is set by Heron.</p>
+<p><br></p>
+<blockquote>
+<p><strong><em>System Administrators:</em></strong></p>
+<ul>
+<li>You may wish to disable the ability to load custom Pod Templates. To achieve this, you must pass the define option <code>-D heron.kubernetes.pod.template.disabled=true</code> to the Heron API Server on the command line when launching. This command has been added to the Kubernetes configuration files to deploy the Heron API Server and is set to <code>false</code> by default.</li>
+<li>If you have a custom <code>Role</code> for the Heron API Server you will need to ensure the <code>ServiceAccount</code> attached to the API server, via a <code>RoleBinding</code>, has the correct permissions to access the <code>ConfigMaps</code>:</li>
+</ul>
+<pre><code class="hljs css language-yaml"><span class="hljs-attr">rules:</span>
+<span class="hljs-bullet">-</span> <span class="hljs-attr">apiGroups:</span> 
+ <span class="hljs-bullet">-</span> <span class="hljs-string">""</span>
+ <span class="hljs-attr">resources:</span> 
+ <span class="hljs-bullet">-</span> <span class="hljs-string">configmaps</span>
+ <span class="hljs-attr">verbs:</span> 
+ <span class="hljs-bullet">-</span> <span class="hljs-string">get</span>
+ <span class="hljs-bullet">-</span> <span class="hljs-string">list</span>
+</code></pre>
+</blockquote>
+<p><br></p>
+<h3><a class="anchor" aria-hidden="true" id="preparation"></a><a href="#preparation" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Preparation</h3>
+<p>To deploy a custom Pod Template to Kubernetes with your topology, you must provide a valid Pod Template embedded in a valid Configuration Map. We will be using the following variables throughout this document, some of which are reserved variable names:</p>
+<ul>
+<li><code>POD-TEMPLATE-NAME</code>: This is the name of the Pod Template's YAML definition file. This is <strong><em>not</em></strong> a reserved variable and is a place-holder name.</li>
+<li><code>CONFIG-MAP-NAME</code>: This is the name that will be used by the Configuration Map in which the Pod Template will be embedded by <code>kubectl</code>. This is <strong><em>not</em></strong> a reserved variable and is a place-holder name.</li>
+<li><code>heron.kubernetes.[executor | manager].pod.template</code>: This variable name is used as the key passed to Heron for the <code>--config-property</code> on the CLI. This <strong><em>is</em></strong> a reserved variable name.</li>
+</ul>
+<p><strong><em>NOTE</em></strong>: Please do <strong><em>not</em></strong> use the <code>.</code> (period character) in the name of the <code>CONFIG-MAP-NAME</code>. This character will be used as a delimiter when submitting your topologies.</p>
+<p>It is highly advised that you validate your Pod Templates before placing them in a <code>ConfigMap</code> to isolate any validity issues using a tool such as <a href="https://kubeval.instrumenta.dev/">Kubeval</a> or the built-in <code>dry-run</code> functionality in Kubernetes. Whilst these tools are handy, they will not catch all potential errors in Kubernetes configurations.</p>
+<p><strong><em>NOTE</em></strong>: When submitting a Pod Template to customize an <code>Executor</code> or <code>Manager</code>, Heron will look for containers named <code>executor</code> and <code>manager</code> respectively. These containers will be modified to support the functioning of Heron, please read further below.</p>
+<h4><a class="anchor" aria-hidden="true" id="pod-templates"></a><a href="#pod-templates" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Pod Templates</h4>
+<p>An example of the Pod Template format is provided below, and is derived from the configuration for the Heron Tracker Pod:</p>
+<pre><code class="hljs css language-yaml"><span class="hljs-attr">apiVersion:</span> <span class="hljs-string">v1</span>
+<span class="hljs-attr">kind:</span> <span class="hljs-string">PodTemplate</span>
+<span class="hljs-attr">metadata:</span>
+  <span class="hljs-attr">name:</span> <span class="hljs-string">heron-tracker</span>
+  <span class="hljs-attr">namespace:</span> <span class="hljs-string">default</span>
+<span class="hljs-attr">template:</span>
+  <span class="hljs-attr">metadata:</span>
+    <span class="hljs-attr">labels:</span>
+      <span class="hljs-attr">app:</span> <span class="hljs-string">heron-tracker</span>
+  <span class="hljs-attr">spec:</span>
+    <span class="hljs-attr">containers:</span>
+      <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">heron-tracker</span>
+        <span class="hljs-attr">image:</span> <span class="hljs-string">apache/heron:latest</span>
+        <span class="hljs-attr">ports:</span>
+          <span class="hljs-bullet">-</span> <span class="hljs-attr">containerPort:</span> <span class="hljs-number">8888</span>
+            <span class="hljs-attr">name:</span> <span class="hljs-string">api-port</span>
+        <span class="hljs-attr">resources:</span>
+          <span class="hljs-attr">requests:</span>
+            <span class="hljs-attr">cpu:</span> <span class="hljs-string">"100m"</span>
+            <span class="hljs-attr">memory:</span> <span class="hljs-string">"200M"</span>
+          <span class="hljs-attr">limits:</span>
+            <span class="hljs-attr">cpu:</span> <span class="hljs-string">"400m"</span>
+            <span class="hljs-attr">memory:</span> <span class="hljs-string">"512M"</span>
+</code></pre>
+<p>You would need to save this file as <code>POD-TEMPLATE-NAME</code>. Once you have a valid Pod Template you may proceed to generate a <code>ConfigMap</code>.</p>
+<h4><a class="anchor" aria-hidden="true" id="configuration-maps"></a><a href="#configuration-maps" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Configuration Maps</h4>
+<blockquote>
+<p>You must place the <code>ConfigMap</code> in the same namespace as the Heron API Server using the <code>--namespace</code> option in the commands below if the API Server is not in the <code>default</code> namespace.</p>
+</blockquote>
+<p>To generate a <code>ConfigMap</code> you will need to run the following command:</p>
+<pre><code class="hljs css language-bash">kubectl create configmap CONFIG-MAP-NAME --from-file path/to/POD-TEMPLATE-NAME
+</code></pre>
+<p>You may then want to verify the contents of the <code>ConfigMap</code> by running the following command:</p>
+<pre><code class="hljs css language-bash">kubectl get configmaps CONFIG-MAP-NAME -o yaml
+</code></pre>
+<p>The <code>ConfigMap</code> should appear similar to the one below for our example:</p>
+<pre><code class="hljs css language-yaml"><span class="hljs-attr">apiVersion:</span> <span class="hljs-string">v1</span>
+<span class="hljs-attr">data:</span>
+  <span class="hljs-attr">POD-TEMPLATE-NAME:</span> <span class="hljs-string">|
+    apiVersion: v1
+    kind: PodTemplate
+    metadata:
+      name: heron-tracker
+      namespace: default
+    template:
+      metadata:
+        labels:
+          app: heron-tracker
+      spec:
+        containers:
+          - name: heron-tracker
+            image: apache/heron:latest
+            ports:
+              - containerPort: 8888
+                name: api-port
+            resources:
+              requests:
+                cpu: "100m"
+                memory: "200M"
+              limits:
+                cpu: "400m"
+                memory: "512M"
+</span><span class="hljs-attr">kind:</span> <span class="hljs-string">ConfigMap</span>
+<span class="hljs-attr">metadata:</span>
+  <span class="hljs-attr">creationTimestamp:</span> <span class="hljs-string">"2021-09-27T21:55:30Z"</span>
+  <span class="hljs-attr">name:</span> <span class="hljs-string">CONFIG-MAP-NAME</span>
+  <span class="hljs-attr">namespace:</span> <span class="hljs-string">default</span>
+  <span class="hljs-attr">resourceVersion:</span> <span class="hljs-string">"1313"</span>
+  <span class="hljs-attr">uid:</span> <span class="hljs-string">ba001653-03d9-4ac8-804c-d2c55c974281</span>
+</code></pre>
+<h3><a class="anchor" aria-hidden="true" id="submitting"></a><a href="#submitting" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Submitting</h3>
+<p>To use the <code>ConfigMap</code> for a topology you would will need to submit with the additional flag <code>--confg-property</code>. The <code>--config-property key=value</code> takes a key-value pair:</p>
+<ul>
+<li>Key: <code>heron.kubernetes.[executor | manager].pod.template</code></li>
+<li>Value: <code>CONFIG-MAP-NAME.POD-TEMPLATE-NAME</code></li>
+</ul>
+<p>Please note that you must concatenate <code>CONFIG-MAP-NAME</code> and <code>POD-TEMPLATE-NAME</code> with a <strong><code>.</code></strong> (period character).</p>
+<p>For example:</p>
+<pre><code class="hljs css language-bash">heron submit kubernetes \
+  --service-url=http://localhost:8001/api/v1/namespaces/default/services/heron-apiserver:9000/proxy \
+  ~/.heron/examples/heron-api-examples.jar \
+  org.apache.heron.examples.api.AckingTopology acking \
+  --config-property heron.kubernetes.executor.pod.template=CONFIG-MAP-NAME.POD-TEMPLATE-NAME \
+  --config-property heron.kubernetes.manager.pod.template=CONFIG-MAP-NAME.POD-TEMPLATE-NAME
+</code></pre>
+<h3><a class="anchor" aria-hidden="true" id="heron-configured-items-in-pod-templates"></a><a href="#heron-configured-items-in-pod-templates" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Heron Configured Items in Pod Templates</h3>
+<p>Heron will locate the containers named <code>executor</code> and/or <code>manager</code> in the Pod Template and customize them as outlined below. All other containers within the Pod Templates will remain unchanged.</p>
+<h4><a class="anchor" aria-hidden="true" id="executor-and-manager-containers"></a><a href="#executor-and-manager-containers" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Executor and Manager Containers</h4>
+<p>All metadata for the <code>Heron containers</code> will be overwritten by Heron. In some other cases, values from the Pod Template for the <code>executor</code> and <code>manager</code> will be overwritten by Heron as outlined below.</p>
+<table>
+<thead>
+<tr><th>Name</th><th>Description</th><th>Policy</th></tr>
+</thead>
+<tbody>
+<tr><td><code>image</code></td><td>The <code>Heron container</code>'s image.</td><td>Overwritten by Heron using values from the config.</td></tr>
+<tr><td><code>env</code></td><td>Environment variables are made available within the container. The <code>HOST</code> and <code>POD_NAME</code> keys are required by Heron and are thus reserved.</td><td>Merged with Heron's values taking precedence. Deduplication is based on <code>name</code>.</td></tr>
+<tr><td><code>ports</code></td><td>Port numbers opened within the container. Some of these port numbers are required by Heron and are thus reserved. The reserved ports are defined in Heron's constants as [<code>6001</code>-<code>6010</code>].</td><td>Merged with Heron's values taking precedence. Deduplication is based on the <code>containerPort</code> value.</td></tr>
+<tr><td><code>limits</code> <br> <code>requests</code></td><td>Heron will attempt to load values for <code>cpu</code> and <code>memory</code> from configs.</td><td>Heron's values take precedence over those in the Pod Templates.</td></tr>
+<tr><td><code>volumeMounts</code></td><td>These are the mount points within the <code>Heron container</code> for the <code>volumes</code> available in the Pod.</td><td>Merged with Heron's values taking precedence. Deduplication is based on the <code>name</code> value.</td></tr>
+<tr><td>Annotation: <code>prometheus.io/scrape</code></td><td>Flag to indicate whether Prometheus logs can be scraped and is set to <code>true</code>.</td><td>Value is overridden by Heron.</td></tr>
+<tr><td>Annotation <code>prometheus.io/port</code></td><td>Port address for Prometheus log scraping and is set to <code>8080</code>.</td><td>Values are overridden by Heron.</td></tr>
+<tr><td>Annotation: Pod</td><td>Pod's revision/version hash.</td><td>Automatically set.</td></tr>
+<tr><td>Annotation: Service</td><td>Labels services can use to attach to the Pod.</td><td>Automatically set.</td></tr>
+<tr><td>Label: <code>app</code></td><td>Name of the application launching the Pod and is set to <code>Heron</code>.</td><td>Values are overridden by Heron.</td></tr>
+<tr><td>Label: <code>topology</code></td><td>The name of topology which was provided when submitting.</td><td>User-defined and supplied on the CLI.</td></tr>
+</tbody>
+</table>
+<h4><a class="anchor" aria-hidden="true" id="pod"></a><a href="#pod" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Pod</h4>
+<p>The following items will be set in the Pod Template's <code>spec</code> by Heron.</p>
+<table>
+<thead>
+<tr><th>Name</th><th>Description</th><th>Policy</th></tr>
+</thead>
+<tbody>
+<tr><td><code>terminationGracePeriodSeconds</code></td><td>Grace period to wait before shutting down the Pod after a <code>SIGTERM</code> signal and is set to <code>0</code> seconds.</td><td>Values are overridden by Heron.</td></tr>
+<tr><td><code>tolerations</code></td><td>Attempts to schedule Pods with <code>taints</code> onto nodes hosting Pods with matching <code>taints</code>. The entries below are included by default. <br>  Keys:<br><code>node.kubernetes.io/not-ready</code> <br> <code>node.kubernetes.io/unreachable</code> <br> Values (common):<br> <code>operator: Exists</code><br> <code>effect: NoExecute</code><br> <code>tolerationSeconds: 10L</code></td><td>Merged with Heron's values taking precedence. Deduplication is based on the <code>key</code> value.</td></tr>
+<tr><td><code>containers</code></td><td>Configurations for containers to be launched within the Pod.</td><td>All containers, excluding the <code>Heron container</code>s, are loaded as-is.</td></tr>
+<tr><td><code>volumes</code></td><td>Volumes to be made available to the entire Pod.</td><td>Merged with Heron's values taking precedence. Deduplication is based on the <code>name</code> value.</td></tr>
+<tr><td><code>secretVolumes</code></td><td>Secrets to be mounted as volumes within the Pod.</td><td>Loaded from the Heron configs if present.</td></tr>
+</tbody>
+</table>
+<p><br></p>
+<hr>
+<p><br></p>
+<h2><a class="anchor" aria-hidden="true" id="adding-persistent-volumes-via-the-command-line-interface"></a><a href="#adding-persistent-volumes-via-the-command-line-interface" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Adding Persistent Volumes via the Command-line Interface</h2>
+<p><br></p>
+<blockquote>
+<p>This section demonstrates how you can utilize both static and dynamically backed <a href="https://kubernetes.io/docs/concepts/storage/dynamic-provisioning/">Persistent Volume Claims</a> in the <code>Executor</code> and <code>Manager</code> containers (hereinafter referred to as <code>Heron containers</code>). You will need to enable Dynamic Provisioning in your Kubernetes cluster to proceed to use the dynamic provisioning functionality.</p>
+</blockquote>
+<p><br/></p>
+<p>It is possible to leverage Persistent Volumes with custom Pod Templates but the Volumes you add will be shared between all  <code>Executor</code> Pods in the topology when customizing the <code>Executor</code>s.</p>
+<p>The CLI commands allow you to configure a Persistent Volume Claim (dynamically or statically backed) which will be unique and isolated to each Pod and mounted in a single <code>Heron container</code> when you submit your topology with a claim name of <code>OnDemand</code>. Using any claim name other than on <code>OnDemand</code> will permit you to configure a shared Persistent Volume without a custom Pod Template which will be shared between all <code>Executor</code> Pods when customizing them. The CLI commands override any configurations you may have present in the Pod Template, but Heron's configurations will take precedence over all others.</p>
+<p>Some use cases include process checkpointing, caching of results for later use in the process, intermediate results which could prove useful in analysis (ETL/ELT to a data lake or warehouse), as a source of data enrichment, etc.</p>
+<p><strong>Note:</strong> Heron <strong><em>will</em></strong> remove any dynamically backed Persistent Volume Claims it creates when a topology is terminated. Please be aware that Heron uses the following <code>Labels</code> to locate the claims it has created:</p>
+<pre><code class="hljs css language-yaml"><span class="hljs-attr">metadata:</span>
+  <span class="hljs-attr">labels:</span>
+    <span class="hljs-attr">topology:</span> <span class="hljs-string">&lt;topology-name&gt;</span>
+    <span class="hljs-attr">onDemand:</span> <span class="hljs-literal">true</span>
+</code></pre>
+<p><br></p>
+<blockquote>
+<p><strong><em>System Administrators:</em></strong></p>
+<ul>
+<li>You may wish to disable the ability to configure Persistent Volume Claims specified via the CLI. To achieve this, you must pass the define option <code>-D heron.kubernetes.volume.from.cli.disabled=true</code>to the Heron API Server on the command line when launching. This command has been added to the Kubernetes configuration files to deploy the Heron API Server and is set to <code>false</code> by default.</li>
+<li>If you have a custom <code>Role</code>/<code>ClusterRole</code> for the Heron API Server you will need to ensure the <code>ServiceAccount</code> attached to the API server has the correct permissions to access the <code>Persistent Volume Claim</code>s:</li>
+</ul>
+<pre><code class="hljs css language-yaml"><span class="hljs-attr">rules:</span>
+<span class="hljs-bullet">-</span> <span class="hljs-attr">apiGroups:</span> 
+ <span class="hljs-bullet">-</span> <span class="hljs-string">""</span>
+ <span class="hljs-attr">resources:</span> 
+ <span class="hljs-bullet">-</span> <span class="hljs-string">persistentvolumeclaims</span>
+ <span class="hljs-attr">verbs:</span> 
+ <span class="hljs-bullet">-</span> <span class="hljs-string">create</span>
+ <span class="hljs-bullet">-</span> <span class="hljs-string">delete</span>
+ <span class="hljs-bullet">-</span> <span class="hljs-string">get</span>
+ <span class="hljs-bullet">-</span> <span class="hljs-string">list</span>
+ <span class="hljs-bullet">-</span> <span class="hljs-string">deletecollection</span>
+</code></pre>
+</blockquote>
+<p><br></p>
+<h3><a class="anchor" aria-hidden="true" id="usage"></a><a href="#usage" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Usage</h3>
+<p>To configure a Persistent Volume Claim you must use the <code>--config-property</code> option with the <code>heron.kubernetes.[executor | manager].volumes.persistentVolumeClaim.</code> command prefix. Heron will not validate your Persistent Volume Claim configurations, so please validate them to ensure they are well-formed. All names must comply with the <a href="https://kubernetes.io/docs/concepts/overview/working-with-objects/names/"><em>lowercase RFC-1123</em></a> standard.</p>
+<p>The command pattern is as follows:
+<code>heron.kubernetes.[executor | manager].volumes.persistentVolumeClaim.[VOLUME NAME].[OPTION]=[VALUE]</code></p>
+<p>The currently supported CLI <code>options</code> are:</p>
+<ul>
+<li><code>claimName</code></li>
+<li><code>storageClass</code></li>
+<li><code>sizeLimit</code></li>
+<li><code>accessModes</code></li>
+<li><code>volumeMode</code></li>
+<li><code>path</code></li>
+<li><code>subPath</code></li>
+<li><code>readOnly</code></li>
+</ul>
+<p><strong><em>Note:</em></strong> A <code>claimName</code> of <code>OnDemand</code> will create unique Volumes for each <code>Heron container</code> as well as deploy a Persistent Volume Claim for each Volume. Any other claim name will result in a shared Volume being created between all Pods in the topology.</p>
+<p><strong><em>Note:</em></strong> The <code>accessModes</code> must be a comma-separated list of values <em>without</em> any white space. Valid values can be found in the <a href="https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes">Kubernetes documentation</a>.</p>
+<p><strong><em>Note:</em></strong> If a <code>storageClassName</code> is specified and there are no matching Persistent Volumes then <a href="https://kubernetes.io/docs/concepts/storage/dynamic-provisioning/">dynamic provisioning</a> must be enabled. Kubernetes will attempt to locate a Persistent Volume that matches the <code>storageClassName</code> before it attempts to use dynamic provisioning. If a <code>storageClassName</code> is not specified there must be <a href="https://kubernetes.io/docs/tasks/configure-pod-container/configure-persistent-volume-storage/">Persistent Volumes</a> provisioned manually. For more on statically and dynamically provisioned volumes please read <a href="https://kubernetes.io/docs/concepts/storage/persistent-volumes/#lifecycle-of-a-volume-and-claim">this</a>.</p>
+<p><br></p>
+<h4><a class="anchor" aria-hidden="true" id="example"></a><a href="#example" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Example</h4>
+<p>A series of example commands to add <code>Persistent Volumes</code> to <code>Executor</code>s, and the <code>YAML</code> entries they make in their respective configurations, are as follows.</p>
+<p><strong><em>Dynamic:</em></strong></p>
+<pre><code class="hljs css language-bash">--config-property heron.kubernetes.executor.volumes.persistentVolumeClaim.volumenameofchoice.claimName=OnDemand
+--config-property heron.kubernetes.executor.volumes.persistentVolumeClaim.volumenameofchoice.storageClassName=storage-class-name-of-choice
+--config-property heron.kubernetes.executor.volumes.persistentVolumeClaim.volumenameofchoice.accessModes=comma,separated,list
+--config-property heron.kubernetes.executor.volumes.persistentVolumeClaim.volumenameofchoice.sizeLimit=555Gi
+--config-property heron.kubernetes.executor.volumes.persistentVolumeClaim.volumenameofchoice.volumeMode=volume-mode-of-choice
+--config-property heron.kubernetes.executor.volumes.persistentVolumeClaim.volumenameofchoice.path=/path/to/mount
+--config-property heron.kubernetes.executor.volumes.persistentVolumeClaim.volumenameofchoice.subPath=/sub/path/to/mount
+</code></pre>
+<p>Generated <code>Persistent Volume Claim</code>:</p>
+<pre><code class="hljs css language-yaml"><span class="hljs-attr">apiVersion:</span> <span class="hljs-string">v1</span>
+<span class="hljs-attr">kind:</span> <span class="hljs-string">PersistentVolumeClaim</span>
+<span class="hljs-attr">metadata:</span>
+  <span class="hljs-attr">labels:</span>
+    <span class="hljs-attr">app:</span> <span class="hljs-string">heron</span>
+    <span class="hljs-attr">onDemand:</span> <span class="hljs-string">"true"</span>
+    <span class="hljs-attr">topology:</span> <span class="hljs-string">&lt;topology-name&gt;</span>
+  <span class="hljs-attr">name:</span> <span class="hljs-string">volumenameofchoice-&lt;topology-name&gt;-[Ordinal]</span>
+<span class="hljs-attr">spec:</span>
+  <span class="hljs-attr">accessModes:</span>
+  <span class="hljs-bullet">-</span> <span class="hljs-string">comma</span>
+  <span class="hljs-bullet">-</span> <span class="hljs-string">separated</span>
+  <span class="hljs-bullet">-</span> <span class="hljs-string">list</span>
+  <span class="hljs-attr">resources:</span>
+    <span class="hljs-attr">requests:</span>
+      <span class="hljs-attr">storage:</span> <span class="hljs-string">555Gi</span>
+  <span class="hljs-attr">storageClassName:</span> <span class="hljs-string">storage-class-name-of-choice</span>
+  <span class="hljs-attr">volumeMode:</span> <span class="hljs-string">volume-mode-of-choice</span>
+</code></pre>
+<p>Pod Spec entries for <code>Volume</code>:</p>
+<pre><code class="hljs css language-yaml"><span class="hljs-attr">volumes:</span>
+  <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">volumenameofchoice</span>
+    <span class="hljs-attr">persistentVolumeClaim:</span>
+      <span class="hljs-attr">claimName:</span> <span class="hljs-string">volumenameofchoice-&lt;topology-name&gt;-[Ordinal]</span>
+</code></pre>
+<p><code>Executor</code> container entries for <code>Volume Mounts</code>:</p>
+<pre><code class="hljs css language-yaml"><span class="hljs-attr">volumeMounts:</span>
+  <span class="hljs-bullet">-</span> <span class="hljs-attr">mountPath:</span> <span class="hljs-string">/path/to/mount</span>
+    <span class="hljs-attr">subPath:</span> <span class="hljs-string">/sub/path/to/mount</span>
+    <span class="hljs-attr">name:</span> <span class="hljs-string">volumenameofchoice</span>
+</code></pre>
+<p><br></p>
+<p><strong><em>Static:</em></strong></p>
+<pre><code class="hljs css language-bash">--config-property heron.kubernetes.executor.volumes.persistentVolumeClaim.volumenameofchoice.claimName=OnDemand
+--config-property heron.kubernetes.executor.volumes.persistentVolumeClaim.volumenameofchoice.accessModes=comma,separated,list
+--config-property heron.kubernetes.executor.volumes.persistentVolumeClaim.volumenameofchoice.sizeLimit=555Gi
+--config-property heron.kubernetes.executor.volumes.persistentVolumeClaim.volumenameofchoice.volumeMode=volume-mode-of-choice
+--config-property heron.kubernetes.executor.volumes.persistentVolumeClaim.volumenameofchoice.path=/path/to/mount
+--config-property heron.kubernetes.executor.volumes.persistentVolumeClaim.volumenameofchoice.subPath=/sub/path/to/mount
+</code></pre>
+<p>Generated <code>Persistent Volume Claim</code>:</p>
+<pre><code class="hljs css language-yaml"><span class="hljs-attr">apiVersion:</span> <span class="hljs-string">v1</span>
+<span class="hljs-attr">kind:</span> <span class="hljs-string">PersistentVolumeClaim</span>
+<span class="hljs-attr">metadata:</span>
+  <span class="hljs-attr">labels:</span>
+    <span class="hljs-attr">app:</span> <span class="hljs-string">heron</span>
+    <span class="hljs-attr">onDemand:</span> <span class="hljs-string">"true"</span>
+    <span class="hljs-attr">topology:</span> <span class="hljs-string">&lt;topology-name&gt;</span>
+  <span class="hljs-attr">name:</span> <span class="hljs-string">volumenameofchoice-&lt;topology-name&gt;-[Ordinal]</span>
+<span class="hljs-attr">spec:</span>
+  <span class="hljs-attr">accessModes:</span>
+  <span class="hljs-bullet">-</span> <span class="hljs-string">comma</span>
+  <span class="hljs-bullet">-</span> <span class="hljs-string">separated</span>
+  <span class="hljs-bullet">-</span> <span class="hljs-string">list</span>
+  <span class="hljs-attr">resources:</span>
+    <span class="hljs-attr">requests:</span>
+      <span class="hljs-attr">storage:</span> <span class="hljs-string">555Gi</span>
+  <span class="hljs-attr">storageClassName:</span> <span class="hljs-string">""</span>
+  <span class="hljs-attr">volumeMode:</span> <span class="hljs-string">volume-mode-of-choice</span>
+</code></pre>
+<p>Pod Spec entries for <code>Volume</code>:</p>
+<pre><code class="hljs css language-yaml"><span class="hljs-attr">volumes:</span>
+  <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">volumenameofchoice</span>
+    <span class="hljs-attr">persistentVolumeClaim:</span>
+      <span class="hljs-attr">claimName:</span> <span class="hljs-string">volumenameofchoice-&lt;topology-name&gt;-[Ordinal]</span>
+</code></pre>
+<p><code>Executor</code> container entries for <code>Volume Mounts</code>:</p>
+<pre><code class="hljs css language-yaml"><span class="hljs-attr">volumeMounts:</span>
+  <span class="hljs-bullet">-</span> <span class="hljs-attr">mountPath:</span> <span class="hljs-string">/path/to/mount</span>
+    <span class="hljs-attr">subPath:</span> <span class="hljs-string">/sub/path/to/mount</span>
+    <span class="hljs-attr">name:</span> <span class="hljs-string">volumenameofchoice</span>
+</code></pre>
+<p><br></p>
+<h3><a class="anchor" aria-hidden="true" id="submitting-1"></a><a href="#submitting-1" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Submitting</h3>
+<p>A series of example commands to sumbit a topology using the <em>dynamic</em> example CLI commands above:</p>
+<pre><code class="hljs css language-bash">heron submit kubernetes \
+  --service-url=http://localhost:8001/api/v1/namespaces/default/services/heron-apiserver:9000/proxy \
+  ~/.heron/examples/heron-api-examples.jar \
+  org.apache.heron.examples.api.AckingTopology acking \
+--config-property heron.kubernetes.executor.volumes.persistentVolumeClaim.volumenameofchoice.claimName=OnDemand \
+--config-property heron.kubernetes.executor.volumes.persistentVolumeClaim.volumenameofchoice.storageClassName=storage-class-name-of-choice \
+--config-property heron.kubernetes.executor.volumes.persistentVolumeClaim.volumenameofchoice.accessModes=comma,separated,list \
+--config-property heron.kubernetes.executor.volumes.persistentVolumeClaim.volumenameofchoice.sizeLimit=555Gi \
+--config-property heron.kubernetes.executor.volumes.persistentVolumeClaim.volumenameofchoice.volumeMode=volume-mode-of-choice \
+--config-property heron.kubernetes.executor.volumes.persistentVolumeClaim.volumenameofchoice.path=/path/to/mount \
+--config-property heron.kubernetes.executor.volumes.persistentVolumeClaim.volumenameofchoice.subPath=/sub/path/to/mount
+</code></pre>
+<h3><a class="anchor" aria-hidden="true" id="required-and-optional-configuration-items"></a><a href="#required-and-optional-configuration-items" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Required and Optional Configuration Items</h3>
+<p>The following table outlines CLI options which are either <strong><em>required</em></strong> ( ✅ ), <strong><em>optional</em></strong> ( ❔ ), or <strong><em>not available</em></strong> ( ❌ ) depending on if you are using dynamically/statically backed or shared <code>Volume</code>s.</p>
+<table>
+<thead>
+<tr><th>Option</th><th>Dynamic</th><th>Static</th><th>Shared</th></tr>
+</thead>
+<tbody>
+<tr><td><code>VOLUME NAME</code></td><td>✅</td><td>✅</td><td>✅</td></tr>
+<tr><td><code>claimName</code></td><td><code>OnDemand</code></td><td><code>OnDemand</code></td><td>A valid name</td></tr>
+<tr><td><code>path</code></td><td>✅</td><td>✅</td><td>✅</td></tr>
+<tr><td><code>subPath</code></td><td>❔</td><td>❔</td><td>❔</td></tr>
+<tr><td><code>storageClassName</code></td><td>✅</td><td>❌</td><td>❌</td></tr>
+<tr><td><code>accessModes</code></td><td>✅</td><td>✅</td><td>❌</td></tr>
+<tr><td><code>sizeLimit</code></td><td>❔</td><td>❔</td><td>❌</td></tr>
+<tr><td><code>volumeMode</code></td><td>❔</td><td>❔</td><td>❌</td></tr>
+<tr><td><code>readOnly</code></td><td>❔</td><td>❔</td><td>❔</td></tr>
+</tbody>
+</table>
+<p><br></p>
+<p><strong><em>Note:</em></strong> The <code>VOLUME NAME</code> will be extracted from the CLI command and a <code>claimName</code> is a always required.</p>
+<p><br></p>
+<h3><a class="anchor" aria-hidden="true" id="configuration-items-created-and-entries-made"></a><a href="#configuration-items-created-and-entries-made" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Configuration Items Created and Entries Made</h3>
+<p>The configuration items and entries in the tables below will made in their respective areas.</p>
+<p>A <code>Volume</code> and a <code>Volume Mount</code> will be created for each <code>volume name</code> which you specify. Additionally, one <code>Persistent Volume Claim</code> will be created for each <code>Volume</code> specified as dynamic using the <code>OnDemand</code> claim name.</p>
+<table>
+<thead>
+<tr><th>Name</th><th>Description</th><th>Policy</th></tr>
+</thead>
+<tbody>
+<tr><td><code>VOLUME NAME</code></td><td>The <code>name</code> of the <code>Volume</code>.</td><td>Entries made in the <code>Persistent Volume Claim</code>'s spec, the Pod Spec's <code>Volumes</code>, and the <code>Heron container</code>'s <code>volumeMounts</code>.</td></tr>
+<tr><td><code>claimName</code></td><td>A Claim name for the Persistent Volume.</td><td>If <code>OnDemand</code> is provided as the parameter then a unique Volume and Persistent Volume Claim will be created. Any other name will result in a shared Volume between all Pods in the topology with only a Volume and Volume Mount being added.</td></tr>
+<tr><td><code>path</code></td><td>The <code>mountPath</code> of the <code>Volume</code>.</td><td>Entries made in the <code>Heron container</code>'s <code>volumeMounts</code>.</td></tr>
+<tr><td><code>subPath</code></td><td>The <code>subPath</code> of the <code>Volume</code>.</td><td>Entries made in the <code>Heron container</code>'s <code>volumeMounts</code>.</td></tr>
+<tr><td><code>storageClassName</code></td><td>The identifier name used to reference the dynamic <code>StorageClass</code>.</td><td>Entries made in the <code>Persistent Volume Claim</code> and Pod Spec's <code>Volume</code>.</td></tr>
+<tr><td><code>accessModes</code></td><td>A comma-separated list of <a href="https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes">access modes</a>.</td><td>Entries made in the <code>Persistent Volume Claim</code>.</td></tr>
+<tr><td><code>sizeLimit</code></td><td>A resource request for storage space <a href="https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#meaning-of-memory">units</a>.</td><td>Entries made in the <code>Persistent Volume Claim</code>.</td></tr>
+<tr><td><code>volumeMode</code></td><td>Either <code>FileSystem</code> (default) or <code>Block</code> (raw block). <a href="https://kubernetes.io/docs/concepts/storage/_print/#volume-mode">Read more</a>.</td><td>Entries made in the <code>Persistent Volume Claim</code>.</td></tr>
+<tr><td>Labels</td><td>Two labels for <code>topology</code> and <code>onDemand</code> provisioning are added.</td><td>These labels are only added to dynamically backed <code>Persistent Volume Claim</code>s created by Heron to support the removal of any claims created when a topology is terminated.</td></tr>
+</tbody>
+</table>
+<p><br></p>
+<hr>
+<p><br></p>
+<h2><a class="anchor" aria-hidden="true" id="adding-empty-directory-host-path-and-nework-file-system-volumes-via-the-command-line-interface"></a><a href="#adding-empty-directory-host-path-and-nework-file-system-volumes-via-the-command-line-interface" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Adding Empty Directory, Host Path, and Nework File System Volumes via the Command-line Interface</h2>
+<p><br></p>
+<blockquote>
+<p>This section demonstrates how you can specify configurations for <code>Empty Dir</code>, <code>Host Path</code>, and <code>NFS</code> volumes via the Command Line Interface during the submit process.</p>
+</blockquote>
+<p><br/></p>
+<p>It is possible to allocate and configure Volumes with Pod Templates but the CLI commands extend this to being able to specify Volumes at submission time.</p>
+<p><br></p>
+<blockquote>
+<p><strong><em>System Administrators:</em></strong></p>
+<ul>
+<li>You may wish to disable the ability to configure Volume configurations specified via the CLI. To achieve this, you must pass the define option <code>-D heron.kubernetes.volume.from.cli.disabled=true</code>to the Heron API Server on the command line when launching. This command has been added to the Kubernetes configuration files to deploy the Heron API Server and is set to <code>false</code> by default.</li>
+<li>⚠ <strong><em>WARNING</em></strong> ⚠ <code>Host Path</code> volumes have inherent <a href="https://kubernetes.io/docs/concepts/storage/volumes/#hostpath">security concerns</a>. <code>Host Path</code>s can breach the containment provided by containerization and should be exclusively used with volume mounts set to <code>read-only</code>, with usage limited to testing and development environments.</li>
+</ul>
+</blockquote>
+<p><br></p>
+<h3><a class="anchor" aria-hidden="true" id="usage-1"></a><a href="#usage-1" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Usage</h3>
+<p>To configure a Volume on the CLI you must use the <code>--config-property</code> option in combination with the following prefixes:</p>
+<ul>
+<li><a href="https://kubernetes.io/docs/concepts/storage/volumes/#emptydir">Empty Directory</a>: <code>heron.kubernetes.[executor | manager].volumes.emptyDir.</code></li>
+<li><a href="https://kubernetes.io/docs/concepts/storage/volumes/#hostpath">Host Path</a>: <code>heron.kubernetes.[executor | manager].volumes.hostPath.</code></li>
+<li><a href="https://kubernetes.io/docs/concepts/storage/volumes/#nfs">Network File System</a>: <code>heron.kubernetes.[executor | manager].volumes.nfs.</code></li>
+</ul>
+<p>Heron will not validate your Volume configurations, so please validate them to ensure they are well-formed. All Volume names must comply with the <a href="https://kubernetes.io/docs/concepts/overview/working-with-objects/names/"><em>lowercase RFC-1123</em></a> standard.</p>
+<p>The command patterns are as follows:</p>
+<ul>
+<li>Empty Directory: <code>heron.kubernetes.[executor | manager].volumes.emptyDir.[VOLUME NAME].[OPTION]=[VALUE]</code></li>
+<li>Host Path: <code>heron.kubernetes.[executor | manager].volumes.hostPath.[VOLUME NAME].[OPTION]=[VALUE]</code></li>
+<li>Network File System: <code>heron.kubernetes.[executor | manager].volumes.nfs.[VOLUME NAME].[OPTION]=[VALUE]</code></li>
+</ul>
+<p>The currently supported CLI <code>options</code> are:</p>
+<ul>
+<li><code>medium</code></li>
+<li><code>type</code></li>
+<li><code>server</code></li>
+<li><code>sizeLimit</code></li>
+<li><code>pathOnHost</code></li>
+<li><code>pathOnNFS</code></li>
+<li><code>path</code></li>
+<li><code>subPath</code></li>
+<li><code>readOnly</code></li>
+</ul>
+<p><br></p>
+<h4><a class="anchor" aria-hidden="true" id="example-1"></a><a href="#example-1" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Example</h4>
+<p>A series of example commands to add Volumes to a <code>Manager</code>, and the <code>YAML</code> entries they make in their respective configurations, are as follows.</p>
+<p><strong><em>Empty Directory:</em></strong></p>
+<pre><code class="hljs css language-bash">--config-property heron.kubernetes.manager.volumes.emptyDir.manager-empty-dir.medium=<span class="hljs-string">"Memory"</span>
+--config-property heron.kubernetes.manager.volumes.emptyDir.manager-empty-dir.sizeLimit=<span class="hljs-string">"50Mi"</span>
+--config-property heron.kubernetes.manager.volumes.emptyDir.manager-empty-dir.path=<span class="hljs-string">"empty/dir/path"</span>
+--config-property heron.kubernetes.manager.volumes.emptyDir.manager-empty-dir.subPath=<span class="hljs-string">"empty/dir/sub/path"</span>
+--config-property heron.kubernetes.manager.volumes.emptyDir.manager-empty-dir.readOnly=<span class="hljs-string">"true"</span>
+</code></pre>
+<p>Generated <code>Volume</code> entry:</p>
+<pre><code class="hljs css language-yaml"><span class="hljs-attr">volumes:</span>
+<span class="hljs-bullet">-</span> <span class="hljs-attr">emptyDir:</span>
+    <span class="hljs-attr">medium:</span> <span class="hljs-string">Memory</span>
+    <span class="hljs-attr">sizeLimit:</span> <span class="hljs-string">50Mi</span>
+  <span class="hljs-attr">name:</span> <span class="hljs-string">manager-empty-dir</span>
+</code></pre>
+<p>Generated <code>Volume Mount</code> entry:</p>
+<pre><code class="hljs css language-yaml"><span class="hljs-attr">volumeMounts:</span>
+<span class="hljs-bullet">-</span> <span class="hljs-attr">mountPath:</span> <span class="hljs-string">empty/dir/path</span>
+  <span class="hljs-attr">name:</span> <span class="hljs-string">manager-empty-dir</span>
+  <span class="hljs-attr">readOnly:</span> <span class="hljs-literal">true</span>
+  <span class="hljs-attr">subPath:</span> <span class="hljs-string">empty/dir/sub/path</span>
+</code></pre>
+<p><br></p>
+<p><strong><em>Host Path:</em></strong></p>
+<pre><code class="hljs css language-bash">--config-property heron.kubernetes.manager.volumes.hostPath.manager-host-path.type=<span class="hljs-string">"File"</span>
+--config-property heron.kubernetes.manager.volumes.hostPath.manager-host-path.pathOnHost=<span class="hljs-string">"/dev/null"</span>
+--config-property heron.kubernetes.manager.volumes.hostPath.manager-host-path.path=<span class="hljs-string">"host/path/path"</span>
+--config-property heron.kubernetes.manager.volumes.hostPath.manager-host-path.subPath=<span class="hljs-string">"host/path/sub/path"</span>
+--config-property heron.kubernetes.manager.volumes.hostPath.manager-host-path.readOnly=<span class="hljs-string">"true"</span>
+</code></pre>
+<p>Generated <code>Volume</code> entry:</p>
+<pre><code class="hljs css language-yaml"><span class="hljs-attr">volumes:</span>
+<span class="hljs-bullet">-</span> <span class="hljs-attr">hostPath:</span>
+    <span class="hljs-attr">path:</span> <span class="hljs-string">/dev/null</span>
+    <span class="hljs-attr">type:</span> <span class="hljs-string">File</span>
+  <span class="hljs-attr">name:</span> <span class="hljs-string">manager-host-path</span>
+</code></pre>
+<p>Generated <code>Volume Mount</code> entry:</p>
+<pre><code class="hljs css language-yaml"><span class="hljs-attr">volumeMounts:</span>
+<span class="hljs-bullet">-</span> <span class="hljs-attr">mountPath:</span> <span class="hljs-string">host/path/path</span>
+  <span class="hljs-attr">name:</span> <span class="hljs-string">manager-host-path</span>
+  <span class="hljs-attr">readOnly:</span> <span class="hljs-literal">true</span>
+  <span class="hljs-attr">subPath:</span> <span class="hljs-string">host/path/sub/path</span>
+</code></pre>
+<p><br></p>
+<p><strong><em>NFS:</em></strong></p>
+<pre><code class="hljs css language-bash">--config-property heron.kubernetes.manager.volumes.nfs.manager-nfs.server=<span class="hljs-string">"nfs-server.address"</span>
+--config-property heron.kubernetes.manager.volumes.nfs.manager-nfs.readOnly=<span class="hljs-string">"true"</span>
+--config-property heron.kubernetes.manager.volumes.nfs.manager-nfs.pathOnNFS=<span class="hljs-string">"/dev/null"</span>
+--config-property heron.kubernetes.manager.volumes.nfs.manager-nfs.path=<span class="hljs-string">"nfs/path"</span>
+--config-property heron.kubernetes.manager.volumes.nfs.manager-nfs.subPath=<span class="hljs-string">"nfs/sub/path"</span>
+--config-property heron.kubernetes.manager.volumes.nfs.manager-nfs.readOnly=<span class="hljs-string">"true"</span>
+</code></pre>
+<p>Generated <code>Volume</code> entry:</p>
+<pre><code class="hljs css language-yaml"><span class="hljs-attr">volumes:</span>
+<span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">manager-nfs</span>
+  <span class="hljs-attr">nfs:</span>
+    <span class="hljs-attr">path:</span> <span class="hljs-string">/dev/null</span>
+    <span class="hljs-attr">readOnly:</span> <span class="hljs-literal">true</span>
+    <span class="hljs-attr">server:</span> <span class="hljs-string">nfs-server.address</span>
+</code></pre>
+<p>Generated <code>Volume Mount</code> entry:</p>
+<pre><code class="hljs css language-yaml"><span class="hljs-attr">volumeMounts:</span>
+<span class="hljs-bullet">-</span> <span class="hljs-attr">mountPath:</span> <span class="hljs-string">nfs/path</span>
+  <span class="hljs-attr">name:</span> <span class="hljs-string">manager-nfs</span>
+  <span class="hljs-attr">readOnly:</span> <span class="hljs-literal">true</span>
+  <span class="hljs-attr">subPath:</span> <span class="hljs-string">nfs/sub/path</span>
+</code></pre>
+<p><br></p>
+<h3><a class="anchor" aria-hidden="true" id="submitting-2"></a><a href="#submitting-2" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Submitting</h3>
+<p>A series of example commands to sumbit a topology using the example CLI commands above:</p>
+<pre><code class="hljs css language-bash">heron submit kubernetes \
+  --service-url=http://localhost:8001/api/v1/namespaces/default/services/heron-apiserver:9000/proxy \
+  ~/.heron/examples/heron-api-examples.jar \
+  org.apache.heron.examples.api.AckingTopology acking \
+\
+--config-property heron.kubernetes.manager.volumes.emptyDir.manager-empty-dir.medium=<span class="hljs-string">"Memory"</span> \
+--config-property heron.kubernetes.manager.volumes.emptyDir.manager-empty-dir.sizeLimit=<span class="hljs-string">"50Mi"</span> \
+--config-property heron.kubernetes.manager.volumes.emptyDir.manager-empty-dir.path=<span class="hljs-string">"empty/dir/path"</span> \
+--config-property heron.kubernetes.manager.volumes.emptyDir.manager-empty-dir.subPath=<span class="hljs-string">"empty/dir/sub/path"</span> \
+--config-property heron.kubernetes.manager.volumes.emptyDir.manager-empty-dir.readOnly=<span class="hljs-string">"true"</span> \
+\
+--config-property heron.kubernetes.manager.volumes.hostPath.manager-host-path.type=<span class="hljs-string">"File"</span> \
+--config-property heron.kubernetes.manager.volumes.hostPath.manager-host-path.pathOnHost=<span class="hljs-string">"/dev/null"</span> \
+--config-property heron.kubernetes.manager.volumes.hostPath.manager-host-path.path=<span class="hljs-string">"host/path/path"</span> \
+--config-property heron.kubernetes.manager.volumes.hostPath.manager-host-path.subPath=<span class="hljs-string">"host/path/sub/path"</span> \
+--config-property heron.kubernetes.manager.volumes.hostPath.manager-host-path.readOnly=<span class="hljs-string">"true"</span> \
+\
+--config-property heron.kubernetes.manager.volumes.nfs.manager-nfs.server=<span class="hljs-string">"nfs-server.address"</span> \
+--config-property heron.kubernetes.manager.volumes.nfs.manager-nfs.readOnly=<span class="hljs-string">"true"</span> \
+--config-property heron.kubernetes.manager.volumes.nfs.manager-nfs.pathOnNFS=<span class="hljs-string">"/dev/null"</span> \
+--config-property heron.kubernetes.manager.volumes.nfs.manager-nfs.path=<span class="hljs-string">"nfs/path"</span> \
+--config-property heron.kubernetes.manager.volumes.nfs.manager-nfs.subPath=<span class="hljs-string">"nfs/sub/path"</span> \
+--config-property heron.kubernetes.manager.volumes.nfs.manager-nfs.readOnly=<span class="hljs-string">"true"</span>
+</code></pre>
+<h3><a class="anchor" aria-hidden="true" id="required-and-optional-configuration-items-1"></a><a href="#required-and-optional-configuration-items-1" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Required and Optional Configuration Items</h3>
+<p>The following table outlines CLI options which are either <strong><em>required</em></strong> ( ✅ ), <strong><em>optional</em></strong> ( ❔ ), or <strong><em>not available</em></strong> ( ❌ ) depending on the type of <code>Volume</code>.</p>
+<table>
+<thead>
+<tr><th>Option</th><th>emptyDir</th><th>hostPath</th><th>NFS</th></tr>
+</thead>
+<tbody>
+<tr><td><code>VOLUME NAME</code></td><td>✅</td><td>✅</td><td>✅</td></tr>
+<tr><td><code>path</code></td><td>✅</td><td>✅</td><td>✅</td></tr>
+<tr><td><code>subPath</code></td><td>❔</td><td>❔</td><td>❔</td></tr>
+<tr><td><code>readOnly</code></td><td>❔</td><td>❔</td><td>❔</td></tr>
+<tr><td><code>medium</code></td><td>❔</td><td>❌</td><td>❌</td></tr>
+<tr><td><code>sizeLimit</code></td><td>❔</td><td>❌</td><td>❌</td></tr>
+<tr><td><code>pathOnHost</code></td><td>❌</td><td>✅</td><td>❌</td></tr>
+<tr><td><code>type</code></td><td>❌</td><td>❔</td><td>❌</td></tr>
+<tr><td><code>pathOnNFS</code></td><td>❌</td><td>❌</td><td>✅</td></tr>
+<tr><td><code>server</code></td><td>❌</td><td>❌</td><td>✅</td></tr>
+</tbody>
+</table>
+<p><br></p>
+<p><strong><em>Note:</em></strong> The <code>VOLUME NAME</code> will be extracted from the CLI command.</p>
+<p><br></p>
+<h3><a class="anchor" aria-hidden="true" id="configuration-items-created-and-entries-made-1"></a><a href="#configuration-items-created-and-entries-made-1" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Configuration Items Created and Entries Made</h3>
+<p>The configuration items and entries in the tables below will made in their respective areas.</p>
+<p>A <code>Volume</code> and a <code>Volume Mount</code> will be created for each <code>volume name</code> which you specify.</p>
+<table>
+<thead>
+<tr><th>Name</th><th>Description</th><th>Policy</th></tr>
+</thead>
+<tbody>
+<tr><td><code>VOLUME NAME</code></td><td>The <code>name</code> of the <code>Volume</code>.</td><td>Entries are made in the Pod Spec's <code>Volumes</code>, and the <code>Heron container</code>'s <code>volumeMounts</code>.</td></tr>
+<tr><td><code>path</code></td><td>The <code>mountPath</code> of the <code>Volume</code>.</td><td>Entries are made in the <code>Heron container</code>'s <code>volumeMounts</code>.</td></tr>
+<tr><td><code>subPath</code></td><td>The <code>subPath</code> of the <code>Volume</code>.</td><td>Entries are made in the <code>Heron container</code>'s <code>volumeMounts</code>.</td></tr>
+<tr><td><code>readOnly</code></td><td>A boolean value which defaults to <code>false</code> and indicates whether the medium has read-write permissions.</td><td>Entries are made in the <code>Heron container</code>s <code>volumeMount</code>. When used with an <code>NFS</code> volume an entry is also made in the associated <code>Volume</code>.</td></tr>
+<tr><td><code>medium</code></td><td>The type of storage medium that will back the <code>Empty Dir</code> and defaults to &quot;&quot;, please read more <a href="https://kubernetes.io/docs/concepts/storage/volumes#emptydir">here</a>.</td><td>An entry is made in the <code>Empty Dir</code>'s <code>Volume</code>.</td></tr>
+<tr><td><code>sizeLimit</code></td><td>Total <a href="https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#meaning-of-memory">amount</a> of local storage required for this <code>Empty Dir</code> Volume.</td><td>An entry is made <code>Empty Dir</code>'s <code>Volume</code>.</td></tr>
+<tr><td><code>pathOnHost</code></td><td>The directory path to be mounted the host.</td><td>A <code>path</code> entry is made <code>Host Path</code>'s <code>Volume</code>.</td></tr>
+<tr><td><code>type</code></td><td>The type of the <code>Host Path</code> volume and defaults to &quot;&quot;, please read more <a href="https://kubernetes.io/docs/concepts/storage/volumes#hostpath">here</a>.</td><td>An entry is made <code>Host Path</code>'s <code>Volume</code>.</td></tr>
+<tr><td><code>pathOnNFS</code></td><td>The directory path to be mounted the NFS server.</td><td>A <code>path</code> entry is made <code>NFS</code>'s <code>Volume</code>.</td></tr>
+<tr><td><code>server</code></td><td>The hostname or IP address of the NFS server.</td><td>An entry is made <code>NFS</code>'s <code>Volume</code>.</td></tr>
+</tbody>
+</table>
+<p><br></p>
+<hr>
+<p><br></p>
+<h2><a class="anchor" aria-hidden="true" id="setting-limits-and-requests-via-the-command-line-interface"></a><a href="#setting-limits-and-requests-via-the-command-line-interface" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Setting Limits and Requests via the Command Line Interface</h2>
+<blockquote>
+<p>This section demonstrates how you can configure a topology's <code>Executor</code> and/or <code>Manager</code> (hereinafter referred to as <code>Heron containers</code>) resource <code>Requests</code> and <code>Limits</code> through CLI commands.</p>
+</blockquote>
+<p><br/></p>
+<p>You may configure an individual topology's <code>Heron container</code>'s resource <code>Requests</code> and <code>Limits</code> during submission through CLI commands. The default behaviour is to acquire values for resources from Configurations and for them to be common between the <code>Executor</code>s and the <code>Manager</code> for a topology.</p>
+<p><br></p>
+<h3><a class="anchor" aria-hidden="true" id="usage-2"></a><a href="#usage-2" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Usage</h3>
+<p>The command pattern is as follows:
+<code>heron.kubernetes.[executor | manager].[limits | requests].[OPTION]=[VALUE]</code></p>
+<p>The currently supported CLI <code>options</code> and their associated <code>values</code> are:</p>
+<ul>
+<li><code>cpu</code>: A natural number indicating the number of <a href="https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#meaning-of-cpu">CPU units</a>.</li>
+<li><code>memory</code>: A natural number indicating the amount of <a href="https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#meaning-of-memory">memory units</a>.</li>
+</ul>
+<p><br></p>
+<h4><a class="anchor" aria-hidden="true" id="example-2"></a><a href="#example-2" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Example</h4>
+<p>An example submission command is as follows.</p>
+<p><strong><em>Limits and Requests:</em></strong></p>
+<pre><code class="hljs css language-bash">~/bin/heron submit kubernetes ~/.heron/examples/heron-api-examples.jar \
+org.apache.heron.examples.api.AckingTopology acking \
+--config-property heron.kubernetes.manager.limits.cpu=2 \
+--config-property heron.kubernetes.manager.limits.memory=3 \
+--config-property heron.kubernetes.manager.requests.cpu=1 \
+--config-property heron.kubernetes.manager.requests.memory=2
+</code></pre>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/schedulers-k8s-with-helm"><span class="arrow-prev">← </span><span>Kubernetes with Helm</span></a><a class="docs-next button" href="/docs/schedulers-aurora-cluster"><span>Aurora Cluster</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#customizing-a-topology-s-execution-environment-using-pod-templates">Customizing a Topology's Execution Environment Using Pod Templates</a><ul class="toc-headings"><li><a href="#preparation">Preparation</a></li><li><a href="#submitting">Submitting</a></li><li><a href="#heron-configured-items-in-pod-templates">Heron Configured Items in Pod Templates</a></li></ul></li><li><a href="#adding-persistent-volumes-via-the-command-line-interface">Adding Persistent Volumes via the Command-line Interface</a><ul class="toc-headings"><li><a href="#usage">Usage</a></li><li><a href="#submitting-1">Submitting</a></li><li><a href="#required-and-optional-configuration-items">Required and Optional Configuration Items</a></li><li><a href="#configuration-items-created-and-entries-made">Configuration Items Created and Entries Made</a></li></ul></li><li><a href="#adding-empty-directory-host-path-and-nework-file-system-volumes-via-the-command-line-interface">Adding Empty Directory, Host Path, and Nework File System Volumes via the Command-line Interface</a><ul class="toc-headings"><li><a href="#usage-1">Usage</a></li><li><a href="#submitting-2">Submitting</a></li><li><a href="#required-and-optional-configuration-items-1">Required and Optional Configuration Items</a></li><li><a href="#configuration-items-created-and-entries-made-1">Configuration Items Created and Entries Made</a></li></ul></li><li><a href="#setting-limits-and-requests-via-the-command-line-interface">Setting Limits and Requests via the Command Line Interface</a><ul class="toc-headings"><li><a href="#usage-2">Usage</a></li></ul></li></ul></nav></div><footer class="nav-footer" id="footer"><div class="apache-disclaimer">Apache Heron is an effort undergoing incubation at <a target="_blank" href="https://apache.org/">The Apache Software Foundation (ASF)</a> sponsored by the Apache Incubator PMC. Incubation is required of all newly accepted projects until a further review indicates that the infrastructure, communications, and decision making process have stabilized in a manner consistent with other successful ASF projects. While incubation status is not necessarily a reflection of the completeness or stability of the code, it does indicate that the project has yet to be fully endorsed by the ASF.<br/><br/>Apache®, the names of Apache projects, and the feather logo are either <a rel="external" href="https://www.apache.org/foundation/marks/list/">registered trademarks or trademarks</a> of the Apache Software Foundation in the United States and/or other countries.<br/><br/><div class="copyright-box">Copyright © 2022 the Apache Software Foundation, Apache Heron, Heron, 
+  Apache, the Apache feather Logo, and the Apache Heron project logo are either registered 
+  trademarks or trademarks of the Apache Software Foundation.</div></div><div class="apache-links"><a class="item" rel="external" href="https://incubator.apache.org/">Apache Incubator</a><div><a class="item" rel="external" href="https://www.apache.org/">About the ASF</a></div><div><a class="item" rel="external" href="https://www.apache.org/events/current-event">Events</a></div><div><a class="item" rel="external" href="https://www.apache.org/foundation/thanks.html">Thanks</a></div><div><a class="item" rel="external" href="https://www.apache.org/foundation/sponsorship.html">Become a Sponsor</a></div><div><a class="item" rel="external" href="https://www.apache.org/security/">Security</a></div><div><a class="item" rel="external" href="https://www.apache.org/licenses/">License</a></div></div></footer></div><script>window.twttr=(function(d,s, id){var js,fjs=d.getElementsByTagName(s)[0],t=window.twttr||{};if(d.getElementById(id))return t;js=d.createElement(s);js.id=id;js.src='https://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js, fjs);t._e = [];t.ready = function(f) {t._e.push(f);};return t;}(document, 'script', 'twitter-wjs'));</script></body></html>

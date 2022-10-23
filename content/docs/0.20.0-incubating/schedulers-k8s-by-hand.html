@@ -1,0 +1,505 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Kubernetes by hand · Apache Heron</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="&lt;!--"/><meta name="docsearch:version" content="0.20.0-incubating"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Kubernetes by hand · Apache Heron"/><meta property="og:type" content="website"/><meta property="og:url" content="https://heron.apache.org/"/><meta property="og:description" content="&lt;!--"/><meta property="og:image" content="https://heron.apache.org/img/undraw_online.svg"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://heron.apache.org/img/undraw_tweetstorm.svg"/><link rel="shortcut icon" href="/img/favicon-32x32.png"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><link rel="alternate" type="application/atom+xml" href="https://heron.apache.org/blog/atom.xml" title="Apache Heron Blog ATOM Feed"/><link rel="alternate" type="application/rss+xml" href="https://heron.apache.org/blog/feed.xml" title="Apache Heron Blog RSS Feed"/><script>
+              (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+              (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+              m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+              })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+              ga('create', 'UA-198017384-1', 'auto');
+              ga('send', 'pageview');
+            </script><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script type="text/javascript" src="/js/custom.js"></script><script type="text/javascript" src="/js/fix-location.js"></script><link rel="stylesheet" href="/css/main.css"/><script src="/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/"><img class="logo" src="/img/HeronTextLogo-small.png" alt="Apache Heron"/><h2 class="headerTitleWithLogo">Apache Heron</h2></a><a href="/versions"><h3>0.20.0-incubating</h3></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class=""><a href="/api/java" target="_self">Javadocs</a></li><li class=""><a href="/api/python" target="_self">Pydocs</a></li><li class="siteNavGroupActive"><a href="/docs/0.20.0-incubating/getting-started-local-single-node" target="_self">Docs</a></li><li class=""><a href="/download" target="_self">Downloads</a></li><li class=""><a href="#community" target="_self">Community</a></li><li class=""><a href="/blog/" target="_self">Blog</a></li><li class=""><a href="#apache" target="_self">Apache</a></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="container docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><div class="hamburger-menu"><div class="line1"></div><div class="line2"></div><div class="line3"></div></div></div><h2><i>›</i><span>Schedulers</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle">Getting Started</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/getting-started-local-single-node">Local (Single Node)</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/getting-started-migrate-storm-topologies">Migrate Storm Topologies</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/getting-started-troubleshooting-guide">Troubleshooting Guide</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Deployment</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/deployment-overview">Deployment Overiew</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/deployment-configuration">Configuration</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/deployment-api-server">The Heron API Server</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Topology Development APIs</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/topology-development-streamlet-api">The Heron Streamlet API for Java</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/topology-development-eco-api">The ECO API for Java</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/topology-development-topology-api-java">The Heron Topology API for Java</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/topology-development-topology-api-python">The Heron Topology API for Python</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/topology-development-streamlet-scala">The Heron Streamlet API for Scala</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Client API Docs</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/client-api-docs-overview">Client API Docs</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Guides</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/guides-effectively-once-java-topologies">Effectively Once Java Topologies</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/guides-data-model">Heron Data Model</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/guides-tuple-serialization">Tuple Serialization</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/guides-ui-guide">Heron UI Guide</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/guides-topology-tuning">Topology Tuning Guide</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/guides-packing-algorithms">Packing Algorithms</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/guides-simulator-mode">Simulator Mode</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/guides-troubeshooting-guide">Topology Troubleshooting Guide</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Heron Concepts</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/heron-design-goals">Heron Design Goals</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/heron-topology-concepts">Heron Topologies</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/heron-streamlet-concepts">Heron Streamlets</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/heron-architecture">Heron Architecture</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/heron-delivery-semantics">Heron Delivery Semantics</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">State Managers</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/state-managers-zookeeper">Zookeeper</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/state-managers-local-fs">Local File System</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Uploaders</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/uploaders-local-fs">Local File System</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/uploaders-hdfs">HDFS</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/uploaders-http">HTTP</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/uploaders-amazon-s3">Amazon S3</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/uploaders-scp">Secure Copy (SCP)</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Schedulers</h3><ul class=""><li class="navListItem navListItemActive"><a class="navItem" href="/docs/0.20.0-incubating/schedulers-k8s-by-hand">Kubernetes by hand</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/schedulers-k8s-with-helm">Kubernetes with Helm</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/schedulers-aurora-cluster">Aurora Cluster</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/schedulers-aurora-local">Aurora Locally</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/schedulers-local">Local Cluster</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/schedulers-nomad">Nomad</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/schedulers-mesos-local-mac">Mesos Cluster Locally</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/schedulers-slurm">Slurm Cluster</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/schedulers-yarn">YARN Cluster</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Cluster Configuration</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/cluster-config-overview">Cluster Config Overview</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/cluster-config-system-level">System Level Configuration</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/cluster-config-instance">Heron Instance</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/cluster-config-metrics">Metrics Manager</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/cluster-config-stream">Stream Manager</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/cluster-config-tmanager">Topology Manager</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Observability</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/observability-prometheus">Prometheus</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/observability-graphite">Graphite</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/observability-scribe">Scribe</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">User Manuals</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/user-manuals-heron-cli">Heron Client</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/user-manuals-heron-explorer">Heron Explorer</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/user-manuals-tracker-rest">Heron Tracker REST API</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/user-manuals-heron-tracker-runbook">Heron Tracker Runbook</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/user-manuals-heron-ui-runbook">Heron UI Runbook</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/user-manuals-heron-shell">Heron Shell</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Compiling</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/compiling-overview">Compiling Overview</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/compiling-linux">Compiling on Linux</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/compiling-osx">Compiling on OS X</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/compiling-docker">Compiling With Docker</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/compiling-running-tests">Running Tests</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/compiling-code-organization">Code Organization</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Extending Heron</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/extending-heron-scheduler">Custom Scheduler</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/extending-heron-metric-sink">Custom Metrics Sink</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Heron Resources</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/0.20.0-incubating/heron-resources-resources">Heron Resources</a></li></ul></div></div></section></div><script>
+            var coll = document.getElementsByClassName('collapsible');
+            var checkActiveCategory = true;
+            for (var i = 0; i < coll.length; i++) {
+              var links = coll[i].nextElementSibling.getElementsByTagName('*');
+              if (checkActiveCategory){
+                for (var j = 0; j < links.length; j++) {
+                  if (links[j].classList.contains('navListItemActive')){
+                    coll[i].nextElementSibling.classList.toggle('hide');
+                    coll[i].childNodes[1].classList.toggle('rotate');
+                    checkActiveCategory = false;
+                    break;
+                  }
+                }
+              }
+
+              coll[i].addEventListener('click', function() {
+                var arrow = this.childNodes[1];
+                arrow.classList.toggle('rotate');
+                var content = this.nextElementSibling;
+                content.classList.toggle('hide');
+              });
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+              createToggler('#navToggler', '#docsNav', 'docsSliderActive');
+              createToggler('#tocToggler', 'body', 'tocActive');
+
+              var headings = document.querySelector('.toc-headings');
+              headings && headings.addEventListener('click', function(event) {
+                var el = event.target;
+                while(el !== headings){
+                  if (el.tagName === 'A') {
+                    document.body.classList.remove('tocActive');
+                    break;
+                  } else{
+                    el = el.parentNode;
+                  }
+                }
+              }, false);
+
+              function createToggler(togglerSelector, targetSelector, className) {
+                var toggler = document.querySelector(togglerSelector);
+                var target = document.querySelector(targetSelector);
+
+                if (!toggler) {
+                  return;
+                }
+
+                toggler.onclick = function(event) {
+                  event.preventDefault();
+
+                  target.classList.toggle(className);
+                };
+              }
+            });
+        </script></nav></div><div class="container mainContainer"><div class="wrapper"><div class="post"><header class="postHeader"><h1 class="postHeaderTitle">Kubernetes by hand</h1></header><article><div><span><!--
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements.  See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership.  The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License.  You may obtain a copy of the License at
+      http://www.apache.org/licenses/LICENSE-2.0
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied.  See the License for the
+    specific language governing permissions and limitations
+    under the License.
+-->
+<blockquote>
+<p>This document shows you how to install Heron on Kubernetes in a step-by-step, &quot;by hand&quot; fashion. An easier way to install Heron on Kubernetes is to use the <a href="https://helm.sh">Helm</a> package manager. For instructions on doing so, see <a href="schedulers-k8s-with-helm">Heron on Kubernetes with Helm</a>).</p>
+</blockquote>
+<p>Heron supports deployment on <a href="https://kubernetes.io/">Kubernetes</a> (sometimes called <strong>k8s</strong>). Heron deployments on Kubernetes use Docker as the containerization format for Heron topologies and use the Kubernetes API for scheduling.</p>
+<p>You can use Heron on Kubernetes in multiple environments:</p>
+<ul>
+<li>Locally using <a href="#minikube">Minikube</a></li>
+<li>In the cloud on <a href="#google-container-engine">Google Container Engine</a> (GKE)</li>
+<li>In <a href="#general-kubernetes-clusters">any other</a> Kubernetes cluster</li>
+</ul>
+<h2><a class="anchor" aria-hidden="true" id="requirements"></a><a href="#requirements" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Requirements</h2>
+<p>In order to run Heron on Kubernetes, you will need:</p>
+<ul>
+<li>A Kubernetes cluster with at least 3 nodes (unless you're running locally on <a href="#minikube">Minikube</a>)</li>
+<li>The <a href="https://kubernetes.io/docs/tasks/tools/install-kubectl/"><code>kubectl</code></a> CLI tool installed and set up to communicate with your cluster</li>
+<li>The <a href="getting-started-local-single-node"><code>heron</code></a> CLI tool</li>
+</ul>
+<p>Any additional requirements will depend on where you're running Heron on Kubernetes.</p>
+<h2><a class="anchor" aria-hidden="true" id="how-heron-on-kubernetes-works"></a><a href="#how-heron-on-kubernetes-works" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>How Heron on Kubernetes Works</h2>
+<p>When deploying to Kubernetes, each Heron container is deployed as a Kubernetes
+<a href="https://kubernetes.io/docs/concepts/workloads/pods/pod/">pod</a> inside of a Docker container. If there
+are 20 containers that are going to be deployed with a topoology, for example, then there will be 20 pods
+deployed to your Kubernetes cluster for that topology.</p>
+<h2><a class="anchor" aria-hidden="true" id="minikube"></a><a href="#minikube" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Minikube</h2>
+<p><a href="https://kubernetes.io/docs/getting-started-guides/minikube/">Minikube</a> enables you to run a Kubernetes cluster locally on a single machine.</p>
+<h3><a class="anchor" aria-hidden="true" id="requirements-1"></a><a href="#requirements-1" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Requirements</h3>
+<p>To run Heron on Minikube you'll need to <a href="https://kubernetes.io/docs/getting-started-guides/minikube/#installation">install Minikube</a> in addition to the other requirements listed <a href="#requirements">above</a>.</p>
+<h3><a class="anchor" aria-hidden="true" id="starting-minikube"></a><a href="#starting-minikube" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Starting Minikube</h3>
+<p>First you'll need to start up Minikube using the <code>minikube start</code> command. We recommend starting Minikube with:</p>
+<ul>
+<li>at least 7 GB of memory</li>
+<li>5 CPUs</li>
+<li>20 GB of storage</li>
+</ul>
+<p>This command will accomplish precisely that:</p>
+<pre><code class="hljs css language-bash">$ minikube start \
+  --memory=7168 \
+  --cpus=5 \
+  --disk-size=20G
+</code></pre>
+<h3><a class="anchor" aria-hidden="true" id="starting-components"></a><a href="#starting-components" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Starting components</h3>
+<p>There are a variety of Heron components that you'll need to start up separately <em>and in order</em>. Make sure that the necessary pods are up and in the <code>RUNNING</code> state before moving on to the next step. You can track the progress of the pods using this command:</p>
+<pre><code class="hljs css language-bash">$ kubectl get pods -w
+</code></pre>
+<h4><a class="anchor" aria-hidden="true" id="zookeeper"></a><a href="#zookeeper" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>ZooKeeper</h4>
+<p>Heron uses <a href="https://zookeeper.apache.org">ZooKeeper</a> for a variety of coordination- and configuration-related tasks. To start up ZooKeeper on Minikube:</p>
+<pre><code class="hljs css language-bash">$ kubectl create -f https://raw.githubusercontent.com/apache/incubator-heron/master/deploy/kubernetes/minikube/zookeeper.yaml
+</code></pre>
+<h4><a class="anchor" aria-hidden="true" id="bookkeeper"></a><a href="#bookkeeper" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>BookKeeper</h4>
+<p>When running Heron on Kubernetes, <a href="https://bookkeeper.apache.org">Apache BookKeeper</a> is used for things like topology artifact storage. You can start up BookKeeper using this command:</p>
+<pre><code class="hljs css language-bash">$ kubectl create -f https://raw.githubusercontent.com/apache/incubator-heron/master/deploy/kubernetes/minikube/bookkeeper.yaml
+</code></pre>
+<h4><a class="anchor" aria-hidden="true" id="heron-tools"></a><a href="#heron-tools" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Heron tools</h4>
+<p>The so-called &quot;Heron tools&quot; include the <a href="user-manuals-heron-ui">Heron UI</a> and the <a href="user-manuals-heron-tracker-runbook">Heron Tracker</a>. To start up the Heron tools:</p>
+<pre><code class="hljs css language-bash">$ kubectl create -f https://raw.githubusercontent.com/apache/incubator-heron/master/deploy/kubernetes/minikube/tools.yaml
+</code></pre>
+<h4><a class="anchor" aria-hidden="true" id="heron-api-server"></a><a href="#heron-api-server" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Heron API server</h4>
+<p>The Heron API server is the endpoint that the Heron CLI client uses to interact with the other components of Heron. To start up the Heron API server on Minikube:</p>
+<pre><code class="hljs css language-bash">$ kubectl create -f https://raw.githubusercontent.com/apache/incubator-heron/master/deploy/kubernetes/minikube/apiserver.yaml
+</code></pre>
+<h3><a class="anchor" aria-hidden="true" id="managing-topologies"></a><a href="#managing-topologies" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Managing topologies</h3>
+<p>Once all of the <a href="#starting-components">components</a> have been successfully started up, you need to open up a proxy port to your Minikube Kubernetes cluster using the <a href="https://kubernetes.io/docs/tasks/access-kubernetes-api/http-proxy-access-api/"><code>kubectl proxy</code></a> command:</p>
+<pre><code class="hljs css language-bash">$ kubectl proxy -p 8001
+</code></pre>
+<blockquote>
+<p>Note: All of the following Kubernetes specific urls are valid with the Kubernetes 1.10.0 release.</p>
+</blockquote>
+<p>Now, verify that the Heron API server running on Minikube is available using curl:</p>
+<pre><code class="hljs css language-bash">$ curl http://localhost:8001/api/v1/namespaces/default/services/heron-apiserver:9000/proxy/api/v1/version
+</code></pre>
+<p>You should get a JSON response like this:</p>
+<pre><code class="hljs css language-json">{
+  <span class="hljs-attr">"heron.build.git.revision"</span> : <span class="hljs-string">"ddbb98bbf173fb082c6fd575caaa35205abe34df"</span>,
+  <span class="hljs-attr">"heron.build.git.status"</span> : <span class="hljs-string">"Clean"</span>,
+  <span class="hljs-attr">"heron.build.host"</span> : <span class="hljs-string">"ci-server-01"</span>,
+  <span class="hljs-attr">"heron.build.time"</span> : <span class="hljs-string">"Sat Mar 31 09:27:19 UTC 2018"</span>,
+  <span class="hljs-attr">"heron.build.timestamp"</span> : <span class="hljs-string">"1522488439000"</span>,
+  <span class="hljs-attr">"heron.build.user"</span> : <span class="hljs-string">"release-agent"</span>,
+  <span class="hljs-attr">"heron.build.version"</span> : <span class="hljs-string">"0.17.8"</span>
+}
+</code></pre>
+<p>Success! You can now manage Heron topologies on your Minikube Kubernetes installation. To submit an example topology to the cluster:</p>
+<pre><code class="hljs css language-bash">$ heron submit kubernetes \
+  --service-url=http://localhost:8001/api/v1/namespaces/default/services/heron-apiserver:9000/proxy \
+  ~/.heron/examples/heron-api-examples.jar \
+  org.apache.heron.examples.api.AckingTopology acking
+</code></pre>
+<p>You can also track the progress of the Kubernetes pods that make up the topology. When you run <code>kubectl get pods</code> you should see pods with names like <code>acking-0</code> and <code>acking-1</code>.</p>
+<p>Another option is to set the service URL for Heron using the <code>heron config</code> command:</p>
+<pre><code class="hljs css language-bash">$ heron config kubernetes <span class="hljs-built_in">set</span> service_url \
+  http://localhost:8001/api/v1/namespaces/default/services/heron-apiserver:9000/proxy
+</code></pre>
+<p>That would enable you to manage topologies without setting the <code>--service-url</code> flag.</p>
+<h3><a class="anchor" aria-hidden="true" id="heron-ui"></a><a href="#heron-ui" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Heron UI</h3>
+<p>The <a href="user-manuals-heron-ui">Heron UI</a> is an in-browser dashboard that you can use to monitor your Heron <a href="heron-topology-concepts">topologies</a>. It should already be running in Minikube.</p>
+<p>You can access <a href="user-manuals-heron-ui">Heron UI</a> in your browser by navigating to <a href="http://localhost:8001/api/v1/namespaces/default/services/heron-ui:8889/proxy/topologies">http://localhost:8001/api/v1/namespaces/default/services/heron-ui:8889/proxy/topologies</a>.</p>
+<h2><a class="anchor" aria-hidden="true" id="google-container-engine"></a><a href="#google-container-engine" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Google Container Engine</h2>
+<p>You can use <a href="https://cloud.google.com/container-engine/">Google Container Engine</a> (GKE) to run Kubernetes clusters on <a href="https://cloud.google.com/">Google Cloud Platform</a>.</p>
+<h3><a class="anchor" aria-hidden="true" id="requirements-2"></a><a href="#requirements-2" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Requirements</h3>
+<p>To run Heron on GKE, you'll need to create a Kubernetes cluster with at least three nodes. This command would create a three-node cluster in your default Google Cloud Platform zone and project:</p>
+<pre><code class="hljs css language-bash">$ gcloud container clusters create heron-gke-cluster \
+  --machine-type=n1-standard-4 \
+  --num-nodes=3
+</code></pre>
+<p>You can specify a non-default zone and/or project using the <code>--zone</code> and <code>--project</code> flags, respectively.</p>
+<p>Once the cluster is up and running, enable your local <code>kubectl</code> to interact with the cluster by fetching your GKE cluster's credentials:</p>
+<pre><code class="hljs css language-bash">$ gcloud container clusters get-credentials heron-gke-cluster
+Fetching cluster endpoint and auth data.
+kubeconfig entry generated <span class="hljs-keyword">for</span> heron-gke-cluster.
+</code></pre>
+<p>Finally, you need to create a Kubernetes <a href="https://kubernetes.io/docs/concepts/configuration/secret">secret</a> that specifies the Cloud Platform connection credentials for your service account. First, download your Cloud Platform credentials as a JSON file, say <code>key.json</code>. This command will download your credentials:</p>
+<pre><code class="hljs css language-bash">$ gcloud iam service-accounts create key.json \
+  --iam-account=YOUR-ACCOUNT
+</code></pre>
+<h3><a class="anchor" aria-hidden="true" id="topology-artifact-storage"></a><a href="#topology-artifact-storage" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Topology artifact storage</h3>
+<p>Heron on Google Container Engine supports two static file storage options for topology artifacts:</p>
+<ul>
+<li><a href="#google-cloud-storage-setup">Google Cloud Storage</a></li>
+<li><a href="#bookkeeper-setup">BookKeeper</a></li>
+</ul>
+<h4><a class="anchor" aria-hidden="true" id="google-cloud-storage-setup"></a><a href="#google-cloud-storage-setup" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Google Cloud Storage setup</h4>
+<p>If you're running Heron on GKE, you can use either <a href="https://cloud.google.com/storage/">Google Cloud Storage</a> or <a href="https://bookkeeper.apache.org">Apache BookKeeper</a> for topology artifact storage.</p>
+<blockquote>
+<p>If you'd like to use BookKeeper instead of Google Cloud Storage, skip to the <a href="#bookkeeper-setup">BookKeeper</a> section below.</p>
+</blockquote>
+<p>To use Google Cloud Storage for artifact storage, you'll need to create a <a href="https://cloud.google.com/storage/">Google Cloud Storage</a> bucket. Here's an example bucket creation command using <a href="https://cloud.google.com/storage/docs/gsutil"><code>gsutil</code>'</a>:</p>
+<pre><code class="hljs css language-bash">$ gsutil mb gs://my-heron-bucket
+</code></pre>
+<p>Cloud Storage bucket names must be globally unique, so make sure to choose a bucket name carefully. Once you've created a bucket, you need to create a Kubernetes <a href="https://kubernetes.io/docs/tasks/configure-pod-container/configmap/">ConfigMap</a> that specifies the bucket name. Here's an example:</p>
+<pre><code class="hljs css language-bash">$ kubectl create configmap heron-apiserver-config \
+  --from-literal=gcs.bucket=BUCKET-NAME
+</code></pre>
+<blockquote>
+<p>You can list your current service accounts using the <code>gcloud iam service-accounts list</code> command.</p>
+</blockquote>
+<p>Then you can create the secret like this:</p>
+<pre><code class="hljs css language-bash">$ kubectl create secret generic heron-gcs-key \
+  --from-file=key.json=key.json
+</code></pre>
+<p>Once you've created a bucket, a <code>ConfigMap</code>, and a secret, you can move on to <a href="#starting-components">starting up</a> the various components of your Heron installation.</p>
+<h3><a class="anchor" aria-hidden="true" id="starting-components-1"></a><a href="#starting-components-1" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Starting components</h3>
+<p>There are a variety of Heron components that you'll need to start up separately <em>and in order</em>. Make sure that the necessary pods are up and in the <code>RUNNING</code> state before moving on to the next step. You can track the progress of the pods using this command:</p>
+<pre><code class="hljs css language-bash">$ kubectl get pods -w
+</code></pre>
+<h4><a class="anchor" aria-hidden="true" id="zookeeper-1"></a><a href="#zookeeper-1" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>ZooKeeper</h4>
+<p>Heron uses <a href="https://zookeeper.apache.org">ZooKeeper</a> for a variety of coordination- and configuration-related tasks. To start up ZooKeeper on your GKE cluster:</p>
+<pre><code class="hljs css language-bash">$ kubectl create -f https://raw.githubusercontent.com/apache/incubator-heron/master/deploy/kubernetes/gcp/zookeeper.yaml
+</code></pre>
+<h4><a class="anchor" aria-hidden="true" id="bookkeeper-setup"></a><a href="#bookkeeper-setup" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>BookKeeper setup</h4>
+<blockquote>
+<p>If you're using <a href="#google-cloud-storage-setup">Google Cloud Storage</a> for topology artifact storage, skip to the <a href="#heron-tools-gke">Heron tools</a> section below.</p>
+</blockquote>
+<p>To start up an <a href="https://bookkeeper.apache.org">Apache BookKeeper</a> cluster for Heron:</p>
+<pre><code class="hljs css language-bash">$ kubectl create -f https://raw.githubusercontent.com/apache/incubator-heron/master/deploy/kubernetes/gcp/bookkeeper.yaml
+</code></pre>
+<h4><a class="anchor" aria-hidden="true" id="heron-tools-a-id-heron-tools-gke-a"></a><a href="#heron-tools-a-id-heron-tools-gke-a" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Heron tools <a id="heron-tools-gke"></a></h4>
+<p>The so-called &quot;Heron tools&quot; include the <a href="user-manuals-heron-ui">Heron UI</a> and the <a href="user-manuals-heron-tracker-runbook">Heron Tracker</a>. To start up the Heron tools:</p>
+<pre><code class="hljs css language-bash">$ kubectl create -f https://raw.githubusercontent.com/apache/incubator-heron/master/deploy/kubernetes/gcp/tools.yaml
+</code></pre>
+<h4><a class="anchor" aria-hidden="true" id="heron-api-server-1"></a><a href="#heron-api-server-1" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Heron API server</h4>
+<p>The <a href="deployment-api-server">Heron API server</a> is the endpoint that the <a href="user-manuals-heron-cli">Heron CLI client</a> uses to interact with the other components of Heron. Heron on Google Container Engine has two separate versions of the Heron API server that you can run depending on which artifact storage system you're using (<a href="#google-cloud-storage-setup">Google Cloud Storage</a> or <a href="#bookkeeper-setup">Apache BookKeeper</a>).</p>
+<p>If you're using Google Cloud Storage:</p>
+<pre><code class="hljs css language-bash">$ kubectl create -f https://raw.githubusercontent.com/apache/incubator-heron/master/deploy/kubernetes/gcp/gcs-apiserver.yaml
+</code></pre>
+<p>If you're using Apache BookKeeper:</p>
+<pre><code class="hljs css language-bash">$ kubectl create -f https://raw.githubusercontent.com/apache/incubator-heron/master/deploy/kubernetes/gcp/bookkeeper-apiserver.yaml
+</code></pre>
+<h3><a class="anchor" aria-hidden="true" id="managing-topologies-1"></a><a href="#managing-topologies-1" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Managing topologies</h3>
+<p>Once all of the <a href="#starting-components">components</a> have been successfully started up, you need to open up a proxy port to your GKE Kubernetes cluster using the <a href="https://kubernetes.io/docs/tasks/access-kubernetes-api/http-proxy-access-api/"><code>kubectl proxy</code></a> command:</p>
+<pre><code class="hljs css language-bash">$ kubectl proxy -p 8001
+</code></pre>
+<blockquote>
+<p>Note: All of the following Kubernetes specific urls are valid with the Kubernetes 1.10.0 release.</p>
+</blockquote>
+<p>Now, verify that the Heron API server running on GKE is available using curl:</p>
+<pre><code class="hljs css language-bash">$ curl http://localhost:8001/api/v1/namespaces/default/services/heron-apiserver:9000/proxy/api/v1/version
+</code></pre>
+<p>You should get a JSON response like this:</p>
+<pre><code class="hljs css language-json">{
+  <span class="hljs-attr">"heron.build.git.revision"</span> : <span class="hljs-string">"bf9fe93f76b895825d8852e010dffd5342e1f860"</span>,
+  <span class="hljs-attr">"heron.build.git.status"</span> : <span class="hljs-string">"Clean"</span>,
+  <span class="hljs-attr">"heron.build.host"</span> : <span class="hljs-string">"ci-server-01"</span>,
+  <span class="hljs-attr">"heron.build.time"</span> : <span class="hljs-string">"Sun Oct  1 20:42:18 UTC 2017"</span>,
+  <span class="hljs-attr">"heron.build.timestamp"</span> : <span class="hljs-string">"1506890538000"</span>,
+  <span class="hljs-attr">"heron.build.user"</span> : <span class="hljs-string">"release-agent1"</span>,
+  <span class="hljs-attr">"heron.build.version"</span> : <span class="hljs-string">"0.16.2"</span>
+}
+</code></pre>
+<p>Success! You can now manage Heron topologies on your GKE Kubernetes installation. To submit an example topology to the cluster:</p>
+<pre><code class="hljs css language-bash">$ heron submit kubernetes \
+  --service-url=http://localhost:8001/api/v1/namespaces/default/services/heron-apiserver:9000/proxy \
+  ~/.heron/examples/heron-api-examples.jar \
+  org.apache.heron.examples.api.AckingTopology acking
+</code></pre>
+<p>You can also track the progress of the Kubernetes pods that make up the topology. When you run <code>kubectl get pods</code> you should see pods with names like <code>acking-0</code> and <code>acking-1</code>.</p>
+<p>Another option is to set the service URL for Heron using the <code>heron config</code> command:</p>
+<pre><code class="hljs css language-bash">$ heron config kubernetes <span class="hljs-built_in">set</span> service_url \
+  http://localhost:8001/api/v1/namespaces/default/services/heron-apiserver:9000/proxy
+</code></pre>
+<p>That would enable you to manage topologies without setting the <code>--service-url</code> flag.</p>
+<h3><a class="anchor" aria-hidden="true" id="heron-ui-1"></a><a href="#heron-ui-1" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Heron UI</h3>
+<p>The <a href="user-manuals-heron-ui">Heron UI</a> is an in-browser dashboard that you can use to monitor your Heron <a href="heron-topology-concepts">topologies</a>. It should already be running in your GKE cluster.</p>
+<p>You can access <a href="user-manuals-heron-ui">Heron UI</a> in your browser by navigating to <a href="http://localhost:8001/api/v1/namespaces/default/services/heron-ui:8889/proxy/topologies">http://localhost:8001/api/v1/namespaces/default/services/heron-ui:8889/proxy/topologies</a>.</p>
+<h2><a class="anchor" aria-hidden="true" id="general-kubernetes-clusters"></a><a href="#general-kubernetes-clusters" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>General Kubernetes clusters</h2>
+<p>Although <a href="#minikube">Minikube</a> and <a href="#google-container-engine">Google Container Engine</a> provide two easy ways to get started running Heron on Kubernetes, you can also run Heron on any Kubernetes cluster. The instructions in this section are tailored to non-Minikube, non-GKE Kubernetes installations.</p>
+<h3><a class="anchor" aria-hidden="true" id="requirements-3"></a><a href="#requirements-3" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Requirements</h3>
+<p>To run Heron on a general Kubernetes installation, you'll need to fulfill the <a href="#requirements">requirements</a> listed at the top of this doc. Once those requirements are met, you can begin starting up the various <a href="#starting-components">components</a> that comprise a Heron on Kubernetes installation.</p>
+<h3><a class="anchor" aria-hidden="true" id="starting-components-2"></a><a href="#starting-components-2" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Starting components</h3>
+<p>There are a variety of Heron components that you'll need to start up separately <em>and in order</em>. Make sure that the necessary pods are up and in the <code>RUNNING</code> state before moving on to the next step. You can track the progress of the pods using this command:</p>
+<pre><code class="hljs css language-bash">$ kubectl get pods -w
+</code></pre>
+<h4><a class="anchor" aria-hidden="true" id="zookeeper-2"></a><a href="#zookeeper-2" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>ZooKeeper</h4>
+<p>Heron uses <a href="https://zookeeper.apache.org">ZooKeeper</a> for a variety of coordination- and configuration-related tasks. To start up ZooKeeper on your Kubernetes cluster:</p>
+<pre><code class="hljs css language-bash">$ kubectl create -f https://raw.githubusercontent.com/apache/incubator-heron/master/deploy/kubernetes/general/zookeeper.yaml
+</code></pre>
+<h4><a class="anchor" aria-hidden="true" id="bookkeeper-1"></a><a href="#bookkeeper-1" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>BookKeeper</h4>
+<p>When running Heron on Kubernetes, <a href="https://bookkeeper.apache.org">Apache BookKeeper</a> is used for things like topology artifact storage (unless you're running on GKE). You can start up BookKeeper using this command:</p>
+<pre><code class="hljs css language-bash">$ kubectl create -f https://raw.githubusercontent.com/apache/incubator-heron/master/deploy/kubernetes/general/bookkeeper.yaml
+</code></pre>
+<h4><a class="anchor" aria-hidden="true" id="heron-tools-1"></a><a href="#heron-tools-1" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Heron tools</h4>
+<p>The so-called &quot;Heron tools&quot; include the <a href="user-manuals-heron-ui">Heron UI</a> and the <a href="user-manuals-heron-tracker-runbook">Heron Tracker</a>. To start up the Heron tools:</p>
+<pre><code class="hljs css language-bash">$ kubectl create -f https://raw.githubusercontent.com/apache/incubator-heron/master/deploy/kubernetes/general/tools.yaml
+</code></pre>
+<h4><a class="anchor" aria-hidden="true" id="heron-api-server-2"></a><a href="#heron-api-server-2" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Heron API server</h4>
+<p>The Heron API server is the endpoint that the Heron CLI client uses to interact with the other components of Heron. To start up the Heron API server on your Kubernetes cluster:</p>
+<pre><code class="hljs css language-bash">$ kubectl create -f https://raw.githubusercontent.com/apache/incubator-heron/master/deploy/kubernetes/general/apiserver.yaml
+</code></pre>
+<h3><a class="anchor" aria-hidden="true" id="managing-topologies-2"></a><a href="#managing-topologies-2" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Managing topologies</h3>
+<p>Once all of the <a href="#starting-components">components</a> have been successfully started up, you need to open up a proxy port to your GKE Kubernetes cluster using the <a href="https://kubernetes.io/docs/tasks/access-kubernetes-api/http-proxy-access-api/"><code>kubectl proxy</code></a> command:</p>
+<pre><code class="hljs css language-bash">$ kubectl proxy -p 8001
+</code></pre>
+<blockquote>
+<p>Note: All of the following Kubernetes specific urls are valid with the Kubernetes 1.10.0 release.</p>
+</blockquote>
+<p>Now, verify that the Heron API server running on GKE is available using curl:</p>
+<pre><code class="hljs css language-bash">$ curl http://localhost:8001/api/v1/namespaces/default/services/heron-apiserver:9000/proxy/api/v1/version
+</code></pre>
+<p>You should get a JSON response like this:</p>
+<pre><code class="hljs css language-json">{
+  <span class="hljs-attr">"heron.build.git.revision"</span> : <span class="hljs-string">"ddbb98bbf173fb082c6fd575caaa35205abe34df"</span>,
+  <span class="hljs-attr">"heron.build.git.status"</span> : <span class="hljs-string">"Clean"</span>,
+  <span class="hljs-attr">"heron.build.host"</span> : <span class="hljs-string">"ci-server-01"</span>,
+  <span class="hljs-attr">"heron.build.time"</span> : <span class="hljs-string">"Sat Mar 31 09:27:19 UTC 2018"</span>,
+  <span class="hljs-attr">"heron.build.timestamp"</span> : <span class="hljs-string">"1522488439000"</span>,
+  <span class="hljs-attr">"heron.build.user"</span> : <span class="hljs-string">"release-agent"</span>,
+  <span class="hljs-attr">"heron.build.version"</span> : <span class="hljs-string">"0.17.8"</span>
+}
+</code></pre>
+<p>Success! You can now manage Heron topologies on your GKE Kubernetes installation. To submit an example topology to the cluster:</p>
+<pre><code class="hljs css language-bash">$ heron submit kubernetes \
+  --service-url=http://localhost:8001/api/v1/namespaces/default/services/heron-apiserver:9000/proxy \
+  ~/.heron/examples/heron-api-examples.jar \
+  org.apache.heron.examples.api.AckingTopology acking
+</code></pre>
+<p>You can also track the progress of the Kubernetes pods that make up the topology. When you run <code>kubectl get pods</code> you should see pods with names like <code>acking-0</code> and <code>acking-1</code>.</p>
+<p>Another option is to set the service URL for Heron using the <code>heron config</code> command:</p>
+<pre><code class="hljs css language-bash">$ heron config kubernetes <span class="hljs-built_in">set</span> service_url \
+  http://localhost:8001/api/v1/namespaces/default/services/heron-apiserver:9000/proxy
+</code></pre>
+<p>That would enable you to manage topologies without setting the <code>--service-url</code> flag.</p>
+<h3><a class="anchor" aria-hidden="true" id="heron-ui-2"></a><a href="#heron-ui-2" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Heron UI</h3>
+<p>The <a href="user-manuals-heron-ui">Heron UI</a> is an in-browser dashboard that you can use to monitor your Heron <a href="heron-topology-concepts">topologies</a>. It should already be running in your GKE cluster.</p>
+<p>You can access <a href="user-manuals-heron-ui">Heron UI</a> in your browser by navigating to <a href="http://localhost:8001/api/v1/namespaces/default/services/heron-ui:8889/proxy">http://localhost:8001/api/v1/namespaces/default/services/heron-ui:8889/proxy</a>.</p>
+<h2><a class="anchor" aria-hidden="true" id="heron-on-kubernetes-configuration"></a><a href="#heron-on-kubernetes-configuration" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Heron on Kubernetes configuration</h2>
+<p>You can configure Heron on Kubernetes using a variety of YAML config files, listed in the sections below.</p>
+<h3><a class="anchor" aria-hidden="true" id="clientyaml"></a><a href="#clientyaml" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>client.yaml</h3>
+<h4><a class="anchor" aria-hidden="true" id="configuration-for-the-heron-cli-tool"></a><a href="#configuration-for-the-heron-cli-tool" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Configuration for the <code>heron</code> CLI tool.</h4>
+<table>
+<thead>
+<tr><th>name</th><th>description</th><th>default</th></tr>
+</thead>
+<tbody>
+<tr><td>heron.package.core.uri</td><td>Location of the core Heron package</td><td>file:///vagrant/.herondata/dist/heron-core-release.tar.gz</td></tr>
+<tr><td>heron.config.is.role.required</td><td>Whether a role is required to submit a topology</td><td>False</td></tr>
+<tr><td>heron.config.is.env.required</td><td>Whether an environment is required to submit a topology</td><td>False</td></tr>
+</tbody>
+</table>
+<h3><a class="anchor" aria-hidden="true" id="heron_internalsyaml"></a><a href="#heron_internalsyaml" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>heron_internals.yaml</h3>
+<h4><a class="anchor" aria-hidden="true" id="configuration-for-a-wide-variety-of-heron-components-including-logging-each-topology-s-stream-manager-and-topology-manager-and-more"></a><a href="#configuration-for-a-wide-variety-of-heron-components-including-logging-each-topology-s-stream-manager-and-topology-manager-and-more" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Configuration for a wide variety of Heron components, including logging, each topology's stream manager and topology manager, and more.</h4>
+<table>
+<thead>
+<tr><th>name</th><th>description</th><th>default</th></tr>
+</thead>
+<tbody>
+<tr><td>heron.logging.directory</td><td>The relative path to the logging directory</td><td>log-files</td></tr>
+<tr><td>heron.logging.maximum.size.mb</td><td>The maximum log file size (in MB)</td><td>100</td></tr>
+<tr><td>heron.logging.maximum.files</td><td>The maximum number of log files</td><td>5</td></tr>
+<tr><td>heron.check.tmanager.location.interval.sec</td><td>The interval, in seconds, after which to check if the topology manager location has been fetched or not</td><td>120</td></tr>
+<tr><td>heron.logging.prune.interval.sec</td><td>The interval, in seconds, at which to prune C++ log files</td><td>300</td></tr>
+<tr><td>heron.logging.flush.interval.sec</td><td>The interval, in seconds, at which to flush C++ log files</td><td>10</td></tr>
+<tr><td>heron.logging.err.threshold</td><td>The threshold level at which to log errors</td><td>3</td></tr>
+<tr><td>heron.metrics.export.interval.sec</td><td>The interval, in seconds, at which different components export metrics to the metrics manager</td><td>60</td></tr>
+<tr><td>heron.metrics.max.exceptions.per.message.count</td><td>The maximum count of exceptions in one <code>MetricPublisherPublishMessage</code> protobuf message</td><td>1024</td></tr>
+<tr><td>heron.streammgr.cache.drain.frequency.ms</td><td>The frequency, in milliseconds, at which to drain the tuple cache in the stream manager</td><td>10</td></tr>
+<tr><td>heron.streammgr.stateful.buffer.size.mb</td><td>The sized-based threshold (in MB) for buffering data tuples waiting for checkpoint markers before giving up</td><td>100</td></tr>
+<tr><td>heron.streammgr.cache.drain.size.mb</td><td>The sized-based threshold (in MB) for draining the tuple cache</td><td>100</td></tr>
+<tr><td>heron.streammgr.xormgr.rotatingmap.nbuckets</td><td>For efficient acknowledgements</td><td>3</td></tr>
+<tr><td>heron.streammgr.mempool.max.message.number</td><td>The max number of messages in the memory pool for each message type</td><td>512</td></tr>
+<tr><td>heron.streammgr.client.reconnect.interval.sec</td><td>The reconnect interval to other stream managers (in seconds) for the stream manager client</td><td>1</td></tr>
+<tr><td>heron.streammgr.client.reconnect.tmanager.interval.sec</td><td>The reconnect interval to the topology manager (in seconds) for the stream manager client</td><td>10</td></tr>
+<tr><td>heron.streammgr.client.reconnect.tmanager.max.attempts</td><td>The max reconnect attempts to tmanager for stream manager client</td><td>30</td></tr>
+<tr><td>heron.streammgr.network.options.maximum.packet.mb</td><td>The maximum packet size (in MB) of the stream manager's network options</td><td>10</td></tr>
+<tr><td>heron.streammgr.tmanager.heartbeat.interval.sec</td><td>The interval (in seconds) at which to send heartbeats</td><td>10</td></tr>
+<tr><td>heron.streammgr.connection.read.batch.size.mb</td><td>The maximum batch size (in MB) for the stream manager to read from socket</td><td>1</td></tr>
+<tr><td>heron.streammgr.connection.write.batch.size.mb</td><td>Maximum batch size (in MB) for the stream manager to write to socket</td><td>1</td></tr>
+<tr><td>heron.streammgr.network.backpressure.threshold</td><td>The number of times Heron should wait to see a buffer full while enqueueing data before declaring the start of backpressure</td><td>3</td></tr>
+<tr><td>heron.streammgr.network.backpressure.highwatermark.mb</td><td>The high-water mark on the number (in MB) that can be left outstanding on a connection</td><td>100</td></tr>
+<tr><td>heron.streammgr.network.backpressure.lowwatermark.mb</td><td>The low-water mark on the number (in MB) that can be left outstanding on a connection</td><td></td></tr>
+<tr><td>heron.tmanager.metrics.collector.maximum.interval.min</td><td>The maximum interval (in minutes) for metrics to be kept in the topology manager</td><td>180</td></tr>
+<tr><td>heron.tmanager.establish.retry.times</td><td>The maximum number of times to retry establishing connection with the topology manager</td><td>30</td></tr>
+<tr><td>heron.tmanager.establish.retry.interval.sec</td><td>The interval at which to retry establishing connection with the topology manager</td><td>1</td></tr>
+<tr><td>heron.tmanager.network.server.options.maximum.packet.mb</td><td>Maximum packet size (in MB) of topology manager's network options to connect to stream managers</td><td>16</td></tr>
+<tr><td>heron.tmanager.network.controller.options.maximum.packet.mb</td><td>Maximum packet size (in MB) of the topology manager's network options to connect to scheduler</td><td>1</td></tr>
+<tr><td>heron.tmanager.network.stats.options.maximum.packet.mb</td><td>Maximum packet size (in MB) of the topology manager's network options for stat queries</td><td>1</td></tr>
+<tr><td>heron.tmanager.metrics.collector.purge.interval.sec</td><td>The interval (in seconds) at which the topology manager purges metrics from socket</td><td>60</td></tr>
+<tr><td>heron.tmanager.metrics.collector.maximum.exception</td><td>The maximum number of exceptions to be stored in the topology metrics collector, to prevent out-of-memory errors</td><td>256</td></tr>
+<tr><td>heron.tmanager.metrics.network.bindallinterfaces</td><td>Whether the metrics reporter should bind on all interfaces</td><td>False</td></tr>
+<tr><td>heron.tmanager.stmgr.state.timeout.sec</td><td>The timeout (in seconds) for the stream manager, compared with (current time - last heartbeat time)</td><td>60</td></tr>
+<tr><td>heron.metricsmgr.network.read.batch.time.ms</td><td>The maximum batch time (in milliseconds) for the metrics manager to read from socket</td><td>16</td></tr>
+<tr><td>heron.metricsmgr.network.read.batch.size.bytes</td><td>The maximum batch size (in bytes) to read from socket</td><td>32768</td></tr>
+<tr><td>heron.metricsmgr.network.write.batch.time.ms</td><td>The maximum batch time (in milliseconds) for the metrics manager to write to socket</td><td>32768</td></tr>
+<tr><td>heron.metricsmgr.network.options.socket.send.buffer.size.bytes</td><td>The maximum socket send buffer size (in bytes)</td><td>6553600</td></tr>
+<tr><td>heron.metricsmgr.network.options.socket.received.buffer.size.bytes</td><td>The maximum socket received buffer size (in bytes) for the metrics manager's network options</td><td>8738000</td></tr>
+<tr><td>heron.metricsmgr.network.options.maximum.packetsize.bytes</td><td>The maximum packet size that the metrics manager can read</td><td>1048576</td></tr>
+<tr><td>heron.instance.network.options.maximum.packetsize.bytes</td><td>The maximum size of packets that Heron instances can read</td><td>10485760</td></tr>
+<tr><td>heron.instance.internal.bolt.read.queue.capacity</td><td>The queue capacity (num of items) in bolt for buffer packets to read from stream manager</td><td>128</td></tr>
+<tr><td>heron.instance.internal.bolt.write.queue.capacity</td><td>The queue capacity (num of items) in bolt for buffer packets to write to stream manager</td><td>128</td></tr>
+<tr><td>heron.instance.internal.spout.read.queue.capacity</td><td>The queue capacity (num of items) in spout for buffer packets to read from stream manager</td><td>1024</td></tr>
+<tr><td>heron.instance.internal.spout.write.queue.capacity</td><td>The queue capacity (num of items) in spout for buffer packets to write to stream manager</td><td>128</td></tr>
+<tr><td>heron.instance.internal.metrics.write.queue.capacity</td><td>The queue capacity (num of items) for metrics packets to write to metrics manager</td><td>128</td></tr>
+<tr><td>heron.instance.network.read.batch.time.ms</td><td>Time based, the maximum batch time in ms for instance to read from stream manager per attempt</td><td>16</td></tr>
+<tr><td>heron.instance.network.read.batch.size.bytes</td><td>Size based, the maximum batch size in bytes to read from stream manager</td><td>32768</td></tr>
+<tr><td>heron.instance.network.write.batch.time.ms</td><td>Time based, the maximum batch time (in milliseconds) for the instance to write to the stream manager per attempt</td><td>16</td></tr>
+<tr><td>heron.instance.network.write.batch.size.bytes</td><td>Size based, the maximum batch size in bytes to write to stream manager</td><td>32768</td></tr>
+<tr><td>heron.instance.network.options.socket.send.buffer.size.bytes</td><td>The maximum socket's send buffer size in bytes</td><td>6553600</td></tr>
+<tr><td>heron.instance.network.options.socket.received.buffer.size.bytes</td><td>The maximum socket's received buffer size in bytes of instance's network options</td><td>8738000</td></tr>
+<tr><td>heron.instance.set.data.tuple.capacity</td><td>The maximum number of data tuple to batch in a HeronDataTupleSet protobuf</td><td>1024</td></tr>
+<tr><td>heron.instance.set.data.tuple.size.bytes</td><td>The maximum size in bytes of data tuple to batch in a HeronDataTupleSet protobuf</td><td>8388608</td></tr>
+<tr><td>heron.instance.set.control.tuple.capacity</td><td>The maximum number of control tuple to batch in a HeronControlTupleSet protobuf</td><td>1024</td></tr>
+<tr><td>heron.instance.ack.batch.time.ms</td><td>The maximum time in ms for a spout to do acknowledgement per attempt, the ack batch could also break if there are no more ack tuples to process</td><td>128</td></tr>
+<tr><td>heron.instance.emit.batch.time.ms</td><td>The maximum time in ms for an spout instance to emit tuples per attempt</td><td>16</td></tr>
+<tr><td>heron.instance.emit.batch.size.bytes</td><td>The maximum batch size in bytes for an spout to emit tuples per attempt</td><td>32768</td></tr>
+<tr><td>heron.instance.execute.batch.time.ms</td><td>The maximum time in ms for an bolt instance to execute tuples per attempt</td><td>16</td></tr>
+<tr><td>heron.instance.execute.batch.size.bytes</td><td>The maximum batch size in bytes for an bolt instance to execute tuples per attempt</td><td>32768</td></tr>
+<tr><td>heron.instance.state.check.interval.sec</td><td>The time interval for an instance to check the state change, for example, the interval a spout uses to check whether activate/deactivate is invoked</td><td>5</td></tr>
+<tr><td>heron.instance.force.exit.timeout.ms</td><td>The time to wait before the instance exits forcibly when uncaught exception happens</td><td>2000</td></tr>
+<tr><td>heron.instance.reconnect.streammgr.interval.sec</td><td>Interval in seconds to reconnect to the stream manager, including the request timeout in connecting</td><td>5</td></tr>
+<tr><td>heron.instance.reconnect.streammgr.interval.sec</td><td>Interval in seconds to reconnect to the stream manager, including the request timeout in connecting</td><td>60</td></tr>
+<tr><td>heron.instance.reconnect.metricsmgr.interval.sec</td><td>Interval in seconds to reconnect to the metrics manager, including the request timeout in connecting</td><td>5</td></tr>
+<tr><td>heron.instance.reconnect.metricsmgr.times</td><td>Interval in seconds to reconnect to the metrics manager, including the request timeout in connecting</td><td>60</td></tr>
+<tr><td>heron.instance.metrics.system.sample.interval.sec</td><td>The interval in second for an instance to sample its system metrics, for instance, CPU load.</td><td>10</td></tr>
+<tr><td>heron.instance.executor.fetch.pplan.interval.sec</td><td>The time interval (in seconds) at which Heron instances fetch the physical plan from executors</td><td>1</td></tr>
+<tr><td>heron.instance.acknowledgement.nbuckets</td><td>For efficient acknowledgement</td><td>10</td></tr>
+<tr><td>heron.instance.tuning.expected.bolt.read.queue.size</td><td>The expected size on read queue in bolt</td><td>8</td></tr>
+<tr><td>heron.instance.tuning.expected.bolt.write.queue.size</td><td>The expected size on write queue in bolt</td><td>8</td></tr>
+<tr><td>heron.instance.tuning.expected.spout.read.queue.size</td><td>The expected size on read queue in spout</td><td>512</td></tr>
+<tr><td>heron.instance.tuning.expected.spout.write.queue.size</td><td>The exepected size on write queue in spout</td><td>8</td></tr>
+<tr><td>heron.instance.tuning.expected.metrics.write.queue.size</td><td>The expected size on metrics write queue</td><td>8</td></tr>
+<tr><td>heron.instance.tuning.current.sample.weight</td><td></td><td>0.8</td></tr>
+<tr><td>heron.instance.tuning.interval.ms</td><td>Interval in ms to tune the size of in &amp; out data queue in instance</td><td>100</td></tr>
+</tbody>
+</table>
+<h3><a class="anchor" aria-hidden="true" id="packingyaml"></a><a href="#packingyaml" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>packing.yaml</h3>
+<table>
+<thead>
+<tr><th>name</th><th>description</th><th>default</th></tr>
+</thead>
+<tbody>
+<tr><td>heron.class.packing.algorithm</td><td>Packing algorithm for packing instances into containers</td><td>org.apache.heron.packing.roundrobin.RoundRobinPacking</td></tr>
+</tbody>
+</table>
+<h3><a class="anchor" aria-hidden="true" id="scheduleryaml"></a><a href="#scheduleryaml" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>scheduler.yaml</h3>
+<table>
+<thead>
+<tr><th>name</th><th>description</th><th>default</th></tr>
+</thead>
+<tbody>
+<tr><td>heron.class.scheduler</td><td>scheduler class for distributing the topology for execution</td><td>org.apache.heron.scheduler.kubernetes.KubernetesScheduler</td></tr>
+<tr><td>heron.class.launcher</td><td>launcher class for submitting and launching the topology</td><td>org.apache.heron.scheduler.kubernetes.KubernetesLauncher</td></tr>
+<tr><td>heron.directory.sandbox.java.home</td><td>location of java - pick it up from shell environment</td><td>$JAVA_HOME</td></tr>
+<tr><td>heron.kubernetes.scheduler.uri</td><td>The URI of the Kubernetes API</td><td></td></tr>
+<tr><td>heron.scheduler.is.service</td><td>Invoke the IScheduler as a library directly</td><td>false</td></tr>
+<tr><td>heron.executor.docker.image</td><td>docker repo for executor</td><td>apache/heron:latest</td></tr>
+</tbody>
+</table>
+<h3><a class="anchor" aria-hidden="true" id="statefulyaml"></a><a href="#statefulyaml" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>stateful.yaml</h3>
+<table>
+<thead>
+<tr><th>name</th><th>description</th><th>default</th></tr>
+</thead>
+<tbody>
+<tr><td>heron.statefulstorage.classname</td><td>The type of storage to be used for state checkpointing</td><td>org.apache.heron.statefulstorage.localfs.LocalFileSystemStorage</td></tr>
+</tbody>
+</table>
+<h3><a class="anchor" aria-hidden="true" id="statemgryaml"></a><a href="#statemgryaml" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>statemgr.yaml</h3>
+<table>
+<thead>
+<tr><th>name</th><th>description</th><th>default</th></tr>
+</thead>
+<tbody>
+<tr><td>heron.class.state.manager</td><td>local state manager class for managing state in a persistent fashion</td><td>org.apache.heron.statemgr.zookeeper.curator.CuratorStateManager</td></tr>
+<tr><td>heron.statemgr.connection.string</td><td>local state manager connection string</td><td></td></tr>
+<tr><td>heron.statemgr.root.path</td><td>path of the root address to store the state in a local file system</td><td>/heron</td></tr>
+<tr><td>heron.statemgr.zookeeper.is.initialize.tree</td><td>create the zookeeper nodes, if they do not exist</td><td>True</td></tr>
+<tr><td>heron.statemgr.zookeeper.session.timeout.ms</td><td>timeout in ms to wait before considering zookeeper session is dead</td><td>30000</td></tr>
+<tr><td>heron.statemgr.zookeeper.connection.timeout.ms</td><td>timeout in ms to wait before considering zookeeper connection is dead</td><td>30000</td></tr>
+<tr><td>heron.statemgr.zookeeper.retry.count</td><td>timeout in ms to wait before considering zookeeper connection is dead</td><td>10</td></tr>
+<tr><td>heron.statemgr.zookeeper.retry.interval.ms</td><td>duration of time to wait until the next retry</td><td>10000</td></tr>
+</tbody>
+</table>
+<h3><a class="anchor" aria-hidden="true" id="uploaderyaml"></a><a href="#uploaderyaml" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>uploader.yaml</h3>
+<table>
+<thead>
+<tr><th>name</th><th>description</th><th>default</th></tr>
+</thead>
+<tbody>
+<tr><td>heron.class.uploader</td><td>uploader class for transferring the topology files (jars, tars, PEXes, etc.) to storage</td><td>org.apache.heron.uploader.s3.S3Uploader</td></tr>
+<tr><td>heron.uploader.s3.bucket</td><td>S3 bucket in which topology assets will be stored (if AWS S3 is being used)</td><td></td></tr>
+<tr><td>heron.uploader.s3.access_key</td><td>AWS access key (if AWS S3 is being used)</td><td></td></tr>
+<tr><td>heron.uploader.s3.secret_key</td><td>AWS secret access key (if AWS S3 is being used)</td><td></td></tr>
+</tbody>
+</table>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/0.20.0-incubating/uploaders-scp"><span class="arrow-prev">← </span><span>Secure Copy (SCP)</span></a><a class="docs-next button" href="/docs/0.20.0-incubating/schedulers-k8s-with-helm"><span>Kubernetes with Helm</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#requirements">Requirements</a></li><li><a href="#how-heron-on-kubernetes-works">How Heron on Kubernetes Works</a></li><li><a href="#minikube">Minikube</a><ul class="toc-headings"><li><a href="#requirements-1">Requirements</a></li><li><a href="#starting-minikube">Starting Minikube</a></li><li><a href="#starting-components">Starting components</a></li><li><a href="#managing-topologies">Managing topologies</a></li><li><a href="#heron-ui">Heron UI</a></li></ul></li><li><a href="#google-container-engine">Google Container Engine</a><ul class="toc-headings"><li><a href="#requirements-2">Requirements</a></li><li><a href="#topology-artifact-storage">Topology artifact storage</a></li><li><a href="#starting-components-1">Starting components</a></li><li><a href="#managing-topologies-1">Managing topologies</a></li><li><a href="#heron-ui-1">Heron UI</a></li></ul></li><li><a href="#general-kubernetes-clusters">General Kubernetes clusters</a><ul class="toc-headings"><li><a href="#requirements-3">Requirements</a></li><li><a href="#starting-components-2">Starting components</a></li><li><a href="#managing-topologies-2">Managing topologies</a></li><li><a href="#heron-ui-2">Heron UI</a></li></ul></li><li><a href="#heron-on-kubernetes-configuration">Heron on Kubernetes configuration</a><ul class="toc-headings"><li><a href="#clientyaml">client.yaml</a></li><li><a href="#heron_internalsyaml">heron_internals.yaml</a></li><li><a href="#packingyaml">packing.yaml</a></li><li><a href="#scheduleryaml">scheduler.yaml</a></li><li><a href="#statefulyaml">stateful.yaml</a></li><li><a href="#statemgryaml">statemgr.yaml</a></li><li><a href="#uploaderyaml">uploader.yaml</a></li></ul></li></ul></nav></div><footer class="nav-footer" id="footer"><div class="apache-disclaimer">Apache Heron is an effort undergoing incubation at <a target="_blank" href="https://apache.org/">The Apache Software Foundation (ASF)</a> sponsored by the Apache Incubator PMC. Incubation is required of all newly accepted projects until a further review indicates that the infrastructure, communications, and decision making process have stabilized in a manner consistent with other successful ASF projects. While incubation status is not necessarily a reflection of the completeness or stability of the code, it does indicate that the project has yet to be fully endorsed by the ASF.<br/><br/>Apache®, the names of Apache projects, and the feather logo are either <a rel="external" href="https://www.apache.org/foundation/marks/list/">registered trademarks or trademarks</a> of the Apache Software Foundation in the United States and/or other countries.<br/><br/><div class="copyright-box">Copyright © 2022 the Apache Software Foundation, Apache Heron, Heron, 
+  Apache, the Apache feather Logo, and the Apache Heron project logo are either registered 
+  trademarks or trademarks of the Apache Software Foundation.</div></div><div class="apache-links"><a class="item" rel="external" href="https://incubator.apache.org/">Apache Incubator</a><div><a class="item" rel="external" href="https://www.apache.org/">About the ASF</a></div><div><a class="item" rel="external" href="https://www.apache.org/events/current-event">Events</a></div><div><a class="item" rel="external" href="https://www.apache.org/foundation/thanks.html">Thanks</a></div><div><a class="item" rel="external" href="https://www.apache.org/foundation/sponsorship.html">Become a Sponsor</a></div><div><a class="item" rel="external" href="https://www.apache.org/security/">Security</a></div><div><a class="item" rel="external" href="https://www.apache.org/licenses/">License</a></div></div></footer></div><script>window.twttr=(function(d,s, id){var js,fjs=d.getElementsByTagName(s)[0],t=window.twttr||{};if(d.getElementById(id))return t;js=d.createElement(s);js.id=id;js.src='https://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js, fjs);t._e = [];t.ready = function(f) {t._e.push(f);};return t;}(document, 'script', 'twitter-wjs'));</script></body></html>

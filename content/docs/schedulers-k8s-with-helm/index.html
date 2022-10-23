@@ -1,0 +1,280 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Kubernetes with Helm · Apache Heron</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="&lt;!--"/><meta name="docsearch:version" content="0.20.5-incubating"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Kubernetes with Helm · Apache Heron"/><meta property="og:type" content="website"/><meta property="og:url" content="https://heron.apache.org/"/><meta property="og:description" content="&lt;!--"/><meta property="og:image" content="https://heron.apache.org/img/undraw_online.svg"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://heron.apache.org/img/undraw_tweetstorm.svg"/><link rel="shortcut icon" href="/img/favicon-32x32.png"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><link rel="alternate" type="application/atom+xml" href="https://heron.apache.org/blog/atom.xml" title="Apache Heron Blog ATOM Feed"/><link rel="alternate" type="application/rss+xml" href="https://heron.apache.org/blog/feed.xml" title="Apache Heron Blog RSS Feed"/><script>
+              (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+              (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+              m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+              })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+              ga('create', 'UA-198017384-1', 'auto');
+              ga('send', 'pageview');
+            </script><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script type="text/javascript" src="/js/custom.js"></script><script type="text/javascript" src="/js/fix-location.js"></script><link rel="stylesheet" href="/css/main.css"/><script src="/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/"><img class="logo" src="/img/HeronTextLogo-small.png" alt="Apache Heron"/><h2 class="headerTitleWithLogo">Apache Heron</h2></a><a href="/versions"><h3>0.20.5-incubating</h3></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class=""><a href="/api/java" target="_self">Javadocs</a></li><li class=""><a href="/api/python" target="_self">Pydocs</a></li><li class="siteNavGroupActive"><a href="/docs/getting-started-local-single-node" target="_self">Docs</a></li><li class=""><a href="/download" target="_self">Downloads</a></li><li class=""><a href="#community" target="_self">Community</a></li><li class=""><a href="/blog/" target="_self">Blog</a></li><li class=""><a href="#apache" target="_self">Apache</a></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="container docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><div class="hamburger-menu"><div class="line1"></div><div class="line2"></div><div class="line3"></div></div></div><h2><i>›</i><span>Schedulers</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle">Getting Started</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/getting-started-local-single-node">Local (Single Node)</a></li><li class="navListItem"><a class="navItem" href="/docs/getting-started-migrate-storm-topologies">Migrate Storm Topologies</a></li><li class="navListItem"><a class="navItem" href="/docs/getting-started-docker">Heron &amp; Docker</a></li><li class="navListItem"><a class="navItem" href="/docs/getting-started-troubleshooting-guide">Troubleshooting Guide</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Deployment</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/deployment-overview">Deployment Overiew</a></li><li class="navListItem"><a class="navItem" href="/docs/deployment-configuration">Configuration</a></li><li class="navListItem"><a class="navItem" href="/docs/deployment-api-server">The Heron API Server</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Topology Development APIs</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/topology-development-streamlet-api">The Heron Streamlet API for Java</a></li><li class="navListItem"><a class="navItem" href="/docs/topology-development-eco-api">The ECO API for Java</a></li><li class="navListItem"><a class="navItem" href="/docs/topology-development-topology-api-java">The Heron Topology API for Java</a></li><li class="navListItem"><a class="navItem" href="/docs/topology-development-topology-api-python">The Heron Topology API for Python</a></li><li class="navListItem"><a class="navItem" href="/docs/topology-development-streamlet-scala">The Heron Streamlet API for Scala</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Client API Docs</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/client-api-docs-overview">Client API Docs</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Guides</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/guides-effectively-once-java-topologies">Effectively Once Java Topologies</a></li><li class="navListItem"><a class="navItem" href="/docs/guides-data-model">Heron Data Model</a></li><li class="navListItem"><a class="navItem" href="/docs/guides-tuple-serialization">Tuple Serialization</a></li><li class="navListItem"><a class="navItem" href="/docs/guides-ui-guide">Heron UI Guide</a></li><li class="navListItem"><a class="navItem" href="/docs/guides-topology-tuning">Topology Tuning Guide</a></li><li class="navListItem"><a class="navItem" href="/docs/guides-packing-algorithms">Packing Algorithms</a></li><li class="navListItem"><a class="navItem" href="/docs/guides-simulator-mode">Simulator Mode</a></li><li class="navListItem"><a class="navItem" href="/docs/guides-troubeshooting-guide">Topology Troubleshooting Guide</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Heron Concepts</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/heron-design-goals">Heron Design Goals</a></li><li class="navListItem"><a class="navItem" href="/docs/heron-topology-concepts">Heron Topologies</a></li><li class="navListItem"><a class="navItem" href="/docs/heron-streamlet-concepts">Heron Streamlets</a></li><li class="navListItem"><a class="navItem" href="/docs/heron-architecture">Heron Architecture</a></li><li class="navListItem"><a class="navItem" href="/docs/heron-delivery-semantics">Heron Delivery Semantics</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">State Managers</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/state-managers-zookeeper">Zookeeper</a></li><li class="navListItem"><a class="navItem" href="/docs/state-managers-local-fs">Local File System</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Uploaders</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/uploaders-local-fs">Local File System</a></li><li class="navListItem"><a class="navItem" href="/docs/uploaders-hdfs">HDFS</a></li><li class="navListItem"><a class="navItem" href="/docs/uploaders-http">HTTP</a></li><li class="navListItem"><a class="navItem" href="/docs/uploaders-amazon-s3">Amazon S3</a></li><li class="navListItem"><a class="navItem" href="/docs/uploaders-scp">Secure Copy (SCP)</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Schedulers</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/schedulers-k8s-by-hand">Kubernetes by hand</a></li><li class="navListItem navListItemActive"><a class="navItem" href="/docs/schedulers-k8s-with-helm">Kubernetes with Helm</a></li><li class="navListItem"><a class="navItem" href="/docs/schedulers-k8s-execution-environment">Kubernetes Environment Customization</a></li><li class="navListItem"><a class="navItem" href="/docs/schedulers-aurora-cluster">Aurora Cluster</a></li><li class="navListItem"><a class="navItem" href="/docs/schedulers-aurora-local">Aurora Locally</a></li><li class="navListItem"><a class="navItem" href="/docs/schedulers-local">Local Cluster</a></li><li class="navListItem"><a class="navItem" href="/docs/schedulers-nomad">Nomad</a></li><li class="navListItem"><a class="navItem" href="/docs/schedulers-mesos-local-mac">Mesos Cluster Locally</a></li><li class="navListItem"><a class="navItem" href="/docs/schedulers-slurm">Slurm Cluster</a></li><li class="navListItem"><a class="navItem" href="/docs/schedulers-yarn">YARN Cluster</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Cluster Configuration</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/cluster-config-overview">Cluster Config Overview</a></li><li class="navListItem"><a class="navItem" href="/docs/cluster-config-system-level">System Level Configuration</a></li><li class="navListItem"><a class="navItem" href="/docs/cluster-config-instance">Heron Instance</a></li><li class="navListItem"><a class="navItem" href="/docs/cluster-config-metrics">Metrics Manager</a></li><li class="navListItem"><a class="navItem" href="/docs/cluster-config-stream">Stream Manager</a></li><li class="navListItem"><a class="navItem" href="/docs/cluster-config-tmanager">Topology Manager</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Observability</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/observability-prometheus">Prometheus</a></li><li class="navListItem"><a class="navItem" href="/docs/observability-graphite">Graphite</a></li><li class="navListItem"><a class="navItem" href="/docs/observability-scribe">Scribe</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">User Manuals</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/user-manuals-heron-cli">Heron Client</a></li><li class="navListItem"><a class="navItem" href="/docs/user-manuals-heron-explorer">Heron Explorer</a></li><li class="navListItem"><a class="navItem" href="/docs/user-manuals-tracker-rest">Heron Tracker REST API</a></li><li class="navListItem"><a class="navItem" href="/docs/user-manuals-heron-tracker-runbook">Heron Tracker Runbook</a></li><li class="navListItem"><a class="navItem" href="/docs/user-manuals-heron-ui-runbook">Heron UI Runbook</a></li><li class="navListItem"><a class="navItem" href="/docs/user-manuals-heron-shell">Heron Shell</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Compiling</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/compiling-overview">Compiling Overview</a></li><li class="navListItem"><a class="navItem" href="/docs/compiling-linux">Compiling on Linux</a></li><li class="navListItem"><a class="navItem" href="/docs/compiling-osx">Compiling on OS X</a></li><li class="navListItem"><a class="navItem" href="/docs/compiling-docker">Compiling With Docker</a></li><li class="navListItem"><a class="navItem" href="/docs/compiling-running-tests">Running Tests</a></li><li class="navListItem"><a class="navItem" href="/docs/compiling-code-organization">Code Organization</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Extending Heron</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/extending-heron-scheduler">Custom Scheduler</a></li><li class="navListItem"><a class="navItem" href="/docs/extending-heron-metric-sink">Custom Metrics Sink</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Heron Resources</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/heron-resources-resources">Heron Resources</a></li></ul></div></div></section></div><script>
+            var coll = document.getElementsByClassName('collapsible');
+            var checkActiveCategory = true;
+            for (var i = 0; i < coll.length; i++) {
+              var links = coll[i].nextElementSibling.getElementsByTagName('*');
+              if (checkActiveCategory){
+                for (var j = 0; j < links.length; j++) {
+                  if (links[j].classList.contains('navListItemActive')){
+                    coll[i].nextElementSibling.classList.toggle('hide');
+                    coll[i].childNodes[1].classList.toggle('rotate');
+                    checkActiveCategory = false;
+                    break;
+                  }
+                }
+              }
+
+              coll[i].addEventListener('click', function() {
+                var arrow = this.childNodes[1];
+                arrow.classList.toggle('rotate');
+                var content = this.nextElementSibling;
+                content.classList.toggle('hide');
+              });
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+              createToggler('#navToggler', '#docsNav', 'docsSliderActive');
+              createToggler('#tocToggler', 'body', 'tocActive');
+
+              var headings = document.querySelector('.toc-headings');
+              headings && headings.addEventListener('click', function(event) {
+                var el = event.target;
+                while(el !== headings){
+                  if (el.tagName === 'A') {
+                    document.body.classList.remove('tocActive');
+                    break;
+                  } else{
+                    el = el.parentNode;
+                  }
+                }
+              }, false);
+
+              function createToggler(togglerSelector, targetSelector, className) {
+                var toggler = document.querySelector(togglerSelector);
+                var target = document.querySelector(targetSelector);
+
+                if (!toggler) {
+                  return;
+                }
+
+                toggler.onclick = function(event) {
+                  event.preventDefault();
+
+                  target.classList.toggle(className);
+                };
+              }
+            });
+        </script></nav></div><div class="container mainContainer"><div class="wrapper"><div class="post"><header class="postHeader"><h1 class="postHeaderTitle">Kubernetes with Helm</h1></header><article><div><span><!--
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements.  See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership.  The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License.  You may obtain a copy of the License at
+      http://www.apache.org/licenses/LICENSE-2.0
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied.  See the License for the
+    specific language governing permissions and limitations
+    under the License.
+-->
+<blockquote>
+<p>If you'd prefer to install Heron on Kubernetes <em>without</em> using the <a href="https://helm.sh">Helm</a> package manager, see the <a href="schedulers-k8s-by-hand">Heron on Kubernetes by hand</a> document.</p>
+</blockquote>
+<p><a href="https://helm.sh">Helm</a> is an open source package manager for <a href="https://kubernetes.io">Kubernetes</a> that enables you to quickly and easily install even the most complex software systems on Kubernetes. Heron has a Helm <a href="https://docs.helm.sh/developing_charts/#charts">chart</a> that you can use to install Heron on Kubernetes using just a few commands. The chart can be used to install Heron on the following platforms:</p>
+<ul>
+<li><a href="#minikube">Minikube</a> (the default)</li>
+<li><a href="#google-kubernetes-engine">Google Kubernetes Engine</a></li>
+<li><a href="#amazon-web-services">Amazon Web Services</a></li>
+<li><a href="#bare-metal">Bare metal</a></li>
+</ul>
+<h2><a class="anchor" aria-hidden="true" id="requirements"></a><a href="#requirements" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Requirements</h2>
+<p>In order to install Heron on Kubernetes using Helm, you'll need to have an existing Kubernetes cluster on one of the supported <a href="#specifying-a-platform">platforms</a> (which includes <a href="#bare-metal">bare metal</a> installations).</p>
+<h2><a class="anchor" aria-hidden="true" id="installing-the-helm-client"></a><a href="#installing-the-helm-client" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Installing the Helm client</h2>
+<p>In order to get started, you need to install Helm on your machine. Installation instructions for <a href="#helm-for-macos">macOS</a> and <a href="#helm-for-linux">Linux</a> are below.</p>
+<h3><a class="anchor" aria-hidden="true" id="helm-for-macos"></a><a href="#helm-for-macos" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Helm for macOS</h3>
+<p>You can install Helm on macOS using <a href="https://brew.sh">Homebrew</a>:</p>
+<pre><code class="hljs css language-bash">$ brew install kubernetes-helm
+</code></pre>
+<h3><a class="anchor" aria-hidden="true" id="helm-for-linux"></a><a href="#helm-for-linux" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Helm for Linux</h3>
+<p>You can install Helm on Linux using a simple installation script:</p>
+<pre><code class="hljs css language-bash">$ curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3
+$ chmod 700 get_helm.sh
+$ ./get_helm.sh
+</code></pre>
+<h2><a class="anchor" aria-hidden="true" id="installing-heron-on-kubernetes"></a><a href="#installing-heron-on-kubernetes" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Installing Heron on Kubernetes</h2>
+<p>To use Helm with Kubernetes, you need to first make sure that <a href="https://kubernetes.io/docs/tasks/tools/install-kubectl">kubectl</a> is using the right configuration context for your cluster. To check which context is being used:</p>
+<pre><code class="hljs css language-bash">$ kubectl config current-context
+</code></pre>
+<p>Once you've installed the Helm client on your machine and gotten Helm pointing to your Kubernetes cluster, you need to make your client aware of the <code>heron-charts</code> Helm repository, which houses the chart for Heron:</p>
+<pre><code class="hljs css language-bash">$ helm repo add heron-charts https://storage.googleapis.com/heron-charts
+<span class="hljs-string">"heron-charts"</span> has been added to your repositories
+</code></pre>
+<p>Create a namespace to install into:</p>
+<pre><code class="hljs css language-bash">$ kubectl create namespace heron
+</code></pre>
+<p>Now you can install the Heron package:</p>
+<pre><code class="hljs css language-bash">$ helm install heron-charts/heron -g -n heron
+</code></pre>
+<p>This will install Heron and provide the installation in the <code>heron</code> namespace (<code>-n</code>) with a random name (<code>-g</code>) like <code>jazzy-anaconda</code>. To provide the installation with a name, such as <code>heron-kube</code>:</p>
+<pre><code class="hljs css language-bash">$ helm install heron-kube heron-charts/heron \
+  --namespace heron
+</code></pre>
+<h3><a class="anchor" aria-hidden="true" id="specifying-a-platform"></a><a href="#specifying-a-platform" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Specifying a platform</h3>
+<p>The default platform for running Heron on Kubernetes is <a href="#minikube">Minikube</a>. To specify a different platform, you can use the <code>--set platform=PLATFORM</code> flag. Here's an example:</p>
+<pre><code class="hljs css language-bash">$ helm install heron-kube heron-charts/heron \
+  --namespace heron \
+  --<span class="hljs-built_in">set</span> platform=gke
+</code></pre>
+<p>The available platforms are:</p>
+<table>
+<thead>
+<tr><th style="text-align:left">Platform</th><th style="text-align:left">Tag</th></tr>
+</thead>
+<tbody>
+<tr><td style="text-align:left"><a href="#minikube">Minikube</a></td><td style="text-align:left"><code>minikube</code></td></tr>
+<tr><td style="text-align:left"><a href="#google-kubernetes-engine">Google Kubernetes Engine</a></td><td style="text-align:left"><code>gke</code></td></tr>
+<tr><td style="text-align:left"><a href="#amazon-web-services">Amazon Web Services</a></td><td style="text-align:left"><code>aws</code></td></tr>
+<tr><td style="text-align:left"><a href="#bare-metal">Bare metal</a></td><td style="text-align:left"><code>baremetal</code></td></tr>
+</tbody>
+</table>
+<h4><a class="anchor" aria-hidden="true" id="minikube"></a><a href="#minikube" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Minikube</h4>
+<p>To run Heron on Minikube, you need to first <a href="https://kubernetes.io/docs/tasks/tools/install-minikube/">install Minikube</a>. Once Minikube is installed, you can start it by running <code>minikube start</code>. Please note, however, that Heron currently requires the following resources:</p>
+<ul>
+<li>7 GB of memory</li>
+<li>5 CPUs</li>
+<li>20 GB of disk space</li>
+</ul>
+<p>To start up Minikube with the minimum necessary resources:</p>
+<pre><code class="hljs css language-bash">$ minikube start \
+  --memory=7168 \
+  --cpus=5 \
+  --disk-size=20g
+</code></pre>
+<p>Once Minikube is running, you can then install Heron in one of two ways:</p>
+<p>Create a namespace to install into:</p>
+<pre><code class="hljs css language-bash">$ kubectl create namespace heron
+</code></pre>
+<pre><code class="hljs css language-bash"><span class="hljs-comment"># Use the Minikube default</span>
+$ helm install heron-kube heron-charts/heron \
+  --namespace heron
+
+<span class="hljs-comment"># Explicitly select Minikube</span>
+$ helm install heron-kube heron-charts/heron \
+  --namespace heron \
+  --<span class="hljs-built_in">set</span> platform=minikube
+</code></pre>
+<h4><a class="anchor" aria-hidden="true" id="google-kubernetes-engine"></a><a href="#google-kubernetes-engine" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Google Kubernetes Engine</h4>
+<p>The resources required to run Heron on <a href="https://cloud.google.com/kubernetes-engine/">Google Kubernetes Engine</a> vary based on your use case. To run a basic Heron cluster intended for development and experimentation, you'll need at least:</p>
+<ul>
+<li>3 nodes</li>
+<li><a href="https://cloud.google.com/compute/docs/machine-types#standard_machine_types">n1-standard-4</a> machines</li>
+</ul>
+<p>To create a cluster with those resources using the <a href="https://cloud.google.com/sdk/gcloud/">gcloud</a> tool:</p>
+<pre><code class="hljs css language-bash">$ gcloud container clusters create heron-gke-dev-cluster \
+  --num-nodes=3 \
+  --machine-type=n1-standard-2
+</code></pre>
+<p>For a production-ready cluster you'll want a larger cluster with:</p>
+<ul>
+<li><em>at least</em> 8 nodes</li>
+<li><a href="https://cloud.google.com/compute/docs/machine-types#standard_machine_types">n1-standard-4 or n1-standard-8</a> machines (preferably the latter)</li>
+</ul>
+<p>To create such a cluster:</p>
+<pre><code class="hljs css language-bash">$ gcloud container clusters create heron-gke-prod-cluster \
+  --num-nodes=8 \
+  --machine-type=n1-standard-8
+</code></pre>
+<p>Once the cluster has been successfully created, you'll need to install that cluster's credentials locally so that they can be used by <a href="https://kubernetes.io/docs/tasks/tools/install-kubectl/">kubectl</a>. You can do this in just one command:</p>
+<pre><code class="hljs css language-bash">$ gcloud container clusters get-credentials heron-gke-dev-cluster <span class="hljs-comment"># or heron-gke-prod-cluster</span>
+</code></pre>
+<p>Create a namespace to install into:</p>
+<pre><code class="hljs css language-bash">$ kubectl create namespace heron
+</code></pre>
+<p>Now you can install Heron:</p>
+<pre><code class="hljs css language-bash">$ helm install heron-kube heron-charts/heron \
+  --namespace heron \
+  --<span class="hljs-built_in">set</span> platform=gke
+</code></pre>
+<h5><a class="anchor" aria-hidden="true" id="resource-configurations"></a><a href="#resource-configurations" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Resource configurations</h5>
+<p>Helm enables you to supply sets of variables via YAML files. There are currently a handful of different resource configurations that can be applied to your Heron on GKE cluster upon installation:</p>
+<table>
+<thead>
+<tr><th style="text-align:left">Configuration</th><th style="text-align:left">Description</th></tr>
+</thead>
+<tbody>
+<tr><td style="text-align:left"><a href="https://github.com/apache/incubator-heron/blob/master/deploy/kubernetes/gke/small.yaml"><code>small.yaml</code></a></td><td style="text-align:left">Smaller Heron cluster intended for basic testing, development, and experimentation</td></tr>
+<tr><td style="text-align:left"><a href="https://github.com/apache/incubator-heron/blob/master/deploy/kubernetes/gke/medium.yaml"><code>medium.yaml</code></a></td><td style="text-align:left">Closer geared for production usage</td></tr>
+</tbody>
+</table>
+<p>To apply the <code>small</code> configuration, for example:</p>
+<pre><code class="hljs css language-bash">$ helm install heron-kube heron-charts/heron \
+  --namespace heron \
+  --<span class="hljs-built_in">set</span> platform=gke \
+  --values https://raw.githubusercontent.com/apache/incubator-heron/master/deploy/kubernetes/gcp/small.yaml
+</code></pre>
+<h4><a class="anchor" aria-hidden="true" id="amazon-web-services"></a><a href="#amazon-web-services" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Amazon Web Services</h4>
+<p>To run Heron on Kubernetes on Amazon Web Services (AWS), you'll need to</p>
+<pre><code class="hljs css language-bash">$ helm install heron-kube heron-charts/heron \
+  --namespace heron \
+  --<span class="hljs-built_in">set</span> platform=aws
+</code></pre>
+<h5><a class="anchor" aria-hidden="true" id="using-s3-uploader"></a><a href="#using-s3-uploader" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Using S3 uploader</h5>
+<p>You can make Heron to use S3 to distribute the user topologies. First you need to set up a S3 bucket and configure an IAM user with enough permissions over it. Get access keys for the user. Then you can deploy Heron like this:</p>
+<pre><code class="hljs css language-bash">$ helm install heron-kube heron-charts/heron \
+  --namespace heron \
+  --<span class="hljs-built_in">set</span> platform=aws \
+  --<span class="hljs-built_in">set</span> uploader.class=s3 \
+  --<span class="hljs-built_in">set</span> uploader.s3Bucket=heron \
+  --<span class="hljs-built_in">set</span> uploader.s3PathPrefix=topologies \
+  --<span class="hljs-built_in">set</span> uploader.s3AccessKey=XXXXXXXXXXXXXXXXXXXX \
+  --<span class="hljs-built_in">set</span> uploader.s3SecretKey=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX \
+  --<span class="hljs-built_in">set</span> uploader.s3Region=us-west-1
+</code></pre>
+<h4><a class="anchor" aria-hidden="true" id="bare-metal"></a><a href="#bare-metal" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Bare metal</h4>
+<p>To run Heron on a bare metal Kubernetes cluster:</p>
+<pre><code class="hljs css language-bash">$ helm install heron-kube heron-charts/heron \
+  --namespace heron \
+  --<span class="hljs-built_in">set</span> platform=baremetal
+</code></pre>
+<h3><a class="anchor" aria-hidden="true" id="managing-topologies"></a><a href="#managing-topologies" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Managing topologies</h3>
+<blockquote>
+<p>When setting the <code>heron</code> CLI configuration, make sure that the cluster name matches the name of the Helm installation. This can be either the name auto-generated by Helm or the name you supplied via the <code>--name</code> flag upon installation (in some of the examples above, the <code>heron-kubernetes</code> name was used). Make sure to adjust the name accordingly if necessary.</p>
+</blockquote>
+<p>Once all of the components have been successfully started up, you need to open up a proxy port to your Kubernetes cluster using the <a href="https://kubernetes.io/docs/tasks/access-kubernetes-api/http-proxy-access-api/"><code>kubectl proxy</code></a> command:</p>
+<pre><code class="hljs css language-bash">$ kubectl proxy -p 8001
+</code></pre>
+<blockquote>
+<p>Note: All of the following Kubernetes specific urls are valid with the Kubernetes 1.10.0 release.</p>
+</blockquote>
+<p>Now, verify that the Heron API server running on Minikube is available using curl:</p>
+<pre><code class="hljs css language-bash">$ curl http://localhost:8001/api/v1/namespaces/default/services/heron-kubernetes-apiserver:9000/proxy/api/v1/version
+</code></pre>
+<p>You should get a JSON response like this:</p>
+<pre><code class="hljs css language-json">{
+  <span class="hljs-attr">"heron.build.git.revision"</span> : <span class="hljs-string">"ddbb98bbf173fb082c6fd575caaa35205abe34df"</span>,
+  <span class="hljs-attr">"heron.build.git.status"</span> : <span class="hljs-string">"Clean"</span>,
+  <span class="hljs-attr">"heron.build.host"</span> : <span class="hljs-string">"ci-server-01"</span>,
+  <span class="hljs-attr">"heron.build.time"</span> : <span class="hljs-string">"Sat Mar 31 09:27:19 UTC 2018"</span>,
+  <span class="hljs-attr">"heron.build.timestamp"</span> : <span class="hljs-string">"1522488439000"</span>,
+  <span class="hljs-attr">"heron.build.user"</span> : <span class="hljs-string">"release-agent"</span>,
+  <span class="hljs-attr">"heron.build.version"</span> : <span class="hljs-string">"0.17.8"</span>
+}
+</code></pre>
+<h2><a class="anchor" aria-hidden="true" id="running-topologies-on-heron-on-kubernetes"></a><a href="#running-topologies-on-heron-on-kubernetes" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Running topologies on Heron on Kubernetes</h2>
+<p>Once you have a Heron cluster up and running on Kubernetes via Helm, you can use the <a href="user-manuals-heron-cli"><code>heron</code> CLI tool</a> like normal if you set the proper URL for the <a href="deployment-api-server">Heron API server</a>. When running Heron on Kubernetes, that URL is:</p>
+<pre><code class="hljs css language-bash">$ http://localhost:8001/api/v1/namespaces/default/services/heron-kubernetes-apiserver:9000/proxy
+</code></pre>
+<p>To set that URL:</p>
+<pre><code class="hljs css language-bash">$ heron config heron-kubernetes <span class="hljs-built_in">set</span> service_url \
+  http://localhost:8001/api/v1/namespaces/default/services/heron-kubernetes-apiserver:9000/proxy
+</code></pre>
+<p>To test your cluster, you can submit an example topology:</p>
+<pre><code class="hljs css language-bash">$ heron submit heron-kubernetes \
+  ~/.heron/examples/heron-streamlet-examples.jar \
+  org.apache.heron.examples.streamlet.WindowedWordCountTopology \
+  WindowedWordCount
+</code></pre>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/schedulers-k8s-by-hand"><span class="arrow-prev">← </span><span>Kubernetes by hand</span></a><a class="docs-next button" href="/docs/schedulers-k8s-execution-environment"><span>Kubernetes Environment Customization</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#requirements">Requirements</a></li><li><a href="#installing-the-helm-client">Installing the Helm client</a><ul class="toc-headings"><li><a href="#helm-for-macos">Helm for macOS</a></li><li><a href="#helm-for-linux">Helm for Linux</a></li></ul></li><li><a href="#installing-heron-on-kubernetes">Installing Heron on Kubernetes</a><ul class="toc-headings"><li><a href="#specifying-a-platform">Specifying a platform</a></li><li><a href="#managing-topologies">Managing topologies</a></li></ul></li><li><a href="#running-topologies-on-heron-on-kubernetes">Running topologies on Heron on Kubernetes</a></li></ul></nav></div><footer class="nav-footer" id="footer"><div class="apache-disclaimer">Apache Heron is an effort undergoing incubation at <a target="_blank" href="https://apache.org/">The Apache Software Foundation (ASF)</a> sponsored by the Apache Incubator PMC. Incubation is required of all newly accepted projects until a further review indicates that the infrastructure, communications, and decision making process have stabilized in a manner consistent with other successful ASF projects. While incubation status is not necessarily a reflection of the completeness or stability of the code, it does indicate that the project has yet to be fully endorsed by the ASF.<br/><br/>Apache®, the names of Apache projects, and the feather logo are either <a rel="external" href="https://www.apache.org/foundation/marks/list/">registered trademarks or trademarks</a> of the Apache Software Foundation in the United States and/or other countries.<br/><br/><div class="copyright-box">Copyright © 2022 the Apache Software Foundation, Apache Heron, Heron, 
+  Apache, the Apache feather Logo, and the Apache Heron project logo are either registered 
+  trademarks or trademarks of the Apache Software Foundation.</div></div><div class="apache-links"><a class="item" rel="external" href="https://incubator.apache.org/">Apache Incubator</a><div><a class="item" rel="external" href="https://www.apache.org/">About the ASF</a></div><div><a class="item" rel="external" href="https://www.apache.org/events/current-event">Events</a></div><div><a class="item" rel="external" href="https://www.apache.org/foundation/thanks.html">Thanks</a></div><div><a class="item" rel="external" href="https://www.apache.org/foundation/sponsorship.html">Become a Sponsor</a></div><div><a class="item" rel="external" href="https://www.apache.org/security/">Security</a></div><div><a class="item" rel="external" href="https://www.apache.org/licenses/">License</a></div></div></footer></div><script>window.twttr=(function(d,s, id){var js,fjs=d.getElementsByTagName(s)[0],t=window.twttr||{};if(d.getElementById(id))return t;js=d.createElement(s);js.id=id;js.src='https://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js, fjs);t._e = [];t.ready = function(f) {t._e.push(f);};return t;}(document, 'script', 'twitter-wjs'));</script></body></html>

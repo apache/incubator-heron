@@ -1,0 +1,372 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Nomad · Apache Heron</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="&lt;!--"/><meta name="docsearch:version" content="0.20.3-incubating"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Nomad · Apache Heron"/><meta property="og:type" content="website"/><meta property="og:url" content="https://heron.apache.org/"/><meta property="og:description" content="&lt;!--"/><meta property="og:image" content="https://heron.apache.org/img/undraw_online.svg"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://heron.apache.org/img/undraw_tweetstorm.svg"/><link rel="shortcut icon" href="/img/favicon-32x32.png"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><link rel="alternate" type="application/atom+xml" href="https://heron.apache.org/blog/atom.xml" title="Apache Heron Blog ATOM Feed"/><link rel="alternate" type="application/rss+xml" href="https://heron.apache.org/blog/feed.xml" title="Apache Heron Blog RSS Feed"/><script>
+              (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+              (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+              m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+              })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+              ga('create', 'UA-198017384-1', 'auto');
+              ga('send', 'pageview');
+            </script><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script type="text/javascript" src="/js/custom.js"></script><script type="text/javascript" src="/js/fix-location.js"></script><link rel="stylesheet" href="/css/main.css"/><script src="/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/"><img class="logo" src="/img/HeronTextLogo-small.png" alt="Apache Heron"/><h2 class="headerTitleWithLogo">Apache Heron</h2></a><a href="/versions"><h3>0.20.3-incubating</h3></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class=""><a href="/api/java" target="_self">Javadocs</a></li><li class=""><a href="/api/python" target="_self">Pydocs</a></li><li class="siteNavGroupActive"><a href="/docs/0.20.3-incubating/getting-started-local-single-node" target="_self">Docs</a></li><li class=""><a href="/download" target="_self">Downloads</a></li><li class=""><a href="#community" target="_self">Community</a></li><li class=""><a href="/blog/" target="_self">Blog</a></li><li class=""><a href="#apache" target="_self">Apache</a></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="container docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><div class="hamburger-menu"><div class="line1"></div><div class="line2"></div><div class="line3"></div></div></div><h2><i>›</i><span>Schedulers</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle">Getting Started</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/0.20.3-incubating/getting-started-local-single-node">Local (Single Node)</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.3-incubating/getting-started-migrate-storm-topologies">Migrate Storm Topologies</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.3-incubating/getting-started-troubleshooting-guide">Troubleshooting Guide</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Deployment</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/0.20.3-incubating/deployment-overview">Deployment Overiew</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.3-incubating/deployment-configuration">Configuration</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.3-incubating/deployment-api-server">The Heron API Server</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Topology Development APIs</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/0.20.3-incubating/topology-development-streamlet-api">The Heron Streamlet API for Java</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.3-incubating/topology-development-eco-api">The ECO API for Java</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.3-incubating/topology-development-topology-api-java">The Heron Topology API for Java</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.3-incubating/topology-development-topology-api-python">The Heron Topology API for Python</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.3-incubating/topology-development-streamlet-scala">The Heron Streamlet API for Scala</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Client API Docs</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/0.20.3-incubating/client-api-docs-overview">Client API Docs</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Guides</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/0.20.3-incubating/guides-effectively-once-java-topologies">Effectively Once Java Topologies</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.3-incubating/guides-data-model">Heron Data Model</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.3-incubating/guides-tuple-serialization">Tuple Serialization</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.3-incubating/guides-ui-guide">Heron UI Guide</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.3-incubating/guides-topology-tuning">Topology Tuning Guide</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.3-incubating/guides-packing-algorithms">Packing Algorithms</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.3-incubating/guides-simulator-mode">Simulator Mode</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.3-incubating/guides-troubeshooting-guide">Topology Troubleshooting Guide</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Heron Concepts</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/0.20.3-incubating/heron-design-goals">Heron Design Goals</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.3-incubating/heron-topology-concepts">Heron Topologies</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.3-incubating/heron-streamlet-concepts">Heron Streamlets</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.3-incubating/heron-architecture">Heron Architecture</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.3-incubating/heron-delivery-semantics">Heron Delivery Semantics</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">State Managers</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/0.20.3-incubating/state-managers-zookeeper">Zookeeper</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.3-incubating/state-managers-local-fs">Local File System</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Uploaders</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/0.20.3-incubating/uploaders-local-fs">Local File System</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.3-incubating/uploaders-hdfs">HDFS</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.3-incubating/uploaders-http">HTTP</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.3-incubating/uploaders-amazon-s3">Amazon S3</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.3-incubating/uploaders-scp">Secure Copy (SCP)</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Schedulers</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/0.20.3-incubating/schedulers-k8s-by-hand">Kubernetes by hand</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.3-incubating/schedulers-k8s-with-helm">Kubernetes with Helm</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.3-incubating/schedulers-aurora-cluster">Aurora Cluster</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.3-incubating/schedulers-aurora-local">Aurora Locally</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.3-incubating/schedulers-local">Local Cluster</a></li><li class="navListItem navListItemActive"><a class="navItem" href="/docs/0.20.3-incubating/schedulers-nomad">Nomad</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.3-incubating/schedulers-mesos-local-mac">Mesos Cluster Locally</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.3-incubating/schedulers-slurm">Slurm Cluster</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.3-incubating/schedulers-yarn">YARN Cluster</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Cluster Configuration</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/0.20.3-incubating/cluster-config-overview">Cluster Config Overview</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.3-incubating/cluster-config-system-level">System Level Configuration</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.3-incubating/cluster-config-instance">Heron Instance</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.3-incubating/cluster-config-metrics">Metrics Manager</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.3-incubating/cluster-config-stream">Stream Manager</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.3-incubating/cluster-config-tmanager">Topology Manager</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Observability</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/0.20.3-incubating/observability-prometheus">Prometheus</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.3-incubating/observability-graphite">Graphite</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.3-incubating/observability-scribe">Scribe</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">User Manuals</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/0.20.3-incubating/user-manuals-heron-cli">Heron Client</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.3-incubating/user-manuals-heron-explorer">Heron Explorer</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.3-incubating/user-manuals-tracker-rest">Heron Tracker REST API</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.3-incubating/user-manuals-heron-tracker-runbook">Heron Tracker Runbook</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.3-incubating/user-manuals-heron-ui-runbook">Heron UI Runbook</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.3-incubating/user-manuals-heron-shell">Heron Shell</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Compiling</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/0.20.3-incubating/compiling-overview">Compiling Overview</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.3-incubating/compiling-linux">Compiling on Linux</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.3-incubating/compiling-osx">Compiling on OS X</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.3-incubating/compiling-docker">Compiling With Docker</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.3-incubating/compiling-running-tests">Running Tests</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.3-incubating/compiling-code-organization">Code Organization</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Extending Heron</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/0.20.3-incubating/extending-heron-scheduler">Custom Scheduler</a></li><li class="navListItem"><a class="navItem" href="/docs/0.20.3-incubating/extending-heron-metric-sink">Custom Metrics Sink</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Heron Resources</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/0.20.3-incubating/heron-resources-resources">Heron Resources</a></li></ul></div></div></section></div><script>
+            var coll = document.getElementsByClassName('collapsible');
+            var checkActiveCategory = true;
+            for (var i = 0; i < coll.length; i++) {
+              var links = coll[i].nextElementSibling.getElementsByTagName('*');
+              if (checkActiveCategory){
+                for (var j = 0; j < links.length; j++) {
+                  if (links[j].classList.contains('navListItemActive')){
+                    coll[i].nextElementSibling.classList.toggle('hide');
+                    coll[i].childNodes[1].classList.toggle('rotate');
+                    checkActiveCategory = false;
+                    break;
+                  }
+                }
+              }
+
+              coll[i].addEventListener('click', function() {
+                var arrow = this.childNodes[1];
+                arrow.classList.toggle('rotate');
+                var content = this.nextElementSibling;
+                content.classList.toggle('hide');
+              });
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+              createToggler('#navToggler', '#docsNav', 'docsSliderActive');
+              createToggler('#tocToggler', 'body', 'tocActive');
+
+              var headings = document.querySelector('.toc-headings');
+              headings && headings.addEventListener('click', function(event) {
+                var el = event.target;
+                while(el !== headings){
+                  if (el.tagName === 'A') {
+                    document.body.classList.remove('tocActive');
+                    break;
+                  } else{
+                    el = el.parentNode;
+                  }
+                }
+              }, false);
+
+              function createToggler(togglerSelector, targetSelector, className) {
+                var toggler = document.querySelector(togglerSelector);
+                var target = document.querySelector(targetSelector);
+
+                if (!toggler) {
+                  return;
+                }
+
+                toggler.onclick = function(event) {
+                  event.preventDefault();
+
+                  target.classList.toggle(className);
+                };
+              }
+            });
+        </script></nav></div><div class="container mainContainer"><div class="wrapper"><div class="post"><header class="postHeader"><h1 class="postHeaderTitle">Nomad</h1></header><article><div><span><!--
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements.  See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership.  The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License.  You may obtain a copy of the License at
+      http://www.apache.org/licenses/LICENSE-2.0
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied.  See the License for the
+    specific language governing permissions and limitations
+    under the License.
+-->
+<p>Heron supports <a href="https://hashicorp.com">Hashicorp</a>'s <a href="https://nomadproject.io">Nomad</a> as a scheduler.</p>
+<blockquote>
+<p>Update: Heron now supports running on Nomad via <a href="https://www.nomadproject.io/docs/drivers/raw_exec.html">raw exec driver</a> and <a href="https://www.nomadproject.io/docs/drivers/docker.html">docker driver</a></p>
+</blockquote>
+<h2><a class="anchor" aria-hidden="true" id="nomad-setup"></a><a href="#nomad-setup" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Nomad setup</h2>
+<p>Setting up a nomad cluster will not be covered here. See the <a href="https://www.nomadproject.io/intro/getting-started/install.html">official Nomad docs</a> for instructions.</p>
+<p><strong>Instructions on running Heron on Nomad via raw execs are located here</strong>:</p>
+<p>Below are instructions on how to to run Heron on Nomad via raw execs.  In this mode, Heron executors will run as raw processes on the host machines.</p>
+<p>The advantages of this mode is that it is incredibly lightweight and likely do not require sudo privileges to setup and run.  However in this mode, the setup procedure may be a little more complex compared to running via docker since there are more things to consider.  Also in resource allocation is considered but not enforced.</p>
+<h2><a class="anchor" aria-hidden="true" id="requirements"></a><a href="#requirements" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Requirements</h2>
+<p>When setting up your Nomad cluster, the following are required:</p>
+<ul>
+<li>The <a href="user-manuals-heron-cli">Heron CLI tool</a> must be installed on each machine used to deploy Heron topologies</li>
+<li>Python 3, Java 7 or 8, and <a href="https://curl.haxx.se/">curl</a> must be installed on every machine in the cluster</li>
+<li>A <a href="https://zookeeper.apache.org">ZooKeeper cluster</a></li>
+</ul>
+<h2><a class="anchor" aria-hidden="true" id="configuring-heron-settings"></a><a href="#configuring-heron-settings" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Configuring Heron settings</h2>
+<p>Before running Heron via Nomad, you'll need to configure some settings. Once you've <a href="getting-started-local-single-node">installed Heron</a>, all of the configurations you'll need to modify will be in the <code>~/.heron/conf/nomad</code> diredctory.</p>
+<p>First, make sure that the <code>heron.nomad.driver</code> is set to &quot;raw_exec&quot; in <code>~/.heron/conf/nomad/scheduler.yaml</code> e.g.</p>
+<pre><code class="hljs css language-yaml"><span class="hljs-attr">heron.nomad.driver:</span> <span class="hljs-string">"raw_exec"</span>
+</code></pre>
+<p>You'll need to use a topology uploader to deploy topology packages to nodes in your cluster. You can use one of the following uploaders:</p>
+<ul>
+<li>The HTTP uploader in conjunction with Heron's <a href="deployment-api-server">API server</a>. The Heron API server acts like a file server to which users can upload topology packages. The API server distributes the packages, along with the Heron core package, to the relevant machines. You can also use the API server to submit your Heron topology to Nomad (described <a href="#deploying-with-the-api-server">below</a>) <!-- TODO: link to upcoming HTTP uploader documentation --></li>
+<li><a href="uploaders-amazon-s3">Amazon S3</a>. Please note that the S3 uploader requires an AWS account.</li>
+<li><a href="uploaders-scp">SCP</a>. Please note that the SCP uploader requires SSH access to nodes in the cluster.</li>
+</ul>
+<p>You can modify the <code>heron.class.uploader</code> parameter in <code>~/.heron/conf/nomad/uploader.yaml</code> to choose an uploader.</p>
+<p>In addition, you must update the <code>heron.statemgr.connection.string</code> parameter in the <code>statemgr.yaml</code> file in <code>~/.heron/conf/nomad</code> to your ZooKeeper connection string. Here's an example:</p>
+<pre><code class="hljs css language-yaml"><span class="hljs-attr">heron.statemgr.connection.string:</span> <span class="hljs-number">127.0</span><span class="hljs-number">.0</span><span class="hljs-number">.1</span><span class="hljs-string">:2181</span>
+</code></pre>
+<p>Then, update the <code>heron.nomad.scheduler.uri</code> parameter in <code>scheduler.yaml</code> to the URL of the Nomad server to which you'll be submitting jobs. Here's an example:</p>
+<pre><code class="hljs css language-yaml"><span class="hljs-attr">heron.nomad.scheduler.uri:</span> <span class="hljs-string">http://127.0.0.1:4646</span>
+</code></pre>
+<p>You may also want to configure where Heron will store files on your machine if you're running Nomad locally (in <code>scheduler.yaml</code>). Here's an example:</p>
+<pre><code class="hljs css language-yaml"><span class="hljs-attr">heron.scheduler.local.working.directory:</span> <span class="hljs-string">${HOME}/.herondata/topologies/${CLUSTER}/${ROLE}/${TOPOLOGY_ID}</span>
+</code></pre>
+<blockquote>
+<p>Heron uses string interpolation to fill in the missing values for <code>CLUSTER</code>, <code>ROLE</code>, etc.</p>
+</blockquote>
+<h2><a class="anchor" aria-hidden="true" id="distributing-heron-core"></a><a href="#distributing-heron-core" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Distributing Heron core</h2>
+<p>The Heron core package needs to be made available for every machine in the cluster to download. You'll need to provide a URI for the Heron core package. Here are the currently supported protocols:</p>
+<ul>
+<li><code>file://</code> (local FS)</li>
+<li><code>http://</code> (HTTP)</li>
+</ul>
+<p>You can do this in one of several ways:</p>
+<ul>
+<li>Use the Heron API server to distribute <code>heron-core.tar.gz</code> (see <a href="deployment-api-server">here</a> for more info)</li>
+<li>Copy <code>heron-core.tar.gz</code> onto every node in the cluster</li>
+<li>Mount a network drive to every machine in the cluster that contains</li>
+<li>Upload <code>heron-core.tar.gz</code> to an S3 bucket and expose an HTTP endpoint</li>
+<li>Upload <code>heron-core.tar.gz</code> to be hosted on a file server and expose an HTTP endpoint</li>
+</ul>
+<blockquote>
+<p>A copy of <code>heron-core.tar.gz</code> is located at <code>~/.heron/dist/heron-core.tar.gz</code> on the machine on which you installed the Heron CLI.</p>
+</blockquote>
+<p>You'll need to set the URL for <code>heron-core.tar.gz</code> in the <code>client.yaml</code> configuration file in <code>~/.heron/conf/nomad</code>. Here are some examples:</p>
+<pre><code class="hljs css language-yaml"><span class="hljs-comment"># local filesystem</span>
+<span class="hljs-attr">heron.package.core.uri:</span> <span class="hljs-string">file:///path/to/heron/heron-core.tar.gz</span>
+
+<span class="hljs-comment"># from a web server</span>
+<span class="hljs-attr">heron.package.core.uri:</span> <span class="hljs-string">http://some.webserver.io/heron-core.tar.gz</span>
+</code></pre>
+<h2><a class="anchor" aria-hidden="true" id="submitting-heron-topologies-to-the-nomad-cluster"></a><a href="#submitting-heron-topologies-to-the-nomad-cluster" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Submitting Heron topologies to the Nomad cluster</h2>
+<p>You can submit Heron topologies to a Nomad cluster via the <a href="user-manuals-heron-cli">Heron CLI tool</a>:</p>
+<pre><code class="hljs css language-bash">$ heron submit nomad \
+  &lt;topology package path&gt; \
+  &lt;topology classpath&gt; \
+  &lt;topology CLI args&gt;
+</code></pre>
+<p>Here's an example:</p>
+<pre><code class="hljs css language-bash">$ heron submit nomad \
+  ~/.heron/examples/heron-streamlet-examples.jar \           <span class="hljs-comment"># Package path</span>
+  org.apache.heron.examples.api.WindowedWordCountTopology \ <span class="hljs-comment"># Topology classpath</span>
+  windowed-word-count                                        <span class="hljs-comment"># Args passed to topology</span>
+</code></pre>
+<h2><a class="anchor" aria-hidden="true" id="deploying-with-the-api-server"></a><a href="#deploying-with-the-api-server" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Deploying with the API server</h2>
+<p>The advantage of running the <a href="deployment-api-server">Heron API Server</a> is that it can act as a file server to help you distribute topology package files and submit jobs to Nomad, so that you don't need to modify the configuration files mentioned above.  By using Heron’s API Server, you can set configurations such as the URI of ZooKeeper and the Nomad server once and not need to configure each machine from which you want to submit Heron topologies.</p>
+<h2><a class="anchor" aria-hidden="true" id="running-the-api-server"></a><a href="#running-the-api-server" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Running the API server</h2>
+<p>You can run the Heron API server on any machine that can be reached by machines in your Nomad cluster via HTTP. Here's a command you can use to run the API server:</p>
+<pre><code class="hljs css language-bash">$ ~/.heron/bin/heron-apiserver \
+  --cluster nomad \
+  --base-template nomad \
+  -D heron.statemgr.connection.string=&lt;ZooKeeper URI&gt; \
+  -D heron.nomad.scheduler.uri=&lt;Nomad URI&gt; \
+  -D heron.class.uploader=org.apache.heron.uploader.http.HttpUploader \
+  --verbose
+</code></pre>
+<p>You can also run the API server in Nomad itself, but you will need to have a local copy of the Heron API server executable on every machine in the cluster. Here's an example Nomad job for the API server:</p>
+<pre><code class="hljs css language-hcl">job <span class="hljs-string">"apiserver"</span> {
+  datacenters = [<span class="hljs-string">"dc1"</span>]
+ <span class="hljs-built_in"> type </span>= <span class="hljs-string">"service"</span>
+ <span class="hljs-built_in"> group </span><span class="hljs-string">"apiserver"</span> {
+    count = 1
+    task <span class="hljs-string">"apiserver"</span> {
+      driver = <span class="hljs-string">"raw_exec"</span>
+     <span class="hljs-built_in"> config </span>{
+        command = &lt;heron_apiserver_executable&gt;
+        args = [
+        <span class="hljs-string">"--cluster"</span>, <span class="hljs-string">"nomad"</span>,
+        <span class="hljs-string">"--base-template"</span>, <span class="hljs-string">"nomad"</span>,
+        <span class="hljs-string">"-D"</span>, <span class="hljs-string">"heron.statemgr.connection.string=&lt;zookeeper_uri&gt;"</span>,
+        <span class="hljs-string">"-D"</span>, <span class="hljs-string">"heron.nomad.scheduler.uri=&lt;scheduler_uri&gt;"</span>,
+        <span class="hljs-string">"-D"</span>, <span class="hljs-string">"heron.class.uploader=org.apache.heron.uploader.http.HttpUploader"</span>,
+        <span class="hljs-string">"--verbose"</span>]
+      }
+      resources {
+        cpu    = 500 # 500 MHz
+        memory = 256 # 256MB
+      }
+    }
+  }
+}
+</code></pre>
+<p>Make sure to replace the following:</p>
+<ul>
+<li><code>&lt;heron_apiserver_executable&gt;</code> --- The local path to where the <a href="deployment-api-server">Heron API server</a> executable is located (usually <code>~/.heron/bin/heron-apiserver</code>)</li>
+<li><code>&lt;zookeeper_uri&gt;</code> --- The URI for your ZooKeeper cluster</li>
+<li><code>&lt;scheduler_uri&gt;</code> --- The URI for your Nomad server</li>
+</ul>
+<h2><a class="anchor" aria-hidden="true" id="using-the-heron-api-server-to-distribute-heron-topology-packages"></a><a href="#using-the-heron-api-server-to-distribute-heron-topology-packages" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Using the Heron API server to distribute Heron topology packages</h2>
+<p>Heron users can upload their Heron topology packages to the Heron API server using the HTTP uploader by modifying the <code>uploader.yaml</code> file to including the following:</p>
+<pre><code class="hljs css language-yaml"><span class="hljs-comment"># uploader class for transferring the topology jar/tar files to storage</span>
+<span class="hljs-attr">heron.class.uploader:</span>    <span class="hljs-string">org.apache.heron.uploader.http.HttpUploader</span>
+<span class="hljs-attr">heron.uploader.http.uri:</span> <span class="hljs-string">http://localhost:9000/api/v1/file/upload</span>
+</code></pre>
+<p>The <a href="user-manuals-heron-cli">Heron CLI</a> will take care of the upload. When the topology is starting up, the topology package will be automatically downloaded from the API server.</p>
+<h2><a class="anchor" aria-hidden="true" id="using-the-api-server-to-distribute-the-heron-core-package"></a><a href="#using-the-api-server-to-distribute-the-heron-core-package" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Using the API server to distribute the Heron core package</h2>
+<p>Heron users can use the Heron API server to distribute the Heron core package. When running the API server, just add this argument:</p>
+<pre><code class="hljs css language-bash">--heron-core-package-path &lt;path to Heron core&gt;
+</code></pre>
+<p>Here's an example:</p>
+<pre><code class="hljs css language-bash">$ ~/.heron/bin/heron-apiserver \
+  --cluster nomad \
+  --base-template nomad \
+  --download-hostname 127.0.0.1 \
+  --heron-core-package-path ~/.heron/dist/heron-core.tar.gz \
+  -D heron.statemgr.connection.string=127.0.0.1:2181 \
+  -D heron.nomad.scheduler.uri=127.0.0.1:4647 \
+  -D heron.class.uploader=org.apache.heron.uploader.http.HttpUploader \
+  --verbose
+</code></pre>
+<p>Then change the <code>client.yaml</code> file in <code>~/.heron/conf/nomad</code> to the following:</p>
+<pre><code class="hljs css language-yaml"><span class="hljs-attr">heron.package.use_core_uri:</span> <span class="hljs-literal">true</span>
+<span class="hljs-attr">heron.package.core.uri:</span>     <span class="hljs-string">http://localhost:9000/api/v1/file/download/core</span>
+</code></pre>
+<h2><a class="anchor" aria-hidden="true" id="using-the-api-server-to-submit-heron-topologies"></a><a href="#using-the-api-server-to-submit-heron-topologies" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Using the API server to submit Heron topologies</h2>
+<p>Users can submit topologies using the <a href="user-manuals-heron-cli">Heron CLI</a> by specifying a service URL to the API server. Here's the format of that command:</p>
+<pre><code class="hljs css language-bash">$ heron submit nomad \
+  --service-url=&lt;Heron API server URL&gt; \
+  &lt;topology package path&gt; \
+  &lt;topology classpath&gt; \
+  &lt;topology args&gt;
+</code></pre>
+<p>Here's an example:</p>
+<pre><code class="hljs css language-bash">$ heron submit nomad \
+  --service-url=http://localhost:9000 \
+  ~/.heron/examples/heron-streamlet-examples.jar \
+  org.apache.heron.examples.api.WindowedWordCountTopology \
+  windowed-word-count
+</code></pre>
+<h2><a class="anchor" aria-hidden="true" id="integration-with-consul-for-metrics"></a><a href="#integration-with-consul-for-metrics" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Integration with Consul for metrics</h2>
+<p>Each Heron executor part of a Heron topology serves metrics out of a port randomly generated by Nomad.  Thus, Consul is needed for service discovery for users to determine which port the Heron executor is serving the metrics out of.
+Every Heron executor will automatically register itself as a service with Consul given that there is a Consul cluster running. The port Heron will be serving metrics will be registered with Consul.</p>
+<p>The service will be registered with the name with the following format:</p>
+<pre><code class="hljs css language-yaml"><span class="hljs-string">metrics-heron-&lt;TOPOLOGY_NAME&gt;-&lt;CONTAINER_INDEX&gt;</span>
+</code></pre>
+<p>Each heron executor registered with Consul will be tagged with</p>
+<pre><code class="hljs css language-yaml"><span class="hljs-string">&lt;TOPOLOGY_NAME&gt;-&lt;CONTAINER_INDEX&gt;</span>
+</code></pre>
+<p>To add additional tags, please add specify them in a comma delimited list via</p>
+<pre><code class="hljs css language-yaml"><span class="hljs-string">heron.nomad.metrics.service.additional.tags</span>
+</code></pre>
+<p>in <code>scheduler.yaml</code>. For example:</p>
+<pre><code class="hljs css language-yaml"><span class="hljs-attr">heron.nomad.metrics.service.additional.tags:</span> <span class="hljs-string">"prometheus,metrics,heron"</span>
+</code></pre>
+<p>Users can then configure Prometheus to scrape metrics for each Heron executor based on these tags</p>
+<p>Instructions on running Heron on Nomad via docker containers are located here:</p>
+<p><strong>Below are instructions on how to run Heron on Nomad via docker containers.</strong>  In this mode, Heron executors will run as docker containers on host machines.</p>
+<h2><a class="anchor" aria-hidden="true" id="requirements-1"></a><a href="#requirements-1" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Requirements</h2>
+<p>When setting up your Nomad cluster, the following are required:</p>
+<ul>
+<li>The <a href="user-manuals-heron-cli">Heron CLI tool</a> must be installed on each machine used to deploy Heron topologies</li>
+<li>Python 2.7, Java 7 or 8, and <a href="https://curl.haxx.se/">curl</a> must be installed on every machine in the cluster</li>
+<li>A <a href="https://zookeeper.apache.org">ZooKeeper cluster</a></li>
+<li>Docker installed and enabled on every machine</li>
+<li>Each machine must also be able to pull the official Heron docker image from DockerHub or have the image preloaded.</li>
+</ul>
+<h2><a class="anchor" aria-hidden="true" id="configuring-heron-settings-1"></a><a href="#configuring-heron-settings-1" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Configuring Heron settings</h2>
+<p>Before running Heron via Nomad, you'll need to configure some settings. Once you've <a href="getting-started-local-single-node">installed Heron</a>, all of the configurations you'll need to modify will be in the <code>~/.heron/conf/nomad</code> diredctory.</p>
+<p>First, make sure that the <code>heron.nomad.driver</code> is set to &quot;docker&quot; in <code>~/.heron/conf/nomad/scheduler.yaml</code> e.g.</p>
+<pre><code class="hljs css language-yaml"><span class="hljs-attr">heron.nomad.driver:</span> <span class="hljs-string">"docker"</span>
+</code></pre>
+<p>You can also adjust which docker image to use for running Heron via the <code>heron.executor.docker.image</code> in <code>~/.heron/conf/nomad/scheduler.yaml</code> e.g.</p>
+<pre><code class="hljs css language-yaml"><span class="hljs-attr">heron.executor.docker.image:</span> <span class="hljs-string">'apache/heron:latest'</span>
+</code></pre>
+<p>You'll need to use a topology uploader to deploy topology packages to nodes in your cluster. You can use one of the following uploaders:</p>
+<ul>
+<li>The HTTP uploader in conjunction with Heron's <a href="deployment-api-server">API server</a>. The Heron API server acts like a file server to which users can upload topology packages. The API server distributes the packages, along with the Heron core package, to the relevant machines. You can also use the API server to submit your Heron topology to Nomad (described <a href="#deploying-with-the-api-server">below</a>) <!-- TODO: link to upcoming HTTP uploader documentation --></li>
+<li><a href="uploaders-amazon-s3">Amazon S3</a>. Please note that the S3 uploader requires an AWS account.</li>
+<li><a href="uploaders-scp">SCP</a>. Please note that the SCP uploader requires SSH access to nodes in the cluster.</li>
+</ul>
+<p>You can modify the <code>heron.class.uploader</code> parameter in <code>~/.heron/conf/nomad/uploader.yaml</code> to choose an uploader.</p>
+<p>In addition, you must update the <code>heron.statemgr.connection.string</code> parameter in the <code>statemgr.yaml</code> file in <code>~/.heron/conf/nomad</code> to your ZooKeeper connection string. Here's an example:</p>
+<pre><code class="hljs css language-yaml"><span class="hljs-attr">heron.statemgr.connection.string:</span> <span class="hljs-number">127.0</span><span class="hljs-number">.0</span><span class="hljs-number">.1</span><span class="hljs-string">:2181</span>
+</code></pre>
+<p>Then, update the <code>heron.nomad.scheduler.uri</code> parameter in <code>scheduler.yaml</code> to the URL of the Nomad server to which you'll be submitting jobs. Here's an example:</p>
+<pre><code class="hljs css language-yaml"><span class="hljs-attr">heron.nomad.scheduler.uri:</span> <span class="hljs-string">http://127.0.0.1:4646</span>
+</code></pre>
+<h2><a class="anchor" aria-hidden="true" id="submitting-heron-topologies-to-the-nomad-cluster-1"></a><a href="#submitting-heron-topologies-to-the-nomad-cluster-1" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Submitting Heron topologies to the Nomad cluster</h2>
+<p>You can submit Heron topologies to a Nomad cluster via the <a href="user-manuals-heron-cli">Heron CLI tool</a>:</p>
+<pre><code class="hljs css language-bash">$ heron submit nomad \
+  &lt;topology package path&gt; \
+  &lt;topology classpath&gt; \
+  &lt;topology CLI args&gt;
+</code></pre>
+<p>Here's an example:</p>
+<pre><code class="hljs css language-bash">$ heron submit nomad \
+  ~/.heron/examples/heron-streamlet-examples.jar \           <span class="hljs-comment"># Package path</span>
+  org.apache.heron.examples.api.WindowedWordCountTopology \ <span class="hljs-comment"># Topology classpath</span>
+  windowed-word-count                                        <span class="hljs-comment"># Args passed to topology</span>
+</code></pre>
+<h2><a class="anchor" aria-hidden="true" id="deploying-with-the-api-server-1"></a><a href="#deploying-with-the-api-server-1" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Deploying with the API server</h2>
+<p>The advantage of running the <a href="deployment-api-server">Heron API Server</a> is that it can act as a file server to help you distribute topology package files and submit jobs to Nomad, so that you don't need to modify the configuration files mentioned above.  By using Heron’s API Server, you can set configurations such as the URI of ZooKeeper and the Nomad server once and not need to configure each machine from which you want to submit Heron topologies.</p>
+<h2><a class="anchor" aria-hidden="true" id="running-the-api-server-1"></a><a href="#running-the-api-server-1" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Running the API server</h2>
+<p>You can run the Heron API server on any machine that can be reached by machines in your Nomad cluster via HTTP. Here's a command you can use to run the API server:</p>
+<pre><code class="hljs css language-bash">$ ~/.heron/bin/heron-apiserver \
+  --cluster nomad \
+  --base-template nomad \
+  -D heron.statemgr.connection.string=&lt;ZooKeeper URI&gt; \
+  -D heron.nomad.scheduler.uri=&lt;Nomad URI&gt; \
+  -D heron.class.uploader=org.apache.heron.uploader.http.HttpUploader \
+  --verbose
+</code></pre>
+<p>You can also run the API server in Nomad itself, but you will need to have a local copy of the Heron API server executable on every machine in the cluster. Here's an example Nomad job for the API server:</p>
+<pre><code class="hljs css language-hcl">job <span class="hljs-string">"apiserver"</span> {
+  datacenters = [<span class="hljs-string">"dc1"</span>]
+ <span class="hljs-built_in"> type </span>= <span class="hljs-string">"service"</span>
+ <span class="hljs-built_in"> group </span><span class="hljs-string">"apiserver"</span> {
+    count = 1
+    task <span class="hljs-string">"apiserver"</span> {
+      driver = <span class="hljs-string">"raw_exec"</span>
+     <span class="hljs-built_in"> config </span>{
+        command = &lt;heron_apiserver_executable&gt;
+        args = [
+        <span class="hljs-string">"--cluster"</span>, <span class="hljs-string">"nomad"</span>,
+        <span class="hljs-string">"--base-template"</span>, <span class="hljs-string">"nomad"</span>,
+        <span class="hljs-string">"-D"</span>, <span class="hljs-string">"heron.statemgr.connection.string=&lt;zookeeper_uri&gt;"</span>,
+        <span class="hljs-string">"-D"</span>, <span class="hljs-string">"heron.nomad.scheduler.uri=&lt;scheduler_uri&gt;"</span>,
+        <span class="hljs-string">"-D"</span>, <span class="hljs-string">"heron.class.uploader=org.apache.heron.uploader.http.HttpUploader"</span>,
+        <span class="hljs-string">"--verbose"</span>]
+      }
+      resources {
+        cpu    = 500 # 500 MHz
+        memory = 256 # 256MB
+      }
+    }
+  }
+}
+</code></pre>
+<p>Make sure to replace the following:</p>
+<ul>
+<li><code>&lt;heron_apiserver_executable&gt;</code> --- The local path to where the <a href="deployment-api-server">Heron API server</a> executable is located (usually <code>~/.heron/bin/heron-apiserver</code>)</li>
+<li><code>&lt;zookeeper_uri&gt;</code> --- The URI for your ZooKeeper cluster</li>
+<li><code>&lt;scheduler_uri&gt;</code> --- The URI for your Nomad server</li>
+</ul>
+<h2><a class="anchor" aria-hidden="true" id="using-the-heron-api-server-to-distribute-heron-topology-packages-1"></a><a href="#using-the-heron-api-server-to-distribute-heron-topology-packages-1" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Using the Heron API server to distribute Heron topology packages</h2>
+<p>Heron users can upload their Heron topology packages to the Heron API server using the HTTP uploader by modifying the <code>uploader.yaml</code> file to including the following:</p>
+<pre><code class="hljs css language-yaml"><span class="hljs-comment"># uploader class for transferring the topology jar/tar files to storage</span>
+<span class="hljs-attr">heron.class.uploader:</span>    <span class="hljs-string">org.apache.heron.uploader.http.HttpUploader</span>
+<span class="hljs-attr">heron.uploader.http.uri:</span> <span class="hljs-string">http://localhost:9000/api/v1/file/upload</span>
+</code></pre>
+<h2><a class="anchor" aria-hidden="true" id="integration-with-consul-for-metrics-1"></a><a href="#integration-with-consul-for-metrics-1" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Integration with Consul for metrics</h2>
+<p>Each container part of a Heron topology serves metrics out of a port randomly generated by Nomad.  Thus, Consul is needed for service discovery for users to determine which port the container is serving the metrics out of.
+Every Heron executor running in a docker container will automatically register itself as a service with Consul given that there is a Consul cluster running. The port Heron will be serving metrics will be registered with Consul.</p>
+<p>The service will be registered with the name with the following format:</p>
+<pre><code class="hljs css language-yaml"><span class="hljs-string">metrics-heron-&lt;TOPOLOGY_NAME&gt;-&lt;CONTAINER_INDEX&gt;</span>
+</code></pre>
+<p>Each heron executor registered with Consul will be tagged with</p>
+<pre><code class="hljs css language-yaml"><span class="hljs-string">&lt;TOPOLOGY_NAME&gt;-&lt;CONTAINER_INDEX&gt;</span>
+</code></pre>
+<p>To add additional tags, please add specify them in a comma delimited list via</p>
+<pre><code class="hljs css language-yaml"><span class="hljs-string">heron.nomad.metrics.service.additional.tags</span>
+</code></pre>
+<p>in <code>scheduler.yaml</code>. For example:</p>
+<pre><code class="hljs css language-yaml"><span class="hljs-attr">heron.nomad.metrics.service.additional.tags:</span> <span class="hljs-string">"prometheus,metrics,heron"</span>
+</code></pre>
+<p>Users can then configure Prometheus to scrape metrics for each container based on these tags</p>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/0.20.3-incubating/schedulers-local"><span class="arrow-prev">← </span><span>Local Cluster</span></a><a class="docs-next button" href="/docs/0.20.3-incubating/schedulers-mesos-local-mac"><span>Mesos Cluster Locally</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#nomad-setup">Nomad setup</a></li><li><a href="#requirements">Requirements</a></li><li><a href="#configuring-heron-settings">Configuring Heron settings</a></li><li><a href="#distributing-heron-core">Distributing Heron core</a></li><li><a href="#submitting-heron-topologies-to-the-nomad-cluster">Submitting Heron topologies to the Nomad cluster</a></li><li><a href="#deploying-with-the-api-server">Deploying with the API server</a></li><li><a href="#running-the-api-server">Running the API server</a></li><li><a href="#using-the-heron-api-server-to-distribute-heron-topology-packages">Using the Heron API server to distribute Heron topology packages</a></li><li><a href="#using-the-api-server-to-distribute-the-heron-core-package">Using the API server to distribute the Heron core package</a></li><li><a href="#using-the-api-server-to-submit-heron-topologies">Using the API server to submit Heron topologies</a></li><li><a href="#integration-with-consul-for-metrics">Integration with Consul for metrics</a></li><li><a href="#requirements-1">Requirements</a></li><li><a href="#configuring-heron-settings-1">Configuring Heron settings</a></li><li><a href="#submitting-heron-topologies-to-the-nomad-cluster-1">Submitting Heron topologies to the Nomad cluster</a></li><li><a href="#deploying-with-the-api-server-1">Deploying with the API server</a></li><li><a href="#running-the-api-server-1">Running the API server</a></li><li><a href="#using-the-heron-api-server-to-distribute-heron-topology-packages-1">Using the Heron API server to distribute Heron topology packages</a></li><li><a href="#integration-with-consul-for-metrics-1">Integration with Consul for metrics</a></li></ul></nav></div><footer class="nav-footer" id="footer"><div class="apache-disclaimer">Apache Heron is an effort undergoing incubation at <a target="_blank" href="https://apache.org/">The Apache Software Foundation (ASF)</a> sponsored by the Apache Incubator PMC. Incubation is required of all newly accepted projects until a further review indicates that the infrastructure, communications, and decision making process have stabilized in a manner consistent with other successful ASF projects. While incubation status is not necessarily a reflection of the completeness or stability of the code, it does indicate that the project has yet to be fully endorsed by the ASF.<br/><br/>Apache®, the names of Apache projects, and the feather logo are either <a rel="external" href="https://www.apache.org/foundation/marks/list/">registered trademarks or trademarks</a> of the Apache Software Foundation in the United States and/or other countries.<br/><br/><div class="copyright-box">Copyright © 2022 the Apache Software Foundation, Apache Heron, Heron, 
+  Apache, the Apache feather Logo, and the Apache Heron project logo are either registered 
+  trademarks or trademarks of the Apache Software Foundation.</div></div><div class="apache-links"><a class="item" rel="external" href="https://incubator.apache.org/">Apache Incubator</a><div><a class="item" rel="external" href="https://www.apache.org/">About the ASF</a></div><div><a class="item" rel="external" href="https://www.apache.org/events/current-event">Events</a></div><div><a class="item" rel="external" href="https://www.apache.org/foundation/thanks.html">Thanks</a></div><div><a class="item" rel="external" href="https://www.apache.org/foundation/sponsorship.html">Become a Sponsor</a></div><div><a class="item" rel="external" href="https://www.apache.org/security/">Security</a></div><div><a class="item" rel="external" href="https://www.apache.org/licenses/">License</a></div></div></footer></div><script>window.twttr=(function(d,s, id){var js,fjs=d.getElementsByTagName(s)[0],t=window.twttr||{};if(d.getElementById(id))return t;js=d.createElement(s);js.id=id;js.src='https://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js, fjs);t._e = [];t.ready = function(f) {t._e.push(f);};return t;}(document, 'script', 'twitter-wjs'));</script></body></html>
