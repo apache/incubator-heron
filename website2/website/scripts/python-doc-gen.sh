@@ -36,7 +36,7 @@ VENV=./venv/
 echo $VENV
 PIP_LOCATION=${HERON_ROOT_DIR}/bazel-bin/scripts/packages
 
-python3 -m venv "$VENV"
+python3.6 -m venv "$VENV"
 source "$VENV/bin/activate"
 pip3 install pdoc==0.3.2
 pip3 install --ignore-installed six
