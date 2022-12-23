@@ -24,7 +24,7 @@ addons:
       - libgoogle-perftools-dev
 
 env:
-  - BAZEL_VERSION=4.2.2 ENABLE_HEAPCHECK=1 LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8 LANGUAGE=en_US.UTF-8
+  - BAZEL_VERSION=6.0.0 ENABLE_HEAPCHECK=1 LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8 LANGUAGE=en_US.UTF-8
 
 before_install:
   # download and install bazel

@@ -16,7 +16,7 @@ set -o errexit -o nounset -o pipefail
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-bazelVersion=4.2.2
+bazelVersion=6.0.0
 bazel_install() {
     apt-get install -y automake cmake gcc g++ zlib1g-dev zip pkg-config wget libssl-dev libunwind-dev
     mkdir -p /opt/bazel
