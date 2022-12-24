@@ -1,6 +1,6 @@
 ---
 
-dist: focal
+dist: jammy
 
 language: java
 
