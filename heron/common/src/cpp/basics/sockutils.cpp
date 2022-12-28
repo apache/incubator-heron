@@ -26,6 +26,13 @@
 #include "basics/sprcodes.h"
 #include "basics/spconsts.h"
 
+#if !defined(SOL_TCP) && defined(IPPROTO_TCP)
+#define SOL_TCP IPPROTO_TCP
+#endif
+#if !defined(TCP_KEEPIDLE) && defined(TCP_KEEPALIVE)
+#define TCP_KEEPIDLE TCP_KEEPALIVE
+#endif
+
 sp_int32 SockUtils::setNonBlocking(sp_int32 fd) {
   sp_int32 flags;
   if ((flags = ::fcntl(fd, F_GETFL, 0)) < 0) return SP_NOTOK;

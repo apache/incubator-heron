@@ -360,9 +360,9 @@ http_archive(
 http_archive(
     name = "com_github_gperftools_gperftools",
     build_file = "@//:third_party/gperftools/gperftools.BUILD",
-    sha256 = "982a37226eb42f40714e26b8076815d5ea677a422fb52ff8bfca3704d9c30a2d",
-    strip_prefix = "gperftools-2.4",
-    urls = ["https://github.com/gperftools/gperftools/releases/download/gperftools-2.4/gperftools-2.4.tar.gz"],
+    sha256 = "83e3bfdd28b8bcf53222c3798d4d395d52dadbbae59e8730c4a6d31a9c3732d8",
+    strip_prefix = "gperftools-2.10",
+    urls = ["https://github.com/gperftools/gperftools/releases/download/gperftools-2.10/gperftools-2.10.tar.gz"],
 )
 
 http_archive(
@@ -444,9 +444,9 @@ http_archive(
 
 http_archive(
     name = "io_bazel_rules_docker",
-    sha256 = "59536e6ae64359b716ba9c46c39183403b01eabfbd57578e84398b4829ca499a",
-    strip_prefix = "rules_docker-0.22.0",
-    urls = ["https://github.com/bazelbuild/rules_docker/releases/download/v0.22.0/rules_docker-v0.22.0.tar.gz"],
+    sha256 = "27d53c1d646fc9537a70427ad7b034734d08a9c38924cc6357cc973fed300820",
+    strip_prefix = "rules_docker-0.24.0",
+    urls = ["https://github.com/bazelbuild/rules_docker/releases/download/v0.24.0/rules_docker-v0.24.0.tar.gz"],
 )
 
 load(
@@ -485,6 +485,15 @@ http_archive(
     strip_prefix = "rules_scala-20220201",
     type = "zip",
     url = "https://github.com/bazelbuild/rules_scala/releases/download/20220201/rules_scala-20220201.zip",
+)
+
+skylib_version = "1.0.3"
+
+http_archive(
+    name = "bazel_skylib",
+    sha256 = "1c531376ac7e5a180e0237938a2536de0c54d93f5c278634818e0efc952dd56c",
+    type = "tar.gz",
+    url = "https://mirror.bazel.build/github.com/bazelbuild/bazel-skylib/releases/download/{}/bazel-skylib-{}.tar.gz".format(skylib_version, skylib_version),
 )
 
 load("@io_bazel_rules_scala//:scala_config.bzl", "scala_config")
