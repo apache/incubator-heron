@@ -29,6 +29,7 @@ import httpx
 # from fastapi import Query
 from fastapi import Query, APIRouter
 from pydantic import BaseModel, Field
+from starlette.background import BackgroundTask
 from starlette.responses import StreamingResponse
 
 from heron.proto import common_pb2, tmanager_pb2
@@ -58,7 +59,6 @@ async def get_container_file_slice(  # pylint: disable=too-many-arguments
   stmgr = topology.info.physical_plan.stmgrs[f"stmgr-{container}"]
   url = f"http://{stmgr.host}:{stmgr.shell_port}/filedata/{path}"
   params = {"offset": offset, "length": length}
-
   async with httpx.AsyncClient() as client:
     response = await client.get(url, params=params)
     return response.json()
@@ -77,13 +77,16 @@ async def get_container_file(  # pylint: disable=too-many-arguments
   topology = state.tracker.get_topology(cluster, role, environ, topology_name)
   stmgr = topology.info.physical_plan.stmgrs[f"stmgr-{container}"]
   url = f"http://{stmgr.host}:{stmgr.shell_port}/download/{path}"
-
   _, _, filename = path.rpartition("/")
-  async with httpx.stream("GET", url) as response:
-    return await StreamingResponse(
-        content=response.iter_bytes(),
+  async with httpx.AsyncClient() as client:
+    request = client.build_request("GET", url)
+    response = await client.send(request, stream=True)
+    
+    return StreamingResponse(
+        response.aiter_bytes(),
+        background=BackgroundTask(response.aclose),
         headers={"Content-Disposition": f"attachment; filename={filename}"},
-    )
+      )
 
 @router.get("/container/filestats")
 async def get_container_file_listing(  # pylint: disable=too-many-arguments
