@@ -81,7 +81,7 @@ async def get_container_file(  # pylint: disable=too-many-arguments
   async with httpx.AsyncClient() as client:
     request = client.build_request("GET", url)
     response = await client.send(request, stream=True)
-    
+
     return StreamingResponse(
         response.aiter_bytes(),
         background=BackgroundTask(response.aclose),
