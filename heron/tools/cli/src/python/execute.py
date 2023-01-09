@@ -104,7 +104,7 @@ def heron_tar(class_name, topology_tar, arguments, tmpdir_root, java_defines):
   tmpdir_abs = os.path.abspath(tmpdir)
 
   with contextlib.closing(tarfile.open(topology_tar)) as tar:
-    # Validate file paths to protect against this: 
+    # Validate file paths to protect against this:
     # https://security.snyk.io/research/zip-slip-vulnerability
     for name in tar.getnames():
       untarpath_abs = os.path.abspath(os.path.join(tmpdir, name))
