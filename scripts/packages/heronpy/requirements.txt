@@ -1,2 +1,2 @@
-protobuf==3.18.3
+protobuf==3.19.6
 cloudpickle~=1.5.0
