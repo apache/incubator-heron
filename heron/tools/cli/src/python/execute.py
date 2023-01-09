@@ -104,11 +104,13 @@ def heron_tar(class_name, topology_tar, arguments, tmpdir_root, java_defines):
   tmpdir_abs = os.path.abspath(tmpdir)
 
   with contextlib.closing(tarfile.open(topology_tar)) as tar:
-    # Validate file paths to protect against this: https://security.snyk.io/research/zip-slip-vulnerability
+    # Validate file paths to protect against this: 
+    # https://security.snyk.io/research/zip-slip-vulnerability
     for name in tar.getnames():
       untarpath_abs = os.path.abspath(os.path.join(tmpdir, name))
       if not untarpath_abs.startswith(tmpdir_abs):
-        raise Exception(f"tar attempted to extract a file outside the destination dir: {untarpath_abs}:{name}")
+        raise Exception("tar attempted to extract a file " \
+            f"outside the destination dir: {untarpath_abs}:{name}")
 
     tar.extractall(path=tmpdir)
 
