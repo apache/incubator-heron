@@ -70,6 +70,15 @@ java_test(
 )
 
 java_test(
+    name = "RoundRobinPackingV2Test",
+    srcs = glob(
+        ["**/roundrobin/RoundRobinPackingV2Test.java"]
+    ),
+    deps = roundrobin_deps_files,
+    size = "small",
+)
+
+java_test(
     name = "ResourceCompliantRRPackingTest",
     size = "small",
     srcs = glob(
