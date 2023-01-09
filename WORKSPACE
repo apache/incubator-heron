@@ -116,7 +116,7 @@ maven_install(
         "com.google.inject:guice:5.1.0",
         "com.google.inject.extensions:guice-assistedinject:5.1.0",
         "com.google.guava:guava:23.6-jre",
-        "com.google.protobuf:protobuf-java:3.18.3",
+        "com.google.protobuf:protobuf-java:3.19.6",
         "io.gsonfire:gson-fire:1.8.3",
         "org.apache.curator:curator-framework:" + curator_version,
         "org.apache.curator:curator-recipes:" + curator_version,
@@ -301,9 +301,9 @@ http_file(
 # protobuf dependencies for C++ and Java
 http_archive(
     name = "com_google_protobuf",
-    sha256 = "663b3a6d56605e6ab7888d32a1525c34f34639b25b8996337821591e60c37041",
-    strip_prefix = "protobuf-3.18.3",
-    urls = ["https://github.com/protocolbuffers/protobuf/archive/v3.18.3.tar.gz"],
+    sha256 = "9a301cf94a8ddcb380b901e7aac852780b826595075577bb967004050c835056",
+    strip_prefix = "protobuf-3.19.6",
+    urls = ["https://github.com/protocolbuffers/protobuf/archive/v3.19.6.tar.gz"],
 )
 # end protobuf dependencies for C++ and Java
 
