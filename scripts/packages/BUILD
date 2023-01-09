@@ -1,4 +1,4 @@
-load("@rules_pkg//:pkg.bzl", "pkg_tar")
+load("@rules_pkg//pkg:tar.bzl", "pkg_tar")
 load("//scripts/packages:self_extract_binary.bzl", "self_extract_binary")
 
 package(default_visibility = ["//visibility:public"])
