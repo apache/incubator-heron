@@ -527,7 +527,7 @@ pkg_tar(
         "//integration_test/src/scala:test-data-files",
     ],
     package_dir = "data/scala",
-    strip_prefix = "/integration_test/src/scala/org/apache/heron/integration_test/topology/",
+    strip_prefix = "/integration_test/src/scala/org/apache/heron/integration_test/topology",
 )
 
 pkg_tar(
@@ -536,7 +536,7 @@ pkg_tar(
         "//integration_test/src/java:test-data-files",
     ],
     package_dir = "data/java",
-    strip_prefix = "/integration_test/src/java/org/apache/heron/integration_test/topology/",
+    strip_prefix = "/integration_test/src/java/org/apache/heron/integration_test/topology",
 )
 
 pkg_tar(
@@ -545,7 +545,7 @@ pkg_tar(
         "//integration_test/src/java:topology-test-data-files",
     ],
     package_dir = "data/java/topology_test",
-    strip_prefix = "/integration_test/src/java/org/apache/heron/integration_topology_test/topology/",
+    strip_prefix = "/integration_test/src/java/org/apache/heron/integration_topology_test/topology",
 )
 
 pkg_tar(
@@ -554,7 +554,7 @@ pkg_tar(
         "//integration_test/src/python/integration_test/topology:test-data-files",
     ],
     package_dir = "data/python",
-    strip_prefix = "/integration_test/src/python/integration_test/topology/",
+    strip_prefix = "/integration_test/src/python/integration_test/topology",
 )
 
 pkg_tar(
