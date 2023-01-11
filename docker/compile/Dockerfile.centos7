@@ -49,7 +49,7 @@ RUN yum -y install \
 ENV LC_ALL en_US.utf8
 ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk
 
-ENV bazelVersion 4.2.2
+ENV bazelVersion 6.0.0
 
 RUN wget -O /tmp/bazel.sh https://github.com/bazelbuild/bazel/releases/download/$bazelVersion/bazel-$bazelVersion-installer-linux-x86_64.sh \
       && chmod +x /tmp/bazel.sh \
