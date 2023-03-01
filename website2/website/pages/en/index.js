@@ -40,6 +40,7 @@ class HomeSplash extends React.Component {
 
     const ProjectTitle = () => (
       <h2 className="projectTitle">
+          <small>This project has been retired</small>
         {siteConfig.title}
         <small>{siteConfig.tagline}</small>
       </h2>
