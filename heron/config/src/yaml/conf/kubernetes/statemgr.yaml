@@ -19,7 +19,7 @@
 heron.class.state.manager: org.apache.heron.statemgr.zookeeper.curator.CuratorStateManager
 
 # local state manager connection string
-heron.statemgr.connection.string:  <zookeeper_host:zookeeper_port>
+heron.statemgr.connection.string:  127.0.0.1:2181
 
 # path of the root address to store the state in a local file system
 heron.statemgr.root.path: "/heron"

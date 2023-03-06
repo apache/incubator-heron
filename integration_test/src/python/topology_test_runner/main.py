@@ -20,10 +20,10 @@ import json
 import logging
 import os
 import pkgutil
+import random
 import re
 import sys
 import time
-import uuid
 from http.client import HTTPConnection
 from threading import Lock, Thread
 
@@ -255,6 +255,8 @@ class ZkFileBasedActualResultsHandler:
     self.state_mgr.start()
 
   def _load_state_mgr(self, cluster):
+    # this should use cli_config_path (after expanding HOME, or changing default to use ~ instead of $HOME)
+    # that way can have test copy of config
     state_mgr_config = configloader.load_state_manager_locations(cluster, os.getenv("HOME")
                                                                  +'/.heron/conf/'+cluster
                                                                  + '/statemgr.yaml')
@@ -481,6 +483,7 @@ def run_topology_tests(conf, test_args):
   """
   lock = Lock()
   timestamp = time.strftime('%Y%m%d%H%M%S')
+  run_fingerprint = f"{timestamp}-{random.randint(0, 2**16):04x}"
 
   http_server_host_port = f"{test_args.http_hostname}:{test_args.http_port}"
 

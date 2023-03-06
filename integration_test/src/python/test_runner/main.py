@@ -20,10 +20,10 @@ import json
 import logging
 import os
 import pkgutil
+import random
 import re
 import sys
 import time
-import uuid
 from http.client import HTTPConnection
 from threading import Lock, Thread
 
@@ -306,6 +306,7 @@ def run_tests(conf, test_args):
   ''' Run the test for each topology specified in the conf file '''
   lock = Lock()
   timestamp = time.strftime('%Y%m%d%H%M%S')
+  run_fingerprint = f"{timestamp}-{random.randint(0, 2**16):04x}"
 
   http_server_host_port = f"{test_args.http_server_hostname}:{test_args.http_server_port}"
 

@@ -18,11 +18,12 @@
 :<<'DOC'
 This script is for running tests in a local VM, similar to the environment used in the CI pipeline. If the targent script fails, a shell will be opened up within the VM.
 
-To only run integration tests:
-  ./local-ci.sh test
+To run all of the tests:
+  ./local-ci.sh
 
-To run the full ci pipeline:
-  ./local-ci.sh ci
+To run a specific command/script:
+  ./local-ci.sh ./scripts/travis/ci.sh
+  ./local-ci.sh bash
 
 DOC
 
@@ -35,7 +36,6 @@ state="$(vagrant status primary --machine-readable | grep primary,state, | cut -
 if [ "$state" != "running" ]; then
     vagrant up primary
 fi
-
 
 # allows you to do `$0 test` to run only integration tests
 script="${1-ci}"
