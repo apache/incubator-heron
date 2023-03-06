@@ -34,6 +34,7 @@ import "tmanager.proto";
 message MetricDatum {
   required string name = 1;
   required string value = 2;
+  repeated string tag = 3;
 }
 
 message ExceptionData {
